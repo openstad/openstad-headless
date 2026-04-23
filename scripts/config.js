@@ -28,6 +28,8 @@ async function setupEnvVars() {
   process.env.DB_BASE_NAME = process.env.DB_BASE_NAME || '';
   process.env.DB_DIALECT = process.env.DB_DIALECT || 'mysql';
   process.env.DB_REQUIRE_SSL = process.env.DB_REQUIRE_SSL || false;
+  process.env.DB_ENABLE_CLEARTEXT_PLUGIN =
+    process.env.DB_ENABLE_CLEARTEXT_PLUGIN || false;
   process.env.DB_AUTH_METHOD = process.env.DB_AUTH_METHOD || '';
 
   process.env.MESSAGESTREAMING_REDIS_URL =
@@ -151,6 +153,11 @@ async function setupEnvVars() {
     process.env.API_DB_DIALECT || process.env.DB_DIALECT || 'mysql';
   process.env.API_DB_REQUIRE_SSL =
     process.env.API_DB_REQUIRE_SSL || process.env.DB_REQUIRE_SSL || false;
+  process.env.API_DB_ENABLE_CLEARTEXT_PLUGIN =
+    process.env.API_DB_ENABLE_CLEARTEXT_PLUGIN ||
+    process.env.DB_ENABLE_CLEARTEXT_PLUGIN ||
+    false;
+
   process.env.API_DB_AUTH_METHOD =
     process.env.API_DB_AUTH_METHOD || process.env.DB_AUTH_METHOD || '';
 
@@ -213,6 +220,10 @@ async function setupEnvVars() {
     process.env.AUTH_DB_REQUIRE_SSL || process.env.DB_REQUIRE_SSL || false;
   process.env.AUTH_DB_AUTH_METHOD =
     process.env.AUTH_DB_AUTH_METHOD || process.env.DB_AUTH_METHOD || '';
+  process.env.AUTH_DB_ENABLE_CLEARTEXT_PLUGIN =
+    process.env.AUTH_DB_ENABLE_CLEARTEXT_PLUGIN ||
+    process.env.DB_ENABLE_CLEARTEXT_PLUGIN ||
+    false;
 
   process.env.AUTH_MAIL_SERVER_URL =
     process.env.AUTH_MAIL_SERVER_URL || process.env.SMTP_HOST;
@@ -304,6 +315,7 @@ DB_PASSWORD=${process.env.DB_PASSWORD}
 DB_BASE_NAME=${process.env.DB_BASE_NAME}
 DB_DIALECT=${process.env.DB_DIALECT}
 DB_REQUIRE_SSL=${process.env.DB_REQUIRE_SSL}
+DB_ENABLE_CLEARTEXT_PLUGIN=${process.env.DB_ENABLE_CLEARTEXT_PLUGIN}
 DB_AUTH_METHOD=${process.env.DB_AUTH_METHOD}
 
 MESSAGESTREAMING_REDIS_URL=${
@@ -347,6 +359,7 @@ API_DB_NAME=${process.env.API_DB_NAME}
 API_DATABASE_DATABASE=${process.env.API_DB_NAME}
 API_DB_DIALECT=${process.env.API_DB_DIALECT}
 API_DB_REQUIRE_SSL=${process.env.API_DB_REQUIRE_SSL}
+API_DB_ENABLE_CLEARTEXT_PLUGIN=${process.env.API_DB_ENABLE_CLEARTEXT_PLUGIN}
 API_DB_AUTH_METHOD=${process.env.API_DB_AUTH_METHOD}
 
 API_FROM_EMAIL_ADDRESS=${process.env.API_FROM_EMAIL_ADDRESS}
@@ -379,6 +392,7 @@ AUTH_DB_PASSWORD=${process.env.AUTH_DB_PASSWORD}
 AUTH_DB_NAME=${process.env.AUTH_DB_NAME}
 AUTH_DB_DIALECT=${process.env.AUTH_DB_DIALECT}
 AUTH_DB_REQUIRE_SSL=${process.env.AUTH_DB_REQUIRE_SSL}
+AUTH_DB_ENABLE_CLEARTEXT_PLUGIN=${process.env.AUTH_DB_ENABLE_CLEARTEXT_PLUGIN}
 AUTH_DB_AUTH_METHOD=${process.env.AUTH_DB_AUTH_METHOD}
 
 AUTH_MAIL_SERVER_URL=${process.env.AUTH_MAIL_SERVER_URL}

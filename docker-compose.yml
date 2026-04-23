@@ -105,6 +105,7 @@ services:
       - DB_HOST=${API_DATABASE_HOST}
       - DB_DIALECT=${API_DB_DIALECT}
       - DB_REQUIRE_SSL=${API_DB_REQUIRE_SSL}
+      - DB_ENABLE_CLEARTEXT_PLUGIN=${API_DB_ENABLE_CLEARTEXT_PLUGIN}
       - DB_AUTH_METHOD=${API_DB_AUTH_METHOD}
       - MESSAGESTREAMING_REDIS_URL=${MESSAGESTREAMING_REDIS_URL}
       - MESSAGESTREAMING_POSTFIX=${MESSAGESTREAMING_POSTFIX}
@@ -199,6 +200,7 @@ services:
       - DB_NAME=${AUTH_DB_NAME}
       - DB_DIALECT=${AUTH_DB_DIALECT}
       - DB_REQUIRE_SSL=${AUTH_DB_REQUIRE_SSL}
+      - DB_ENABLE_CLEARTEXT_PLUGIN=${AUTH_DB_ENABLE_CLEARTEXT_PLUGIN}
       - DB_AUTH_METHOD=${AUTH_DB_AUTH_METHOD}
       - MAIL_SERVER_URL=${AUTH_MAIL_SERVER_URL}
       - MAIL_SERVER_PORT=${AUTH_MAIL_SERVER_PORT}
@@ -321,6 +323,19 @@ services:
       - openstad-admin-server-node_modules:/opt/openstad-headless/apps/admin-server/node_modules
       - ./packages:/opt/openstad-headless/packages
 
+  openstad-update-lock:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: update-lock
+    container_name: openstad-update-lock
+    profiles:
+      - tools
+    working_dir: /opt/openstad-headless
+    command: npm run update-lock
+    volumes:
+      - .:/opt/openstad-headless
+
   openstad-cms-server:
     build:
       target: ${BUILD_TARGET:-release-with-packages}
@@ -352,8 +367,6 @@ services:
       - API_KEY=${API_FIXED_AUTH_KEY}
       - FORCE_HTTP=${FORCE_HTTP}
       - APOS_RELEASE_ID=${APOS_RELEASE_ID}
-      - REACT_CDN=${REACT_CDN}
-      - REACT_DOM_CDN=${REACT_DOM_CDN}
       - DISABLE_WIDGET_PREVIEW=${CMS_DISABLE_WIDGET_PREVIEW:-false}
       - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME_CMS:-openstad-cms-server}
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT_CMS:-http://openstad-otel-collector:4317}

@@ -1,6 +1,7 @@
 import ImageGalleryStyle from '@/components/image-gallery-style';
 import { ImageUploader } from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -79,6 +80,8 @@ const formSchema = z.object({
   maxChoicesMessage: z.string().optional(),
   variant: z.string().optional(),
   multiple: z.boolean().optional(),
+  prevPageText: z.string().optional(),
+  nextPageText: z.string().optional(),
   options: z
     .array(
       z.object({
@@ -138,7 +141,7 @@ const formSchema = z.object({
   createImageSlider: z.boolean().optional(),
   imageClickable: z.boolean().optional(),
   routingSelectedQuestion: z.string().optional(),
-  routingSelectedAnswer: z.string().optional(),
+  routingSelectedAnswer: z.union([z.string(), z.array(z.string())]).optional(),
   imageOptionUpload: z.string().optional(),
   images: z
     .array(
@@ -253,12 +256,37 @@ export default function WidgetChoiceGuideItems(
         mergedWeights
       );
 
+      const oldOptions = selectedItem.options || [];
+      const newOptions = options || [];
+      const triggerMap: Record<string, string> = {};
+      for (let i = 0; i < Math.min(oldOptions.length, newOptions.length); i++) {
+        if (oldOptions[i].trigger !== newOptions[i].trigger) {
+          triggerMap[oldOptions[i].trigger] = newOptions[i].trigger;
+        }
+      }
+      const hasTriggerChanges = Object.keys(triggerMap).length > 0;
+
       setItems((currentItems) =>
-        currentItems.map((item) =>
-          item.trigger === selectedItem.trigger
-            ? { ...item, ...values, weights: normalizedMergedWeights }
-            : item
-        )
+        currentItems.map((item) => {
+          if (item.trigger === selectedItem.trigger) {
+            return { ...item, ...values, weights: normalizedMergedWeights };
+          }
+          if (
+            hasTriggerChanges &&
+            item.routingSelectedQuestion === selectedItem.trigger
+          ) {
+            const answers = Array.isArray(item.routingSelectedAnswer)
+              ? item.routingSelectedAnswer
+              : item.routingSelectedAnswer
+                ? [item.routingSelectedAnswer]
+                : [];
+            const updated = answers.map(
+              (answer) => triggerMap[answer] || answer
+            );
+            return { ...item, routingSelectedAnswer: updated };
+          }
+          return item;
+        })
       );
       setItem(null);
     } else {
@@ -291,6 +319,8 @@ export default function WidgetChoiceGuideItems(
           imageA: values.imageA || '',
           imageB: values.imageB || '',
           placeholder: values.placeholder || '',
+          prevPageText: values.prevPageText || '',
+          nextPageText: values.nextPageText || '',
           maxChoices: values.maxChoices || '',
           maxChoicesMessage: values.maxChoicesMessage || '',
           defaultValue: values.defaultValue || '',
@@ -434,6 +464,8 @@ export default function WidgetChoiceGuideItems(
     maxCharacters: '',
     variant: 'text input',
     multiple: false,
+    prevPageText: '',
+    nextPageText: '',
     options: [],
     showMoreInfo: false,
     moreInfoButton: '',
@@ -522,6 +554,8 @@ export default function WidgetChoiceGuideItems(
         explanationA: selectedItem.explanationA || '',
         explanationB: selectedItem.explanationB || '',
         placeholder: selectedItem.placeholder || '',
+        prevPageText: selectedItem.prevPageText || '',
+        nextPageText: selectedItem.nextPageText || '',
         imageA: selectedItem.imageA || '',
         imageB: selectedItem.imageB || '',
         maxChoices: selectedItem.maxChoices || '',
@@ -585,11 +619,30 @@ export default function WidgetChoiceGuideItems(
   ) => {
     if (isItemAction) {
       setItems((currentItems) => {
-        return handleMovementOrDeletion(
+        const index = currentItems.findIndex(
+          (entry) => entry.trigger === clickedTrigger
+        );
+        const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
+        const triggerA = currentItems[index]?.trigger;
+        const triggerB = currentItems[swapIndex]?.trigger;
+
+        const newItems = handleMovementOrDeletion(
           currentItems,
           actionType,
           clickedTrigger
         ) as Item[];
+
+        if (actionType !== 'delete' && triggerA && triggerB) {
+          for (const item of newItems) {
+            if (item.routingSelectedQuestion === triggerA) {
+              item.routingSelectedQuestion = triggerB;
+            } else if (item.routingSelectedQuestion === triggerB) {
+              item.routingSelectedQuestion = triggerA;
+            }
+          }
+        }
+
+        return newItems;
       });
     } else if (isMatrixAction) {
       let newMatrixOptions: Matrix;
@@ -671,6 +724,7 @@ export default function WidgetChoiceGuideItems(
       'imageUpload',
       'documentUpload',
       'text',
+      'pagination',
     ].includes(chosenType);
 
     const finalDimensions =
@@ -683,7 +737,7 @@ export default function WidgetChoiceGuideItems(
     setDimensions(finalDimensions);
   }, [form.watch('type')]);
 
-  function handleSaveItems() {
+  async function handleSaveItems() {
     const updatedProps = { ...props };
 
     Object.keys(updatedProps).forEach((key: string) => {
@@ -693,7 +747,7 @@ export default function WidgetChoiceGuideItems(
       }
     });
 
-    props.updateConfig({ ...updatedProps, items });
+    await props.updateConfig({ ...updatedProps, items });
     setMatrixOptions(matrixDefault);
     window.location.reload();
   }
@@ -995,7 +1049,10 @@ export default function WidgetChoiceGuideItems(
                               }}>
                               <span
                                 dangerouslySetInnerHTML={{
-                                  __html: item.title || 'Geen titel',
+                                  __html:
+                                    item.type === 'pagination'
+                                      ? '--- Nieuwe pagina ---'
+                                      : item.title || 'Geen titel',
                                 }}
                               />
                             </span>
@@ -1536,680 +1593,227 @@ export default function WidgetChoiceGuideItems(
                                 <SelectItem value="images">
                                   Antwoordopties met afbeeldingen
                                 </SelectItem>
+                                <SelectItem value="pagination">
+                                  Voeg pagina toe
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
                           </FormItem>
                         )}></FormField>
-                      <FormField
-                        control={form.control}
-                        name="title"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Titel/Vraag</FormLabel>
-                            <FormControl>
-                              <TrixEditor
-                                value={field.value || ''}
-                                onChange={(val) => field.onChange(val)}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="description"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Beschrijving</FormLabel>
-                            <FormControl>
-                              <TrixEditor
-                                value={field.value || ''}
-                                onChange={(val) => field.onChange(val)}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      {form.watch('type') === 'pagination' && (
+                        <>
+                          <FormField
+                            control={form.control}
+                            name="prevPageText"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Tekst voor: Vorige pagina</FormLabel>
+                                <Input {...field} />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="nextPageText"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Tekst voor: Volgende pagina
+                                </FormLabel>
+                                <Input {...field} />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </>
+                      )}
+                      {form.watch('type') !== 'pagination' && (
+                        <>
+                          <FormField
+                            control={form.control}
+                            name="title"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Titel/Vraag</FormLabel>
+                                <FormControl>
+                                  <TrixEditor
+                                    value={field.value || ''}
+                                    onChange={(val) => field.onChange(val)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="description"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Beschrijving</FormLabel>
+                                <FormControl>
+                                  <TrixEditor
+                                    value={field.value || ''}
+                                    onChange={(val) => field.onChange(val)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                      <>
-                        <ImageUploader
-                          form={form}
-                          project={project as string}
-                          fieldName="uploadInfoImage"
-                          imageLabel="Afbeeldingen uploaden boven de vraag"
-                          description="Je kunt hier meerdere afbeeldingen tegelijk uploaden. Klik na het uploaden op een afbeelding om extra informatie toe te voegen, zoals een beschrijving of alternatieve tekst voor schermlezers."
-                          allowedTypes={['image/*']}
-                          allowMultiple={true}
-                          onImageUploaded={(imageResult) => {
-                            let defaultImageArr: ImageArray[] = [];
+                          <>
+                            <ImageUploader
+                              form={form}
+                              project={project as string}
+                              fieldName="uploadInfoImage"
+                              imageLabel="Afbeeldingen uploaden boven de vraag"
+                              description="Je kunt hier meerdere afbeeldingen tegelijk uploaden. Klik na het uploaden op een afbeelding om extra informatie toe te voegen, zoals een beschrijving of alternatieve tekst voor schermlezers."
+                              allowedTypes={['image/*']}
+                              allowMultiple={true}
+                              onImageUploaded={(imageResult) => {
+                                let defaultImageArr: ImageArray[] = [];
 
-                            if (!!form.watch('infoImage')) {
-                              defaultImageArr = [
-                                {
-                                  url: form.getValues('infoImage') || '',
-                                  name: '',
-                                  imageAlt: '',
-                                  imageDescription: '',
-                                },
-                              ];
+                                if (!!form.watch('infoImage')) {
+                                  defaultImageArr = [
+                                    {
+                                      url: form.getValues('infoImage') || '',
+                                      name: '',
+                                      imageAlt: '',
+                                      imageDescription: '',
+                                    },
+                                  ];
 
-                              form.setValue('infoImage', '');
-                            }
+                                  form.setValue('infoImage', '');
+                                }
 
-                            let array = [
-                              ...(form.getValues('images') || defaultImageArr),
-                            ];
-                            array.push(imageResult);
-                            form.setValue('images', array);
-                            form.resetField('uploadInfoImage');
-                            form.trigger('images');
-                          }}
-                        />
+                                let array = [
+                                  ...(form.getValues('images') ||
+                                    defaultImageArr),
+                                ];
+                                array.push(imageResult);
+                                form.setValue('images', array);
+                                form.resetField('uploadInfoImage');
+                                form.trigger('images');
+                              }}
+                            />
 
-                        <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
-                          {imageFields.length > 0 && (
-                            <div className="grid">
-                              <section className="grid col-span-full grid-cols-3 gap-y-8 gap-x-8 mb-4">
-                                {imageFields.map(({ id, url }, index) => {
-                                  return (
-                                    <div
-                                      key={id}
-                                      className={`relative grid ${
-                                        index === imageIndexOpen
-                                          ? 'col-span-full'
-                                          : 'tile'
-                                      } gap-x-4 items-center image-gallery`}
-                                      style={{
-                                        gridTemplateColumns:
-                                          index === imageIndexOpen
-                                            ? '1fr 2fr 40px'
-                                            : '1fr',
-                                      }}>
-                                      <div className="image-container">
-                                        <img
-                                          src={url}
-                                          alt={url}
-                                          onClick={() => {
-                                            if (index === imageIndexOpen) {
-                                              setImageIndexOpen(-1);
-                                            } else {
-                                              setImageIndexOpen(index);
-                                            }
-                                          }}
-                                        />
-                                      </div>
-                                      <Button
-                                        color="red"
-                                        onClick={() => {
-                                          removeImage(index);
-                                        }}
-                                        className="absolute left-0 top-0">
-                                        <X size={24} />
-                                      </Button>
-
-                                      <div
-                                        className="grid gap-y-4 items-center"
-                                        style={{
-                                          display:
+                            <div className="space-y-2 col-span-full md:col-span-1 flex flex-col">
+                              {imageFields.length > 0 && (
+                                <div className="grid">
+                                  <section className="grid col-span-full grid-cols-3 gap-y-8 gap-x-8 mb-4">
+                                    {imageFields.map(({ id, url }, index) => {
+                                      return (
+                                        <div
+                                          key={id}
+                                          className={`relative grid ${
                                             index === imageIndexOpen
-                                              ? 'grid'
-                                              : 'none',
-                                        }}>
-                                        <FormField
-                                          control={form.control}
-                                          name={`images.${index}.imageAlt`}
-                                          render={({ field }) => (
-                                            <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
-                                              <FormLabel>
-                                                Afbeelding beschrijving voor
-                                                screenreaders
-                                              </FormLabel>
-                                              <FormControl>
-                                                <Input {...field} />
-                                              </FormControl>
-                                              <FormMessage />
-                                            </FormItem>
-                                          )}
-                                        />
+                                              ? 'col-span-full'
+                                              : 'tile'
+                                          } gap-x-4 items-center image-gallery`}
+                                          style={{
+                                            gridTemplateColumns:
+                                              index === imageIndexOpen
+                                                ? '1fr 2fr 40px'
+                                                : '1fr',
+                                          }}>
+                                          <div className="image-container">
+                                            <img
+                                              src={url}
+                                              alt={url}
+                                              onClick={() => {
+                                                if (index === imageIndexOpen) {
+                                                  setImageIndexOpen(-1);
+                                                } else {
+                                                  setImageIndexOpen(index);
+                                                }
+                                              }}
+                                            />
+                                          </div>
+                                          <Button
+                                            color="red"
+                                            onClick={() => {
+                                              removeImage(index);
+                                            }}
+                                            className="absolute left-0 top-0">
+                                            <X size={24} />
+                                          </Button>
 
-                                        <FormField
-                                          control={form.control}
-                                          name={`images.${index}.imageDescription`}
-                                          render={({ field }) => (
-                                            <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
-                                              <FormLabel>
-                                                Beschrijving afbeelding
-                                              </FormLabel>
-                                              <FormControl>
-                                                <Input {...field} />
-                                              </FormControl>
-                                              <FormMessage />
-                                            </FormItem>
+                                          <div
+                                            className="grid gap-y-4 items-center"
+                                            style={{
+                                              display:
+                                                index === imageIndexOpen
+                                                  ? 'grid'
+                                                  : 'none',
+                                            }}>
+                                            <FormField
+                                              control={form.control}
+                                              name={`images.${index}.imageAlt`}
+                                              render={({ field }) => (
+                                                <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
+                                                  <FormLabel>
+                                                    Afbeelding beschrijving voor
+                                                    screenreaders
+                                                  </FormLabel>
+                                                  <FormControl>
+                                                    <Input {...field} />
+                                                  </FormControl>
+                                                  <FormMessage />
+                                                </FormItem>
+                                              )}
+                                            />
+
+                                            <FormField
+                                              control={form.control}
+                                              name={`images.${index}.imageDescription`}
+                                              render={({ field }) => (
+                                                <FormItem className="col-span-full sm:col-span-2 md:col-span-2 lg:col-span-2">
+                                                  <FormLabel>
+                                                    Beschrijving afbeelding
+                                                  </FormLabel>
+                                                  <FormControl>
+                                                    <Input {...field} />
+                                                  </FormControl>
+                                                  <FormMessage />
+                                                </FormItem>
+                                              )}
+                                            />
+                                          </div>
+                                          {imageFields.length > 1 && (
+                                            <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
+                                              <ArrowLeft
+                                                className="cursor-pointer"
+                                                onClick={() =>
+                                                  moveUpImage(index)
+                                                }
+                                              />
+                                              <ArrowRight
+                                                className="cursor-pointer"
+                                                onClick={() =>
+                                                  moveDownImage(index)
+                                                }
+                                              />
+                                            </span>
                                           )}
-                                        />
-                                      </div>
-                                      {imageFields.length > 1 && (
-                                        <span className="grid gap-2 py-3 px-2 col-span-full justify-between arrow-container">
-                                          <ArrowLeft
-                                            className="cursor-pointer"
-                                            onClick={() => moveUpImage(index)}
-                                          />
-                                          <ArrowRight
-                                            className="cursor-pointer"
-                                            onClick={() => moveDownImage(index)}
-                                          />
-                                        </span>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </section>
+                                        </div>
+                                      );
+                                    })}
+                                  </section>
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
 
-                        <FormField
-                          control={form.control}
-                          name="createImageSlider"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                Wil je van de afbeeldingen een slider maken?
-                              </FormLabel>
-                              <Select
-                                onValueChange={(e: string) =>
-                                  field.onChange(e === 'true')
-                                }
-                                value={field.value ? 'true' : 'false'}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Kies een optie" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="false">Nee</SelectItem>
-                                  <SelectItem value="true">Ja</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-
-                        <FormField
-                          control={form.control}
-                          name="imageClickable"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                Moeten de afbeeldingen uitvergroot worden als
-                                erop geklikt wordt?
-                              </FormLabel>
-                              <Select
-                                onValueChange={(e: string) =>
-                                  field.onChange(e === 'true')
-                                }
-                                value={field.value ? 'true' : 'false'}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Kies een optie" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="false">Nee</SelectItem>
-                                  <SelectItem value="true">Ja</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </>
-
-                      <FormField
-                        control={form.control}
-                        name="showMoreInfo"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Extra info</FormLabel>
-                            <FormDescription>
-                              Wil je een blok met uitklapbare tekst toevoegen?
-                              (bijvoorbeeld met extra uitleg)
-                            </FormDescription>
-                            <Select
-                              onValueChange={(e: string) =>
-                                field.onChange(e === 'true')
-                              }
-                              value={field.value ? 'true' : 'false'}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Kies een optie" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="true">Ja</SelectItem>
-                                <SelectItem value="false">Nee</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      {form.watch('showMoreInfo') && (
-                        <>
-                          <FormField
-                            control={form.control}
-                            name="moreInfoButton"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>
-                                  Meer informatie knop tekst
-                                </FormLabel>
-                                <Input {...field} />
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="moreInfoContent"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Meer informatie tekst</FormLabel>
-                                <Textarea rows={5} {...field} />
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </>
-                      )}
-
-                      {!['none', 'a-b-slider', 'sort', 'scale'].includes(
-                        form.watch('type') || ''
-                      ) && (
-                        <FormField
-                          control={form.control}
-                          name="fieldRequired"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Is dit veld verplicht?</FormLabel>
-                              {form.watch('type') === 'matrix' && (
-                                <FormDescription>
-                                  Als je het veld <b>verplicht</b> maakt moeten
-                                  gebruikers bij elke rij een antwoord
-                                  selecteren. Als je het veld{' '}
-                                  <b>niet verplicht</b> maakt kunnen gebruikers
-                                  elke rij overslaan en invullen wat ze willen.
-                                </FormDescription>
-                              )}
-                              <Select
-                                onValueChange={(e: string) =>
-                                  field.onChange(e === 'true')
-                                }
-                                value={field.value ? 'true' : 'false'}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Kies een optie" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="true">Ja</SelectItem>
-                                  <SelectItem value="false">Nee</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
-                      {form.watch('type') === 'text' && (
-                        <>
-                          <FormField
-                            control={form.control}
-                            name="variant"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>
-                                  Is het veld qua grootte 1 regel of een
-                                  tekstvak?
-                                </FormLabel>
-                                <Select
-                                  value={field.value || 'text input'}
-                                  onValueChange={field.onChange}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Kies een optie" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    <SelectItem value="text input">
-                                      1 regel
-                                    </SelectItem>
-                                    <SelectItem value="textarea">
-                                      Tekstvak
-                                    </SelectItem>
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="placeholder"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Placeholder</FormLabel>
-                                <Input {...field} />
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="minCharacters"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Minimaal aantal tekens</FormLabel>
-                                <Input {...field} />
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="maxCharacters"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Maximaal aantal tekens</FormLabel>
-                                <Input {...field} />
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </>
-                      )}
-
-                      {form.watch('type') === 'matrix' && (
-                        <FormField
-                          control={form.control}
-                          name="matrixMultiple"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>
-                                Mogen er meerdere antwoorden per rij worden
-                                geselecteerd?
-                              </FormLabel>
-                              <Select
-                                onValueChange={(e: string) =>
-                                  field.onChange(e === 'true')
-                                }
-                                value={field.value ? 'true' : 'false'}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Kies een optie" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="false">Nee</SelectItem>
-                                  <SelectItem value="true">Ja</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
-
-                      {(form.watch('type') === 'imageUpload' ||
-                        form.watch('type') === 'images' ||
-                        form.watch('type') === 'documentUpload') && (
-                        <FormField
-                          control={form.control}
-                          name="multiple"
-                          render={({ field }) => (
-                            <FormItem>
-                              {form.watch('type') === 'imageUpload' ||
-                              form.watch('type') === 'documentUpload' ? (
-                                <FormLabel>
-                                  Mogen er meerdere{' '}
-                                  {form.watch('type') === 'documentUpload'
-                                    ? 'documenten'
-                                    : 'afbeeldingen'}{' '}
-                                  tegelijkertijd geüpload worden?
-                                </FormLabel>
-                              ) : (
-                                <FormLabel>
-                                  Mogen er meerdere afbeeldingen geselecteerd
-                                  worden?
-                                </FormLabel>
-                              )}
-                              <Select
-                                onValueChange={(e: string) =>
-                                  field.onChange(e === 'true')
-                                }
-                                value={field.value ? 'true' : 'false'}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Kies een optie" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="true">Ja</SelectItem>
-                                  <SelectItem value="false">Nee</SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
-
-                      {form.watch('type') === 'a-b-slider' && (
-                        <div className="col-span-full grid-cols-2 grid gap-4 gap-y-4">
-                          <FormField
-                            control={form.control}
-                            name="labelA"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Label voor A</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="labelB"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Label voor B</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="sliderTitleUnderA"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Uitleg bij A</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="sliderTitleUnderB"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Uitleg bij B</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="explanationA"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Label onder slider A</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <FormField
-                            control={form.control}
-                            name="explanationB"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Label onder slider B</FormLabel>
-                                <FormControl>
-                                  <Input {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <div className="col-span-full md:col-span-1 flex flex-col">
-                            <ImageUploader
-                              form={form}
-                              project={project as string}
-                              imageLabel="Upload hier afbeelding A"
-                              fieldName="imageUploadA"
-                              allowedTypes={['image/*']}
-                              onImageUploaded={(imageResult) => {
-                                const result =
-                                  typeof imageResult.url !== 'undefined'
-                                    ? imageResult.url
-                                    : '';
-                                form.setValue('imageA', result);
-                                form.resetField('imageUploadA');
-                              }}
-                            />
-                          </div>
-
-                          <div className="col-span-full md:col-span-1 flex flex-col">
-                            <ImageUploader
-                              form={form}
-                              project={project as string}
-                              imageLabel="Upload hier afbeelding B"
-                              fieldName="imageUploadB"
-                              allowedTypes={['image/*']}
-                              onImageUploaded={(imageResult) => {
-                                const result =
-                                  typeof imageResult.url !== 'undefined'
-                                    ? imageResult.url
-                                    : '';
-                                form.setValue('imageB', result);
-                                form.resetField('imageUploadB');
-                              }}
-                            />
-                          </div>
-
-                          <div className="col-span-full md:col-span-1 flex flex-col my-2">
-                            {!!form.watch('imageA') && (
-                              <>
-                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                  Afbeelding A
-                                </label>
-                                <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
-                                  <div style={{ position: 'relative' }}>
-                                    <img
-                                      src={form.watch('imageA')}
-                                      alt={form.watch('imageA')}
-                                    />
-                                    <Button
-                                      color="red"
-                                      onClick={() => {
-                                        form.setValue('imageA', '');
-                                      }}
-                                      style={{
-                                        position: 'absolute',
-                                        right: 0,
-                                        top: 0,
-                                      }}>
-                                      <X size={24} />
-                                    </Button>
-                                  </div>
-                                </section>
-                              </>
-                            )}
-                          </div>
-
-                          <div className="col-span-full md:col-span-1 flex flex-col my-2">
-                            {!!form.watch('imageB') && (
-                              <>
-                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                  Afbeelding B
-                                </label>
-                                <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
-                                  <div style={{ position: 'relative' }}>
-                                    <img
-                                      src={form.watch('imageB')}
-                                      alt={form.watch('imageB')}
-                                    />
-                                    <Button
-                                      color="red"
-                                      onClick={() => {
-                                        form.setValue('imageB', '');
-                                      }}
-                                      style={{
-                                        position: 'absolute',
-                                        right: 0,
-                                        top: 0,
-                                      }}>
-                                      <X size={24} />
-                                    </Button>
-                                  </div>
-                                </section>
-                              </>
-                            )}
-                          </div>
-
-                          <div className="col-span-full md:col-span-1 flex flex-col gap-y-4 mb-4">
                             <FormField
                               control={form.control}
-                              name="skipQuestion"
+                              name="createImageSlider"
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>
-                                    Mogelijkheid om deze vraag over te slaan?
+                                    Wil je van de afbeeldingen een slider maken?
                                   </FormLabel>
-                                  <FormDescription>
-                                    Als je wil dat de gebruiker de vraag kan
-                                    overslaan, selecteer dan &apos;Ja&apos;. Als
-                                    de gebruiker de vraag overslaat, wordt de
-                                    vraag niet meegenomen in de weging.
-                                  </FormDescription>
                                   <Select
                                     onValueChange={(e: string) =>
                                       field.onChange(e === 'true')
@@ -2217,7 +1821,136 @@ export default function WidgetChoiceGuideItems(
                                     value={field.value ? 'true' : 'false'}>
                                     <FormControl>
                                       <SelectTrigger>
-                                        <SelectValue placeholder="Nee" />
+                                        <SelectValue placeholder="Kies een optie" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="false">Nee</SelectItem>
+                                      <SelectItem value="true">Ja</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+
+                            <FormField
+                              control={form.control}
+                              name="imageClickable"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>
+                                    Moeten de afbeeldingen uitvergroot worden
+                                    als erop geklikt wordt?
+                                  </FormLabel>
+                                  <Select
+                                    onValueChange={(e: string) =>
+                                      field.onChange(e === 'true')
+                                    }
+                                    value={field.value ? 'true' : 'false'}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Kies een optie" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="false">Nee</SelectItem>
+                                      <SelectItem value="true">Ja</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </>
+
+                          <FormField
+                            control={form.control}
+                            name="showMoreInfo"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Extra info</FormLabel>
+                                <FormDescription>
+                                  Wil je een blok met uitklapbare tekst
+                                  toevoegen? (bijvoorbeeld met extra uitleg)
+                                </FormDescription>
+                                <Select
+                                  onValueChange={(e: string) =>
+                                    field.onChange(e === 'true')
+                                  }
+                                  value={field.value ? 'true' : 'false'}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Kies een optie" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="true">Ja</SelectItem>
+                                    <SelectItem value="false">Nee</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          {form.watch('showMoreInfo') && (
+                            <>
+                              <FormField
+                                control={form.control}
+                                name="moreInfoButton"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>
+                                      Meer informatie knop tekst
+                                    </FormLabel>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="moreInfoContent"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Meer informatie tekst</FormLabel>
+                                    <Textarea rows={5} {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </>
+                          )}
+
+                          {!['none', 'a-b-slider', 'sort', 'scale'].includes(
+                            form.watch('type') || ''
+                          ) && (
+                            <FormField
+                              control={form.control}
+                              name="fieldRequired"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Is dit veld verplicht?</FormLabel>
+                                  {form.watch('type') === 'matrix' && (
+                                    <FormDescription>
+                                      Als je het veld <b>verplicht</b> maakt
+                                      moeten gebruikers bij elke rij een
+                                      antwoord selecteren. Als je het veld{' '}
+                                      <b>niet verplicht</b> maakt kunnen
+                                      gebruikers elke rij overslaan en invullen
+                                      wat ze willen.
+                                    </FormDescription>
+                                  )}
+                                  <Select
+                                    onValueChange={(e: string) =>
+                                      field.onChange(e === 'true')
+                                    }
+                                    value={field.value ? 'true' : 'false'}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Kies een optie" />
                                       </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
@@ -2229,33 +1962,356 @@ export default function WidgetChoiceGuideItems(
                                 </FormItem>
                               )}
                             />
-
-                            {form.watch('skipQuestion') && (
-                              <>
-                                <FormField
-                                  control={form.control}
-                                  name="skipQuestionLabel"
-                                  render={({ field }) => (
-                                    <FormItem>
-                                      <FormLabel>
-                                        Tekst bij de checkbox voor het overslaan
-                                      </FormLabel>
+                          )}
+                          {form.watch('type') === 'text' && (
+                            <>
+                              <FormField
+                                control={form.control}
+                                name="variant"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>
+                                      Is het veld qua grootte 1 regel of een
+                                      tekstvak?
+                                    </FormLabel>
+                                    <Select
+                                      value={field.value || 'text input'}
+                                      onValueChange={field.onChange}>
                                       <FormControl>
-                                        <Input {...field} />
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Kies een optie" />
+                                        </SelectTrigger>
                                       </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
+                                      <SelectContent>
+                                        <SelectItem value="text input">
+                                          1 regel
+                                        </SelectItem>
+                                        <SelectItem value="textarea">
+                                          Tekstvak
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="placeholder"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Placeholder</FormLabel>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="minCharacters"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>
+                                      Minimaal aantal tekens
+                                    </FormLabel>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="maxCharacters"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>
+                                      Maximaal aantal tekens
+                                    </FormLabel>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </>
+                          )}
+
+                          {form.watch('type') === 'matrix' && (
+                            <FormField
+                              control={form.control}
+                              name="matrixMultiple"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>
+                                    Mogen er meerdere antwoorden per rij worden
+                                    geselecteerd?
+                                  </FormLabel>
+                                  <Select
+                                    onValueChange={(e: string) =>
+                                      field.onChange(e === 'true')
+                                    }
+                                    value={field.value ? 'true' : 'false'}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Kies een optie" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="false">Nee</SelectItem>
+                                      <SelectItem value="true">Ja</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
+
+                          {(form.watch('type') === 'imageUpload' ||
+                            form.watch('type') === 'images' ||
+                            form.watch('type') === 'documentUpload') && (
+                            <FormField
+                              control={form.control}
+                              name="multiple"
+                              render={({ field }) => (
+                                <FormItem>
+                                  {form.watch('type') === 'imageUpload' ||
+                                  form.watch('type') === 'documentUpload' ? (
+                                    <FormLabel>
+                                      Mogen er meerdere{' '}
+                                      {form.watch('type') === 'documentUpload'
+                                        ? 'documenten'
+                                        : 'afbeeldingen'}{' '}
+                                      tegelijkertijd geüpload worden?
+                                    </FormLabel>
+                                  ) : (
+                                    <FormLabel>
+                                      Mogen er meerdere afbeeldingen
+                                      geselecteerd worden?
+                                    </FormLabel>
                                   )}
+                                  <Select
+                                    onValueChange={(e: string) =>
+                                      field.onChange(e === 'true')
+                                    }
+                                    value={field.value ? 'true' : 'false'}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Kies een optie" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="true">Ja</SelectItem>
+                                      <SelectItem value="false">Nee</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
+
+                          {form.watch('type') === 'a-b-slider' && (
+                            <div className="col-span-full grid-cols-2 grid gap-4 gap-y-4">
+                              <FormField
+                                control={form.control}
+                                name="labelA"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Label voor A</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="labelB"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Label voor B</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="sliderTitleUnderA"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Uitleg bij A</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="sliderTitleUnderB"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Uitleg bij B</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="explanationA"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Label onder slider A</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <FormField
+                                control={form.control}
+                                name="explanationB"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Label onder slider B</FormLabel>
+                                    <FormControl>
+                                      <Input {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <div className="col-span-full md:col-span-1 flex flex-col">
+                                <ImageUploader
+                                  form={form}
+                                  project={project as string}
+                                  imageLabel="Upload hier afbeelding A"
+                                  fieldName="imageUploadA"
+                                  allowedTypes={['image/*']}
+                                  onImageUploaded={(imageResult) => {
+                                    const result =
+                                      typeof imageResult.url !== 'undefined'
+                                        ? imageResult.url
+                                        : '';
+                                    form.setValue('imageA', result);
+                                    form.resetField('imageUploadA');
+                                  }}
                                 />
+                              </div>
+
+                              <div className="col-span-full md:col-span-1 flex flex-col">
+                                <ImageUploader
+                                  form={form}
+                                  project={project as string}
+                                  imageLabel="Upload hier afbeelding B"
+                                  fieldName="imageUploadB"
+                                  allowedTypes={['image/*']}
+                                  onImageUploaded={(imageResult) => {
+                                    const result =
+                                      typeof imageResult.url !== 'undefined'
+                                        ? imageResult.url
+                                        : '';
+                                    form.setValue('imageB', result);
+                                    form.resetField('imageUploadB');
+                                  }}
+                                />
+                              </div>
+
+                              <div className="col-span-full md:col-span-1 flex flex-col my-2">
+                                {!!form.watch('imageA') && (
+                                  <>
+                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                      Afbeelding A
+                                    </label>
+                                    <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
+                                      <div style={{ position: 'relative' }}>
+                                        <img
+                                          src={form.watch('imageA')}
+                                          alt={form.watch('imageA')}
+                                        />
+                                        <Button
+                                          color="red"
+                                          onClick={() => {
+                                            form.setValue('imageA', '');
+                                          }}
+                                          style={{
+                                            position: 'absolute',
+                                            right: 0,
+                                            top: 0,
+                                          }}>
+                                          <X size={24} />
+                                        </Button>
+                                      </div>
+                                    </section>
+                                  </>
+                                )}
+                              </div>
+
+                              <div className="col-span-full md:col-span-1 flex flex-col my-2">
+                                {!!form.watch('imageB') && (
+                                  <>
+                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                      Afbeelding B
+                                    </label>
+                                    <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
+                                      <div style={{ position: 'relative' }}>
+                                        <img
+                                          src={form.watch('imageB')}
+                                          alt={form.watch('imageB')}
+                                        />
+                                        <Button
+                                          color="red"
+                                          onClick={() => {
+                                            form.setValue('imageB', '');
+                                          }}
+                                          style={{
+                                            position: 'absolute',
+                                            right: 0,
+                                            top: 0,
+                                          }}>
+                                          <X size={24} />
+                                        </Button>
+                                      </div>
+                                    </section>
+                                  </>
+                                )}
+                              </div>
+
+                              <div className="col-span-full md:col-span-1 flex flex-col gap-y-4 mb-4">
                                 <FormField
                                   control={form.control}
-                                  name="skipQuestionAllowExplanation"
+                                  name="skipQuestion"
                                   render={({ field }) => (
                                     <FormItem>
                                       <FormLabel>
-                                        Mogelijkheid voor de gebruiker om
-                                        toelichting te geven voor het overslaan?
+                                        Mogelijkheid om deze vraag over te
+                                        slaan?
                                       </FormLabel>
+                                      <FormDescription>
+                                        Als je wil dat de gebruiker de vraag kan
+                                        overslaan, selecteer dan &apos;Ja&apos;.
+                                        Als de gebruiker de vraag overslaat,
+                                        wordt de vraag niet meegenomen in de
+                                        weging.
+                                      </FormDescription>
                                       <Select
                                         onValueChange={(e: string) =>
                                           field.onChange(e === 'true')
@@ -2280,250 +2336,349 @@ export default function WidgetChoiceGuideItems(
                                   )}
                                 />
 
-                                {form.watch('skipQuestionAllowExplanation') && (
-                                  <FormField
-                                    control={form.control}
-                                    name="skipQuestionExplanation"
-                                    render={({ field }) => (
-                                      <FormItem>
-                                        <FormLabel>
-                                          Titel boven het tekstveld van de
-                                          toelichting
-                                        </FormLabel>
-                                        <FormControl>
-                                          <Input {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                      </FormItem>
-                                    )}
-                                  />
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      )}
+                                {form.watch('skipQuestion') && (
+                                  <>
+                                    <FormField
+                                      control={form.control}
+                                      name="skipQuestionLabel"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel>
+                                            Tekst bij de checkbox voor het
+                                            overslaan
+                                          </FormLabel>
+                                          <FormControl>
+                                            <Input {...field} />
+                                          </FormControl>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
+                                    <FormField
+                                      control={form.control}
+                                      name="skipQuestionAllowExplanation"
+                                      render={({ field }) => (
+                                        <FormItem>
+                                          <FormLabel>
+                                            Mogelijkheid voor de gebruiker om
+                                            toelichting te geven voor het
+                                            overslaan?
+                                          </FormLabel>
+                                          <Select
+                                            onValueChange={(e: string) =>
+                                              field.onChange(e === 'true')
+                                            }
+                                            value={
+                                              field.value ? 'true' : 'false'
+                                            }>
+                                            <FormControl>
+                                              <SelectTrigger>
+                                                <SelectValue placeholder="Nee" />
+                                              </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                              <SelectItem value="true">
+                                                Ja
+                                              </SelectItem>
+                                              <SelectItem value="false">
+                                                Nee
+                                              </SelectItem>
+                                            </SelectContent>
+                                          </Select>
+                                          <FormMessage />
+                                        </FormItem>
+                                      )}
+                                    />
 
-                      {form.watch('type') === 'text' && (
-                        <FormField
-                          control={form.control}
-                          name="defaultValue"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Standaard ingevulde waarde</FormLabel>
-                              <Input {...field} />
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      )}
-
-                      {(form.watch('type') === 'checkbox' ||
-                        (form.watch('type') === 'images' &&
-                          form.watch('multiple'))) && (
-                        <>
-                          <FormField
-                            control={form.control}
-                            name="maxChoices"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>
-                                  Maximaal te selecteren opties
-                                </FormLabel>
-                                <FormDescription>
-                                  <em className="text-xs">
-                                    Als je wilt dat er maximaal een aantal
-                                    opties geselecteerd kunnen worden, vul dan
-                                    hier het aantal in.
-                                  </em>
-                                </FormDescription>
-                                <Input {...field} />
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name="maxChoicesMessage"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>
-                                  Maximaal aantal bereikt melding
-                                </FormLabel>
-                                <FormDescription>
-                                  <em className="text-xs">
-                                    Als het maximaal aantal opties is
-                                    geselecteerd, geef dan een melding aan de
-                                    gebruiker. Dit is optioneel.
-                                  </em>
-                                </FormDescription>
-                                <Input {...field} />
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                        </>
-                      )}
-
-                      <FormField
-                        control={form.control}
-                        name="routingInitiallyHide"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Is deze vraag altijd zichtbaar?
-                            </FormLabel>
-                            <Select
-                              onValueChange={(e: string) =>
-                                field.onChange(e === 'true')
-                              }
-                              value={field.value ? 'true' : 'false'}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Kies een optie" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {/* True and false are deliberately switched */}
-                                <SelectItem value="true">Nee</SelectItem>
-                                <SelectItem value="false">Ja</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      {form.watch('routingInitiallyHide') && (
-                        <>
-                          <FormField
-                            control={form.control}
-                            name="routingSelectedQuestion"
-                            render={({ field }) => {
-                              const formFields = items || [];
-                              let formMultipleChoiceFields = formFields.filter(
-                                (f: any) =>
-                                  (f.type === 'select' ||
-                                    f.type === 'radiobox' ||
-                                    f.type === 'images' ||
-                                    f.type === 'checkbox') &&
-                                  f.trigger !== form.watch('trigger')
-                              );
-
-                              return (
-                                <FormItem>
-                                  <FormLabel>
-                                    Welke vraag beïnvloedt de zichtbaarheid van
-                                    deze vraag?
-                                  </FormLabel>
-
-                                  {formMultipleChoiceFields.length === 0 ? (
-                                    <p
-                                      className="text-sm"
-                                      style={{
-                                        padding: '11px',
-                                        borderLeft: '4px solid red',
-                                        backgroundColor: '#ffdbd7',
-                                        borderTopRightRadius: '5px',
-                                        borderBottomRightRadius: '5px',
-                                        marginTop: '12px',
-                                      }}>
-                                      Je hebt nog geen meerkeuze, enkele keuze
-                                      of afbeelding keuze vragen toegevoegd.
-                                      Voeg deze eerst toe om deze vraag te
-                                      kunnen tonen op basis van een ander
-                                      antwoord.
-                                    </p>
-                                  ) : (
-                                    <Select
-                                      value={field.value}
-                                      onValueChange={field.onChange}>
-                                      <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Kies een vraag" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        {formMultipleChoiceFields.map(
-                                          (f: any) => (
-                                            <SelectItem
-                                              key={f.trigger}
-                                              value={f.trigger}>
-                                              {f.title || f.fieldKey}
-                                            </SelectItem>
-                                          )
+                                    {form.watch(
+                                      'skipQuestionAllowExplanation'
+                                    ) && (
+                                      <FormField
+                                        control={form.control}
+                                        name="skipQuestionExplanation"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>
+                                              Titel boven het tekstveld van de
+                                              toelichting
+                                            </FormLabel>
+                                            <FormControl>
+                                              <Input {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
                                         )}
-                                      </SelectContent>
-                                    </Select>
-                                  )}
+                                      />
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          )}
 
-                                  <FormMessage />
-                                </FormItem>
-                              );
-                            }}
-                          />
-
-                          {form.watch('routingSelectedQuestion') !== '' && (
+                          {form.watch('type') === 'text' && (
                             <FormField
                               control={form.control}
-                              name="routingSelectedAnswer"
-                              render={({ field }) => {
-                                const selectedQuestion = items?.find(
-                                  (i: any) =>
-                                    i.trigger ===
-                                    form.watch('routingSelectedQuestion')
-                                );
-                                const options = selectedQuestion?.options || [];
+                              name="defaultValue"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>
+                                    Standaard ingevulde waarde
+                                  </FormLabel>
+                                  <Input {...field} />
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
 
-                                return (
+                          {(form.watch('type') === 'checkbox' ||
+                            (form.watch('type') === 'images' &&
+                              form.watch('multiple'))) && (
+                            <>
+                              <FormField
+                                control={form.control}
+                                name="maxChoices"
+                                render={({ field }) => (
                                   <FormItem>
                                     <FormLabel>
-                                      Bij welk antwoord moet deze vraag getoond
-                                      worden?
+                                      Maximaal te selecteren opties
                                     </FormLabel>
-
-                                    {options.length === 0 ? (
-                                      <p
-                                        className="text-sm"
-                                        style={{
-                                          padding: '11px',
-                                          borderLeft: '4px solid red',
-                                          backgroundColor: '#ffdbd7',
-                                          borderTopRightRadius: '5px',
-                                          borderBottomRightRadius: '5px',
-                                          marginTop: '12px',
-                                        }}>
-                                        De geselecteerde vraag heeft nog geen
-                                        antwoordopties. Voeg deze eerst toe om
-                                        deze vraag te kunnen tonen op basis van
-                                        een ander antwoord.
-                                      </p>
-                                    ) : (
-                                      <Select
-                                        value={field.value}
-                                        onValueChange={field.onChange}>
-                                        <FormControl>
-                                          <SelectTrigger>
-                                            <SelectValue placeholder="Kies een antwoord" />
-                                          </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                          {options.map((o: any) => (
-                                            <SelectItem
-                                              key={o.trigger}
-                                              value={o.trigger}>
-                                              {o.titles?.[0]?.key || o.trigger}
-                                            </SelectItem>
-                                          ))}
-                                        </SelectContent>
-                                      </Select>
-                                    )}
-
+                                    <FormDescription>
+                                      <em className="text-xs">
+                                        Als je wilt dat er maximaal een aantal
+                                        opties geselecteerd kunnen worden, vul
+                                        dan hier het aantal in.
+                                      </em>
+                                    </FormDescription>
+                                    <Input {...field} />
                                     <FormMessage />
                                   </FormItem>
-                                );
-                              }}
-                            />
+                                )}
+                              />
+                              <FormField
+                                control={form.control}
+                                name="maxChoicesMessage"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>
+                                      Maximaal aantal bereikt melding
+                                    </FormLabel>
+                                    <FormDescription>
+                                      <em className="text-xs">
+                                        Als het maximaal aantal opties is
+                                        geselecteerd, geef dan een melding aan
+                                        de gebruiker. Dit is optioneel.
+                                      </em>
+                                    </FormDescription>
+                                    <Input {...field} />
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            </>
+                          )}
+
+                          <FormField
+                            control={form.control}
+                            name="routingInitiallyHide"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Is deze vraag altijd zichtbaar?
+                                </FormLabel>
+                                <Select
+                                  onValueChange={(e: string) =>
+                                    field.onChange(e === 'true')
+                                  }
+                                  value={field.value ? 'true' : 'false'}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Kies een optie" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {/* True and false are deliberately switched */}
+                                    <SelectItem value="true">Nee</SelectItem>
+                                    <SelectItem value="false">Ja</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          {form.watch('routingInitiallyHide') && (
+                            <>
+                              <FormField
+                                control={form.control}
+                                name="routingSelectedQuestion"
+                                render={({ field }) => {
+                                  const formFields = items || [];
+                                  let formMultipleChoiceFields =
+                                    formFields.filter(
+                                      (f: any) =>
+                                        (f.type === 'select' ||
+                                          f.type === 'radiobox' ||
+                                          f.type === 'images' ||
+                                          f.type === 'checkbox') &&
+                                        f.trigger !== form.watch('trigger')
+                                    );
+
+                                  return (
+                                    <FormItem>
+                                      <FormLabel>
+                                        Welke vraag beïnvloedt de zichtbaarheid
+                                        van deze vraag?
+                                      </FormLabel>
+
+                                      {formMultipleChoiceFields.length === 0 ? (
+                                        <p
+                                          className="text-sm"
+                                          style={{
+                                            padding: '11px',
+                                            borderLeft: '4px solid red',
+                                            backgroundColor: '#ffdbd7',
+                                            borderTopRightRadius: '5px',
+                                            borderBottomRightRadius: '5px',
+                                            marginTop: '12px',
+                                          }}>
+                                          Je hebt nog geen meerkeuze, enkele
+                                          keuze of afbeelding keuze vragen
+                                          toegevoegd. Voeg deze eerst toe om
+                                          deze vraag te kunnen tonen op basis
+                                          van een ander antwoord.
+                                        </p>
+                                      ) : (
+                                        <Select
+                                          value={field.value}
+                                          onValueChange={(value) => {
+                                            field.onChange(value);
+                                            form.setValue(
+                                              'routingSelectedAnswer',
+                                              []
+                                            );
+                                          }}>
+                                          <FormControl>
+                                            <SelectTrigger>
+                                              <SelectValue placeholder="Kies een vraag" />
+                                            </SelectTrigger>
+                                          </FormControl>
+                                          <SelectContent>
+                                            {formMultipleChoiceFields.map(
+                                              (f: any) => (
+                                                <SelectItem
+                                                  key={f.trigger}
+                                                  value={f.trigger}>
+                                                  {f.title || f.fieldKey}
+                                                </SelectItem>
+                                              )
+                                            )}
+                                          </SelectContent>
+                                        </Select>
+                                      )}
+
+                                      <FormMessage />
+                                    </FormItem>
+                                  );
+                                }}
+                              />
+
+                              {form.watch('routingSelectedQuestion') !== '' && (
+                                <FormField
+                                  control={form.control}
+                                  name="routingSelectedAnswer"
+                                  render={({ field }) => {
+                                    const selectedQuestion = items?.find(
+                                      (i: any) =>
+                                        i.trigger ===
+                                        form.watch('routingSelectedQuestion')
+                                    );
+                                    const options =
+                                      selectedQuestion?.options || [];
+
+                                    const optionTriggers = options.map(
+                                      (o: any) => o.trigger
+                                    );
+                                    const rawValues = Array.isArray(field.value)
+                                      ? field.value
+                                      : field.value
+                                        ? [field.value]
+                                        : [];
+                                    const selectedValues = rawValues.filter(
+                                      (v: string) => optionTriggers.includes(v)
+                                    );
+
+                                    if (
+                                      selectedValues.length !== rawValues.length
+                                    ) {
+                                      field.onChange(selectedValues);
+                                    }
+
+                                    const toggleValue = (trigger: string) => {
+                                      const next = selectedValues.includes(
+                                        trigger
+                                      )
+                                        ? selectedValues.filter(
+                                            (v: string) => v !== trigger
+                                          )
+                                        : [...selectedValues, trigger];
+                                      field.onChange(next);
+                                    };
+
+                                    return (
+                                      <FormItem>
+                                        <FormLabel>
+                                          Bij welk antwoord moet deze vraag
+                                          getoond worden?
+                                        </FormLabel>
+
+                                        {options.length === 0 ? (
+                                          <p
+                                            className="text-sm"
+                                            style={{
+                                              padding: '11px',
+                                              borderLeft: '4px solid red',
+                                              backgroundColor: '#ffdbd7',
+                                              borderTopRightRadius: '5px',
+                                              borderBottomRightRadius: '5px',
+                                              marginTop: '12px',
+                                            }}>
+                                            De geselecteerde vraag heeft nog
+                                            geen antwoordopties. Voeg deze eerst
+                                            toe om deze vraag te kunnen tonen op
+                                            basis van een ander antwoord.
+                                          </p>
+                                        ) : (
+                                          <div className="flex flex-col gap-2 mt-2">
+                                            {options.map((o: any) => (
+                                              <label
+                                                key={o.trigger}
+                                                className="flex items-center gap-2 cursor-pointer">
+                                                <Checkbox
+                                                  checked={selectedValues.includes(
+                                                    o.trigger
+                                                  )}
+                                                  onCheckedChange={() =>
+                                                    toggleValue(o.trigger)
+                                                  }
+                                                />
+                                                <span className="text-sm">
+                                                  {o.titles?.[0]?.key ||
+                                                    o.trigger}
+                                                </span>
+                                              </label>
+                                            ))}
+                                          </div>
+                                        )}
+
+                                        <FormMessage />
+                                      </FormItem>
+                                    );
+                                  }}
+                                />
+                              )}
+                            </>
                           )}
                         </>
                       )}

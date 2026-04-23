@@ -1,4 +1,4 @@
-import { SessionContext } from '@/auth';
+import { SessionContext } from '@/auth-context';
 import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { RenameResourceDialog } from '@/components/dialog-resource-rename';
