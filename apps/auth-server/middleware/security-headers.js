@@ -16,7 +16,13 @@ module.exports = function (req, res, next) {
     ? allowedDomains
     : (allowedDomains || '').split(',');
 
-  if (whitelist.includes(domain)) {
+  const stripWww = (d) => (d && d.startsWith('www.') ? d.slice(4) : d);
+  const normalizedDomain = stripWww(domain);
+  const isDomainAllowed = whitelist.some(
+    (d) => stripWww(d) === normalizedDomain
+  );
+
+  if (isDomainAllowed) {
     res.header('Access-Control-Allow-Origin', origin);
   } else if (
     config.dev &&

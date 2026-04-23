@@ -6,7 +6,12 @@ import 'leaflet/dist/leaflet.css';
 import React from 'react';
 import type { PropsWithChildren } from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { Circle, Polyline } from 'react-leaflet';
+import {
+  Circle,
+  Marker as LeafletMarkerComponent,
+  Polyline,
+  Popup,
+} from 'react-leaflet';
 // @ts-ignore
 import { MapContainer } from 'react-leaflet/MapContainer';
 // @ts-ignore
@@ -18,9 +23,11 @@ import { AutoZoom } from './auto-zoom';
 import './css/base-map.css';
 import { InvalidateSizeOnResize } from './invalidate-size-on-resize';
 import parseLocation from './lib/parse-location';
+import { isSafeUrl, sanitizeColor } from './lib/sanitize';
 import { MapConsumer } from './map-consumer';
 import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
+import MarkerIcon from './marker-icon';
 import TileLayer from './tile-layer';
 import type { BaseMapWidgetProps } from './types/basemap-widget-props';
 import type { LocationType } from './types/location';
@@ -35,6 +42,12 @@ declare module 'leaflet' {
 
 function isRdCoordinates(x: number, y: number) {
   return x > 0 && x < 300000 && y > 300000 && y < 620000; // Typische ranges voor RD-coördinaten
+}
+
+function generateColorSwatchSVG(color: string): string {
+  const safe = sanitizeColor(color);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13"><rect width="13" height="13" rx="2" fill="${safe}" /></svg>`;
+  return `data:image/svg+xml;base64,${btoa(svg)}`;
 }
 
 function generateLineStyleSVG(features: any[]): string {
@@ -246,6 +259,9 @@ const BaseMap = ({
     datalayer: [],
     enableOnOffSwitching: false,
   },
+  markerSets: markerSetsConfig = [],
+  markerInteractionType = 'default',
+  customLegend = [],
   zoomAfterInit = true,
   ...props
 }: PropsWithChildren<
@@ -264,6 +280,12 @@ const BaseMap = ({
 
   const { data: datalayers } = datastore.useDatalayer({
     projectId: props.projectId,
+  });
+
+  const hasMarkerSets =
+    Array.isArray(markerSetsConfig) && markerSetsConfig.length > 0;
+  const { data: allMarkerSets } = datastore.useMarkers({
+    projectId: hasMarkerSets ? props.projectId : undefined,
   });
 
   let mapDataLayers: {
@@ -649,7 +671,8 @@ const BaseMap = ({
 
   return (
     <>
-      {mapDataLayers.length > 0 && (
+      {(mapDataLayers.length > 0 ||
+        (Array.isArray(customLegend) && customLegend.length > 0)) && (
         <ul className="legend osc-map-legend">
           {mapDataLayers.map((layer) => (
             <li key={layer.id} className="legend-item">
@@ -682,6 +705,29 @@ const BaseMap = ({
               </label>
             </li>
           ))}
+          {Array.isArray(customLegend) &&
+            customLegend.map((item: any, index: number) => (
+              <li key={`custom-legend-${index}`} className="legend-item">
+                <div className="legend-label">
+                  <div className="legend-info">
+                    {item.icon ? (
+                      <img
+                        src={item.icon}
+                        alt={item.label}
+                        className="legend-icon"
+                      />
+                    ) : item.color ? (
+                      <img
+                        src={generateColorSwatchSVG(item.color)}
+                        alt=""
+                        className="legend-icon"
+                      />
+                    ) : null}
+                    <span>{item.label}</span>
+                  </div>
+                </div>
+              </li>
+            ))}
         </ul>
       )}
       <div className="map-container osc-map" ref={containerWrapperRef}>
@@ -760,6 +806,80 @@ const BaseMap = ({
               }
               onMarkerClick={onMarkerClick}
             />
+
+            {/* Marker set markers with popup support */}
+            {Array.isArray(markerSetsConfig) &&
+              markerSetsConfig.length > 0 &&
+              Array.isArray(allMarkerSets) &&
+              allMarkerSets.length > 0 &&
+              markerSetsConfig.map((config: any) => {
+                const found = allMarkerSets.find(
+                  (ms: any) => ms.id === config.id
+                );
+                if (!found || !Array.isArray(found.markers)) return null;
+                return (
+                  <React.Fragment key={`ms-group-${found.id}`}>
+                    {found.markers.map((m: any, mIdx: number) => {
+                      if (m.lat == null || m.lng == null) return null;
+                      const icon = m.icon
+                        ? L.icon({
+                            iconUrl: m.icon,
+                            iconSize: [30, 40],
+                            iconAnchor: [15, 40],
+                            popupAnchor: [0, -40],
+                            className: 'custom-image-icon',
+                          })
+                        : MarkerIcon({ icon: { color: m.color || '#555588' } });
+                      const target = m.openInNewTab ? '_blank' : '_self';
+                      const btnText = m.buttonText || 'Lees verder';
+                      const safeUrl = m.url && isSafeUrl(m.url) ? m.url : '';
+
+                      const isDirect = markerInteractionType === 'direct';
+
+                      return (
+                        <LeafletMarkerComponent
+                          key={`ms-${found.id}-${mIdx}`}
+                          position={[m.lat, m.lng]}
+                          icon={icon}
+                          eventHandlers={
+                            isDirect && safeUrl
+                              ? {
+                                  click: () => {
+                                    window.open(safeUrl, target);
+                                  },
+                                }
+                              : {}
+                          }>
+                          {!isDirect &&
+                            (m.title || m.description || safeUrl) && (
+                              <Popup className="leaflet-popup">
+                                {m.title && (
+                                  <h3 className="utrecht-heading-3">
+                                    {m.title}
+                                  </h3>
+                                )}
+                                {m.description && <p>{m.description}</p>}
+                                {safeUrl && (
+                                  <a
+                                    className="pop-up-link"
+                                    href={safeUrl}
+                                    target={target}
+                                    rel={
+                                      m.openInNewTab
+                                        ? 'noopener noreferrer'
+                                        : undefined
+                                    }>
+                                    {btnText}
+                                  </a>
+                                )}
+                              </Popup>
+                            )}
+                        </LeafletMarkerComponent>
+                      );
+                    })}
+                  </React.Fragment>
+                );
+              })}
 
             {locationProx && locationProx.lat && locationProx.lng && (
               <Circle

@@ -85,6 +85,8 @@ router.use('/area', require('./area'));
 router.use('/project/:projectId(\\d+)/datalayer', require('./datalayer'));
 router.use('/datalayer', require('./datalayer'));
 
+router.use('/project/:projectId(\\d+)/markers', require('./markers'));
+
 router.use('/repo', require('./template')); // backwards compatibility
 router.use('/template', require('./template'));
 
