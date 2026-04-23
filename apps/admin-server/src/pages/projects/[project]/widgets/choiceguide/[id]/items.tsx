@@ -683,7 +683,7 @@ export default function WidgetChoiceGuideItems(
     setDimensions(finalDimensions);
   }, [form.watch('type')]);
 
-  function handleSaveItems() {
+  async function handleSaveItems() {
     const updatedProps = { ...props };
 
     Object.keys(updatedProps).forEach((key: string) => {
@@ -693,7 +693,7 @@ export default function WidgetChoiceGuideItems(
       }
     });
 
-    props.updateConfig({ ...updatedProps, items });
+    await props.updateConfig({ ...updatedProps, items });
     setMatrixOptions(matrixDefault);
     window.location.reload();
   }
