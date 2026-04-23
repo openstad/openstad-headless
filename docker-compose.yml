@@ -145,6 +145,8 @@ services:
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://openstad-otel-collector:4317}
       - OTEL_ENABLED=${OTEL_ENABLED_API:-false}
       - SPAM_FILTER_ENABLED=${SPAM_FILTER_ENABLED:-false}
+      - PDF_API_ENDPOINT=${PDF_API_ENDPOINT}
+      - PDF_API_KEY=${PDF_API_KEY}
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:

@@ -569,6 +569,10 @@ secrets:
     cookieName:
     onlySecure:
     jwtSecret:
+  ### PDF generation (optional, leave empty to disable)
+  pdf:
+    apiEndpoint: ""
+    apiKey: ""
   cdn:
     zipCodeAutofillApiUrl: https://openstad-cdn.nl/api/autofill.php?query=
     zipCodeApiUrl: https://openstad-cdn.nl/api/postcode.php?postcode=
