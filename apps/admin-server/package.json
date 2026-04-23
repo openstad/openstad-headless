@@ -6,9 +6,9 @@
   "author": "Gemeente Amsterdam",
   "license": "MIT",
   "scripts": {
-    "dev": "node -r ./telemetry-preload.js ../../node_modules/.bin/next dev --webpack --hostname 0.0.0.0",
+    "dev": "node --require ./telemetry-preload.js ../../node_modules/.bin/next dev --webpack --hostname 0.0.0.0",
     "build": "next build --webpack",
-    "start": "node -r ./telemetry-preload.js ../../node_modules/.bin/next start --hostname 0.0.0.0",
+    "start": "node --require ./telemetry-preload.js ../../node_modules/.bin/next start --hostname 0.0.0.0",
     "lint": "eslint ."
   },
   "dependencies": {
