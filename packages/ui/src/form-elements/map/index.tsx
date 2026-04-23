@@ -111,14 +111,22 @@ const MapField: FC<MapProps> = ({
     config: { api: props.api },
   });
 
-  const { data: areas } = datastore.useArea({
-    projectId: props.projectId,
-  });
-
   const areaId = props?.map?.areaId;
   const allowedPolygonIds = (props?.allowedPolygons || []).map(
     (poly) => poly.id
   );
+
+  const { data: projectArea } = datastore.useArea({ areaId });
+  const { data: allowedAreasData } = datastore.useAreas(
+    allowedPolygonIds.length > 0 ? { ids: allowedPolygonIds } : undefined
+  );
+
+  const areas =
+    allowedPolygonIds.length > 0
+      ? allowedAreasData
+      : projectArea
+        ? [projectArea]
+        : [];
   const {
     safeAreas,
     hasAllowedPolygons,

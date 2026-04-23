@@ -15,6 +15,17 @@ import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
 import './style.css';
 
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      'trix-editor': React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & { input?: string },
+        HTMLElement
+      >;
+    }
+  }
+}
+
 // Temporary TypeScript declaration for 'trix-editor'
 declare global {
   namespace JSX {
@@ -99,7 +110,6 @@ const TrixEditor: React.FC<{
       if (typeof window !== 'undefined') {
         // @ts-expect-error: trix has no types
         await import('trix');
-        // @ts-expect-error: trix has no types
         await import('trix/dist/trix.css');
 
         // Use semantic paragraphs for new blocks created with Enter.

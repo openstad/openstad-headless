@@ -6,6 +6,7 @@
 *.css
 coverage/
 /init
+/dist
 
 ### Exclude project files for Jetbrains users ###
 .idea

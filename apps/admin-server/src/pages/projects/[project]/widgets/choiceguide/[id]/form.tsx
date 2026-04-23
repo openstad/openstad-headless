@@ -170,18 +170,6 @@ export default function ChoicesSelectorForm(
           className="w-fit lg:w-2/3 grid grid-cols-1 lg:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="noOfQuestionsToShow"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Aantal vragen per pagina</FormLabel>
-                <FormControl>
-                  <Input type="number" {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
             name="showPageCountAndCurrentPageInButton"
             render={({ field }) => (
               <FormItem>
