@@ -34,6 +34,7 @@ export type CheckboxFieldProps = {
     label: string;
     isOtherOption?: boolean;
     defaultValue?: boolean;
+    trigger?: string;
   }[];
   fieldRequired?: boolean;
   requiredWarning?: string;
@@ -150,6 +151,17 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
   }, [choices, fieldKey, randomizeItems]);
 
   useEffect(() => {
+    const initialOtherOptionValues: { [key: string]: string } = {};
+    displayChoices?.forEach((choice, index) => {
+      if (choice?.isOtherOption) {
+        const id = choice.trigger || `${index}`;
+        initialOtherOptionValues[`${fieldKey}_${id}_other`] = '';
+      }
+    });
+    setOtherOptionValues(initialOtherOptionValues);
+  }, [displayChoices, fieldKey]);
+
+  useEffect(() => {
     if (onChange) {
       onChange({
         name: fieldKey,
@@ -167,7 +179,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
 
   const handleChoiceChange = (
     event: React.ChangeEvent<HTMLInputElement>,
-    index: number
+    trigger: string
   ): void => {
     const choiceValue = event.target.value;
     if (event.target.checked) {
@@ -176,13 +188,13 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
       setSelectedChoices(
         selectedChoices.filter((choice) => choice !== choiceValue)
       );
-      if (otherOptionValues.hasOwnProperty(`${fieldKey}_${index}_other`)) {
-        otherOptionValues[`${fieldKey}_${index}_other`] = '';
+      if (otherOptionValues.hasOwnProperty(`${fieldKey}_${trigger}_other`)) {
+        otherOptionValues[`${fieldKey}_${trigger}_other`] = '';
         setOtherOptionValues({ ...otherOptionValues });
         if (onChange) {
           onChange(
             {
-              name: `${fieldKey}_${index}_other`,
+              name: `${fieldKey}_${trigger}_other`,
               value: '',
             },
             false
@@ -221,6 +233,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
         label: string;
         isOtherOption?: boolean;
         defaultValue?: boolean;
+        trigger?: string;
       },
     ];
   }
@@ -329,7 +342,9 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                         ? selectedChoices.includes(choice.value)
                         : false
                     }
-                    onChange={(e) => handleChoiceChange(e, index)}
+                    onChange={(e) =>
+                      handleChoiceChange(e, choice.trigger || `${index}`)
+                    }
                     disabled={
                       disabled ||
                       (maxReached && !selectedChoices.includes(choice.value))
@@ -348,11 +363,15 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                   onChange={(e: { name: string; value: string }) =>
                     handleOtherOptionChange(e)
                   }
-                  fieldKey={`${fieldKey}_${index}_other`}
+                  fieldKey={`${fieldKey}_${choice.trigger || index}_other`}
                   title=""
-                  defaultValue={otherOptionValues[`${fieldKey}_${index}_other`]}
+                  defaultValue={
+                    otherOptionValues[
+                      `${fieldKey}_${choice.trigger || index}_other`
+                    ]
+                  }
                   fieldInvalid={false}
-                  randomId={`${fieldKey}_${index}`}
+                  randomId={`${fieldKey}_${choice.trigger || index}`}
                 />
               </div>
             )}
