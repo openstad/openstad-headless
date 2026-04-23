@@ -409,6 +409,7 @@ function getWidgetJavascriptOutput(
           const redirectUri = new URL(encodeURI(window.location.href));
           redirectUri.searchParams.delete('openstadlogout');
           redirectUri.searchParams.delete('openstadlogintoken');
+          redirectUri.hash = '';
           
           const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", encodeURIComponent(redirectUri.toString())));
           
@@ -477,19 +478,22 @@ function getWidgetJavascriptOutput(
           insertCssLinks(customCssUrls);
           
           function renderWidget () {
-            
+
             // Check if widget has already been rendered
             if (renderedWidgets[randomComponentId]) {
               return;
             }
-            
+
             renderedWidgets[randomComponentId] = true;
-            
+
+            const React = window.OpenStadReact;
+            const ReactDOM = window.OpenStadReactDOM;
+
             ${widgetOutput}
             ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget(randomComponentId, config);
           }
-          
-          ${reactCheck}
+
+          ${reactCheck(apiUrl)}
           currentScript.remove();
       } catch(e) {
         console.error("Could not place widget", e);

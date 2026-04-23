@@ -18,7 +18,8 @@
     "test:e2e:debug": "jest --no-cache --config jest-e2e.config.js --verbose --forceExit",
     "init-database": "node ./scripts/init-database.js",
     "migrate-database": "node ./scripts/migrate-database.js",
-    "build-packages": "node ./scripts/build-packages.js"
+    "build-packages": "node ./scripts/build-react-runtime.js && node ./scripts/build-packages.js",
+    "build:react-runtime": "node scripts/build-react-runtime.js"
   },
   "dependencies": {
     "@azure/identity": "^4.6.0",
@@ -82,8 +83,10 @@
     "postcss-prefix-selector": "^2.1.0",
     "redis": "^4.6.13",
     "sanitize-html": "^2.7.0",
-    "sequelize": "^6.28.0",
+    "sequelize": "^6.37.8",
     "umzug": "^3.2.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "ws": "^7.5.7"
   },
   "devDependencies": {

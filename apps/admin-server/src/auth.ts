@@ -1,7 +1,6 @@
 import { getIronSession } from 'iron-session';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { type NextRequest, NextResponse } from 'next/server';
-import { createContext } from 'react';
 
 import hasRole from './lib/hasRole';
 import { Role } from './lib/roles';
@@ -188,49 +187,4 @@ async function signIn(
   return NextResponse.redirect(loginUrl, { headers: res.headers });
 }
 
-function clientSignIn() {
-  let loginUrl = `/signin`;
-  document.location.href = loginUrl;
-}
-
-type SessionUserType = {
-  id?: number;
-  name?: string;
-  role?: string;
-  jwt?: string;
-};
-
-async function fetchSessionUser() {
-  try {
-    let response = await fetch('/api/current-user', {
-      headers: { 'Content-type': 'application/json' },
-    });
-    if (!response.ok) {
-      throw new Error('Fetch failed');
-    }
-    let result = await response.json();
-    return {
-      id: result.id,
-      name: result.name,
-      role: result.role,
-      jwt: result.jwt,
-    };
-  } catch (err) {
-    console.log(err);
-    return {};
-  }
-}
-
-let defaultSession: SessionUserType = {};
-let SessionContext = createContext(defaultSession);
-
-export {
-  authMiddleware,
-  getSession,
-  sessionOptions,
-  signIn,
-  clientSignIn,
-  SessionContext,
-  fetchSessionUser,
-  type SessionUserType,
-};
+export { authMiddleware, getSession, sessionOptions, signIn };

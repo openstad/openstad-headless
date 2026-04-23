@@ -26,13 +26,6 @@ module.exports = {
         req.data.global.projectTitle = req.project.title;
         req.data.prefix = self.apos.options.prefix || '';
 
-        req.data.global.reactCdn =
-          process.env.REACT_CDN ||
-          'https://unpkg.com/react@18.3.1/umd/react.production.min.js';
-        req.data.global.reactDomCdn =
-          process.env.REACT_DOM_CDN ||
-          'https://unpkg.com/react-dom@{VERSION}/umd/react-dom.production.min.js';
-
         try {
           if (!!req.project.id) {
             const project = await projectService.fetchOne(req.project.id);

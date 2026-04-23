@@ -114,6 +114,10 @@ let defaultConfig = {
     multipleStatements: true,
     requireSsl: process.env.DB_REQUIRE_SSL || false,
     authMethod: process.env.DB_AUTH_METHOD,
+    enableCleartextPlugin:
+      process.env.DB_ENABLE_CLEARTEXT_PLUGIN ||
+      process.env.API_DB_ENABLE_CLEARTEXT_PLUGIN ||
+      false,
   },
 
   express: {

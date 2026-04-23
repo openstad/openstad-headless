@@ -1,6 +1,7 @@
 import ImageGalleryStyle from '@/components/image-gallery-style';
 import { ImageUploader } from '@/components/image-uploader';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -125,7 +126,7 @@ const formSchema = z.object({
   matrixMultiple: z.boolean().optional(),
   routingInitiallyHide: z.boolean().optional(),
   routingSelectedQuestion: z.string().optional(),
-  routingSelectedAnswer: z.string().optional(),
+  routingSelectedAnswer: z.union([z.string(), z.array(z.string())]).optional(),
   infoBlockStyle: z.string().optional(),
   infoBlockShareButton: z.boolean().optional(),
   infoBlockExtraButton: z.string().optional(),
@@ -220,10 +221,37 @@ export default function WidgetEnqueteItems(
     }
 
     if (selectedItem) {
+      const oldOptions = selectedItem.options || [];
+      const newOptions = options || [];
+      const triggerMap: Record<string, string> = {};
+      for (let i = 0; i < Math.min(oldOptions.length, newOptions.length); i++) {
+        if (oldOptions[i].trigger !== newOptions[i].trigger) {
+          triggerMap[oldOptions[i].trigger] = newOptions[i].trigger;
+        }
+      }
+      const hasTriggerChanges = Object.keys(triggerMap).length > 0;
+
       setItems((currentItems) =>
-        currentItems.map((item) =>
-          item.trigger === selectedItem.trigger ? { ...item, ...values } : item
-        )
+        currentItems.map((item) => {
+          if (item.trigger === selectedItem.trigger) {
+            return { ...item, ...values };
+          }
+          if (
+            hasTriggerChanges &&
+            item.routingSelectedQuestion === selectedItem.trigger
+          ) {
+            const answers = Array.isArray(item.routingSelectedAnswer)
+              ? item.routingSelectedAnswer
+              : item.routingSelectedAnswer
+                ? [item.routingSelectedAnswer]
+                : [];
+            const updated = answers.map(
+              (answer) => triggerMap[answer] || answer
+            );
+            return { ...item, routingSelectedAnswer: updated };
+          }
+          return item;
+        })
       );
       setItem(null);
     } else {
@@ -469,77 +497,72 @@ export default function WidgetEnqueteItems(
     onFieldChanged('items', items);
   }, [items]);
 
-  // Sets form to selected item values when item is selected
-  useEffect(() => {
-    if (selectedItem) {
-      // Migrate fallback image fields to images array if needed
-      let images = selectedItem.images || [];
-      if ((!images || images.length === 0) && selectedItem.image) {
-        images = [
-          {
-            url: selectedItem.image,
-            imageAlt: selectedItem.imageAlt || '',
-            imageDescription: selectedItem.imageDescription || '',
-          },
-        ];
-      }
-
-      const formValues = {
-        trigger: selectedItem.trigger,
-        title: selectedItem.title || '',
-        fieldKey: selectedItem.fieldKey || '',
-        description: selectedItem.description || '',
-        questionType: selectedItem.questionType || '',
-        minCharacters: selectedItem.minCharacters || '',
-        maxCharacters: selectedItem.maxCharacters || '',
-        nextPageText: selectedItem.nextPageText || '',
-        prevPageText: selectedItem.prevPageText || '',
-        variant: selectedItem.variant || '',
-        options: selectedItem.options || [],
-        multiple: selectedItem.multiple || false,
-        randomizeItems: selectedItem.randomizeItems || false,
-        infoBlockStyle: selectedItem.infoBlockStyle || 'default',
-        infoBlockShareButton: selectedItem.infoBlockShareButton || false,
-        infoBlockExtraButton: selectedItem.infoBlockExtraButton || '',
-        infoBlockExtraButtonTitle: selectedItem.infoBlockExtraButtonTitle || '',
-        fieldRequired: selectedItem.fieldRequired || false,
-        createImageSlider: selectedItem.createImageSlider || false,
-        imageClickable: selectedItem.imageClickable || false,
-        maxChoices: selectedItem.maxChoices || '',
-        maxChoicesMessage: selectedItem.maxChoicesMessage || '',
-        showSmileys: selectedItem.showSmileys || false,
-        defaultValue: selectedItem.defaultValue || '',
-        placeholder: selectedItem.placeholder || '',
-        matrix: selectedItem.matrix || matrixDefault,
-        matrixMultiple: selectedItem.matrixMultiple || false,
-        routingInitiallyHide: selectedItem.routingInitiallyHide || false,
-        numberingStyle: selectedItem.numberingStyle || 'none',
-        routingSelectedQuestion: selectedItem.routingSelectedQuestion || '',
-        routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
-        infoField: selectedItem.infoField || '',
-        infofieldExplanation: selectedItem.infofieldExplanation || false,
-        videoUrl: selectedItem.videoUrl || '',
-        videoSubtitle: selectedItem.videoSubtitle || false,
-        videoLang: selectedItem.videoLang || '',
-        images,
-
-        // Keeping these for backwards compatibility
-        image1: selectedItem.image1 || '',
-        text1: selectedItem.text1 || '',
-        key1: selectedItem.key1 || '',
-        image2: selectedItem.image2 || '',
-        text2: selectedItem.text2 || '',
-        key2: selectedItem.key2 || '',
-        image: '',
-        imageAlt: '',
-        imageDescription: '',
-      };
-
-      form.reset(formValues);
-      setOptions(selectedItem.options || []);
-      setMatrixOptions(selectedItem.matrix || matrixDefault);
+  function buildFormValues(item: Item) {
+    let images = item.images || [];
+    if ((!images || images.length === 0) && item.image) {
+      images = [
+        {
+          url: item.image,
+          imageAlt: item.imageAlt || '',
+          imageDescription: item.imageDescription || '',
+        },
+      ];
     }
-  }, [selectedItem, form]);
+
+    return {
+      trigger: item.trigger,
+      title: item.title || '',
+      fieldKey: item.fieldKey || '',
+      description: item.description || '',
+      questionType: item.questionType || '',
+      minCharacters: item.minCharacters || '',
+      maxCharacters: item.maxCharacters || '',
+      nextPageText: item.nextPageText || '',
+      prevPageText: item.prevPageText || '',
+      variant: item.variant || '',
+      options: item.options || [],
+      multiple: item.multiple || false,
+      randomizeItems: item.randomizeItems || false,
+      infoBlockStyle: item.infoBlockStyle || 'default',
+      infoBlockShareButton: item.infoBlockShareButton || false,
+      infoBlockExtraButton: item.infoBlockExtraButton || '',
+      infoBlockExtraButtonTitle: item.infoBlockExtraButtonTitle || '',
+      fieldRequired: item.fieldRequired || false,
+      createImageSlider: item.createImageSlider || false,
+      imageClickable: item.imageClickable || false,
+      maxChoices: item.maxChoices || '',
+      maxChoicesMessage: item.maxChoicesMessage || '',
+      showSmileys: item.showSmileys || false,
+      defaultValue: item.defaultValue || '',
+      placeholder: item.placeholder || '',
+      matrix: item.matrix || matrixDefault,
+      matrixMultiple: item.matrixMultiple || false,
+      routingInitiallyHide: item.routingInitiallyHide || false,
+      numberingStyle: item.numberingStyle || 'none',
+      routingSelectedQuestion: item.routingSelectedQuestion || '',
+      routingSelectedAnswer: item.routingSelectedAnswer || '',
+      infoField: item.infoField || '',
+      infofieldExplanation: item.infofieldExplanation || false,
+      videoUrl: item.videoUrl || '',
+      videoSubtitle: item.videoSubtitle || false,
+      videoLang: item.videoLang || '',
+      images,
+
+      // Keeping these for backwards compatibility
+      image1: item.image1 || '',
+      text1: item.text1 || '',
+      key1: item.key1 || '',
+      image2: item.image2 || '',
+      text2: item.text2 || '',
+      key2: item.key2 || '',
+      image: '',
+      imageAlt: '',
+      imageDescription: '',
+    };
+  }
+
+  // Sets form to selected item values when item is selected
+  // Item selection is handled directly in the click handler (no useEffect needed)
 
   useEffect(() => {
     if (selectedOption) {
@@ -573,11 +596,30 @@ export default function WidgetEnqueteItems(
   ) => {
     if (isItemAction) {
       setItems((currentItems) => {
-        return handleMovementOrDeletion(
+        const index = currentItems.findIndex(
+          (entry) => entry.trigger === clickedTrigger
+        );
+        const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
+        const triggerA = currentItems[index]?.trigger;
+        const triggerB = currentItems[swapIndex]?.trigger;
+
+        const newItems = handleMovementOrDeletion(
           currentItems,
           actionType,
           clickedTrigger
         ) as Item[];
+
+        if (actionType !== 'delete' && triggerA && triggerB) {
+          for (const item of newItems) {
+            if (item.routingSelectedQuestion === triggerA) {
+              item.routingSelectedQuestion = triggerB;
+            } else if (item.routingSelectedQuestion === triggerB) {
+              item.routingSelectedQuestion = triggerA;
+            }
+          }
+        }
+
+        return newItems;
       });
     } else if (isMatrixAction) {
       let newMatrixOptions: Matrix;
@@ -700,6 +742,7 @@ export default function WidgetEnqueteItems(
   function handleSaveOptions() {
     form.setValue('options', options);
     setSettingOptions(false);
+    setOption(null);
   }
 
   function handleSaveMatrixOptions() {
@@ -798,10 +841,12 @@ export default function WidgetEnqueteItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
+                                form.reset(buildFormValues(item));
                                 setItem(item);
-                                setOptions([]);
-                                setMatrixOptions(matrixDefault);
+                                setOptions(item.options || []);
+                                setMatrixOptions(item.matrix || matrixDefault);
                                 setSettingOptions(false);
+                                setOption(null);
                               }}
                               dangerouslySetInnerHTML={{
                                 __html: `${
@@ -2394,7 +2439,8 @@ export default function WidgetEnqueteItems(
                                 (f.questionType === 'multiplechoice' ||
                                   f.questionType === 'multiple' ||
                                   f.questionType === 'images' ||
-                                  f.questionType === 'select') &&
+                                  f.questionType === 'select' ||
+                                  f.questionType === 'scale') &&
                                 f.trigger !== form.watch('trigger')
                             );
 
@@ -2424,7 +2470,13 @@ export default function WidgetEnqueteItems(
                                 ) : (
                                   <Select
                                     value={field.value}
-                                    onValueChange={field.onChange}>
+                                    onValueChange={(value) => {
+                                      field.onChange(value);
+                                      form.setValue(
+                                        'routingSelectedAnswer',
+                                        []
+                                      );
+                                    }}>
                                     <FormControl>
                                       <SelectTrigger>
                                         <SelectValue placeholder="Kies een vraag" />
@@ -2460,7 +2512,40 @@ export default function WidgetEnqueteItems(
                                   i.trigger ===
                                   form.watch('routingSelectedQuestion')
                               );
-                              const options = selectedQuestion?.options || [];
+
+                              const isScale =
+                                selectedQuestion?.questionType === 'scale';
+                              const options = isScale
+                                ? [1, 2, 3, 4, 5].map((n) => ({
+                                    trigger: `scale-${n}`,
+                                    titles: [{ key: `${n}` }],
+                                  }))
+                                : selectedQuestion?.options || [];
+
+                              const optionTriggers = options.map(
+                                (o: any) => o.trigger
+                              );
+                              const rawValues = Array.isArray(field.value)
+                                ? field.value
+                                : field.value
+                                  ? [field.value]
+                                  : [];
+                              const selectedValues = rawValues.filter(
+                                (v: string) => optionTriggers.includes(v)
+                              );
+
+                              if (selectedValues.length !== rawValues.length) {
+                                field.onChange(selectedValues);
+                              }
+
+                              const toggleValue = (trigger: string) => {
+                                const next = selectedValues.includes(trigger)
+                                  ? selectedValues.filter(
+                                      (v: string) => v !== trigger
+                                    )
+                                  : [...selectedValues, trigger];
+                                field.onChange(next);
+                              };
 
                               return (
                                 <FormItem>
@@ -2486,24 +2571,25 @@ export default function WidgetEnqueteItems(
                                       een ander antwoord.
                                     </p>
                                   ) : (
-                                    <Select
-                                      value={field.value}
-                                      onValueChange={field.onChange}>
-                                      <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Kies een antwoord" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        {options.map((o: any) => (
-                                          <SelectItem
-                                            key={o.trigger}
-                                            value={o.trigger}>
+                                    <div className="flex flex-col gap-2 mt-2">
+                                      {options.map((o: any) => (
+                                        <label
+                                          key={o.trigger}
+                                          className="flex items-center gap-2 cursor-pointer">
+                                          <Checkbox
+                                            checked={selectedValues.includes(
+                                              o.trigger
+                                            )}
+                                            onCheckedChange={() =>
+                                              toggleValue(o.trigger)
+                                            }
+                                          />
+                                          <span className="text-sm">
                                             {o.titles?.[0]?.key || o.trigger}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
+                                          </span>
+                                        </label>
+                                      ))}
+                                    </div>
                                   )}
 
                                   <FormMessage />

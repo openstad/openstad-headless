@@ -5,9 +5,6 @@ forgot to override the title block in a template that does not have access to an
 Apostrophe page or piece.') }} {% endif %} {% endblock %} {% block extraHead %}
 {% if data.global.googleSiteVerificationTag %} {{
 data.global.googleSiteVerificationTag | safe }} {% endif %}
-<script src="{{data.global.reactCdn}}"></script>
-<script src="{{data.global.reactDomCdn}}"></script>
-
 {% if data.global.favicon %} {% set faviconUrl = data.global.favicon._url or
 data.global.favicon %} {% set faviconExtension = data.global.favicon.extension
 or '' %} {% if faviconExtension == 'svg' %}

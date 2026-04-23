@@ -88,7 +88,11 @@ function Form({
       if (
         field?.routingInitiallyHide &&
         field?.routingSelectedQuestion &&
-        field?.routingSelectedAnswer
+        field?.routingSelectedAnswer &&
+        !(
+          Array.isArray(field.routingSelectedAnswer) &&
+          field.routingSelectedAnswer.length === 0
+        )
       ) {
         const getRoutingSelectedQuestionField = fields.find(
           (f) => f.trigger === field.routingSelectedQuestion
