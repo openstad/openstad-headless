@@ -75,7 +75,7 @@ function buildPdfHtml(
     .join('');
 
   const logoHtml = logoUrl
-    ? `<img src="${escapeHtml(logoUrl)}" alt="Logo" class="logo" />`
+    ? `<img src="${escapeAttr(logoUrl)}" alt="Logo" class="logo" />`
     : '';
   const titleHtml = title ? `<h1>${escapeHtml(title)}</h1>` : '';
   const descriptionHtml = description
