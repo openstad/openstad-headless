@@ -22,6 +22,7 @@ import * as z from 'zod';
 
 const formSchema = z.object({
   trigger: z.string(),
+  date: z.string().optional(),
   title: z.string(),
   description: z.string(),
   active: z.boolean(),
@@ -32,6 +33,7 @@ const formSchema = z.object({
     .array(
       z.object({
         trigger: z.string(),
+        date: z.string().optional(),
         title: z.string(),
         url: z.string(),
         openInNewWindow: z.boolean(),
@@ -78,6 +80,7 @@ export default function WidgetAgendaItems(
               ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
               : 0
           }`,
+          date: values.date,
           title: values.title,
           description: values.description,
           active: values.active,
@@ -130,6 +133,7 @@ export default function WidgetAgendaItems(
 
   const defaults = () => ({
     trigger: '0',
+    date: '',
     title: '',
     description: '',
     active: true,
@@ -146,6 +150,7 @@ export default function WidgetAgendaItems(
 
   type Item = {
     trigger: string;
+    date?: string;
     title?: string;
     description: string;
     active: boolean;
@@ -177,6 +182,7 @@ export default function WidgetAgendaItems(
     if (selectedItem) {
       form.reset({
         trigger: selectedItem.trigger,
+        date: selectedItem.date || '',
         title: selectedItem.title || '',
         description: selectedItem.description,
         active: selectedItem.active,
@@ -490,6 +496,17 @@ export default function WidgetAgendaItems(
                         <FormItem>
                           <FormLabel>Beschrijving</FormLabel>
                           <Input {...field} />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Datum</FormLabel>
+                          <Input type="date" {...field} />
                           <FormMessage />
                         </FormItem>
                       )}

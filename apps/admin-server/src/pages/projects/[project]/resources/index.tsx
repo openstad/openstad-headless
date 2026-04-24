@@ -67,7 +67,9 @@ const prepareDataForExport = (data: any[]) => {
             .join(' | ');
 
           resource[key] = createString || '';
-        } catch (e) {}
+        } catch (e) {
+          console.warn(`Failed to serialize statuses for export (${key}):`, e);
+        }
       }
 
       if (
@@ -87,10 +89,11 @@ const prepareDataForExport = (data: any[]) => {
             .join(' | ');
 
           resource[key] = createString || '';
-        } catch (e) {}
+        } catch (e) {
+          console.warn(`Failed to serialize ${key} for export:`, e);
+        }
       }
     }
-
     allResources.push(resource);
   });
 
