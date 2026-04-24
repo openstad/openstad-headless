@@ -137,7 +137,8 @@ jobs:
           record: true
           install: false
           component: true
-          command: npm run test:component
+          group: 'Component'
+          tag: 'component'
           ci-build-id: ${{ needs.generate-ci-build-id.outputs.build_id }}
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
@@ -292,7 +293,7 @@ jobs:
           safe-chain setup-ci
 
       - name: Install Cypress
-        run: npm install cypress
+        run: npm install cypress --safe-chain-skip-minimum-package-age
 
       - name: Set up Docker Compose
         uses: docker/setup-compose-action@v1

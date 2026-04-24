@@ -19,6 +19,7 @@ module.exports = function (req, res, next) {
   )
     return next();
   if (req.path.match('^(/api/lock(/[^/]*)?)$')) return next();
+  if (req.path.match('^(/api/audit-log)')) return next();
   if (req.path.match('^(/api/project)$') && req.method == 'GET') return next();
   if (req.path.match('^(/api/user)') && req.method == 'GET') return next();
 

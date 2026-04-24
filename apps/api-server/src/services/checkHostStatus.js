@@ -38,6 +38,20 @@ const getIngress = async (k8sApi, name, namespace) => {
   }
 };
 
+const deleteIngress = async (k8sApi, name, namespace) => {
+  try {
+    await k8sApi.deleteNamespacedIngress({ name, namespace });
+    return true;
+  } catch (error) {
+    const status = error?.statusCode || error?.response?.statusCode;
+    if (status === 404) {
+      return false; // Already gone
+    }
+    console.error(`Error deleting ingress ${name}: ${error}`);
+    throw error;
+  }
+};
+
 /*
 Allow extra hosts to be set for TLS, e.g. for www redirection
 You can add the array tlsExtraDomains in the project config
@@ -210,6 +224,7 @@ const createIngress = async (
       metadata: {
         //name must be unique, lowercase, alphanumer, - is allowed
         name: `${name}`,
+        labels: { 'app.kubernetes.io/managed-by': 'Openstad' },
         annotations,
       },
       spec,
@@ -274,6 +289,27 @@ const checkHostStatus = async (conditions) => {
       if (project && project.config && project.config.uniqueId) {
         // get ingress config files
         ingress = await getIngress(k8sApi, project.config.uniqueId, namespace);
+      }
+
+      // If projectToggle is off, remove the ingress and clean up hostStatus
+      if (project.config?.project?.projectToggle === false) {
+        if (ingress && project.config.uniqueId) {
+          const managedBy =
+            ingress.metadata?.labels?.['app.kubernetes.io/managed-by'];
+          if (managedBy !== 'Openstad') {
+            return;
+          }
+          try {
+            await deleteIngress(k8sApi, project.config.uniqueId, namespace);
+          } catch (error) {
+            console.error(
+              `Error deleting ingress for project ${project.id}: ${error}`
+            );
+          }
+        }
+        hostStatus = { ingress: false };
+        await project.update({ hostStatus });
+        return;
       }
 
       // Allow the TLS secret name to be set in the project config

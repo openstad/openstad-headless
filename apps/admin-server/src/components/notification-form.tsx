@@ -1,4 +1,4 @@
-import { fetchSessionUser } from '@/auth';
+import { fetchSessionUser } from '@/auth-context';
 import { Button } from '@/components/ui/button';
 import {
   Form,
