@@ -11,6 +11,7 @@ const getWidgetSettings = require('./widget-settings');
 const widgetDefinitions = getWidgetSettings();
 
 const reactCheck = require('../../util/react-check');
+const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
 
 let router = express.Router({ mergeParams: true });
 
@@ -139,6 +140,63 @@ router
       );
     }
 
+    const projectDomains = widget.project.config.allowedDomains || [];
+    const hasProjectDomains = projectDomains.length > 0 || !!widget.project.url;
+
+    const allowedDomains = hasProjectDomains
+      ? prefillAllowedDomains([...projectDomains], widget.project.url)
+      : null;
+
+    const referer = req.headers.referer || req.headers.referrer;
+    if (referer) {
+      if (hasProjectDomains) {
+        try {
+          const refererHost = new URL(referer).hostname;
+          const allowed = allowedDomains.some(
+            (domain) =>
+              refererHost === domain || refererHost === domain.split(':')[0]
+          );
+          if (!allowed) {
+            console.log(
+              `[widget] Widget ${widgetId}: referer "${referer}" is not in the allowed domains for project ${widget.project.id}`
+            );
+            db.DomainBlock.findOne({
+              where: {
+                projectId: widget.project.id,
+                widgetId: parseInt(widgetId),
+                domain: refererHost,
+              },
+            })
+              .then((record) => {
+                if (record) {
+                  record.update({
+                    count: record.count + 1,
+                    lastSeen: new Date(),
+                    referer,
+                  });
+                } else {
+                  db.DomainBlock.create({
+                    projectId: widget.project.id,
+                    widgetId: parseInt(widgetId),
+                    domain: refererHost,
+                    referer,
+                  });
+                }
+              })
+              .catch((e) =>
+                console.log('[widget] Could not save domain block:', e.message)
+              );
+          }
+        } catch (e) {
+          // Malformed Referer header, skip domain check
+        }
+      } else {
+        console.log(
+          `[widget] Widget ${widgetId}: project ${widget.project.id} has no url or allowedDomains configured, loaded from "${referer}"`
+        );
+      }
+    }
+
     const defaultConfig = getDefaultConfig(widget.project, widget.type);
 
     try {
@@ -149,7 +207,8 @@ router
         defaultConfig,
         widget.project.safeConfig,
         widget.config,
-        widgetId
+        widgetId,
+        allowedDomains
       );
 
       res.header('Content-Type', 'application/javascript');
@@ -244,7 +303,8 @@ function setConfigsToOutput(
   defaultConfig,
   projectConfig,
   widgetConfig,
-  widgetId
+  widgetId,
+  allowedDomains
 ) {
   // Move general settings to the root to ensure we have the correct config
   if (widgetConfig.hasOwnProperty('general')) {
@@ -266,7 +326,8 @@ function setConfigsToOutput(
     widgetSettings,
     widgetType,
     componentId,
-    config
+    config,
+    allowedDomains
   );
 }
 
@@ -274,7 +335,8 @@ function getWidgetJavascriptOutput(
   widgetSettings,
   widgetType,
   componentId,
-  widgetConfig
+  widgetConfig,
+  allowedDomains
 ) {
   // If we include remix icon in the components, we are sending a lot of data to the client
   // By using a CDN and loading it through a <link> tag, we reduce the size of the response and leverage browser cache
@@ -407,6 +469,31 @@ function getWidgetJavascriptOutput(
         
         const currentScript = document.currentScript;
           currentScript.insertAdjacentHTML('afterend', \`<div class="openstad" id="\${randomComponentId}"></div>\`);
+
+          ${
+            allowedDomains && allowedDomains.length > 0
+              ? `
+          const allowedHosts = ${JSON.stringify(allowedDomains)};
+          const currentHostname = window.location.hostname;
+          const domainAllowed = allowedHosts.some(function(host) {
+            return currentHostname === host || currentHostname === host.split(':')[0];
+          });
+
+          if (!domainAllowed) {
+            var warningEl = document.getElementById(randomComponentId);
+            if (warningEl) {
+              warningEl.innerHTML = '<div style="border: 2px solid #f59e0b; background-color: #fffbeb; border-radius: 8px; padding: 16px 20px; font-family: sans-serif; color: #92400e; margin: 12px 0;">' +
+                '<strong style="font-size: 16px;">OpenStad widget kan niet worden geladen</strong>' +
+                '<p style="margin: 8px 0 0 0; font-size: 14px;">Deze website (<strong>' + currentHostname + '</strong>) staat niet in de lijst met toegestane websites voor dit project. ' +
+                'Voeg dit domein toe in het OpenStad admin-panel onder Instellingen &gt; Toegestane websites.</p></div>';
+            }
+            console.error('OpenStad: widget kan niet laden op ' + currentHostname + ' (domein niet toegestaan)');
+            currentScript.remove();
+            return;
+          }
+          `
+              : ''
+          }
 
           const redirectUri = new URL(encodeURI(window.location.href));
           redirectUri.searchParams.delete('openstadlogout');

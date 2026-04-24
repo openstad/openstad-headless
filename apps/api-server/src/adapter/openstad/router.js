@@ -176,15 +176,10 @@ router
 
     const isAllowedRedirectDomain = (url, project) => {
       let allowedDomains = prefillAllowedDomains(
-        project?.config?.allowedDomains || []
+        project?.config?.allowedDomains || [],
+        project?.url
       );
 
-      if (project.url) {
-        try {
-          let projectDomain = new URL(project.url).host;
-          allowedDomains.push(projectDomain);
-        } catch (err) {}
-      }
       if (config.admin.domain) {
         const domain = config.admin.domain.replace(/:\d+$/, '');
         allowedDomains.push(domain);

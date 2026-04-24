@@ -6,7 +6,8 @@ const isRedirectAllowed = async (projectId, redirectUri) => {
   const project = await db.Project.findByPk(projectId);
   if (!project) return false;
   let allowedDomains = prefillAllowedDomains(
-    project?.config?.allowedDomains || []
+    project?.config?.allowedDomains || [],
+    project?.url
   );
 
   allowedDomains = allowedDomains.map((domain) => {
