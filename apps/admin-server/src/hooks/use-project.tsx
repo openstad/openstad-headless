@@ -19,6 +19,12 @@ export function useProject(scopes?: Array<string>) {
       : null
   );
 
+  const pdfStatusSwr = useSWR(
+    projectNumber
+      ? `/api/openstad/api/project/${projectNumber}/pdf/status`
+      : null
+  );
+
   async function createProject(name: string) {
     const res = await fetch('/api/openstad/api/project', {
       method: 'POST',
@@ -129,6 +135,7 @@ export function useProject(scopes?: Array<string>) {
 
   return {
     ...projectSwr,
+    pdfAvailable: pdfStatusSwr.data?.available ?? null,
     createProject,
     importProject,
     updateProject,

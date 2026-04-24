@@ -1754,4 +1754,15 @@ router
     }
   });
 
+// PDF availability check
+// ----------------------
+router
+  .route('/:projectId(\\d+)/pdf/status')
+  .get(auth.can('Project', 'update'))
+  .get(function (req, res) {
+    const available =
+      !!process.env.PDF_API_ENDPOINT && !!process.env.PDF_API_KEY;
+    res.json({ available });
+  });
+
 module.exports = router;

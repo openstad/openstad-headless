@@ -57,7 +57,7 @@ export default function ProjectSettingsNotifications({
 
   const router = useRouter();
   const { project } = router.query;
-  const { data, isLoading, updateProjectEmails } = useProject();
+  const { data, isLoading, updateProjectEmails, pdfAvailable } = useProject();
   const defaults = useCallback(
     () => ({
       fromAddress: data?.emailConfig?.[category]?.fromAddress || '',
@@ -249,17 +249,28 @@ export default function ProjectSettingsNotifications({
                       met de bevestigingsmail na het indienen van een inzending.
                     </FormDescription>
                     <FormControl>
-                      <div className="flex items-center gap-2">
-                        <Checkbox
-                          id={field.name}
-                          checked={field.value}
-                          onCheckedChange={(checked) =>
-                            field.onChange(Boolean(checked))
-                          }
-                        />
-                        <Label htmlFor={field.name} className="cursor-pointer">
-                          PDF bijlage meesturen bij bevestigingsmails
-                        </Label>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id={field.name}
+                            checked={field.value}
+                            disabled={pdfAvailable === false}
+                            onCheckedChange={(checked) =>
+                              field.onChange(Boolean(checked))
+                            }
+                          />
+                          <Label
+                            htmlFor={field.name}
+                            className="cursor-pointer">
+                            PDF bijlage meesturen bij bevestigingsmails
+                          </Label>
+                        </div>
+                        {pdfAvailable === false && (
+                          <p className="text-sm text-orange-600">
+                            PDF generatie is niet beschikbaar. De benodigde
+                            server-configuratie ontbreekt.
+                          </p>
+                        )}
                       </div>
                     </FormControl>
                     <FormMessage />
