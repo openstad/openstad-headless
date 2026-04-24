@@ -262,7 +262,9 @@ module.exports = function (db, sequelize, DataTypes) {
               description: entry.description
                 ? sanitize.content(entry.description.trim())
                 : '',
-              authorName: entry.authorName ? entry.authorName.trim() : null,
+              authorName: entry.authorName
+                ? sanitize.noTags(entry.authorName.trim())
+                : null,
               modBreakDate: entry.modBreakDate || new Date().toISOString(),
               createdAt: entry.createdAt || new Date().toISOString(),
             };
