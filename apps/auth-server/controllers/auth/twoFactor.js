@@ -71,7 +71,7 @@ exports.post = async (req, res, next) => {
       req.currentClientAuth = clientAuth.getClientAuth(req.session, req.client);
       await clientAuth.saveSession(req.session);
     } catch (e) {
-      next(e);
+      return next(e);
     }
 
     const redirectUrl = req.query.redirect_uri
