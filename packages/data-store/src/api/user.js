@@ -1,5 +1,42 @@
 import fetch from './fetch';
 
+function parseJwtExp(token) {
+  if (!token) return null;
+
+  try {
+    const payloadPart = token.split('.')[1];
+    if (!payloadPart) return null;
+
+    const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(
+      normalized.length + ((4 - (normalized.length % 4)) % 4),
+      '='
+    );
+    const payload = JSON.parse(atob(padded));
+
+    return typeof payload.exp === 'number' ? payload.exp * 1000 : null;
+  } catch (err) {
+    return null;
+  }
+}
+
+function withJwtTiming(user, token) {
+  if (!user || !user.id || !token) return user;
+
+  const jwtExpiresAt = parseJwtExp(token);
+  const jwtExpiresInHours = jwtExpiresAt
+    ? ((jwtExpiresAt - Date.now()) / (60 * 60 * 1000)).toFixed(2)
+    : null;
+
+  return {
+    ...user,
+    jwt: token,
+    jwtExpiresAt,
+    jwtExpiresInHours,
+    jwtRemainingHours: jwtExpiresInHours,
+  };
+}
+
 export default {
   fetch: async function ({ projectId, userId }) {
     let url = `/api/project/${projectId}/user/${userId}`;
@@ -21,8 +58,9 @@ export default {
     let json = await this.fetch(url, { headers });
 
     let openStadUser = json;
-    if (openStadUser && openStadUser.id)
-      openStadUser = { ...openStadUser, jwt: self.currentUserJWT };
+    if (openStadUser && openStadUser.id) {
+      openStadUser = withJwtTiming(openStadUser, this.currentUserJWT);
+    }
 
     return openStadUser;
   },

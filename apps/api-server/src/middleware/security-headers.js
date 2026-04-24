@@ -77,6 +77,8 @@ module.exports = function (req, res, next) {
     res.header('Feature-Policy', "vibrate 'none'; geolocation 'none'");
   }
 
+  res.removeHeader('Date');
+
   if (req.method === 'OPTIONS') {
     return res.end();
   }

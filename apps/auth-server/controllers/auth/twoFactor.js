@@ -1,5 +1,6 @@
 const twofactor = require('node-2fa');
 const QRCode = require('qrcode');
+const clientAuth = require('../../utils/clientAuth');
 const { logAuthEvent } = require('../../middleware/auditLog');
 
 const twoFactorBaseUrl = '/auth/two-factor';
@@ -65,10 +66,13 @@ exports.post = async (req, res, next) => {
 
   if (verified) {
     try {
-      req.session.twoFactorValid = true;
-      await req.session.save();
+      clientAuth.setClientAuth(req.session, req.client, {
+        twoFactorValid: true,
+      });
+      req.currentClientAuth = clientAuth.getClientAuth(req.session, req.client);
+      await clientAuth.saveSession(req.session);
     } catch (e) {
-      next(e);
+      return next(e);
     }
 
     const redirectUrl = req.query.redirect_uri

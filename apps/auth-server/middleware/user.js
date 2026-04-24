@@ -4,6 +4,7 @@ const userProfileValidation = require('../config/user').validation.profile;
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const Promise = require('bluebird');
+const clientAuth = require('../utils/clientAuth');
 
 exports.withAll = (req, res, next) => {
   const limit = req.query.limit ? parseInt(req.query.limit, 10) : 1000;
@@ -59,26 +60,21 @@ exports.withOne = (req, res, next) => {
 };
 
 exports.withRoleForClient = (req, res, next) => {
-  db.UserRole.findOne({
-    where: { userId: req.user.id, clientId: req.client.id },
-  })
-    .then((userRole) => {
-      if (userRole) {
-        const roleId = userRole.roleId;
+  clientAuth
+    .resolveRoleForClient(req.user, req.client)
+    .then((role) => {
+      req.currentClientRole = role;
+      req.user.role = role;
 
-        db.Role.findOne({ where: { id: roleId } })
-          .then((role) => {
-            if (role) {
-              req.user.role = role.name;
-            }
-            next();
-          })
-          .catch((err) => {
-            next(err);
-          });
-      } else {
-        next();
+      if (req.session && req.client) {
+        clientAuth.setClientAuth(req.session, req.client, { role });
+        req.currentClientAuth = clientAuth.getClientAuth(
+          req.session,
+          req.client
+        );
       }
+
+      next();
     })
     .catch((err) => {
       next(err);

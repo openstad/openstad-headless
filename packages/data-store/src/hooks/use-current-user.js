@@ -29,21 +29,12 @@ export default function useCurrentUser(props) {
       return {};
     }
 
-    // console.log('GETCURRENTUSER', self.currentUser);
-    if (self.currentUser && self.currentUser.id) {
-      // just once TODO: ik denk dat het jkan met useSWRmutaion,: als ik het goedlees update die alleen met de hand
-      return self.currentUser;
-    }
-
     // get user from props
     let initialUser = {};
     try {
       initialUser = globalOpenStadUser || props.openStadUser || {};
     } catch (err) {}
 
-    if (initialUser.id && initialUser.projectId == self.projectId) {
-      return initialUser;
-    }
     let jwt;
     if (params.has('openstadlogintoken')) {
       jwt = params.get('openstadlogintoken');
@@ -74,7 +65,12 @@ export default function useCurrentUser(props) {
     let sessionUser = storage.get('openStadUser') || {};
 
     // or use existing jwt
-    jwt = jwt || initialUser.jwt || sessionUser.jwt;
+    if (!jwt && sessionUser.jwt) {
+      jwt = sessionUser.jwt;
+    }
+    if (!jwt && initialUser.jwt) {
+      jwt = initialUser.jwt;
+    }
 
     // or get jwt for cmsUser
     if (!jwt && cmsUser && cmsUser.access_token && cmsUser.iss) {

@@ -11,10 +11,19 @@ const adminRemotePattern = (() => {
 })();
 
 const nextConfig = {
+  poweredByHeader: false,
   reactStrictMode: true,
   transpilePackages: ['@openstad-headless/*'],
   images: {
     remotePatterns: [adminRemotePattern],
+  },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [{ key: 'Date', value: '' }],
+      },
+    ];
   },
   async rewrites() {
     return [

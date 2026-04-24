@@ -8,6 +8,7 @@ const service = require('./service');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const isRedirectAllowed = require('../../services/isRedirectAllowed');
 const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
+const sessionDuration = require('../../util/session-duration');
 let router = express.Router({ mergeParams: true });
 
 // Todo: dit is 'openstad', dus veel configuratie mag hier hardcoded en uit de config gehaald
@@ -61,7 +62,9 @@ router
       jwt.sign(
         { userId: openStadUser.id, authProvider: req.authConfig.provider },
         config.auth['jwtSecret'],
-        { expiresIn: 182 * 24 * 60 * 60 },
+        {
+          expiresIn: sessionDuration.getJwtExpiresInForRole(openStadUser.role),
+        },
         (err, token) => {
           if (err) return next(err);
           return res.json({
@@ -367,7 +370,9 @@ router
     jwt.sign(
       { userId: req.userData.id, authProvider: req.authConfig.provider },
       req.authConfig.jwtSecret,
-      { expiresIn: 182 * 24 * 60 * 60 },
+      {
+        expiresIn: sessionDuration.getJwtExpiresInForRole(req.userData.role),
+      },
       (err, token) => {
         if (err) return next(err);
         req.redirectUrl = req.redirectUrl.replace('[[jwt]]', token);

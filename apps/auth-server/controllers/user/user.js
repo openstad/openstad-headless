@@ -1,5 +1,6 @@
 const login = require('connect-ensure-login');
 const db = require('../../db');
+const clientAuth = require('../../utils/clientAuth');
 
 /**
  * Simple informational end point, if you want to get information
@@ -28,7 +29,7 @@ exports.info = (req, res) => {
   res.json({
     user_id: req.user.id,
     clientId: req?.client?.id || null,
-    role: req.user.role,
+    role: req.currentClientRole || req.user.role,
     name: req.user.name,
     email: req.user.email,
     phoneNumber: req.user.phoneNumber,
