@@ -274,6 +274,19 @@ router
       }
     }
 
+    if (!!data && !!data.privacyConsentAt && !!data.clientId) {
+      const clientId = String(data?.clientId);
+      const currentValue =
+        typeof data.privacyConsentAt === 'object' ? data.privacyConsentAt : {};
+      const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
+
+      if (clientConsentIsSet) {
+        data.privacyConsentAt = currentValue[clientId];
+      } else {
+        delete data.privacyConsentAt;
+      }
+    }
+
     // if user has same projectId and userId
     // rows are duplicate for a user
     let where = {
