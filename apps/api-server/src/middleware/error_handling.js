@@ -28,7 +28,7 @@ module.exports = function (app) {
       500;
     var userIsAdmin = req.user && req.user.role && req.user.role == 'admin';
     var isDev = env === 'development';
-    var showDebug = isDev || userIsAdmin;
+    var showDebug = (isDev || userIsAdmin) && status >= 500;
     var friendlyStatus = statuses[status];
     var stack = err.stack || err.toString();
     var message = err.message || err.error;
