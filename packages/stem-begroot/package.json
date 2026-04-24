@@ -19,7 +19,7 @@
     "@utrecht/component-library-css": "^4.2.0",
     "@utrecht/component-library-react": "^4.2.0",
     "@utrecht/design-tokens": "^1.0.0-alpha.631",
-    "postcss": "^8.4.38",
+    "postcss": "^8.5.10",
     "postcss-prefix-selector": "^2.1.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
