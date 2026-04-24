@@ -19,6 +19,7 @@ export const keyMap: Record<string, string> = {
   modBreaks: 'Moderatie berichten',
   images: 'Afbeeldingen',
   documents: 'Documenten',
+  'extraData.embeddedUrl': 'Embedded URL',
   extraData: 'Extra gegevens',
   'user.id': 'Gebruiker ID',
   'user.role': 'Gebruiker rol',

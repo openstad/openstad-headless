@@ -4,6 +4,10 @@ const flattenObject = (obj: any, parent: string = '', res: any = {}) => {
     if (typeof obj[key] === 'object' && obj[key] !== null) {
       if (key === 'extraData') {
         const cleanedExtraData = cleanExtraData(obj[key]);
+        if (cleanedExtraData.embeddedUrl) {
+          res[`${propName}.embeddedUrl`] = cleanedExtraData.embeddedUrl;
+          delete cleanedExtraData.embeddedUrl;
+        }
         res[propName] = JSON.stringify(cleanedExtraData);
       } else if (Array.isArray(obj[key])) {
         res[propName] = obj[key]

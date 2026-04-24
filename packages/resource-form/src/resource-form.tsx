@@ -269,6 +269,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
   async function onSubmit(formData: any) {
     setDisableSubmit(true);
+    formData.embeddedUrl = window.location.href;
     const finalFormData = configureFormData(formData, true);
     finalFormData.__timeToSubmitMs = Math.max(
       Date.now() - formStartTimeRef.current,
