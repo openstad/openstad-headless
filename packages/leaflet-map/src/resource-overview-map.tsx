@@ -93,6 +93,7 @@ const ResourceOverviewMap = ({
     allResources.map((resource: any, index: number) => {
       // TODO: types/resource does not exist yet
       let marker: MarkerProps = {
+        markerId: `resource-${resource.id || resource.uniqueId || index}`,
         location: resource?.location ? { ...resource.location } : undefined,
       };
       const markerLatLng: any = parseLocation(marker); // unify location format
@@ -204,17 +205,15 @@ const ResourceOverviewMap = ({
 
   currentMarkers = currentMarkers.concat(projectMarkers);
 
-  if (givenResources) {
-    resources.metadata.totalCount = givenResources.length;
-  }
+  const totalCount = givenResources
+    ? givenResources.length
+    : (resources?.metadata?.totalCount ?? 0);
 
   let countButtonElement: React.JSX.Element = <></>;
   if (countButton?.show) {
     countButtonElement = (
       <div className="utrecht-button utrecht-button--secondary-action osc-resource-overview-map-button osc-first-button">
-        <section className="resource-counter">
-          {resources?.metadata?.totalCount}
-        </section>
+        <section className="resource-counter">{totalCount}</section>
         <section className="resource-label">
           {countButton.label || 'plannen'}
         </section>

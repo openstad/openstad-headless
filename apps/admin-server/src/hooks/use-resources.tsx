@@ -133,23 +133,16 @@ export default function useResources(
     }
   }
 
-  async function fetchAll(totalCount: number, pageSizeLimit: number) {
-    let allData: any[] = [];
-    const totalPagesToFetch = Math.ceil(totalCount / pageSizeLimit);
-
-    for (let currentPage = 0; currentPage < totalPagesToFetch; currentPage++) {
-      const fetchAllParams = new URLSearchParams({
-        includeUser: '1',
-        includeVoteCount: '1',
-        includeTags: '1',
-        page: currentPage.toString(),
-        pageSize: pageSizeLimit.toString(),
-      });
-      const response = await fetch(`${baseUrl}?${fetchAllParams.toString()}`);
-      const results = await response.json();
-      allData = allData.concat(results?.records || []);
-    }
-    return allData;
+  async function fetchAll() {
+    const fetchAllParams = new URLSearchParams({
+      includeUser: '1',
+      includeVoteCount: '1',
+      includeTags: '1',
+      noPagination: 'true',
+    });
+    const response = await fetch(`${baseUrl}?${fetchAllParams.toString()}`);
+    const results = await response.json();
+    return results?.records || [];
   }
 
   return {

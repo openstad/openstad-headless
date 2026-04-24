@@ -221,6 +221,8 @@ function getDefaultConfig(project, widgetType) {
     zipCodeApiUrl: zipCodeApiUrl || '',
     zipCodeAutofillApiUrl: zipCodeAutofillApiUrl || '',
     serverTime: new Date().toISOString(),
+    randomSortRotationMs:
+      parseInt(process.env.RANDOM_SORT_ROTATION_MS, 10) || 0,
   };
 
   if (
