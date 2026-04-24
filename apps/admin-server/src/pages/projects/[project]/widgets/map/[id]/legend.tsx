@@ -96,7 +96,7 @@ export default function WidgetMapLegend() {
               key={field.reactKey}
               className="flex flex-col gap-3 p-4 bg-gray-50 rounded-md">
               <div className="flex justify-between items-center">
-                <Heading size="sm">Item {index + 1}</Heading>
+                <Heading size="lg">Item {index + 1}</Heading>
                 <Button
                   type="button"
                   variant="ghost"

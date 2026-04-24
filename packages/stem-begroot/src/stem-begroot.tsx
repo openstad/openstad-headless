@@ -102,6 +102,7 @@ export type StemBegrootWidgetProps = BaseProps &
     filterBehavior?: string;
     voteAfterLoggingIn?: boolean;
     displayModBreak?: boolean;
+    randomSortRotationMs?: number;
   };
 
 function StemBegroot({

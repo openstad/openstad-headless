@@ -398,13 +398,13 @@ export default function MarkersEditor({
                       control={markerForm.control}
                       name="icon"
                       render={({ field }) => {
-                        const usedIcons = [
-                          ...new Set(
+                        const usedIcons = Array.from(
+                          new Set(
                             markers
                               .map((m) => m.icon)
                               .filter((url) => url && url !== field.value)
-                          ),
-                        ];
+                          )
+                        );
 
                         return (
                           <FormItem>

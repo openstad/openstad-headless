@@ -820,9 +820,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
           <Separator className="lg:col-span-2 my-6" />
 
           <div className="lg:col-span-2 col-span-2">
-            <Heading level={3} appearance="utrecht-heading-6">
-              Modbreaks
-            </Heading>
+            <Heading size="xl">Modbreaks</Heading>
             {!modbreakTitle && (
               <p className="text-sm text-orange-600 mb-4">
                 Geen standaardnaam ingesteld.{' '}
@@ -880,7 +878,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                       <FormControl>
                         <TrixEditor
                           value={descField.value}
-                          onChange={(val: string) => descField.onChange(val)}
+                          onChange={(val) => descField.onChange(val)}
                         />
                       </FormControl>
                       <FormMessage />

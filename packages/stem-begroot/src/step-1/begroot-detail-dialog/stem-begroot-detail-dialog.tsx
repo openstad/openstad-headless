@@ -1,5 +1,4 @@
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
-import { deterministicRandomSort } from '@openstad-headless/lib';
 import { humanizeDate } from '@openstad-headless/lib/humanize-date';
 import {
   Icon,
