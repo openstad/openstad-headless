@@ -802,6 +802,7 @@ router
           'nickName',
           'role',
           'emailNotificationConsent',
+          'privacyConsentAt',
         ]; // todo: dit moet natuurlijk niet hier, maar dat is nu minder relevant
         for (let userProjectSpecificField of userProjectSpecificFields) {
           delete synchronizedUpdatedUserData[userProjectSpecificField];

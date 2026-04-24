@@ -37,6 +37,7 @@ exports.info = (req, res) => {
     streetName: req.user.streetName,
     houseNumber: req.user.houseNumber,
     emailNotificationConsent: req.user?.emailNotificationConsent || {},
+    privacyConsentAt: req.user?.privacyConsentAt || {},
     suffix: req.user.suffix,
     postcode: req.user.postcode,
     accessCode: req.user.accessCode,

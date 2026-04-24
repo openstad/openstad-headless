@@ -8069,15 +8069,38 @@ textarea:disabled {
   }
 }
 
-.form-group.emailNotificationConsent {
+.form-group.emailNotificationConsent,
+.form-group.privacyConsent {
   display: flex;
+  align-items: flex-start;
   gap: 10px;
 }
 
+.form-group.privacyConsent {
+  position: relative;
+  margin-bottom: 40px;
+}
+
 .form-group.emailNotificationConsent label,
-.form-group.emailNotificationConsent input {
+.form-group.emailNotificationConsent input,
+.form-group.privacyConsent label,
+.form-group.privacyConsent input {
   font-weight: normal;
   font-size: 16px;
   margin: 0;
   color: #000;
+}
+
+.form-group.privacyConsent input[type='checkbox'] {
+  margin-top: 0.4em;
+}
+
+.form-group.privacyConsent label.error {
+  display: block;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  color: red;
+  font-weight: 700;
 }

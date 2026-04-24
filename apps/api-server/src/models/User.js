@@ -363,6 +363,18 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: true,
         defaultValue: null,
       },
+
+      privacyConsentAt: {
+        type: DataTypes.DATE,
+        auth: {
+          listableBy: ['moderator', 'owner'],
+          viewableBy: ['moderator', 'owner'],
+          createableBy: ['moderator'],
+          updateableBy: ['moderator'],
+        },
+        allowNull: true,
+        defaultValue: null,
+      },
     },
     {
       charset: 'utf8',
