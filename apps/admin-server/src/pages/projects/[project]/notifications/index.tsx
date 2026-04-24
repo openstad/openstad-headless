@@ -152,7 +152,7 @@ export default function ProjectNotifications() {
                           <br />
                           -location
                           <br />
-                          -modBreakDateHumanized
+                          -modBreaks
                           <br />
                           -publishDateHumanized
                         </p>

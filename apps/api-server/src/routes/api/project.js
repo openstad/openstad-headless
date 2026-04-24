@@ -332,25 +332,6 @@ async function createResources(
         );
       }
 
-      // Remap known top-level secondary user reference.
-      const sourceModBreakUserId = updatedResource.modBreakUserId;
-      if (
-        typeof sourceModBreakUserId === 'number' ||
-        (typeof sourceModBreakUserId === 'string' &&
-          /^\d+$/.test(sourceModBreakUserId))
-      ) {
-        const normalizedSourceModBreakUserId =
-          typeof sourceModBreakUserId === 'number'
-            ? sourceModBreakUserId
-            : parseInt(sourceModBreakUserId, 10);
-        updatedResource.modBreakUserId = await getOrCreateUser(
-          normalizedSourceModBreakUserId,
-          userMap,
-          req.projectId,
-          req.createdUserIds
-        );
-      }
-
       const newResource = await db.Resource.create({
         ...updatedResource,
         projectId: req.projectId,
