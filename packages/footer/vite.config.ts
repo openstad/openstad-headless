@@ -4,6 +4,7 @@ export default createWidgetConfig({
   name: 'Footer',
   entry: 'src/footer.tsx',
   usePrefix: false,
+  bundleReact: true,
   outputOverrides: {
     assetFileNames: (assetInfo: { name?: string }) => {
       if (assetInfo.name === 'style.css') return 'footer.css';

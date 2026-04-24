@@ -4,4 +4,5 @@ export default createWidgetConfig({
   name: 'NavBar',
   entry: 'src/navBar.tsx',
   usePrefix: false,
+  bundleReact: true,
 });

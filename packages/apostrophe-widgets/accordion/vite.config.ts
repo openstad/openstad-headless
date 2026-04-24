@@ -4,4 +4,5 @@ export default createWidgetConfig({
   name: 'ApostropheWidgetsAccordion',
   entry: 'src/accordion.tsx',
   usePrefix: false,
+  bundleReact: true,
 });
