@@ -265,16 +265,12 @@ async function fetchSessionUser() {
   }
 }
 
-let defaultSession: SessionUserType = {};
-let SessionContext = createContext(defaultSession);
-
 export {
   authMiddleware,
   getSession,
   sessionOptions,
   signIn,
   clientSignIn,
-  SessionContext,
   fetchSessionUser,
   type SessionUserType,
 };
