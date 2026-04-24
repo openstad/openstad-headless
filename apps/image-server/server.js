@@ -1,4 +1,15 @@
 require('dotenv').config();
+
+const {
+  createTelemetry,
+  setupGracefulShutdown,
+} = require('@openstad-headless/lib/telemetry');
+const telemetryManager = createTelemetry({
+  serviceName: process.env.OTEL_SERVICE_NAME || 'openstad-image-server',
+});
+telemetryManager.initialize();
+setupGracefulShutdown(telemetryManager);
+
 const express = require('express');
 const crypto = require('crypto');
 const app = express();

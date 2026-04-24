@@ -154,6 +154,11 @@ router
     returnTo = decodeURIComponent(returnTo);
     returnTo = returnTo || '/?openstadlogintoken=[[jwt]]';
     returnTo = String(returnTo);
+
+    const hashIndex = returnTo.indexOf('#');
+    if (hashIndex !== -1) {
+      returnTo = returnTo.substring(0, hashIndex);
+    }
     if (!returnTo.match(/\[\[jwt\]\]/))
       returnTo =
         returnTo +

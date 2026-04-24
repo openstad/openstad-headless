@@ -1,7 +1,10 @@
-export default function useAreas() {
+export default function useAreas({ ids } = {}) {
   let self = this;
 
-  const { data, error, isLoading } = self.useSWR({}, 'areas.fetch');
+  const { data, error, isLoading } = self.useSWR(
+    ids && ids.length > 0 ? { ids } : null,
+    'areas.fetch'
+  );
 
   let areas = data || [];
   if (error) {

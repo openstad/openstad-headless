@@ -1,5 +1,15 @@
 require('dotenv').config();
 
+const {
+  createTelemetry,
+  setupGracefulShutdown,
+} = require('@openstad-headless/lib/telemetry');
+const telemetryManager = createTelemetry({
+  serviceName: process.env.OTEL_SERVICE_NAME || 'openstad-cms-server',
+});
+telemetryManager.initialize();
+setupGracefulShutdown(telemetryManager);
+
 const apostrophe = require('apostrophe');
 const express = require('express');
 const app = express();
@@ -11,6 +21,7 @@ const REFRESH_PROJECTS_INTERVAL = 60000 * 5;
 const Url = require('node:url');
 const messageStreaming = require('./services/message-streaming');
 
+const compression = require('compression');
 const basicAuth = require('express-basic-auth');
 const path = require('node:path');
 
@@ -31,6 +42,13 @@ if (
   app.use(rateLimiter());
 }
 
+app.use(
+  compression({
+    level: 6,
+    threshold: 1024,
+  })
+);
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'UP',
@@ -39,6 +57,10 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.use(
+  '/widget-assets',
+  express.static(path.join(__dirname, 'public', 'widget-assets'))
+);
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/:sitePrefix?/config-reset', async function (req, res, next) {
@@ -193,6 +215,7 @@ async function run(id, projectData, options, callback) {
   // Get host from projectData url
   const url = Url.parse(projectData.url);
   const protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+  projectData.fullUrl = projectData.url;
   projectData.url = protocol + url.hostname + (url.port ? ':' + url.port : '');
 
   const sessionSecret = await getSessionSecret(projectData.url, projectData.id);

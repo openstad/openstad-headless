@@ -12,6 +12,7 @@ const verificationService = require('../../services/verificationService');
 const authUrlConfig = require('../../config/auth').get('Url');
 const clientAuth = require('../../utils/clientAuth');
 const interpolate = require('../../utils/interpolate');
+const { logAuthEvent } = require('../../middleware/auditLog');
 
 const setNoCachHeadersMw = (req, res, next) => {
   res.setHeader('Surrogate-Control', 'no-store');
@@ -279,6 +280,9 @@ exports.postAuthenticate = (req, res, next) => {
 
     // Redirect if it fails to the original e-mail screen
     if (!user) {
+      logAuthEvent(req, 'login_failed', {
+        data: { method: 'url' },
+      });
       req.flash('error', {
         msg: 'De url is geen geldige login url, wellicht is deze verlopen',
       });
@@ -302,6 +306,9 @@ exports.postAuthenticate = (req, res, next) => {
       req.brute.resetKey(req.bruteKey);
 
       //log the succesfull login
+      logAuthEvent(req, 'login', {
+        data: { method: 'url' },
+      });
       clientAuth
         .initializeClientAuth(req.session, req.client, user, {
           authType,

@@ -158,6 +158,20 @@ spec:
           - name: SPAM_FILTER_ENABLED
             value: "{{ .Values.api.spamFilterEnabled }}"
 
+          - name: PDF_API_ENDPOINT
+            valueFrom:
+              secretKeyRef:
+                key: pdfApiEndpoint
+                name: {{ template "openstad.pdf.secret.fullname" . }}
+                optional: true
+
+          - name: PDF_API_KEY
+            valueFrom:
+              secretKeyRef:
+                key: pdfApiKey
+                name: {{ template "openstad.pdf.secret.fullname" . }}
+                optional: true
+
           - name: AUTH_JWTSECRET
             valueFrom:
               secretKeyRef:
@@ -195,18 +209,6 @@ spec:
 
           - name: CMS_URL
             value: https://{{ template "openstad.cms.url" . }}
-
-          - name: REACT_CDN
-            valueFrom:
-              secretKeyRef:
-                key: reactUrl
-                name: {{ template "openstad.cdn.secret.fullname" . }}
-
-          - name: REACT_DOM_CDN
-            valueFrom:
-              secretKeyRef:
-                key: reactDomUrl
-                name: {{ template "openstad.cdn.secret.fullname" . }}
 
           - name: ZIPCODE_AUTOFILL_API_URL
             valueFrom:
@@ -288,6 +290,30 @@ spec:
               secretKeyRef:
                 key: rateWindowMs
                 name: {{ template "openstad.ratelimit.secret.fullname" . }}
+
+          - name: OTEL_SERVICE_NAME
+            value: {{ .Values.api.otelServiceName | quote }}
+
+          - name: OTEL_EXPORTER_OTLP_ENDPOINT
+            value: {{ .Values.api.otelExporterOtlpEndpoint | quote }}
+
+          - name: OTEL_ENABLED
+            value: {{ (hasKey .Values.api "otelEnabled") | ternary .Values.api.otelEnabled (default false $.Values.global.otelEnabled) | quote }}
+
+          - name: AUDIT_RETENTION_MONTHS
+            value: {{ .Values.api.audit.retentionMonths | quote }}
+          - name: AUDIT_INCIDENT_RETENTION_MONTHS
+            value: {{ .Values.api.audit.incidentRetentionMonths | quote }}
+          - name: AUDIT_INTERNAL_TOKEN
+            value: {{ .Values.api.audit.internalToken | quote }}
+          - name: AUDIT_OTLP_ENABLED
+            value: {{ .Values.api.audit.otlp.enabled | quote }}
+          - name: AUDIT_OTLP_SERVICE_NAME
+            value: {{ .Values.api.audit.otlp.serviceName | default (printf "%s-audit" (include "openstad.fullname" .)) | quote }}
+          - name: AUDIT_OTLP_ENDPOINT
+            value: {{ .Values.api.audit.otlp.endpoint | default .Values.api.otelExporterOtlpEndpoint | quote }}
+          - name: AUDIT_OTLP_HEADERS
+            value: {{ .Values.api.audit.otlp.headers | quote }}
 
           {{- if .Values.api.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.api.extraEnvVars "context" $) | nindent 10 }}
@@ -493,18 +519,6 @@ spec:
 
             - name: CMS_URL
               value: https://{{ template "openstad.cms.url" . }}
-
-            - name: REACT_CDN
-              valueFrom:
-                secretKeyRef:
-                  key: reactUrl
-                  name: {{ template "openstad.cdn.secret.fullname" . }}
-
-            - name: REACT_DOM_CDN
-              valueFrom:
-                secretKeyRef:
-                  key: reactDomUrl
-                  name: {{ template "openstad.cdn.secret.fullname" . }}
 
             - name: ZIPCODE_AUTOFILL_API_URL
               valueFrom:

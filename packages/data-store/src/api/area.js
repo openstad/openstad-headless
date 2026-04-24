@@ -1,6 +1,6 @@
 export default {
-  fetch: async function ({ projectId }) {
-    let url = `/api/project/${projectId}/area`;
+  fetch: async function ({ areaId }) {
+    let url = `/api/area/${areaId}`;
     return this.fetch(url);
   },
 };

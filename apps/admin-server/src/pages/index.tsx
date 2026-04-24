@@ -1,6 +1,6 @@
 import { Inter } from 'next/font/google';
 
-import { clientSignIn } from '../auth';
+import { clientSignIn } from '../auth-context';
 
 const inter = Inter({ subsets: ['latin'] });
 

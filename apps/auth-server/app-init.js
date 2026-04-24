@@ -83,6 +83,8 @@ const initializeApp = async () => {
       connectionLimit:
         parseInt(process.env.DB_MAX_POOL_SIZE || process.env.maxPoolSize) || 5,
       ssl,
+      enableCleartextPlugin:
+        process.env.DB_ENABLE_CLEARTEXT_PLUGIN === 'true' ? true : false,
     });
 
     const sessionStore = new MySQLStore({}, mysqlConnectionPool);

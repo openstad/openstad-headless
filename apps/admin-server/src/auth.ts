@@ -1,7 +1,6 @@
 import { getIronSession } from 'iron-session';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { type NextRequest, NextResponse } from 'next/server';
-import { createContext } from 'react';
 
 import hasRole from './lib/hasRole';
 import { Role } from './lib/roles';
