@@ -13,6 +13,7 @@ setupGracefulShutdown(telemetryManager);
 const express = require('express');
 const crypto = require('crypto');
 const app = express();
+app.disable('x-powered-by');
 const imgSteam = require('image-steam');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
@@ -215,6 +216,7 @@ app.use(function (req, res, next) {
     'Access-Control-Allow-Headers',
     'Content-Type, Authorization, Content-Length, X-Requested-With, x-http-method-override'
   );
+  res.removeHeader('Date');
   next();
 });
 

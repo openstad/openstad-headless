@@ -10,6 +10,7 @@ const tokenUrl = require('../../services/tokenUrl');
 const authService = require('../../services/authService');
 const verificationService = require('../../services/verificationService');
 const authUrlConfig = require('../../config/auth').get('Url');
+const clientAuth = require('../../utils/clientAuth');
 const interpolate = require('../../utils/interpolate');
 const { logAuthEvent } = require('../../middleware/auditLog');
 
@@ -308,8 +309,13 @@ exports.postAuthenticate = (req, res, next) => {
       logAuthEvent(req, 'login', {
         data: { method: 'url' },
       });
-      authService
-        .logSuccessFullLogin(req)
+      clientAuth
+        .initializeClientAuth(req.session, req.client, user, {
+          authType,
+          twoFactorValid: false,
+        })
+        .then(() => clientAuth.saveSession(req.session))
+        .then(() => authService.logSuccessFullLogin(req))
         .then(() => {
           redirectToAuthorisation();
         })
