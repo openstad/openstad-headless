@@ -58,7 +58,7 @@ exports.index = (req, res, next) => {
       const newLabel = requiredUserFieldsLabels[field.key];
 
       if (!!newLabel) {
-        field.label = newLabel;
+        field.label = sanitize.noTags(newLabel);
       }
 
       return field;
