@@ -715,11 +715,8 @@ router
       ...req.body,
     };
 
-    if (userhasModeratorRights(req.user)) {
-      if (data.modBreak) {
-        data.modBreakUserId = req.body.modBreakUserId = req.user.id;
-        data.modBreakDate = req.body.modBreakDate = new Date().toString();
-      }
+    if (!userhasModeratorRights(req.user)) {
+      delete data.modBreaks;
     }
 
     resource

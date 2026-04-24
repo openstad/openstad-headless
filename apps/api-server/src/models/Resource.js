@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const { Op } = require('sequelize');
+const crypto = require('crypto');
 
 const co = require('co'),
   config = require('config'),
@@ -242,44 +243,69 @@ module.exports = function (db, sequelize, DataTypes) {
         ),
       },
 
+      modBreaks: {
+        type: DataTypes.JSON,
+        auth: {
+          createableBy: 'editor',
+          updateableBy: 'editor',
+        },
+        allowNull: true,
+        defaultValue: null,
+        set: function (value) {
+          if (!Array.isArray(value) || value.length === 0) {
+            this.setDataValue('modBreaks', null);
+            return;
+          }
+          var sanitized = value.map(function (entry) {
+            return {
+              id: entry.id || crypto.randomUUID(),
+              description: entry.description
+                ? sanitize.content(entry.description.trim())
+                : '',
+              authorName: entry.authorName
+                ? sanitize.noTags(entry.authorName.trim())
+                : null,
+              modBreakDate: entry.modBreakDate || new Date().toISOString(),
+              createdAt: entry.createdAt || new Date().toISOString(),
+            };
+          });
+          this.setDataValue('modBreaks', sanitized);
+        },
+      },
+
+      modBreaksHumanized: {
+        type: DataTypes.VIRTUAL,
+        get: function () {
+          var breaks = this.getDataValue('modBreaks');
+          if (!breaks || !Array.isArray(breaks)) return [];
+          return breaks.map(function (entry) {
+            return Object.assign({}, entry, {
+              modBreakDateHumanized: entry.modBreakDate
+                ? moment(entry.modBreakDate).format('LLL')
+                : undefined,
+            });
+          });
+        },
+      },
+
       modBreak: {
-        type: DataTypes.TEXT,
-        auth: {
-          createableBy: 'editor',
-          updateableBy: 'editor',
+        type: DataTypes.VIRTUAL,
+        get: function () {
+          var breaks = this.getDataValue('modBreaks');
+          if (!breaks || !Array.isArray(breaks) || breaks.length === 0)
+            return undefined;
+          return breaks[0].description;
         },
-        allowNull: true,
-        set: function (text) {
-          text = text ? sanitize.content(text.trim()) : null;
-          this.setDataValue('modBreak', text);
-        },
-      },
-
-      modBreakUserId: {
-        type: DataTypes.INTEGER,
-        auth: {
-          createableBy: 'editor',
-          updateableBy: 'editor',
-        },
-        allowNull: true,
-      },
-
-      modBreakDate: {
-        type: DataTypes.DATE,
-        auth: {
-          createableBy: 'editor',
-          updateableBy: 'editor',
-        },
-        allowNull: true,
       },
 
       modBreakDateHumanized: {
         type: DataTypes.VIRTUAL,
         get: function () {
-          var date = this.getDataValue('modBreakDate');
+          var breaks = this.getDataValue('modBreaks');
+          if (!breaks || !Array.isArray(breaks) || breaks.length === 0)
+            return undefined;
           try {
-            if (!date) return undefined;
-            return moment(date).format('LLL');
+            return moment(breaks[0].modBreakDate).format('LLL');
           } catch (error) {
             return (error.message || 'dateFilter error').toString();
           }
@@ -362,15 +388,6 @@ module.exports = function (db, sequelize, DataTypes) {
       individualHooks: true,
 
       validate: {
-        validModBreak: function () {
-          return true;
-          /*
-        skip validation for now, should be moved to own rest object.
-
-        if (this.modBreak && (!this.modBreakUserId || !this.modBreakDate)) {
-          throw Error('Incomplete mod break');
-        }*/
-        },
         validExtraData: function (next) {
           let self = this;
           let errors = [];
@@ -713,7 +730,9 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       selectTags: function (tags) {
-        const safeIds = tags.map((t) => parseInt(t, 10)).filter(Number.isFinite);
+        const safeIds = tags
+          .map((t) => parseInt(t, 10))
+          .filter(Number.isFinite);
         if (safeIds.length === 0) return {};
         return {
           where: {
@@ -728,7 +747,9 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       excludeTags: function (tags) {
-        const safeIds = tags.map((t) => parseInt(t, 10)).filter(Number.isFinite);
+        const safeIds = tags
+          .map((t) => parseInt(t, 10))
+          .filter(Number.isFinite);
         if (safeIds.length === 0) return {};
         return {
           where: {
@@ -743,7 +764,9 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       selectStatuses: function (statuses) {
-        const safeIds = statuses.map((s) => parseInt(s, 10)).filter(Number.isFinite);
+        const safeIds = statuses
+          .map((s) => parseInt(s, 10))
+          .filter(Number.isFinite);
         if (safeIds.length === 0) return {};
         return {
           where: {
@@ -758,7 +781,9 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       excludeStatuses: function (statuses) {
-        const safeIds = statuses.map((s) => parseInt(s, 10)).filter(Number.isFinite);
+        const safeIds = statuses
+          .map((s) => parseInt(s, 10))
+          .filter(Number.isFinite);
         if (safeIds.length === 0) return {};
         return {
           where: {
@@ -777,7 +802,9 @@ module.exports = function (db, sequelize, DataTypes) {
         const conditions = {};
         tagGroups.forEach((group, index) => {
           if (!Array.isArray(group)) return;
-          const safeIds = group.map((t) => parseInt(t, 10)).filter(Number.isFinite);
+          const safeIds = group
+            .map((t) => parseInt(t, 10))
+            .filter(Number.isFinite);
           if (safeIds.length === 0) return;
           conditions[`tagGroup${index}`] = {
             [db.Sequelize.Op.in]: db.Sequelize.literal(`
@@ -789,9 +816,11 @@ module.exports = function (db, sequelize, DataTypes) {
         if (Object.keys(conditions).length === 0) return {};
         return {
           where: {
-            [db.Sequelize.Op.and]: Object.values(conditions).map((condition) => ({
-              id: condition,
-            })),
+            [db.Sequelize.Op.and]: Object.values(conditions).map(
+              (condition) => ({
+                id: condition,
+              })
+            ),
           },
         };
       },
@@ -800,18 +829,39 @@ module.exports = function (db, sequelize, DataTypes) {
         const safeLat = parseFloat(lat);
         const safeLng = parseFloat(lng);
         const safeDistance = parseFloat(maxDistance);
-        if (!Number.isFinite(safeLat) || !Number.isFinite(safeLng) || !Number.isFinite(safeDistance)) return {};
+        if (
+          !Number.isFinite(safeLat) ||
+          !Number.isFinite(safeLng) ||
+          !Number.isFinite(safeDistance)
+        )
+          return {};
         return {
           where: {
             [db.Sequelize.Op.and]: [
-              db.Sequelize.literal(`location IS NOT NULL AND JSON_EXTRACT(location, '$.lat') IS NOT NULL AND JSON_EXTRACT(location, '$.lng') IS NOT NULL`),
+              db.Sequelize.literal(
+                `location IS NOT NULL AND JSON_EXTRACT(location, '$.lat') IS NOT NULL AND JSON_EXTRACT(location, '$.lng') IS NOT NULL`
+              ),
               db.Sequelize.where(
                 db.Sequelize.fn(
                   'ST_Distance_Sphere',
                   db.Sequelize.fn(
                     'POINT',
-                    db.Sequelize.cast(db.Sequelize.fn('JSON_EXTRACT', db.Sequelize.col('location'), db.Sequelize.literal("'$.lng'")), 'DECIMAL(10,7)'),
-                    db.Sequelize.cast(db.Sequelize.fn('JSON_EXTRACT', db.Sequelize.col('location'), db.Sequelize.literal("'$.lat'")), 'DECIMAL(10,7)')
+                    db.Sequelize.cast(
+                      db.Sequelize.fn(
+                        'JSON_EXTRACT',
+                        db.Sequelize.col('location'),
+                        db.Sequelize.literal("'$.lng'")
+                      ),
+                      'DECIMAL(10,7)'
+                    ),
+                    db.Sequelize.cast(
+                      db.Sequelize.fn(
+                        'JSON_EXTRACT',
+                        db.Sequelize.col('location'),
+                        db.Sequelize.literal("'$.lat'")
+                      ),
+                      'DECIMAL(10,7)'
+                    )
                   ),
                   db.Sequelize.fn('POINT', safeLng, safeLat)
                 ),
@@ -942,7 +992,7 @@ module.exports = function (db, sequelize, DataTypes) {
             voteCount('no'),
             commentCount('commentCount'),
           ],
-          exclude: ['modBreak'],
+          exclude: ['modBreaks'],
         },
       },
 
@@ -997,14 +1047,6 @@ module.exports = function (db, sequelize, DataTypes) {
       through: 'resource_statuses',
       constraints: false,
       onDelete: 'CASCADE',
-    });
-  };
-
-  Resource.prototype.setModBreak = function (user, modBreak) {
-    return this.update({
-      modBreak: modBreak,
-      modBreakUserId: user.id,
-      modBreakDate: new Date(),
     });
   };
 
