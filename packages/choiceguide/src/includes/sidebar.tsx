@@ -79,6 +79,7 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
                         <img
                           className="osc-choice-plane-background-image"
                           src={image}
+                          alt={option.title}
                         />
                       );
                     }
