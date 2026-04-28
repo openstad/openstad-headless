@@ -283,7 +283,7 @@ function Account({
   }
 
   return (
-    <section className="account osc">
+    <section className="account osc" aria-label="Accountgegevens">
       {currentUserIsLoading ? null : !hasRole(currentUser, 'member') ? (
         <>
           <Banner className="big">

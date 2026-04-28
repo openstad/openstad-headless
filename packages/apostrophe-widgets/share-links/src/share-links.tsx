@@ -16,7 +16,7 @@ interface Item {
 
 function ShareLinks({
   title,
-  headingLevel = 3,
+  headingLevel = 2,
   selectedSocialShareOptions = [
     'facebook',
     'x',
