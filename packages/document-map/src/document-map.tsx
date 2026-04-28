@@ -1326,6 +1326,8 @@ function DocumentMap({
                   infoPopupButtonText ? 'button-has-text' : ''
                 }`}
                 appearance="primary-action-button"
+                aria-expanded={isModalOpen}
+                aria-controls="info-panel-id"
                 onClick={() => setModalOpen(true)}>
                 <i className="ri-information-line"></i>
                 {infoPopupButtonText && (
@@ -1340,6 +1342,7 @@ function DocumentMap({
                 className="modal-overlay"
                 aria-hidden={isModalOpen ? 'false' : 'true'}>
                 <div
+                  id="info-panel-id"
                   ref={modalRef}
                   className="modal"
                   role="dialog"
@@ -1353,7 +1356,9 @@ function DocumentMap({
                     <i className="ri-close-fill"></i>
                     <span>Info venster sluiten</span>
                   </Button>
-                  <Heading level={3}>Hoe werkt het?</Heading>
+                  <Heading level={3} id="modal-title">
+                    Hoe werkt het?
+                  </Heading>
                   <Spacer size={1} />
                   <Paragraph>{infoPopupContent}</Paragraph>
                 </div>
