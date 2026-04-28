@@ -96,7 +96,9 @@ export const ImageUploader: React.FC<{
               type="file"
               accept={acceptAttribute}
               multiple={allowMultiple}
-              {...field}
+              ref={field.ref}
+              name={field.name}
+              onBlur={field.onBlur}
               onChange={async (e) => {
                 const files = e.target.files;
                 if (files && files.length > 0) {

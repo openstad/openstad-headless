@@ -244,8 +244,8 @@ export default function MarkersEditor({
     if (!isValid) return;
 
     const { name, markers: currentMarkers } = getFullState();
-    await onSave(name, currentMarkers);
     setSavedState({ name, markers: currentMarkers });
+    await onSave(name, currentMarkers);
   }
 
   return (
@@ -443,8 +443,9 @@ export default function MarkersEditor({
                                   form={markerForm}
                                   project={project}
                                   imageLabel="Upload een nieuw icoon"
+                                  description="PNG of JPG. PNG aanbevolen voor transparante achtergrond."
                                   fieldName="iconUploader"
-                                  allowedTypes={['image/*']}
+                                  allowedTypes={['image/png', 'image/jpeg']}
                                   onImageUploaded={(imageResult) => {
                                     const result =
                                       typeof imageResult.url !== 'undefined'
