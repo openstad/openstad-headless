@@ -406,7 +406,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       if (event.key === 'ArrowLeft') {
         event.preventDefault();
         handleSwipeLeft();
-      } else if (event.key === 'ArrowRight') {
+      } else if (event.key === 'ArrowRight' || event.key === 'Enter') {
         event.preventDefault();
         handleSwipeRight();
       }
@@ -949,6 +949,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                       aria-hidden={
                         infoVisibleCardId !== card.id ? 'true' : 'false'
                       }
+                      {...(infoVisibleCardId !== card.id
+                        ? { inert: 'true' as any }
+                        : {})}
                       onClick={() => {
                         setInfoVisibleCardId(null);
                       }}>
