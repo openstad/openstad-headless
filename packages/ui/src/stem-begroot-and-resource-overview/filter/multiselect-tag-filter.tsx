@@ -1,5 +1,4 @@
 import DataStore from '@openstad-headless/data-store/src';
-import { MultiSelect } from '@openstad-headless/ui/src';
 import { FormLabel } from '@utrecht/component-library-react';
 import React, { useEffect, useState } from 'react';
 
@@ -111,26 +110,35 @@ const MultiSelectTagFilter = ({
     ? selected
     : Array.from(new Set([...selected, ...prefilterTagsSelected]));
 
+  const groupId = getRandomId(props.placeholder);
+  const groupLabel = props.placeholder || `Selecteer ${tagType.toLowerCase()}`;
+
   return (
     tags.length > 0 && (
       <div className="form-element">
-        <FormLabel id={getRandomId(props.placeholder)}>
-          {props.placeholder || `Selecteer ${tagType.toLowerCase()}`}
-        </FormLabel>
-        <MultiSelect
-          id={getRandomId(props.placeholder)}
-          onItemSelected={(value, label) => {
-            setStopUsingDefaultValue(true);
-            onUpdateFilter && onUpdateFilter(value, label);
-          }}
-          options={(tags || []).map((tag: TagDefinition) => ({
-            value: tag.id,
-            label: tag.name,
-            checked: combinedSelects.includes(tag.id),
-          }))}
-          inlineOptions={inlineOptions}
-          defaultOpen={inlineOptions}
-        />
+        <FormLabel id={groupId}>{groupLabel}</FormLabel>
+        <div
+          className={`multiselect-options${inlineOptions ? ' multiselect-options--inline' : ''}`}
+          role="group"
+          aria-labelledby={groupId}>
+          {(tags as TagDefinition[]).map((tag) => {
+            const checkboxId = `${groupId}-tag-${tag.id}`;
+            return (
+              <div key={tag.id} className="multiselect-option">
+                <input
+                  type="checkbox"
+                  id={checkboxId}
+                  checked={combinedSelects.includes(tag.id)}
+                  onChange={() => {
+                    setStopUsingDefaultValue(true);
+                    onUpdateFilter && onUpdateFilter(tag.id, tag.name);
+                  }}
+                />
+                <label htmlFor={checkboxId}>{tag.name}</label>
+              </div>
+            );
+          })}
+        </div>
       </div>
     )
   );
