@@ -17,7 +17,13 @@ import {
   Paragraph,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { createContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useEffect,
+  useId,
+  useMemo,
+  useState,
+} from 'react';
 
 import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
 import NotificationService from '../../lib/NotificationProvider/notification-service';
@@ -114,6 +120,9 @@ function CommentsInner({
   variant = 'medium',
   ...props
 }: CommentsWidgetProps) {
+  const instanceId = useId();
+  const loginDescriptionId = `${instanceId}-login-description`;
+
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -454,11 +463,11 @@ function CommentsInner({
               </>
             )}
             <Banner className="big" role="complementary">
-              <p id="login-description">{loginText}</p>
+              <p id={loginDescriptionId}>{loginText}</p>
               <Spacer size={1} />
               <Button
                 appearance="primary-action-button"
-                aria-describedby="login-description"
+                aria-describedby={loginDescriptionId}
                 onClick={() => {
                   // login
                   if (args.login?.url) {
