@@ -89,6 +89,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
   if (openstadlogintoken) {
     jwt = openstadlogintoken;
     session[`project-${targetProjectId}`] = jwt;
+    session['project-1'] = jwt;
     await session.save();
     let path = req.nextUrl.pathname;
     if (path == '' || path == '/') path = '/projects';
@@ -104,10 +105,11 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
 
     let forceNewLogin = false;
 
-    // check login token
+    // check login token — validate against project 1 (admin project)
+    // because admin rights are granted via project 1, not per target project
     if (jwt) {
       try {
-        const result = await loadSessionUser(targetProjectId, jwt as string);
+        const result = await loadSessionUser(1, jwt as string);
         if (
           !(
             req.nextUrl.pathname.match(/^\/(?:projects)?\/?$/) &&
@@ -134,14 +136,13 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
       const adminJwt = session['project-1'];
       if (adminJwt) {
         try {
-          const adminResult =
-            targetProjectId === 1 && session.user
-              ? {
-                  id: session.user.id,
-                  name: session.user.name,
-                  role: session.user.role,
-                }
-              : await loadSessionUser(1, adminJwt as string);
+          const adminResult = session.user
+            ? {
+                id: session.user.id,
+                name: session.user.name,
+                role: session.user.role,
+              }
+            : await loadSessionUser(1, adminJwt as string);
 
           session.adminUser = {
             id: adminResult.id,
