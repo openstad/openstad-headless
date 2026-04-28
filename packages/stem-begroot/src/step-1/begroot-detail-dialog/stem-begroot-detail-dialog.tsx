@@ -240,12 +240,14 @@ export const StemBegrootResourceDetailDialog = ({
     }
   };
 
+  const dialogTitleId = 'begrootmodule-dialog-title';
+
   return (
     <Dialog
       open={openDetailDialog}
       onOpenChange={setOpenDetailDialog}
       className="begrootmodule-dialog"
-      aria-label="Details van inzending"
+      aria-labelledby={dialogTitleId}
       children={
         <Carousel
           startIndex={resourceDetailIndex}
@@ -394,6 +396,7 @@ export const StemBegrootResourceDetailDialog = ({
                         <div>
                           {displayTitle ? (
                             <Heading1
+                              id={dialogTitleId}
                               dangerouslySetInnerHTML={{
                                 __html: resource?.title,
                               }}
