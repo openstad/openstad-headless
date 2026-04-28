@@ -133,7 +133,7 @@ const NumberInput: FC<NumberInputProps> = ({
       )}
       {description && (
         <>
-          <FormFieldDescription>
+          <FormFieldDescription id={`${randomID}_desc`}>
             <RteContent content={description} unwrapSingleRootDiv={true} />
           </FormFieldDescription>
           <Spacer size={0.5} />
@@ -183,7 +183,11 @@ const NumberInput: FC<NumberInputProps> = ({
           autoComplete="off"
           placeholder={placeholder}
           aria-invalid={fieldInvalid}
-          aria-describedby={`${randomId}_error`}
+          aria-describedby={
+            [description ? `${randomID}_desc` : '', `${randomId}_error`]
+              .filter(Boolean)
+              .join(' ') || undefined
+          }
         />
         {append && <span className="utrecht-form-field__append">{append}</span>}
       </div>
