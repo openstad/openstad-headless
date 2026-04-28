@@ -8,7 +8,7 @@ export default function ProjectResourceAuditLog() {
 
   return (
     <AuditLogTable
-      modelName="Resource"
+      modelName="resource"
       modelId={id as string}
       projectId={project as string}
     />

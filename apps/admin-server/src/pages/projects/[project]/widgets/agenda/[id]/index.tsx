@@ -1,3 +1,4 @@
+import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
@@ -55,6 +56,7 @@ export default function WidgetAgenda({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="items">Items</TabsTrigger>
               <TabsTrigger value="display">Weergave</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
+              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig && (
@@ -112,6 +114,13 @@ export default function WidgetAgenda({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
+            </TabsContent>
+            <TabsContent value="auditlog" className="p-0">
+              <AuditLogTable
+                modelName="widgets"
+                modelId={id as string}
+                projectId={projectId as string}
+              />
             </TabsContent>
           </Tabs>
 

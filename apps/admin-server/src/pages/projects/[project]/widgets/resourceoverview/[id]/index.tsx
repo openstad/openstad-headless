@@ -1,3 +1,4 @@
+import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
@@ -97,6 +98,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="likes">Likes widget</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
+              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
             </TabsList>
             {previewConfig ? (
               <>
@@ -257,6 +259,13 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                 </TabsContent>
               </>
             ) : null}
+            <TabsContent value="auditlog" className="p-0">
+              <AuditLogTable
+                modelName="widgets"
+                modelId={id as string}
+                projectId={projectId as string}
+              />
+            </TabsContent>
           </Tabs>
 
           <div className="py-6 mt-6 bg-white rounded-md">

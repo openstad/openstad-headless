@@ -1,4 +1,5 @@
 import MapInput from '@/components/maps/leaflet-input';
+import { MapErrorBoundary } from '@/components/maps/map-error-boundary';
 import { PageLayout } from '@/components/ui/page-layout';
 import useSubmissions from '@/hooks/use-submission';
 import { useWidgetsHook } from '@/hooks/use-widgets';
@@ -91,12 +92,14 @@ export default function ProjectStatusEdit() {
         if (value.lat && value.lng) {
           return (
             <div className={'w-full'}>
-              <MapInput
-                field={{
-                  value: JSON.stringify({ lat: value.lat, lng: value.lng }),
-                }}
-                center={{ lat: value.lat, lng: value.lng }}
-              />
+              <MapErrorBoundary>
+                <MapInput
+                  field={{
+                    value: JSON.stringify({ lat: value.lat, lng: value.lng }),
+                  }}
+                  center={{ lat: value.lat, lng: value.lng }}
+                />
+              </MapErrorBoundary>
             </div>
           );
         }

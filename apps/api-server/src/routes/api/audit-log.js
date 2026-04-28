@@ -93,6 +93,9 @@ router.get(
 
       if (action) {
         where.action = action;
+      } else if (req.query.excludeAction) {
+        const { Op } = require('sequelize');
+        where.action = { [Op.ne]: req.query.excludeAction };
       }
 
       if (source) {
@@ -129,14 +132,29 @@ router.get(
         order: [['createdAt', 'DESC']],
         limit: pageSize,
         offset,
+        raw: true,
       });
+
+      const safeJsonParse = (val) => {
+        if (typeof val !== 'string') return val;
+        try {
+          return JSON.parse(val);
+        } catch {
+          return null;
+        }
+      };
+      const records = rows.map((row) => ({
+        ...row,
+        previousData: safeJsonParse(row.previousData),
+        newData: safeJsonParse(row.newData),
+      }));
 
       res.json({
         total: count,
         page,
         pageSize,
         totalPages: Math.ceil(count / pageSize),
-        records: rows,
+        records,
       });
     } catch (err) {
       next(err);

@@ -11,6 +11,7 @@ const SENSITIVE_FIELDS = [
   'secret',
 ];
 
+const IGNORED_FIELDS = ['updatedAt', 'createdAt', 'deletedAt'];
 const MAX_TEXT_LENGTH = 500;
 const HOSTNAME = os.hostname();
 
@@ -64,21 +65,27 @@ function getClientIp(req) {
   return req.ip || null;
 }
 
-function sanitizeData(data) {
+function sanitizeData(data, _seen) {
   if (!data || typeof data !== 'object') return data;
 
+  const plain = data.dataValues || data;
+  const seen = _seen || new WeakSet();
+  if (seen.has(plain)) return undefined;
+  seen.add(plain);
+
   const sanitized = {};
-  for (const [key, value] of Object.entries(data)) {
-    if (SENSITIVE_FIELDS.includes(key)) continue;
+  for (const [key, value] of Object.entries(plain)) {
+    if (SENSITIVE_FIELDS.includes(key) || IGNORED_FIELDS.includes(key))
+      continue;
 
     if (typeof value === 'string' && value.length > MAX_TEXT_LENGTH) {
       sanitized[key] = value.substring(0, MAX_TEXT_LENGTH) + '...';
     } else if (Array.isArray(value)) {
       sanitized[key] = value.map((item) =>
-        item && typeof item === 'object' ? sanitizeData(item) : item
+        item && typeof item === 'object' ? sanitizeData(item, seen) : item
       );
     } else if (value && typeof value === 'object') {
-      sanitized[key] = sanitizeData(value);
+      sanitized[key] = sanitizeData(value, seen);
     } else {
       sanitized[key] = value;
     }
@@ -90,14 +97,14 @@ function getChangedFields(previousData, newData) {
   if (!previousData || !newData) return newData;
 
   const changed = {};
+  const prevKeys = new Set(Object.keys(previousData));
   for (const key of Object.keys(newData)) {
-    if (SENSITIVE_FIELDS.includes(key)) continue;
+    if (SENSITIVE_FIELDS.includes(key) || IGNORED_FIELDS.includes(key))
+      continue;
+    if (!prevKeys.has(key)) continue;
 
-    const prev = previousData[key];
-    const next = newData[key];
-
-    if (JSON.stringify(prev) !== JSON.stringify(next)) {
-      changed[key] = next;
+    if (JSON.stringify(previousData[key]) !== JSON.stringify(newData[key])) {
+      changed[key] = newData[key];
     }
   }
   return Object.keys(changed).length > 0 ? changed : null;

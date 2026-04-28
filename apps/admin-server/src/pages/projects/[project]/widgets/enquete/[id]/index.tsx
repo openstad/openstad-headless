@@ -1,3 +1,4 @@
+import AuditLogTable from '@/components/audit-log-table';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
@@ -65,6 +66,7 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="datalayers">Kaart opties</TabsTrigger>
               <TabsTrigger value="polygons">Polygonen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
+              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig && (
@@ -170,6 +172,13 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
+            </TabsContent>
+            <TabsContent value="auditlog" className="p-0">
+              <AuditLogTable
+                modelName="widgets"
+                modelId={id as string}
+                projectId={projectId as string}
+              />
             </TabsContent>
           </Tabs>
 

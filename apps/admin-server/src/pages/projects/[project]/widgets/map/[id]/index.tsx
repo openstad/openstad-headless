@@ -1,3 +1,4 @@
+import AuditLogTable from '@/components/audit-log-table';
 import WidgetPublish from '@/components/widget-publish';
 import {
   WithApiUrlProps,
@@ -63,6 +64,7 @@ export default function WidgetMap({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="markerSets">Markers</TabsTrigger>
               <TabsTrigger value="legend">Legenda</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
+              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
               {/* <Preview type="map" /> */}
@@ -99,6 +101,13 @@ export default function WidgetMap({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
+            </TabsContent>
+            <TabsContent value="auditlog" className="p-0">
+              <AuditLogTable
+                modelName="widgets"
+                modelId={id as string}
+                projectId={projectId as string}
+              />
             </TabsContent>
           </Tabs>
         </div>
