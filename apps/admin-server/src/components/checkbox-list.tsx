@@ -1,4 +1,4 @@
-import _, { uniqueId } from 'lodash';
+import _ from 'lodash';
 import React, { Fragment, useEffect } from 'react';
 
 import { Checkbox } from './ui/checkbox';
@@ -55,7 +55,11 @@ export const CheckboxList = <T extends { [key: string]: any }>({
             name={fieldName}
             render={({ field }) => (
               <FormItem
-                className={`col-span-full ${layout === 'vertical' ? 'flex flex-col' : 'flex flex-row flex-wrap'}`}>
+                className={`col-span-full ${
+                  layout === 'vertical'
+                    ? 'flex flex-col'
+                    : 'flex flex-row flex-wrap'
+                }`}>
                 {items?.map((item: any) => (
                   <FormField
                     key={keyPerItem(item)}

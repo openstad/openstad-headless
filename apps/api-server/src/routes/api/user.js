@@ -20,7 +20,9 @@ function getUniqueUserKey(user) {
     return `${provider}-*-${identifier}`;
   }
   if (user?.id) return `user-${user.id}`;
-  return `user-${user?.email || ''}-${user?.name || ''}-${user?.createdAt || ''}`;
+  return `user-${user?.email || ''}-${user?.name || ''}-${
+    user?.createdAt || ''
+  }`;
 }
 
 function getRecencyValue(user) {
@@ -207,8 +209,14 @@ router
   .get(pagination.init)
   .get(function (req, res, next) {
     let { dbQuery } = req;
+    const hasByIdpUserFilter =
+      req.query.byIdpUser &&
+      req.query.byIdpUser.identifier &&
+      req.query.byIdpUser.provider;
     const shouldDedupeByIdpUser =
-      !req.params.projectId && req.query.uniqueByIdpUser !== '0';
+      !req.params.projectId &&
+      req.query.uniqueByIdpUser !== '0' &&
+      !hasByIdpUserFilter;
     const shouldExcludeAnonymous = req.query.excludeAnonymous === '1';
 
     dbQuery.where = {
@@ -243,8 +251,14 @@ router
     db.User.scope(...req.scope)
       .findAndCountAll(dbQuery)
       .then(function (result) {
+        const hasByIdpUserFilter =
+          req.query.byIdpUser &&
+          req.query.byIdpUser.identifier &&
+          req.query.byIdpUser.provider;
         const shouldDedupeByIdpUser =
-          !req.params.projectId && req.query.uniqueByIdpUser !== '0';
+          !req.params.projectId &&
+          req.query.uniqueByIdpUser !== '0' &&
+          !hasByIdpUserFilter;
         const rows = shouldDedupeByIdpUser
           ? dedupeUsersByIdentity(result.rows)
           : result.rows;
@@ -274,9 +288,10 @@ router
     // check config
     if (
       !(
-        req.project.config &&
-        req.project.config.users &&
-        req.project.config.users.canCreateNewUsers
+        ['admin', 'editor'].includes(req.body?.role) || // Allow admin/editor creation for projects that have ended
+        (req.project.config &&
+          req.project.config.users &&
+          req.project.config.users.canCreateNewUsers)
       )
     )
       return next(createError(401, 'Gebruikers mogen niet aangemaakt worden'));
@@ -577,6 +592,14 @@ router
     }
     return next();
   })
+  .put(function (req, res, next) {
+    const value =
+      typeof req.body?.anonymizeUserName === 'string'
+        ? req.body.anonymizeUserName.trim()
+        : '';
+    req.anonymizeUserName = value || undefined;
+    return next();
+  })
   .put(async function (req, res, next) {
     let result;
     if (
@@ -586,7 +609,7 @@ router
         req.targetUser.can('update', req.user)
       )
     )
-      return next(new Error('You cannot update this User'));
+      return next(createError(403, 'You cannot update this User'));
     if (req.onlyUserIds && !req.onlyUserIds.includes(req.targetUser.id)) {
       req.results = {
         resources: [],
@@ -599,7 +622,9 @@ router
     }
     try {
       if (req.params.willOrDo == 'do') {
-        result = await req.targetUser.doAnonymize();
+        result = await req.targetUser.doAnonymize(req.anonymizeUserName, {
+          deleteVotes: false,
+        });
       } else {
         result = await req.targetUser.willAnonymize();
       }
@@ -621,9 +646,11 @@ router
         if (!req.onlyUserIds || req.onlyUserIds.includes(user.id)) {
           let result;
           if (!(user && user.can && user.can('update', req.user)))
-            return next(new Error('You cannot update this User'));
+            return next(createError(403, 'You cannot update this User'));
           if (req.params.willOrDo == 'do') {
-            result = await user.doAnonymize();
+            result = await user.doAnonymize(req.anonymizeUserName, {
+              deleteVotes: false,
+            });
           } else {
             result = await user.willAnonymize();
           }

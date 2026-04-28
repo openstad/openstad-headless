@@ -26,9 +26,9 @@ const Stepper = (props: Props) => {
               <>
                 <div className="step-container">
                   <div
-                    className={`step-icon ${currentStep === index ? 'active' : ''} ${
-                      currentStep > index ? 'done' : ''
-                    }`}>
+                    className={`step-icon ${
+                      currentStep === index ? 'active' : ''
+                    } ${currentStep > index ? 'done' : ''}`}>
                     <Paragraph>{index >= 1 ? index : 1}</Paragraph>
                   </div>
                   <Paragraph> {step}</Paragraph>
@@ -41,9 +41,9 @@ const Stepper = (props: Props) => {
               <>
                 <div className="step-container">
                   <div
-                    className={`step-icon ${currentStep === index ? 'active' : ''} ${
-                      currentStep > index ? 'done' : ''
-                    }`}>
+                    className={`step-icon ${
+                      currentStep === index ? 'active' : ''
+                    } ${currentStep > index ? 'done' : ''}`}>
                     <Paragraph>{index + 1}</Paragraph>
                   </div>
                   <Paragraph> {step}</Paragraph>

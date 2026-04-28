@@ -290,7 +290,9 @@ function CommentsInner({
     const pathname =
       typeof window !== 'undefined' ? window.location.pathname : '';
     const search = typeof window !== 'undefined' ? window.location.search : '';
-    const scope = `${props.projectId || 'project'}:${resourceId}:${pathname}:${search}`;
+    const scope = `${
+      props.projectId || 'project'
+    }:${resourceId}:${pathname}:${search}`;
     return getScopedSessionRandomSortSeed(scope, 'commentsRandomSortSeed');
   }, [props.projectId, resourceId]);
 

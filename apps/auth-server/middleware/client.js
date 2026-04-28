@@ -150,10 +150,11 @@ exports.checkIfAccessTokenBelongToCurrentClient = async (req, res, next) => {
 exports.checkUniqueCodeAuth = (errorCallback) => {
   //validate code auth type
   return (req, res, next) => {
-    const authTypes = req.client.authTypes;
+    const authTypes = req.client.authTypes || [];
 
-    // if UniqueCode authentication is used, other methods are blocked to enforce users can never authorize with email
-    if (authTypes.indexOf('UniqueCode') !== -1) {
+    // if UniqueCode is the only authentication method, enforce that the user has a valid unique code.
+    // when other auth types are also active, users may log in via those providers instead.
+    if (authTypes.length === 1 && authTypes.indexOf('UniqueCode') !== -1) {
       db.UniqueCode.findOne({
         where: { clientId: req.client.id, userId: req.user.id },
       })
@@ -190,9 +191,9 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
 exports.checkPhonenumberAuth = (errorCallback) => {
   //validate code auth type
   return (req, res, next) => {
-    const authTypes = req.client.authTypes;
+    const authTypes = req.client.authTypes || [];
 
-    // if UniqueCode authentication is used, other methods are blocked to enforce users can never authorize with email
+    // if Phonenumber is the configured authentication method, enforce that the user has a confirmed phone number.
     if (authTypes.indexOf('Phonenumber') !== -1) {
       const userHasPrivilegedRole = privilegedRoles.indexOf(req.user.role) > -1;
 
@@ -253,7 +254,9 @@ exports.check2FA = (req, res, next) => {
     !req.session.twoFactorValid
   ) {
     return res.redirect(
-      `/auth/two-factor?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+      `/auth/two-factor?clientId=${
+        req.client.clientId
+      }&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
     );
   }
 
@@ -296,7 +299,9 @@ exports.checkRequiredUserFields = (req, res, next) => {
   // if error redirect to register
   if (error) {
     res.redirect(
-      `/auth/required-fields?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+      `/auth/required-fields?clientId=${
+        req.client.clientId
+      }&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
     );
   } else {
     next();

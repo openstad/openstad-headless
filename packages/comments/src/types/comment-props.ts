@@ -4,6 +4,9 @@ import React, { Dispatch, SetStateAction } from 'react';
 export type CommentProps = {
   comment: Comment;
   selected?: boolean;
+  disableReplyFeatures?: boolean;
+  disableLocationLink?: boolean;
+  keepMenuIconStatic?: boolean;
   type?: string;
   index?: number;
   showDateSeperately?: boolean;

@@ -16,7 +16,9 @@ const RESOURCE_DETAIL_TYPES: WidgetDefinition[] = ['resourcedetail'];
 function getWidgetLabel(widget: Widget): string {
   return (
     widget.description ||
-    `${WidgetDefinitions[widget.type]?.name || widget.type} (Widget ${widget.id})`
+    `${WidgetDefinitions[widget.type]?.name || widget.type} (Widget ${
+      widget.id
+    })`
   );
 }
 

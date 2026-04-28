@@ -14,6 +14,7 @@ const db = require('../../db');
 const authLocalConfig = require('../../config/auth').get('Local');
 const URL = require('url').URL;
 const authType = 'Local';
+const { logAuthEvent } = require('../../middleware/auditLog');
 
 /**
  * Render the index.html or index-with-code.js depending on if query param has code or not
@@ -45,10 +46,12 @@ exports.login = (req, res) => {
   res.render('auth/local/login', {
     loginUrl:
       authLocalConfig.loginUrl +
-      `?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`,
+      `?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : ''}`,
     clientId: req.client.clientId,
     client: req.client,
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    redirectUrl: req.query.redirect_uri
+      ? encodeURIComponent(req.query.redirect_uri)
+      : '',
     title: configAuthType.title ? configAuthType.title : authLocalConfig.title,
     description: configAuthType.description
       ? configAuthType.description
@@ -93,7 +96,12 @@ exports.postRegister = (req, res, next) => {
 
     db.User()
       .create({ name, email, password })
-      .then(() => {
+      .then((user) => {
+        logAuthEvent(req, 'register', {
+          userId: user.id,
+          userName: name || email,
+          data: { method: 'local', email },
+        });
         res.redirect(
           authLocalConfig.loginUrl + '?clientId=' + req.client.clientId
         );
@@ -118,6 +126,9 @@ exports.postLogin = (req, res, next) => {
 
     // Redirect if it fails to the original e-mail screen
     if (!user) {
+      logAuthEvent(req, 'login_failed', {
+        data: { method: 'local', email: req.body.email },
+      });
       req.flash('error', { msg: 'Incorrect combination email/password' });
       const redirectUrl = req.query.redirect_uri
         ? encodeURIComponent(req.query.redirect_uri)
@@ -138,12 +149,21 @@ exports.postLogin = (req, res, next) => {
       const redirectUrl = req.query.redirect_uri
         ? encodeURIComponent(req.query.redirect_uri)
         : req.client.redirectUrl;
+      if (!redirectUrl)
+        return next(
+          new Error(
+            'No redirect_uri provided and no default redirectUrl configured for this client'
+          )
+        );
       const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
       //    const redirectTo = req.session.returnTo ? req.session.returnTo : req.client.redirectUrl;
 
       // Redirect if it succeeds to authorize screen
       req.brute.resetKey(req.bruteKey);
+      logAuthEvent(req, 'login', {
+        data: { method: 'local' },
+      });
       return res.redirect(authorizeUrl);
     });
   })(req, res, next);
@@ -157,6 +177,11 @@ exports.postLogin = (req, res, next) => {
  */
 exports.logout = async (req, res) => {
   let userId = req.user && req.user.id;
+
+  logAuthEvent(req, 'logout', {
+    userId,
+  });
+
   if (userId) {
     await db.AccessToken.destroy({ where: { userId } });
   }
@@ -165,16 +190,24 @@ exports.logout = async (req, res) => {
 
   const config = req.client.config;
   const allowedDomains = req.client.allowedDomains
-    ? req.client.allowedDomains
-    : false;
+    ? [...req.client.allowedDomains]
+    : [];
+
+  // Always allow the admin domain for logout redirects
+  if (process.env.ADMIN_URL) {
+    try {
+      allowedDomains.push(new URL(process.env.ADMIN_URL).hostname);
+    } catch (e) {
+      console.warn('Invalid ADMIN_URL env var:', process.env.ADMIN_URL);
+    }
+  }
+
   let redirectURL = req.query.redirectUrl;
 
   try {
     const redirectUrlHost = redirectURL ? new URL(redirectURL).hostname : false;
     redirectURL =
-      redirectUrlHost &&
-      allowedDomains &&
-      allowedDomains.indexOf(redirectUrlHost) !== -1
+      redirectUrlHost && allowedDomains.includes(redirectUrlHost)
         ? redirectURL
         : false;
   } catch (e) {

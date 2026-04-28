@@ -47,7 +47,7 @@ export default function WidgetCounter({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Account',
+            name: 'Accountgegevens',
             url: `/projects/${projectId}/widgets/account/${id}`,
           },
         ]}>

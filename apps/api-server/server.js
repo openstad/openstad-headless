@@ -1,9 +1,14 @@
 require('dotenv').config();
 
-// Initialize telemetry FIRST, before any other modules
-const { telemetryManager, setupGracefulShutdown } = require('./src/telemetry');
+const {
+  createTelemetry,
+  setupGracefulShutdown,
+} = require('@openstad-headless/lib/telemetry');
+const telemetryManager = createTelemetry({
+  serviceName: process.env.OTEL_SERVICE_NAME || 'openstad-api-server',
+});
 telemetryManager.initialize();
-setupGracefulShutdown();
+setupGracefulShutdown(telemetryManager);
 
 const config = require('config');
 

@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { type SessionUserType, getSession } from '../../auth';
+import { getSession } from '../../auth';
+import { type SessionUserType } from '../../auth-context';
 
 export default async function handler(
   req: NextApiRequest,

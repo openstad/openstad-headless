@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -24,6 +25,7 @@ const formSchema = z.object({
   title: z.string(),
   description: z.string(),
   active: z.boolean(),
+  highlighted: z.boolean(),
   activeFrom: z.string().optional(),
   activeTo: z.string().optional(),
   links: z
@@ -79,6 +81,7 @@ export default function WidgetAgendaItems(
           title: values.title,
           description: values.description,
           active: values.active,
+          highlighted: values.highlighted,
           activeFrom: values.activeFrom,
           activeTo: values.activeTo,
           links: values.links || [],
@@ -130,6 +133,7 @@ export default function WidgetAgendaItems(
     title: '',
     description: '',
     active: true,
+    highlighted: false,
     activeFrom: '',
     activeTo: '',
     links: [],
@@ -145,6 +149,7 @@ export default function WidgetAgendaItems(
     title?: string;
     description: string;
     active: boolean;
+    highlighted?: boolean;
     activeFrom?: string;
     activeTo?: string;
     links?: Array<Link>;
@@ -175,6 +180,7 @@ export default function WidgetAgendaItems(
         title: selectedItem.title || '',
         description: selectedItem.description,
         active: selectedItem.active,
+        highlighted: selectedItem.highlighted || false,
         activeFrom: toDateInputValue(selectedItem.activeFrom),
         activeTo: toDateInputValue(selectedItem.activeTo),
         links: selectedItem.links || [],
@@ -511,6 +517,28 @@ export default function WidgetAgendaItems(
                         )}
                       />
                     )}
+                    <FormField
+                      control={form.control}
+                      name="highlighted"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Extra uitlichten</FormLabel>
+                          <FormDescription>
+                            Dit item wordt weergegeven als een gekleurd blok met
+                            de primaire kleuren.
+                          </FormDescription>
+                          <Switch.Root
+                            className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                            onCheckedChange={(e: boolean) => {
+                              field.onChange(e);
+                            }}
+                            checked={field.value}>
+                            <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                          </Switch.Root>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     {props.useActiveDates && (
                       <>
                         <FormField

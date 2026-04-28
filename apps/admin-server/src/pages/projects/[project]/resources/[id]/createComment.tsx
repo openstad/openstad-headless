@@ -22,7 +22,7 @@ import { Heading } from '@/components/ui/typography';
 import useComments from '@/hooks/use-comments';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -109,6 +109,12 @@ export default function ProjectResourceCreateArgument() {
       parentId: '',
     },
   });
+
+  useEffect(() => {
+    if (router.query.parentId) {
+      form.setValue('parentId', router.query.parentId as string);
+    }
+  }, [router.query.parentId]);
 
   return (
     <div className="p-6 bg-white rounded-md">

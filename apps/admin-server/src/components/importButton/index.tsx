@@ -20,18 +20,9 @@ import { translateHeaders } from './translate-headers';
 import {
   extractUniqueStatuses,
   prepareStatuses,
-  processStatuses,
 } from './utils/status-import-helper';
-import {
-  extractUniqueTags,
-  prepareTags,
-  processTags,
-} from './utils/tags-import-helper';
-import {
-  extractUniqueUserIds,
-  prepareUsers,
-  processUserId,
-} from './utils/user-import-helper';
+import { extractUniqueTags, prepareTags } from './utils/tags-import-helper';
+import { extractUniqueUserIds, prepareUsers } from './utils/user-import-helper';
 import validateFileData from './validate-file-data';
 import { processXlsFile } from './xls-extractor';
 
@@ -108,7 +99,9 @@ export const ImportButton = ({ project }: { project: string }) => {
               Array.isArray(value[valueKeys[0]]) ||
               typeof value[valueKeys[0]] === 'string'
             ) {
-              formattedFirstValue = `${valueKeys[0]} : ${String(value[valueKeys[0]]).slice(0, 25)}`;
+              formattedFirstValue = `${valueKeys[0]} : ${String(
+                value[valueKeys[0]]
+              ).slice(0, 25)}`;
             } else {
               formattedFirstValue = `${valueKeys[0]}: ${value[valueKeys[0]]}`;
             }
@@ -121,7 +114,9 @@ export const ImportButton = ({ project }: { project: string }) => {
               Array.isArray(value[valueKeys[1]]) ||
               typeof value[valueKeys[1]] === 'string'
             ) {
-              formattedSecondValue = `${valueKeys[1]} : ${String(value[valueKeys[1]]).slice(0, 25)}`;
+              formattedSecondValue = `${valueKeys[1]} : ${String(
+                value[valueKeys[1]]
+              ).slice(0, 25)}`;
             } else {
               formattedSecondValue = `${valueKeys[1]}: ${value[valueKeys[1]]}`;
             }

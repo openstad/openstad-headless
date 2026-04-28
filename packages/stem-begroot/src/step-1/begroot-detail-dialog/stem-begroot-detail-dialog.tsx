@@ -35,6 +35,7 @@ export const StemBegrootResourceDetailDialog = ({
   resourceBtnTextHandler,
   resourceBtnEnabled,
   defineOriginalUrl,
+  defineOriginalUrlText,
   displayPriceLabel,
   displayRanking,
   showVoteCount,
@@ -67,6 +68,7 @@ export const StemBegrootResourceDetailDialog = ({
   onPrimaryButtonClick: (resource: any) => void;
   resourceDetailIndex: number;
   defineOriginalUrl: (resource: any) => string | null;
+  defineOriginalUrlText: (resource: any) => string | null;
   resourceBtnTextHandler: (resource: any) => string;
   resourceBtnEnabled: (resource: any) => boolean;
   displayPriceLabel: boolean;
@@ -99,7 +101,9 @@ export const StemBegrootResourceDetailDialog = ({
   const getResourceStableKey = (resource: any) =>
     String(
       resource?.id ||
-        `${resource?.projectId || ''}:${resource?.title || ''}:${resource?.createdAt || ''}`
+        `${resource?.projectId || ''}:${resource?.title || ''}:${
+          resource?.createdAt || ''
+        }`
     );
 
   const [carouselIndexSetter, setCarouselIndexSetter] = useState<
@@ -257,6 +261,7 @@ export const StemBegrootResourceDetailDialog = ({
             const canUseButton = resourceBtnEnabled(resource);
             const primaryButtonText = resourceBtnTextHandler(resource);
             const originalUrl = defineOriginalUrl(resource);
+            const originalUrlText = defineOriginalUrlText(resource);
 
             let defaultImage = '';
 
@@ -374,7 +379,7 @@ export const StemBegrootResourceDetailDialog = ({
                               target="_blank"
                               href={originalUrl}
                               className="ams-standalone-link">
-                              {originalUrl}
+                              {originalUrlText}
                             </Link>
                           </>
                         ) : null}
@@ -433,17 +438,6 @@ export const StemBegrootResourceDetailDialog = ({
                       </div>
 
                       <Spacer size={2} />
-
-                      {originalUrl && showOriginalResource ? (
-                        <>
-                          <Paragraph className="strong">
-                            Dit een vervolg op het volgende plan:&nbsp;
-                            <Link target="_blank" href={originalUrl}>
-                              {originalUrl}
-                            </Link>
-                          </Paragraph>
-                        </>
-                      ) : null}
 
                       <div className="osc-stem-begroot-content-item-footer">
                         {showVoteCount ? (

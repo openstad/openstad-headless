@@ -54,9 +54,19 @@ module.exports = function toAuthorizedJSON(user) {
     }
 
     let testRole;
-    if (self.rawAttributes[key] && self.rawAttributes[key].auth) {
-      if (self.rawAttributes[key].auth.authorizeData) {
-        return self.rawAttributes[key].auth.authorizeData(
+    const attributeKey =
+      (self.rawAttributes && self.rawAttributes[key] && key) ||
+      Object.keys(self.rawAttributes || {}).find(
+        (rawKey) =>
+          typeof key === 'string' && rawKey.toLowerCase() === key.toLowerCase()
+      );
+    if (
+      attributeKey &&
+      self.rawAttributes[attributeKey] &&
+      self.rawAttributes[attributeKey].auth
+    ) {
+      if (self.rawAttributes[attributeKey].auth.authorizeData) {
+        return self.rawAttributes[attributeKey].auth.authorizeData(
           null,
           'view',
           user,
@@ -65,7 +75,7 @@ module.exports = function toAuthorizedJSON(user) {
         );
       } else {
         // todo: waarom loopt dit niet via authorizeData
-        testRole = self.rawAttributes[key].auth.viewableBy;
+        testRole = self.rawAttributes[attributeKey].auth.viewableBy;
         if (
           Array.isArray(testRole)
             ? testRole.includes('detailsViewableByRole')
@@ -77,7 +87,7 @@ module.exports = function toAuthorizedJSON(user) {
         }
 
         // todo: waarom loopt dit niet via authorizeData
-        testRole = self.rawAttributes[key].auth.viewableBy || [];
+        testRole = self.rawAttributes[attributeKey].auth.viewableBy || [];
         if (!Array.isArray(testRole)) testRole = [testRole];
         if (testRole.includes('detailsViewableByRole')) {
           if (self.detailsViewableByRole) {

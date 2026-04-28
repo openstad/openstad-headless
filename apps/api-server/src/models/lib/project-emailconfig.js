@@ -48,6 +48,22 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         type: 'string', // todo: add type email/list of emails
         default: apiConfig.notifications.admin.emailAddress,
       },
+      sendUpdatedResourceAdminEmail: {
+        type: 'boolean',
+        default: false,
+      },
+      pdfAttachmentEnabled: {
+        type: 'boolean',
+        default: false,
+      },
+      pdfTitle: {
+        type: 'string',
+        default: 'Nieuwe inzending',
+      },
+      pdfDescription: {
+        type: 'string',
+        default: '',
+      },
       sendEndDateNotifications: {
         type: 'object',
         subset: {

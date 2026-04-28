@@ -154,7 +154,9 @@ function Swipe({
                       }
                     />
                     <label
-                      htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
+                      htmlFor={`${slide.id || slide.trigger}_${
+                        q.titles[0].key
+                      }`}>
                       <span>{String.fromCharCode(97 + key).toUpperCase()}</span>{' '}
                       {q.titles[0].key}
                     </label>
@@ -181,7 +183,9 @@ function Swipe({
                       onChange={(e) => updateAnswer(fieldKey, e.target.value)}
                     />
                     <label
-                      htmlFor={`${slide.id || slide.trigger}_${q.titles[0].key}`}>
+                      htmlFor={`${slide.id || slide.trigger}_${
+                        q.titles[0].key
+                      }`}>
                       <span>{String.fromCharCode(97 + key).toUpperCase()}</span>{' '}
                       {q.titles[0].key}
                     </label>
@@ -286,7 +290,9 @@ function Swipe({
                   fieldRequired={slide.fieldRequired}
                   multiple={slide.multiple}
                   view={slide.view}
-                  randomId={`img-choice-${Math.random().toString(36).substring(2, 15)}`}
+                  randomId={`img-choice-${Math.random()
+                    .toString(36)
+                    .substring(2, 15)}`}
                   onChange={(e) => {
                     const fieldKey = `${slide.id || slide.trigger}_images`;
                     updateAnswer(fieldKey, e.value);
@@ -547,7 +553,9 @@ function VideoSlider({
                         <button
                           className="video-slide--next"
                           type="button"
-                          aria-label={`Ga naar volgende slide (${slideIndex + 2})`}
+                          aria-label={`Ga naar volgende slide (${
+                            slideIndex + 2
+                          })`}
                           onClick={() => {
                             const swiperEl = document.querySelector(
                               '.swiper-horizontal'
@@ -600,7 +608,9 @@ function VideoSlider({
                 }
               });
             }}
-            className={`video-slider-play-button ${autoPlay ? '--autoplay' : ''}`}
+            className={`video-slider-play-button ${
+              autoPlay ? '--autoplay' : ''
+            }`}
             aria-label={autoPlay ? 'Pauzeer alle videos' : 'Speel alle videos'}
             type="button">
             <span>
@@ -628,7 +638,9 @@ function VideoSlider({
                 console.error('Error toggling fullscreen:', error);
               }
             }}
-            className={`video-slider-fullscreen-button${isFullscreen ? ' --fullscreen' : ''}`}
+            className={`video-slider-fullscreen-button${
+              isFullscreen ? ' --fullscreen' : ''
+            }`}
             aria-label={isFullscreen ? 'Venster verlaten' : 'Volledig scherm'}
             type="button">
             <span>{isFullscreen ? 'Venster verlaten' : 'Volledig scherm'}</span>

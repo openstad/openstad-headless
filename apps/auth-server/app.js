@@ -1,3 +1,15 @@
+require('dotenv').config();
+
+const {
+  createTelemetry,
+  setupGracefulShutdown,
+} = require('@openstad-headless/lib/telemetry');
+const telemetryManager = createTelemetry({
+  serviceName: process.env.OTEL_SERVICE_NAME || 'openstad-auth-server',
+});
+telemetryManager.initialize();
+setupGracefulShutdown(telemetryManager);
+
 const initializeApp = require('./app-init');
 const config = require('./config');
 const memoryStorage = require('./memoryStorage');

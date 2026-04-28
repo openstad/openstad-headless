@@ -3,6 +3,10 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { authMiddleware, getSession } from './auth';
 import { HasAccess } from './lib/hasAccess';
 
+export const config = {
+  runtime: 'nodejs',
+};
+
 const restrictedPaths = [
   '/areas',
   '/duplicate',

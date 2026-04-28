@@ -36,6 +36,7 @@ const ResourceOverviewWithMap = (props: ResourceOverviewWithMapWidgetProps) => {
           givenResources={
             filteredResources.length > 0 ? filteredResources : undefined
           }
+          noFetch={true}
           locationProx={location}
         />
       </div>

@@ -1,7 +1,6 @@
 import { getIronSession } from 'iron-session';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { type NextRequest, NextResponse } from 'next/server';
-import { createContext } from 'react';
 
 import hasRole from './lib/hasRole';
 import { Role } from './lib/roles';
@@ -62,7 +61,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
   let match = req.nextUrl.pathname.match(/^\/projects\/(\d+)/);
   if (match) targetProjectId = parseInt(match[1]);
   match = req.nextUrl.pathname.match(
-    /^\/api\/openstad\/(?:api|auth)\/project\/(\d+)/
+    /^\/api\/openstad\/(?:api|auth|stats)\/project\/(\d+)/
   );
   if (match) targetProjectId = parseInt(match[1]);
 
@@ -94,7 +93,9 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     // check login token
     if (jwt) {
       try {
-        let url = `${process.env.API_URL_INTERNAL || process.env.API_URL}/auth/project/${targetProjectId}/me`;
+        let url = `${
+          process.env.API_URL_INTERNAL || process.env.API_URL
+        }/auth/project/${targetProjectId}/me`;
         let response = await fetch(url, {
           headers: { Authorization: `Bearer ${jwt}` },
         });
@@ -139,7 +140,9 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     let path = req.nextUrl.pathname.replace('/api/openstad', '');
     let query = searchParams ? '?' + searchParams.toString() : '';
     query = query.replace(/openstadlogintoken=(?:.(?!&|$))+./, '');
-    const rewrittenUrl = `${process.env.API_URL_INTERNAL || process.env.API_URL}${path}${query}`;
+    const rewrittenUrl = `${
+      process.env.API_URL_INTERNAL || process.env.API_URL
+    }${path}${query}`;
     return NextResponse.rewrite(rewrittenUrl, {
       headers: {
         Authorization: `Bearer ${jwt}`,
@@ -176,53 +179,12 @@ async function signIn(
   let path = req.nextUrl.pathname.replace('/api/openstad', '');
   if (path == '/') path = '/projects';
   let redirectUri = `${process.env.URL}${path}?openstadlogintoken=[[jwt]]`;
-  let loginUrl = `${process.env.API_URL}/auth/project/${projectId}/login?useAuth=default&redirectUri=${redirectUri}${forceNewLogin ? '&forceNewLogin=1' : ''}`;
+  let loginUrl = `${
+    process.env.API_URL
+  }/auth/project/${projectId}/login?useAuth=default&redirectUri=${redirectUri}${
+    forceNewLogin ? '&forceNewLogin=1' : ''
+  }`;
   return NextResponse.redirect(loginUrl, { headers: res.headers });
 }
 
-function clientSignIn() {
-  let loginUrl = `/signin`;
-  document.location.href = loginUrl;
-}
-
-type SessionUserType = {
-  id?: number;
-  name?: string;
-  role?: string;
-  jwt?: string;
-};
-
-async function fetchSessionUser() {
-  try {
-    let response = await fetch('/api/current-user', {
-      headers: { 'Content-type': 'application/json' },
-    });
-    if (!response.ok) {
-      throw new Error('Fetch failed');
-    }
-    let result = await response.json();
-    return {
-      id: result.id,
-      name: result.name,
-      role: result.role,
-      jwt: result.jwt,
-    };
-  } catch (err) {
-    console.log(err);
-    return {};
-  }
-}
-
-let defaultSession: SessionUserType = {};
-let SessionContext = createContext(defaultSession);
-
-export {
-  authMiddleware,
-  getSession,
-  sessionOptions,
-  signIn,
-  clientSignIn,
-  SessionContext,
-  fetchSessionUser,
-  type SessionUserType,
-};
+export { authMiddleware, getSession, sessionOptions, signIn };

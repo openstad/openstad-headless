@@ -7,10 +7,9 @@ import {
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import type { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import { BaseProps } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { boolean } from 'zod';
 
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
@@ -21,7 +20,9 @@ import {
 } from '../../../../../../components/ui/tabs';
 import WidgetResourcesMapButtons from './buttons';
 import WidgetResourcesMapDatalayers from './datalayers';
+import WidgetResourcesMapLegend from './legend';
 import WidgetResourcesMapMap from './map';
+import WidgetResourcesMapMarkers from './markers';
 import WidgetResourcesMapPolygons from './polygons';
 
 export const getServerSideProps = withApiUrl;
@@ -77,7 +78,7 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Resource Map',
+            name: 'Inzendingen kaart',
             url: `/projects/${projectId}/widgets/resourcesmap/${id}`,
           },
         ]}>
@@ -88,6 +89,8 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="button">Knoppen</TabsTrigger>
               <TabsTrigger value="polygons">Polygonen</TabsTrigger>
               <TabsTrigger value="datalayers">Kaartlagen</TabsTrigger>
+              <TabsTrigger value="markerSets">Markers</TabsTrigger>
+              <TabsTrigger value="legend">Legenda</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
             </TabsList>
             {previewConfig ? (
@@ -103,6 +106,12 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
                 </TabsContent>
                 <TabsContent value="datalayers" className="p-0">
                   <WidgetResourcesMapDatalayers {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="markerSets" className="p-0">
+                  <WidgetResourcesMapMarkers {...totalPropPackage} />
+                </TabsContent>
+                <TabsContent value="legend" className="p-0">
+                  <WidgetResourcesMapLegend {...totalPropPackage} />
                 </TabsContent>
                 <TabsContent value="publish" className="p-0">
                   <WidgetPublish apiUrl={apiUrl} />

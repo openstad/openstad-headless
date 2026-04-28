@@ -1,7 +1,7 @@
 import { UploadDocument } from '@/hooks/upload-document';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import React, { useEffect } from 'react';
-import { FieldValues, Path, UseFormReturn, useForm } from 'react-hook-form';
+import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 
 import {
   FormControl,
@@ -47,7 +47,12 @@ export const ImageUploader: React.FC<{
   async function uploadImage(data: any) {
     let response;
 
-    if (data && data.type === 'image/gif') {
+    if (
+      data &&
+      (data.type === 'image/gif' ||
+        data.type === 'image/x-icon' ||
+        data.type === 'image/vnd.microsoft.icon')
+    ) {
       response = await UploadDocument(data, project);
     } else {
       let image = prepareFile(data);

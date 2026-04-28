@@ -41,6 +41,7 @@ const ResourceOverviewMap = ({
   ctaButton = undefined,
   locationProx = undefined,
   givenResources,
+  noFetch = false,
   selectedProjects = [],
   onMarkerClick,
   ...props
@@ -57,10 +58,10 @@ const ResourceOverviewMap = ({
 
   const { data: resources } = datastore.useResources(
     {
-      projectId: props.projectId,
+      projectId: noFetch ? undefined : props.projectId,
       pageSize: 99999,
     },
-    { suspense: !!givenResources }
+    { suspense: false }
   );
 
   const allResources = givenResources || resources?.records || [];
@@ -235,15 +236,9 @@ const ResourceOverviewMap = ({
     );
   }
 
-  const { data: areas } = datastore.useArea({
-    projectId: props.projectId,
-  });
-
   let areaId = props?.map?.areaId || false;
-  const polygon =
-    areaId && Array.isArray(areas) && areas.length > 0
-      ? (areas.find((area) => area.id.toString() === areaId) || {}).polygon
-      : [];
+  const { data: areaData } = datastore.useArea({ areaId });
+  const polygon = areaData?.polygon || [];
 
   function calculateCenter(polygon: Point[] | Point[][] | Point[][][]) {
     if (!polygon || polygon.length === 0) {
@@ -276,7 +271,7 @@ const ResourceOverviewMap = ({
     if (!!polygon) {
       setCenter(calculateCenter(polygon));
     }
-  }, [polygon, areas]);
+  }, [areaData]);
 
   const zoom = {
     minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
@@ -308,7 +303,7 @@ const ResourceOverviewMap = ({
       }
     : props?.resourceOverviewMapWidget || {};
 
-  return (polygon && center) || !Number(areaId) ? (
+  return (polygon.length > 0 && center) || !Number(areaId) ? (
     <div className="map-container--buttons">
       <Button
         appearance="primary-action-button"

@@ -3,7 +3,7 @@ import { Heading } from '@/components/ui/typography';
 import { WidgetDefinition } from '@/lib/widget-definitions';
 import React, { useCallback, useContext, useEffect } from 'react';
 
-import { SessionContext } from '../auth';
+import { SessionContext } from '../auth-context';
 
 // Can we type config better? Or should we define types for all widgetConfigs and use them as seperate props. A.k.a. likeConifg?:LikeConfig, argConfig?: ArgConfig
 type Props = {

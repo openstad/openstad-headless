@@ -1,5 +1,6 @@
 const twofactor = require('node-2fa');
 const QRCode = require('qrcode');
+const { logAuthEvent } = require('../../middleware/auditLog');
 
 const twoFactorBaseUrl = '/auth/two-factor';
 
@@ -13,6 +14,8 @@ const formatRedirectUrl = (url, req) => {
   let redirectUrl = req.query.redirect_uri
     ? req.query.redirect_uri
     : req.client.redirectUrl;
+
+  if (!redirectUrl) return `${url}?clientId=${req.client.clientId}`;
 
   // check if url is encoded otherwise encode
   redirectUrl = isEncoded(redirectUrl)
@@ -41,7 +44,9 @@ exports.index = (req, res, next) => {
     description: configTwoFactor.description,
     title: configTwoFactor.title,
     buttonText: configTwoFactor.buttonText,
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    redirectUrl: req.query.redirect_uri
+      ? encodeURIComponent(req.query.redirect_uri)
+      : '',
   });
 };
 
@@ -69,10 +74,17 @@ exports.post = async (req, res, next) => {
     const redirectUrl = req.query.redirect_uri
       ? encodeURIComponent(req.query.redirect_uri)
       : req.client.redirectUrl;
+    if (!redirectUrl)
+      return next(
+        new Error(
+          'No redirect_uri provided and no default redirectUrl configured for this client'
+        )
+      );
     const authorizeUrl = `/dialog/authorize?redirect_uri=${redirectUrl}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
     res.redirect(authorizeUrl);
   } else {
+    logAuthEvent(req, '2fa_failed', {});
     console.log('Two factor validation failed');
     req.flash('error', {
       msg: 'Two factor validatie is niet gelukt, probeer het nogmaals.',
@@ -124,7 +136,11 @@ exports.configure = async (req, res, next) => {
       twoFactorSecret = twoFactor.secret;
     }
 
-    const otpAuthUrl = `otpauth://totp/${encodeURIComponent(issuer)}:%20${encodeURIComponent(accountName)}?secret=${twoFactorSecret}&issuer=${encodeURIComponent(issuer)}`;
+    const otpAuthUrl = `otpauth://totp/${encodeURIComponent(
+      issuer
+    )}:%20${encodeURIComponent(
+      accountName
+    )}?secret=${twoFactorSecret}&issuer=${encodeURIComponent(issuer)}`;
 
     const qrCode = await QRCode.toDataURL(otpAuthUrl);
 
@@ -137,7 +153,9 @@ exports.configure = async (req, res, next) => {
       description: configTwoFactor.description,
       title: configTwoFactor.title,
       buttonText: configTwoFactor.buttonText,
-      redirectUrl: encodeURIComponent(req.query.redirect_uri),
+      redirectUrl: req.query.redirect_uri
+        ? encodeURIComponent(req.query.redirect_uri)
+        : '',
     });
   }
 };
@@ -151,6 +169,7 @@ exports.configurePost = async (req, res, next) => {
     req.user
       .update({ twoFactorConfigured: true })
       .then(() => {
+        logAuthEvent(req, '2fa_configured', {});
         req.flash('success', { msg: 'Two factor authentication configured!' });
         res.redirect(redirectToTwoFactor);
       })

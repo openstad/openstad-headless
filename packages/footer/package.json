@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:component": "../../scripts/run-package-component-tests.sh"
   },
   "dependencies": {
     "@openstad-headless/data-store": "file:../data-store",
@@ -16,14 +17,14 @@
     "@utrecht/component-library-css": "^4.2.0",
     "@utrecht/component-library-react": "^4.2.0",
     "@utrecht/design-tokens": "^1.0.0-alpha.631",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
     "swr": "^2.2.4"
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "^14.2.3",
-    "@types/react": "^18.2.78",
-    "@types/react-dom": "^18.2.7",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react": "^4.4.1",

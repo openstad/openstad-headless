@@ -88,7 +88,11 @@ function Form({
       if (
         field?.routingInitiallyHide &&
         field?.routingSelectedQuestion &&
-        field?.routingSelectedAnswer
+        field?.routingSelectedAnswer &&
+        !(
+          Array.isArray(field.routingSelectedAnswer) &&
+          field.routingSelectedAnswer.length === 0
+        )
       ) {
         const getRoutingSelectedQuestionField = fields.find(
           (f) => f.trigger === field.routingSelectedQuestion
@@ -401,7 +405,9 @@ function Form({
             return field.type === 'pagination' ? null : (
               <div
                 // @ts-ignore
-                className={`question question-type-${field.type} --${field.infoBlockStyle || ''}`}
+                className={`question question-type-${field.type} --${
+                  field.infoBlockStyle || ''
+                }`}
                 key={uniqueKey}>
                 {renderField(field, index, randomId, fieldInvalid)}
                 <FormFieldErrorMessage className="error-message">

@@ -1,7 +1,9 @@
 import {
+  CommentWidgetContext,
   Comments,
   CommentsWidgetProps,
 } from '@openstad-headless/comments/src/comments';
+import CommentComponent from '@openstad-headless/comments/src/parts/comment';
 import DataStore from '@openstad-headless/data-store/src';
 import { FormValue } from '@openstad-headless/form/src/form';
 import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
@@ -118,6 +120,10 @@ export type DocumentMapProps = BaseProps &
     defaultSorting?: string;
     sorting?: Array<{ value: string; label: string }>;
     displaySearchBar?: boolean;
+    markerClickBehavior?: 'sidebar' | 'popup';
+    hideCommentsList?: boolean;
+    hideFilters?: boolean;
+    hideToggleMarkers?: boolean;
   };
 
 function DocumentMap({
@@ -162,6 +168,10 @@ function DocumentMap({
   defaultSorting,
   sorting = [],
   displaySearchBar = false,
+  markerClickBehavior = 'sidebar',
+  hideCommentsList = false,
+  hideFilters = false,
+  hideToggleMarkers = false,
   ...props
 }: DocumentMapProps) {
   const [sort, setSort] = useState<string | undefined>(
@@ -258,6 +268,7 @@ function DocumentMap({
     urlTagIdsArray && allTags
       ? allTags.filter((tag: { id: number }) => urlTagIdsArray.includes(tag.id))
       : [];
+  const [refreshComments, setRefreshComments] = useState(false);
 
   const useCommentsData = {
     projectId: props.projectId,
@@ -265,6 +276,7 @@ function DocumentMap({
     sentiment: sentiment,
     onlyIncludeTagIds: filteredTagsIdsString || undefined,
     search: search || '',
+    refreshKey: refreshComments,
   };
 
   const { data: comments } = datastore.useComments(useCommentsData);
@@ -273,7 +285,7 @@ function DocumentMap({
   const [filteredComments, setFilteredComments] =
     useState<Array<Comment>>(comments);
   const [commentValue, setCommentValue] = useState<string>('');
-  const [refreshComments, setRefreshComments] = useState(false);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCommentValue(e.target.value);
@@ -491,11 +503,13 @@ function DocumentMap({
   const addComment = async (e: any, position: any) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isSubmittingComment) return;
 
     if (
       commentValue.length >= props.comments?.descriptionMinLength &&
       commentValue.length <= props.comments?.descriptionMaxLength
     ) {
+      setIsSubmittingComment(true);
       try {
         const defaultTagsArray = defaultTags
           ? defaultTags
@@ -538,6 +552,8 @@ function DocumentMap({
       } catch (error) {
         notifyFailed();
         console.error('Error creating comment:', error);
+      } finally {
+        setIsSubmittingComment(false);
       }
     } else {
       return;
@@ -573,6 +589,9 @@ function DocumentMap({
         : true,
     requiredUserRole: props.comments?.requiredUserRole || 'member',
   };
+
+  const isPopupMarkerBehavior = markerClickBehavior === 'popup';
+  const shouldShowCommentsList = !(isPopupMarkerBehavior && hideCommentsList);
 
   const { data: currentUser } = datastore.useCurrentUser({ ...args });
 
@@ -634,9 +653,10 @@ function DocumentMap({
         const currentComment = filteredComments?.findIndex(
           (comment: any) => parseInt(comment.id) === index
         );
-        const commentPage = Math.floor(currentComment / itemsPerPage);
-
-        setoverridePage(commentPage);
+        if (typeof currentComment === 'number' && currentComment >= 0) {
+          const commentPage = Math.floor(currentComment / itemsPerPage);
+          setoverridePage(commentPage);
+        }
       }
 
       const commentElement = document.getElementById(`comment-${index}`);
@@ -695,7 +715,11 @@ function DocumentMap({
         ref={markerRef}
         icon={MarkerIcon({
           icon: {
-            className: `${index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon'} ${isDefaultColor ? 'basic-icon' : ''} id-${index}`,
+            className: `${
+              index === selectedMarkerIndex
+                ? '--highlightedIcon'
+                : '--defaultIcon'
+            } ${isDefaultColor ? 'basic-icon' : ''} id-${index}`,
             color: !isDefaultColor ? color : undefined,
           },
         })}
@@ -705,9 +729,15 @@ function DocumentMap({
               setSelectedMarkerIndex(-1);
               setSelectedCommentIndex(-1);
             } else {
+              setPopupPosition(null);
+              if (isPopupMarkerBehavior) {
+                updateMapBounds(true);
+              }
               setSelectedMarkerIndex(index);
               setSelectedCommentIndex(index);
-              scrollToComment(index);
+              if (!isPopupMarkerBehavior) {
+                scrollToComment(index);
+              }
             }
           },
           keydown: (e: L.LeafletKeyboardEvent) => {
@@ -716,15 +746,55 @@ function DocumentMap({
                 setSelectedMarkerIndex(-1);
                 setSelectedCommentIndex(-1);
               } else {
+                setPopupPosition(null);
+                if (isPopupMarkerBehavior) {
+                  updateMapBounds(true);
+                }
                 setSelectedMarkerIndex(index);
                 setSelectedCommentIndex(index);
-                scrollToComment(index);
+                if (!isPopupMarkerBehavior) {
+                  scrollToComment(index);
+                }
               }
             }
           },
         }}
       />
     );
+  };
+
+  const selectedComment: any =
+    filteredComments?.find(
+      (comment: any) => parseInt(comment.id, 10) === selectedCommentIndex
+    ) || null;
+  const popupComment =
+    selectedComment && isPopupMarkerBehavior
+      ? {
+          ...selectedComment,
+          replies: [],
+        }
+      : selectedComment;
+  const hasOpenPopup =
+    !!popupPosition || (isPopupMarkerBehavior && !!popupComment);
+
+  const popupCommentWidgetContextValue: CommentsWidgetProps & {
+    setRefreshComments: React.Dispatch<React.SetStateAction<boolean>>;
+  } = {
+    ...props,
+    resourceId: resourceId || '',
+    canComment: args.canComment,
+    canLike:
+      typeof props.comments?.canLike != 'undefined'
+        ? props.comments.canLike
+        : true,
+    canDislike:
+      typeof props.comments?.canDislike != 'undefined'
+        ? props.comments.canDislike
+        : false,
+    canReply: false,
+    placeholder: props.commentsWidget?.placeholder || 'Typ hier uw reactie',
+    requiredUserRole: args.requiredUserRole,
+    setRefreshComments,
   };
 
   const getUrl = () => {
@@ -798,16 +868,20 @@ function DocumentMap({
 
   const mapRef = useRef<any>(null);
 
-  useEffect(() => {
+  const updateMapBounds = (disableBounds: boolean) => {
     const map = mapRef.current;
-    if (map) {
-      if (popupPosition) {
-        map.setMaxBounds([]);
-      } else {
-        map.setMaxBounds(bounds);
-      }
+    if (!map) return;
+
+    if (disableBounds) {
+      map.setMaxBounds([]);
+    } else if (bounds) {
+      map.setMaxBounds(bounds);
     }
-  }, [popupPosition]);
+  };
+
+  useEffect(() => {
+    updateMapBounds(hasOpenPopup);
+  }, [bounds, hasOpenPopup]);
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -913,9 +987,34 @@ function DocumentMap({
   }, [mapRef.current, isTouchDevice]);
 
   return !bounds ? null : (
-    <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
+    <div
+      className={`documentMap--container ${largeDoc ? '--largeDoc' : ''} ${displayResourceInfo === 'above' ? '--info-above' : ''} ${displayResourceInfo === 'below' ? '--info-below' : ''}`}>
+      {displayResourceInfo === 'above' && (
+        <div className="resource-info-full">
+          <section className="content-intro">
+            {displayResourceTitle === 'yes' && resource.title ? (
+              <Heading level={1}>{resource.title}</Heading>
+            ) : null}
+            {displayResourceSummary === 'yes' && resource.summary ? (
+              <Heading
+                level={2}
+                appearance="utrecht-heading-4"
+                dangerouslySetInnerHTML={{
+                  __html: resource.summary,
+                }}></Heading>
+            ) : null}
+            {displayResourceDescription === 'yes' && resource.description ? (
+              <Paragraph
+                dangerouslySetInnerHTML={{ __html: resource.description }}
+              />
+            ) : null}
+          </section>
+        </div>
+      )}
       <div
-        className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
+        className={`map-container ${
+          !toggleMarker ? '--hideMarkers' : ''
+        } ${displayMapSide}`}>
         {(displayResourceInfo === 'left' ||
           accessibilityUrlVisible ||
           backUrl ||
@@ -1003,7 +1102,9 @@ function DocumentMap({
             zoom={zoom}
             zoomSnap={0}
             maxBounds={
-              popupPosition ? undefined : (bounds as LatLngBoundsLiteral)
+              popupPosition || (isPopupMarkerBehavior && selectedComment)
+                ? undefined
+                : (bounds as LatLngBoundsLiteral)
             }>
             <MapEvents />
             {filteredComments &&
@@ -1064,7 +1165,10 @@ function DocumentMap({
                     </Button>
                   </>
                 ) : (
-                  <form>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                    }}>
                     <div>
                       <FormLabel htmlFor="commentBox">
                         {addCommentText}
@@ -1158,7 +1262,7 @@ function DocumentMap({
                       )}
                     <Button
                       appearance="primary-action-button"
-                      type="submit"
+                      type="button"
                       onClick={(e) => addComment(e, popupPosition)}>
                       {submitCommentText}
                     </Button>
@@ -1166,12 +1270,44 @@ function DocumentMap({
                 )}
               </Popup>
             )}
+            {isPopupMarkerBehavior &&
+              popupComment?.location &&
+              !popupPosition && (
+                <Popup
+                  className="document-map-comment-popup"
+                  position={popupComment.location}
+                  eventHandlers={{
+                    popupclose: () => {
+                      setSelectedMarkerIndex(-1);
+                      setSelectedCommentIndex(-1);
+                    },
+                  }}>
+                  <CommentWidgetContext.Provider
+                    value={popupCommentWidgetContextValue}>
+                    <CommentComponent
+                      comment={popupComment}
+                      disableReplyFeatures
+                      disableLocationLink
+                      keepMenuIconStatic
+                      adminLabel={props.comments?.adminLabel || 'admin'}
+                      editorLabel={props.comments?.editorLabel}
+                      setRefreshComments={() =>
+                        setRefreshComments((prev) => !prev)
+                      }
+                      submitComment={() => setRefreshComments((prev) => !prev)}
+                      variant={props.commentsWidget?.variant || 'medium'}
+                    />
+                  </CommentWidgetContext.Provider>
+                </Popup>
+              )}
           </MapContainer>
 
           {!!args.canComment && (
             <>
               <Button
-                className={`info-trigger ${infoPopupButtonText ? 'button-has-text' : ''}`}
+                className={`info-trigger ${
+                  infoPopupButtonText ? 'button-has-text' : ''
+                }`}
                 appearance="primary-action-button"
                 onClick={() => setModalOpen(true)}>
                 <i className="ri-information-line"></i>
@@ -1212,17 +1348,19 @@ function DocumentMap({
       <div className="content document-map-info-container" ref={contentRef}>
         {!isDefinitive && (
           <>
-            <div className="toggleMarkers">
-              <Checkbox
-                id="toggleMarkers"
-                defaultChecked
-                onChange={() => setToggleMarker(!toggleMarker)}
-              />
-              <FormLabel htmlFor="toggleMarkers">
-                {' '}
-                <Paragraph>{addMarkerText}</Paragraph>{' '}
-              </FormLabel>
-            </div>
+            {!hideToggleMarkers && (
+              <div className="toggleMarkers">
+                <Checkbox
+                  id="toggleMarkers"
+                  defaultChecked
+                  onChange={() => setToggleMarker(!toggleMarker)}
+                />
+                <FormLabel htmlFor="toggleMarkers">
+                  {' '}
+                  <Paragraph>{addMarkerText}</Paragraph>{' '}
+                </FormLabel>
+              </div>
+            )}
             {displayLikes && (
               <>
                 <Likes
@@ -1290,7 +1428,8 @@ function DocumentMap({
           </section>
         )}
 
-        {tagGroups &&
+        {!hideFilters &&
+        tagGroups &&
         Array.isArray(tagGroups) &&
         tagGroups.length > 0 &&
         datastore ? (
@@ -1332,7 +1471,7 @@ function DocumentMap({
           />
         ) : null}
 
-        {!isDefinitive && (
+        {!isDefinitive && shouldShowCommentsList && (
           <div ref={containerRef}>
             <Comments
               {...props}
@@ -1357,6 +1496,29 @@ function DocumentMap({
           </div>
         )}
       </div>
+
+      {displayResourceInfo === 'below' && (
+        <div className="resource-info-full">
+          <section className="content-intro">
+            {displayResourceTitle === 'yes' && resource.title ? (
+              <Heading level={1}>{resource.title}</Heading>
+            ) : null}
+            {displayResourceSummary === 'yes' && resource.summary ? (
+              <Heading
+                level={2}
+                appearance="utrecht-heading-4"
+                dangerouslySetInnerHTML={{
+                  __html: resource.summary,
+                }}></Heading>
+            ) : null}
+            {displayResourceDescription === 'yes' && resource.description ? (
+              <Paragraph
+                dangerouslySetInnerHTML={{ __html: resource.description }}
+              />
+            ) : null}
+          </section>
+        </div>
+      )}
 
       <button
         className={`back-to-top ${showButton ? 'show' : ''}`}

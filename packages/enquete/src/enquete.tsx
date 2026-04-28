@@ -517,6 +517,15 @@ function Enquete(props: EnqueteWidgetProps) {
             };
           });
 
+          fieldData['choices'] = labelOptions.map((label, index) => {
+            const currentValue = index + 1;
+            return {
+              value: currentValue.toString(),
+              label: currentValue.toString(),
+              trigger: `scale-${currentValue}`,
+            };
+          });
+
           // TickmarkSlider uses overrideDefaultValue (string) for its initial value
           if (
             draftValue !== undefined &&

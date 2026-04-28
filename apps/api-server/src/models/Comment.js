@@ -54,7 +54,7 @@ module.exports = function (db, sequelize, DataTypes) {
           //  	msg  : 'Bericht moet tussen 30 en 500 tekens zijn'
           // }
           textLength(value) {
-            let len = sanitize.summary(value.trim()).length;
+            let len = value.trim().length;
             let descriptionMinLength =
               (this.config &&
                 this.config.comments &&
@@ -224,7 +224,7 @@ module.exports = function (db, sequelize, DataTypes) {
               'name',
               'email',
               'extraData',
-              'phonenumber',
+              'phoneNumber',
               'address',
               'city',
               'postcode',
@@ -302,14 +302,13 @@ module.exports = function (db, sequelize, DataTypes) {
                 'name',
                 'email',
                 'extraData',
-                'phonenumber',
+                'phoneNumber',
                 'address',
                 'city',
                 'postcode',
               ],
             },
           ],
-          order: [['createdAt', 'ASC']],
         };
       },
 

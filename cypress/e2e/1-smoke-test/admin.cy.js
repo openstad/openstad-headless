@@ -1,10 +1,10 @@
 describe('Can log into admin server', () => {
   it('Allows us to log in as an admin', () => {
-    cy.visit(Cypress.env('ADMIN_URL'));
+    cy.visit(Cypress.expose('ADMIN_URL'));
     cy.contains('Welcome to Openstad');
     cy.contains('Sign in').click();
 
-    cy.origin(Cypress.env('AUTH_APP_URL'), () => {
+    cy.origin(Cypress.expose('AUTH_APP_URL'), () => {
       cy.location('href').should('include', '/login');
       cy.contains('Controleer stemcode').should('exist');
 
@@ -16,7 +16,7 @@ describe('Can log into admin server', () => {
       );
 
       cy.get('input[name="unique_code"]').type(
-        Cypress.env('AUTH_FIRST_LOGIN_CODE')
+        Cypress.expose('AUTH_FIRST_LOGIN_CODE')
       );
       cy.get('input[type="submit"]').click();
 

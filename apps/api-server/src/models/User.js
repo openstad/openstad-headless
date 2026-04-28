@@ -591,7 +591,10 @@ module.exports = function (db, sequelize, DataTypes) {
     return result;
   };
 
-  User.prototype.doAnonymize = async function () {
+  User.prototype.doAnonymize = async function (
+    anonymizeUserName,
+    { deleteVotes = true } = {}
+  ) {
     let self = this;
     let result = await self.willAnonymize();
 
@@ -599,15 +602,18 @@ module.exports = function (db, sequelize, DataTypes) {
       // anonymize
       if (!self.project) throw Error('Project not found');
 
+      const anonymizedName =
+        anonymizeUserName ||
+        self?.project?.config?.anonymize?.anonymizeUserName ||
+        'Gebruiker is geanonimiseerd';
+
       await self.update({
         idpUser: {},
         role: 'anonymous',
         extraData: {},
         email: null,
         nickName: null,
-        name:
-          self?.project?.config?.anonymize?.anonymizeUserName ||
-          'Gebruiker is geanonimiseerd',
+        name: anonymizedName,
         firstname: null,
         lastname: null,
         listableByRole: 'editor',
@@ -622,7 +628,7 @@ module.exports = function (db, sequelize, DataTypes) {
       });
 
       // remove existing votes
-      if (result.votes && result.votes.length) {
+      if (deleteVotes && result.votes && result.votes.length) {
         for (const vote of result.votes) {
           await vote.destroy();
         }

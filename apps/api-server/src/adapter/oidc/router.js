@@ -126,7 +126,7 @@ router
             req.project.id +
             '/digest-login?useAuth=' +
             req.authConfig.provider +
-            '\&returnTo=' +
+            '&returnTo=' +
             req.query.redirectUri
         )
       );
@@ -159,7 +159,21 @@ router
     let contentType =
       req.authConfig.serverExchangeContentType || 'application/json';
     if (contentType == 'application/x-www-form-urlencoded')
-      data = `client_id=${encodeURIComponent(req.authConfig.clientId)}&client_secret=${encodeURIComponent(req.authConfig.clientSecret)}&code=${encodeURIComponent(code)}&grant_type=authorization_code&redirect_uri=${encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.returnTo)}`;
+      data = `client_id=${encodeURIComponent(
+        req.authConfig.clientId
+      )}&client_secret=${encodeURIComponent(
+        req.authConfig.clientSecret
+      )}&code=${encodeURIComponent(
+        code
+      )}&grant_type=authorization_code&redirect_uri=${encodeURIComponent(
+        config.url +
+          '/auth/project/' +
+          req.project.id +
+          '/digest-login?useAuth=' +
+          req.authConfig.provider +
+          '&returnTo=' +
+          req.query.returnTo
+      )}`;
 
     fetch(url, {
       method: 'POST',

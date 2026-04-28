@@ -3,11 +3,29 @@
   --padding-x: 0.8rem;
   --padding-y: 0.5rem;
   --padding: var(--padding-y) var(--padding-x);
+  --item-gap: 0.7rem;
+  --circle-margin-top: 0.2rem;
+  --connector-start: calc(var(--circle-margin-top) + (var(--icon-size) / 2));
+  --connector-left: calc(
+    var(--icon-size) + var(--padding-x) - (var(--icon-size) / 2) - 1px
+  );
+  --connector-color: var(
+    --nlds-agenda-item-background-color,
+    var(--utrecht-button-primary-action-background-color)
+  );
+  --highlighted-background-color: var(
+    --nlds-agenda-highlighted-background-color,
+    var(--utrecht-button-primary-action-background-color, #0a67a3)
+  );
+  --highlighted-color: var(
+    --nlds-agenda-highlighted-color,
+    var(--utrecht-button-primary-action-color, #ffffff)
+  );
 
   display: flex;
   justify-content: space-between;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: var(--item-gap);
   margin-top: 1rem;
 }
 
@@ -21,19 +39,55 @@
   position: relative;
 }
 
+.osc-agenda-item.--highlighted-item {
+  background-color: var(--highlighted-background-color);
+  color: var(--highlighted-color);
+}
+
+.osc-agenda-item.--highlighted-item .osc-date-circle {
+  background-color: var(--highlighted-background-color);
+  border-color: currentColor;
+  outline-color: transparent;
+}
+
+.osc-agenda-item.--highlighted-item.--active-item .osc-date-circle:before {
+  background-color: currentColor;
+}
+
+.osc-agenda-item.--highlighted-item::after {
+  content: '';
+  width: 2px;
+  background-color: currentColor;
+  position: absolute;
+  top: var(--connector-start);
+  bottom: 0;
+  left: var(--connector-left);
+  z-index: 1;
+}
+
+.osc-agenda-item.--highlighted-item:not(:first-child)::after {
+  top: calc(var(--connector-start) - var(--item-gap));
+}
+
+.osc-agenda-item.--highlighted-item:has(
+    + .osc-agenda-item.--highlighted-item
+  )::after {
+  bottom: calc(var(--item-gap) * -1);
+}
+
+.osc-agenda-item.--highlighted-item .osc-agenda-content,
+.osc-agenda-item.--highlighted-item .osc-agenda-content * {
+  color: inherit;
+}
+
 .osc-agenda-item::before {
   content: '';
   width: 2px;
-  background-color: var(
-    --nlds-agenda-item-background-color,
-    var(--utrecht-button-primary-action-background-color)
-  );
+  background-color: var(--connector-color);
   position: absolute;
-  top: 1rem;
-  height: calc(100% + 1rem);
-  left: calc(
-    (var(--icon-size) + var(--padding-x) - (var(--icon-size) / 2) - 1px)
-  );
+  top: var(--connector-start);
+  height: calc(100% + var(--item-gap));
+  left: var(--connector-left);
   z-index: 1;
 }
 
@@ -77,7 +131,7 @@
     );
   border-radius: 50%;
   margin-right: 1rem;
-  margin-top: 0.2rem;
+  margin-top: var(--circle-margin-top);
   z-index: 2;
   position: relative;
   flex-shrink: 0;
@@ -85,11 +139,18 @@
 
 /* The last item should not have a line extending down */
 .osc-agenda > .osc-agenda-item:last-child::before,
+.osc-agenda > .osc-agenda-item:last-child::after,
 .osc-agenda > .osc-agenda-item:has(+ .utrecht-accordion__section)::before,
+.osc-agenda > .osc-agenda-item:has(+ .utrecht-accordion__section)::after,
 .osc-agenda > :nth-last-child(1 of .osc-agenda-item)::before,
+.osc-agenda > :nth-last-child(1 of .osc-agenda-item)::after,
 .osc-agenda
   > .utrecht-accordion__section
   > .utrecht-accordion__panel
-  > :nth-last-child(1 of .osc-agenda-item)::before {
+  > :nth-last-child(1 of .osc-agenda-item)::before,
+.osc-agenda
+  > .utrecht-accordion__section
+  > .utrecht-accordion__panel
+  > :nth-last-child(1 of .osc-agenda-item)::after {
   content: none;
 }

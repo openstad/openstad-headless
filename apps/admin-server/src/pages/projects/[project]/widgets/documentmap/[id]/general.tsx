@@ -35,6 +35,7 @@ import { Input } from '../../../../../../components/ui/input';
 const formSchema = z.object({
   resourceId: z.string().optional(),
   entireDocumentVisible: z.enum(['entirely', 'onlyTop']).optional(),
+  markerClickBehavior: z.enum(['sidebar', 'popup']).optional(),
   zoom: z.number().optional(),
   minZoom: z.number().optional(),
   maxZoom: z.number().optional(),
@@ -42,6 +43,9 @@ const formSchema = z.object({
   displayPagination: z.boolean().optional(),
   displaySearchBar: z.boolean().optional(),
   onlyAllowClickOnImage: z.boolean().optional(),
+  hideCommentsList: z.boolean().optional(),
+  hideFilters: z.boolean().optional(),
+  hideToggleMarkers: z.boolean().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -73,10 +77,14 @@ export default function DocumentGeneral(
       minZoom: props.minZoom || -6,
       maxZoom: props.maxZoom || 10,
       entireDocumentVisible: props.entireDocumentVisible || 'entirely',
+      markerClickBehavior: props.markerClickBehavior || 'sidebar',
       itemsPerPage: props?.itemsPerPage || 9999,
       displayPagination: props?.displayPagination || false,
       onlyAllowClickOnImage: props?.onlyAllowClickOnImage || false,
       displaySearchBar: props?.displaySearchBar || false,
+      hideCommentsList: props?.hideCommentsList || false,
+      hideFilters: props?.hideFilters || false,
+      hideToggleMarkers: props?.hideToggleMarkers || false,
     },
   });
 
@@ -274,6 +282,97 @@ export default function DocumentGeneral(
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="markerClickBehavior"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Gedrag bij klikken op een marker</FormLabel>
+              <FormDescription>
+                Kies hoe een reactie opent wanneer iemand op een marker klikt.
+                In de pop-up weergave wordt dezelfde reactie getoond als in de
+                zijbalk, zonder antwoorden of antwoordknop.
+              </FormDescription>
+              <Select
+                onValueChange={(value) => {
+                  field.onChange(value);
+                  props.onFieldChanged(field.name, value);
+                }}
+                value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Standaard" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="sidebar">
+                    Toon reactie in de zijbalk
+                  </SelectItem>
+                  <SelectItem value="popup">
+                    Toon reactie in een pop-up
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </FormItem>
+          )}
+        />
+
+        {form.watch('markerClickBehavior') === 'popup' && (
+          <FormField
+            control={form.control}
+            name="hideCommentsList"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Reactielijst verbergen</FormLabel>
+                <FormDescription>
+                  Gebruik dit als reacties alleen via de marker pop-up zichtbaar
+                  moeten zijn en niet meer in de zijbalk hoeven te staan.
+                </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {form.watch('markerClickBehavior') === 'popup' &&
+          form.watch('hideCommentsList') && (
+            <>
+              <FormField
+                control={form.control}
+                name="hideFilters"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Filter-, zoek- en sorteeropties verbergen
+                    </FormLabel>
+                    <FormDescription>
+                      Verberg de balk met filters, zoekfunctie en
+                      sorteermogelijkheden.
+                    </FormDescription>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="hideToggleMarkers"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Markers aan/uit-knop verbergen</FormLabel>
+                    <FormDescription>
+                      Verberg de knop waarmee markers aan of uit kunnen worden
+                      gezet.
+                    </FormDescription>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
 
         <FormField
           control={form.control}

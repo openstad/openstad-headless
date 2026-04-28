@@ -156,6 +156,7 @@ LOGGING=app:*,-app:db:query
 TIMEZONE=Europe/Amsterdam
 TEMPLATE_SOURCE=https://cdn.jsdelivr.net/gh/Amsterdam/openstad-ecosystem-templates/site/index.json
 IGNORE_BRUTE_FORCE_IPS=[]
+SPAM_FILTER_ENABLED=false
 ```
 
 ```

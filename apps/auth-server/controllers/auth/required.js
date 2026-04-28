@@ -51,7 +51,9 @@ exports.index = (req, res, next) => {
     description: configRequiredFields.description,
     title: configRequiredFields.title,
     buttonText: configRequiredFields.buttonText,
-    redirect_uri: encodeURIComponent(req.query.redirect_uri),
+    redirect_uri: req.query.redirect_uri
+      ? encodeURIComponent(req.query.redirect_uri)
+      : '',
   });
 };
 
@@ -60,6 +62,12 @@ exports.post = (req, res, next) => {
   const redirectUrl = req.query.redirect_uri
     ? encodeURIComponent(req.query.redirect_uri)
     : req.client.redirectUrl;
+  if (!redirectUrl)
+    return next(
+      new Error(
+        'No redirect_uri provided and no default redirectUrl configured for this client'
+      )
+    );
 
   let data = {};
   clientRequiredUserFields.forEach((field) => {

@@ -65,6 +65,15 @@ module.exports = function ({
             if (typeof fieldValue === 'string') {
               return fieldValue.toLowerCase().includes(term);
             }
+            if (
+              typeof fieldValue === 'number' ||
+              typeof fieldValue === 'boolean'
+            ) {
+              return String(fieldValue).toLowerCase().includes(term);
+            }
+            if (fieldValue instanceof Date) {
+              return fieldValue.toISOString().toLowerCase().includes(term);
+            }
             return false;
           });
         });

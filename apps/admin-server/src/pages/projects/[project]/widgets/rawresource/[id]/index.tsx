@@ -17,7 +17,6 @@ import {
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
 import WidgetRawGeneral from './general';
-import WidgetRawStylingClasses from './styling';
 
 export const getServerSideProps = withApiUrl;
 export default function WidgetRawResource({ apiUrl }: WithApiUrlProps) {

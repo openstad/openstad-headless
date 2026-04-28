@@ -52,14 +52,18 @@ export function MultiSelect({
   const checkedOptions = options?.filter((option) => option.checked) || [];
   let openButtonLabel = label;
   if (checkedOptions.length > 1) {
-    openButtonLabel = `${checkedOptions.length} optie${checkedOptions.length !== 1 ? 's' : ''} geselecteerd`;
+    openButtonLabel = `${checkedOptions.length} optie${
+      checkedOptions.length !== 1 ? 's' : ''
+    } geselecteerd`;
   } else if (checkedOptions.length === 1) {
     openButtonLabel = checkedOptions[0].label;
   }
 
   return (
     <div
-      className={`multi-select ${inlineOptions ? 'multiselect-container--inline' : ''}`}
+      className={`multi-select ${
+        inlineOptions ? 'multiselect-container--inline' : ''
+      }`}
       ref={containerRef}>
       {!inlineOptions && (
         <Button
@@ -79,7 +83,9 @@ export function MultiSelect({
 
       {isOpen && (
         <section
-          className={`multiselect-container ${inlineOptions ? 'multiselect-container--inline' : ''}`}
+          className={`multiselect-container ${
+            inlineOptions ? 'multiselect-container--inline' : ''
+          }`}
           role="listbox"
           aria-multiselectable="true">
           {options?.map((option, index) => {

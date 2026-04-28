@@ -1,3 +1,12 @@
+declare module 'react' {
+    namespace JSX {
+        interface IntrinsicElements {
+            'trix-editor': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+                input?: string;
+            }, HTMLElement>;
+        }
+    }
+}
 import { FormValue } from '@openstad-headless/form/src/form';
 import React, { FC } from 'react';
 import './style.css';
@@ -21,7 +30,7 @@ export type TextInputProps = {
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
-    variant?: 'text input' | 'textarea' | 'richtext';
+    variant?: 'text input' | 'textarea' | 'richtext' | 'email';
     placeholder?: string;
     defaultValue?: string;
     disabled?: boolean;
@@ -60,6 +69,8 @@ export type TextInputProps = {
 declare const TrixEditor: React.FC<{
     value: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+    onFocus?: () => void;
+    onBlur?: () => void;
 }>;
 declare const TextInput: FC<TextInputProps>;
 export { TrixEditor };

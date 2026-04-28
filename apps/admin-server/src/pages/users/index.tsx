@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { sortTable } from '@/components/ui/sortTable';
 import { useUsers, type userType } from '@/hooks/use-users';
 import { ChevronLeft, ChevronRight, Loader, Plus } from 'lucide-react';
 import Link from 'next/link';
@@ -11,26 +10,32 @@ import * as XLSX from 'xlsx';
 import { PageLayout } from '../../components/ui/page-layout';
 import { ListHeading, Paragraph } from '../../components/ui/typography';
 
-const PAGE_SIZE_OPTIONS = [10, 20, 25, 50, 100];
-const DEFAULT_PAGE_SIZE = 20;
+const PAGE_SIZE_OPTIONS: number[] = [25, 50, 100, 250, 500];
+const DEFAULT_PAGE_SIZE = 25;
 const SEARCH_DEBOUNCE_MS = 600;
+const USER_SORT_FIELDS = ['email', 'name', 'postcode'] as const;
+type UserSortField = (typeof USER_SORT_FIELDS)[number];
+type SortDirection = 'asc' | 'desc';
 
 export default function Users() {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
+  const [showAll, setShowAll] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortField, setSortField] = useState<UserSortField>('name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [apiSearch] = useDebouncedValue(searchQuery, SEARCH_DEBOUNCE_MS);
 
-  const { data, metadata, isValidating } = useUsers({
+  const { data, metadata, isValidating, fetchAll } = useUsers({
     page: currentPage,
     pageSize,
     q: apiSearch || undefined,
+    sort: `${sortField}_${sortDirection}`,
     uniqueByIdpUser: true,
     excludeAnonymous: true,
   });
   const lastDataRef = useRef<userType[] | null>(null);
-  const [users, setUsers] = useState<userType[]>([]);
 
   const getUserRouteKey = (user: userType) => {
     if (user.idpUser?.identifier && user.idpUser?.provider) {
@@ -42,18 +47,17 @@ export default function Users() {
   useEffect(() => {
     if (!data) return;
     lastDataRef.current = data;
-    setUsers(data);
   }, [data]);
+
+  useEffect(() => {
+    if (!showAll || !metadata?.totalCount) return;
+    if (pageSize === metadata.totalCount) return;
+    setPageSize(metadata.totalCount);
+  }, [metadata?.totalCount, pageSize, showAll]);
 
   useEffect(() => {
     setCurrentPage(0);
   }, [apiSearch, pageSize]);
-
-  const [filterData, setFilterData] = useState<userType[]>([]);
-
-  useEffect(() => {
-    setFilterData(users);
-  }, [users]);
 
   if (!data && !lastDataRef.current) return null;
 
@@ -65,11 +69,45 @@ export default function Users() {
     XLSX.writeFile(workbook, fileName);
   };
 
-  function transform() {
+  async function transform() {
     const today = new Date();
-    const projectId = router.query.project;
+    const allUsers = await fetchAll();
+    const projectId = router.query.project ?? 'users';
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
-    exportData(data, `${projectId}_gebruikers_${formattedDate}.xlsx`);
+    exportData(allUsers, `${projectId}_gebruikers_${formattedDate}.xlsx`);
+  }
+
+  function handlePageSizeChange(value: string) {
+    if (value === 'all') {
+      setShowAll(true);
+      setPageSize(
+        Math.max(
+          metadata?.totalCount ??
+            lastDataRef.current?.length ??
+            DEFAULT_PAGE_SIZE,
+          1
+        )
+      );
+      return;
+    }
+
+    setShowAll(false);
+    setPageSize(Number(value));
+  }
+
+  function handleSort(field: UserSortField) {
+    if (field === sortField) {
+      setSortDirection((current) => (current === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+    setCurrentPage(0);
+  }
+
+  function getSortButtonClass(field: UserSortField) {
+    if (field !== sortField) return 'filter-button';
+    return `filter-button font-bold text-black ${sortDirection === 'asc' ? '--up' : ''}`;
   }
 
   return (
@@ -122,34 +160,28 @@ export default function Users() {
             <div className="mt-4 grid grid-cols-2 lg:grid-cols-4 items-center py-2 px-2 border-b border-border">
               <ListHeading className="hidden lg:flex">
                 <button
-                  className="filter-button"
-                  onClick={(e) =>
-                    setFilterData(sortTable('email', e, filterData))
-                  }>
+                  className={getSortButtonClass('email')}
+                  onClick={() => handleSort('email')}>
                   E-mail
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
                 <button
-                  className="filter-button"
-                  onClick={(e) =>
-                    setFilterData(sortTable('name', e, filterData))
-                  }>
+                  className={getSortButtonClass('name')}
+                  onClick={() => handleSort('name')}>
                   Naam
                 </button>
               </ListHeading>
               <ListHeading className="hidden lg:flex">
                 <button
-                  className="filter-button"
-                  onClick={(e) =>
-                    setFilterData(sortTable('postcode', e, filterData))
-                  }>
+                  className={getSortButtonClass('postcode')}
+                  onClick={() => handleSort('postcode')}>
                   Postcode
                 </button>
               </ListHeading>
             </div>
             <ul>
-              {filterData?.map((user: any) => (
+              {(data || [])?.map((user: any) => (
                 <Link
                   href={`/users/${btoa(getUserRouteKey(user))}`}
                   key={getUserRouteKey(user)}>
@@ -187,13 +219,14 @@ export default function Users() {
                     </Paragraph>
                     <select
                       className="p-2 rounded border"
-                      value={pageSize}
-                      onChange={(e) => setPageSize(Number(e.target.value))}>
+                      value={showAll ? 'all' : pageSize}
+                      onChange={(e) => handlePageSizeChange(e.target.value)}>
                       {PAGE_SIZE_OPTIONS.map((size) => (
                         <option key={size} value={size}>
                           {size}
                         </option>
                       ))}
+                      <option value={'all'}>Alle</option>
                     </select>
                   </div>
                   {metadata.pageCount > 1 && (

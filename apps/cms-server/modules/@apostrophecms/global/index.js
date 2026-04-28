@@ -3,6 +3,8 @@ const fs = require('fs');
 const fields = require('./lib/fields');
 const arrangeFields = require('./lib/arrangeFields');
 const projectService = require('../../../services/projects');
+const resourceService = require('../../../services/resources');
+const extractVerificationCode = require('./lib/extractVerificationCode');
 
 module.exports = {
   options: {
@@ -24,13 +26,6 @@ module.exports = {
         req.data.global.projectTitle = req.project.title;
         req.data.prefix = self.apos.options.prefix || '';
 
-        req.data.global.reactCdn =
-          process.env.REACT_CDN ||
-          'https://unpkg.com/react@18.3.1/umd/react.production.min.js';
-        req.data.global.reactDomCdn =
-          process.env.REACT_DOM_CDN ||
-          'https://unpkg.com/react-dom@{VERSION}/umd/react-dom.production.min.js';
-
         try {
           if (!!req.project.id) {
             const project = await projectService.fetchOne(req.project.id);
@@ -51,6 +46,17 @@ module.exports = {
             cmsDefaults = JSON.parse(cmsDefaults);
         } catch (err) {}
 
+        // google search console verification
+        const verificationCode = extractVerificationCode(
+          req.data.global.googleSiteVerification
+        );
+        if (verificationCode) {
+          req.data.global.googleSiteVerificationTag =
+            '<meta name="google-site-verification" content="' +
+            verificationCode +
+            '" />';
+        }
+
         // analytics
         if (req.data.global.analyticsType == 'serverdefault') {
           req.data.global.analyticsType = cmsDefaults.analyticsType;
@@ -67,7 +73,54 @@ module.exports = {
           ? req.cookies && req.cookies['openstad-cookie-consent'] == 1
           : true;
 
+        // Fetch resource data for OG meta tags when openstadResourceId is in the query.
+        // Note: projects using a custom resourceIdRelativePath (e.g. ?articleId=[id])
+        // are not yet supported here. That requires a configurable param name setting.
+        const resourceId = req.query && req.query.openstadResourceId;
+        if (
+          resourceId &&
+          /^\d+$/.test(resourceId) &&
+          req.project &&
+          req.project.id
+        ) {
+          const resource = await resourceService.fetchOne(
+            req.project.id,
+            resourceId
+          );
+          if (resource) {
+            req.data.activeResource = resource;
+          }
+        }
+
+        // Pass the original URL so templates can build og:url without losing
+        // existing query parameters.
+        req.data.originalUrl = req.originalUrl;
+
         return next();
+      },
+    };
+  },
+
+  handlers(self) {
+    return {
+      beforeSave: {
+        validateGoogleSiteVerification(req, doc) {
+          const value = doc.googleSiteVerification;
+          if (!value || typeof value !== 'string' || !value.trim()) {
+            return;
+          }
+
+          if (!extractVerificationCode(value)) {
+            const e = self.apos.error(
+              'invalid',
+              'Plak de volledige <meta> tag uit Google Search Console, niet alleen de verificatiecode.'
+            );
+            e.path = 'googleSiteVerification';
+            throw self.apos.error('invalid', {
+              errors: [e],
+            });
+          }
+        },
       },
     };
   },
@@ -236,6 +289,7 @@ module.exports = {
         type: 'attachment',
         label: 'Favicon',
         fileGroup: 'icons',
+        help: 'Gebruik bij voorkeur een vierkante .png of .ico van minstens 48x48 pixels. Google toont deze doorgaans betrouwbaarder in zoekresultaten.',
       },
       // cssExtras: {
       //   type: 'string',
@@ -341,6 +395,14 @@ module.exports = {
         },
       },
 
+      googleSiteVerification: {
+        type: 'string',
+        label: 'Google Search Console verificatie tag',
+        placeholder:
+          '<meta name="google-site-verification" content="verificatiecode" />',
+        help: 'Plak hier de volledige <meta> tag uit Google Search Console.',
+      },
+
       footerlinks: {
         type: 'array',
         label: 'Footer links',
@@ -422,7 +484,12 @@ module.exports = {
       },
       analitics: {
         label: 'Analytics',
-        fields: ['analyticsType', 'analyticsIdentifier', 'analyticsCodeBlock'],
+        fields: [
+          'analyticsType',
+          'analyticsIdentifier',
+          'analyticsCodeBlock',
+          'googleSiteVerification',
+        ],
       },
       footer: {
         label: 'Footer',

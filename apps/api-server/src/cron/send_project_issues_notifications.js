@@ -37,7 +37,9 @@ module.exports = {
           if (!notificationsToBeSent[project.id])
             notificationsToBeSent[project.id] = { project, messages: [] };
           notificationsToBeSent[project.id].messages.push(
-            `Project ${project.title} ${project.url ? ' (' + project.url + ')' : ''} has an endDate in the past but projectHasEnded is not set.`
+            `Project ${project.title} ${
+              project.url ? ' (' + project.url + ')' : ''
+            } has an endDate in the past but projectHasEnded is not set.`
           );
         }
 

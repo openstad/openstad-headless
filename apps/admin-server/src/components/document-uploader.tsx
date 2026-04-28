@@ -1,5 +1,5 @@
 import { UploadDocument } from '@/hooks/upload-document';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 
 import {
@@ -18,6 +18,7 @@ export const DocumentUploader: React.FC<{
   documentLabel?: string;
   allowedTypes?: string[];
   project?: string;
+  allowMultiple?: boolean;
 }> = ({
   form,
   fieldName,
@@ -25,50 +26,35 @@ export const DocumentUploader: React.FC<{
   allowedTypes,
   documentLabel = 'Document',
   project,
+  allowMultiple = false,
 }) => {
-  const [document, setDocument] = React.useState<{
-    url: string;
-    name: string;
-  }>();
-  const [documentUrl, setDocumentUrl] = React.useState<string>('');
+  async function doUpload(file: File) {
+    const uploadedDocument = await UploadDocument(file, project);
 
-  async function doUpload(data: any) {
-    const uploadedDocument = await UploadDocument(data, project);
+    let uploadedDocumentUrl = uploadedDocument.url;
+    const lastDotIndex = uploadedDocumentUrl.lastIndexOf('.');
+    const lastUnderscoreIndex = uploadedDocumentUrl.lastIndexOf('_');
 
-    setDocument(uploadedDocument);
-  }
-
-  useEffect(() => {
-    if (document) {
-      let uploadedDocumentUrl = document.url;
-      const lastDotIndex = uploadedDocumentUrl.lastIndexOf('.');
-      const lastUnderscoreIndex = uploadedDocumentUrl.lastIndexOf('_');
-
-      if (lastDotIndex === -1 && lastUnderscoreIndex > 1) {
+    if (lastDotIndex === -1 && lastUnderscoreIndex > 1) {
+      uploadedDocumentUrl =
+        uploadedDocumentUrl.substring(0, lastUnderscoreIndex) +
+        '.' +
+        uploadedDocumentUrl.substring(lastUnderscoreIndex + 1);
+    } else if (lastDotIndex > -1 && lastUnderscoreIndex > -1) {
+      if (lastDotIndex < lastUnderscoreIndex) {
         uploadedDocumentUrl =
           uploadedDocumentUrl.substring(0, lastUnderscoreIndex) +
           '.' +
           uploadedDocumentUrl.substring(lastUnderscoreIndex + 1);
-      } else if (lastDotIndex > -1 && lastUnderscoreIndex > -1) {
-        if (lastDotIndex < lastUnderscoreIndex) {
-          uploadedDocumentUrl =
-            uploadedDocumentUrl.substring(0, lastUnderscoreIndex) +
-            '.' +
-            uploadedDocumentUrl.substring(lastUnderscoreIndex + 1);
-        }
-      }
-
-      if (documentUrl !== uploadedDocumentUrl) {
-        setDocumentUrl(uploadedDocumentUrl);
-        form.setValue(fieldName, uploadedDocumentUrl);
-        onDocumentUploaded &&
-          onDocumentUploaded({
-            url: uploadedDocumentUrl,
-            name: document?.name,
-          });
       }
     }
-  }, [document, form, fieldName, onDocumentUploaded]);
+
+    form.setValue(fieldName, uploadedDocumentUrl);
+    onDocumentUploaded?.({
+      url: uploadedDocumentUrl,
+      name: uploadedDocument?.name,
+    });
+  }
 
   const acceptAttribute = allowedTypes ? allowedTypes.join(',') : '';
 
@@ -83,9 +69,15 @@ export const DocumentUploader: React.FC<{
             <Input
               type="file"
               accept={acceptAttribute}
+              multiple={allowMultiple}
               {...field}
-              onChange={(e) => {
-                doUpload(e.target.files?.[0]);
+              onChange={async (e) => {
+                const files = e.target.files;
+                if (files && files.length > 0) {
+                  for (const file of Array.from(files)) {
+                    await doUpload(file);
+                  }
+                }
               }}
             />
           </FormControl>

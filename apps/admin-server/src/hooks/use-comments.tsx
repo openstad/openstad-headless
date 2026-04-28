@@ -1,12 +1,21 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
 
+export type CommentListOptions = {
+  sort?: string;
+  searchField?: string;
+  searchTerm?: string;
+  sentiment?: string;
+  resourceId?: string;
+};
+
 export default function useComments(
   projectId?: string,
   includes?: string,
   getFromComments?: boolean,
   page?: number,
-  pageSize?: number
+  pageSize?: number,
+  options?: CommentListOptions
 ) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
 
@@ -15,14 +24,33 @@ export default function useComments(
     : '?includeComments=1&includeRepliesOnComments=1';
   getFromComments = getFromComments ? getFromComments : false;
 
+  const resourcePath =
+    getFromComments && options?.resourceId && options.resourceId !== '0'
+      ? `/resource/${options.resourceId}`
+      : '';
   const baseUrl = getFromComments
-    ? `/api/openstad/api/project/${projectNumber}/comment${includeString}`
+    ? `/api/openstad/api/project/${projectNumber}${resourcePath}/comment${includeString}`
     : `/api/openstad/api/project/${projectNumber}/resource${includeString}`;
 
-  let url = baseUrl;
+  const params = new URLSearchParams();
   if (page !== undefined && pageSize !== undefined) {
-    url += `&page=${page}&pageSize=${pageSize}`;
+    params.set('page', page.toString());
+    params.set('pageSize', pageSize.toString());
   }
+  if (options?.sort?.trim()) {
+    params.set('sort', options.sort.trim());
+  }
+  if (options?.searchTerm?.trim()) {
+    const searchField =
+      options.searchField && options.searchField !== ''
+        ? options.searchField
+        : 'text';
+    params.set(`search[${searchField}]`, options.searchTerm.trim());
+  }
+  if (options?.sentiment?.trim()) {
+    params.set('sentiment', options.sentiment.trim());
+  }
+  const url = `${baseUrl}${params.toString() ? `&${params.toString()}` : ''}`;
 
   const commentListSwr = useSWR(projectNumber ? url : null);
 
@@ -112,9 +140,11 @@ export default function useComments(
     const totalPagesToFetch = Math.ceil(totalCount / pageSizeLimit);
 
     for (let currentPage = 0; currentPage < totalPagesToFetch; currentPage++) {
-      const response = await fetch(
-        `${baseUrl}&page=${currentPage}&pageSize=${pageSizeLimit}`
-      );
+      const fetchAllParams = new URLSearchParams({
+        page: currentPage.toString(),
+        pageSize: pageSizeLimit.toString(),
+      });
+      const response = await fetch(`${baseUrl}&${fetchAllParams.toString()}`);
       const results = await response.json();
       allData = allData.concat(results?.records || []);
     }

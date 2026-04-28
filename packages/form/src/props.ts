@@ -72,6 +72,7 @@ type CombinedFieldPropsWithType =
 
 type ComponentFieldProps = {
   index?: number;
+  infoBlockStyle?: string;
   infoBlockExtraButtonTitle?: string;
   infoBlockExtraButton?: string;
 } & CombinedFieldProps;
@@ -102,7 +103,7 @@ type FieldWithOptionalFields = CombinedFieldProps & {
   trigger?: string;
   routingInitiallyHide?: boolean;
   routingSelectedQuestion?: string;
-  routingSelectedAnswer?: string;
+  routingSelectedAnswer?: string | string[];
   infoBlockStyle?: string;
 };
 

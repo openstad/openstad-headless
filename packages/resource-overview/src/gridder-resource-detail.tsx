@@ -39,6 +39,10 @@ export type GridderResourceDetailProps = BaseProps &
     displayTags?: boolean;
     displayBudget?: boolean;
     dialogTagGroups?: string[];
+    likeWidget?: Omit<
+      LikeWidgetProps,
+      keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
+    >;
     resourceOverviewMapWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -229,20 +233,9 @@ export const GridderResourceDetail = ({
           <div className="osc-gridder-resource-detail-actions">
             {displayLikeButton && (
               <Likes
+                {...props.likeWidget}
                 {...props}
                 disabled={!canLike}
-                title={props.resourceOverviewMapWidget?.title}
-                yesLabel={props.resourceOverviewMapWidget?.yesLabel}
-                noLabel={props.resourceOverviewMapWidget?.noLabel}
-                displayDislike={props.resourceOverviewMapWidget?.displayDislike}
-                hideCounters={props.resourceOverviewMapWidget?.hideCounters}
-                variant={props.resourceOverviewMapWidget?.variant}
-                showProgressBar={
-                  props.resourceOverviewMapWidget?.showProgressBar
-                }
-                progressBarDescription={
-                  props.resourceOverviewMapWidget?.progressBarDescription
-                }
                 resourceId={resource.id}
               />
             )}

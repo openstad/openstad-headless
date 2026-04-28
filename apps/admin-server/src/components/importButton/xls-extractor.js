@@ -34,10 +34,10 @@ export async function getXlsData(file, inputConfig = {}) {
 export function processXlsData(data) {
   if (!data || !data.length) return data;
 
-  // translate headers of the first row only
-  data[0] = translateHeaders(data[0]);
-
-  return data.map((row) => processXlsRow(row));
+  // Translate every row before flattening dot notation keys into nested objects.
+  return data
+    .map((row) => translateHeaders(row))
+    .map((row) => processXlsRow(row));
 }
 
 export function processXlsRow(row) {

@@ -2,18 +2,24 @@ import { stripHtmlTags } from '@openstad-headless/lib/strip-html-tags';
 import * as XLSX from 'xlsx';
 
 import { fetchMatrixData } from './fetch-matrix-data';
+import { getRuntimeSpamFilterEnabled } from './get-runtime-spam-flag';
 import { normalizeToArray } from './normalize-to-array';
 
 export interface ExportSettings {
   splitMultipleChoice: boolean;
 }
 
-export const exportSubmissionsToCSV = (
+export const exportSubmissionsToCSV = async (
   data: any,
   widgetName: string,
   selectedWidget: any,
   settings?: ExportSettings
 ) => {
+  const includeSpamColumn = await getRuntimeSpamFilterEnabled();
+  const includeHashedIpColumn = data?.some(
+    (row: any) => !!row?.submittedData?.ipAddress
+  );
+
   function transformString() {
     widgetName = widgetName.replace(/\s+/g, '-').toLowerCase();
     widgetName = widgetName.replace(/[^a-z0-9-]/g, '');
@@ -131,17 +137,22 @@ export const exportSubmissionsToCSV = (
             titles.length > 0 &&
             titles[0].isOtherOption
           ) {
-            const otherKey = `${item.fieldKey}_${index}_other`;
-
-            const hasOtherData = data.some(
-              (row: any) => !!row?.submittedData?.[otherKey]
-            );
-
             const otherTitle =
               titles[0].key || titles[0].title || 'Anders, namelijk';
-            if (hasOtherData && otherTitle) {
-              fieldKeyToTitleMap.set(otherKey, otherTitle);
-            }
+
+            const triggerKey = `${item.fieldKey}_${option.trigger}_other`;
+            const indexKey = `${item.fieldKey}_${index}_other`;
+            const possibleKeys =
+              triggerKey === indexKey ? [triggerKey] : [triggerKey, indexKey];
+
+            possibleKeys.forEach((key) => {
+              const hasData = data.some(
+                (row: any) => !!row?.submittedData?.[key]
+              );
+              if (hasData) {
+                fieldKeyToTitleMap.set(key, otherTitle);
+              }
+            });
           }
         });
       }
@@ -154,7 +165,9 @@ export const exportSubmissionsToCSV = (
       'Aangemaakt op': row.createdAt || ' ',
       'Project ID': row.projectId || ' ',
       Widget: widgetName || ' ',
-      'Waarschijnlijk spam': row.isSpam ? 'Ja' : 'Nee',
+      ...(includeSpamColumn
+        ? { 'Waarschijnlijk spam': row.isSpam ? 'Ja' : 'Nee' }
+        : {}),
       'Gebruikers ID': row.userId || ' ',
       'Gebruikers rol': row.user?.role || ' ',
       'Gebruikers naam': row.user?.name || ' ',
@@ -166,7 +179,7 @@ export const exportSubmissionsToCSV = (
       'Gebruikers postcode': row.user?.postcode || ' ',
     };
 
-    if (process.env.NEXT_PUBLIC_HASH_IP_ADDRESSES === 'true') {
+    if (includeHashedIpColumn) {
       rowData['Gebruikers IP-adres (gehasht)'] =
         row?.submittedData?.ipAddress || ' ';
     }
@@ -224,7 +237,9 @@ export const exportSubmissionsToCSV = (
         const selectedValues = normalizeToArray(rawValue);
 
         mcConfig.options.forEach((optionLabel) => {
-          const columnHeader = `${mcConfig.title}: ${stripHtmlTags(optionLabel)}`;
+          const columnHeader = `${mcConfig.title}: ${stripHtmlTags(
+            optionLabel
+          )}`;
           const isSelected = selectedValues.some(
             (val) => val.toLowerCase() === optionLabel.toLowerCase()
           );

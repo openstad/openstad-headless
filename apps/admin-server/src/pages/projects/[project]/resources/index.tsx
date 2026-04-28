@@ -2,10 +2,9 @@ import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { ImportButton } from '@/components/importButton';
 import { Checkbox } from '@/components/ui/checkbox';
-import { searchTable, sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
-import flattenObject from '@/lib/export-helpers/flattenObject';
+import { getRuntimeSpamFilterEnabled } from '@/lib/export-helpers/get-runtime-spam-flag';
 import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
 import { keyMap } from '@/lib/keyMap';
 import { Paginator } from '@openstad-headless/ui/src';
@@ -14,10 +13,29 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-hot-toast';
-import * as XLSX from 'xlsx';
+import { useDebouncedValue } from 'rooks';
 
 import { Button } from '../../../../components/ui/button';
 import { PageLayout } from '../../../../components/ui/page-layout';
+
+type SortDirection = 'asc' | 'desc';
+
+const RESOURCE_SORT_MAP: Record<string, string> = {
+  id: 'id',
+  resource: 'title',
+  'voted-yes': 'yes',
+  'voted-no': 'no',
+  score: 'score',
+  'date-added': 'createdAt',
+};
+
+const RESOURCE_SEARCH_FIELD_MAP: Record<string, string> = {
+  title: 'text',
+  id: 'text',
+  yes: 'text',
+  no: 'text',
+  createdAt: 'text',
+};
 
 const prepareDataForExport = (data: any[]) => {
   const allResources: any[] = [];
@@ -60,7 +78,9 @@ const prepareDataForExport = (data: any[]) => {
           const createString = values
             .map((value: any) => {
               return key.startsWith('images')
-                ? `${value.url}${value.description ? ` (${value.description})` : ''}`
+                ? `${value.url}${
+                    value.description ? ` (${value.description})` : ''
+                  }`
                 : `${value.url}${value.name ? ` (${value.name})` : ''}`;
             })
             .filter(Boolean)
@@ -85,9 +105,24 @@ export default function ProjectResources() {
   const [totalPages, setTotalPages] = useState(0);
   const [pageLimit, setPageLimit] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
+  const [filterSearchType, setFilterSearchType] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<string>('date-added');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [apiSearchTerm] = useDebouncedValue(searchTerm, 400);
+  const [selectedWidgets, setSelectedWidgets] = useState<number[]>([]);
 
-  const { data, pagination, error, isLoading, remove, duplicate, fetchAll } =
-    useResources(project as string, false, page, pageLimit);
+  const { data, pagination, remove, duplicate, fetchAll } = useResources(
+    project as string,
+    false,
+    page,
+    pageLimit,
+    {
+      sort: `${RESOURCE_SORT_MAP[sortField] || 'createdAt'}_${sortDirection}`,
+      searchField: RESOURCE_SEARCH_FIELD_MAP[filterSearchType] || 'text',
+      searchTerm: apiSearchTerm || undefined,
+    }
+  );
 
   async function transform() {
     const today = new Date();
@@ -96,18 +131,19 @@ export default function ProjectResources() {
 
     const allData = await fetchAll(totalCount, pageLimit);
     const preparedData = prepareDataForExport(allData);
+    const includeSpamColumn = await getRuntimeSpamFilterEnabled();
+    const exportKeyMap = includeSpamColumn
+      ? keyMap
+      : Object.fromEntries(
+          Object.entries(keyMap).filter(([key]) => key !== 'isSpam')
+        );
 
     exportToXLSX(
       preparedData,
       `${projectId}_resources_${formattedDate}.xlsx`,
-      keyMap
+      exportKeyMap
     );
   }
-
-  const [filterData, setFilterData] = useState(data);
-  const [filterSearchType, setFilterSearchType] = useState<string>('');
-  const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
-  const [selectedWidgets, setSelectedWidgets] = useState<number[]>([]);
 
   useEffect(() => {
     if (pagination) {
@@ -116,8 +152,26 @@ export default function ProjectResources() {
       setTotalPages(pageCount);
       setTotalCount(count);
     }
-    setFilterData(data);
   }, [pagination, pageLimit]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [apiSearchTerm, filterSearchType]);
+
+  const handleSort = (field: string) => {
+    if (field === sortField) {
+      setSortDirection((current) => (current === 'asc' ? 'desc' : 'asc'));
+    } else {
+      setSortField(field);
+      setSortDirection('desc');
+    }
+    setPage(0);
+  };
+
+  const getSortButtonClass = (field: string) => {
+    if (field !== sortField) return 'filter-button';
+    return `filter-button font-bold text-black ${sortDirection === 'asc' ? '--up' : ''}`;
+  };
 
   if (!data) return null;
 
@@ -165,8 +219,12 @@ export default function ProjectResources() {
             <div className="mb-2">
               <span className="text-sm text-gray-500">
                 {selectedWidgets.length > 0
-                  ? `${selectedWidgets.length} van ${totalCount} ${totalCount === 1 ? 'inzending' : 'inzendingen'} geselecteerd`
-                  : `${totalCount} ${totalCount === 1 ? 'inzending' : 'inzendingen'}`}
+                  ? `${selectedWidgets.length} van ${totalCount} ${
+                      totalCount === 1 ? 'inzending' : 'inzendingen'
+                    } geselecteerd`
+                  : `${totalCount} ${
+                      totalCount === 1 ? 'inzending' : 'inzendingen'
+                    }`}
               </span>
             </div>
             <div className="flex justify-between mb-4 gap-4">
@@ -230,6 +288,7 @@ export default function ProjectResources() {
                 </p>
                 <select
                   className="p-2 rounded"
+                  value={filterSearchType}
                   onChange={(e) => setFilterSearchType(e.target.value)}>
                   <option value="">Alles</option>
                   <option value="id">Stem ID</option>
@@ -242,9 +301,8 @@ export default function ProjectResources() {
                   type="text"
                   className="p-2 rounded"
                   placeholder="Zoeken..."
-                  onChange={(e) =>
-                    debouncedSearchTable(e.target.value, filterData, data)
-                  }
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
             </div>
@@ -259,12 +317,11 @@ export default function ProjectResources() {
                 <Checkbox
                   className="my-auto"
                   checked={
-                    filterData?.length > 0 &&
-                    filterData.every((r: any) => selectedWidgets.includes(r.id))
+                    data?.length > 0 &&
+                    data.every((r: any) => selectedWidgets.includes(r.id))
                   }
                   onCheckedChange={(checked) => {
-                    const currentPageIds =
-                      filterData?.map((r: any) => r.id) || [];
+                    const currentPageIds = data?.map((r: any) => r.id) || [];
                     if (checked) {
                       setSelectedWidgets((prev) =>
                         Array.from(new Set([...prev, ...currentPageIds]))
@@ -278,62 +335,50 @@ export default function ProjectResources() {
                 />
                 <ListHeading className="hidden lg:flex">
                   <button
-                    className="filter-button"
-                    onClick={(e) =>
-                      setFilterData(sortTable('id', e, filterData))
-                    }>
+                    className={getSortButtonClass('id')}
+                    onClick={() => handleSort('id')}>
                     ID
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex">
                   <button
-                    className="filter-button"
-                    onClick={(e) =>
-                      setFilterData(sortTable('resource', e, filterData))
-                    }>
+                    className={getSortButtonClass('resource')}
+                    onClick={() => handleSort('resource')}>
                     Inzendingen
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-1">
                   <button
-                    className="filter-button"
-                    onClick={(e) =>
-                      setFilterData(sortTable('voted-yes', e, filterData))
-                    }>
+                    className={getSortButtonClass('voted-yes')}
+                    onClick={() => handleSort('voted-yes')}>
                     Gestemd op ja
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-1">
                   <button
-                    className="filter-button"
-                    onClick={(e) =>
-                      setFilterData(sortTable('voted-no', e, filterData))
-                    }>
+                    className={getSortButtonClass('voted-no')}
+                    onClick={() => handleSort('voted-no')}>
                     Gestemd op nee
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-1">
                   <button
-                    className="filter-button"
-                    onClick={(e) =>
-                      setFilterData(sortTable('score', e, filterData))
-                    }>
+                    className={getSortButtonClass('score')}
+                    onClick={() => handleSort('score')}>
                     Wilson score interval
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-1">
                   <button
-                    className="filter-button"
-                    onClick={(e) =>
-                      setFilterData(sortTable('date-added', e, filterData))
-                    }>
+                    className={getSortButtonClass('date-added')}
+                    onClick={() => handleSort('date-added')}>
                     Datum aangemaakt
                   </button>
                 </ListHeading>
                 <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
               </div>
               <ul className="admin-overview">
-                {filterData?.map((resource: any) => (
+                {data?.map((resource: any) => (
                   <li
                     key={resource.id}
                     className="grid grid-cols-2 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
