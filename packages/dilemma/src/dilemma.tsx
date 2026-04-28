@@ -91,6 +91,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
   const [infoDialog, setInfoDialog] = useState<boolean>(false);
   const [interacted, setInteracted] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [showExplanationDialog, setShowExplanationDialog] =
     useState<boolean>(false);
   const [explanations, setExplanations] = useState<Record<string, string>>(
@@ -137,6 +138,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
     setSelectedOption(null);
     setInteracted(false);
+    setSubmitted(false);
 
     // Find next unanswered dilemma index
     const unanswered = dilemmaCards.filter((d) => !newAnswers[d.id]);
@@ -181,6 +183,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
     setSelectedOption(null);
     setInteracted(false);
+    setSubmitted(false);
 
     const futureUnanswered = dilemmaCards.filter(
       (dilemma) => !newDilemmaAnswers[dilemma.id]
@@ -213,7 +216,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     if (!answerToUse && previousAnswers[currentDilemma?.id]) {
       answerToUse = previousAnswers[currentDilemma.id] as 'a' | 'b';
     }
-    if (!answerToUse || !currentDilemma) return;
+    if (!answerToUse || !currentDilemma) {
+      setSubmitted(true);
+      return;
+    }
 
     if (currentDilemma.infofieldExplanation) {
       setShowExplanationDialog(true);
@@ -429,7 +435,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       aria-label="Dilemma keuze"
       aria-invalid={
         required &&
-        interacted &&
+        submitted &&
         !selectedOption &&
         !previousAnswers[currentDilemma.id]
           ? 'true'
@@ -606,7 +612,8 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       <div
         id="dilemma-info-panel"
         className="info-card dilemma-info-field"
-        aria-hidden={!infoDialog}>
+        aria-hidden={!infoDialog}
+        {...(!infoDialog ? { inert: 'true' as any } : {})}>
         <div className="info-card-container">
           <Paragraph
             dangerouslySetInnerHTML={{
