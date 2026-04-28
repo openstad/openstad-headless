@@ -72,9 +72,11 @@ const NumberInput: FC<NumberInputProps> = ({
       ? (overrideDefaultValue as string)
       : defaultValue;
 
-  const randomID =
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15);
+  const [randomID] = useState(
+    () =>
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15)
+  );
   const [value, setValue] = useState(initialValue);
   const MAX_VALUE = 1_000_000_000_000;
 

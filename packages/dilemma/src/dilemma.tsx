@@ -433,14 +433,6 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       className={`dilemma-field ${infofieldExplanation ? '--explanation' : ''}`}
       role="region"
       aria-label="Dilemma keuze"
-      aria-invalid={
-        required &&
-        submitted &&
-        !selectedOption &&
-        !previousAnswers[currentDilemma.id]
-          ? 'true'
-          : 'false'
-      }
       data-required={required}>
       <div className="dilemma-intro">
         <Heading level={2} dangerouslySetInnerHTML={{ __html: title || '' }} />
@@ -473,6 +465,14 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
             checked={
               selectedOption === 'a' ||
               (!selectedOption && previousAnswers[currentDilemma.id] === 'a')
+            }
+            aria-invalid={
+              required &&
+              submitted &&
+              !selectedOption &&
+              !previousAnswers[currentDilemma.id]
+                ? 'true'
+                : undefined
             }
             onChange={() => handleOptionSelect('a')}
             onClick={() => handleOptionSelect('a')}
@@ -511,6 +511,14 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
               selectedOption === 'b' ||
               (!selectedOption && previousAnswers[currentDilemma.id] === 'b')
             }
+            aria-invalid={
+              required &&
+              submitted &&
+              !selectedOption &&
+              !previousAnswers[currentDilemma.id]
+                ? 'true'
+                : undefined
+            }
             onChange={() => handleOptionSelect('b')}
             onClick={() => handleOptionSelect('b')}
           />
@@ -533,6 +541,15 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           </label>
         </div>
       </div>
+
+      {required &&
+        submitted &&
+        !selectedOption &&
+        !previousAnswers[currentDilemma.id] && (
+          <p role="alert" className="sr-only">
+            Maak een keuze voordat je verder gaat.
+          </p>
+        )}
 
       <div className="dilemma-actions">
         <button
@@ -612,7 +629,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       <div
         id="dilemma-info-panel"
         className="info-card dilemma-info-field"
-        aria-hidden={!infoDialog}
+        aria-hidden={!infoDialog ? 'true' : undefined}
         {...(!infoDialog ? { inert: 'true' as any } : {})}>
         <div className="info-card-container">
           <Paragraph
