@@ -290,59 +290,61 @@ export default function WidgetChoiceGuideItems(
       );
       setItem(null);
     } else {
-      setItems((currentItems) => [
-        ...currentItems,
-        {
-          trigger: `${
-            currentItems.length > 0
-              ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
-              : 1
-          }`,
-          title: values.title,
-          description: values.description,
-          type: values.type,
-          fieldRequired: values.fieldRequired || false,
-          minCharacters: values.minCharacters,
-          maxCharacters: values.maxCharacters,
-          variant: values.variant || 'text input',
-          multiple: values.multiple || false,
-          options: values.options || [],
-          showMoreInfo: values.showMoreInfo || false,
-          moreInfoButton: values.moreInfoButton || '',
-          moreInfoContent: values.moreInfoContent || '',
-          labelA: values.labelA || '',
-          labelB: values.labelB || '',
-          sliderTitleUnderA: values.sliderTitleUnderA || '',
-          sliderTitleUnderB: values.sliderTitleUnderB || '',
-          explanationA: values.explanationA || '',
-          explanationB: values.explanationB || '',
-          imageA: values.imageA || '',
-          imageB: values.imageB || '',
-          placeholder: values.placeholder || '',
-          prevPageText: values.prevPageText || '',
-          nextPageText: values.nextPageText || '',
-          maxChoices: values.maxChoices || '',
-          maxChoicesMessage: values.maxChoicesMessage || '',
-          defaultValue: values.defaultValue || '',
-          weights: normalizedValuesWeights,
-          skipQuestion: values.skipQuestion || false,
-          skipQuestionAllowExplanation:
-            values.skipQuestionAllowExplanation || false,
-          skipQuestionExplanation: values.skipQuestionExplanation || '',
-          skipQuestionLabel: values.skipQuestionLabel || 'Sla vraag over',
-          matrix: values.matrix || matrixDefault,
-          matrixMultiple: values.matrixMultiple || false,
-          routingInitiallyHide: values.routingInitiallyHide || false,
-          createImageSlider: values.createImageSlider || false,
-          imageClickable: values.imageClickable || false,
-          images: values?.images || [],
-          routingSelectedQuestion: values.routingSelectedQuestion || '',
-          routingSelectedAnswer: values.routingSelectedAnswer || '',
+      setItems((currentItems) => {
+        const maxTrigger = currentItems.reduce(
+          (max, i) => Math.max(max, parseInt(i.trigger) || 0),
+          0
+        );
+        return [
+          ...currentItems,
+          {
+            trigger: `${maxTrigger + 1}`,
+            title: values.title,
+            description: values.description,
+            type: values.type,
+            fieldRequired: values.fieldRequired || false,
+            minCharacters: values.minCharacters,
+            maxCharacters: values.maxCharacters,
+            variant: values.variant || 'text input',
+            multiple: values.multiple || false,
+            options: values.options || [],
+            showMoreInfo: values.showMoreInfo || false,
+            moreInfoButton: values.moreInfoButton || '',
+            moreInfoContent: values.moreInfoContent || '',
+            labelA: values.labelA || '',
+            labelB: values.labelB || '',
+            sliderTitleUnderA: values.sliderTitleUnderA || '',
+            sliderTitleUnderB: values.sliderTitleUnderB || '',
+            explanationA: values.explanationA || '',
+            explanationB: values.explanationB || '',
+            imageA: values.imageA || '',
+            imageB: values.imageB || '',
+            placeholder: values.placeholder || '',
+            prevPageText: values.prevPageText || '',
+            nextPageText: values.nextPageText || '',
+            maxChoices: values.maxChoices || '',
+            maxChoicesMessage: values.maxChoicesMessage || '',
+            defaultValue: values.defaultValue || '',
+            weights: normalizedValuesWeights,
+            skipQuestion: values.skipQuestion || false,
+            skipQuestionAllowExplanation:
+              values.skipQuestionAllowExplanation || false,
+            skipQuestionExplanation: values.skipQuestionExplanation || '',
+            skipQuestionLabel: values.skipQuestionLabel || 'Sla vraag over',
+            matrix: values.matrix || matrixDefault,
+            matrixMultiple: values.matrixMultiple || false,
+            routingInitiallyHide: values.routingInitiallyHide || false,
+            createImageSlider: values.createImageSlider || false,
+            imageClickable: values.imageClickable || false,
+            images: values?.images || [],
+            routingSelectedQuestion: values.routingSelectedQuestion || '',
+            routingSelectedAnswer: values.routingSelectedAnswer || '',
 
-          // Keeping this for backwards compatibility
-          image: values.infoImage || '',
-        },
-      ]);
+            // Keeping this for backwards compatibility
+            image: values.infoImage || '',
+          },
+        ];
+      });
     }
     form.reset(defaults);
     setOptions([]);
@@ -367,12 +369,12 @@ export default function WidgetChoiceGuideItems(
       );
       setOption(null);
     } else {
+      const maxTrigger = options.reduce(
+        (max, o) => Math.max(max, parseInt(o.trigger) || 0),
+        -1
+      );
       const newOption = {
-        trigger: `${
-          options.length > 0
-            ? parseInt(options[options.length - 1].trigger) + 1
-            : 0
-        }`,
+        trigger: `${maxTrigger + 1}`,
         titles: values.options?.[values.options.length - 1].titles || [],
       };
       setOptions((currentOptions) => [...currentOptions, newOption]);
@@ -690,25 +692,30 @@ export default function WidgetChoiceGuideItems(
     actionType: 'moveUp' | 'moveDown' | 'delete',
     trigger: string
   ) {
-    const index = list.findIndex((entry) => entry.trigger === trigger);
-
     if (actionType === 'delete') {
       return list.filter((entry) => entry.trigger !== trigger);
     }
 
+    const sorted = [...list].sort(
+      (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
+    );
+    const index = sorted.findIndex((entry) => entry.trigger === trigger);
+
     if (
       (actionType === 'moveUp' && index > 0) ||
-      (actionType === 'moveDown' && index < list.length - 1)
+      (actionType === 'moveDown' && index < sorted.length - 1)
     ) {
-      const newItemList = [...list];
       const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
-      let tempTrigger = newItemList[swapIndex].trigger;
-      newItemList[swapIndex].trigger = newItemList[index].trigger;
-      newItemList[index].trigger = tempTrigger;
-      return newItemList;
+      const triggerA = sorted[index].trigger;
+      const triggerB = sorted[swapIndex].trigger;
+      return sorted.map((entry) => {
+        if (entry.trigger === triggerA) return { ...entry, trigger: triggerB };
+        if (entry.trigger === triggerB) return { ...entry, trigger: triggerA };
+        return entry;
+      });
     }
 
-    return list; // If no action is performed, return the original list
+    return list;
   }
 
   useEffect(() => {

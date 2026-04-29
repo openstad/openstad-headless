@@ -47,20 +47,22 @@ export default function WidgetDistributionModuleItems(
       );
       setItem(null);
     } else {
-      setItems((currentItems) => [
-        ...currentItems,
-        {
-          trigger: `${
-            currentItems.length > 0
-              ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
-              : 1
-          }`,
-          title: values.title,
-          key: values.key,
-          description: values.description,
-          placeholder: values.placeholder || '',
-        },
-      ]);
+      setItems((currentItems) => {
+        const maxTrigger = currentItems.reduce(
+          (max, i) => Math.max(max, parseInt(i.trigger) || 0),
+          0
+        );
+        return [
+          ...currentItems,
+          {
+            trigger: `${maxTrigger + 1}`,
+            title: values.title,
+            key: values.key,
+            description: values.description,
+            placeholder: values.placeholder || '',
+          },
+        ];
+      });
     }
 
     form.reset(defaults);
@@ -124,25 +126,30 @@ export default function WidgetDistributionModuleItems(
     actionType: 'moveUp' | 'moveDown' | 'delete',
     trigger: string
   ) {
-    const index = list.findIndex((entry) => entry.trigger === trigger);
-
     if (actionType === 'delete') {
       return list.filter((entry) => entry.trigger !== trigger);
     }
 
+    const sorted = [...list].sort(
+      (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
+    );
+    const index = sorted.findIndex((entry) => entry.trigger === trigger);
+
     if (
       (actionType === 'moveUp' && index > 0) ||
-      (actionType === 'moveDown' && index < list.length - 1)
+      (actionType === 'moveDown' && index < sorted.length - 1)
     ) {
-      const newItemList = [...list];
       const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
-      let tempTrigger = newItemList[swapIndex].trigger;
-      newItemList[swapIndex].trigger = newItemList[index].trigger;
-      newItemList[index].trigger = tempTrigger;
-      return newItemList;
+      const triggerA = sorted[index].trigger;
+      const triggerB = sorted[swapIndex].trigger;
+      return sorted.map((entry) => {
+        if (entry.trigger === triggerA) return { ...entry, trigger: triggerB };
+        if (entry.trigger === triggerB) return { ...entry, trigger: triggerA };
+        return entry;
+      });
     }
 
-    return list; // If no action is performed, return the original list
+    return list;
   }
 
   function handleSaveItems() {
