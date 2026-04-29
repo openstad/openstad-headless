@@ -44,6 +44,12 @@ export default function useResources(
   const records = resourcesListSwr.data?.records || resourcesListSwr.data || [];
   const pagination = resourcesListSwr.data?.metadata || null;
 
+  function getExistingRecords(): any[] {
+    return Array.isArray(resourcesListSwr.data)
+      ? resourcesListSwr.data
+      : resourcesListSwr.data?.records || [];
+  }
+
   async function create(body: any) {
     const res = await fetch(url, {
       method: 'POST',
@@ -55,7 +61,7 @@ export default function useResources(
 
     if (res.ok) {
       const data = await res.json();
-      resourcesListSwr.mutate([...resourcesListSwr.data, data]);
+      resourcesListSwr.mutate([...getExistingRecords(), data]);
       return data;
     } else {
       throw new Error('Could not create the plan');
@@ -79,8 +85,9 @@ export default function useResources(
 
     if (res.ok) {
       const data = await res.json();
-      const existingData = [...resourcesListSwr.data];
-      const updatedList = existingData.filter((ed) => ed.id !== data.id);
+      const updatedList = getExistingRecords().filter(
+        (ed: any) => ed.id !== data.id
+      );
       updatedList.push(data);
       resourcesListSwr.mutate(updatedList);
       return data;
@@ -103,8 +110,9 @@ export default function useResources(
     });
 
     if (res.ok) {
-      const existingData = [...resourcesListSwr.data];
-      const updatedList = existingData.filter((ed) => ed.id !== id);
+      const updatedList = getExistingRecords().filter(
+        (ed: any) => ed.id !== id
+      );
       resourcesListSwr.mutate(updatedList);
       return updatedList;
     } else {
@@ -126,7 +134,7 @@ export default function useResources(
     if (res.ok) {
       const data = await res.json();
 
-      resourcesListSwr.mutate([...resourcesListSwr.data, ...data]);
+      resourcesListSwr.mutate([...getExistingRecords(), ...data]);
       return data;
     } else {
       throw new Error('Could not duplicate the widgets');
