@@ -144,58 +144,8 @@ router
     const hasProjectDomains = projectDomains.length > 0 || !!widget.project.url;
 
     const allowedDomains = hasProjectDomains
-      ? prefillAllowedDomains([...projectDomains], widget.project.url)
+      ? prefillAllowedDomains(projectDomains, widget.project.url)
       : null;
-
-    const referer = req.headers.referer || req.headers.referrer;
-    if (referer) {
-      if (hasProjectDomains) {
-        try {
-          const refererHost = new URL(referer).hostname;
-          const allowed = allowedDomains.some(
-            (domain) =>
-              refererHost === domain || refererHost === domain.split(':')[0]
-          );
-          if (!allowed) {
-            console.log(
-              `[widget] Widget ${widgetId}: referer "${referer}" is not in the allowed domains for project ${widget.project.id}`
-            );
-            db.DomainBlock.findOne({
-              where: {
-                projectId: widget.project.id,
-                widgetId: parseInt(widgetId),
-                domain: refererHost,
-              },
-            })
-              .then((record) => {
-                if (record) {
-                  record.update({
-                    count: record.count + 1,
-                    lastSeen: new Date(),
-                    referer,
-                  });
-                } else {
-                  db.DomainBlock.create({
-                    projectId: widget.project.id,
-                    widgetId: parseInt(widgetId),
-                    domain: refererHost,
-                    referer,
-                  });
-                }
-              })
-              .catch((e) =>
-                console.log('[widget] Could not save domain block:', e.message)
-              );
-          }
-        } catch (e) {
-          // Malformed Referer header, skip domain check
-        }
-      } else {
-        console.log(
-          `[widget] Widget ${widgetId}: project ${widget.project.id} has no url or allowedDomains configured, loaded from "${referer}"`
-        );
-      }
-    }
 
     const defaultConfig = getDefaultConfig(widget.project, widget.type);
 
@@ -475,11 +425,20 @@ function getWidgetJavascriptOutput(
               ? `
           const allowedHosts = ${JSON.stringify(allowedDomains)};
           const currentHostname = window.location.hostname;
+          function stripWww(d) { return d && d.startsWith('www.') ? d.slice(4) : d; }
+          var normalizedHost = stripWww(currentHostname);
           const domainAllowed = allowedHosts.some(function(host) {
-            return currentHostname === host || currentHostname === host.split(':')[0];
+            return normalizedHost === stripWww(host.split(':')[0]);
           });
 
           if (!domainAllowed) {
+            try {
+              fetch(currentScript.src.split('?')[0] + '/report-block', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ domain: currentHostname, referer: window.location.href }),
+              }).catch(function() {});
+            } catch(e) {}
             var warningEl = document.getElementById(randomComponentId);
             if (warningEl) {
               warningEl.innerHTML = '<div style="border: 2px solid #f59e0b; background-color: #fffbeb; border-radius: 8px; padding: 16px 20px; font-family: sans-serif; color: #92400e; margin: 12px 0;">' +
@@ -591,5 +550,72 @@ function getWidgetJavascriptOutput(
     `;
   return output;
 }
+
+const reportBlockCooldowns = new Map();
+const REPORT_BLOCK_COOLDOWN_MS = 5 * 60 * 1000;
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamp] of reportBlockCooldowns) {
+    if (now - timestamp > REPORT_BLOCK_COOLDOWN_MS) {
+      reportBlockCooldowns.delete(key);
+    }
+  }
+}, 60 * 1000);
+
+router.post('/:widgetId([a-zA-Z0-9]+)/report-block', async (req, res) => {
+  const { widgetId } = req.params;
+  const { domain, referer } = req.body || {};
+
+  if (!domain || typeof domain !== 'string') {
+    return res.status(400).json({ error: 'Missing domain' });
+  }
+
+  const cooldownKey = `${widgetId}:${domain}`;
+  const lastReport = reportBlockCooldowns.get(cooldownKey);
+  if (lastReport && Date.now() - lastReport < REPORT_BLOCK_COOLDOWN_MS) {
+    return res.status(200).json({ ok: true });
+  }
+  reportBlockCooldowns.set(cooldownKey, Date.now());
+
+  try {
+    const widget = await db.Widget.findOne({
+      where: { id: widgetId },
+      include: [db.Project],
+    });
+
+    if (!widget || !widget.project) {
+      return res.status(404).json({ error: 'Widget not found' });
+    }
+
+    const record = await db.DomainBlock.findOne({
+      where: {
+        projectId: widget.project.id,
+        widgetId: parseInt(widgetId),
+        domain: domain.substring(0, 255),
+      },
+    });
+
+    if (record) {
+      await record.update({
+        count: record.count + 1,
+        lastSeen: new Date(),
+        referer: referer ? String(referer).substring(0, 2048) : record.referer,
+      });
+    } else {
+      await db.DomainBlock.create({
+        projectId: widget.project.id,
+        widgetId: parseInt(widgetId),
+        domain: domain.substring(0, 255),
+        referer: referer ? String(referer).substring(0, 2048) : '',
+      });
+    }
+
+    res.status(200).json({ ok: true });
+  } catch (e) {
+    console.log('[widget] Could not save domain block:', e.message);
+    res.status(500).json({ error: 'Could not save domain block' });
+  }
+});
 
 module.exports = router;
