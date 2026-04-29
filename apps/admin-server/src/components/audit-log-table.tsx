@@ -52,6 +52,52 @@ function ActionBadge({ action }: { action: string }) {
   );
 }
 
+const AUTH_METHOD_LABELS: Record<string, string> = {
+  url: 'E-maillink',
+  local: 'Wachtwoord',
+  uniqueCode: 'Stemcode',
+  anonymous: 'Anoniem',
+  phonenumber: 'SMS',
+};
+
+function AuthEventDetails({ data }: { data: any }) {
+  if (!data) return null;
+  const method = data?.method;
+  if (!method) return null;
+  return (
+    <Paragraph className="text-xs text-muted-foreground">
+      Methode: {AUTH_METHOD_LABELS[method] || method}
+    </Paragraph>
+  );
+}
+
+const MODEL_LABELS: Record<string, string> = {
+  widgets: 'Widget',
+  resource: 'Inzending',
+  tag: 'Tag',
+  status: 'Status',
+  area: 'Polygoon',
+  user: 'Gebruiker',
+  project: 'Project',
+  submission: 'Formulier inzending',
+  choicesguide: 'Keuzewijzer',
+  datalayer: 'Kaartlaag',
+  markers: 'Marker',
+  pdf: 'PDF',
+  AuthSession: 'Sessie',
+  'audit-log': 'Logboek',
+};
+
+function formatModelName(
+  modelName: string,
+  modelId?: number | null,
+  source?: string
+) {
+  const label = MODEL_LABELS[modelName] || modelName;
+  if (!modelId || source === 'auth') return label;
+  return `${label} ID ${modelId}`;
+}
+
 function formatDate(dateString: string) {
   return new Date(dateString).toLocaleString('nl-NL', {
     day: '2-digit',
@@ -108,34 +154,31 @@ export default function AuditLogTable({
   return (
     <div className="container px-0">
       <div className="p-6 bg-white rounded-md">
-        <div className="grid grid-cols-1 lg:grid-cols-12 items-center py-2 px-2 border-b border-border">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-4 items-center py-2 px-2 border-b border-border">
           <ListHeading className="hidden lg:flex lg:col-span-2">
             Datum/Tijd
           </ListHeading>
           <ListHeading className="hidden lg:flex lg:col-span-2">
             Gebruiker
           </ListHeading>
-          <ListHeading className="hidden lg:flex lg:col-span-1">
+          <ListHeading className="hidden lg:flex lg:col-span-2">
             Actie
           </ListHeading>
           {!modelName && (
-            <ListHeading className="hidden lg:flex lg:col-span-1">
+            <ListHeading className="hidden lg:flex lg:col-span-2">
               Object
             </ListHeading>
           )}
           <ListHeading
-            className={`hidden lg:flex ${modelName ? 'lg:col-span-5' : 'lg:col-span-4'}`}>
+            className={`hidden lg:flex ${modelName ? 'lg:col-span-6' : 'lg:col-span-4'}`}>
             Wijzigingen
-          </ListHeading>
-          <ListHeading className="hidden lg:flex lg:col-span-2">
-            IP-adres
           </ListHeading>
         </div>
         <ul>
           {records.map((entry: any) => (
             <li
               key={entry.id}
-              className="grid grid-cols-1 lg:grid-cols-12 items-start py-3 px-2 border-b border-border hover:bg-muted/50">
+              className="grid grid-cols-1 lg:grid-cols-12 gap-x-4 items-start py-3 px-2 border-b border-border hover:bg-muted/50">
               <Paragraph className="lg:col-span-2 text-xs">
                 {formatDate(entry.createdAt)}
               </Paragraph>
@@ -147,30 +190,38 @@ export default function AuditLogTable({
                   {entry.userRole || ''}
                 </Paragraph>
               </div>
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-2">
                 <ActionBadge action={entry.action} />
-                {entry.source === 'auth' && (
-                  <span className="ml-1 text-xs text-muted-foreground">
-                    (auth)
-                  </span>
-                )}
               </div>
               {!modelName && (
-                <Paragraph className="lg:col-span-1 text-xs">
-                  {entry.modelName}
-                  {entry.modelId ? ` #${entry.modelId}` : ''}
-                </Paragraph>
+                <div className="lg:col-span-2">
+                  <Paragraph className="text-xs">
+                    {formatModelName(
+                      entry.modelName,
+                      entry.modelId,
+                      entry.source
+                    )}
+                  </Paragraph>
+                  {!projectId && entry.projectId && (
+                    <Paragraph className="text-xs text-muted-foreground">
+                      {entry.projectName
+                        ? `${entry.projectName} ID ${entry.projectId}`
+                        : `Project ID ${entry.projectId}`}
+                    </Paragraph>
+                  )}
+                </div>
               )}
-              <div className={modelName ? 'lg:col-span-5' : 'lg:col-span-4'}>
-                <ChangesDisplay
-                  previousData={entry.previousData}
-                  newData={entry.newData}
-                  action={entry.action}
-                />
+              <div className={modelName ? 'lg:col-span-6' : 'lg:col-span-4'}>
+                {entry.source === 'auth' ? (
+                  <AuthEventDetails data={entry.newData} />
+                ) : (
+                  <ChangesDisplay
+                    previousData={entry.previousData}
+                    newData={entry.newData}
+                    action={entry.action}
+                  />
+                )}
               </div>
-              <Paragraph className="lg:col-span-2 text-xs text-muted-foreground">
-                {entry.ipAddress || ''}
-              </Paragraph>
             </li>
           ))}
         </ul>

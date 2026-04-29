@@ -58,7 +58,7 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
               {/* <TabsTrigger value="display">Weergave</TabsTrigger> */}
               {/* <TabsTrigger value="confirmation">Bevestiging</TabsTrigger> */}
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
-              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig && (

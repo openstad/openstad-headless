@@ -103,7 +103,7 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="text">Content</TabsTrigger>
               <TabsTrigger value="confirmation">Bevestiging</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
-              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig ? (

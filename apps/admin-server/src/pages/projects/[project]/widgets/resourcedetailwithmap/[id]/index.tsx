@@ -85,7 +85,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="resources">Resources</TabsTrigger>
               <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
-              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
 
             <TabsContent value="resources">

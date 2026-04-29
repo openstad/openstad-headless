@@ -87,7 +87,7 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="pagination">Paginering</TabsTrigger>
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
-              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
 
             {previewConfig ? (

@@ -98,7 +98,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="likes">Likes widget</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
-              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             {previewConfig ? (
               <>

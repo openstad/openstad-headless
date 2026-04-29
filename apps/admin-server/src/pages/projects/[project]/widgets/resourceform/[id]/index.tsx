@@ -68,7 +68,7 @@ export default function WidgetResourceForm({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="datalayers">Kaart opties</TabsTrigger>
               <TabsTrigger value="polygons">Polygonen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
-              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0"></TabsContent>
             <TabsContent value="general" className="p-0">

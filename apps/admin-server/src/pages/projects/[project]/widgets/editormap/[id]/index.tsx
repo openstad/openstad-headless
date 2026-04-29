@@ -53,7 +53,7 @@ export default function WidgetEditorMap({ apiUrl }: WithApiUrlProps) {
           <Tabs defaultValue="publish">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
-              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />

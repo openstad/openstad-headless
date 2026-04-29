@@ -54,7 +54,7 @@ export default function ProjectResource() {
               <TabsTrigger value="comments">Reacties</TabsTrigger>
               <TabsTrigger value="createComment">Reactie plaatsen</TabsTrigger>
               <TabsTrigger value="preview">Preview</TabsTrigger>
-              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             <TabsContent value="info" className="p-0">
               <ProjectResourceCreate />

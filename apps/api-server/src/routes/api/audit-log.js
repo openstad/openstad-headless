@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
+const { Op } = require('sequelize');
 const db = require('../../db');
 const pagination = require('../../middleware/pagination');
 const auditLogService = require('../../services/audit-log');
@@ -89,12 +90,53 @@ router.get(
       }
       if (modelName) where.modelName = modelName;
       if (modelId) where.modelId = parseInt(modelId);
-      if (userId) where.userId = parseInt(userId);
+
+      if (userId) {
+        const parsedUserId = parseInt(userId);
+        if (isNaN(parsedUserId)) {
+          return res.status(400).json({ error: 'Invalid userId' });
+        }
+
+        const user = await db.User.findByPk(parsedUserId, {
+          attributes: ['id', 'email', 'idpUser'],
+          raw: true,
+        });
+
+        if (user?.email) {
+          const relatedUsers = await db.User.findAll({
+            attributes: ['id', 'idpUser'],
+            where: { email: user.email },
+            raw: true,
+          });
+
+          const apiUserIds = relatedUsers.map((u) => u.id);
+
+          // Auth events store the auth-server user ID, not the API user ID.
+          // Extract idpUser identifiers so we can match those too.
+          const authUserIds = relatedUsers
+            .map((u) => {
+              try {
+                const idp =
+                  typeof u.idpUser === 'string'
+                    ? JSON.parse(u.idpUser)
+                    : u.idpUser;
+                return idp?.identifier ? parseInt(idp.identifier) : null;
+              } catch {
+                return null;
+              }
+            })
+            .filter((id) => id != null);
+
+          const allIds = [...new Set([...apiUserIds, ...authUserIds])];
+          where.userId = { [Op.in]: allIds };
+        } else {
+          where.userId = parsedUserId;
+        }
+      }
 
       if (action) {
         where.action = action;
       } else if (req.query.excludeAction) {
-        const { Op } = require('sequelize');
         where.action = { [Op.ne]: req.query.excludeAction };
       }
 
@@ -106,7 +148,6 @@ router.get(
       }
 
       if (fromDate || toDate) {
-        const { Op } = require('sequelize');
         where.createdAt = {};
 
         if (fromDate) {
@@ -143,10 +184,26 @@ router.get(
           return null;
         }
       };
+      const projectIds = [
+        ...new Set(rows.map((r) => r.projectId).filter(Boolean)),
+      ];
+      const projectNames = {};
+      if (projectIds.length > 0) {
+        const projects = await db.Project.findAll({
+          attributes: ['id', 'name'],
+          where: { id: { [Op.in]: projectIds } },
+          raw: true,
+        });
+        projects.forEach((p) => {
+          projectNames[p.id] = p.name;
+        });
+      }
+
       const records = rows.map((row) => ({
         ...row,
         previousData: safeJsonParse(row.previousData),
         newData: safeJsonParse(row.newData),
+        projectName: projectNames[row.projectId] || null,
       }));
 
       res.json({

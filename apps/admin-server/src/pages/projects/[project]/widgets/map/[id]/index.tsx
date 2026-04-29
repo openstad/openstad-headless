@@ -64,7 +64,7 @@ export default function WidgetMap({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="markerSets">Markers</TabsTrigger>
               <TabsTrigger value="legend">Legenda</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
-              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
               {/* <Preview type="map" /> */}

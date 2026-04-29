@@ -58,7 +58,7 @@ export default function WidgetCounter({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="display">Instellingen</TabsTrigger>
               <TabsTrigger value="content">Content</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
-              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             <TabsContent value="display" className="p-0">
               {previewConfig ? (

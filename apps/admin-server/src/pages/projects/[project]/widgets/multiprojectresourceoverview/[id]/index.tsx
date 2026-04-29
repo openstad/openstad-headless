@@ -102,7 +102,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                 Instellingen multi project
               </TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
-              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             {previewConfig ? (
               <>
