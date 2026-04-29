@@ -11,6 +11,7 @@
     "test:component": "../../scripts/run-package-component-tests.sh"
   },
   "dependencies": {
+    "@openstad-headless/agenda": "file:../agenda",
     "@openstad-headless/comments": "file:../comments",
     "@openstad-headless/data-store": "file:../data-store",
     "@openstad-headless/lib": "file:../lib",

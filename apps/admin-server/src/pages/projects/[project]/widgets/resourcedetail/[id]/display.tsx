@@ -81,6 +81,7 @@ const formSchema = z.object({
   urlWithResourceFormForEditing: z.string().optional(),
   displayDeleteButton: z.boolean().optional(),
   displayDeleteEditButtonOnTop: z.boolean().optional(),
+  displayTimeline: z.boolean().optional(),
   selectedSocialShareOptions: z.array(z.enum(shareOptions)).optional(),
 });
 
@@ -136,6 +137,7 @@ export default function WidgetResourceDetailDisplay(
       urlWithResourceFormForEditing: props?.urlWithResourceFormForEditing || '',
       displayDeleteEditButtonOnTop:
         props?.displayDeleteEditButtonOnTop || false,
+      displayTimeline: props?.displayTimeline || false,
       selectedSocialShareOptions:
         typeof props?.selectedSocialShareOptions === 'undefined'
           ? defaultShareValues
@@ -421,6 +423,22 @@ export default function WidgetResourceDetailDisplay(
                 <FormDescription>
                   Als je dit aanvinkt, wordt de afbeelding in de dialog klikbaar
                   en wordt de afbeelding geopend in een nieuw tabblad.
+                </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayTimeline"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tijdlijn weergeven</FormLabel>
+                <FormDescription>
+                  Tijdlijn items worden per resource beheerd in het tabblad
+                  Tijdlijn bij de resource.
                 </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />

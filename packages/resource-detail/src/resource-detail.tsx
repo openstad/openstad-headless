@@ -1,3 +1,4 @@
+import { Agenda } from '@openstad-headless/agenda/src/agenda';
 import {
   Comments,
   CommentsWidgetProps,
@@ -62,7 +63,8 @@ type booleanProps = {
     | 'displayEditResourceButton'
     | 'displayDeleteButton'
     | 'displayDeleteEditButtonOnTop'
-    | 'displaySocials']: boolean | undefined;
+    | 'displaySocials'
+    | 'displayTimeline']: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = {
@@ -145,6 +147,7 @@ function ResourceDetail({
   urlWithResourceFormForEditing = '',
   displayDeleteButton = true,
   displayDeleteEditButtonOnTop = false,
+  displayTimeline = false,
   selectedSocialShareOptions = [
     'facebook',
     'x',
@@ -188,6 +191,10 @@ function ResourceDetail({
   };
 
   if (!resource) return null;
+
+  const timelineItems =
+    resource?.extraData?.timeline ?? resource?.extraData?.tijdlijn ?? [];
+
   const shouldHaveSideColumn =
     displayLikes ||
     displayTags ||
@@ -606,6 +613,15 @@ function ResourceDetail({
                     </div>
                   ))}
               </div>
+              {displayTimeline && timelineItems.length > 0 && (
+                <Agenda
+                  {...props}
+                  items={timelineItems}
+                  displayTitle={true}
+                  title="Tijdlijn"
+                  useActiveDates={true}
+                />
+              )}
               {displayLocation && resource.location && (
                 <>
                   <Heading level={2} appearance="utrecht-heading-2">
