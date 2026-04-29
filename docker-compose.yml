@@ -141,6 +141,7 @@ services:
       - HASH_IP_ADDRESSES=${HASH_IP_ADDRESSES}
       - HASH_IP_SALT=${HASH_IP_SALT}
       - USER_ID_SALT=${USER_ID_SALT}
+      - AUDIT_INTERNAL_TOKEN=${AUDIT_INTERNAL_TOKEN}
       - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-openstad-api-server}
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://openstad-otel-collector:4317}
       - OTEL_ENABLED=${OTEL_ENABLED_API:-false}
@@ -230,6 +231,8 @@ services:
       - ALLOWED_ADMIN_DOMAINS=["${ADMIN_DOMAIN}"]
       - ENVIRONMENT_NAME=${ENVIRONMENT_NAME}
       - NODE_ENV=development
+      - AUDIT_API_ENDPOINT=http://openstad-api-server:${API_PORT}/api/audit-log/auth-event
+      - AUDIT_API_TOKEN=${AUDIT_INTERNAL_TOKEN}
       - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-openstad-auth-server}
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://openstad-otel-collector:4317}
       - OTEL_ENABLED=${OTEL_ENABLED_AUTH:-false}
