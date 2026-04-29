@@ -9,43 +9,55 @@ const memoryStorage = require('../../memoryStorage');
 const utils = require('../../utils');
 const validate = require('../../validate');
 
-const prefillAllowedDomains = function (allowedDomains) {
+function parseHost(value) {
+  if (!value) return null;
   try {
-    if (process.env.BASE_DOMAIN) {
-      let baseDomain = process.env.BASE_DOMAIN;
-      if (baseDomain.indexOf('http') !== 0) {
-        baseDomain = 'https://' + baseDomain;
-      }
-      const baseUrl = new URL(baseDomain);
-      allowedDomains.push(baseUrl.host);
+    if (value.indexOf('http') !== 0) value = 'https://' + value;
+    return new URL(value).host;
+  } catch {
+    return null;
+  }
+}
+
+function getParentDomains(hostname) {
+  const host = hostname.split(':')[0];
+  const parts = host.split('.');
+  const parents = [];
+  for (let i = 1; i < parts.length - 1; i++) {
+    parents.push(parts.slice(i).join('.'));
+  }
+  return parents;
+}
+
+function addWithParents(list, host) {
+  if (!host) return;
+  list.push(host);
+  for (const parent of getParentDomains(host)) {
+    list.push(parent);
+  }
+}
+
+const prefillAllowedDomains = function (inputDomains) {
+  const allowedDomains = [...(inputDomains || [])];
+  try {
+    const configuredHosts = allowedDomains
+      .map((d) => parseHost(d))
+      .filter(Boolean);
+    for (const host of configuredHosts) {
+      addWithParents(allowedDomains, host);
     }
 
-    if (process.env.APP_URL) {
-      let appUrl = process.env.APP_URL;
-      if (appUrl.indexOf('http') !== 0) {
-        appUrl = 'https://' + appUrl;
-      }
-      const url = new URL(appUrl);
-      allowedDomains.push(url.host);
-    }
+    const envVars = [
+      process.env.BASE_DOMAIN,
+      process.env.APP_URL,
+      process.env.CMS_URL,
+      process.env.API_URL,
+      process.env.ADMIN_URL,
+    ];
 
-    if (process.env.CMS_URL) {
-      const cmsUrl = new URL(process.env.CMS_URL);
-      allowedDomains.push(cmsUrl.host);
-    }
-
-    if (process.env.API_URL) {
-      const apiUrl = new URL(process.env.API_URL);
-      allowedDomains.push(apiUrl.host);
-    }
-
-    if (process.env.ADMIN_URL) {
-      let adminUrl = process.env.ADMIN_URL;
-      if (adminUrl.indexOf('http') !== 0) {
-        adminUrl = 'https://' + adminUrl;
-      }
-      const url = new URL(adminUrl);
-      allowedDomains.push(url.host);
+    for (const envVar of envVars) {
+      if (!envVar) continue;
+      addWithParents(allowedDomains, parseHost(envVar));
     }
   } catch (err) {
     console.error('Error processing allowed domains:', err);
