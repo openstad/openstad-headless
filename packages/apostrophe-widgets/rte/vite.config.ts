@@ -4,4 +4,5 @@ export default createWidgetConfig({
   name: 'ApostropheWidgetsRTE',
   entry: 'src/rte.tsx',
   usePrefix: false,
+  bundleReact: true,
 });

@@ -4,4 +4,5 @@ export default createWidgetConfig({
   name: 'ApostropheWidgetsAlertBox',
   entry: 'src/alert-box.tsx',
   usePrefix: false,
+  bundleReact: true,
 });

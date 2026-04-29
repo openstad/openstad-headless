@@ -4,4 +4,5 @@ export default createWidgetConfig({
   name: 'ApostropheWidgetsHeading',
   entry: 'src/heading.tsx',
   usePrefix: false,
+  bundleReact: true,
 });

@@ -4,11 +4,6 @@ const fs = require('fs');
 
 const outfile = path.resolve(__dirname, '../dist/openstad-react-runtime.js');
 
-if (fs.existsSync(outfile)) {
-  console.log('React runtime already built, skipping');
-  process.exit(0);
-}
-
 const distDir = path.resolve(__dirname, '../dist');
 if (!fs.existsSync(distDir)) {
   fs.mkdirSync(distDir, { recursive: true });
