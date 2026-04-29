@@ -61,6 +61,24 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
       'emailNotificationConsent'
     );
 
+  const totalPropPackage = {
+    ...widget?.config,
+    ...previewConfig,
+    updateConfig: (config: ResourceDetailWidgetProps) => {
+      const merged = { ...widget.config, ...config };
+      updateConfig(merged);
+      updatePreview(merged as ResourceDetailWidgetProps);
+    },
+    onFieldChanged: (key: string, value: any) => {
+      if (previewConfig) {
+        updatePreview({
+          ...previewConfig,
+          [key]: value,
+        });
+      }
+    },
+  };
+
   return (
     <div>
       <PageLayout
@@ -94,38 +112,12 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig && (
-                <WidgetResourceDetailGeneral
-                  {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
-                />
+                <WidgetResourceDetailGeneral {...totalPropPackage} />
               )}
             </TabsContent>
             <TabsContent value="display" className="p-0">
               {previewConfig && (
-                <WidgetResourceDetailDisplay
-                  {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
-                />
+                <WidgetResourceDetailDisplay {...totalPropPackage} />
               )}
             </TabsContent>
 
@@ -401,20 +393,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
 
             <TabsContent value="document-map" className="p-0">
               {previewConfig && (
-                <WidgetResourceDetailDocumentMap
-                  {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
-                />
+                <WidgetResourceDetailDocumentMap {...totalPropPackage} />
               )}
             </TabsContent>
 

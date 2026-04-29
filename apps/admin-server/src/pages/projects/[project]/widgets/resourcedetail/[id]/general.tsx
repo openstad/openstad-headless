@@ -85,7 +85,7 @@ export default function WidgetResourceDetailGeneral(
             keyForValue="id"
             label={(resource) => `${resource.id} ${resource.title}`}
             onFieldChanged={(e, key) => {
-              props.onFieldChanged;
+              props.onFieldChanged(e, key);
               setToggle(e + '_' + key);
             }}
             noSelection="Niet koppelen - beschrijf het path of gebruik queryparam openstadResourceId"
