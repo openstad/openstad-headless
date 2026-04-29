@@ -268,6 +268,13 @@ const RangeSlider: FC<RangeSliderProps> = ({
             changeValue('value', e.target.value);
           }}
           aria-label={`Selecteer een waarde tussen ${titleA || 'Optie A'} en ${titleB || 'Optie B'}${title ? ` voor ${title}` : ''}`}
+          aria-valuetext={
+            rangeValue === 50
+              ? 'Neutraal'
+              : rangeValue < 50
+                ? `${(50 - rangeValue) * 2}% richting ${titleA || labelA || 'Optie A'}`
+                : `${(rangeValue - 50) * 2}% richting ${titleB || labelB || 'Optie B'}`
+          }
           disabled={disabled || fieldDisabled}
           aria-invalid={fieldInvalid}
           aria-describedby={`${randomId}_error`}
