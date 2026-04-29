@@ -19,7 +19,7 @@ import useUnsavedChanges from '@/hooks/use-unsaved-changes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import 'leaflet/dist/leaflet.css';
 import { ArrowLeft, MapPin, Trash2, X } from 'lucide-react';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -70,6 +70,7 @@ export default function MarkersEditor({
   const [leafletLib, setLeafletLib] = useState<any>(null);
   const [markerIconFn, setMarkerIconFn] = useState<any>(null);
   const [skipNextMapClick, setSkipNextMapClick] = useState(false);
+  const lastAppliedInitialRef = useRef<string>('');
 
   const { setSavedState, getCurrentStateRef } = useUnsavedChanges();
 
@@ -99,6 +100,10 @@ export default function MarkersEditor({
   const watchedIcon = markerForm.watch('icon');
 
   useEffect(() => {
+    const key = JSON.stringify({ name: initialName, markers: initialMarkers });
+    if (key === lastAppliedInitialRef.current) return;
+    lastAppliedInitialRef.current = key;
+
     setMarkers(initialMarkers);
     nameForm.reset({ name: initialName });
     setSavedState({ name: initialName, markers: initialMarkers });
@@ -208,7 +213,16 @@ export default function MarkersEditor({
     }
 
     if (activeMarkerIndex !== null) {
-      applyMarkerFormToState();
+      markerForm.setValue('lat', latlng.lat);
+      markerForm.setValue('lng', latlng.lng);
+      const updated = [...markers];
+      updated[activeMarkerIndex] = {
+        ...updated[activeMarkerIndex],
+        lat: latlng.lat,
+        lng: latlng.lng,
+      };
+      setMarkers(updated);
+      return;
     }
 
     const newMarker: Marker = {
@@ -285,7 +299,9 @@ export default function MarkersEditor({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <Heading size="lg" className="mb-4">
-              Klik op de kaart om een marker te plaatsen
+              {activeMarkerIndex !== null
+                ? 'Klik op de kaart om de marker te verplaatsen'
+                : 'Klik op de kaart om een marker te plaatsen'}
             </Heading>
             {isSSR || !leafletComponents ? (
               <div
@@ -530,6 +546,14 @@ export default function MarkersEditor({
                     />
 
                     <div className="flex gap-2 pt-4">
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          applyMarkerFormToState();
+                          switchToMarker(null);
+                        }}>
+                        Toepassen
+                      </Button>
                       <Button
                         type="button"
                         variant="destructive"
