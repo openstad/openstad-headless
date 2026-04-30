@@ -404,8 +404,8 @@ const defaultItemRenderer = (
           overviewTagGroups.includes(tag.type)
         )
       : Array.isArray(resource?.tags)
-        ? resource.tags
-        : [];
+      ? resource.tags
+      : [];
 
   resourceFilteredTags = resourceFilteredTags.length
     ? resourceFilteredTags.sort(
@@ -543,9 +543,7 @@ const defaultItemRenderer = (
                     }>
                   )
                     ?.filter((t) => t.type !== 'status')
-                    ?.map((t) => (
-                      <Pill text={t.name} />
-                    ))}
+                    ?.map((t) => <Pill text={t.name} />)}
                 </div>
               </>
             )}
@@ -691,9 +689,7 @@ const defaultItemRenderer = (
                     }>
                   )
                     ?.filter((t) => t.type !== 'status')
-                    ?.map((t) => (
-                      <Pill text={t.name} />
-                    ))}
+                    ?.map((t) => <Pill text={t.name} />)}
                 </div>
               </>
             )}
@@ -1341,6 +1337,7 @@ function ResourceOverviewInner({
         filteredResources
           ?.slice(page * pageSize, (page + 1) * pageSize)
           ?.map((resource: any, index: number) => {
+            const absoluteIndex = page * pageSize + index;
             return (
               <React.Fragment
                 key={`resource-item-${resource?.id || resource?.uniqueId}`}>
@@ -1354,7 +1351,7 @@ function ResourceOverviewInner({
                     overviewTagGroups,
                   },
                   () => {
-                    onResourceClick(resource, index);
+                    onResourceClick(resource, absoluteIndex);
                   },
                   refreshLikes
                 )}
