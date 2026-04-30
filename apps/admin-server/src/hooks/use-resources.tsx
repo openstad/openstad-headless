@@ -7,13 +7,27 @@ export type ResourceListOptions = {
   searchTerm?: string;
 };
 
+type UseResourcesConfig = {
+  includeGlobalTags?: boolean;
+  skipFetch?: boolean;
+};
+
 export default function useResources(
   projectId?: string,
-  includeGlobalTags?: boolean,
+  configOrIncludeGlobalTags?: boolean | UseResourcesConfig,
   page?: number,
   pageSize?: number,
   options?: ResourceListOptions
 ) {
+  const includeGlobalTags =
+    typeof configOrIncludeGlobalTags === 'object'
+      ? configOrIncludeGlobalTags?.includeGlobalTags
+      : configOrIncludeGlobalTags;
+  const skipFetch =
+    typeof configOrIncludeGlobalTags === 'object'
+      ? configOrIncludeGlobalTags?.skipFetch
+      : false;
+
   const projectNumber: number | undefined = validateProjectNumber(projectId);
   const baseUrl = `/api/openstad/api/project/${projectNumber}/resource`;
   const params = new URLSearchParams({
@@ -39,7 +53,7 @@ export default function useResources(
 
   const url = `${baseUrl}?${params.toString()}`;
 
-  const resourcesListSwr = useSWR(projectNumber ? url : null);
+  const resourcesListSwr = useSWR(!skipFetch && projectNumber ? url : null);
 
   const records = resourcesListSwr.data?.records || resourcesListSwr.data || [];
   const pagination = resourcesListSwr.data?.metadata || null;
