@@ -627,7 +627,13 @@ module.exports = function (db, sequelize, DataTypes) {
                 { method: ['includeVoteCount', 'commentsAgainst'] },
                 { method: ['filterByTags', ''] },
                 { method: ['includeUserVote', 'commentsAgainst', userId] },
-                'includeRepliesOnComments'
+                {
+                  method: [
+                    'includeRepliesOnComments',
+                    userId,
+                    'commentsAgainst',
+                  ],
+                }
               ),
               as: 'commentsAgainst',
               required: false,
@@ -642,7 +648,7 @@ module.exports = function (db, sequelize, DataTypes) {
                 { method: ['includeVoteCount', 'commentsFor'] },
                 { method: ['filterByTags', ''] },
                 { method: ['includeUserVote', 'commentsFor', userId] },
-                'includeRepliesOnComments'
+                { method: ['includeRepliesOnComments', userId, 'commentsFor'] }
               ),
               as: 'commentsFor',
               required: false,
@@ -657,7 +663,13 @@ module.exports = function (db, sequelize, DataTypes) {
                 { method: ['includeVoteCount', 'commentsNoSentiment'] },
                 { method: ['filterByTags', ''] },
                 { method: ['includeUserVote', 'commentsNoSentiment', userId] },
-                'includeRepliesOnComments'
+                {
+                  method: [
+                    'includeRepliesOnComments',
+                    userId,
+                    'commentsNoSentiment',
+                  ],
+                }
               ),
               as: 'commentsNoSentiment',
               required: false,

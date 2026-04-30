@@ -246,15 +246,26 @@ module.exports = function (db, sequelize, DataTypes) {
         };
       },
 
-      includeRepliesOnComments: function (userId) {
+      includeRepliesOnComments: function (userId, parentAlias) {
         let commentVoteThreshold = 5; // todo: configureerbaar
+        const allowedAliases = [
+          'commentsAgainst',
+          'commentsFor',
+          'commentsNoSentiment',
+        ];
+        if (parentAlias && !allowedAliases.includes(parentAlias)) {
+          throw new Error(`Invalid parentAlias: ${parentAlias}`);
+        }
+        const replyTableName = parentAlias
+          ? `\`${parentAlias}->replies\``
+          : 'replies';
         return {
           include: [
             {
               model: db.Comment.scope(
                 'defaultScope',
-                { method: ['includeVoteCount', 'replies'] },
-                { method: ['includeUserVote', 'replies', userId] }
+                { method: ['includeVoteCount', replyTableName] },
+                { method: ['includeUserVote', replyTableName, userId] }
               ),
               as: 'replies',
               required: false,
@@ -412,7 +423,6 @@ module.exports = function (db, sequelize, DataTypes) {
           include: [
             {
               model: db.Tag,
-              as: 'tags',
               through: { attributes: [] },
               required: safeIds.length > 0,
               where: safeIds.length > 0 ? { id: { [Op.in]: safeIds } } : {},
@@ -440,7 +450,6 @@ module.exports = function (db, sequelize, DataTypes) {
     });
     this.belongsToMany(models.Tag, {
       through: 'comment_tags',
-      as: 'tags',
       foreignKey: 'commentId',
       otherKey: 'tagId',
       constraints: false,
