@@ -22,7 +22,7 @@ module.exports = {
     this.app.disable('x-powered-by');
     this.app.set('trust proxy', true);
     this.app.set('view engine', 'njk');
-    this.app.set('env', process.env.NODE_APP_INSTANCE || 'development');
+    this.app.set('env', process.env.NODE_ENV || 'production');
     this.app.use(rateLimiter());
 
     if (process.env.REQUEST_LOGGING === 'ON') {
