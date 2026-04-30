@@ -16,31 +16,24 @@ export default function ProjectResourceTimeline() {
     project as string,
     id as string
   );
-  const { update } = useResources(project as string, true);
+  const { update } = useResources(project as string, {
+    includeGlobalTags: true,
+    skipFetch: true,
+  });
 
   const [items, setItems] = useState<AgendaItem[]>([]);
 
   useEffect(() => {
     if (!resource) return;
-    setItems(
-      resource?.extraData?.timeline ?? resource?.extraData?.tijdlijn ?? []
-    );
+    setItems(resource?.timeline ?? []);
   }, [resource?.id]);
 
   async function handleSave() {
     if (!id) return;
 
-    const existingExtra =
-      typeof resource?.extraData === 'object' && resource.extraData !== null
-        ? { ...resource.extraData }
-        : {};
-
-    existingExtra.timeline = items;
-    delete existingExtra.tijdlijn;
-
     try {
       await update(Number.parseInt(id as string), {
-        extraData: existingExtra,
+        timeline: items,
       });
       mutate();
       toast.success('Tijdlijn opgeslagen');

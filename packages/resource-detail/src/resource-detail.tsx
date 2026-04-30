@@ -192,8 +192,7 @@ function ResourceDetail({
 
   if (!resource) return null;
 
-  const timelineItems =
-    resource?.extraData?.timeline ?? resource?.extraData?.tijdlijn ?? [];
+  const timelineItems = resource?.timeline ?? [];
 
   const shouldHaveSideColumn =
     displayLikes ||

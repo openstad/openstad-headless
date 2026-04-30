@@ -234,6 +234,16 @@ module.exports = function (db, sequelize, DataTypes) {
 
       extraData: getExtraDataConfig(DataTypes.JSON, 'resources'),
 
+      timeline: {
+        type: DataTypes.JSON,
+        auth: {
+          createableBy: 'editor',
+          updateableBy: 'editor',
+        },
+        allowNull: true,
+        defaultValue: null,
+      },
+
       location: {
         type: DataTypes.JSON,
         allowNull: !(
