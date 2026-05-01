@@ -45,11 +45,27 @@ function VideoField({
     }
     return true;
   });
+  const mutedRef = useRef<boolean>(muted);
+  const previousVideoUrlRef = useRef(videoUrl);
+  const previousPageRef = useRef(props.currentPage);
   const [muteToggle, setMuteToggle] = useState<boolean>(false);
   const [playing, setPlaying] = useState<boolean>(true);
 
   useEffect(() => {
+    mutedRef.current = muted;
+  }, [muted]);
+
+  useEffect(() => {
+    const videoUrlChanged = previousVideoUrlRef.current !== videoUrl;
+    const pageChanged = previousPageRef.current !== props.currentPage;
+
+    previousVideoUrlRef.current = videoUrl;
+    previousPageRef.current = props.currentPage;
+
+    if (!videoUrlChanged && !pageChanged) return;
+
     setVideoId(getYouTubeVideoId(videoUrl));
+
     if (player && typeof player.destroy === 'function') {
       player.destroy();
       setPlayer(null);
@@ -74,7 +90,7 @@ function VideoField({
           playerVars: {
             autoplay: 1,
             controls: 0,
-            mute: muted ? 1 : 0,
+            mute: mutedRef.current ? 1 : 0,
             loop: 1,
             playlist: videoId,
             cc_lang_pref: videoLang,
@@ -87,7 +103,7 @@ function VideoField({
           events: {
             onReady: (event: any) => {
               setPlayer(event.target);
-              if (muted) {
+              if (mutedRef.current) {
                 event.target.mute();
               } else {
                 event.target.unMute();
@@ -98,7 +114,7 @@ function VideoField({
         });
       }
     }
-  }, [muted, videoId, videoLang, videoSubtitle]);
+  }, [videoId, videoLang, videoSubtitle]);
 
   const handleVideoClick = useCallback(() => {
     if (player) {

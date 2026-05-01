@@ -14,7 +14,7 @@ import {
   Paragraph,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import './likes.css';
 
@@ -70,7 +70,15 @@ function Likes({
     api: props.api,
   });
 
-  const storage = new LocalStorage({ projectId: props.projectId });
+  const storage = useMemo(
+    () => new LocalStorage({ projectId: props.projectId }),
+    [props.projectId]
+  );
+
+  const votesIsActive = props.votes.isActive;
+  const requiredUserRole = props.votes.requiredUserRole;
+  const loginUrl = props.login?.url || '';
+  const anonymousLoginUrl = props.login?.anonymous?.url || '';
 
   const { data: currentUser } = datastore.useCurrentUser(props);
   const { data: resource } = datastore.useResource({
@@ -92,55 +100,70 @@ function Likes({
     supportedLikeTypes.pop();
   }
 
-  useEffect(() => {
-    let pending = storage.get('osc-resource-vote-pending');
-    if (pending && pending[resource.id]) {
-      if (currentUser && currentUser.role) {
-        doVote(null, pending[resource.id]);
-        storage.remove('osc-resource-vote-pending');
-      }
-    }
-  }, [resource, currentUser, storage, doVote]);
+  const doVote = useCallback(
+    async (
+      e: React.MouseEvent<HTMLElement, MouseEvent> | null,
+      value: string
+    ) => {
+      if (e) e.stopPropagation();
 
-  async function doVote(
-    e: React.MouseEvent<HTMLElement, MouseEvent> | null,
-    value: string
-  ) {
-    if (e) e.stopPropagation();
+      if (isBusy) return;
+      setIsBusy(true);
 
-    if (isBusy) return;
-    setIsBusy(true);
-
-    if (!props.votes.isActive) {
-      return;
-    }
-
-    if (!hasRole(currentUser, props.votes.requiredUserRole)) {
-      let loginUrl = props.login?.url || '';
-      if (props.votes.requiredUserRole == 'anonymous') {
-        loginUrl = props.login?.anonymous?.url || '';
-      }
-      if (!loginUrl) {
-        console.log('Config error: no login url defined');
+      if (!votesIsActive) {
         return;
       }
-      // login
-      storage.set('osc-resource-vote-pending', { [resource.id]: value });
-      return (document.location.href = loginUrl);
+
+      if (!hasRole(currentUser, requiredUserRole)) {
+        let resolvedLoginUrl = loginUrl;
+        if (requiredUserRole == 'anonymous') {
+          resolvedLoginUrl = anonymousLoginUrl;
+        }
+        if (!resolvedLoginUrl) {
+          console.log('Config error: no login url defined');
+          return;
+        }
+        // login
+        storage.set('osc-resource-vote-pending', { [resource.id]: value });
+        return (document.location.href = resolvedLoginUrl);
+      }
+
+      let change: { [key: string]: any } = {};
+      if (resource.userVote) change[resource.userVote.opinion] = -1;
+
+      await resource.submitLike({
+        opinion: value,
+      });
+
+      setIsBusy(false);
+      if (refreshResourceLikes) {
+        await refreshResourceLikes();
+      }
+    },
+    [
+      anonymousLoginUrl,
+      currentUser,
+      isBusy,
+      loginUrl,
+      refreshResourceLikes,
+      requiredUserRole,
+      resource,
+      storage,
+      votesIsActive,
+    ]
+  );
+
+  useEffect(() => {
+    if (!resource) return;
+
+    const pending = storage.get('osc-resource-vote-pending');
+    const pendingVote = pending && pending[resource.id];
+
+    if (pendingVote && currentUser && currentUser.role) {
+      doVote(null, pendingVote);
+      storage.remove('osc-resource-vote-pending');
     }
-
-    let change: { [key: string]: any } = {};
-    if (resource.userVote) change[resource.userVote.opinion] = -1;
-
-    await resource.submitLike({
-      opinion: value,
-    });
-
-    setIsBusy(false);
-    if (refreshResourceLikes) {
-      await refreshResourceLikes();
-    }
-  }
+  }, [resource, currentUser, storage, doVote]);
 
   if (typeof props.children === 'function') {
     return <>{props.children((value: string) => doVote(null, value))}</>;

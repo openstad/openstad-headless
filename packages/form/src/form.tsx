@@ -22,7 +22,7 @@ import {
   FormFieldErrorMessage,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import './form.css';
 import type {
@@ -51,7 +51,7 @@ function Form({
   submitDisabled = false,
   secondaryLabel = '',
   secondaryHandler = () => {},
-  getValuesOnChange = () => {},
+  getValuesOnChange,
   allowResetAfterSubmit = true,
   currentPage,
   setCurrentPage,
@@ -66,47 +66,58 @@ function Form({
   initialValues,
   ...props
 }: FormProps) {
-  const initialFormValues: { [key: string]: FormValue } = {};
-  const initialHiddenFields: string[] = [];
-  const fieldsWithImpactOnRouting: string[] = [];
+  const { initialFormValues, initialHiddenFields, fieldsWithImpactOnRouting } =
+    useMemo(() => {
+      const computedInitialFormValues: { [key: string]: FormValue } = {};
+      const computedInitialHiddenFields: Array<string> = [];
+      const computedFieldsWithImpactOnRouting: Array<string> = [];
 
-  fields.forEach((field) => {
-    const fieldKey = field.fieldKey || '';
+      fields.forEach((field) => {
+        const fieldKey = field.fieldKey || '';
 
-    if (fieldKey) {
-      initialFormValues[fieldKey] =
-        typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
-      initialFormValues[fieldKey] =
-        field.type === 'map' ? {} : initialFormValues[fieldKey];
+        if (fieldKey) {
+          computedInitialFormValues[fieldKey] =
+            typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
+          computedInitialFormValues[fieldKey] =
+            field.type === 'map' ? {} : computedInitialFormValues[fieldKey];
 
-      if (field.type === 'tickmark-slider') {
-        initialFormValues[fieldKey] = Math.ceil(
-          (field?.fieldOptions?.length || 2) / 2
-        ).toString();
+          if (field.type === 'tickmark-slider') {
+            computedInitialFormValues[fieldKey] = Math.ceil(
+              (field?.fieldOptions?.length || 2) / 2
+            ).toString();
+          }
+
+          if (
+            field?.routingInitiallyHide &&
+            field?.routingSelectedQuestion &&
+            field?.routingSelectedAnswer
+          ) {
+            const getRoutingSelectedQuestionField = fields.find(
+              (f) => f.trigger === field.routingSelectedQuestion
+            );
+            const routingSelectedQuestionFieldKey =
+              getRoutingSelectedQuestionField?.fieldKey || '';
+
+            computedFieldsWithImpactOnRouting.push(
+              routingSelectedQuestionFieldKey
+            );
+            computedInitialHiddenFields.push(fieldKey);
+          }
+        }
+      });
+
+      if (initialValues) {
+        Object.entries(initialValues).forEach(([key, value]) => {
+          computedInitialFormValues[key] = value as FormValue;
+        });
       }
 
-      if (
-        field?.routingInitiallyHide &&
-        field?.routingSelectedQuestion &&
-        field?.routingSelectedAnswer
-      ) {
-        const getRoutingSelectedQuestionField = fields.find(
-          (f) => f.trigger === field.routingSelectedQuestion
-        );
-        const routingSelectedQuestionFieldKey =
-          getRoutingSelectedQuestionField?.fieldKey || '';
-
-        fieldsWithImpactOnRouting.push(routingSelectedQuestionFieldKey);
-        initialHiddenFields.push(fieldKey);
-      }
-    }
-  });
-
-  if (initialValues) {
-    Object.entries(initialValues).forEach(([key, value]) => {
-      initialFormValues[key] = value as FormValue;
-    });
-  }
+      return {
+        initialFormValues: computedInitialFormValues,
+        initialHiddenFields: computedInitialHiddenFields,
+        fieldsWithImpactOnRouting: computedFieldsWithImpactOnRouting,
+      };
+    }, [fields, initialValues]);
 
   const [formValues, setFormValues] = useState(initialFormValues);
   const [formErrors, setFormErrors] = useState<{
@@ -114,6 +125,8 @@ function Form({
   }>({});
   const formRef = useRef<HTMLFormElement>(null);
   const resetFunctions = useRef<Array<() => void>>([]);
+  const getValuesOnChangeRef =
+    useRef<FormProps['getValuesOnChange']>(getValuesOnChange);
   const [routingHiddenFields, setRoutingHiddenFields] =
     useState<Array<string>>(initialHiddenFields);
   const [lastUpdatedKey, setLastUpdatedKey] = useState<string>('');
@@ -252,10 +265,14 @@ function Form({
   };
 
   useEffect(() => {
-    if (getValuesOnChange) {
-      getValuesOnChange(formValues, routingHiddenFields);
-    }
+    getValuesOnChangeRef.current = getValuesOnChange;
+  }, [getValuesOnChange]);
 
+  useEffect(() => {
+    getValuesOnChangeRef.current?.(formValues, routingHiddenFields);
+  }, [formValues, routingHiddenFields]);
+
+  useEffect(() => {
     if (
       lastUpdatedKey &&
       fieldsWithImpactOnRouting.length > 0 &&
@@ -269,12 +286,12 @@ function Form({
         setRoutingHiddenFields,
         formValues,
       });
+      setLastUpdatedKey('');
     }
   }, [
     fields,
     fieldsWithImpactOnRouting,
     formValues,
-    getValuesOnChange,
     initialFormValues,
     lastUpdatedKey,
     routingHiddenFields,

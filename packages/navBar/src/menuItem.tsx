@@ -1,5 +1,5 @@
 import { Link } from '@utrecht/component-library-react';
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import './navBar.css';
 
@@ -13,12 +13,17 @@ interface Item {
 
 function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
   const ref = useRef<HTMLDivElement>(null);
+  const setOpenIndexRef = useRef(setOpenIndex);
 
-  const handleClickOutside = (event: MouseEvent) => {
+  useEffect(() => {
+    setOpenIndexRef.current = setOpenIndex;
+  }, [setOpenIndex]);
+
+  const handleClickOutside = useCallback((event: MouseEvent) => {
     if (ref.current && !ref.current.contains(event.target as Node)) {
-      setOpenIndex(null);
+      setOpenIndexRef.current(null);
     }
-  };
+  }, []);
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);

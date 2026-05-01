@@ -17,7 +17,14 @@ import {
   Paragraph,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { createContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
 import NotificationService from '../../lib/NotificationProvider/notification-service';
@@ -122,9 +129,12 @@ function CommentsInner({
   );
   const [search, setSearch] = useState<string>('');
 
+  const initialSearchRef = useRef(search);
+  const initialPageRef = useRef(page);
+
   useEffect(() => {
-    if (searchTerm !== search) setSearch(searchTerm);
-  }, [searchTerm, search]);
+    if (searchTerm !== initialSearchRef.current) setSearch(searchTerm);
+  }, [searchTerm]);
 
   const datastore = new DataStore({
     projectId: props.projectId,
@@ -187,11 +197,11 @@ function CommentsInner({
     tagIdsArray
   );
 
-  const goToLastPage = () => {
+  const goToLastPage = useCallback(() => {
     if (totalPages > 0 && displayPagination) {
       setPage(totalPages - 1);
     }
-  };
+  }, [displayPagination, totalPages]);
 
   useEffect(() => {
     if (onGoToLastPage) {
@@ -200,10 +210,10 @@ function CommentsInner({
   }, [onGoToLastPage, goToLastPage]);
 
   useEffect(() => {
-    if (overridePage !== page) {
+    if (overridePage !== initialPageRef.current) {
       setPage(overridePage);
     }
-  }, [overridePage, page]);
+  }, [overridePage]);
 
   const refreshComments = () => {
     setRefreshKey((prevKey) => prevKey + 1); // Increment the key to trigger a refresh

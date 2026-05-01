@@ -457,7 +457,7 @@ function DocumentMap({
     });
 
     useEffect(() => {
-      if (map && bounds && !!docHeight && !!docWidth && !isBoundsSet) {
+      if (map && bounds && !isBoundsSet) {
         if (entireDocumentVisible === 'entirely') {
           map.fitBounds(bounds as LatLngBoundsLiteral);
         } else {
@@ -480,7 +480,7 @@ function DocumentMap({
         }
         setIsBoundsSet(true);
       }
-    }, [map]);
+    }, [map, bounds, entireDocumentVisible, isBoundsSet]);
 
     return null;
   };
