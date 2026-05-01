@@ -52,6 +52,10 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.use(
+  '/widget-assets',
+  express.static(path.join(__dirname, 'public', 'widget-assets'))
+);
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/:sitePrefix?/config-reset', async function (req, res, next) {
