@@ -55,7 +55,6 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
           <button
             className="toggle-submenu"
             onClick={() => {
-              console.log('Submenu toggle clicked', { index, open });
               setOpenIndex(index);
             }}
             aria-expanded={open}

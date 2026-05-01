@@ -5,7 +5,7 @@ import { Button, ButtonLink } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { PropsWithChildren, useEffect } from 'react';
+import { PropsWithChildren, useEffect, useRef } from 'react';
 import React, { useState } from 'react';
 
 import { loadWidget } from '../../lib/load-widget';
@@ -273,6 +273,7 @@ const ResourceOverviewMap = ({
   }
 
   const [center, setCenter] = useState<LocationType | undefined>(undefined);
+  const skipTargetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!!polygon) {
@@ -286,12 +287,8 @@ const ResourceOverviewMap = ({
   };
 
   const skipMarkers = () => {
-    const nextFocus: HTMLButtonElement | null = document.querySelectorAll(
-      '.leaflet-control-zoom-in'
-    )[0] as HTMLButtonElement;
-
-    if (nextFocus) {
-      nextFocus.focus();
+    if (skipTargetRef.current) {
+      skipTargetRef.current.focus();
     }
   };
 
@@ -328,6 +325,7 @@ const ResourceOverviewMap = ({
         markers={currentMarkers}
         locationProx={locationProx}
         dataLayerSettings={dataLayerSettings}></BaseMap>
+      <div ref={skipTargetRef} tabIndex={-1} style={{ outline: 'none' }} />
       <div className="map-buttons">
         {ctaButtonElement}
         {countButtonElement}

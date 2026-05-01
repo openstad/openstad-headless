@@ -897,10 +897,6 @@ function StemBegroot({
     );
   }, [activeTagTab]);
 
-  useEffect(() => {
-    console.log('Curr step', currentStep);
-  }, [currentStep]);
-
   return (
     <>
       <StemBegrootResourceDetailDialog
