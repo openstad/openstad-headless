@@ -143,7 +143,13 @@ async function writeToDatabase(entry) {
       await db.AuditLog.create(entry);
     }
   } catch (err) {
-    console.error('Audit log DB write failed:', err.message);
+    console.error('Audit log DB write failed:', {
+      error: err.message,
+      action: entry.action,
+      modelName: entry.modelName,
+      modelId: entry.modelId,
+      projectId: entry.projectId,
+    });
   }
 }
 

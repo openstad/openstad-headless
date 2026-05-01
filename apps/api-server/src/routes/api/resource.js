@@ -449,25 +449,32 @@ router
           .catch(next);
       })
       .catch(function (error) {
-        // todo: dit komt uit de oude routes; maak het generieker
         if (
           typeof error == 'object' &&
           error instanceof Sequelize.ValidationError
         ) {
           let errors = [];
           error.errors.forEach(function (error) {
-            // notNull kent geen custom messages in deze versie van sequelize; zie https://github.com/sequelize/sequelize/issues/1500
-            // TODO: we zitten op een nieuwe versie van seq; vermoedelijk kan dit nu wel
             errors.push(
               error.type === 'notNull Violation' && error.path === 'location'
                 ? 'Kies een locatie op de kaart'
                 : error.message
             );
           });
-          //	res.status(422).json(errors);
+
+          console.error('[resource-create] Validation error:', {
+            projectId: req.params.projectId,
+            widgetId: req.body?.widgetId || null,
+            errors: errors,
+          });
 
           next(createError(422, errors.join(', ')));
         } else {
+          console.error('[resource-create] Failed:', {
+            projectId: req.params.projectId,
+            widgetId: req.body?.widgetId || null,
+            error: error.message || error,
+          });
           next(error);
         }
       });
