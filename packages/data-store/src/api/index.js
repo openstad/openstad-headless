@@ -11,6 +11,7 @@ import fetchx from './fetch';
 import markers from './markers';
 import projectVotedUsersCount from './projectVotedUsersCount';
 import resource from './resource';
+import resourceMarkers from './resource-markers';
 import resources from './resources';
 import submissions from './submissions';
 import tags from './tags';
@@ -90,6 +91,10 @@ function API(props = {}) {
     delete: resources.delete.bind(self),
     create: resources.create.bind(self),
     submitLike: resources.submitLike.bind(self),
+  };
+
+  self.resourceMarkers = {
+    fetch: resourceMarkers.fetch.bind(self),
   };
 
   self.choicesguide = {

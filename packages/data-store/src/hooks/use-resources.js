@@ -66,10 +66,14 @@ export default function useResources(
     options
   );
 
-  // Secondary all-resources call (only when fetchAll is true)
+  const useMarkersEndpoint = fetchAll === 'markers';
   const { data: allDataRaw, isLoading: allIsLoading } = self.useSWR(
-    fetchAll ? { ...filterParams, noPagination: true } : null,
-    'resources.fetch',
+    fetchAll
+      ? useMarkersEndpoint
+        ? { ...filterParams, _markers: true }
+        : { ...filterParams, noPagination: true }
+      : null,
+    useMarkersEndpoint ? 'resourceMarkers.fetch' : 'resources.fetch',
     options
   );
 

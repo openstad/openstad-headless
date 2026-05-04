@@ -1012,7 +1012,11 @@ function ResourceOverviewInner({
     sort,
     projectIds: projectIds || [],
     allowMultipleProjects: selectedProjects && selectedProjects.length > 1,
-    fetchAll: needsAllResourcesFetch,
+    fetchAll: needsAllResourcesFetch
+      ? !listUsesAllResources && !displayMap
+        ? 'markers'
+        : true
+      : false,
   });
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
