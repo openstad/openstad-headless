@@ -66,6 +66,24 @@ module.exports = {
 
     // ... then middleware everyone needs...
     this._initBasicMiddleware();
+
+    this.app.post(
+      '/client-log/validation-error',
+      rateLimiter({ windowMs: 60000, max: 10 }),
+      function (req, res) {
+        const fieldsStr = JSON.stringify(req.body?.fields || {}).substring(
+          0,
+          2000
+        );
+        console.error('[client-validation] Failed:', {
+          url: req.body?.url?.substring(0, 200),
+          fields: fieldsStr,
+          ip: req.ip,
+        });
+        res.status(204).end();
+      }
+    );
+
     this._initSessionMiddleware();
 
     var middleware = config.express.middleware;

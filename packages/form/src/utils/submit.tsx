@@ -58,6 +58,44 @@ export const handleSubmit = (
 
   setFormErrors(errors);
 
+  const activeErrors = Object.entries(errors).filter(([, v]) => v !== null);
+  if (activeErrors.length > 0) {
+    try {
+      const apiUrl = (window as any).OpenStadAPI?.apiUrl;
+      if (apiUrl) {
+        const fieldDetails: Record<
+          string,
+          { error: string | null; value: string }
+        > = {};
+        for (const [key, error] of activeErrors) {
+          const val = formValues[key];
+          let valSummary = '';
+          if (val === undefined || val === null || val === '') {
+            valSummary = 'empty';
+          } else if (typeof val === 'string') {
+            valSummary = `${val.length} chars`;
+          } else if (Array.isArray(val)) {
+            valSummary = `array(${val.length})`;
+          } else if (typeof val === 'object') {
+            valSummary = `object(${Object.keys(val).length} keys)`;
+          } else {
+            valSummary = String(val);
+          }
+          fieldDetails[key] = { error, value: valSummary };
+        }
+
+        fetch(`${apiUrl}/client-log/validation-error`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            url: window.location.href,
+            fields: fieldDetails,
+          }),
+        }).catch(() => {});
+      }
+    } catch (e) {}
+  }
+
   if (Object.values(errors).every((error) => error === null)) {
     if (pageHandler) pageHandler();
 
