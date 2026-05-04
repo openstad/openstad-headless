@@ -152,6 +152,40 @@ function initCarousel(container) {
   updateItemWidths();
   updateCarousel();
 
+  const autoplayEnabled = track.getAttribute('data-autoplay') === 'true';
+  const autoplayInterval =
+    parseInt(track.getAttribute('data-autoplay-interval') || '5', 10) * 1000;
+  let autoplayTimer = null;
+  let autoplayPaused = false;
+
+  if (autoplayEnabled) {
+    function startAutoplay() {
+      if (autoplayPaused || autoplayTimer) return;
+      autoplayTimer = setInterval(() => {
+        itemsPerView = getItemsPerView();
+        maxIndex = Math.max(0, items.length - itemsPerView);
+        currentIndex = currentIndex >= maxIndex ? 0 : currentIndex + 1;
+        updateCarousel();
+      }, autoplayInterval);
+    }
+
+    function stopAutoplay() {
+      clearInterval(autoplayTimer);
+      autoplayTimer = null;
+    }
+
+    startAutoplay();
+
+    container.addEventListener('mouseenter', () => {
+      autoplayPaused = true;
+      stopAutoplay();
+    });
+    container.addEventListener('mouseleave', () => {
+      autoplayPaused = false;
+      startAutoplay();
+    });
+  }
+
   window.addEventListener('resize', () => {
     updateItemWidths();
     const newItemsPerView = getItemsPerView();

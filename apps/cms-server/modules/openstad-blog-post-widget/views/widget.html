@@ -31,6 +31,8 @@
       %}
       data-carousel-track
       data-items-visible="{{ data.widget.carouselItemsVisible or '3' }}"
+      data-autoplay="{{ 'true' if data.widget.autoplay else 'false' }}"
+      data-autoplay-interval="{{ data.widget.autoplayInterval or '5' }}"
       {%
       endif
       %}>
