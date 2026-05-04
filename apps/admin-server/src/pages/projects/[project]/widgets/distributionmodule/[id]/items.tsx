@@ -127,7 +127,9 @@ export default function WidgetDistributionModuleItems(
     trigger: string
   ) {
     if (actionType === 'delete') {
-      return list.filter((entry) => entry.trigger !== trigger);
+      return list
+        .filter((entry) => entry.trigger !== trigger)
+        .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger));
     }
 
     const sorted = [...list].sort(
@@ -142,14 +144,18 @@ export default function WidgetDistributionModuleItems(
       const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
       const triggerA = sorted[index].trigger;
       const triggerB = sorted[swapIndex].trigger;
-      return sorted.map((entry) => {
-        if (entry.trigger === triggerA) return { ...entry, trigger: triggerB };
-        if (entry.trigger === triggerB) return { ...entry, trigger: triggerA };
-        return entry;
-      });
+      return sorted
+        .map((entry) => {
+          if (entry.trigger === triggerA)
+            return { ...entry, trigger: triggerB };
+          if (entry.trigger === triggerB)
+            return { ...entry, trigger: triggerA };
+          return entry;
+        })
+        .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger));
     }
 
-    return list;
+    return sorted;
   }
 
   function handleSaveItems() {
