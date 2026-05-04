@@ -120,6 +120,43 @@ async function shouldSendUpdatedResourceAdminEmail(req) {
   }
 }
 
+router.all('*', function (req, res, next) {
+  const isWrite = ['POST', 'PUT', 'DELETE'].includes(req.method);
+  if (isWrite) {
+    const start = Date.now();
+    const logCtx = {
+      method: req.method,
+      path: req.originalUrl?.substring(0, 200),
+      projectId: req.params?.projectId,
+      userId: req.user?.id || null,
+      userRole: req.user?.role || 'anonymous',
+      ip: req.ip,
+    };
+    console.log('[resource-route] Incoming write:', logCtx);
+
+    const originalJson = res.json;
+    res.json = function (data) {
+      console.log('[resource-route] Response:', {
+        ...logCtx,
+        status: res.statusCode,
+        duration: Date.now() - start + 'ms',
+        resourceId: data?.id || null,
+      });
+      return originalJson.call(this, data);
+    };
+
+    res.on('close', () => {
+      if (!res.writableFinished) {
+        console.warn('[resource-route] Connection closed before response:', {
+          ...logCtx,
+          duration: Date.now() - start + 'ms',
+        });
+      }
+    });
+  }
+  return next();
+});
+
 // scopes: for all get requests
 router.all('*', function (req, res, next) {
   req.scope = [
@@ -340,16 +377,30 @@ router
   // -----------
   .post(auth.can('Resource', 'create'))
   .post(function (req, res, next) {
-    if (!req.project) return next(createError(401, 'Project niet gevonden'));
+    if (!req.project) {
+      console.error('[resource-create] Rejected: project not found', {
+        projectId: req.params.projectId,
+      });
+      return next(createError(401, 'Project niet gevonden'));
+    }
     return next();
   })
   .post(function (req, res, next) {
     if (!req.project?.config?.resources?.canAddNewResources) {
+      console.error('[resource-create] Rejected: submissions closed', {
+        projectId: req.params.projectId,
+      });
       return next(createError(401, 'Inzenden is gesloten'));
     }
     return next();
   })
   .post(rateLimiter(), function (req, res, next) {
+    console.log('[resource-post] Received:', {
+      projectId: req.params.projectId,
+      widgetId: req.body?.widgetId || req.body?.submittedData?.widgetId || null,
+      userId: req.user?.id || null,
+    });
+
     try {
       req.body.location = req.body.location
         ? JSON.parse(req.body.location)
@@ -426,9 +477,21 @@ router
           }
           const url = new URL(image.url);
           if (url.hostname !== hostname) {
+            console.error(
+              '[resource-create] Rejected: invalid image hostname',
+              {
+                projectId: req.params.projectId,
+                imageHost: url.hostname,
+                expected: hostname,
+              }
+            );
             return next(createError(400, 'Invalid image url'));
           }
         } catch (err) {
+          console.error('[resource-create] Rejected: invalid image url', {
+            projectId: req.params.projectId,
+            url: image.url?.substring(0, 100),
+          });
           return next(createError(400, 'Invalid image url'));
         }
       });
@@ -446,7 +509,13 @@ router
             req.results = result;
             return next();
           })
-          .catch(next);
+          .catch(function (error) {
+            console.error('[resource-create] Post-create lookup failed:', {
+              projectId: req.params.projectId,
+              error: error.message || error,
+            });
+            next(error);
+          });
       })
       .catch(function (error) {
         if (
@@ -1043,5 +1112,84 @@ function getOnlyIds(objArr) {
     })
     .filter((obj) => obj !== false);
 }
+
+router
+  .route('/markers')
+  .get(auth.can('Resource', 'list'))
+  .get(function (req, res, next) {
+    const where = {
+      projectId: req.params.projectId,
+    };
+
+    const scope = [
+      'defaultScope',
+      { method: ['onlyVisible', req.user.id, req.user.role] },
+      'markerFields',
+      'includeTags',
+      'includeStatuses',
+    ];
+
+    if (req.query.tags) {
+      let tags = req.query.tags;
+      if (!Array.isArray(tags)) tags = [tags];
+      scope.push({ method: ['selectTags', tags] });
+    }
+
+    if (req.query.excludeTags) {
+      let excludeTags = req.query.excludeTags;
+      if (!Array.isArray(excludeTags)) excludeTags = [excludeTags];
+      scope.push({ method: ['excludeTags', excludeTags] });
+    }
+
+    if (req.query.statuses) {
+      let statuses = req.query.statuses;
+      if (!Array.isArray(statuses)) statuses = [statuses];
+      scope.push({ method: ['selectStatuses', statuses] });
+    }
+
+    if (req.query.excludeStatuses) {
+      let excludeStatuses = req.query.excludeStatuses;
+      if (!Array.isArray(excludeStatuses)) excludeStatuses = [excludeStatuses];
+      scope.push({ method: ['excludeStatuses', excludeStatuses] });
+    }
+
+    if (req.query.tagGroups) {
+      try {
+        const tagGroups = JSON.parse(req.query.tagGroups);
+        if (Array.isArray(tagGroups) && tagGroups.length > 0) {
+          scope.push({ method: ['selectTagGroups', tagGroups] });
+        }
+      } catch (e) {}
+    }
+
+    if (req.query.lat && req.query.lng && req.query.maxDistance) {
+      scope.push({
+        method: [
+          'withinDistance',
+          req.query.lat,
+          req.query.lng,
+          req.query.maxDistance,
+        ],
+      });
+    }
+
+    db.Resource.scope(...scope)
+      .findAll({
+        where,
+      })
+      .then(function (resources) {
+        req.results = resources;
+        return next();
+      })
+      .catch(next);
+  })
+  .get(
+    searchInResults({
+      searchfields: ['id', 'title'],
+    })
+  )
+  .get(function (req, res, next) {
+    res.json(req.results);
+  });
 
 module.exports = router;

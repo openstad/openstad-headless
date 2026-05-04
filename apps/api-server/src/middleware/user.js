@@ -63,6 +63,12 @@ module.exports = async function getUser(req, res, next) {
 
     return next();
   } catch (error) {
+    console.error('[user-middleware] Failed:', {
+      error: error.message,
+      method: req.method,
+      path: req.originalUrl?.substring(0, 200),
+      projectId: req.params?.projectId || null,
+    });
     console.error(error);
     next(error);
   }

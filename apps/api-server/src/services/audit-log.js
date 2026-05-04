@@ -143,13 +143,48 @@ async function writeToDatabase(entry) {
       await db.AuditLog.create(entry);
     }
   } catch (err) {
-    console.error('Audit log DB write failed:', {
+    const detail = {
       error: err.message,
       action: entry.action,
       modelName: entry.modelName,
       modelId: entry.modelId,
       projectId: entry.projectId,
-    });
+    };
+
+    if (err.message && err.message.includes('CHARACTER SET')) {
+      const fields = [
+        'previousData',
+        'newData',
+        'userAgent',
+        'routePath',
+        'referer',
+      ];
+      for (const field of fields) {
+        if (entry[field]) {
+          try {
+            const testVal =
+              typeof entry[field] === 'string'
+                ? entry[field]
+                : JSON.stringify(entry[field]);
+            if (/[\uD800-\uDFFF]/.test(testVal)) {
+              detail.problematicField = field;
+              detail.sample = testVal.substring(0, 200);
+              break;
+            }
+          } catch (e) {}
+        }
+      }
+
+      if (!detail.problematicField) {
+        detail.problematicField = 'unknown';
+        detail.fieldSummary = Object.keys(entry)
+          .filter((k) => entry[k] != null)
+          .map((k) => `${k}:${typeof entry[k]}`)
+          .join(', ');
+      }
+    }
+
+    console.error('Audit log DB write failed:', detail);
   }
 }
 
