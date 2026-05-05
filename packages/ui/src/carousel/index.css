@@ -12,7 +12,43 @@
 }
 
 .carousel-items {
+  position: relative;
   flex: 1;
+}
+
+.carousel-item {
+  width: 100%;
+}
+
+/* Oude afbeelding: absoluut bovenop, fadet weg */
+.carousel-item--leaving {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  animation: osc-carousel-fade-out 0.5s ease-in-out forwards;
+}
+
+/* Nieuwe afbeelding: fadet in */
+.carousel-item--entering {
+  animation: osc-carousel-fade-in 0.5s ease-in-out;
+}
+
+@keyframes osc-carousel-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes osc-carousel-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
 }
 
 .osc-carousel-navigation-button-wrapper {
@@ -23,13 +59,13 @@
 .osc-carousel-previous {
   position: absolute;
   left: 10px;
-  z-index: 1;
+  z-index: 3;
 }
 
 .osc-carousel-next {
   position: absolute;
   right: 10px;
-  z-index: 1;
+  z-index: 3;
 }
 
 .osc-carousel-pager {
@@ -40,6 +76,7 @@
   transform: translateX(-50%);
   bottom: 10px;
   top: auto;
+  z-index: 3;
 }
 
 .osc-carousel-pager .osc-carousel-pager-button {
