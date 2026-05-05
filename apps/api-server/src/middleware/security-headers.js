@@ -36,6 +36,7 @@ module.exports = function (req, res, next) {
         '^(/api/repo|/api/template|/api/area|/api/widget|/api/image|/api/document|/api/widget-type|/widget|/api/project/0/tag|/api/pending-budget-vote|/$)'
       ) ||
         req.path.match('^(/api/lock(/[^/]*)?)$') ||
+        req.path.match('^(/client-log/)') ||
         (req.path.match('^(/api/user)') && req.method == 'GET') ||
         (req.path.match('^(/api/project)$') && req.method == 'GET'))
     ) {
