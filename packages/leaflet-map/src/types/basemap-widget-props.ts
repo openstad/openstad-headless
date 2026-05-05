@@ -3,6 +3,17 @@ import { PostcodeAutoFillLocation } from '@openstad-headless/ui/src/stem-begroot
 
 import type { MapPropsType } from '../types/index';
 
+export type MarkerSetConfig = {
+  id: number;
+  name: string;
+};
+
+export type CustomLegendItem = {
+  label: string;
+  color?: string;
+  icon?: string;
+};
+
 export type BaseMapWidgetProps = BaseProps &
   ProjectSettingProps & {
     resourceId?: string;
@@ -11,4 +22,7 @@ export type BaseMapWidgetProps = BaseProps &
     interactionType?: 'default' | 'direct';
     mapDataLayers?: any;
     locationProx?: PostcodeAutoFillLocation;
+    markerSets?: MarkerSetConfig[];
+    markerInteractionType?: 'default' | 'direct';
+    customLegend?: CustomLegendItem[];
   } & MapPropsType;

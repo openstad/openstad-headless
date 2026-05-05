@@ -109,7 +109,6 @@ fieldset.utrecht-form-fieldset__fieldset table.utrecht-table td {
     .utrecht-table__body
     > .utrecht-table__row
     td:first-child {
-    font-weight: bold;
     padding-top: 10px;
   }
 

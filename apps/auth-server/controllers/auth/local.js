@@ -14,6 +14,7 @@ const db = require('../../db');
 const authLocalConfig = require('../../config/auth').get('Local');
 const URL = require('url').URL;
 const authType = 'Local';
+const { logAuthEvent } = require('../../middleware/auditLog');
 
 /**
  * Render the index.html or index-with-code.js depending on if query param has code or not
@@ -95,7 +96,12 @@ exports.postRegister = (req, res, next) => {
 
     db.User()
       .create({ name, email, password })
-      .then(() => {
+      .then((user) => {
+        logAuthEvent(req, 'register', {
+          userId: user.id,
+          userName: name || email,
+          data: { method: 'local', email },
+        });
         res.redirect(
           authLocalConfig.loginUrl + '?clientId=' + req.client.clientId
         );
@@ -120,6 +126,9 @@ exports.postLogin = (req, res, next) => {
 
     // Redirect if it fails to the original e-mail screen
     if (!user) {
+      logAuthEvent(req, 'login_failed', {
+        data: { method: 'local', email: req.body.email },
+      });
       req.flash('error', { msg: 'Incorrect combination email/password' });
       const redirectUrl = req.query.redirect_uri
         ? encodeURIComponent(req.query.redirect_uri)
@@ -152,6 +161,9 @@ exports.postLogin = (req, res, next) => {
 
       // Redirect if it succeeds to authorize screen
       req.brute.resetKey(req.bruteKey);
+      logAuthEvent(req, 'login', {
+        data: { method: 'local' },
+      });
       return res.redirect(authorizeUrl);
     });
   })(req, res, next);
@@ -165,6 +177,11 @@ exports.postLogin = (req, res, next) => {
  */
 exports.logout = async (req, res) => {
   let userId = req.user && req.user.id;
+
+  logAuthEvent(req, 'logout', {
+    userId,
+  });
+
   if (userId) {
     await db.AccessToken.destroy({ where: { userId } });
   }

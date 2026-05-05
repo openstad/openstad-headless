@@ -1,16 +1,9 @@
 {% extends "layout.html" %} {% import "filters.html" as filters %} {% import
 "@apostrophecms/pager:macros.html" as pager with context %} {% block title %}{{
-data.page.title }} {% endblock %} {% block main %}
+data.page.title }} {% endblock %} {% block main %} {% area data.page, 'top' %}
 
 <div class="section">
   <div class="container u-small-dropdowns">
-    <div class="row">
-      <div class="col-xs-12">
-        <div class="news-overview-header">
-          <h1 class="utrecht-heading-1">{{ data.page.title }}</h1>
-        </div>
-      </div>
-    </div>
     <div class="row">
       <div class="col-xs-12">
         <article class="news-grid">
@@ -23,7 +16,7 @@ data.page.title }} {% endblock %} {% block main %}
             </figure>
             <div class="card-content">
               <div class="date">
-                {{ piece.publishedAt | date('MMMM D, YYYY') }}
+                {{ piece.publishedAt | date('D MMMM YYYY') }}
               </div>
               <h2 class="utrecht-heading-4">{{ piece.title }}</h2>
               <p class="utrecht-paragraph">{{ piece.summary }}</p>
@@ -40,4 +33,5 @@ data.page.title }} {% endblock %} {% block main %}
     </div>
   </div>
 </div>
-{% endblock %}
+
+{% area data.page, 'bottom' %} {% endblock %}

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { Polygon, Popup, Tooltip } from 'react-leaflet';
 import { difference, polygon as tPolygon } from 'turf';
 
+import { isSafeUrl, sanitizeColor } from './lib/sanitize';
 import type {
   AreaMultiPolygon,
   AreaPolygon,
@@ -146,14 +147,18 @@ export function Area({
   ...props
 }: BaseProps & AreaProps) {
   const datastore = new DataStore({});
-  const { data: allAreas } = datastore.useArea({
-    projectId: props.projectId,
-  });
+  const areaIds = areas?.map((item: { id: number }) => item.id);
+  const { data: fetchedAreas } = datastore.useAreas(
+    areaIds && areaIds.length > 0 ? { ids: areaIds } : undefined
+  );
 
   interface Area {
     id: number;
     name: string;
     url: string;
+    color?: string;
+    openInNewTab?: boolean;
+    buttonText?: string;
   }
 
   const [poly, setPoly] = useState<any>([]);
@@ -190,13 +195,9 @@ export function Area({
   }, [area, areaRenderMode]);
 
   const multiPolygon: any[] = [];
-  const areaIds = areas?.map((item: Area) => item.id);
-  const safeAllAreas = Array.isArray(allAreas) ? allAreas : [];
-  const filteredAreas = safeAllAreas.filter((item: any) =>
-    areaIds?.includes(item.id)
-  );
+  const safeFetchedAreas = Array.isArray(fetchedAreas) ? fetchedAreas : [];
 
-  filteredAreas.forEach((item: any) => {
+  safeFetchedAreas.forEach((item: any) => {
     multiPolygon.push({
       title: item.name,
       polygon: item.polygon,
@@ -209,6 +210,9 @@ export function Area({
     );
     if (existingItem) {
       existingItem.url = item.url;
+      existingItem.color = item.color;
+      existingItem.openInNewTab = item.openInNewTab;
+      existingItem.buttonText = item.buttonText;
     }
   });
 
@@ -235,23 +239,49 @@ export function Area({
             <Polygon
               key={index}
               {...props}
-              pathOptions={areaPolygonStyle}
+              pathOptions={
+                item.color
+                  ? {
+                      ...areaPolygonStyle,
+                      color: sanitizeColor(item.color),
+                      fillColor: sanitizeColor(item.color),
+                      fillOpacity: 0.3,
+                      weight: 3,
+                    }
+                  : areaPolygonStyle
+              }
               positions={item.polygon}
               eventHandlers={
                 interactionType !== 'direct'
                   ? {
                       mouseover: (e) => {
                         e.target.setStyle({
-                          fillOpacity: 0.05,
+                          fillOpacity: 0.15,
                         });
                       },
                       mouseout: (e) => {
-                        e.target.setStyle(areaPolygonStyle);
+                        e.target.setStyle(
+                          item.color
+                            ? {
+                                ...areaPolygonStyle,
+                                color: sanitizeColor(item.color),
+                                fillColor: sanitizeColor(item.color),
+                                fillOpacity: 0.3,
+                                weight: 3,
+                              }
+                            : areaPolygonStyle
+                        );
                       },
                     }
                   : {
                       click: () => {
-                        if (item.url) window.open(item.url, '_self');
+                        const url =
+                          item.url && isSafeUrl(item.url) ? item.url : '';
+                        if (url)
+                          window.open(
+                            url,
+                            item.openInNewTab ? '_blank' : '_self'
+                          );
                       },
                     }
               }>
@@ -260,9 +290,15 @@ export function Area({
                   {item.title && (
                     <h3 className="utrecht-heading-3">{item.title}</h3>
                   )}
-                  {item.url && (
-                    <a className="pop-up-link" href={item.url}>
-                      Lees verder
+                  {item.url && isSafeUrl(item.url) && (
+                    <a
+                      className="pop-up-link"
+                      href={item.url}
+                      target={item.openInNewTab ? '_blank' : '_self'}
+                      rel={
+                        item.openInNewTab ? 'noopener noreferrer' : undefined
+                      }>
+                      {item.buttonText || 'Lees verder'}
                     </a>
                   )}
                 </Popup>
@@ -270,7 +306,13 @@ export function Area({
                 <Tooltip permanent direction="center">
                   <span
                     onClick={() => {
-                      if (item.url) window.open(item.url, '_self');
+                      const url =
+                        item.url && isSafeUrl(item.url) ? item.url : '';
+                      if (url)
+                        window.open(
+                          url,
+                          item.openInNewTab ? '_blank' : '_self'
+                        );
                     }}>
                     {item.title}
                   </span>

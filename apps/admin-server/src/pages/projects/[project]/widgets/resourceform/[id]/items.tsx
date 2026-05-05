@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -113,7 +114,7 @@ const formSchema = z.object({
   matrixMultiple: z.boolean().optional(),
   routingInitiallyHide: z.boolean().optional(),
   routingSelectedQuestion: z.string().optional(),
-  routingSelectedAnswer: z.string().optional(),
+  routingSelectedAnswer: z.union([z.string(), z.array(z.string())]).optional(),
   selectAll: z.boolean().optional(),
   selectAllLabel: z.string().optional(),
 });
@@ -167,10 +168,37 @@ export default function WidgetResourceFormItems(
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
     if (selectedItem) {
+      const oldOptions = selectedItem.options || [];
+      const newOptions = options || [];
+      const triggerMap: Record<string, string> = {};
+      for (let i = 0; i < Math.min(oldOptions.length, newOptions.length); i++) {
+        if (oldOptions[i].trigger !== newOptions[i].trigger) {
+          triggerMap[oldOptions[i].trigger] = newOptions[i].trigger;
+        }
+      }
+      const hasTriggerChanges = Object.keys(triggerMap).length > 0;
+
       setItems((currentItems) =>
-        currentItems.map((item) =>
-          item.trigger === selectedItem.trigger ? { ...item, ...values } : item
-        )
+        currentItems.map((item) => {
+          if (item.trigger === selectedItem.trigger) {
+            return { ...item, ...values };
+          }
+          if (
+            hasTriggerChanges &&
+            item.routingSelectedQuestion === selectedItem.trigger
+          ) {
+            const answers = Array.isArray(item.routingSelectedAnswer)
+              ? item.routingSelectedAnswer
+              : item.routingSelectedAnswer
+                ? [item.routingSelectedAnswer]
+                : [];
+            const updated = answers.map(
+              (answer) => triggerMap[answer] || answer
+            );
+            return { ...item, routingSelectedAnswer: updated };
+          }
+          return item;
+        })
       );
       setItem(null);
     } else {
@@ -442,11 +470,30 @@ export default function WidgetResourceFormItems(
   ) => {
     if (isItemAction) {
       setItems((currentItems) => {
-        return handleMovementOrDeletion(
+        const index = currentItems.findIndex(
+          (entry) => entry.trigger === clickedTrigger
+        );
+        const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
+        const triggerA = currentItems[index]?.trigger;
+        const triggerB = currentItems[swapIndex]?.trigger;
+
+        const newItems = handleMovementOrDeletion(
           currentItems,
           actionType,
           clickedTrigger
         ) as Item[];
+
+        if (actionType !== 'delete' && triggerA && triggerB) {
+          for (const item of newItems) {
+            if (item.routingSelectedQuestion === triggerA) {
+              item.routingSelectedQuestion = triggerB;
+            } else if (item.routingSelectedQuestion === triggerB) {
+              item.routingSelectedQuestion = triggerA;
+            }
+          }
+        }
+
+        return newItems;
       });
     } else if (isMatrixAction) {
       let newMatrixOptions: Matrix;
@@ -1844,7 +1891,13 @@ export default function WidgetResourceFormItems(
                                 ) : (
                                   <Select
                                     value={field.value}
-                                    onValueChange={field.onChange}>
+                                    onValueChange={(value) => {
+                                      field.onChange(value);
+                                      form.setValue(
+                                        'routingSelectedAnswer',
+                                        []
+                                      );
+                                    }}>
                                     <FormControl>
                                       <SelectTrigger>
                                         <SelectValue placeholder="Kies een vraag" />
@@ -1894,6 +1947,31 @@ export default function WidgetResourceFormItems(
                                   }));
                               }
 
+                              const optionTriggers = options.map(
+                                (o: any) => o.trigger
+                              );
+                              const rawValues = Array.isArray(field.value)
+                                ? field.value
+                                : field.value
+                                  ? [field.value]
+                                  : [];
+                              const selectedValues = rawValues.filter(
+                                (v: string) => optionTriggers.includes(v)
+                              );
+
+                              if (selectedValues.length !== rawValues.length) {
+                                field.onChange(selectedValues);
+                              }
+
+                              const toggleValue = (trigger: string) => {
+                                const next = selectedValues.includes(trigger)
+                                  ? selectedValues.filter(
+                                      (v: string) => v !== trigger
+                                    )
+                                  : [...selectedValues, trigger];
+                                field.onChange(next);
+                              };
+
                               return (
                                 <FormItem>
                                   <FormLabel>
@@ -1918,24 +1996,25 @@ export default function WidgetResourceFormItems(
                                       een ander antwoord.
                                     </p>
                                   ) : (
-                                    <Select
-                                      value={field.value}
-                                      onValueChange={field.onChange}>
-                                      <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Kies een antwoord" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        {options.map((o: any) => (
-                                          <SelectItem
-                                            key={o.trigger}
-                                            value={o.trigger}>
+                                    <div className="flex flex-col gap-2 mt-2">
+                                      {options.map((o: any) => (
+                                        <label
+                                          key={o.trigger}
+                                          className="flex items-center gap-2 cursor-pointer">
+                                          <Checkbox
+                                            checked={selectedValues.includes(
+                                              o.trigger
+                                            )}
+                                            onCheckedChange={() =>
+                                              toggleValue(o.trigger)
+                                            }
+                                          />
+                                          <span className="text-sm">
                                             {o.titles?.[0]?.key || o.trigger}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
+                                          </span>
+                                        </label>
+                                      ))}
+                                    </div>
                                   )}
 
                                   <FormMessage />

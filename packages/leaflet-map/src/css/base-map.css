@@ -130,7 +130,7 @@
 }
 
 .osc-map-legend.legend .legend-icon {
-  width: 10px;
+  width: 13px;
   height: 13px;
   margin-right: 5px;
   display: inline-block;
@@ -156,4 +156,5 @@
 
 .leaflet-overlay-pane .leaflet-interactive {
   pointer-events: none;
+  transition: fill-opacity 0.2s ease;
 }

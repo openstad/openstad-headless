@@ -48,7 +48,11 @@ function _invokeDir(dirName, fn, ctx) {
 
     if (isDir) {
       _invokeDir(fullPath, fn, ctx);
-    } else if (fileName !== 'index.js' && fileName.match(/\.js$/) !== null) {
+    } else if (
+      fileName !== 'index.js' &&
+      fileName.match(/\.js$/) !== null &&
+      !fileName.match(/\.test\.js$/)
+    ) {
       var name = fileName.replace(/\.js$/, '');
       var module = require(fullPath);
       fn.call(ctx || module, module, name, dirName);

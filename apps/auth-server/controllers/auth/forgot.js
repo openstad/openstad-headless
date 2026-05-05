@@ -14,6 +14,7 @@ const password = require('../../services/password');
 const authLocalConfig = require('../../config/auth').get('Local');
 const authForgotConfig = require('../../config/auth').get('Forgot');
 const authResetConfig = require('../../config/auth').get('Reset');
+const { logAuthEvent } = require('../../middleware/auditLog');
 
 exports.forgot = (req, res) => {
   const config = req.client.config ? req.client.config : {};
@@ -81,6 +82,10 @@ exports.postReset = (req, res, next) => {
           });
         })
         .then(() => {
+          logAuthEvent(req, 'password_reset', {
+            userId,
+            userName: user.email,
+          });
           req.flash('success', {
             msg: 'Wachtwoord aangepast, je kan nu inloggen!',
           });

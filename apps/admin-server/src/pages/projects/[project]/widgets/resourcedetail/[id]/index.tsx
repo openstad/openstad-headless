@@ -16,7 +16,9 @@ import WidgetResourceDetailDocumentMap from '@/pages/projects/[project]/widgets/
 import { ResourceOverviewMapWidgetTabProps } from '@/pages/projects/[project]/widgets/resourcesmap/[id]';
 import WidgetResourcesMapButtons from '@/pages/projects/[project]/widgets/resourcesmap/[id]/buttons';
 import WidgetResourcesMapDatalayers from '@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers';
+import WidgetResourcesMapLegend from '@/pages/projects/[project]/widgets/resourcesmap/[id]/legend';
 import WidgetResourcesMapMap from '@/pages/projects/[project]/widgets/resourcesmap/[id]/map';
+import WidgetResourcesMapMarkers from '@/pages/projects/[project]/widgets/resourcesmap/[id]/markers';
 import WidgetResourcesMapPolygons from '@/pages/projects/[project]/widgets/resourcesmap/[id]/polygons';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
 import { useRouter } from 'next/router';
@@ -132,6 +134,8 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                     <TabsTrigger value="map">Kaart</TabsTrigger>
                     <TabsTrigger value="polygons">Polygonen</TabsTrigger>
                     <TabsTrigger value="datalayers">Kaartlagen</TabsTrigger>
+                    <TabsTrigger value="markerSets">Markers</TabsTrigger>
+                    <TabsTrigger value="legend">Legenda</TabsTrigger>
                     <TabsTrigger value="button">Knoppen</TabsTrigger>
                   </TabsList>
 
@@ -177,6 +181,32 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   </TabsContent>
                   <TabsContent value="datalayers" className="p-0">
                     <WidgetResourcesMapDatalayers
+                      {...extractConfig<
+                        ResourceDetailWidgetProps,
+                        ResourceOverviewMapWidgetTabProps
+                      >({
+                        previewConfig,
+                        subWidgetKey: 'resourceOverviewMapWidget',
+                        updateConfig,
+                        updatePreview,
+                      })}
+                    />
+                  </TabsContent>
+                  <TabsContent value="markerSets" className="p-0">
+                    <WidgetResourcesMapMarkers
+                      {...extractConfig<
+                        ResourceDetailWidgetProps,
+                        ResourceOverviewMapWidgetTabProps
+                      >({
+                        previewConfig,
+                        subWidgetKey: 'resourceOverviewMapWidget',
+                        updateConfig,
+                        updatePreview,
+                      })}
+                    />
+                  </TabsContent>
+                  <TabsContent value="legend" className="p-0">
+                    <WidgetResourcesMapLegend
                       {...extractConfig<
                         ResourceDetailWidgetProps,
                         ResourceOverviewMapWidgetTabProps

@@ -29,13 +29,19 @@ module.exports = async function sendMessage({ message }) {
       });
     }
 
-    await transporter.sendMail({
+    const mailOptions = {
       from: message.from,
       to: message.to,
       subject: message.subject,
       text: message.text,
       html: message.body,
-    });
+    };
+
+    if (message._pdfAttachment) {
+      mailOptions.attachments = [message._pdfAttachment];
+    }
+
+    await transporter.sendMail(mailOptions);
   } catch (err) {
     console.error(err);
     throw err;

@@ -9,6 +9,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../src/components/ui/tabs';
+import ProjectResourceAuditLog from './audit-log';
 import ProjectResourceArguments from './comments';
 import ProjectResourceCreate from './info';
 import ProjectResourcePreview from './preview';
@@ -53,6 +54,7 @@ export default function ProjectResource() {
               <TabsTrigger value="comments">Reacties</TabsTrigger>
               <TabsTrigger value="createComment">Reactie plaatsen</TabsTrigger>
               <TabsTrigger value="preview">Preview</TabsTrigger>
+              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
             </TabsList>
             <TabsContent value="info" className="p-0">
               <ProjectResourceCreate />
@@ -68,6 +70,9 @@ export default function ProjectResource() {
             </TabsContent>
             <TabsContent value="preview" className="p-0">
               <ProjectResourcePreview />
+            </TabsContent>
+            <TabsContent value="auditlog" className="p-0">
+              <ProjectResourceAuditLog />
             </TabsContent>
           </Tabs>
         </div>

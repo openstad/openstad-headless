@@ -32,6 +32,14 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 {{- end -}}
 
+{{- define "openstad.pdf.secret.fullname" -}}
+{{- if not .Values.secrets.existingSecret -}}
+{{- printf "%s-pdf-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{ .Values.secrets.existingSecret }}
+{{- end -}}
+{{- end -}}
+
 {{- define "openstad.cdn.secret.fullname" -}}
 {{- if not .Values.secrets.existingSecret -}}
 {{- printf "%s-cdn-secret" (include "openstad.fullname" .) | trunc 63 | trimSuffix "-" -}}

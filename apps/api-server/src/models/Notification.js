@@ -1,4 +1,12 @@
 const merge = require('merge');
+const {
+  processResourceQA,
+  processSubmissionQA,
+} = require('../services/qa-processor');
+const {
+  buildPdfAttachment,
+  shouldGeneratePdf,
+} = require('../services/pdf-attachment');
 
 function deriveNotificationTemplateData(instance) {
   const normalizeBaseUrl = (url) => {
@@ -150,8 +158,8 @@ module.exports = (db, sequelize, DataTypes) => {
           try {
             await instance.update({ status: 'pending' });
 
-            // send immediatly or wait for cron
-            let immediateTypes = [
+            // send immediately or wait for cron
+            const immediateTypes = [
               'new concept resource - user feedback',
               'new published resource - user feedback',
               'updated resource - user feedback',
@@ -174,7 +182,7 @@ module.exports = (db, sequelize, DataTypes) => {
               const derivedTemplateData =
                 deriveNotificationTemplateData(instance);
 
-              let messageData = {
+              const messageData = {
                 projectId: instance.projectId,
                 engine: instance.engine,
                 type: instance.type,
@@ -186,239 +194,75 @@ module.exports = (db, sequelize, DataTypes) => {
               };
 
               let htmlContent = '';
-
-              if (instance.data.resourceId) {
-                const resource = await db.Resource.findByPk(
-                  instance.data.resourceId,
-                  {
-                    include: [{ model: db.Tag, attributes: ['name', 'type'] }],
-                  }
-                );
-
-                const widget = !!resource
-                  ? await db.Widget.findByPk(resource.widgetId)
-                  : instance.widgetId || null;
-
-                if (
-                  widget &&
-                  widget.dataValues.config &&
-                  widget.dataValues.config.items
-                ) {
-                  const widgetItems = widget.dataValues.config.items;
-
-                  const questionsAndAnswers = widgetItems.map((item) => {
-                    const question = item.title || item.fieldKey;
-                    const fieldKey = item.fieldKey;
-                    let answer =
-                      resource[fieldKey] ||
-                      resource.extraData?.[fieldKey] ||
-                      '';
-
-                    if (fieldKey.includes('[') && fieldKey.includes(']')) {
-                      const [mainKey, subKey] = fieldKey
-                        .split(/[\[\]]/)
-                        .filter(Boolean);
-                      if (mainKey === 'tags') {
-                        const tags = resource.tags.filter(
-                          (tag) => tag.type === subKey
-                        );
-                        answer = tags.map((tag) => tag.name).join(', ');
-                      }
-                    } else {
-                      if (
-                        typeof answer === 'string' &&
-                        answer.startsWith('[') &&
-                        answer.endsWith(']')
-                      ) {
-                        try {
-                          const parsedAnswer = JSON.parse(answer);
-                          if (Array.isArray(parsedAnswer)) {
-                            answer = parsedAnswer.length
-                              ? parsedAnswer.join(', ')
-                              : '';
-                          }
-                        } catch (e) {
-                          // If parsing fails, keep the original answer
-                        }
-                      } else if (Array.isArray(answer)) {
-                        // Check if the elements are objects with a 'url' field
-                        if (
-                          answer.every(
-                            (item) =>
-                              typeof item === 'object' &&
-                              item !== null &&
-                              'url' in item
-                          )
-                        ) {
-                          // Determine if the field is for images or documents based on the fieldKey
-                          answer = answer
-                            .map((item, index) => {
-                              const name =
-                                item.name ||
-                                (fieldKey === 'images'
-                                  ? `Afbeelding ${index + 1}`
-                                  : `Document ${index + 1}`);
-                              return `<a href="${item.url}" target="_blank">${name}</a>`;
-                            })
-                            .join(', ');
-                        } else {
-                          answer = answer.join(', ');
-                        }
-                      } else if (
-                        typeof answer === 'object' &&
-                        answer !== null
-                      ) {
-                        answer = Object.entries(answer)
-                          .map(([key, value]) => `${key}: ${value}`)
-                          .join(', ');
-                      }
-                    }
-
-                    return { question, answer };
-                  });
-
-                  htmlContent = `
-                  <mj-table cellpadding="5" border="1px solid black" width="100%">
-                    <tbody>
-                      ${questionsAndAnswers
-                        .map(
-                          (qa) => `
-                        <tr style="background-color: #f0f0f0;">
-                          <td style="padding: 10px; font-weight: bold; color: #000; font-size: 13px;font-family: Roboto;">${qa.question}</td>
-                        </tr>
-                        <tr style="background-color: #ffffff;">
-                          <td style="padding: 10px; color: #000; font-size: 13px;font-family: Roboto;">
-                            ${qa.answer}
-                            <br/>
-                          </td>
-                        </tr>
-                      `
-                        )
-                        .join('')}
-                    </tbody>
-                  </mj-table>
-                `;
-                }
-              }
-
+              // _pdfAttachment is a non-persisted in-memory property.
+              // This works because immediateTypes are sent synchronously
+              // after .create() — never re-fetched from DB. If the send
+              // flow is ever refactored to re-fetch, this property will be lost.
+              let pdfAttachment = null;
               let htmlContentEnquete = '';
 
-              if (instance.data.submissionId) {
-                const submission = await db.Submission.findByPk(
-                  instance.data.submissionId
-                );
-
-                const widget = !!instance.data.widgetId
-                  ? await db.Widget.findByPk(instance.data.widgetId)
-                  : null;
+              // Process resource Q&A
+              if (instance.data.resourceId) {
+                const resourceResult = await processResourceQA(instance, db);
+                htmlContent = resourceResult.htmlContent;
 
                 if (
-                  widget &&
-                  widget.dataValues.config &&
-                  widget.dataValues.config.items &&
-                  submission &&
-                  submission.dataValues &&
-                  submission.dataValues.submittedData
+                  resourceResult.questionsAndAnswers.length &&
+                  shouldGeneratePdf(instance.type)
                 ) {
-                  const widgetItems = widget.dataValues.config.items;
-                  const submittedData = submission.dataValues.submittedData;
-
-                  const questionsAndAnswers = widgetItems.map((item) => {
-                    const question = item.title || item.fieldKey;
-                    const fieldKey = item.fieldKey;
-                    let answer = submittedData[fieldKey] || '';
-
-                    if (
-                      typeof answer === 'string' &&
-                      answer.startsWith('[') &&
-                      answer.endsWith(']')
-                    ) {
-                      try {
-                        const parsedAnswer = JSON.parse(answer);
-                        if (Array.isArray(parsedAnswer)) {
-                          answer = parsedAnswer.length
-                            ? parsedAnswer.join(', ')
-                            : '';
-                        }
-                      } catch (e) {
-                        // If parsing fails, keep the original answer
-                      }
-                    } else if (Array.isArray(answer)) {
-                      // Check if the elements are objects with a 'url' field
-                      if (
-                        answer.every(
-                          (item) =>
-                            typeof item === 'object' &&
-                            item !== null &&
-                            'url' in item
-                        )
-                      ) {
-                        // Determine if the field is for images or documents based on the fieldKey
-                        answer = answer
-                          .map((item, index) => {
-                            const name =
-                              item.name ||
-                              (fieldKey === 'images'
-                                ? `Afbeelding ${index + 1}`
-                                : `Document ${index + 1}`);
-                            return `<a href="${item.url}" target="_blank">${name}</a>`;
-                          })
-                          .join(', ');
-                      } else {
-                        answer = answer.join(', ');
-                      }
-                    } else if (typeof answer === 'object' && answer !== null) {
-                      answer = Object.entries(answer)
-                        .map(([key, value]) => `${key}: ${value}`)
-                        .join(', ');
-                    }
-
-                    return { question, answer };
-                  });
-
-                  htmlContentEnquete = `
-                  <mj-table cellpadding="5" border="1px solid black" width="100%">
-                    <tbody>
-                      ${questionsAndAnswers
-                        .map(
-                          (qa) => `
-                        <tr style="background-color: #f0f0f0;">
-                          <td style="padding: 10px; font-weight: bold; color: #000; font-size: 13px;font-family: Roboto;">${qa.question}</td>
-                        </tr>
-                        <tr style="background-color: #ffffff;">
-                          <td style="padding: 10px; color: #000; font-size: 13px;font-family: Roboto;">
-                            ${qa.answer}
-                            <br/>
-                          </td>
-                        </tr>
-                      `
-                        )
-                        .join('')}
-                    </tbody>
-                  </mj-table>
-                `;
+                  const project = await db.Project.scope(
+                    'includeEmailConfig'
+                  ).findByPk(instance.projectId);
+                  if (
+                    project?.emailConfig?.notifications?.pdfAttachmentEnabled
+                  ) {
+                    pdfAttachment = await buildPdfAttachment(
+                      instance,
+                      resourceResult.questionsAndAnswers,
+                      resourceResult.widgetItems,
+                      db,
+                      project
+                    );
+                  }
                 }
               }
 
-              let recipients =
+              // Process submission Q&A
+              if (instance.data.submissionId) {
+                const submissionResult = await processSubmissionQA(
+                  instance,
+                  db
+                );
+                htmlContentEnquete = submissionResult.htmlContent;
+              }
+
+              // Create and send messages to all recipients
+              const recipients =
                 instance.to &&
                 instance.to.split(',').map((email) => email.trim());
               if (recipients && recipients.length) {
                 await Promise.all(
                   recipients.map(async (recipient) => {
-                    let message = await db.NotificationMessage.create(
+                    const message = await db.NotificationMessage.create(
                       { ...messageData, to: recipient },
                       {
                         data: {
                           ...messageData.data,
                           submissionContent: htmlContent,
                           enqueteContent: htmlContentEnquete,
+                          pdfAttachment,
                         },
                       }
                     );
                     await message.send();
                   })
                 );
+              }
+
+              // Allow GC to reclaim PDF buffer immediately
+              if (pdfAttachment) {
+                pdfAttachment.content = null;
+                pdfAttachment = null;
               }
 
               await instance.update({ status: 'sent' });

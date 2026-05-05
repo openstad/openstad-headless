@@ -8,9 +8,12 @@ const outputUser = (req, res, next) => {
   delete result.password;
   delete result.hashedPhoneNumber;
   if (result.roles) {
-    result.roles.map((role) => {
+    result.roles = result.roles.map((role) => {
       let client = req.clients.find((c) => c.id == role.clientId);
-      role.clientId = client.clientId;
+      if (client) {
+        role.clientId = client.clientId;
+      }
+      return role;
     });
     let clientId = getClientIdFromRequest(req);
     if (clientId) {

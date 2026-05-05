@@ -34,6 +34,7 @@ export type FormProps = {
   setCurrentPage?: (page: number) => void;
   prevPage?: any;
   prevPageText?: string;
+  nextPageText?: string;
   pageFieldStartPositions?: number[];
   pageFieldEndPositions?: number[];
   totalPages?: number;
@@ -103,7 +104,7 @@ type FieldWithOptionalFields = CombinedFieldProps & {
   trigger?: string;
   routingInitiallyHide?: boolean;
   routingSelectedQuestion?: string;
-  routingSelectedAnswer?: string;
+  routingSelectedAnswer?: string | string[];
   infoBlockStyle?: string;
 };
 
