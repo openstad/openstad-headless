@@ -13,8 +13,14 @@ interface Item {
 
 function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
   const ref = useRef<HTMLDivElement>(null);
+  const openRef = useRef(open);
+
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
 
   const handleClickOutside = (event: MouseEvent) => {
+    if (!openRef.current) return;
     if (ref.current && !ref.current.contains(event.target as Node)) {
       setOpenIndex(null);
     }
