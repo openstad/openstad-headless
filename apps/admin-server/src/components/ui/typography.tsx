@@ -7,13 +7,18 @@ export function Paragraph({
   children,
   className,
   style,
+  title,
 }: {
   children: ReactNode;
   className?: string;
   style?: CSSProperties;
+  title?: string;
 }) {
   return (
-    <p className={cn('text-sm leading-7', className)} style={style}>
+    <p
+      className={cn('text-sm leading-7', className)}
+      style={style}
+      title={title}>
       {children}
     </p>
   );

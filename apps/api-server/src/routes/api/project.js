@@ -1214,13 +1214,37 @@ router
       })
       .catch(next);
   })
+  .get(async function (req, res, next) {
+    // blocked domains (last 24h)
+    try {
+      let blockedByProject = await projectsWithIssues.blockedDomains();
+      for (let projectId of Object.keys(blockedByProject)) {
+        let { project, blocks } = blockedByProject[projectId];
+        let entry = project.toJSON();
+        entry.issue = 'blocked-domains';
+        entry.domainBlocks = blocks.map((b) => ({
+          widgetId: b.widgetId,
+          domain: b.domain,
+          referer: b.referer,
+          count: b.count,
+          lastSeen: b.lastSeen,
+        }));
+        req.results.push(entry);
+        req.dbQuery.count += 1;
+      }
+    } catch (e) {
+      console.log('[issues] Could not fetch blocked domains:', e.message);
+    }
+    return next();
+  })
   .get(searchInResults({ searchfields: ['name', 'title'] }))
   .get(auth.useReqUser)
   .get(pagination.paginateResults)
   .get(function (req, res, next) {
     let records = req.results.records || req.results;
     records.forEach((record, i) => {
-      let project = record.toJSON();
+      let project =
+        typeof record.toJSON === 'function' ? record.toJSON() : record;
       if (!(req.user && hasRole(req.user, 'admin'))) {
         project.config = undefined;
       }
@@ -1325,33 +1349,31 @@ router
     if (req.body.url && req.body.url != project.url)
       req.pendingMessages.push({ key: `project-urls-update`, value: 'event' });
 
-    // Update allowedDomains if creating a new site
     let updateBody = req.body;
-    const hasInitDomain =
-      project?.config?.allowedDomains !== undefined &&
-      project.config.allowedDomains.length === 1 &&
-      project.config.allowedDomains[0] == 'api.openstad.org';
-    if (
-      ((project?.config?.allowedDomains || []).length === 0 || hasInitDomain) &&
-      req?.body?.url
-    ) {
-      // Check if url has protocol
-      let reqUrl = req.body.url;
-      if (!reqUrl.includes('http://') && !reqUrl.includes('https://')) {
-        reqUrl = 'http://' + reqUrl;
+
+    if (req.body.url && req.body.url !== project.url) {
+      try {
+        let providers = await authSettings.providers({ project });
+        for (let provider of providers) {
+          let authConfig = await authSettings.config({
+            project,
+            useAuth: provider,
+          });
+          let adapter = await authSettings.adapter({ authConfig });
+          if (adapter.service.updateClient) {
+            let projectWithNewUrl = { ...project.toJSON(), url: req.body.url };
+            await adapter.service.updateClient({
+              authConfig,
+              project: projectWithNewUrl,
+            });
+          }
+        }
+      } catch (err) {
+        console.log(
+          '[allowedDomains] Could not sync auth client after url change:',
+          err.message
+        );
       }
-      let url = new URL(reqUrl);
-      let host = url.host;
-
-      updateBody.config = updateBody.config || {};
-      updateBody.config.allowedDomains = [host];
-
-      // Update client (auth-db)
-      let adminAuthConfig = await authSettings.config({ project: project });
-      service.updateClient({
-        authConfig: adminAuthConfig,
-        project: updateBody,
-      });
     }
 
     project
