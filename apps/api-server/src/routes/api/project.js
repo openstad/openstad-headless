@@ -1703,4 +1703,34 @@ router
     }
   });
 
+router.route('/:projectId(\\d+)/branding').get(async function (req, res) {
+  try {
+    let project = req.project;
+    if (!project) return res.json({});
+
+    let providers = await authSettings.providers({ project });
+    for (let provider of providers) {
+      if (provider === 'default') continue;
+      let authConfig = await authSettings.config({
+        project,
+        useAuth: provider,
+      });
+      let adapter = await authSettings.adapter({ authConfig });
+      if (adapter.service.fetchClient && authConfig.clientId) {
+        let client = await adapter.service.fetchClient({
+          authConfig,
+          project,
+        });
+        return res.json({
+          logo: client?.config?.styling?.logo || null,
+        });
+      }
+    }
+
+    return res.json({});
+  } catch (err) {
+    return res.json({});
+  }
+});
+
 module.exports = router;
