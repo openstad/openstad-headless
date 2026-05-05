@@ -135,10 +135,9 @@ async function loadProject(projectId) {
 
 async function loadProjects() {
   try {
-    projects = {};
-
     const allProjects = await projectService.fetchAll();
 
+    projects = {};
     allProjects.forEach(async (project) => {
       setupProject(project);
     });
