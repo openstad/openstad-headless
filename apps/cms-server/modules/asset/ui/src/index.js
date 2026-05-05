@@ -48,6 +48,44 @@ if (typeof window.process == 'undefined') {
   window.process = { env: { NODE_ENV: 'production' } };
 }
 
+window._widgetAssetsPending = {};
+window.loadWidgetAssets = function (scriptUrl, cssUrl) {
+  if (window._widgetAssetsPending[scriptUrl]) {
+    return window._widgetAssetsPending[scriptUrl];
+  }
+
+  var promise = new Promise(function (resolve, reject) {
+    if (cssUrl && !document.querySelector('link[href="' + cssUrl + '"]')) {
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = cssUrl;
+      link.onerror = function () {
+        console.error('Failed to load CSS: ' + cssUrl);
+      };
+      document.head.appendChild(link);
+    }
+
+    var existing = document.querySelector('script[src="' + scriptUrl + '"]');
+    if (existing) {
+      resolve();
+      return;
+    }
+
+    var script = document.createElement('script');
+    script.src = scriptUrl;
+    script.onload = resolve;
+    script.onerror = function () {
+      script.remove();
+      delete window._widgetAssetsPending[scriptUrl];
+      reject(new Error('Failed to load ' + scriptUrl));
+    };
+    document.body.appendChild(script);
+  });
+
+  window._widgetAssetsPending[scriptUrl] = promise;
+  return promise;
+};
+
 window.setCookieConsent = function (allowCookies) {
   let date = new Date();
   document.cookie =

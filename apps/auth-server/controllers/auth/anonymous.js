@@ -8,6 +8,7 @@ const login = require('connect-ensure-login');
 const tokenUrl = require('../../services/tokenUrl');
 const authAnonymousConfig = require('../../config/auth').get(authType);
 const url = require('url');
+const { logAuthEvent } = require('../../middleware/auditLog');
 
 exports.login = (req, res, next) => {
   /**
@@ -79,6 +80,11 @@ exports.register = (req, res, next) => {
           const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(
             req.query.redirect_uri
           )}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+
+          logAuthEvent(req, 'register', {
+            userId: user.id,
+            data: { method: 'anonymous', email: req.body.email },
+          });
 
           try {
             db.ActionLog.create(values)

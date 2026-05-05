@@ -89,21 +89,25 @@ function Form({
           (field?.fieldOptions?.length || 2) / 2
         ).toString();
       }
-    }
 
-    if (
-      field?.routingInitiallyHide &&
-      field?.routingSelectedQuestion &&
-      field?.routingSelectedAnswer
-    ) {
-      const getRoutingSelectedQuestionField = fields.find(
-        (f) => f.trigger === field.routingSelectedQuestion
-      );
-      const routingSelectedQuestionFieldKey =
-        getRoutingSelectedQuestionField?.fieldKey || '';
+      if (
+        field?.routingInitiallyHide &&
+        field?.routingSelectedQuestion &&
+        field?.routingSelectedAnswer &&
+        !(
+          Array.isArray(field.routingSelectedAnswer) &&
+          field.routingSelectedAnswer.length === 0
+        )
+      ) {
+        const getRoutingSelectedQuestionField = fields.find(
+          (f) => f.trigger === field.routingSelectedQuestion
+        );
+        const routingSelectedQuestionFieldKey =
+          getRoutingSelectedQuestionField?.fieldKey || '';
 
-      fieldsWithImpactOnRouting.push(routingSelectedQuestionFieldKey);
-      initialHiddenFields.push(routingKeys[index]);
+        fieldsWithImpactOnRouting.push(routingSelectedQuestionFieldKey);
+        initialHiddenFields.push(fieldKey);
+      }
     }
   });
 

@@ -2,6 +2,7 @@ import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { PostcodeAutoFillLocation } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 
 import type { MapPropsType } from '../types/index';
+import { CustomLegendItem, MarkerSetConfig } from './basemap-widget-props';
 import { MarkerIconType } from './marker-icon';
 import { MarkerProps } from './marker-props';
 
@@ -31,6 +32,9 @@ export type ResourceOverviewMapWidgetProps = BaseProps &
     enableOnOffSwitching?: boolean;
     displayDislike?: boolean;
     onMarkerClick?: (resource: any, index: number) => void;
+    markerSets?: MarkerSetConfig[];
+    markerInteractionType?: 'default' | 'direct';
+    customLegend?: CustomLegendItem[];
   };
 
 export type dataLayerArray = {

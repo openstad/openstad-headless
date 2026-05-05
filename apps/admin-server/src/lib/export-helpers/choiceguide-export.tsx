@@ -123,12 +123,15 @@ export const exportChoiceGuideToCSV = async (
           item.options.length > 0
         ) {
           item.options.forEach(
-            (option: {
-              titles: [
-                { key?: string; title?: string; isOtherOption?: boolean },
-              ];
-              trigger: string;
-            }) => {
+            (
+              option: {
+                titles: [
+                  { key?: string; title?: string; isOtherOption?: boolean },
+                ];
+                trigger: string;
+              },
+              index: number
+            ) => {
               if (
                 !!option.titles &&
                 Array.isArray(option.titles) &&
@@ -140,9 +143,19 @@ export const exportChoiceGuideToCSV = async (
                   option.titles[0].title ||
                   'Anders, namelijk'
                 }`;
-                const otherKey = `${newKey}_${option.trigger}_other`;
+                const triggerKey = `${newKey}_${option.trigger}_other`;
+                const indexKey = `${newKey}_${index}_other`;
+                const possibleKeys =
+                  triggerKey === indexKey
+                    ? [triggerKey]
+                    : [triggerKey, indexKey];
 
-                fieldKeyToTitleMap.set(otherKey, otherTitle);
+                possibleKeys.forEach((key) => {
+                  const hasData = data.some((row: any) => !!row?.result?.[key]);
+                  if (hasData) {
+                    fieldKeyToTitleMap.set(key, otherTitle);
+                  }
+                });
               }
             }
           );

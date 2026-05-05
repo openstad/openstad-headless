@@ -84,7 +84,7 @@ export type Item = {
   matrixMultiple?: boolean;
   routingInitiallyHide?: boolean;
   routingSelectedQuestion?: string;
-  routingSelectedAnswer?: string;
+  routingSelectedAnswer?: string | string[];
   selectAll?: boolean;
   selectAllLabel?: string;
 };

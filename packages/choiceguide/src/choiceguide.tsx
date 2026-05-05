@@ -62,7 +62,13 @@ function ChoiceGuide(props: ChoiceGuideProps) {
     typeof loginRequired !== 'undefined' && loginRequired;
   const showForm = onlyShowForUsers ? !!hasRole(currentUser, 'member') : true;
 
-  const formFields = InitializeFormFields(items, props, showForm);
+  const questionsPerPage = Number(noOfQuestionsToShow) || 100;
+  const formFields = InitializeFormFields(
+    items,
+    props,
+    showForm,
+    questionsPerPage
+  );
 
   const defaultAnswers = formFields.reduce((acc, item) => {
     acc[item.fieldKey] = item?.defaultValue;
@@ -162,17 +168,15 @@ function ChoiceGuide(props: ChoiceGuideProps) {
     }
   };
 
-  const questionsPerPage = Number(noOfQuestionsToShow) || 100;
-  const totalPages = Math.ceil(formFields.length / questionsPerPage);
+  const paginationFieldPositions = formFields
+    .map((field, idx) => (field.type === 'pagination' ? idx : -1))
+    .filter((idx) => idx !== -1);
 
-  const paginationFieldPositions: number[] = [];
-  for (let i = 0; i < totalPages - 1; i++) {
-    const endIndex = (i + 1) * questionsPerPage;
-    paginationFieldPositions.push(endIndex);
-  }
-
-  // Add start and end indices for slicing
-  const pageFieldStartPositions = [0, ...paginationFieldPositions];
+  const totalPages = paginationFieldPositions.length + 1;
+  const pageFieldStartPositions = [
+    0,
+    ...paginationFieldPositions.map((idx) => idx + 1),
+  ];
   const pageFieldEndPositions = [
     ...paginationFieldPositions,
     formFields.length,

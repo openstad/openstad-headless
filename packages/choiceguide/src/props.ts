@@ -118,6 +118,8 @@ export type Item = {
   defaultValue?: string;
   maxChoices?: string;
   maxChoicesMessage?: string;
+  prevPageText?: string;
+  nextPageText?: string;
   skipQuestion?: boolean;
   skipQuestionAllowExplanation?: boolean;
   skipQuestionExplanation?: string;
@@ -126,7 +128,7 @@ export type Item = {
   matrixMultiple?: boolean;
   routingInitiallyHide?: boolean;
   routingSelectedQuestion?: string;
-  routingSelectedAnswer?: string;
+  routingSelectedAnswer?: string | string[];
   imageOptionUpload?: string;
   placeholder?: string;
   images?: Array<{
