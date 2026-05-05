@@ -84,7 +84,7 @@ export default {
       body: JSON.stringify(data),
     });
 
-    return json.jwt;
+    return { jwt: json.jwt, expireOnClose: json.expireOnClose || false };
   },
 
   update: async function ({ projectId, user }) {

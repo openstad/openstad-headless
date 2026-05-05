@@ -104,6 +104,10 @@ const initializeApp = async () => {
       };
     }
 
+    if (process.env.SESSION_EXPIRE_ON_CLOSE === 'true') {
+      delete sessionCookieConfig.maxAge;
+    }
+
     const sessionConfig = {
       saveUninitialized: true,
       resave: true,

@@ -67,9 +67,11 @@ router
         },
         (err, token) => {
           if (err) return next(err);
-          return res.json({
-            jwt: token,
-          });
+          const response = { jwt: token };
+          if (sessionDuration.shouldExpireOnClose(openStadUser.role)) {
+            response.expireOnClose = true;
+          }
+          return res.json(response);
         }
       );
     } catch (err) {
@@ -376,6 +378,10 @@ router
       (err, token) => {
         if (err) return next(err);
         req.redirectUrl = req.redirectUrl.replace('[[jwt]]', token);
+        if (sessionDuration.shouldExpireOnClose(req.userData.role)) {
+          req.redirectUrl +=
+            (req.redirectUrl.includes('?') ? '&' : '?') + 'expireOnClose=1';
+        }
         return next();
       }
     );

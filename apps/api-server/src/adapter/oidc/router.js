@@ -65,9 +65,11 @@ router
         },
         (err, token) => {
           if (err) return next(err);
-          return res.json({
-            jwt: token,
-          });
+          const response = { jwt: token };
+          if (sessionDuration.shouldExpireOnClose(openStadUser.role)) {
+            response.expireOnClose = true;
+          }
+          return res.json(response);
         }
       );
     } catch (err) {
@@ -324,6 +326,10 @@ router
         (err, token) => {
           if (err) return next(err);
           redirectUrl = redirectUrl.replace('[[jwt]]', token);
+          if (sessionDuration.shouldExpireOnClose(req.userData.role)) {
+            redirectUrl +=
+              (redirectUrl.includes('?') ? '&' : '?') + 'expireOnClose=1';
+          }
           // Revalidate redirectUrl after adding the token
           if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
             return res
