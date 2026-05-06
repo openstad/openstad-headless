@@ -26,6 +26,7 @@ import useTags from '@/hooks/use-tags';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   ChoiceGuideProps,
@@ -268,7 +269,7 @@ export default function WidgetChoiceGuideItems(
 
       setItems((currentItems) =>
         currentItems.map((item) => {
-          if (item.trigger === selectedItem.trigger) {
+          if (item.id === selectedItem.id) {
             return { ...item, ...values, weights: normalizedMergedWeights };
           }
           if (
@@ -298,6 +299,7 @@ export default function WidgetChoiceGuideItems(
         return [
           ...currentItems,
           {
+            id: generateId(),
             trigger: `${maxTrigger + 1}`,
             title: values.title,
             description: values.description,
@@ -357,7 +359,7 @@ export default function WidgetChoiceGuideItems(
     if (selectedOption) {
       setOptions((currentOptions) =>
         currentOptions.map((option) =>
-          option.trigger === selectedOption.trigger
+          option.id === selectedOption.id
             ? {
                 ...option,
                 titles:
@@ -374,6 +376,7 @@ export default function WidgetChoiceGuideItems(
         -1
       );
       const newOption = {
+        id: generateId(),
         trigger: `${maxTrigger + 1}`,
         titles: values.options?.[values.options.length - 1].titles || [],
       };
@@ -391,7 +394,7 @@ export default function WidgetChoiceGuideItems(
 
         if (updatedMatrixOption === 'rows') {
           updatedMatrix.rows = updatedMatrix.rows.map((row) =>
-            row.trigger === matrixOption.trigger
+            row.id === matrixOption.id
               ? {
                   ...row,
                   text:
@@ -402,7 +405,7 @@ export default function WidgetChoiceGuideItems(
           );
         } else {
           updatedMatrix.columns = updatedMatrix.columns.map((column) =>
-            column.trigger === matrixOption.trigger
+            column.id === matrixOption.id
               ? {
                   ...column,
                   text:
@@ -439,6 +442,7 @@ export default function WidgetChoiceGuideItems(
       const newText = newTextObj?.text || '';
 
       const newMatrixOption: MatrixOption = {
+        id: generateId(),
         trigger: newTrigger.toString(),
         text: newText,
       };
@@ -507,9 +511,11 @@ export default function WidgetChoiceGuideItems(
     defaultValues: defaults(),
   });
 
+  const itemsInitialized = React.useRef(false);
   useEffect(() => {
-    if (props?.items && props?.items?.length > 0) {
-      setItems(props?.items);
+    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
+      itemsInitialized.current = true;
+      setItems(props.items.map(withId));
     }
   }, [props?.items]);
 
@@ -583,8 +589,13 @@ export default function WidgetChoiceGuideItems(
       };
 
       form.reset(formValues);
-      setOptions(selectedItem.options || []);
-      setMatrixOptions(selectedItem.matrix || matrixDefault);
+      setOptions((selectedItem.options || []).map(withId));
+      const matrix = selectedItem.matrix || matrixDefault;
+      setMatrixOptions({
+        ...matrix,
+        rows: (matrix.rows || []).map(withId),
+        columns: (matrix.columns || []).map(withId),
+      });
       setActiveTab('1');
     }
   }, [selectedItem, form]);
@@ -593,7 +604,7 @@ export default function WidgetChoiceGuideItems(
     if (selectedOption) {
       const updatedOptions = [...options];
       const index = options.findIndex(
-        (option) => option.trigger === selectedOption.trigger
+        (option) => option.id === selectedOption.id
       );
       updatedOptions[index] = { ...selectedOption };
 
@@ -777,7 +788,7 @@ export default function WidgetChoiceGuideItems(
       );
 
       itemsToSave = itemsToSave.map((item) =>
-        item.trigger === selectedItem.trigger
+        item.id === selectedItem.id
           ? { ...item, ...values, weights: normalizedMergedWeights }
           : item
       );
@@ -1070,8 +1081,7 @@ export default function WidgetChoiceGuideItems(
                           <div
                             key={index}
                             className={`flex cursor-pointer justify-between border border-secondary ${
-                              item.trigger == selectedItem?.trigger &&
-                              'bg-secondary'
+                              item.id === selectedItem?.id && 'bg-secondary'
                             }`}>
                             <span className="flex gap-2 py-3 px-2">
                               <ArrowUp
@@ -1090,8 +1100,7 @@ export default function WidgetChoiceGuideItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
-                                if (selectedItem?.trigger === item.trigger)
-                                  return;
+                                if (selectedItem?.id === item.id) return;
                                 setItem(item);
                                 setOptions([]);
                                 setMatrixOptions(matrixDefault);
@@ -1153,8 +1162,7 @@ export default function WidgetChoiceGuideItems(
                                     <div
                                       key={index}
                                       className={`flex cursor-pointer justify-between border border-secondary ${
-                                        option.trigger ==
-                                          selectedOption?.trigger &&
+                                        option.id === selectedOption?.id &&
                                         'bg-secondary'
                                       }`}>
                                       <span className="flex gap-2 py-3 px-2">
@@ -1216,8 +1224,7 @@ export default function WidgetChoiceGuideItems(
                             const currentOption = matrixOptions?.[
                               matrixItem.type
                             ].findIndex(
-                              (option) =>
-                                option.trigger === matrixOption?.trigger
+                              (option) => option.id === matrixOption?.id
                             );
                             const activeOption =
                               currentOption !== -1
@@ -1284,8 +1291,7 @@ export default function WidgetChoiceGuideItems(
                       {hasList() &&
                         (() => {
                           const currentOption = options.findIndex(
-                            (option) =>
-                              option.trigger === selectedOption?.trigger
+                            (option) => option.id === selectedOption?.id
                           );
                           const activeOption =
                             currentOption !== -1
@@ -1507,7 +1513,7 @@ export default function WidgetChoiceGuideItems(
                               <div
                                 key={index}
                                 className={`flex cursor-pointer justify-between border border-secondary ${
-                                  option.trigger == selectedOption?.trigger &&
+                                  option.id === selectedOption?.id &&
                                   'bg-secondary'
                                 }`}>
                                 <span className="flex gap-2 py-3 px-2">

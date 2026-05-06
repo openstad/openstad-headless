@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DistributionModuleProps } from '@openstad-headless/distribution-module/src/distribution-module';
 import {
@@ -42,7 +43,7 @@ export default function WidgetDistributionModuleItems(
     if (selectedItem) {
       setItems((currentItems) =>
         currentItems.map((item) =>
-          item.trigger === selectedItem.trigger ? { ...item, ...values } : item
+          item.id === selectedItem.id ? { ...item, ...values } : item
         )
       );
       setItem(null);
@@ -55,6 +56,7 @@ export default function WidgetDistributionModuleItems(
         return [
           ...currentItems,
           {
+            id: generateId(),
             trigger: `${maxTrigger + 1}`,
             title: values.title,
             key: values.key,
@@ -81,9 +83,11 @@ export default function WidgetDistributionModuleItems(
     defaultValues: defaults(),
   });
 
+  const itemsInitialized = React.useRef(false);
   useEffect(() => {
-    if (props?.items && props?.items?.length > 0) {
-      setItems(props?.items);
+    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
+      itemsInitialized.current = true;
+      setItems(props.items.map(withId));
     }
   }, [props?.items]);
 
@@ -188,8 +192,7 @@ export default function WidgetDistributionModuleItems(
                           <div
                             key={index}
                             className={`flex cursor-pointer justify-between border border-secondary ${
-                              item.trigger == selectedItem?.trigger &&
-                              'bg-secondary'
+                              item.id === selectedItem?.id && 'bg-secondary'
                             }`}>
                             <span className="flex gap-2 py-3 px-2">
                               <ArrowUp

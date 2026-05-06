@@ -10,14 +10,16 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Switch from '@radix-ui/react-switch';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 export interface AgendaItem {
+  id?: string;
   trigger: string;
   title?: string;
   description: string;
@@ -29,6 +31,7 @@ export interface AgendaItem {
 }
 
 export interface AgendaLink {
+  id?: string;
   trigger: string;
   title: string;
   url: string;
@@ -124,6 +127,12 @@ export function AgendaItemsEditor({
   onItemsChange,
   showActiveDates = false,
 }: AgendaItemsEditorProps) {
+  const idsAssigned = useRef(false);
+  if (!idsAssigned.current) {
+    idsAssigned.current = true;
+    items = items.map(withId) as AgendaItem[];
+  }
+
   const [links, setLinks] = useState<AgendaLink[]>([]);
   const [selectedItem, setItem] = useState<AgendaItem | null>(null);
   const [selectedLink, setLink] = useState<AgendaLink | null>(null);
@@ -146,16 +155,14 @@ export function AgendaItemsEditor({
         activeTo: toDateInputValue(selectedItem.activeTo),
         links: selectedItem.links || [],
       });
-      setLinks(selectedItem.links || []);
+      setLinks((selectedItem.links || []).map(withId));
     }
   }, [selectedItem, form]);
 
   useEffect(() => {
     if (selectedLink) {
       const updatedLinks = [...links];
-      const index = links.findIndex(
-        (link) => link.trigger === selectedLink.trigger
-      );
+      const index = links.findIndex((link) => link.id === selectedLink.id);
       updatedLinks[index] = { ...selectedLink };
 
       form.reset({
@@ -169,7 +176,7 @@ export function AgendaItemsEditor({
     if (selectedItem) {
       onItemsChange(
         items.map((item) =>
-          item.trigger === selectedItem.trigger ? { ...item, ...values } : item
+          item.id === selectedItem.id ? { ...item, ...values } : item
         )
       );
       setItem(null);
@@ -181,6 +188,7 @@ export function AgendaItemsEditor({
       onItemsChange([
         ...items,
         {
+          id: generateId(),
           trigger: `${maxTrigger + 1}`,
           title: values.title,
           description: values.description,
@@ -200,7 +208,7 @@ export function AgendaItemsEditor({
     if (selectedLink) {
       setLinks((currentLinks) =>
         currentLinks.map((link) =>
-          link.trigger === selectedLink.trigger
+          link.id === selectedLink.id
             ? {
                 ...link,
                 title:
@@ -223,6 +231,7 @@ export function AgendaItemsEditor({
         -1
       );
       const newLink = {
+        id: generateId(),
         trigger: `${maxLinkTrigger + 1}`,
         title: values.links?.[values.links.length - 1].title || '',
         url: values.links?.[values.links.length - 1].url || '',
@@ -285,8 +294,7 @@ export function AgendaItemsEditor({
                         <div
                           key={index}
                           className={`flex cursor-pointer justify-between border border-secondary ${
-                            item.trigger == selectedItem?.trigger &&
-                            'bg-secondary'
+                            item.id === selectedItem?.id && 'bg-secondary'
                           }`}>
                           <span className="flex gap-2 py-3 px-2">
                             <ArrowUp
@@ -409,8 +417,7 @@ export function AgendaItemsEditor({
                           <div
                             key={index}
                             className={`flex cursor-pointer justify-between border border-secondary ${
-                              link.trigger == selectedLink?.trigger &&
-                              'bg-secondary'
+                              link.id === selectedLink?.id && 'bg-secondary'
                             }`}>
                             <span className="flex gap-2 py-3 px-2">
                               <ArrowUp

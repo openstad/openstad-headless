@@ -27,6 +27,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import {
@@ -233,7 +234,7 @@ export default function WidgetEnqueteItems(
 
       setItems((currentItems) =>
         currentItems.map((item) => {
-          if (item.trigger === selectedItem.trigger) {
+          if (item.id === selectedItem.id) {
             return { ...item, ...values };
           }
           if (
@@ -263,6 +264,7 @@ export default function WidgetEnqueteItems(
         return [
           ...currentItems,
           {
+            id: generateId(),
             trigger: `${maxTrigger + 1}`,
             title: values.title,
             key: values.key,
@@ -323,7 +325,7 @@ export default function WidgetEnqueteItems(
       setOptions((currentOptions) => {
         const updatedOptions = currentOptions
           .map((option) => {
-            if (option.trigger === selectedOption.trigger) {
+            if (option.id === selectedOption.id) {
               const newTitles =
                 values.options?.find((o) => o.trigger === option.trigger)
                   ?.titles || [];
@@ -348,6 +350,7 @@ export default function WidgetEnqueteItems(
         -1
       );
       const newOption = {
+        id: generateId(),
         trigger: `${maxTrigger + 1}`,
         titles: values.options?.[values.options.length - 1].titles || [],
       };
@@ -365,7 +368,7 @@ export default function WidgetEnqueteItems(
 
         if (updatedMatrixOption === 'rows') {
           updatedMatrix.rows = updatedMatrix.rows.map((row) =>
-            row.trigger === matrixOption.trigger
+            row.id === matrixOption.id
               ? {
                   ...row,
                   text:
@@ -376,7 +379,7 @@ export default function WidgetEnqueteItems(
           );
         } else {
           updatedMatrix.columns = updatedMatrix.columns.map((column) =>
-            column.trigger === matrixOption.trigger
+            column.id === matrixOption.id
               ? {
                   ...column,
                   text:
@@ -413,6 +416,7 @@ export default function WidgetEnqueteItems(
       const newText = newTextObj?.text || '';
 
       const newMatrixOption: MatrixOption = {
+        id: generateId(),
         trigger: newTrigger.toString(),
         text: newText,
       };
@@ -488,9 +492,11 @@ export default function WidgetEnqueteItems(
     defaultValues: defaults(),
   });
 
+  const itemsInitialized = React.useRef(false);
   useEffect(() => {
-    if (props?.items && props?.items?.length > 0) {
-      setItems(props?.items);
+    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
+      itemsInitialized.current = true;
+      setItems(props.items.map(withId));
     }
   }, [props?.items]);
 
@@ -570,7 +576,7 @@ export default function WidgetEnqueteItems(
     if (selectedOption) {
       const updatedOptions = [...options];
       const index = options.findIndex(
-        (option) => option.trigger === selectedOption.trigger
+        (option) => option.id === selectedOption.id
       );
       updatedOptions[index] = { ...selectedOption };
 
@@ -713,7 +719,7 @@ export default function WidgetEnqueteItems(
         values.matrix = matrixOptions;
       }
       itemsToSave = itemsToSave.map((item) =>
-        item.trigger === selectedItem.trigger ? { ...item, ...values } : item
+        item.id === selectedItem.id ? { ...item, ...values } : item
       );
     }
 
@@ -788,8 +794,7 @@ export default function WidgetEnqueteItems(
     if (key) {
       const isUnique = items.every(
         (item) =>
-          (selectedItem && item.trigger === selectedItem.trigger) ||
-          item.fieldKey !== key
+          (selectedItem && item.id === selectedItem.id) || item.fieldKey !== key
       );
 
       setIsFieldKeyUnique(isUnique);
@@ -847,14 +852,11 @@ export default function WidgetEnqueteItems(
                             className={`flex cursor-pointer justify-between border border-secondary 
                             ${
                               item.questionType === 'pagination' &&
-                              item.trigger !== selectedItem?.trigger
+                              item.id !== selectedItem?.id
                                 ? 'bg-[#f8f8f8]'
                                 : ''
                             }
-                            ${
-                              item.trigger == selectedItem?.trigger &&
-                              'bg-secondary'
-                            }`}>
+                            ${item.id === selectedItem?.id && 'bg-secondary'}`}>
                             <span className="flex gap-2 py-3 px-2">
                               <ArrowUp
                                 className="cursor-pointer"
@@ -872,12 +874,19 @@ export default function WidgetEnqueteItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
-                                if (selectedItem?.trigger === item.trigger)
-                                  return;
+                                if (selectedItem?.id === item.id) return;
                                 form.reset(buildFormValues(item));
                                 setItem(item);
-                                setOptions(item.options || []);
-                                setMatrixOptions(item.matrix || matrixDefault);
+                                setOptions((item.options || []).map(withId));
+                                setMatrixOptions({
+                                  ...(item.matrix || matrixDefault),
+                                  rows: (
+                                    (item.matrix || matrixDefault).rows || []
+                                  ).map(withId),
+                                  columns: (
+                                    (item.matrix || matrixDefault).columns || []
+                                  ).map(withId),
+                                });
                                 setSettingOptions(false);
                                 setOption(null);
                               }}
@@ -938,8 +947,7 @@ export default function WidgetEnqueteItems(
                                     <div
                                       key={index}
                                       className={`flex cursor-pointer justify-between border border-secondary ${
-                                        option.trigger ==
-                                          selectedOption?.trigger &&
+                                        option.id === selectedOption?.id &&
                                         'bg-secondary'
                                       }`}>
                                       <span className="flex gap-2 py-3 px-2">
@@ -1001,8 +1009,7 @@ export default function WidgetEnqueteItems(
                             const currentOption = matrixOptions?.[
                               matrixItem.type
                             ].findIndex(
-                              (option) =>
-                                option.trigger === matrixOption?.trigger
+                              (option) => option.id === matrixOption?.id
                             );
                             const activeOption =
                               currentOption !== -1
@@ -1069,8 +1076,7 @@ export default function WidgetEnqueteItems(
                       {hasList() &&
                         (() => {
                           const currentOption = options.findIndex(
-                            (option) =>
-                              option.trigger === selectedOption?.trigger
+                            (option) => option.id === selectedOption?.id
                           );
                           const activeOption =
                             currentOption !== -1
@@ -1500,7 +1506,7 @@ export default function WidgetEnqueteItems(
                               <div
                                 key={index}
                                 className={`flex cursor-pointer justify-between border border-secondary ${
-                                  option.trigger == selectedOption?.trigger &&
+                                  option.id === selectedOption?.id &&
                                   'bg-secondary'
                                 }`}>
                                 <span className="flex gap-2 py-3 px-2">
