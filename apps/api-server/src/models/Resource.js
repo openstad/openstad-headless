@@ -628,6 +628,22 @@ module.exports = function (db, sequelize, DataTypes) {
 
       api: {},
 
+      markerFields: {
+        attributes: ['id', 'projectId', 'location', 'title'],
+      },
+
+      markerFieldsWithSearch: {
+        attributes: [
+          'id',
+          'projectId',
+          'location',
+          'title',
+          'summary',
+          'description',
+          'createdAt',
+        ],
+      },
+
       includeComments: function (userId) {
         return {
           include: [
