@@ -266,7 +266,11 @@ router
   .route('/markers')
   .get(auth.can('Resource', 'list'))
   .get(function (req, res, next) {
-    req.scope.push('markerFields');
+    if (req.query.search) {
+      req.scope.push('markerFieldsWithSearch');
+    } else {
+      req.scope.push('markerFields');
+    }
     req.scope.push('includeTags');
 
     let { dbQuery } = req;
@@ -295,6 +299,11 @@ router
       .catch(next);
   })
   .get(auth.useReqUser)
+  .get(
+    searchInResults({
+      searchfields: ['id', 'title', 'summary', 'description', 'createdAt'],
+    })
+  )
   .get(function (req, res, next) {
     res.json(req.results);
   });
