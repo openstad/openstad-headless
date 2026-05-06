@@ -326,9 +326,6 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     setIsFinished(unanswered.length === 0);
   }, [dilemmas, dilemmaCards, getUnansweredDilemmas]);
 
-  useEffect(() => {
-    console.log('test');
-  }, []);
   if (isFinished || unansweredDilemmas.length === 0) {
     return (
       <div
@@ -362,6 +359,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
                     <div className="dilemma-summary-content">
                       <div className="dilemma-summary-option">
                         <button
+                          type="button"
                           className={`dilemma-summary-btn ${
                             answer === 'a' ? 'active' : ''
                           }`}
@@ -384,6 +382,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
                       <div className="dilemma-summary-option">
                         <button
+                          type="button"
                           className={`dilemma-summary-btn ${
                             answer === 'b' ? 'active' : ''
                           }`}
