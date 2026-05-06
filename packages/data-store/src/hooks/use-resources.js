@@ -70,7 +70,7 @@ export default function useResources(
   const { data: allDataRaw, isLoading: allIsLoading } = self.useSWR(
     fetchAll
       ? useMarkersEndpoint
-        ? { ...filterParams, _markers: true }
+        ? filterParams
         : { ...filterParams, noPagination: true }
       : null,
     useMarkersEndpoint ? 'resourceMarkers.fetch' : 'resources.fetch',

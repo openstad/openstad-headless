@@ -263,6 +263,43 @@ router.all('*', function (req, res, next) {
 });
 
 router
+  .route('/markers')
+  .get(auth.can('Resource', 'list'))
+  .get(function (req, res, next) {
+    req.scope.push('markerFields');
+    req.scope.push('includeTags');
+
+    let { dbQuery } = req;
+
+    dbQuery.where = {
+      ...req.queryConditions,
+      ...dbQuery.where,
+      deletedAt: null,
+    };
+
+    let projectIds = req?.query?.projectIds || [];
+
+    if (
+      !Array.isArray(projectIds) ||
+      (Array.isArray(projectIds) && projectIds.length === 0)
+    ) {
+      dbQuery.where.projectId = req.params.projectId;
+    }
+
+    db.Resource.scope(...req.scope)
+      .findAll(dbQuery)
+      .then(function (resources) {
+        req.results = resources;
+        return next();
+      })
+      .catch(next);
+  })
+  .get(auth.useReqUser)
+  .get(function (req, res, next) {
+    res.json(req.results);
+  });
+
+router
   .route('/')
 
   // list resources

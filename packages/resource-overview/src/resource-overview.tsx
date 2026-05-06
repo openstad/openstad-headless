@@ -1013,9 +1013,9 @@ function ResourceOverviewInner({
     projectIds: projectIds || [],
     allowMultipleProjects: selectedProjects && selectedProjects.length > 1,
     fetchAll: needsAllResourcesFetch
-      ? !listUsesAllResources && !displayMap
-        ? 'markers'
-        : true
+      ? listUsesAllResources
+        ? true
+        : 'markers'
       : false,
   });
 
