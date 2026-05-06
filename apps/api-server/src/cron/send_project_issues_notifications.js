@@ -57,6 +57,18 @@ module.exports = {
           );
         }
 
+        let blockedByProject = await projectsWithIssues.blockedDomains();
+        for (let projectId of Object.keys(blockedByProject)) {
+          let { project, blocks } = blockedByProject[projectId];
+          if (!notificationsToBeSent[projectId])
+            notificationsToBeSent[projectId] = { project, messages: [] };
+          for (let block of blocks) {
+            notificationsToBeSent[projectId].messages.push(
+              `Widget ${block.widgetId} was blocked ${block.count}x on domain "${block.domain}" (last seen: ${block.referer})`
+            );
+          }
+        }
+
         // send notifications
         let projectIds = Object.keys(notificationsToBeSent);
         for (let projectId of projectIds) {

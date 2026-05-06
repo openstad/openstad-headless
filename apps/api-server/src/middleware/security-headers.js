@@ -13,7 +13,10 @@ module.exports = function (req, res, next) {
   let allowedDomains =
     (req.project && req.project.config && req.project.config.allowedDomains) ||
     config.allowedDomains;
-  allowedDomains = prefillAllowedDomains(allowedDomains || []);
+  allowedDomains = prefillAllowedDomains(
+    allowedDomains || [],
+    req.project?.url
+  );
 
   const stripWww = (d) => (d && d.startsWith('www.') ? d.slice(4) : d);
   const normalizedDomain = stripWww(domain);
