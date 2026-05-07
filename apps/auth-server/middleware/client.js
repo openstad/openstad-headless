@@ -247,12 +247,18 @@ exports.check2FA = (req, res, next) => {
 
   // check two factor is validated otherwise send to 2factor screen
   if (twoFactorRoles && twoFactorRoles.includes(userRole) && twoFactorValid) {
+    console.log(
+      `[2fa-check][${new Date().toISOString()}] PASSED userId=${req.user?.id} role=${userRole}`
+    );
     return next();
   } else if (
     twoFactorRoles &&
     twoFactorRoles.includes(userRole) &&
     !twoFactorValid
   ) {
+    console.log(
+      `[2fa-check][${new Date().toISOString()}] REQUIRED userId=${req.user?.id} role=${userRole}, redirecting to two-factor`
+    );
     return res.redirect(
       `/auth/two-factor?clientId=${
         req.client.clientId
@@ -322,7 +328,9 @@ exports.checkRequiredUserFields = (req, res, next) => {
       }&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
     );
   } else {
-    console.log(`[required-fields-check] all fields OK for userId=${user?.id}`);
+    console.log(
+      `[required-fields-check][${new Date().toISOString()}] all fields OK for userId=${user?.id}`
+    );
     next();
   }
 };

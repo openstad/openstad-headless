@@ -277,9 +277,14 @@ exports.authorization = [
             const encodedReturnTo = encodeURIComponent(returnTo);
             redirectURI = redirectURI.replace(returnTo, encodedReturnTo);
           }
+          console.log(
+            `[oauth2][${new Date().toISOString()}] AUTHORIZE_OK clientId=${clientId} redirectHost=${redirectUrlHost} returnTo=${returnTo?.substring(0, 100)}`
+          );
           return done(null, client, redirectURI);
         } else {
-          console.log("===> Redirect host doesn't match the client host");
+          console.log(
+            `[oauth2][${new Date().toISOString()}] AUTHORIZE_DOMAIN_REJECTED clientId=${clientId} redirectHost=${redirectUrlHost} allowedDomains=${JSON.stringify(allowedDomains)}`
+          );
           throw new Error("Redirect host doesn't match the client host");
         }
       })
@@ -293,6 +298,9 @@ exports.authorization = [
     db.Client.findOne({ where: { clientId: req.query.client_id } })
       .then((client) => {
         if (client != null) {
+          console.log(
+            `[oauth2][${new Date().toISOString()}] DECISION_AUTO clientId=${req.query.client_id} userId=${req.user?.id} transactionID=${req.oauth2?.transactionID}`
+          );
           //  && client.trustedClient && client.trustedClient === true) {
           // This is how we short call the decision like the dialog below does
           server.decision({ loadTransaction: false }, (serverReq, callback) => {

@@ -45,7 +45,9 @@ module.exports = async function getUser(req, res, next) {
     });
 
     if (userId === null || typeof userId === 'undefined') {
-      console.log(`[user-mw] no userId from JWT for ${req.method} ${req.path}`);
+      console.log(
+        `[user-mw][${new Date().toISOString()}] no userId from JWT for ${req.method} ${req.path}`
+      );
       return nextWithEmptyUser(req, res, next);
     }
     console.log(
@@ -227,7 +229,7 @@ async function getUserInstance({
     return mergedUser;
   } catch (err) {
     console.log(
-      `[auth-sync] failed for userId=${dbUser?.id || 'unknown'} projectId=${dbUser?.projectId || 'unknown'} error="${err?.message}" tokenPresent=${!!dbUser?.idpUser?.accesstoken}`
+      `[auth-sync][${new Date().toISOString()}] failed for userId=${dbUser?.id || 'unknown'} projectId=${dbUser?.projectId || 'unknown'} error="${err?.message}" tokenPresent=${!!dbUser?.idpUser?.accesstoken}`
     );
     return await resetUserToken(dbUser);
   }

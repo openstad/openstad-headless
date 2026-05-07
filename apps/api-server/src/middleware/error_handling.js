@@ -36,7 +36,7 @@ module.exports = function (app) {
 
     // Always log full error server-side
     console.log(
-      `[api-error] ${status} ${req.method} ${req.originalUrl?.substring(0, 80)}: ${message}`
+      `[api-error][${new Date().toISOString()}] ${status} ${req.method} ${req.originalUrl?.substring(0, 80)}: ${message}`
     );
 
     if (shouldLogSubmitFailure(req, status)) {

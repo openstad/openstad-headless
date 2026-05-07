@@ -245,7 +245,9 @@ passport.use(
         return done(null, token, { scope: '*' });
       })
       .catch((err) => {
-        console.log(`[bearer-debug] token validation failed: ${err?.message}`);
+        console.log(
+          `[bearer-debug][${new Date().toISOString()}] token validation failed: ${err?.message}`
+        );
         done(null, false);
       });
   })
@@ -271,8 +273,18 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser((id, done) => {
   db.User.findOne({ where: { id } })
     .then((user) => {
-      if (!user) throw new Error('Error in deserializeUser for id=' + id);
+      if (!user) {
+        console.log(
+          `[deserialize][${new Date().toISOString()}] USER_NOT_FOUND id=${id}`
+        );
+        throw new Error('Error in deserializeUser for id=' + id);
+      }
       done(null, user);
     })
-    .catch((err) => done(err));
+    .catch((err) => {
+      console.log(
+        `[deserialize][${new Date().toISOString()}] ERROR id=${id} error=${err?.message}`
+      );
+      done(err);
+    });
 });

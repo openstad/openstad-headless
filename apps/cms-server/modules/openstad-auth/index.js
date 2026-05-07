@@ -30,6 +30,17 @@ function removeURLParameter(url, parameter) {
   return url;
 }
 
+function authLog(tag, msg, req) {
+  const ts = new Date().toISOString();
+  const sessionUserId = req?.session?.openstadUser?.id || null;
+  const path = req?.originalUrl?.substring(0, 120) || '';
+  const prefix = req?.sitePrefix || '';
+  const projectId = req?.project?.id || '';
+  console.log(
+    `[cms-auth][${ts}] ${tag} | userId=${sessionUserId} projectId=${projectId} prefix=${prefix} path=${path} | ${msg}`
+  );
+}
+
 module.exports = {
   middleware(self) {
     return {
@@ -43,12 +54,16 @@ module.exports = {
       },
       async authenticate(req, res, next) {
         if (!req.session) {
-          console.log(`[cms-auth] no session for ${req.originalUrl}`);
+          authLog('NO_SESSION', 'no session object', req);
           return next();
         }
 
         if (req.query.openstadlogout) {
-          console.log(`[cms-auth] openstadlogout for ${req.originalUrl}`);
+          authLog(
+            'LOGOUT',
+            'openstadlogout param received, destroying session',
+            req
+          );
           req.session.destroy(() => {});
           return next();
         }
@@ -64,10 +79,6 @@ module.exports = {
         };
 
         if (req.query.openstadlogintoken) {
-          const thisHost = req.headers['x-forwarded-host'] || req.get('host');
-          const protocol = req.headers['x-forwarded-proto'] || req.protocol;
-          const fullUrl = protocol + '://' + thisHost + req.originalUrl;
-          const parsedUrl = Url.parse(fullUrl, true);
           const fullUrlPath = parsedUrl.path;
 
           // remove the JWT Parameter otherwise keeps redirecting
@@ -75,6 +86,8 @@ module.exports = {
             req.session && req.session.returnTo
               ? req.session.returnTo
               : removeURLParameter(fullUrlPath, 'openstadlogintoken');
+
+          const returnToBeforePrefix = returnTo;
 
           // make sure references to external urls fail, only take the path
           returnTo = Url.parse(returnTo, true);
@@ -88,12 +101,26 @@ module.exports = {
             returnTo = returnTo.replace(`/${req.sitePrefix}`, '');
           }
 
-          console.log(
-            `[cms-auth] received openstadlogintoken, storing in session and redirecting to: ${returnTo}`
+          authLog(
+            'TOKEN_RECEIVED',
+            `token received, session.returnTo was ${req.session.returnTo}, returnTo before prefix strip: ${returnToBeforePrefix}, after: ${returnTo}, sitePrefix: ${req.sitePrefix}`,
+            req
           );
+
           req.session.save((saveErr) => {
-            if (saveErr)
-              console.log(`[cms-auth] session save error:`, saveErr?.message);
+            if (saveErr) {
+              authLog(
+                'SESSION_SAVE_ERROR',
+                `error saving session: ${saveErr?.message}`,
+                req
+              );
+            } else {
+              authLog(
+                'SESSION_SAVED',
+                `session saved OK, redirecting to: ${returnTo}`,
+                req
+              );
+            }
             res.redirect(returnTo);
           });
         } else {
@@ -101,8 +128,10 @@ module.exports = {
           const apiUrl = process.env.API_URL_INTERNAL || process.env.API_URL;
 
           if (!jwt) {
-            console.log(
-              `[cms-auth] no JWT in session for ${req.originalUrl}, proceeding without auth`
+            authLog(
+              'NO_JWT',
+              `no JWT in session, proceeding without auth`,
+              req
             );
             return next();
           } else {
@@ -110,9 +139,6 @@ module.exports = {
             const url = projectId
               ? `${apiUrl}/auth/project/${projectId}/me`
               : `${apiUrl}/auth/me`;
-            console.log(
-              `[cms-auth] JWT found in session, calling ${url} for projectId=${projectId}`
-            );
 
             const setUserData = function (req, next) {
               const requiredRoles = ['member', 'moderator', 'admin', 'editor'];
@@ -138,6 +164,12 @@ module.exports = {
                 req.data.hasModeratorRights = true;
               }
 
+              authLog(
+                'SET_USER_DATA',
+                `loggedIn=${req.data.loggedIn} userId=${user.id} role=${user.role}`,
+                req
+              );
+
               req.session.save(() => {
                 return next();
               });
@@ -156,13 +188,15 @@ module.exports = {
               req.session.openstadUser &&
               date - dateToCheck < THIRTY_SECONDS
             ) {
-              console.log(
-                `[cms-auth] using cached user data (last check ${Math.round((date - dateToCheck) / 1000)}s ago) for userId=${req.session.openstadUser?.id}`
+              authLog(
+                'CACHED',
+                `using cached data (${Math.round((date - dateToCheck) / 1000)}s ago), cachedUserId=${req.session.openstadUser?.id} cachedRole=${req.session.openstadUser?.role} aposUser=${req.user?.email}`,
+                req
               );
               setUserData(req, next);
             } else {
               try {
-                console.log(`[cms-auth] fetching /me from API: ${url}`);
+                authLog('FETCH_ME', `calling ${url}`, req);
                 let response = await fetch(url, {
                   headers: {
                     Accept: 'application/json',
@@ -171,8 +205,10 @@ module.exports = {
                   },
                 });
                 if (!response.ok) {
-                  console.log(
-                    `[cms-auth] /me returned HTTP ${response.status} for projectId=${projectId}`
+                  authLog(
+                    'FETCH_ME_HTTP_ERROR',
+                    `HTTP ${response.status} from ${url}`,
+                    req
                   );
                   throw new Error(
                     `Fetch failed with status ${response.status}`
@@ -180,8 +216,10 @@ module.exports = {
                 }
 
                 let user = await response.json();
-                console.log(
-                  `[cms-auth] /me response: id=${user?.id} role=${user?.role} keys=${Object.keys(user || {}).length}`
+                authLog(
+                  'FETCH_ME_RESPONSE',
+                  `id=${user?.id} role=${user?.role} keys=${Object.keys(user || {}).length}`,
+                  req
                 );
 
                 if (user && Object.keys(user).length > 0 && user.id) {
@@ -189,23 +227,25 @@ module.exports = {
                   req.session.openStadlastJWTCheck = new Date().getTime();
 
                   req.session.save(() => {
-                    console.log(
-                      `[cms-auth] user authenticated: userId=${user.id} role=${user.role}`
+                    authLog(
+                      'AUTHENTICATED',
+                      `userId=${user.id} role=${user.role}`,
+                      req
                     );
                     setUserData(req, next);
                   });
                 } else {
-                  console.log(
-                    `[cms-auth] /me returned empty user, destroying session and redirecting to / for ${req.originalUrl}`
+                  authLog(
+                    'EMPTY_USER',
+                    `/me returned empty user, destroying session and redirecting to /`,
+                    req
                   );
                   req.session.destroy(() => {
                     res.redirect('/');
                   });
                 }
               } catch (err) {
-                console.log(
-                  `[cms-auth] /me fetch error: ${err?.message} for ${req.originalUrl}`
-                );
+                authLog('FETCH_ME_ERROR', `error: ${err?.message}`, req);
                 req.session.destroy(() => {
                   res.redirect('/');
                 });
@@ -245,6 +285,12 @@ module.exports = {
         if (req.user && req.user.email === email) {
           return next();
         }
+
+        authLog(
+          'APOS_AUTH',
+          `logging in apos user: email=${email} role=${groupName}`,
+          req
+        );
 
         if (self.apos && self.apos.user) {
           let aposUser;
@@ -315,10 +361,15 @@ module.exports = {
               req.session.openstadUser = bak.openstadUser;
               req.session.openstadLoginToken = bak.openstadLoginToken;
               req.session.openstadLastJWTCheck = bak.openstadLastJWTCheck;
+              authLog(
+                'APOS_LOGGED_IN',
+                `apos login complete, redirecting to ${req.url}`,
+                req
+              );
               res.redirect(req.url);
             });
           } catch (e) {
-            console.log('errr', e);
+            authLog('APOS_LOGIN_ERROR', `error: ${e?.message}`, req);
             return next(e);
           }
         }
@@ -330,6 +381,7 @@ module.exports = {
       get: {
         // GET /api/v1/openstad-auth/logout
         async logout(req, res) {
+          authLog('CMS_LOGOUT_ROUTE', `logout route hit`, req);
           // If there is no session we can redirect back safely
           if (!req.session) {
             return res.redirect('/');

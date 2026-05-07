@@ -529,7 +529,7 @@ module.exports = function (app) {
     // een deserialize error betekent een data fout; daar hoef je een gebruiker niet mee te belasten
     if (err && err.message && err.message.match(/^Error in deserializeUser/)) {
       console.log(
-        `[auth-error] deserializeUser error, destroying session and redirecting to logout: ${err?.message}`
+        `[auth-error][${new Date().toISOString()}] deserializeUser error, destroying session and redirecting to logout: ${err?.message}`
       );
       await req.session.destroy();
       let querystring = '?';

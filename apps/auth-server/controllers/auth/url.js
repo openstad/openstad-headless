@@ -283,6 +283,9 @@ exports.postAuthenticate = (req, res, next) => {
       logAuthEvent(req, 'login_failed', {
         data: { method: 'url' },
       });
+      console.log(
+        `[url-auth][${new Date().toISOString()}] LOGIN_FAILED token invalid/expired, clientId=${req.client?.clientId}, redirecting back to email form`
+      );
       req.flash('error', {
         msg: 'De url is geen geldige login url, wellicht is deze verlopen',
       });
@@ -320,7 +323,9 @@ exports.postAuthenticate = (req, res, next) => {
         .then(() => clientAuth.saveSession(req.session))
         .then(() => authService.logSuccessFullLogin(req))
         .then(() => {
-          console.log(`[url-auth] session saved, redirecting to authorize`);
+          console.log(
+            `[url-auth][${new Date().toISOString()}] session saved, redirecting to authorize`
+          );
           redirectToAuthorisation();
         })
         .catch((err) => {

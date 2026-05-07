@@ -22,7 +22,7 @@ exports.check = (req, res, next) => {
 
   if (!req.isAuthenticated || !isAuthenticated) {
     console.log(
-      `[auth-check] NOT authenticated for ${req.originalUrl} clientId=${req.client?.clientId}`
+      `[auth-check][${new Date().toISOString()}] NOT authenticated for ${req.originalUrl} clientId=${req.client?.clientId}`
     );
     let url = '/login?clientId=' + req.client.clientId;
 
@@ -53,7 +53,7 @@ exports.check = (req, res, next) => {
 
           if (isExpired) {
             console.log(
-              `[auth-check] session EXPIRED for userId=${user?.id} role=${currentRole} authenticatedAt=${req.currentClientAuth?.authenticatedAt} path=${req.originalUrl}`
+              `[auth-check][${new Date().toISOString()}] session EXPIRED for userId=${user?.id} role=${currentRole} authenticatedAt=${req.currentClientAuth?.authenticatedAt} path=${req.originalUrl}`
             );
             clientAuth.clearClientAuth(req.session, req.client);
             await clientAuth.saveSession(req.session);
@@ -76,13 +76,13 @@ exports.check = (req, res, next) => {
         }
 
         console.log(
-          `[auth-check] OK for userId=${user?.id} path=${req.originalUrl} hasClientAuth=${!!req.currentClientAuth}`
+          `[auth-check][${new Date().toISOString()}] OK for userId=${user?.id} path=${req.originalUrl} hasClientAuth=${!!req.currentClientAuth}`
         );
         return next();
       })
       .catch((err) => {
         console.log(
-          `[auth-check] error: ${err?.message} path=${req.originalUrl}`
+          `[auth-check][${new Date().toISOString()}] error: ${err?.message} path=${req.originalUrl}`
         );
         next(err);
       });

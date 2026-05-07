@@ -195,11 +195,11 @@ exports.logout = async (req, res) => {
       where: { userID: userId, clientID: clientId },
     });
     console.log(
-      `[logout] destroyed ${count} access token(s) for userID=${userId} clientID=${clientId}`
+      `[logout][${new Date().toISOString()}] destroyed ${count} access token(s) for userID=${userId} clientID=${clientId}`
     );
   } else {
     console.log(
-      `[logout] skipped token destroy: userID=${userId} clientID=${clientId}`
+      `[logout][${new Date().toISOString()}] skipped token destroy: userID=${userId} clientID=${clientId}`
     );
   }
 

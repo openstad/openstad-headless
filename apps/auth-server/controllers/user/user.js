@@ -26,7 +26,7 @@ exports.info = (req, res) => {
   // example simply returns the scope in the response.
 
   console.log(
-    `[userinfo] returning info for authUserId=${req.user?.id} role=${req.currentClientRole || req.user?.role} clientId=${req?.client?.id}`
+    `[userinfo][${new Date().toISOString()}] returning info for authUserId=${req.user?.id} role=${req.currentClientRole || req.user?.role} clientId=${req?.client?.id}`
   );
   // todo: ik denk dat hier de default role moet komen
   res.json({

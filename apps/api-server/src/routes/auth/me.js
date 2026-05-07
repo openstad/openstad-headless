@@ -9,12 +9,12 @@ let router = express.Router({ mergeParams: true });
 router.route('(/project/:projectId)?/me').get(async function (req, res, next) {
   if (!req.user || !req.user.id) {
     console.log(
-      `[/me] returning empty: user=${!!req.user} userId=${req.user?.id} projectId=${req.params.projectId}`
+      `[/me][${new Date().toISOString()}] EMPTY user=${!!req.user} userId=${req.user?.id} projectId=${req.params.projectId}`
     );
     return res.json({});
   }
   console.log(
-    `[/me] returning user: userId=${req.user.id} role=${req.user.role} projectId=${req.params.projectId}`
+    `[/me][${new Date().toISOString()}] OK userId=${req.user.id} role=${req.user.role} projectId=${req.params.projectId}`
   );
 
   let userNickName = '';

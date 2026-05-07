@@ -352,6 +352,9 @@ async function serveSite(req, res, siteConfig, forceRestart) {
       siteConfig.config.cms &&
       siteConfig.config.cms.redirectURI;
     if (redirectURI) {
+      console.log(
+        `[cms-routing][${new Date().toISOString()}] SITE_REDIRECT domain=${domain} redirectURI=${redirectURI}`
+      );
       return res.redirect(redirectURI);
     }
 
@@ -442,7 +445,7 @@ app.use('/:sitePrefix', function (req, res, next) {
       originalUrl.includes('/idee/delen')
     ) {
       console.log(
-        `[cms-routing] sitePrefix=${req.params.sitePrefix} originalUrl=${originalUrl.substring(0, 120)} rewrittenUrl=${req.url.substring(0, 120)}`
+        `[cms-routing][${new Date().toISOString()}] SITE_MATCH sitePrefix=${req.params.sitePrefix} sessionUserId=${req.session?.openstadUser?.id || null} originalUrl=${originalUrl.substring(0, 150)} rewrittenUrl=${req.url.substring(0, 150)}`
       );
     }
 
@@ -455,7 +458,7 @@ app.use('/:sitePrefix', function (req, res, next) {
       req.url.includes('/idee/delen')
     ) {
       console.log(
-        `[cms-routing] NO site found for ${domainAndPath} url=${req.url.substring(0, 120)}`
+        `[cms-routing][${new Date().toISOString()}] NO_SITE_MATCH domain=${domainAndPath} sessionUserId=${req.session?.openstadUser?.id || null} url=${req.url.substring(0, 150)}`
       );
     }
     next();
@@ -503,7 +506,7 @@ app.use('/:privileged(admin)?/login', function (req, res, next) {
     query += `${query ? '&' : ''}loginPriviliged=1`;
   }
   console.log(
-    `[cms-login] /login route hit: originalUrl=${req.originalUrl} sitePrefix=${req.sitePrefix} referer=${req.headers?.referer?.substring(0, 100)} redirecting to ${url}`
+    `[cms-login][${new Date().toISOString()}] LOGIN_ROUTE originalUrl=${req.originalUrl} sitePrefix=${req.sitePrefix} sessionUserId=${req.session?.openstadUser?.id || null} referer=${req.headers?.referer?.substring(0, 120)} redirectingTo=${url}`
   );
   return res.redirect(url && query ? url + '?' + query : url);
 });
@@ -511,7 +514,7 @@ app.use('/:privileged(admin)?/login', function (req, res, next) {
 app.get('/auth/login', (req, res, next) => {
   let returnUrl = createReturnUrl(req, res);
   console.log(
-    `[cms-login] /auth/login route hit: sitePrefix=${req.sitePrefix} returnUrl=${returnUrl.substring(0, 100)} referer=${req.headers?.referer?.substring(0, 100)}`
+    `[cms-login][${new Date().toISOString()}] AUTH_LOGIN_ROUTE sitePrefix=${req.sitePrefix} sessionUserId=${req.session?.openstadUser?.id || null} returnUrl=${returnUrl.substring(0, 120)} referer=${req.headers?.referer?.substring(0, 120)}`
   );
   returnUrl = encodeURIComponent(returnUrl + '?openstadlogintoken=[[jwt]]');
 
@@ -526,7 +529,7 @@ app.get('/auth/login', (req, res, next) => {
     : url + '&forceNewLogin=1'; // ;
 
   console.log(
-    `[cms-login] redirecting to API login: projectId=${project?.id} forceNewLogin=1`
+    `[cms-login][${new Date().toISOString()}] REDIRECT_TO_API projectId=${project?.id} forceNewLogin=1 redirectUri=${decodeURIComponent(returnUrl).substring(0, 120)}`
   );
   return res.redirect(url);
 });
@@ -538,6 +541,9 @@ app.use('/logout', function (req, res, next) {
   let query = req.url.substr(i + 1);
   const protocol = req.headers['x-forwarded-proto'] || req.protocol;
   const url = protocol + '://' + domainAndPath + '/auth/logout';
+  console.log(
+    `[cms-login][${new Date().toISOString()}] LOGOUT_ROUTE originalUrl=${req.originalUrl} sitePrefix=${req.sitePrefix} sessionUserId=${req.session?.openstadUser?.id || null} redirectingTo=${url}`
+  );
   return res.redirect(url && query ? url + '?' + query : url);
 });
 
@@ -555,6 +561,9 @@ app.get('/auth/logout', (req, res, next) => {
     ? url + '&loginPriviliged=1'
     : url + '&forceNewLogin=1'; // ;
 
+  console.log(
+    `[cms-login][${new Date().toISOString()}] AUTH_LOGOUT_ROUTE sitePrefix=${req.sitePrefix} sessionUserId=${req.session?.openstadUser?.id || null} returnUrl=${returnUrl.substring(0, 100)} redirectingTo=${url.substring(0, 150)}`
+  );
   return res.redirect(url);
 });
 

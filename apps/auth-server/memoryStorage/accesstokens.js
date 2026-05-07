@@ -35,7 +35,7 @@ exports.find = (token) => {
       .then((token) => {
         if (!token) {
           console.log(
-            `[bearer-debug] token NOT found in DB for jti=${id} sub=${decoded.sub}`
+            `[bearer-debug][${new Date().toISOString()}] token NOT found in DB for jti=${id} sub=${decoded.sub}`
           );
           resolve(undefined);
         }

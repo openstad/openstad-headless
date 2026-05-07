@@ -160,7 +160,9 @@ router
       );
       return next(createError(403, 'redirectUri not found in allowlist.'));
     }
-    console.log(`[api-login] no redirectUri, falling through`);
+    console.log(
+      `[api-login][${new Date().toISOString()}] no redirectUri, falling through`
+    );
     return next();
   });
 
@@ -236,7 +238,9 @@ router
     // get accesstoken for code
     let code = req.query.code;
     if (!code) {
-      console.log(`[digest-login] no code in request, aborting`);
+      console.log(
+        `[digest-login][${new Date().toISOString()}] no code in request, aborting`
+      );
       throw createError(403, 'Je bent niet ingelogd');
     }
 
@@ -249,7 +253,9 @@ router
     };
 
     try {
-      console.log(`[digest-login] exchanging code for token at ${url}`);
+      console.log(
+        `[digest-login][${new Date().toISOString()}] exchanging code for token at ${url}`
+      );
       let response = await fetch(url, {
         headers: { 'Content-type': 'application/json' },
         method: 'POST',
@@ -267,22 +273,30 @@ router
 
       let accessToken = json.access_token;
       if (!accessToken) {
-        console.log(`[digest-login] no access_token in response`);
+        console.log(
+          `[digest-login][${new Date().toISOString()}] no access_token in response`
+        );
         return next(createError(403, 'Inloggen niet gelukt: geen accessToken'));
       }
 
-      console.log(`[digest-login] token exchange OK, got access_token`);
+      console.log(
+        `[digest-login][${new Date().toISOString()}] token exchange OK, got access_token`
+      );
       req.userAccessToken = accessToken;
       return next();
     } catch (err) {
-      console.log(`[digest-login] token exchange error: ${err?.message}`);
+      console.log(
+        `[digest-login][${new Date().toISOString()}] token exchange error: ${err?.message}`
+      );
       return next(createError(401, 'Login niet gelukt'));
     }
   })
   .get(async function (req, res, next) {
     try {
       // get userdata from auth server
-      console.log(`[digest-login] fetching userinfo from auth server`);
+      console.log(
+        `[digest-login][${new Date().toISOString()}] fetching userinfo from auth server`
+      );
       req.userData = await service.fetchUserData({
         authConfig: req.authConfig,
         accessToken: req.userAccessToken,
@@ -291,7 +305,9 @@ router
         `[digest-login] userinfo OK: identifier=${req.userData?.idpUser?.identifier} email=${req.userData?.email} role=${req.userData?.role}`
       );
     } catch (err) {
-      console.log(`[digest-login] userinfo fetch error: ${err?.message}`);
+      console.log(
+        `[digest-login][${new Date().toISOString()}] userinfo fetch error: ${err?.message}`
+      );
       return next(createError(err));
     }
     return next();
@@ -448,7 +464,9 @@ router
       },
       (err, token) => {
         if (err) {
-          console.log(`[digest-login] JWT sign error: ${err?.message}`);
+          console.log(
+            `[digest-login][${new Date().toISOString()}] JWT sign error: ${err?.message}`
+          );
           return next(err);
         }
         req.redirectUrl = req.redirectUrl.replace('[[jwt]]', token);
@@ -512,6 +530,9 @@ router
           url += `&redirectUrl=${encodeURIComponent(safeRedirect)}`;
         }
       }
+      console.log(
+        `[api-logout][${new Date().toISOString()}] redirecting to auth server: safeRedirect=${safeRedirect?.substring(0, 100)} fullUrl=${url.substring(0, 150)}`
+      );
       return res.redirect(url);
     }
     return next();
