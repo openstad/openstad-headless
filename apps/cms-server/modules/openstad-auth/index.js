@@ -43,10 +43,12 @@ module.exports = {
       },
       async authenticate(req, res, next) {
         if (!req.session) {
+          console.log(`[cms-auth] no session for ${req.originalUrl}`);
           return next();
         }
 
         if (req.query.openstadlogout) {
+          console.log(`[cms-auth] openstadlogout for ${req.originalUrl}`);
           req.session.destroy(() => {});
           return next();
         }

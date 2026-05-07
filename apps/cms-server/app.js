@@ -432,11 +432,32 @@ app.use('/:sitePrefix', function (req, res, next) {
     req.site = site;
 
     // Remove the prefix from the URL
+    const originalUrl = req.url;
     req.url = req.url.replace(`/${req.params.sitePrefix}`, '');
+
+    if (
+      originalUrl.includes('openstadlogintoken') ||
+      originalUrl.includes('openstadlogout') ||
+      originalUrl.includes('/login') ||
+      originalUrl.includes('/idee/delen')
+    ) {
+      console.log(
+        `[cms-routing] sitePrefix=${req.params.sitePrefix} originalUrl=${originalUrl.substring(0, 120)} rewrittenUrl=${req.url.substring(0, 120)}`
+      );
+    }
 
     // Reinitialize route parameters, so the next middleware will see the correct parameters
     req.app._router.handle(req, res, next);
   } else {
+    if (
+      req.url.includes('openstadlogintoken') ||
+      req.url.includes('/login') ||
+      req.url.includes('/idee/delen')
+    ) {
+      console.log(
+        `[cms-routing] NO site found for ${domainAndPath} url=${req.url.substring(0, 120)}`
+      );
+    }
     next();
   }
 });
@@ -481,11 +502,17 @@ app.use('/:privileged(admin)?/login', function (req, res, next) {
   if (req.params.privileged) {
     query += `${query ? '&' : ''}loginPriviliged=1`;
   }
+  console.log(
+    `[cms-login] /login route hit: originalUrl=${req.originalUrl} sitePrefix=${req.sitePrefix} referer=${req.headers?.referer?.substring(0, 100)} redirecting to ${url}`
+  );
   return res.redirect(url && query ? url + '?' + query : url);
 });
 
 app.get('/auth/login', (req, res, next) => {
   let returnUrl = createReturnUrl(req, res);
+  console.log(
+    `[cms-login] /auth/login route hit: sitePrefix=${req.sitePrefix} returnUrl=${returnUrl.substring(0, 100)} referer=${req.headers?.referer?.substring(0, 100)}`
+  );
   returnUrl = encodeURIComponent(returnUrl + '?openstadlogintoken=[[jwt]]');
 
   const domainAndPath =
@@ -498,6 +525,9 @@ app.get('/auth/login', (req, res, next) => {
     ? url + '&loginPriviliged=1'
     : url + '&forceNewLogin=1'; // ;
 
+  console.log(
+    `[cms-login] redirecting to API login: projectId=${project?.id} forceNewLogin=1`
+  );
   return res.redirect(url);
 });
 
