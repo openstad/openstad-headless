@@ -36,17 +36,24 @@ export default function WidgetDistributionModuleItems(
 ) {
   type FormData = z.infer<typeof formSchema>;
   const [items, setItems] = useState<Item[]>([]);
-  const [selectedItem, setItem] = useState<Item | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const selectedItem = selectedItemId
+    ? items.find((i) => i.id === selectedItemId) || null
+    : null;
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
     if (selectedItem) {
+      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+
       setItems((currentItems) =>
         currentItems.map((item) =>
-          item.id === selectedItem.id ? { ...item, ...values } : item
+          item.id === selectedItem.id
+            ? { ...item, ...valuesWithoutTrigger }
+            : item
         )
       );
-      setItem(null);
+      setSelectedItemId(null);
     } else {
       setItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
@@ -106,7 +113,7 @@ export default function WidgetDistributionModuleItems(
         placeholder: selectedItem.placeholder || '',
       });
     }
-  }, [selectedItem, form]);
+  }, [selectedItemId, form]);
 
   const handleAction = (
     actionType: 'moveUp' | 'moveDown' | 'delete',
@@ -168,7 +175,7 @@ export default function WidgetDistributionModuleItems(
 
   function resetForm() {
     form.reset(defaults());
-    setItem(null);
+    setSelectedItemId(null);
   }
 
   return (
@@ -210,7 +217,9 @@ export default function WidgetDistributionModuleItems(
                             </span>
                             <span
                               className="gap-2 py-3 px-2 w-full"
-                              onClick={() => setItem(item)}>
+                              onClick={() =>
+                                setSelectedItemId(item.id ?? null)
+                              }>
                               {`${item.title || 'Geen titel'}`}
                             </span>
                             <span className="gap-2 py-3 px-2">
