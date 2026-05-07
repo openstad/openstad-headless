@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { IconButton } from '../iconbutton';
 import '../index.css';
@@ -17,6 +17,9 @@ type Props = {
   beforeIndexChange?: () => void;
   setIndexInParent?: (setter: (index: number) => void) => void;
   pager?: boolean;
+  autoplay?: boolean;
+  autoplayInterval?: number;
+  fade?: boolean;
 } & React.HTMLAttributes<HTMLDivElement>;
 
 export function Carousel({
@@ -27,11 +30,31 @@ export function Carousel({
   beforeIndexChange = () => {},
   setIndexInParent = () => {},
   pager = false,
+  autoplay = false,
+  autoplayInterval = 5000,
+  fade = false,
   ...props
 }: Props) {
   const [index, setIndex] = useState<number>(startIndex);
+  const [leavingIndex, setLeavingIndex] = useState<number | null>(null);
+  const autoplayPaused = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const indexRef = useRef(index);
+  indexRef.current = index;
 
-  if (items.length === 0) return null;
+  const handleIndexChange = useCallback(
+    (newIndex: number) => {
+      if (beforeIndexChange) beforeIndexChange();
+
+      setLeavingIndex(indexRef.current);
+      setIndex(newIndex);
+
+      setTimeout(() => {
+        setLeavingIndex(null);
+      }, 600);
+    },
+    [beforeIndexChange]
+  );
 
   useEffect(() => {
     if (setIndexInParent) {
@@ -39,16 +62,42 @@ export function Carousel({
     }
   }, [setIndexInParent]);
 
-  const handleIndexChange = (newIndex: number) => {
-    if (beforeIndexChange) {
-      beforeIndexChange();
-    }
+  useEffect(() => {
+    if (!autoplay || items.length <= 1) return;
 
-    setIndex(newIndex);
-  };
+    timerRef.current = setInterval(() => {
+      if (!autoplayPaused.current) {
+        const next =
+          indexRef.current >= items.length - 1 ? 0 : indexRef.current + 1;
+        handleIndexChange(next);
+      }
+    }, autoplayInterval);
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [autoplay, autoplayInterval, items.length, handleIndexChange]);
+
+  if (items.length === 0) return null;
 
   return (
-    <div {...props} className={`osc ${props.className} osc-carousel width-100`}>
+    <div
+      {...props}
+      className={`osc ${props.className} osc-carousel width-100`}
+      onMouseEnter={
+        autoplay
+          ? () => {
+              autoplayPaused.current = true;
+            }
+          : undefined
+      }
+      onMouseLeave={
+        autoplay
+          ? () => {
+              autoplayPaused.current = false;
+            }
+          : undefined
+      }>
       {items.length > 1 && (
         <div className="carousel-button-container">
           <div className="osc-carousel-navigation-button-wrapper osc-carousel-previous">
@@ -74,7 +123,21 @@ export function Carousel({
         </div>
       )}
 
-      <div className="carousel-items">{itemRenderer(items.at(index))}</div>
+      <div className="carousel-items">
+        {/* Nieuwe afbeelding — in normale flow, bepaalt de hoogte */}
+        <div
+          className={`carousel-item${fade && leavingIndex !== null ? ' carousel-item--entering' : ''}`}>
+          {itemRenderer(items.at(index))}
+        </div>
+        {/* Oude afbeelding — absoluut bovenop, fadet weg */}
+        {fade && leavingIndex !== null && (
+          <div
+            key={leavingIndex}
+            className="carousel-item carousel-item--leaving">
+            {itemRenderer(items.at(leavingIndex))}
+          </div>
+        )}
+      </div>
 
       {pager && items.length > 1 && (
         <div className="osc-carousel-pager">
