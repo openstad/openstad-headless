@@ -7,7 +7,15 @@ let router = express.Router({ mergeParams: true });
 // me: translate bearer jwt to user data
 // -------------------------------------
 router.route('(/project/:projectId)?/me').get(async function (req, res, next) {
-  if (!req.user || !req.user.id) return res.json({});
+  if (!req.user || !req.user.id) {
+    console.log(
+      `[/me] returning empty: user=${!!req.user} userId=${req.user?.id} projectId=${req.params.projectId}`
+    );
+    return res.json({});
+  }
+  console.log(
+    `[/me] returning user: userId=${req.user.id} role=${req.user.role} projectId=${req.params.projectId}`
+  );
 
   let userNickName = '';
 

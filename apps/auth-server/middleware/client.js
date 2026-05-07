@@ -276,6 +276,9 @@ exports.checkRequiredUserFields = (req, res, next) => {
   const requiredFields = req.client.requiredUserFields;
   const user = req.user;
   let error;
+  console.log(
+    `[required-fields-check] userId=${user?.id} requiredFields=${JSON.stringify(requiredFields)}`
+  );
 
   if (requiredFields) {
     requiredFields.forEach((field) => {
@@ -310,12 +313,16 @@ exports.checkRequiredUserFields = (req, res, next) => {
 
   // if error redirect to register
   if (error) {
+    console.log(
+      `[required-fields-check] MISSING fields for userId=${user?.id}, redirecting to required-fields`
+    );
     res.redirect(
       `/auth/required-fields?clientId=${
         req.client.clientId
       }&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
     );
   } else {
+    console.log(`[required-fields-check] all fields OK for userId=${user?.id}`);
     next();
   }
 };

@@ -309,6 +309,9 @@ exports.postAuthenticate = (req, res, next) => {
       logAuthEvent(req, 'login', {
         data: { method: 'url' },
       });
+      console.log(
+        `[url-auth] login success for userId=${user.id} clientId=${req.client?.clientId}`
+      );
       clientAuth
         .initializeClientAuth(req.session, req.client, user, {
           authType,
@@ -317,9 +320,13 @@ exports.postAuthenticate = (req, res, next) => {
         .then(() => clientAuth.saveSession(req.session))
         .then(() => authService.logSuccessFullLogin(req))
         .then(() => {
+          console.log(`[url-auth] session saved, redirecting to authorize`);
           redirectToAuthorisation();
         })
-        .catch(() => {
+        .catch((err) => {
+          console.log(
+            `[url-auth] session init/save error: ${err?.message}, redirecting anyway`
+          );
           redirectToAuthorisation();
         });
     });

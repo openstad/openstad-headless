@@ -191,9 +191,16 @@ exports.logout = async (req, res) => {
   });
 
   if (userId && clientId) {
-    await db.AccessToken.destroy({
+    const count = await db.AccessToken.destroy({
       where: { userID: userId, clientID: clientId },
     });
+    console.log(
+      `[logout] destroyed ${count} access token(s) for userID=${userId} clientID=${clientId}`
+    );
+  } else {
+    console.log(
+      `[logout] skipped token destroy: userID=${userId} clientID=${clientId}`
+    );
   }
 
   await req.session.destroy();

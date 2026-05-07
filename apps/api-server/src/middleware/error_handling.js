@@ -35,9 +35,9 @@ module.exports = function (app) {
     message = message && message.replace(/Validation error:?\s*/, '');
 
     // Always log full error server-side
-    if (status >= 500) {
-      console.error(stack);
-    }
+    console.log(
+      `[api-error] ${status} ${req.method} ${req.originalUrl?.substring(0, 80)}: ${message}`
+    );
 
     if (shouldLogSubmitFailure(req, status)) {
       console.error(

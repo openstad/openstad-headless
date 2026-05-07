@@ -85,8 +85,16 @@ router
   .route('(/project/:projectId)?/login')
   .get(async function (req, res, next) {
     // logout first?
-    if (!req.query.forceNewLogin) return next();
+    if (!req.query.forceNewLogin) {
+      console.log(
+        `[api-login] projectId=${req.params.projectId} no forceNewLogin, skipping logout step`
+      );
+      return next();
+    }
 
+    console.log(
+      `[api-login] projectId=${req.params.projectId} forceNewLogin=1 redirectUri=${req.query.redirectUri?.substring(0, 60)}`
+    );
     const projectId = req.params.projectId;
     if (
       req.query.redirectUri &&
@@ -109,8 +117,14 @@ router
         req.project.id +
         '/logout?redirectUri=' +
         backToHereUrl;
+      console.log(
+        `[api-login] forceNewLogin: redirecting through logout first`
+      );
       return res.redirect(url);
     } else if (req.query.redirectUri) {
+      console.log(
+        `[api-login] redirectUri not in allowlist: ${req.query.redirectUri?.substring(0, 60)}`
+      );
       return next(createError(403, 'redirectUri not found in allowlist.'));
     }
     return next();
@@ -136,10 +150,17 @@ router
       if (req.query.loginPriviliged)
         url = `${req.authConfig.serverUrl}/auth/admin/login`;
       url = `${url}?redirect_uri=${redirectUri}&response_type=code&client_id=${req.authConfig.clientId}&scope=offline`;
+      console.log(
+        `[api-login] redirecting to auth server dialog/authorize for projectId=${projectId}`
+      );
       return res.redirect(url);
     } else if (req.query.redirectUri) {
+      console.log(
+        `[api-login] redirectUri not in allowlist for dialog: ${req.query.redirectUri?.substring(0, 60)}`
+      );
       return next(createError(403, 'redirectUri not found in allowlist.'));
     }
+    console.log(`[api-login] no redirectUri, falling through`);
     return next();
   });
 
@@ -150,6 +171,9 @@ router
   .route('(/project/:projectId)?/digest-login')
   .get(async function (req, res, next) {
     // check redirect first
+    console.log(
+      `[digest-login] started: projectId=${req.params.projectId} returnTo=${req.query.returnTo?.substring(0, 80)} code=${req.query.code ? 'present' : 'MISSING'}`
+    );
     let returnTo = req.query.returnTo;
     returnTo = decodeURIComponent(returnTo);
     returnTo = returnTo || '/?openstadlogintoken=[[jwt]]';
@@ -194,9 +218,15 @@ router
 
     // check if redirect domain is allowed
     if (isAllowedRedirectDomain(redirectUrl, req.project)) {
+      console.log(
+        `[digest-login] redirect domain allowed: ${redirectUrl.substring(0, 80)}`
+      );
       req.redirectUrl = redirectUrl;
       return next();
     } else {
+      console.log(
+        `[digest-login] redirect domain NOT allowed: ${redirectUrl.substring(0, 80)}`
+      );
       res.status(500).json({
         status: 'Redirect domain not allowed',
       });
@@ -205,7 +235,10 @@ router
   .get(async function (req, res, next) {
     // get accesstoken for code
     let code = req.query.code;
-    if (!code) throw createError(403, 'Je bent niet ingelogd');
+    if (!code) {
+      console.log(`[digest-login] no code in request, aborting`);
+      throw createError(403, 'Je bent niet ingelogd');
+    }
 
     let url = `${req.authConfig.serverUrlInternal}/oauth/token`;
     let data = {
@@ -216,6 +249,7 @@ router
     };
 
     try {
+      console.log(`[digest-login] exchanging code for token at ${url}`);
       let response = await fetch(url, {
         headers: { 'Content-type': 'application/json' },
         method: 'POST',
@@ -223,31 +257,41 @@ router
       });
 
       if (!response.ok) {
-        console.log(response);
+        console.log(
+          `[digest-login] token exchange failed: HTTP ${response.status}`
+        );
         throw new Error('Fetch failed');
       }
 
       let json = await response.json();
 
       let accessToken = json.access_token;
-      if (!accessToken)
+      if (!accessToken) {
+        console.log(`[digest-login] no access_token in response`);
         return next(createError(403, 'Inloggen niet gelukt: geen accessToken'));
+      }
 
+      console.log(`[digest-login] token exchange OK, got access_token`);
       req.userAccessToken = accessToken;
       return next();
     } catch (err) {
-      console.log(err);
+      console.log(`[digest-login] token exchange error: ${err?.message}`);
       return next(createError(401, 'Login niet gelukt'));
     }
   })
   .get(async function (req, res, next) {
     try {
       // get userdata from auth server
+      console.log(`[digest-login] fetching userinfo from auth server`);
       req.userData = await service.fetchUserData({
         authConfig: req.authConfig,
         accessToken: req.userAccessToken,
       });
+      console.log(
+        `[digest-login] userinfo OK: identifier=${req.userData?.idpUser?.identifier} email=${req.userData?.email} role=${req.userData?.role}`
+      );
     } catch (err) {
+      console.log(`[digest-login] userinfo fetch error: ${err?.message}`);
       return next(createError(err));
     }
     return next();
@@ -300,21 +344,36 @@ router
     };
 
     // find or create the user
+    console.log(
+      `[digest-login] looking up user: identifier=${data.idpUser?.identifier} provider=${data.idpUser?.provider} projectId=${data.projectId}`
+    );
     db.User.findAll(where)
       .then((result) => {
+        console.log(
+          `[digest-login] findAll result: ${result?.length} user(s) found`
+        );
         if (result && result.length > 1)
           return next(createError(403, 'Meerdere users gevonden'));
         if (result && result.length == 1) {
           // user found; update and use
           let user = result[0];
+          console.log(
+            `[digest-login] updating existing user: apiUserId=${user.id} role=${user.role}`
+          );
 
           user
             .update(data)
             .then(() => {
+              console.log(
+                `[digest-login] user updated OK: apiUserId=${user.id}`
+              );
               req.userData.id = user.id;
               return next();
             })
             .catch((e) => {
+              console.log(
+                `[digest-login] user update FAILED for apiUserId=${user.id}: ${e?.message}`
+              );
               req.userData.id = user.id;
               return next();
             });
@@ -332,6 +391,9 @@ router
 
           db.User.create(data)
             .then((result) => {
+              console.log(
+                `[digest-login] user created: apiUserId=${result.id} role=${result.role}`
+              );
               req.userData.id = result.id;
               return next();
             })
@@ -375,6 +437,9 @@ router
   })
   .get(function (req, res, next) {
     if (!req.redirectUrl.match('[[jwt]]')) return next();
+    console.log(
+      `[digest-login] signing JWT: userId=${req.userData.id} role=${req.userData.role} provider=${req.authConfig.provider}`
+    );
     jwt.sign(
       { userId: req.userData.id, authProvider: req.authConfig.provider },
       req.authConfig.jwtSecret,
@@ -382,8 +447,14 @@ router
         expiresIn: sessionDuration.getJwtExpiresInForRole(req.userData.role),
       },
       (err, token) => {
-        if (err) return next(err);
+        if (err) {
+          console.log(`[digest-login] JWT sign error: ${err?.message}`);
+          return next(err);
+        }
         req.redirectUrl = req.redirectUrl.replace('[[jwt]]', token);
+        console.log(
+          `[digest-login] redirecting to: ${req.redirectUrl.substring(0, 120)}...`
+        );
         return next();
       }
     );
@@ -398,6 +469,9 @@ router
 router
   .route('(/project/:projectId)?/logout')
   .get(async function (req, res, next) {
+    console.log(
+      `[api-logout] projectId=${req.params.projectId} redirectUri=${req.query.redirectUri?.substring(0, 80)} userId=${req.user?.id}`
+    );
     // api user
     if (req.user && req.user.id > 1) {
       // note: it is unlikely that you get here; most logout requests will not send Auth headers

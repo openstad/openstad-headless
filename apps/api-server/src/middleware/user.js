@@ -45,8 +45,12 @@ module.exports = async function getUser(req, res, next) {
     });
 
     if (userId === null || typeof userId === 'undefined') {
+      console.log(`[user-mw] no userId from JWT for ${req.method} ${req.path}`);
       return nextWithEmptyUser(req, res, next);
     }
+    console.log(
+      `[user-mw] parsed JWT: userId=${userId} authProvider=${authProvider} path=${req.path}`
+    );
 
     let projectId = req.project && req.project.id;
 
@@ -63,7 +67,9 @@ module.exports = async function getUser(req, res, next) {
 
     return next();
   } catch (error) {
-    console.error(error);
+    console.log(
+      `[user-mw] error for ${req.method} ${req.path}: ${error?.message}`
+    );
     next(error);
   }
 };
@@ -156,6 +162,9 @@ async function getUserInstance({
     }
 
     dbUser = await db.User.findOne({ where });
+    console.log(
+      `[auth-sync] user lookup: userId=${userId} projectId=${projectId} found=${!!dbUser} dbUserId=${dbUser?.id} dbRole=${dbUser?.role}`
+    );
 
     if (isFixed) {
       if (!dbUser.projectId || dbUser.projectId == config.admin.projectId)
@@ -164,6 +173,9 @@ async function getUserInstance({
     }
 
     if (!dbUser || !dbUser.idpUser || !dbUser.idpUser.accesstoken) {
+      console.log(
+        `[auth-sync] skipping for userId=${userId} projectId=${projectId}: dbUser=${!!dbUser} idpUser=${!!dbUser?.idpUser} accesstoken=${!!dbUser?.idpUser?.accesstoken}`
+      );
       return dbUser;
     }
   } catch (err) {
@@ -214,13 +226,9 @@ async function getUserInstance({
 
     return mergedUser;
   } catch (err) {
-    if (err?.message === 'Auth server rejected access token') {
-      console.log(
-        `[auth-sync] resetting stale access token for userId=${dbUser?.id || 'unknown'} projectId=${dbUser?.projectId || 'unknown'}`
-      );
-    } else {
-      console.log(err);
-    }
+    console.log(
+      `[auth-sync] failed for userId=${dbUser?.id || 'unknown'} projectId=${dbUser?.projectId || 'unknown'} error="${err?.message}" tokenPresent=${!!dbUser?.idpUser?.accesstoken}`
+    );
     return await resetUserToken(dbUser);
   }
 }

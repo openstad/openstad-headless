@@ -86,7 +86,12 @@ module.exports = {
             returnTo = returnTo.replace(`/${req.sitePrefix}`, '');
           }
 
-          req.session.save(() => {
+          console.log(
+            `[cms-auth] received openstadlogintoken, storing in session and redirecting to: ${returnTo}`
+          );
+          req.session.save((saveErr) => {
+            if (saveErr)
+              console.log(`[cms-auth] session save error:`, saveErr?.message);
             res.redirect(returnTo);
           });
         } else {
@@ -94,12 +99,18 @@ module.exports = {
           const apiUrl = process.env.API_URL_INTERNAL || process.env.API_URL;
 
           if (!jwt) {
+            console.log(
+              `[cms-auth] no JWT in session for ${req.originalUrl}, proceeding without auth`
+            );
             return next();
           } else {
             const projectId = req.project.id;
             const url = projectId
               ? `${apiUrl}/auth/project/${projectId}/me`
               : `${apiUrl}/auth/me`;
+            console.log(
+              `[cms-auth] JWT found in session, calling ${url} for projectId=${projectId}`
+            );
 
             const setUserData = function (req, next) {
               const requiredRoles = ['member', 'moderator', 'admin', 'editor'];
@@ -143,9 +154,13 @@ module.exports = {
               req.session.openstadUser &&
               date - dateToCheck < THIRTY_SECONDS
             ) {
+              console.log(
+                `[cms-auth] using cached user data (last check ${Math.round((date - dateToCheck) / 1000)}s ago) for userId=${req.session.openstadUser?.id}`
+              );
               setUserData(req, next);
             } else {
               try {
+                console.log(`[cms-auth] fetching /me from API: ${url}`);
                 let response = await fetch(url, {
                   headers: {
                     Accept: 'application/json',
@@ -154,25 +169,41 @@ module.exports = {
                   },
                 });
                 if (!response.ok) {
-                  throw new Error('Fetch failed');
+                  console.log(
+                    `[cms-auth] /me returned HTTP ${response.status} for projectId=${projectId}`
+                  );
+                  throw new Error(
+                    `Fetch failed with status ${response.status}`
+                  );
                 }
 
                 let user = await response.json();
+                console.log(
+                  `[cms-auth] /me response: id=${user?.id} role=${user?.role} keys=${Object.keys(user || {}).length}`
+                );
 
                 if (user && Object.keys(user).length > 0 && user.id) {
                   req.session.openstadUser = user;
                   req.session.openStadlastJWTCheck = new Date().getTime();
 
                   req.session.save(() => {
+                    console.log(
+                      `[cms-auth] user authenticated: userId=${user.id} role=${user.role}`
+                    );
                     setUserData(req, next);
                   });
                 } else {
-                  // if not valid clear the JWT and redirect
+                  console.log(
+                    `[cms-auth] /me returned empty user, destroying session and redirecting to / for ${req.originalUrl}`
+                  );
                   req.session.destroy(() => {
                     res.redirect('/');
                   });
                 }
               } catch (err) {
+                console.log(
+                  `[cms-auth] /me fetch error: ${err?.message} for ${req.originalUrl}`
+                );
                 req.session.destroy(() => {
                   res.redirect('/');
                 });

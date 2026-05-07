@@ -34,6 +34,9 @@ exports.find = (token) => {
     db.AccessToken.findOne({ where: { tokenId: id } })
       .then((token) => {
         if (!token) {
+          console.log(
+            `[bearer-debug] token NOT found in DB for jti=${id} sub=${decoded.sub}`
+          );
           resolve(undefined);
         }
         return resolve(token);
@@ -78,7 +81,9 @@ exports.save = (token, expirationDate, userID, clientID, scope) => {
       scope,
     })
       .then((token) => {
-        console.log('Savedddd access token');
+        console.log(
+          `[access-token] created: jti=${id} userID=${userID} clientID=${clientID} expiresAt=${expirationDate}`
+        );
         if (!token) {
           resolve(undefined);
         }

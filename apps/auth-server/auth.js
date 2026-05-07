@@ -245,10 +245,7 @@ passport.use(
         return done(null, token, { scope: '*' });
       })
       .catch((err) => {
-        if (err?.message === 'Access token not found') {
-          return done(null, false);
-        }
-        console.log('Errr in authjs token', err);
+        console.log(`[bearer-debug] token validation failed: ${err?.message}`);
         done(null, false);
       });
   })
