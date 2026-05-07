@@ -18,6 +18,9 @@ const {
   logSpamAnalysis,
   removeSpamMetaFields,
 } = require('../../services/spam-detector');
+const {
+  sendResourceSubmissionNotifications,
+} = require('../../services/notification-batch');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -598,9 +601,10 @@ router
 
     if (!req.query.nomail && req.body['publishDate']) {
       const tags = await req.results.getTags();
+      let emailReceivers = [];
+
       if (tags && tags.length > 0) {
-        // Convert to csv string
-        const emailReceivers = (
+        emailReceivers = (
           await Promise.all(
             tags.flatMap(async (tag) => {
               const { useDifferentSubmitAddress, newSubmitAddress } =
@@ -616,50 +620,54 @@ router
         )
           .filter((data) => data !== null && data.length > 0)
           .flat();
-
-        if (emailReceivers.length > 0) {
-          db.Notification.create({
-            type: 'new published resource - admin update',
-            projectId: req.project.id,
-            data: {
-              userId: req.user.id,
-              resourceId: req.results.id,
-              emailReceivers: emailReceivers,
-            },
-          });
-        }
       }
 
-      if (sendConfirmationToAdmin) {
-        db.Notification.create({
-          type: 'new published resource - admin update',
+      // Tag-specific recipients — always a standalone admin notification
+      if (emailReceivers.length > 0) {
+        sendResourceSubmissionNotifications({
           projectId: req.project.id,
-          data: {
-            userId: req.user.id,
-            resourceId: req.results.id,
+          resourceId: req.results.id,
+          userId: req.user.id,
+          admin: {
+            type: 'new published resource - admin update',
+            emailReceivers,
           },
+          user: null,
+          db,
         });
       }
 
-      if (sendConfirmationToUser) {
-        db.Notification.create({
-          type: 'new published resource - user feedback',
+      // Pair admin + user so they share the PDF; user fires standalone if no admin
+      if (sendConfirmationToAdmin) {
+        sendResourceSubmissionNotifications({
           projectId: req.project.id,
-          data: {
-            userId: req.user.id,
-            resourceId: req.results.id,
-          },
+          resourceId: req.results.id,
+          userId: req.user.id,
+          admin: { type: 'new published resource - admin update' },
+          user: sendConfirmationToUser
+            ? { type: 'new published resource - user feedback' }
+            : null,
+          db,
+        });
+      } else if (sendConfirmationToUser) {
+        sendResourceSubmissionNotifications({
+          projectId: req.project.id,
+          resourceId: req.results.id,
+          userId: req.user.id,
+          admin: null,
+          user: { type: 'new published resource - user feedback' },
+          db,
         });
       }
     } else if (!req.query.nomail && !req.body['publishDate']) {
       if (sendConfirmationToUser) {
-        db.Notification.create({
-          type: 'new concept resource - user feedback',
+        sendResourceSubmissionNotifications({
           projectId: req.project.id,
-          data: {
-            userId: req.user.id,
-            resourceId: req.results.id,
-          },
+          resourceId: req.results.id,
+          userId: req.user.id,
+          admin: null,
+          user: { type: 'new concept resource - user feedback' },
+          db,
         });
       }
     }
@@ -872,26 +880,31 @@ router
     });
   })
   .put(async function (req, res, next) {
-    if (await shouldSendUpdatedResourceAdminEmail(req)) {
-      db.Notification.create({
-        type: 'updated resource - admin update',
+    const sendAdminUpdate = await shouldSendUpdatedResourceAdminEmail(req);
+
+    // Pair admin update + changedToPublished user notification to share PDF
+    if (sendAdminUpdate) {
+      sendResourceSubmissionNotifications({
         projectId: req.project.id,
-        data: {
-          userId: req.user.id,
-          resourceId: req.results.id,
-        },
+        resourceId: req.results.id,
+        userId: req.user.id,
+        admin: { type: 'updated resource - admin update' },
+        user: req.changedToPublished
+          ? { type: 'new published resource - user feedback' }
+          : null,
+        db,
+      });
+    } else if (req.changedToPublished) {
+      sendResourceSubmissionNotifications({
+        projectId: req.project.id,
+        resourceId: req.results.id,
+        userId: req.user.id,
+        admin: null,
+        user: { type: 'new published resource - user feedback' },
+        db,
       });
     }
-    if (req.changedToPublished) {
-      db.Notification.create({
-        type: 'new published resource - user feedback',
-        projectId: req.project.id,
-        data: {
-          userId: req.user.id,
-          resourceId: req.results.id,
-        },
-      });
-    }
+
     next();
   })
   .put(auth.useReqUser)

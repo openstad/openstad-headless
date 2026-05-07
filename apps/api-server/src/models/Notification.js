@@ -206,16 +206,26 @@ module.exports = (db, sequelize, DataTypes) => {
                 const resourceResult = await processResourceQA(instance, db);
                 htmlContent = resourceResult.htmlContent;
 
-                if (
+                if (options?.sharedPdfAttachment !== undefined) {
+                  // Pre-built PDF supplied by notification-batch helper — use as-is.
+                  // sharedPdfAttachment is null when the toggle is off for this audience.
+                  pdfAttachment = options.sharedPdfAttachment;
+                } else if (
                   resourceResult.questionsAndAnswers.length &&
                   shouldGeneratePdf(instance.type)
                 ) {
                   const project = await db.Project.scope(
                     'includeEmailConfig'
                   ).findByPk(instance.projectId);
-                  if (
-                    project?.emailConfig?.notifications?.pdfAttachmentEnabled
-                  ) {
+                  const isAdminType = [
+                    'new published resource - admin update',
+                    'updated resource - admin update',
+                  ].includes(instance.type);
+                  const toggleEnabled = isAdminType
+                    ? project?.emailConfig?.notifications
+                        ?.pdfAttachmentAdminEnabled
+                    : project?.emailConfig?.notifications?.pdfAttachmentEnabled;
+                  if (toggleEnabled) {
                     pdfAttachment = await buildPdfAttachment(
                       instance,
                       resourceResult.questionsAndAnswers,
