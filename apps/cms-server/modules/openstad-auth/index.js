@@ -166,7 +166,7 @@ module.exports = {
 
               authLog(
                 'SET_USER_DATA',
-                `loggedIn=${req.data.loggedIn} userId=${user.id} role=${user.role}`,
+                `loggedIn=${req.data.loggedIn} userId=${user?.id} role=${user?.role}`,
                 req
               );
 
@@ -229,7 +229,7 @@ module.exports = {
                   req.session.save(() => {
                     authLog(
                       'AUTHENTICATED',
-                      `userId=${user.id} role=${user.role}`,
+                      `userId=${user?.id} role=${user?.role}`,
                       req
                     );
                     setUserData(req, next);
