@@ -531,7 +531,7 @@ router
         }
       }
       console.log(
-        `[api-logout][${new Date().toISOString()}] redirecting to auth server: safeRedirect=${safeRedirect?.substring(0, 100)} fullUrl=${url.substring(0, 150)}`
+        `[api-logout][${new Date().toISOString()}] redirecting to auth server: fullUrl=${url.substring(0, 150)}`
       );
       return res.redirect(url);
     }
