@@ -150,7 +150,10 @@ export default function WidgetResourceFormItems(
   type FormData = z.infer<typeof formSchema>;
   const [items, setItems] = useState<Item[]>([]);
   const [options, setOptions] = useState<Option[]>([]);
-  const [selectedItem, setItem] = useState<Item | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const selectedItem = selectedItemId
+    ? items.find((i) => i.id === selectedItemId) || null
+    : null;
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
   const [file, setFile] = useState<File>();
@@ -169,6 +172,8 @@ export default function WidgetResourceFormItems(
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
     if (selectedItem) {
+      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+
       const oldOptions = selectedItem.options || [];
       const newOptions = options || [];
       const triggerMap: Record<string, string> = {};
@@ -182,7 +187,7 @@ export default function WidgetResourceFormItems(
       setItems((currentItems) =>
         currentItems.map((item) => {
           if (item.id === selectedItem.id) {
-            return { ...item, ...values };
+            return { ...item, ...valuesWithoutTrigger };
           }
           if (
             hasTriggerChanges &&
@@ -201,7 +206,7 @@ export default function WidgetResourceFormItems(
           return item;
         })
       );
-      setItem(null);
+      setSelectedItemId(null);
     } else {
       setItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
@@ -449,7 +454,7 @@ export default function WidgetResourceFormItems(
         columns: (matrix.columns || []).map(withId),
       });
     }
-  }, [selectedItem, form]);
+  }, [selectedItemId, form]);
 
   useEffect(() => {
     if (selectedOption) {
@@ -627,7 +632,7 @@ export default function WidgetResourceFormItems(
     form.reset(defaults());
     setOptions([]);
     setMatrixOptions(matrixDefault);
-    setItem(null);
+    setSelectedItemId(null);
   }
 
   function handleSaveOptions() {
@@ -750,7 +755,7 @@ export default function WidgetResourceFormItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
-                                setItem(item);
+                                setSelectedItemId(item.id ?? null);
                                 setOptions([]);
                                 setMatrixOptions(matrixDefault);
                                 setSettingOptions(false);

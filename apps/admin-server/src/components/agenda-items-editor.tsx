@@ -134,7 +134,10 @@ export function AgendaItemsEditor({
   }
 
   const [links, setLinks] = useState<AgendaLink[]>([]);
-  const [selectedItem, setItem] = useState<AgendaItem | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const selectedItem = selectedItemId
+    ? items.find((i) => i.id === selectedItemId) || null
+    : null;
   const [selectedLink, setLink] = useState<AgendaLink | null>(null);
   const [settingLinks, setSettingLinks] = useState<boolean>(false);
 
@@ -157,7 +160,7 @@ export function AgendaItemsEditor({
       });
       setLinks((selectedItem.links || []).map(withId));
     }
-  }, [selectedItem, form]);
+  }, [selectedItemId, form]);
 
   useEffect(() => {
     if (selectedLink) {
@@ -174,12 +177,16 @@ export function AgendaItemsEditor({
 
   function onSubmit(values: FormData) {
     if (selectedItem) {
+      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+
       onItemsChange(
         items.map((item) =>
-          item.id === selectedItem.id ? { ...item, ...values } : item
+          item.id === selectedItem.id
+            ? { ...item, ...valuesWithoutTrigger }
+            : item
         )
       );
-      setItem(null);
+      setSelectedItemId(null);
     } else {
       const maxTrigger = items.reduce(
         (max, i) => Math.max(max, parseInt(i.trigger) || 0),
@@ -270,7 +277,7 @@ export function AgendaItemsEditor({
   function resetForm() {
     form.reset(defaults());
     setLinks([]);
-    setItem(null);
+    setSelectedItemId(null);
   }
 
   function handleSaveLinks() {
@@ -312,7 +319,7 @@ export function AgendaItemsEditor({
                           </span>
                           <span
                             className="gap-2 py-3 px-2 w-full"
-                            onClick={() => setItem(item)}>
+                            onClick={() => setSelectedItemId(item.id ?? null)}>
                             {item.title || item.description || '(geen titel)'}
                           </span>
                           <span className="gap-2 py-3 px-2">

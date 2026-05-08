@@ -190,7 +190,10 @@ export default function WidgetChoiceGuideItems(
   type FormData = z.infer<typeof formSchema>;
   const [items, setItems] = useState<Item[]>([]);
   const [options, setOptions] = useState<Option[]>([]);
-  const [selectedItem, setItem] = useState<Item | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const selectedItem = selectedItemId
+    ? items.find((i) => i.id === selectedItemId) || null
+    : null;
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('1');
@@ -267,10 +270,16 @@ export default function WidgetChoiceGuideItems(
       }
       const hasTriggerChanges = Object.keys(triggerMap).length > 0;
 
+      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+
       setItems((currentItems) =>
         currentItems.map((item) => {
           if (item.id === selectedItem.id) {
-            return { ...item, ...values, weights: normalizedMergedWeights };
+            return {
+              ...item,
+              ...valuesWithoutTrigger,
+              weights: normalizedMergedWeights,
+            };
           }
           if (
             hasTriggerChanges &&
@@ -289,7 +298,7 @@ export default function WidgetChoiceGuideItems(
           return item;
         })
       );
-      setItem(null);
+      setSelectedItemId(null);
     } else {
       setItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
@@ -598,7 +607,7 @@ export default function WidgetChoiceGuideItems(
       });
       setActiveTab('1');
     }
-  }, [selectedItem, form]);
+  }, [selectedItemId, form]);
 
   useEffect(() => {
     if (selectedOption) {
@@ -766,16 +775,17 @@ export default function WidgetChoiceGuideItems(
 
     if (selectedItem) {
       const values = form.getValues();
-      if (values?.options) {
-        values.options = options;
+      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+      if (valuesWithoutTrigger?.options) {
+        valuesWithoutTrigger.options = options;
       }
-      if (values?.matrix) {
-        values.matrix = matrixOptions;
+      if (valuesWithoutTrigger?.matrix) {
+        valuesWithoutTrigger.matrix = matrixOptions;
       }
 
       const normalizedValuesWeights = ensureABDefaultsOnWeights(
-        values.type,
-        values.weights || {}
+        valuesWithoutTrigger.type,
+        valuesWithoutTrigger.weights || {}
       );
       const selectedItemWeights = structuredClone(selectedItem.weights || {});
       const mergedWeights = {
@@ -783,13 +793,17 @@ export default function WidgetChoiceGuideItems(
         ...structuredClone(normalizedValuesWeights),
       };
       const normalizedMergedWeights = ensureABDefaultsOnWeights(
-        values.type,
+        valuesWithoutTrigger.type,
         mergedWeights
       );
 
       itemsToSave = itemsToSave.map((item) =>
         item.id === selectedItem.id
-          ? { ...item, ...values, weights: normalizedMergedWeights }
+          ? {
+              ...item,
+              ...valuesWithoutTrigger,
+              weights: normalizedMergedWeights,
+            }
           : item
       );
     }
@@ -805,7 +819,7 @@ export default function WidgetChoiceGuideItems(
 
     setItems(itemsToSave);
     props.updateConfig({ ...updatedProps, items: itemsToSave });
-    setItem(null);
+    setSelectedItemId(null);
     form.reset(defaults());
     setOptions([]);
     setMatrixOptions(matrixDefault);
@@ -840,7 +854,7 @@ export default function WidgetChoiceGuideItems(
     form.reset(defaults());
     setOptions([]);
     setMatrixOptions(matrixDefault);
-    setItem(null);
+    setSelectedItemId(null);
   }
 
   function handleSaveOptions() {
@@ -1101,7 +1115,7 @@ export default function WidgetChoiceGuideItems(
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
                                 if (selectedItem?.id === item.id) return;
-                                setItem(item);
+                                setSelectedItemId(item.id ?? null);
                                 setOptions([]);
                                 setMatrixOptions(matrixDefault);
                                 setSettingOptions(false);
