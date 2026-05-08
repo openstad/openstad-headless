@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import RteContent from '../../../ui/src/rte-formatting/rte-content';
 import { calculateColor, calculateScoreForItem } from '../parts/scoreUtils';
-import { ChoiceOptions, Item, Score } from '../props';
+import type { ChoiceOptions, Item, Score } from '../props';
 
 const defaultBarColor = {
   default: '#bed200',
@@ -19,7 +19,7 @@ type ChoiceItemProps = {
   choicesPreferenceMinColor?: string;
   choicesPreferenceMaxColor?: string;
   showPageCountAndCurrentPageInButton?: boolean;
-  hiddenFields?: string[];
+  hiddenFields?: Array<string>;
   items?: Array<Item>;
 };
 
@@ -44,7 +44,14 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
       props.items
     );
     setScore(itemScore);
-  }, [props.choiceOption, props.answers, props.weights]);
+  }, [
+    props.choiceOption,
+    props.answers,
+    props.weights,
+    props.choicesType,
+    props.hiddenFields,
+    props.items,
+  ]);
 
   const renderScore = () => {
     if (props.choicesType === 'minus-to-plus-100') {
@@ -82,9 +89,8 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
           <h4>{props.choiceOption?.title}</h4>
           <div className="osc-choice-bar osc-from-center">
             <div
-              className={`osc-choice-bar-progress ${getClass(
-                percentage
-              )}`}></div>
+              className={`osc-choice-bar-progress ${getClass(percentage)}`}
+            />
           </div>
         </div>
       );
@@ -98,33 +104,36 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
 
       return (
         <div className="osc-choice-default not-minus-to-plus">
-          {displayTitle && <Heading4>{props.choiceOption?.title}</Heading4>}
-          {displayDescription && props.choiceOption?.description && (
+          {displayTitle ? (
+            <Heading4>{props.choiceOption?.title}</Heading4>
+          ) : null}
+          {displayDescription && props.choiceOption?.description ? (
             <div className="osc-choice-description">
               <RteContent
                 content={props.choiceOption.description}
                 inlineComponent="p"
-                unwrapSingleRootDiv={true}
+                unwrapSingleRootDiv
               />
             </div>
-          )}
-          {displayScore && (
+          ) : null}
+          {displayScore ? (
             <div className="osc-choice-bar">
-              <div className="osc-choice-bar-mask"></div>
+              <div className="osc-choice-bar-mask" />
               <div
                 className="osc-choice-bar-progress"
-                data-score={Math.round(percentageValue)}></div>
-            </div>
-          )}
-          {displayImage && props.choiceOption?.image && (
-            <div className="osc-choice-image-container">
-              <img
-                src={props.choiceOption.image}
-                alt={props.choiceOption.title}
-                className="osc-choice-image"
+                data-score={Math.round(percentageValue)}
               />
             </div>
-          )}
+          ) : null}
+          {displayImage && props.choiceOption?.image ? (
+            <div className="osc-choice-image-container">
+              <img
+                alt={props.choiceOption.title}
+                className="osc-choice-image"
+                src={props.choiceOption.image}
+              />
+            </div>
+          ) : null}
         </div>
       );
     }

@@ -116,7 +116,7 @@ function Activity({
   // Init
   React.useEffect(() => {
     getActivityData();
-  }, [activityDataLoading]);
+  }, [activityDataLoading, getActivityData]);
 
   const listItem = (data: ActivityData, key: number) => {
     const options: Intl.DateTimeFormatOptions = {

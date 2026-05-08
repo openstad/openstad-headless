@@ -7,7 +7,7 @@ import '@utrecht/design-tokens/dist/root.css';
 import React, { useContext } from 'react';
 
 import { CommentWidgetContext } from '../comments';
-import { CommentFormProps } from '../types/comment-form-props';
+import type { CommentFormProps } from '../types/comment-form-props';
 
 function CommentForm({
   comment,
@@ -161,9 +161,9 @@ function CommentForm({
 
   return (
     <div className="reaction-input-container">
-      {commentsContext.formIntro && <p>{commentsContext.formIntro}</p>}
+      {commentsContext.formIntro ? <p>{commentsContext.formIntro}</p> : null}
       <Spacer size={1} />
-      {args.formIntro && <p>{args.formIntro}</p>}
+      {args.formIntro ? <p>{args.formIntro}</p> : null}
       <Form
         fields={formFields}
         submitDisabled={disableSubmit}

@@ -8,7 +8,7 @@ describe('<Counter />', () => {
   });
 
   it('renders with a static count', () => {
-    cy.mount(<Counter counterType={'static'} label={'Count'} amount={123} />);
+    cy.mount(<Counter amount={123} counterType="static" label="Count" />);
 
     cy.get('.amount').should('contain', '123');
     cy.get('.label').should('contain', 'Count');

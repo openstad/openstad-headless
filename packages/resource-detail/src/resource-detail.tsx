@@ -377,7 +377,7 @@ function ResourceDetail({
           : '';
       document.title = resource.title + current;
     }
-  }, [resource]);
+  }, [props.pageTitle, resource]);
 
   useEffect(() => {
     if (displayDescriptionExpandable && descriptionRef.current) {

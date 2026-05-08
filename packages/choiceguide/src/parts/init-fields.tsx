@@ -1,4 +1,4 @@
-import { FieldProps } from '@openstad-headless/form/src/props.js';
+import type { FieldProps } from '@openstad-headless/form/src/props.js';
 import React from 'react';
 
 const getMinMaxByField = (key, data) => {
@@ -87,7 +87,7 @@ export const InitializeFormFields = (
         case 'select':
         case 'radiobox':
           if (item.options && item.options.length > 0) {
-            const defaultValue: string[] = [];
+            const defaultValue: Array<string> = [];
 
             fieldData['choices'] = item.options.map((option) => {
               if (option.titles[0].defaultValue) {

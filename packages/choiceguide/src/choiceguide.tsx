@@ -1,6 +1,6 @@
 import DataStore from '@openstad-headless/data-store/src';
 import Form from '@openstad-headless/form/src/form';
-import { FormValue } from '@openstad-headless/form/src/form';
+import type { FormValue } from '@openstad-headless/form/src/form';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { Banner, Button, Spacer } from '@openstad-headless/ui/src';
 import {
@@ -17,7 +17,7 @@ import RteContent from '../../ui/src/rte-formatting/rte-content';
 import { ChoiceGuideSidebar } from './includes/sidebar.js';
 import { InitializeFormFields } from './parts/init-fields.js';
 import { InitializeWeights } from './parts/init-weights.js';
-import { ChoiceGuideProps, WeightOverview } from './props.js';
+import type { ChoiceGuideProps, WeightOverview } from './props.js';
 import './style.css';
 
 function ChoiceGuide(props: ChoiceGuideProps) {
@@ -83,7 +83,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
   const [currentAnswers, setCurrentAnswers] = useState<{
     [key: string]: string;
   }>({});
-  const [hiddenFields, setHiddenFields] = useState<string[]>([]);
+  const [hiddenFields, setHiddenFields] = useState<Array<string>>([]);
 
   const sidebarRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -101,7 +101,7 @@ function ChoiceGuide(props: ChoiceGuideProps) {
 
   const getChangedAnswers = (
     newAnswers: { [key: string]: string },
-    newHiddenFields: string[]
+    newHiddenFields: Array<string>
   ) => {
     if (
       newHiddenFields.length !== hiddenFields.length ||
@@ -196,10 +196,10 @@ function ChoiceGuide(props: ChoiceGuideProps) {
                 <Heading6>{loginText || 'Inloggen om deel te nemen.'}</Heading6>
                 <Spacer size={1} />
                 <Button
-                  type="button"
                   onClick={() => {
                     document.location.href = props.login?.url || '';
-                  }}>
+                  }}
+                  type="button">
                   {loginTextButton || 'Inloggen'}
                 </Button>
               </Banner>
@@ -208,24 +208,26 @@ function ChoiceGuide(props: ChoiceGuideProps) {
           )}
 
           <div className="osc-choiceguide-intro">
-            {introTitle && (
+            {introTitle ? (
               <RteContent
                 content={introTitle}
                 inlineComponent={Heading4}
-                unwrapSingleRootDiv={true}
+                unwrapSingleRootDiv
               />
-            )}
+            ) : null}
             <div className="osc-choiceguide-intro-description">
-              {introDescription && (
+              {introDescription ? (
                 <RteContent
                   content={introDescription}
                   inlineComponent={Paragraph}
-                  unwrapSingleRootDiv={true}
+                  unwrapSingleRootDiv
                 />
-              )}
+              ) : null}
             </div>
           </div>
           <Form
+            allowResetAfterSubmit={false}
+            currentPage={currentPage}
             fields={formFields}
             title=""
             submitText={submitButtonText || 'Versturen'}
@@ -236,16 +238,22 @@ function ChoiceGuide(props: ChoiceGuideProps) {
               currentAnswers: { [key: string]: string },
               hiddenFields
             ) => getChangedAnswers(currentAnswers, hiddenFields)}
-            allowResetAfterSubmit={false}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            prevPage={currentPage > 0 ? currentPage - 1 : null}
-            submitDisabled={!showForm}
-            prevPageText={'Vorige'}
-            pageFieldStartPositions={pageFieldStartPositions}
             pageFieldEndPositions={pageFieldEndPositions}
-            totalPages={totalPages}
+            pageFieldStartPositions={pageFieldStartPositions}
+            prevPage={currentPage > 0 ? currentPage - 1 : null}
+            prevPageText="Vorige"
+            secondaryLabel=""
+            setCurrentPage={setCurrentPage}
             showBackButtonInTopOfPage={showBackButtonInTopOfPage || false}
+            submitDisabled={!showForm}
+            submitHandler={onSubmit}
+            submitText={
+              currentPage < totalPages - 1
+                ? nextButtonText || 'Volgende'
+                : submitButtonText || 'Versturen'
+            }
+            title=""
+            totalPages={totalPages}
             {...props}
           />
           <NotificationProvider />
@@ -254,13 +262,13 @@ function ChoiceGuide(props: ChoiceGuideProps) {
           {choicesType !== 'hidden' && (
             <ChoiceGuideSidebar
               {...choiceGuide}
-              choiceOptions={choiceOption?.choiceOptions}
-              weights={weights}
               answers={answers}
-              widgetId={widgetId}
+              choiceOptions={choiceOption?.choiceOptions}
               hiddenFields={hiddenFields}
               items={formFields}
               stickyBarDefaultOpen={stickyBarDefaultOpen}
+              weights={weights}
+              widgetId={widgetId}
             />
           )}
         </div>

@@ -1,5 +1,5 @@
 import type { BaseProps } from '@openstad-headless/types';
-import React, { FC, useEffect, useId, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 
 import './video.scss';
 
@@ -16,12 +16,12 @@ export type VideoProps = {
   videoSubtitle?: boolean;
 };
 
-const VideoField: FC<VideoFieldProps> = ({
+function VideoField({
   videoUrl,
   videoLang,
   videoSubtitle,
   ...props
-}) => {
+}: VideoFieldProps) {
   const id = useId();
   function getYouTubeVideoId(url?: string) {
     if (!url) return '';
@@ -45,16 +45,32 @@ const VideoField: FC<VideoFieldProps> = ({
     }
     return true;
   });
+  const mutedRef = useRef<boolean>(muted);
+  const previousVideoUrlRef = useRef(videoUrl);
+  const previousPageRef = useRef(props.currentPage);
   const [muteToggle, setMuteToggle] = useState<boolean>(false);
   const [playing, setPlaying] = useState<boolean>(true);
 
   useEffect(() => {
+    mutedRef.current = muted;
+  }, [muted]);
+
+  useEffect(() => {
+    const videoUrlChanged = previousVideoUrlRef.current !== videoUrl;
+    const pageChanged = previousPageRef.current !== props.currentPage;
+
+    previousVideoUrlRef.current = videoUrl;
+    previousPageRef.current = props.currentPage;
+
+    if (!videoUrlChanged && !pageChanged) return;
+
     setVideoId(getYouTubeVideoId(videoUrl));
+
     if (player && typeof player.destroy === 'function') {
       player.destroy();
       setPlayer(null);
     }
-  }, [props.currentPage]);
+  }, [player, props.currentPage, videoUrl]);
 
   useEffect(() => {
     if ((window as any).YT && (window as any).YT.Player) {
@@ -74,7 +90,7 @@ const VideoField: FC<VideoFieldProps> = ({
           playerVars: {
             autoplay: 1,
             controls: 0,
-            mute: muted ? 1 : 0,
+            mute: mutedRef.current ? 1 : 0,
             loop: 1,
             playlist: videoId,
             cc_lang_pref: videoLang,
@@ -87,7 +103,7 @@ const VideoField: FC<VideoFieldProps> = ({
           events: {
             onReady: (event: any) => {
               setPlayer(event.target);
-              if (muted) {
+              if (mutedRef.current) {
                 event.target.mute();
               } else {
                 event.target.unMute();
@@ -98,15 +114,14 @@ const VideoField: FC<VideoFieldProps> = ({
         });
       }
     }
-  }, [videoId]);
+  }, [videoId, videoLang, videoSubtitle]);
 
-  const handleVideoClick = () => {
+  const handleVideoClick = useCallback(() => {
     if (player) {
       setMuteToggle(true);
-      setTimeout(() => {
+      const timeout = setTimeout(() => {
         setMuteToggle(false);
       }, 1000);
-
       if (muted) {
         player.unMute();
         setMuted(false);
@@ -118,8 +133,10 @@ const VideoField: FC<VideoFieldProps> = ({
         if (typeof window !== 'undefined')
           window.sessionStorage.setItem('video-muted', 'true');
       }
+
+      return () => clearTimeout(timeout);
     }
-  };
+  }, [muted, player]);
 
   const handlePlayPause = (e: any) => {
     e.preventDefault();
@@ -172,6 +189,6 @@ const VideoField: FC<VideoFieldProps> = ({
       </div>
     </>
   );
-};
+}
 export { VideoField };
 export default VideoField;

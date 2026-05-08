@@ -943,7 +943,13 @@ function ResourceOverviewInner({
     setExcludeTags(excludeTags);
     setIncludeTags(includeTags);
     setTags(urlTagIdsArray || []);
-  }, [onlyIncludeTagIds, urlTagIds]);
+  }, [
+    includeOrExcludeTagIds,
+    onlyIncludeTagIds,
+    tagIdsToLimitResourcesTo,
+    urlTagIds,
+    urlTagIdsArray,
+  ]);
 
   const [includeTags, setIncludeTags] = useState<number[]>([]);
   const [excludeTags, setExcludeTags] = useState<number[]>([]);
@@ -1012,7 +1018,12 @@ function ResourceOverviewInner({
     ) {
       setResources(resourcesWithPagination.records || []);
     }
-  }, [resourcesWithPagination, pageSize]);
+  }, [
+    resourcesWithPagination,
+    pageSize,
+    selectedProjects.length,
+    projectIds.length,
+  ]);
 
   useEffect(() => {
     const allResources: any = [];
@@ -1212,6 +1223,11 @@ function ResourceOverviewInner({
     location,
     groupedTags,
     randomSortSeed,
+    selectedProjects,
+    filterBehaviorInclude,
+    filterBehavior,
+    statusIdsToLimitResourcesTo,
+    includeOrExcludeStatusIds,
   ]);
 
   useEffect(() => {

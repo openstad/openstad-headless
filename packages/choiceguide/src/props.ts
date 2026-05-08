@@ -1,6 +1,6 @@
-import { Matrix } from '@openstad-headless/enquete/src/types/enquete-props';
-import { DataLayer } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import type { Matrix } from '@openstad-headless/enquete/src/types/enquete-props';
+import type { DataLayer } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 
 export type ChoiceGuideProps = ChoiceGuide &
   ChoiceGuideGeneralSettings &
@@ -26,7 +26,7 @@ export type ChoiceGuide = {
   maxCharactersWarning?: string;
   minCharactersError?: string;
   maxCharactersError?: string;
-  datalayer?: DataLayer[];
+  datalayer?: Array<DataLayer>;
   enableOnOffSwitching?: boolean;
   showBackButtonInTopOfPage?: boolean;
   allowedPolygons?: Array<{ id: number; name: string }>;
@@ -37,7 +37,7 @@ export type ChoiceGuide = {
 type ExtraProjectSettings = {
   choiceGuide: ChoiceGuide;
   choiceOption?: {
-    choiceOptions: ChoiceOptions[];
+    choiceOptions: Array<ChoiceOptions>;
   };
   items?: Array<Item>;
   widgetId?: string;
@@ -55,6 +55,9 @@ export type ChoiceGuideGeneralSettings = {
 };
 
 export type ChoiceGuideSidebarProps = {
+  displayDescription: any;
+  displayImage: any;
+  displayTitle: any;
   choicesType: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden';
   choicesPreferenceMinColor?: string;
   choicesPreferenceMaxColor?: string;
@@ -62,7 +65,7 @@ export type ChoiceGuideSidebarProps = {
   choicesNoPreferenceYetTitle?: string;
   choicesInBetweenPreferenceTitle?: string;
   startWithAllQuestionsAnswered: boolean;
-  choiceOptions?: ChoiceOptions[];
+  choiceOptions?: Array<ChoiceOptions>;
   scores?: Record<string, Score>;
   answers?: Record<string, Record<string, number>>;
   imageAspectRatio?: '16x9' | '1x1';
@@ -70,7 +73,7 @@ export type ChoiceGuideSidebarProps = {
   showPageCountAndCurrentPageInButton?: boolean;
   weights?: WeightOverview;
   widgetId?: string;
-  hiddenFields?: string[];
+  hiddenFields?: Array<string>;
   items?: Array<Item>;
   stickyBarDefaultOpen?: boolean;
 };

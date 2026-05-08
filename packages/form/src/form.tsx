@@ -52,7 +52,7 @@ function Form({
   submitDisabled = false,
   secondaryLabel = '',
   secondaryHandler = () => {},
-  getValuesOnChange = () => {},
+  getValuesOnChange,
   allowResetAfterSubmit = true,
   currentPage,
   setCurrentPage,
@@ -68,54 +68,70 @@ function Form({
   initialValues,
   ...props
 }: FormProps) {
-  const initialFormValues: { [key: string]: FormValue } = {};
-  const initialHiddenFields: string[] = [];
-  const fieldsWithImpactOnRouting: string[] = [];
-  const routingKeys: string[] = fields.map(
-    (field, index) => field.fieldKey || `_routing_${index}`
-  );
+  const {
+    initialFormValues,
+    initialHiddenFields,
+    fieldsWithImpactOnRouting,
+    routingKeys,
+  } = useMemo(() => {
+    const computedInitialFormValues: { [key: string]: FormValue } = {};
+    const computedInitialHiddenFields: Array<string> = [];
+    const computedFieldsWithImpactOnRouting: Array<string> = [];
+    const computedRoutingKeys: string[] = fields.map(
+      (field, index) => field.fieldKey || `_routing_${index}`
+    );
 
-  fields.forEach((field, index) => {
-    const fieldKey = field.fieldKey || '';
+    fields.forEach((field) => {
+      const fieldKey = field.fieldKey || '';
 
-    if (fieldKey) {
-      initialFormValues[fieldKey] =
-        typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
-      initialFormValues[fieldKey] =
-        field.type === 'map' ? {} : initialFormValues[fieldKey];
+      if (fieldKey) {
+        computedInitialFormValues[fieldKey] =
+          typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
+        computedInitialFormValues[fieldKey] =
+          field.type === 'map' ? {} : computedInitialFormValues[fieldKey];
 
-      if (field.type === 'tickmark-slider') {
-        initialFormValues[fieldKey] = Math.ceil(
-          (field?.fieldOptions?.length || 2) / 2
-        ).toString();
+        if (field.type === 'tickmark-slider') {
+          computedInitialFormValues[fieldKey] = Math.ceil(
+            (field?.fieldOptions?.length || 2) / 2
+          ).toString();
+        }
+
+        if (
+          field?.routingInitiallyHide &&
+          field?.routingSelectedQuestion &&
+          field?.routingSelectedAnswer &&
+          !(
+            Array.isArray(field.routingSelectedAnswer) &&
+            field.routingSelectedAnswer.length === 0
+          )
+        ) {
+          const getRoutingSelectedQuestionField = fields.find(
+            (f) => f.trigger === field.routingSelectedQuestion
+          );
+          const routingSelectedQuestionFieldKey =
+            getRoutingSelectedQuestionField?.fieldKey || '';
+
+          computedFieldsWithImpactOnRouting.push(
+            routingSelectedQuestionFieldKey
+          );
+          computedInitialHiddenFields.push(fieldKey);
+        }
       }
-
-      if (
-        field?.routingInitiallyHide &&
-        field?.routingSelectedQuestion &&
-        field?.routingSelectedAnswer &&
-        !(
-          Array.isArray(field.routingSelectedAnswer) &&
-          field.routingSelectedAnswer.length === 0
-        )
-      ) {
-        const getRoutingSelectedQuestionField = fields.find(
-          (f) => f.trigger === field.routingSelectedQuestion
-        );
-        const routingSelectedQuestionFieldKey =
-          getRoutingSelectedQuestionField?.fieldKey || '';
-
-        fieldsWithImpactOnRouting.push(routingSelectedQuestionFieldKey);
-        initialHiddenFields.push(fieldKey);
-      }
-    }
-  });
-
-  if (initialValues) {
-    Object.entries(initialValues).forEach(([key, value]) => {
-      initialFormValues[key] = value as FormValue;
     });
-  }
+
+    if (initialValues) {
+      Object.entries(initialValues).forEach(([key, value]) => {
+        computedInitialFormValues[key] = value as FormValue;
+      });
+    }
+
+    return {
+      initialFormValues: computedInitialFormValues,
+      initialHiddenFields: computedInitialHiddenFields,
+      fieldsWithImpactOnRouting: computedFieldsWithImpactOnRouting,
+      routingKeys: computedRoutingKeys,
+    };
+  }, [fields, initialValues]);
 
   const [formValues, setFormValues] = useState(initialFormValues);
   const [formErrors, setFormErrors] = useState<{
@@ -123,6 +139,8 @@ function Form({
   }>({});
   const formRef = useRef<HTMLFormElement>(null);
   const resetFunctions = useRef<Array<() => void>>([]);
+  const getValuesOnChangeRef =
+    useRef<FormProps['getValuesOnChange']>(getValuesOnChange);
   const [routingHiddenFields, setRoutingHiddenFields] =
     useState<Array<string>>(initialHiddenFields);
   const [lastUpdatedKey, setLastUpdatedKey] = useState<string>('');
@@ -200,7 +218,7 @@ function Form({
   }
 
   const handleFormSubmit = (event: React.FormEvent) => {
-    let pageHandler = undefined;
+    let pageHandler: (() => void) | null = null;
 
     const isNumber = typeof currentPage === 'number';
     const isTotalNumber = typeof effectiveTotalPages === 'number';
@@ -305,13 +323,17 @@ function Form({
   };
 
   useEffect(() => {
-    if (getValuesOnChange) {
-      const externalHiddenFields = routingHiddenFields.filter(
-        (key) => !key.startsWith('_routing_')
-      );
-      getValuesOnChange(formValues, externalHiddenFields);
-    }
+    getValuesOnChangeRef.current = getValuesOnChange;
+  }, [getValuesOnChange]);
 
+  useEffect(() => {
+    const externalHiddenFields = routingHiddenFields.filter(
+      (key) => !key.startsWith('_routing_')
+    );
+    getValuesOnChangeRef.current?.(formValues, externalHiddenFields);
+  }, [formValues, routingHiddenFields]);
+
+  useEffect(() => {
     if (
       lastUpdatedKey &&
       fieldsWithImpactOnRouting.length > 0 &&
@@ -326,8 +348,16 @@ function Form({
         setRoutingHiddenFields,
         formValues,
       });
+      setLastUpdatedKey('');
     }
-  }, [formValues]);
+  }, [
+    fields,
+    fieldsWithImpactOnRouting,
+    formValues,
+    initialFormValues,
+    lastUpdatedKey,
+    routingHiddenFields,
+  ]);
 
   const scrollTop = () => {
     const formWidget = document.querySelector(
