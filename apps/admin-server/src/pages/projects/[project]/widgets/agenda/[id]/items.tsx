@@ -4,17 +4,20 @@ import {
 } from '@/components/agenda-items-editor';
 import { Button } from '@/components/ui/button';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { withId } from '@/lib/widget-item-helpers';
 import { AgendaWidgetProps } from '@openstad-headless/agenda/src/agenda';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 export default function WidgetAgendaItems(
   props: AgendaWidgetProps & EditFieldProps<AgendaWidgetProps>
 ) {
   const [items, setItems] = useState<AgendaItem[]>([]);
 
+  const itemsInitialized = React.useRef(false);
   useEffect(() => {
-    if (props?.items && props?.items?.length > 0) {
-      setItems(props?.items);
+    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
+      itemsInitialized.current = true;
+      setItems(props.items.map(withId) as AgendaItem[]);
     }
   }, [props?.items]);
 
