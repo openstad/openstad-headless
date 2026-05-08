@@ -1,38 +1,9 @@
-import react from '@vitejs/plugin-react';
-import path from 'path';
-import { defineConfig } from 'vite';
+import { createWidgetConfig } from '../lib/vite.config.factory';
 
-import { prefix } from '../lib/prefix';
-
-export default defineConfig(({ command }) => {
-  if (command === 'serve') {
-    return {
-      plugins: [react()],
-      css: prefix(),
-    };
-  } else {
-    return {
-      plugins: [react({ jsxRuntime: 'classic' })],
-      css: prefix(),
-      define: { 'process.env.NODE_ENV': '"production"' },
-      build: {
-        lib: {
-          formats: ['iife'],
-          entry: path.resolve(__dirname, 'src/choiceguide.tsx'), // Correct path to your entry file
-          name: 'OpenstadHeadlessChoiceGuide',
-          fileName: 'choiceguide',
-        },
-        rollupOptions: {
-          external: ['react', 'react-dom'],
-          output: {
-            globals: {
-              react: 'React',
-              'react-dom': 'ReactDOM',
-            },
-          },
-        },
-        outDir: 'dist', // Ensures output is in the dist directory
-      },
-    };
-  }
+export default createWidgetConfig({
+  name: 'OpenstadHeadlessChoiceGuide',
+  entry: 'src/choiceguide.tsx',
+  externalRemixicon: false,
+  libOverrides: { fileName: 'choiceguide' },
+  buildOverrides: { outDir: 'dist' },
 });

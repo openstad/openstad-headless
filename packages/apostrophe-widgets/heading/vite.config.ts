@@ -1,34 +1,7 @@
-import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import { createWidgetConfig } from '../../lib/vite.config.factory';
 
-// https://vitejs.dev/config/
-export default defineConfig(({ command }) => {
-  // When running in dev mode, use the React plugin
-  if (command === 'serve') {
-    return {
-      plugins: [react()],
-    };
-    // During build, use the classic runtime and build as an IIFE so we can deliver it to the browser
-  } else {
-    return {
-      plugins: [react({ jsxRuntime: 'classic' })],
-      define: { 'process.env.NODE_ENV': '"production"' },
-      build: {
-        lib: {
-          formats: ['iife'],
-          entry: 'src/heading.tsx',
-          name: 'ApostropheWidgetsHeading',
-        },
-        rollupOptions: {
-          external: ['react', 'react-dom', 'remixicon/fonts/remixicon.css'],
-          output: {
-            globals: {
-              react: 'React',
-              'react-dom': 'ReactDOM',
-            },
-          },
-        },
-      },
-    };
-  }
+export default createWidgetConfig({
+  name: 'ApostropheWidgetsHeading',
+  entry: 'src/heading.tsx',
+  usePrefix: false,
 });

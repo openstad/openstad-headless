@@ -47,7 +47,12 @@ export const ImageUploader: React.FC<{
   async function uploadImage(data: any) {
     let response;
 
-    if (data && data.type === 'image/gif') {
+    if (
+      data &&
+      (data.type === 'image/gif' ||
+        data.type === 'image/x-icon' ||
+        data.type === 'image/vnd.microsoft.icon')
+    ) {
       response = await UploadDocument(data, project);
     } else {
       let image = prepareFile(data);

@@ -137,17 +137,22 @@ export const exportSubmissionsToCSV = async (
             titles.length > 0 &&
             titles[0].isOtherOption
           ) {
-            const otherKey = `${item.fieldKey}_${index}_other`;
-
-            const hasOtherData = data.some(
-              (row: any) => !!row?.submittedData?.[otherKey]
-            );
-
             const otherTitle =
               titles[0].key || titles[0].title || 'Anders, namelijk';
-            if (hasOtherData && otherTitle) {
-              fieldKeyToTitleMap.set(otherKey, otherTitle);
-            }
+
+            const triggerKey = `${item.fieldKey}_${option.trigger}_other`;
+            const indexKey = `${item.fieldKey}_${index}_other`;
+            const possibleKeys =
+              triggerKey === indexKey ? [triggerKey] : [triggerKey, indexKey];
+
+            possibleKeys.forEach((key) => {
+              const hasData = data.some(
+                (row: any) => !!row?.submittedData?.[key]
+              );
+              if (hasData) {
+                fieldKeyToTitleMap.set(key, otherTitle);
+              }
+            });
           }
         });
       }

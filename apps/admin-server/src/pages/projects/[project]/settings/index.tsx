@@ -217,22 +217,6 @@ export default function ProjectSettings() {
 
     const cdns = ['https://openstad-cdn.nl'];
 
-    if (process.env.REACT_CDN) {
-      let reactCdn = process.env.REACT_CDN;
-      if (!reactCdn.startsWith('http')) {
-        reactCdn = `https://${reactCdn}`;
-      }
-      cdns.push(reactCdn);
-    }
-
-    if (process.env.REACT_DOM_CDN) {
-      let reactDomCdn = process.env.REACT_DOM_CDN;
-      if (!reactDomCdn.startsWith('http')) {
-        reactDomCdn = `https://${reactDomCdn}`;
-      }
-      cdns.push(reactDomCdn);
-    }
-
     setCdnUrls(cdns);
   }, [data]);
 

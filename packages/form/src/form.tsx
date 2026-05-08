@@ -30,6 +30,7 @@ import type {
   ComponentFieldProps,
   FormProps,
 } from './props';
+import { computeEffectivePagination } from './utils/pagination';
 import { updateRouting } from './utils/routing';
 import { handleSubmit } from './utils/submit';
 
@@ -57,6 +58,7 @@ function Form({
   setCurrentPage,
   prevPage,
   prevPageText,
+  nextPageText,
   pageFieldStartPositions,
   pageFieldEndPositions,
   totalPages,
@@ -66,58 +68,70 @@ function Form({
   initialValues,
   ...props
 }: FormProps) {
-  const { initialFormValues, initialHiddenFields, fieldsWithImpactOnRouting } =
-    useMemo(() => {
-      const computedInitialFormValues: { [key: string]: FormValue } = {};
-      const computedInitialHiddenFields: Array<string> = [];
-      const computedFieldsWithImpactOnRouting: Array<string> = [];
+  const {
+    initialFormValues,
+    initialHiddenFields,
+    fieldsWithImpactOnRouting,
+    routingKeys,
+  } = useMemo(() => {
+    const computedInitialFormValues: { [key: string]: FormValue } = {};
+    const computedInitialHiddenFields: Array<string> = [];
+    const computedFieldsWithImpactOnRouting: Array<string> = [];
+    const computedRoutingKeys: string[] = fields.map(
+      (field, index) => field.fieldKey || `_routing_${index}`
+    );
 
-      fields.forEach((field) => {
-        const fieldKey = field.fieldKey || '';
+    fields.forEach((field) => {
+      const fieldKey = field.fieldKey || '';
 
-        if (fieldKey) {
-          computedInitialFormValues[fieldKey] =
-            typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
-          computedInitialFormValues[fieldKey] =
-            field.type === 'map' ? {} : computedInitialFormValues[fieldKey];
+      if (fieldKey) {
+        computedInitialFormValues[fieldKey] =
+          typeof field.defaultValue !== 'undefined' ? field.defaultValue : '';
+        computedInitialFormValues[fieldKey] =
+          field.type === 'map' ? {} : computedInitialFormValues[fieldKey];
 
-          if (field.type === 'tickmark-slider') {
-            computedInitialFormValues[fieldKey] = Math.ceil(
-              (field?.fieldOptions?.length || 2) / 2
-            ).toString();
-          }
-
-          if (
-            field?.routingInitiallyHide &&
-            field?.routingSelectedQuestion &&
-            field?.routingSelectedAnswer
-          ) {
-            const getRoutingSelectedQuestionField = fields.find(
-              (f) => f.trigger === field.routingSelectedQuestion
-            );
-            const routingSelectedQuestionFieldKey =
-              getRoutingSelectedQuestionField?.fieldKey || '';
-
-            computedFieldsWithImpactOnRouting.push(
-              routingSelectedQuestionFieldKey
-            );
-            computedInitialHiddenFields.push(fieldKey);
-          }
+        if (field.type === 'tickmark-slider') {
+          computedInitialFormValues[fieldKey] = Math.ceil(
+            (field?.fieldOptions?.length || 2) / 2
+          ).toString();
         }
-      });
 
-      if (initialValues) {
-        Object.entries(initialValues).forEach(([key, value]) => {
-          computedInitialFormValues[key] = value as FormValue;
-        });
+        if (
+          field?.routingInitiallyHide &&
+          field?.routingSelectedQuestion &&
+          field?.routingSelectedAnswer &&
+          !(
+            Array.isArray(field.routingSelectedAnswer) &&
+            field.routingSelectedAnswer.length === 0
+          )
+        ) {
+          const getRoutingSelectedQuestionField = fields.find(
+            (f) => f.trigger === field.routingSelectedQuestion
+          );
+          const routingSelectedQuestionFieldKey =
+            getRoutingSelectedQuestionField?.fieldKey || '';
+
+          computedFieldsWithImpactOnRouting.push(
+            routingSelectedQuestionFieldKey
+          );
+          computedInitialHiddenFields.push(fieldKey);
+        }
       }
+    });
 
-      return {
-        initialFormValues: computedInitialFormValues,
-        initialHiddenFields: computedInitialHiddenFields,
-        fieldsWithImpactOnRouting: computedFieldsWithImpactOnRouting,
-      };
-    }, [fields, initialValues]);
+    if (initialValues) {
+      Object.entries(initialValues).forEach(([key, value]) => {
+        computedInitialFormValues[key] = value as FormValue;
+      });
+    }
+
+    return {
+      initialFormValues: computedInitialFormValues,
+      initialHiddenFields: computedInitialHiddenFields,
+      fieldsWithImpactOnRouting: computedFieldsWithImpactOnRouting,
+      routingKeys: computedRoutingKeys,
+    };
+  }, [fields, initialValues]);
 
   const [formValues, setFormValues] = useState(initialFormValues);
   const [formErrors, setFormErrors] = useState<{
@@ -131,58 +145,102 @@ function Form({
     useState<Array<string>>(initialHiddenFields);
   const [lastUpdatedKey, setLastUpdatedKey] = useState<string>('');
 
-  let fieldsToRender = fields;
-  if (
-    typeof currentPage === 'number' &&
-    typeof pageFieldStartPositions !== 'undefined' &&
-    typeof pageFieldEndPositions !== 'undefined'
-  ) {
-    const start = pageFieldStartPositions[currentPage];
-    const end = pageFieldEndPositions[currentPage];
+  const {
+    effectiveTotalPages,
+    effectiveStartPositions,
+    effectiveEndPositions,
+    effectiveCurrentPage,
+  } = useMemo(
+    () =>
+      computeEffectivePagination({
+        fields,
+        routingKeys,
+        routingHiddenFields,
+        totalPages,
+        pageFieldStartPositions,
+        pageFieldEndPositions,
+        currentPage,
+      }),
+    [fields, routingKeys, routingHiddenFields, totalPages, currentPage]
+  );
 
+  // Button labels: Form is the single owner of button text logic
+  const lastField = fields[fields.length - 1];
+  const lastFieldIsYouthOutro =
+    lastField?.type === 'none' &&
+    (lastField as any)?.infoBlockStyle === 'youth-outro';
+
+  let currentButtonLabel = submitText;
+  let currentPrevLabel = prevPageText;
+
+  if (typeof effectiveTotalPages === 'number' && effectiveTotalPages > 1) {
+    const isLastPage = effectiveCurrentPage === effectiveTotalPages - 1;
+    const isSecondToLast = effectiveCurrentPage === effectiveTotalPages - 2;
+    const isSubmitPage =
+      isLastPage || (isSecondToLast && lastFieldIsYouthOutro);
+
+    if (!isSubmitPage) {
+      const visiblePagFields = fields.filter(
+        (f, i) =>
+          f.type === 'pagination' &&
+          !routingHiddenFields.includes(routingKeys[i])
+      );
+      const currentPagField = visiblePagFields[effectiveCurrentPage] as any;
+      currentButtonLabel =
+        currentPagField?.nextPageText || nextPageText || 'Volgende';
+      currentPrevLabel = currentPagField?.prevPageText || prevPageText;
+    }
+  }
+
+  useEffect(() => {
+    if (
+      typeof effectiveCurrentPage === 'number' &&
+      typeof currentPage === 'number' &&
+      effectiveCurrentPage !== currentPage &&
+      setCurrentPage
+    ) {
+      setCurrentPage(effectiveCurrentPage);
+    }
+  }, [effectiveCurrentPage]);
+
+  let fieldsToRender = fields;
+  let fieldsToRenderOffset = 0;
+  if (
+    typeof effectiveCurrentPage === 'number' &&
+    typeof effectiveStartPositions !== 'undefined' &&
+    typeof effectiveEndPositions !== 'undefined'
+  ) {
+    const start = effectiveStartPositions[effectiveCurrentPage];
+    const end = effectiveEndPositions[effectiveCurrentPage];
+
+    fieldsToRenderOffset = start;
     fieldsToRender = fields.slice(start, end);
   }
 
   const handleFormSubmit = (event: React.FormEvent) => {
-    const nonPaginationFields = fields.filter(
-      (field) => field.type !== 'pagination'
-    );
-
-    let pageHandler = undefined;
+    let pageHandler: (() => void) | null = null;
 
     const isNumber = typeof currentPage === 'number';
-    const isTotalNumber = typeof totalPages === 'number';
-    const hasPages = isNumber && isTotalNumber && currentPage < totalPages - 1;
+    const isTotalNumber = typeof effectiveTotalPages === 'number';
+    const hasPages =
+      isNumber && isTotalNumber && currentPage < effectiveTotalPages - 1;
     const hasSetCurrentPage = !!setCurrentPage;
     const isSecondToLast =
-      isNumber && isTotalNumber && currentPage === totalPages - 2;
-    const lastFieldIsYouthOutro =
-      isTotalNumber &&
-      (nonPaginationFields[totalPages - 1] as any)?.infoBlockStyle ===
-        'youth-outro';
+      isNumber && isTotalNumber && currentPage === effectiveTotalPages - 2;
 
-    const shouldGoToNextPage =
-      hasPages &&
-      hasSetCurrentPage &&
-      (!lastFieldIsYouthOutro ||
-        !isSecondToLast ||
-        (isSecondToLast && lastFieldIsYouthOutro));
+    const shouldGoToNextPage = hasPages && hasSetCurrentPage;
 
     if (isNumber && isTotalNumber && shouldGoToNextPage) {
       allowResetAfterSubmit = false;
       pageHandler = () => setCurrentPage(currentPage + 1);
     }
 
-    const lastField = fields[fields.length - 1];
-    const lastFieldIsOutro =
-      lastField?.type === 'none' && lastField?.infoBlockStyle === 'youth-outro';
-
     let submitBeforeLastPage = false;
     if (
       typeof currentPage === 'number' &&
-      typeof totalPages === 'number' &&
-      currentPage === totalPages - 2 &&
-      lastFieldIsOutro
+      typeof effectiveTotalPages === 'number' &&
+      currentPage === effectiveTotalPages - 2 &&
+      lastFieldIsYouthOutro
     ) {
       submitBeforeLastPage = true;
     }
@@ -269,7 +327,10 @@ function Form({
   }, [getValuesOnChange]);
 
   useEffect(() => {
-    getValuesOnChangeRef.current?.(formValues, routingHiddenFields);
+    const externalHiddenFields = routingHiddenFields.filter(
+      (key) => !key.startsWith('_routing_')
+    );
+    getValuesOnChangeRef.current?.(formValues, externalHiddenFields);
   }, [formValues, routingHiddenFields]);
 
   useEffect(() => {
@@ -280,6 +341,7 @@ function Form({
     ) {
       updateRouting({
         fields,
+        routingKeys,
         initialFormValues,
         routingHiddenFields,
         setFormValues,
@@ -381,7 +443,7 @@ function Form({
                   setCurrentPage && setCurrentPage(currentPage - 1);
                   scrollTop();
                 }}>
-                {prevPageText || 'vorige'}
+                {currentPrevLabel || 'vorige'}
               </Button>
             )}
           </div>
@@ -414,10 +476,8 @@ function Form({
               typeof formErrors[field.fieldKey] !== 'undefined'
             );
 
-            if (
-              field.fieldKey &&
-              routingHiddenFields.includes(field.fieldKey)
-            ) {
+            const routingKey = routingKeys[fieldsToRenderOffset + index];
+            if (routingKey && routingHiddenFields.includes(routingKey)) {
               return null;
             }
 
@@ -508,7 +568,7 @@ function Form({
                   setCurrentPage && setCurrentPage(currentPage - 1);
                   scrollTop();
                 }}>
-                <span>{prevPageText || 'vorige'}</span>
+                <span>{currentPrevLabel || 'vorige'}</span>
               </Button>
             )}
             <Button
@@ -519,7 +579,7 @@ function Form({
               onClick={() => {
                 scrollTop();
               }}>
-              <span>{submitText}</span>
+              <span>{currentButtonLabel}</span>
             </Button>
           </div>
         </form>

@@ -24,7 +24,7 @@ export const BudgetStatusPanel = ({
   title?: string;
   budgetChosenTitle?: string;
   budgetRemainingTitle?: string;
-}): JSX.Element => {
+}): React.JSX.Element => {
   return (
     <>
       {showInfoMenu && (

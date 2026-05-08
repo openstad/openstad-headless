@@ -151,6 +151,11 @@ router
     returnTo = decodeURIComponent(returnTo);
     returnTo = returnTo || '/?openstadlogintoken=[[jwt]]';
     returnTo = String(returnTo);
+
+    const hashIndex = returnTo.indexOf('#');
+    if (hashIndex !== -1) {
+      returnTo = returnTo.substring(0, hashIndex);
+    }
     if (!returnTo.match(/\[\[jwt\]\]/))
       returnTo =
         returnTo +
@@ -168,15 +173,10 @@ router
 
     const isAllowedRedirectDomain = (url, project) => {
       let allowedDomains = prefillAllowedDomains(
-        project?.config?.allowedDomains || []
+        project?.config?.allowedDomains || [],
+        project?.url
       );
 
-      if (project.url) {
-        try {
-          let projectDomain = new URL(project.url).host;
-          allowedDomains.push(projectDomain);
-        } catch (err) {}
-      }
       if (config.admin.domain) {
         const domain = config.admin.domain.replace(/:\d+$/, '');
         allowedDomains.push(domain);
@@ -446,6 +446,10 @@ router
       codes = await service.fetchUniqueCode({
         authConfig: req.authConfig,
         isExport: req.query.export === 'true',
+        limit: req.query.limit,
+        offset: req.query.offset,
+        search: req.query.search,
+        sort: req.query.sort,
       });
     } catch (err) {
       console.log(err);

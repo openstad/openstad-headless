@@ -5,6 +5,7 @@ type ExtendedFormValue = FormValue | string[];
 
 type RoutingFunction = {
   fields: Array<FieldWithOptionalFields>;
+  routingKeys: string[];
   initialFormValues: { [key: string]: FormValue };
   routingHiddenFields: string[];
   setFormValues: React.Dispatch<
@@ -16,6 +17,7 @@ type RoutingFunction = {
 
 export const updateRouting = ({
   fields,
+  routingKeys,
   initialFormValues,
   routingHiddenFields,
   setFormValues,
@@ -25,15 +27,17 @@ export const updateRouting = ({
   const hiddenFields: Array<string> = [];
   const updateValues: { [key: string]: FormValue } = {};
 
-  fields.forEach((field: FieldWithOptionalFields) => {
+  fields.forEach((field: FieldWithOptionalFields, index: number) => {
     if (
       !field?.routingInitiallyHide ||
       !field.routingSelectedQuestion ||
-      !field.routingSelectedAnswer
+      !field.routingSelectedAnswer ||
+      (Array.isArray(field.routingSelectedAnswer) &&
+        field.routingSelectedAnswer.length === 0)
     )
       return;
 
-    const fieldKeyFromFieldToHide = field.fieldKey || '';
+    const fieldKeyFromFieldToHide = routingKeys[index] || '';
     if (hiddenFields.includes(fieldKeyFromFieldToHide)) return;
 
     const fieldToCheck = fields.find(
@@ -60,21 +64,26 @@ export const updateRouting = ({
     const fieldChoices = (fieldToCheck as any)?.choices || [];
 
     type choiceType = { trigger: string; value: string };
-    const selectedOption: choiceType = fieldChoices.find(
-      (choice: choiceType) => choice.trigger === field.routingSelectedAnswer
-    );
-    const selectedOptionValue = selectedOption ? selectedOption.value : null;
+    const selectedAnswerTriggers = Array.isArray(field.routingSelectedAnswer)
+      ? field.routingSelectedAnswer
+      : [field.routingSelectedAnswer];
 
-    // This may seem a bit complex, but this way all the TypeScript warnings are gone
-    if (
-      Array.isArray(answer) &&
-      answer.length > 0 &&
-      selectedOption &&
-      selectedOptionValue !== null &&
-      (answer as string[]).includes(selectedOptionValue)
-    ) {
-      return;
-    } else if (!Array.isArray(answer) && answer === selectedOptionValue) {
+    const selectedOptionValues: string[] = selectedAnswerTriggers
+      .map((trigger) => {
+        const option: choiceType = fieldChoices.find(
+          (choice: choiceType) => choice.trigger === trigger
+        );
+        return option ? option.value : null;
+      })
+      .filter((value): value is string => value !== null);
+
+    const answerMatchesAny =
+      selectedOptionValues.length > 0 &&
+      (Array.isArray(answer)
+        ? answer.some((val) => selectedOptionValues.includes(val as string))
+        : selectedOptionValues.includes(answer as string));
+
+    if (answerMatchesAny) {
       return;
     } else {
       hiddenFields.push(fieldKeyFromFieldToHide);

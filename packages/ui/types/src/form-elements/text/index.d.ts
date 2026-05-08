@@ -1,3 +1,12 @@
+declare module 'react' {
+    namespace JSX {
+        interface IntrinsicElements {
+            'trix-editor': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+                input?: string;
+            }, HTMLElement>;
+        }
+    }
+}
 import { FormValue } from '@openstad-headless/form/src/form';
 import React, { FC } from 'react';
 import './style.css';

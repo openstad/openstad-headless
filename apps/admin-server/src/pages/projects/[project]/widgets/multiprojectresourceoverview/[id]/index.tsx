@@ -30,7 +30,9 @@ import WidgetResourceOverviewSearch from '../../resourceoverview/[id]/search';
 import WidgetResourceOverviewSorting from '../../resourceoverview/[id]/sorting';
 import { ResourceOverviewMapWidgetTabProps } from '../../resourcesmap/[id]';
 import WidgetResourcesMapButton from '../../resourcesmap/[id]/buttons';
+import WidgetResourcesMapLegend from '../../resourcesmap/[id]/legend';
 import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
+import WidgetResourcesMapMarkers from '../../resourcesmap/[id]/markers';
 import WidgetResourcesMapPolygons from '../../resourcesmap/[id]/polygons';
 
 export const getServerSideProps = withApiUrl;
@@ -114,6 +116,8 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
                       <TabsTrigger value="general">Kaart</TabsTrigger>
                       <TabsTrigger value="polygons">Polygonen</TabsTrigger>
+                      <TabsTrigger value="markerSets">Markers</TabsTrigger>
+                      <TabsTrigger value="legend">Legenda</TabsTrigger>
                       <TabsTrigger value="buttons">Knoppen</TabsTrigger>
                     </TabsList>
                     <TabsContent value="general" className="p-0">
@@ -145,6 +149,32 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     </TabsContent>
                     <TabsContent value="polygons" className="p-0">
                       <WidgetResourcesMapPolygons
+                        {...extractConfig<
+                          ResourceOverviewWidgetProps,
+                          ResourceOverviewMapWidgetTabProps
+                        >({
+                          previewConfig,
+                          subWidgetKey: 'resourceOverviewMapWidget',
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
+                    </TabsContent>
+                    <TabsContent value="markerSets" className="p-0">
+                      <WidgetResourcesMapMarkers
+                        {...extractConfig<
+                          ResourceOverviewWidgetProps,
+                          ResourceOverviewMapWidgetTabProps
+                        >({
+                          previewConfig,
+                          subWidgetKey: 'resourceOverviewMapWidget',
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
+                    </TabsContent>
+                    <TabsContent value="legend" className="p-0">
+                      <WidgetResourcesMapLegend
                         {...extractConfig<
                           ResourceOverviewWidgetProps,
                           ResourceOverviewMapWidgetTabProps

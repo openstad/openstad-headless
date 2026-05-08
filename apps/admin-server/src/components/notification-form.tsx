@@ -1,4 +1,4 @@
-import { fetchSessionUser } from '@/auth';
+import { fetchSessionUser } from '@/auth-context';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -527,7 +527,7 @@ export function NotificationForm({
 
     try {
       const mjml2html = (await import('mjml-browser')).default;
-      const htmlOutput = mjml2html(data).html;
+      const htmlOutput = (await mjml2html(data)).html;
       setMjmlHtml(htmlOutput);
       setError(null);
     } catch (err) {

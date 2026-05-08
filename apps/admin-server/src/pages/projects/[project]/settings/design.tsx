@@ -203,11 +203,10 @@ export default function ProjectSettingsDesign() {
                           id="editing"
                           placeholder="Schrijf hier je custom css..."
                           spellCheck="false"
-                          onInput={(
-                            e: React.ChangeEvent<HTMLTextAreaElement>
-                          ) => {
-                            update(e.target.value);
-                            sync_scroll(e.target);
+                          onInput={(e) => {
+                            const target = e.target as HTMLTextAreaElement;
+                            update(target.value);
+                            sync_scroll(target);
                           }}
                           onScroll={(e) => sync_scroll(e.target as HTMLElement)}
                           onKeyDown={(event) =>

@@ -168,7 +168,7 @@ function CommentForm({
         fields={formFields}
         submitDisabled={disableSubmit}
         submitHandler={props.submitComment}
-        submitText="Verstuur"
+        submitText="Versturen"
         title=""
       />
     </div>

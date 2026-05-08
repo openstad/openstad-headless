@@ -9,6 +9,7 @@ export type RadioboxFieldProps = {
         label: string;
         isOtherOption?: boolean;
         defaultValue?: boolean;
+        trigger?: string;
     }[];
     fieldRequired?: boolean;
     requiredWarning?: string;

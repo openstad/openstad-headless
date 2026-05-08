@@ -1,4 +1,15 @@
 require('dotenv').config();
+
+const {
+  createTelemetry,
+  setupGracefulShutdown,
+} = require('@openstad-headless/lib/telemetry');
+const telemetryManager = createTelemetry({
+  serviceName: process.env.OTEL_SERVICE_NAME || 'openstad-image-server',
+});
+telemetryManager.initialize();
+setupGracefulShutdown(telemetryManager);
+
 const express = require('express');
 const crypto = require('crypto');
 const app = express();
@@ -9,6 +20,44 @@ const s3 = require('./s3');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const mime = require('mime-types');
 
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff'];
+
+/**
+ * Detect image MIME type from a fetch Response.
+ * Uses extension-based lookup first, falls back to magic-byte detection via file-type.
+ * Only returns image types that match the allowed extensions list.
+ */
+async function detectImageMimeType(response, extension) {
+  if (extension) {
+    const fromExt = mime.lookup(extension);
+    if (fromExt) return fromExt;
+  }
+
+  const reader = response.clone().body.getReader();
+  const { value } = await reader.read();
+  reader.cancel();
+
+  if (!value) {
+    const ct = response.headers.get('content-type');
+    return ct && ct.startsWith('image/') ? ct : 'application/octet-stream';
+  }
+
+  // 4100 bytes is the minimum needed by file-type to detect all supported formats
+  // See https://github.com/sindresorhus/file-type?tab=readme-ov-file#samplesize
+  const buf = Buffer.from(
+    value.buffer,
+    value.byteOffset,
+    Math.min(value.byteLength, 4100)
+  );
+  const mod = await import('file-type');
+  const detect = mod.fileTypeFromBuffer || mod.default?.fromBuffer;
+  const detected = detect ? await detect(buf) : null;
+
+  if (detected && ALLOWED_EXTENSIONS.includes(detected.ext))
+    return detected.mime;
+  const ct = response.headers.get('content-type');
+  return ct && ct.startsWith('image/') ? ct : 'application/octet-stream';
+}
 const { createFilename, sanitizeFileName, getFileUrl } = require('./utils');
 const fs = require('node:fs');
 const path = require('path');
@@ -183,31 +232,22 @@ app.get('/image/*', rateLimiter(), async function (req, res, next) {
     req.url = req.url.replace(/^\/image\//, '');
 
     // SSRF mitigation: Validate and sanitize image path
-    // Only allow filenames with safe characters and common image extensions
-    const ALLOWED_EXTENSIONS = [
-      'jpg',
-      'jpeg',
-      'png',
-      'gif',
-      'bmp',
-      'webp',
-      'tiff',
-    ];
     const safeImageNamePattern = /^[a-zA-Z0-9_\-\.]+$/;
     const unsafePath = req.url;
 
     // Prevent directory traversal or illegal characters
     const baseName = path.basename(unsafePath); // strips directory components
-    const extension = baseName.split('.').pop().toLowerCase();
+    const hasExtension = baseName.includes('.');
+    const extension = hasExtension
+      ? baseName.split('.').pop().toLowerCase()
+      : null;
     if (
       baseName !== unsafePath || // directory component detected
       !safeImageNamePattern.test(baseName) || // unsafe chars present
-      !ALLOWED_EXTENSIONS.includes(extension) // extension not allowed
+      (hasExtension && !ALLOWED_EXTENSIONS.includes(extension)) // extension present but not allowed
     ) {
       return res.status(400).send('Invalid image filename or path');
     }
-
-    const mimeType = mime.lookup(extension);
 
     const endpoint = process.env.S3_ENDPOINT.replace(
       'https://',
@@ -242,7 +282,8 @@ app.get('/image/*', rateLimiter(), async function (req, res, next) {
           .send('File not found');
       }
 
-      res.setHeader('Content-Type', mimeType);
+      const contentType = await detectImageMimeType(response, extension);
+      res.setHeader('Content-Type', contentType);
       const contentLength = response.headers.get('content-length');
       if (contentLength) res.setHeader('Content-Length', contentLength);
 

@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 
-import { SessionContext } from '../../auth';
+import { SessionContext } from '../../auth-context';
 import { Logo } from './logo';
 
 export function Sidenav({

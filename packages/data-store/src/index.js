@@ -12,6 +12,7 @@ import useComments from './hooks/use-comments.js';
 import useCurrentUser from './hooks/use-current-user.js';
 import useDatalayer from './hooks/use-datalayer.js';
 import useEnqueteResultCount from './hooks/use-enquete-result-count';
+import useMarkers from './hooks/use-markers.js';
 import useProjectVotedUsersCount from './hooks/use-project-voted-users-count';
 import useResource from './hooks/use-resource.js';
 import useResources from './hooks/use-resources.js';
@@ -38,6 +39,7 @@ function DataStore(props = {}) {
   self.useResources = useResources.bind(self);
   self.useArea = useArea.bind(self);
   self.useDatalayer = useDatalayer.bind(self);
+  self.useMarkers = useMarkers.bind(self);
   self.useAreas = useAreas.bind(self);
   self.useTags = useTags.bind(self);
   self.useCurrentUser = useCurrentUser.bind(self);
@@ -82,6 +84,11 @@ function DataStore(props = {}) {
       // otherwise, fetcherAsString is the name of the fetcher function and we use that directly
     } else {
       fetcher = self.api[fetcherAsString];
+    }
+
+    // Allow hooks to pass null to skip the fetch entirely
+    if (props === null) {
+      return useSWR(null, null);
     }
 
     let key = self.createKey(props, fetcherAsString);

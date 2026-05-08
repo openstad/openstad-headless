@@ -1,7 +1,7 @@
 module.exports = {
   allowedDomains: {
     type: 'arrayOfStrings',
-    default: ['api.openstad.org'],
+    default: [],
   },
 
   project: {

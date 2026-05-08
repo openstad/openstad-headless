@@ -8,6 +8,7 @@ import commentsByProject from './commentsByProject';
 import datalayer from './datalayer';
 import enqueteResultCount from './enqueteResultCount';
 import fetchx from './fetch';
+import markers from './markers';
 import projectVotedUsersCount from './projectVotedUsersCount';
 import resource from './resource';
 import resources from './resources';
@@ -114,6 +115,10 @@ function API(props = {}) {
 
   self.datalayer = {
     fetch: datalayer.fetch.bind(self),
+  };
+
+  self.markers = {
+    fetch: markers.fetch.bind(self),
   };
 
   self.widget = {

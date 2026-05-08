@@ -59,7 +59,7 @@ function useUsers(options?: UsersPaginationOptions) {
         ? (options?.pageSize ?? 20)
         : options?.pageSize,
   });
-        
+
   const usersSwr = useSWR(url);
   const res = usersSwr.data;
   const data = res?.records ?? res;

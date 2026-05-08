@@ -36,6 +36,7 @@ BASIC_AUTH_PASSWORD = openstad
 COOKIE_SECURE_OFF = process.env.FORCE_HTTP ? 'yes' : ''
 
 DB_REQUIRE_SSL = false
+DB_ENABLE_CLEARTEXT_PLUGIN = false
 DB_AUTH_METHOD = ''
 
 WHITELISTED_EMAILS=''
@@ -51,6 +52,7 @@ API_DB_PASSWORD = process.env.DB_PASSWORD
 API_DB_NAME = process.env.DB_BASE_NAME ? process.env.DB_BASE_NAME + '-api' :  'api'
 API_DB_DIALECT = process.env.DB_DIALECT || 'mysql'
 API_DB_REQUIRE_SSL = process.env.DB_REQUIRE_SSL || false
+API_DB_ENABLE_CLEARTEXT_PLUGIN = process.env.DB_ENABLE_CLEARTEXT_PLUGIN || false
 API_DB_AUTH_METHOD = process.env.DB_AUTH_METHOD || ''
 
 API_FROM_EMAIL_ADDRESS = process.env.FROM_EMAIL_ADDRESS
@@ -76,6 +78,7 @@ AUTH_DB_PASSWORD = process.env.DB_PASSWORD
 AUTH_DB_NAME = ( process.env.DB_BASE_NAME ? process.env.DB_BASE_NAME + '-auth-server' :  'auth-server' )
 AUTH_DB_DIALECT = process.env.DB_DIALECT || 'mysql'
 AUTH_DB_REQUIRE_SSL = process.env.DB_REQUIRE_SSL || false
+AUTH_DB_ENABLE_CLEARTEXT_PLUGIN = process.env.DB_ENABLE_CLEARTEXT_PLUGIN || false
 AUTH_DB_AUTH_METHOD = process.env.DB_AUTH_METHOD || ''
 
 AUTH_MAIL_SERVER_URL = process.env.SMTP_HOST

@@ -68,7 +68,7 @@ export const StemBegrootResourceDetailDialog = ({
   onPrimaryButtonClick: (resource: any) => void;
   resourceDetailIndex: number;
   defineOriginalUrl: (resource: any) => string | null;
-    defineOriginalUrlText: (resource: any) => string | null;
+  defineOriginalUrlText: (resource: any) => string | null;
   resourceBtnTextHandler: (resource: any) => string;
   resourceBtnEnabled: (resource: any) => boolean;
   displayPriceLabel: boolean;

@@ -9,6 +9,7 @@ const express = require('express');
 const router = express.Router({ mergeParams: true });
 var createError = require('http-errors');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
+const { Op } = require('sequelize');
 
 // scopes: for all get requests
 router.all('*', function (req, res, next) {
@@ -23,6 +24,27 @@ router
   .get(pagination.init)
   .get(function (req, res, next) {
     let { dbQuery } = req;
+
+    // Support ?ids=1,2,3 to fetch specific areas
+    if (req.query.ids) {
+      const ids = [
+        ...new Set(
+          req.query.ids
+            .split(',')
+            .map(Number)
+            .filter((id) => !isNaN(id) && id > 0)
+        ),
+      ].slice(0, 100);
+
+      if (ids.length > 0) {
+        dbQuery.where = dbQuery.where || {};
+        dbQuery.where.id = { [Op.in]: ids };
+      } else {
+        req.results = [];
+        req.dbQuery.count = 0;
+        return next();
+      }
+    }
 
     return db.Area.scope('includeTags')
       .findAndCountAll(dbQuery)

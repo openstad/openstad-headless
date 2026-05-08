@@ -1,3 +1,4 @@
+import ColorPicker from '@/components/colorpicker';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -32,7 +33,16 @@ import { ResourceOverviewMapWidgetTabProps } from '.';
 
 const formSchema = z.object({
   customPolygon: z
-    .array(z.object({ id: z.number(), name: z.string() }))
+    .array(
+      z.object({
+        id: z.number(),
+        name: z.string(),
+        url: z.string().optional(),
+        color: z.string().optional(),
+        openInNewTab: z.boolean().optional(),
+        buttonText: z.string().optional(),
+      })
+    )
     .optional(),
   customPolygonUrl: z.any().optional(),
   interactionType: z.enum(['default', 'direct']).optional().default('default'),
@@ -50,7 +60,7 @@ export default function WidgetResourcesMapButton(
 
   async function onSubmit(values: FormData) {
     const customPolygon = values?.customPolygon?.map((item: any) => {
-      const url = values?.customPolygonUrl[item.id] ?? '';
+      const url = values?.customPolygonUrl?.[item.id] ?? item.url ?? '';
       return { ...item, url };
     });
 
@@ -60,6 +70,14 @@ export default function WidgetResourcesMapButton(
   }
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
+
+  const existingPolygons = (props?.customPolygon || []).reduce(
+    (acc: any, p: any) => {
+      acc[p.id] = p;
+      return acc;
+    },
+    {}
+  );
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
@@ -95,6 +113,8 @@ export default function WidgetResourcesMapButton(
                   Array.isArray(field.value) &&
                   field.value.some((obj) => obj.id === Number(item.id));
 
+                const existingData = existingPolygons[Number(item.id)] || {};
+
                 return (
                   <FormItem
                     key={item.id}
@@ -115,7 +135,14 @@ export default function WidgetResourcesMapButton(
                                 const { name } = item;
                                 form.setValue('customPolygon', [
                                   ...values,
-                                  { name, id: Number(item.id) },
+                                  {
+                                    name,
+                                    id: Number(item.id),
+                                    url: '',
+                                    color: '',
+                                    openInNewTab: false,
+                                    buttonText: '',
+                                  },
                                 ]);
                                 props.onFieldChanged(field.name, [
                                   ...values,
@@ -138,13 +165,13 @@ export default function WidgetResourcesMapButton(
                       <FormLabel className="font-normal">{item.name}</FormLabel>
                     </div>
                     {isChecked && (
-                      <div className="w-1/2">
+                      <div className="w-full pl-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <FormField
                           control={form.control}
                           name={`customPolygonUrl.${Number(item.id)}`}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Add URL</FormLabel>
+                              <FormLabel>URL</FormLabel>
                               <FormControl>
                                 <Input
                                   placeholder="url / path"
@@ -158,6 +185,93 @@ export default function WidgetResourcesMapButton(
                               </FormControl>
                               <FormMessage />
                             </FormItem>
+                          )}
+                        />
+                        <PolygonExtraField
+                          form={form}
+                          itemId={Number(item.id)}
+                          fieldName="color"
+                          existingData={existingData}
+                          render={(polygonIndex) => (
+                            <FormField
+                              control={form.control}
+                              name={`customPolygon.${polygonIndex}.color`}
+                              render={({ field: colorField }) => (
+                                <FormItem>
+                                  <FormLabel>Kleur</FormLabel>
+                                  <FormControl>
+                                    <ColorPicker
+                                      value={
+                                        colorField.value ||
+                                        existingData.color ||
+                                        ''
+                                      }
+                                      onChange={(e) =>
+                                        colorField.onChange(e.target.value)
+                                      }
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          )}
+                        />
+                        <PolygonExtraField
+                          form={form}
+                          itemId={Number(item.id)}
+                          fieldName="buttonText"
+                          existingData={existingData}
+                          render={(polygonIndex) => (
+                            <FormField
+                              control={form.control}
+                              name={`customPolygon.${polygonIndex}.buttonText`}
+                              render={({ field: btnField }) => (
+                                <FormItem>
+                                  <FormLabel>Knoptekst</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Lees verder"
+                                      type="text"
+                                      value={
+                                        btnField.value ||
+                                        existingData.buttonText ||
+                                        ''
+                                      }
+                                      onChange={(e) =>
+                                        btnField.onChange(e.target.value)
+                                      }
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
+                          )}
+                        />
+                        <PolygonExtraField
+                          form={form}
+                          itemId={Number(item.id)}
+                          fieldName="openInNewTab"
+                          existingData={existingData}
+                          render={(polygonIndex) => (
+                            <FormField
+                              control={form.control}
+                              name={`customPolygon.${polygonIndex}.openInNewTab`}
+                              render={({ field: tabField }) => (
+                                <FormItem className="flex flex-row items-center space-x-3 space-y-0 pt-8">
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={
+                                        tabField.value ??
+                                        existingData.openInNewTab ??
+                                        false
+                                      }
+                                      onCheckedChange={tabField.onChange}
+                                    />
+                                  </FormControl>
+                                  <FormLabel>Open in nieuw tabblad</FormLabel>
+                                </FormItem>
+                              )}
+                            />
                           )}
                         />
                       </div>
@@ -210,4 +324,23 @@ export default function WidgetResourcesMapButton(
       </Form>
     </div>
   );
+}
+
+function PolygonExtraField({
+  form,
+  itemId,
+  fieldName,
+  existingData,
+  render,
+}: {
+  form: any;
+  itemId: number;
+  fieldName: string;
+  existingData: any;
+  render: (polygonIndex: number) => React.ReactNode;
+}) {
+  const polygons = form.watch('customPolygon') || [];
+  const polygonIndex = polygons.findIndex((p: any) => p.id === itemId);
+  if (polygonIndex === -1) return null;
+  return <>{render(polygonIndex)}</>;
 }

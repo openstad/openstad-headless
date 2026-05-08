@@ -1,4 +1,4 @@
-import { SessionContext } from '@/auth';
+import { SessionContext } from '@/auth-context';
 import { Button } from '@/components/ui/button';
 import { PageLayout } from '@/components/ui/page-layout';
 import { sortTable } from '@/components/ui/sortTable';

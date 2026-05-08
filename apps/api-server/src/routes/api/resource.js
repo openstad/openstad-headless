@@ -98,6 +98,7 @@ async function attachModeratorOnlyExtraDataKeys(resources) {
     resource.moderatorOnlyExtraDataKeys =
       extraDataConfig?.moderatorOnlyFieldKeys || [];
   });
+}
 
 async function shouldSendUpdatedResourceAdminEmail(req) {
   const projectId = req.project?.id || Number(req.params.projectId);
