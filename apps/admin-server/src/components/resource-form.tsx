@@ -254,6 +254,49 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   const [extraData, setExtraData] = useState(existingData?.extraData || '');
   const [imageIndexOpen, setImageIndexOpen] = useState<number>(-1);
 
+  // Timeline state
+  interface TimelineLink {
+    title: string;
+    url: string;
+    openInNewWindow: boolean;
+  }
+  interface TimelineItem {
+    trigger: string;
+    date?: string;
+    title: string;
+    description: string;
+    active: boolean;
+    highlighted?: boolean;
+    links?: TimelineLink[];
+  }
+  // `timeline` is the canonical key; `tijdlijn` is kept as a read-only fallback
+  // for backward compatibility with records saved before the rename.
+  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>(
+    existingData?.extraData?.timeline ?? existingData?.extraData?.tijdlijn ?? []
+  );
+  const [tlTitle, setTlTitle] = useState('');
+  const [tlDate, setTlDate] = useState('');
+  const [tlDescription, setTlDescription] = useState('');
+  const [tlActive, setTlActive] = useState(true);
+  const [tlHighlighted, setTlHighlighted] = useState(false);
+  const [tlLinks, setTlLinks] = useState<TimelineLink[]>([]);
+  const [tlLinkTitle, setTlLinkTitle] = useState('');
+  const [tlLinkUrl, setTlLinkUrl] = useState('');
+  const [tlLinkNewWindow, setTlLinkNewWindow] = useState(false);
+  const [editingTlIndex, setEditingTlIndex] = useState<number | null>(null);
+
+  // Sync timeline state once existingData finishes loading (SWR is async).
+  // Without this, opening an edit page shows an empty editor even if the
+  // resource already has timeline items saved.
+  useEffect(() => {
+    if (!existingData) return;
+    const loaded =
+      existingData?.extraData?.timeline ??
+      existingData?.extraData?.tijdlijn ??
+      [];
+    setTimelineItems(loaded);
+  }, [existingData?.id, existingData?.extraData]);
+
   const [targetUser, setTargetUser] = useState<{
     name?: string;
     email?: string;
@@ -300,10 +343,27 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   function onSubmit(values: FormType) {
     // Add extraData if its valid JSON
     try {
-      if (extraData !== values.extraData) {
+      if (typeof extraData === 'string' && extraData.length > 0) {
         values.extraData = JSON.parse(extraData);
       }
-    } catch (e) {}
+    } catch (e) {
+      console.warn('Invalid extraData JSON, skipping parse:', e);
+    }
+    // extraData is a freeform JSON blob in this codebase;
+    // schema types only the `originalId` key explicitly. Localized cast is
+    // intentional here to avoid forcing all other extraData writers to update.
+    // extraData is a freeform JSON blob; the schema only types `originalId`
+    // explicitly. A localized cast keeps the write site type-safe without
+    // forcing every other extraData consumer to update.
+    const extraDataObj =
+      typeof values.extraData === 'object' && values.extraData !== null
+        ? (values.extraData as Record<string, unknown>)
+        : {};
+    extraDataObj.timeline = timelineItems;
+    // Drop the legacy `tijdlijn` key on write so new saves use the canonical
+    // `timeline` key. Old records are still readable via the fallback above.
+    delete extraDataObj.tijdlijn;
+    values.extraData = extraDataObj as typeof values.extraData;
 
     onFormSubmit(values)
       .then(() => {
@@ -886,6 +946,217 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 );
               }}
             />
+          </div>
+          <div className="col-span-full">
+            <h3 className="text-lg font-bold mb-2">Timeline</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="border rounded p-4 bg-gray-50">
+                <h4 className="font-semibold mb-2">
+                  Items ({timelineItems.length})
+                </h4>
+                <div className="flex flex-col gap-1 max-h-60 overflow-y-auto">
+                  {timelineItems.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex items-center gap-2 p-2 border rounded cursor-pointer ${editingTlIndex === idx ? 'bg-blue-100 border-blue-400' : 'bg-white'}`}
+                      onClick={() => {
+                        setEditingTlIndex(idx);
+                        setTlTitle(item.title);
+                        setTlDate(item.date || '');
+                        setTlDescription(item.description);
+                        setTlActive(item.active);
+                        setTlHighlighted(item.highlighted || false);
+                        setTlLinks(item.links || []);
+                      }}>
+                      <span
+                        className={`w-3 h-3 rounded-full flex-shrink-0 ${item.active ? 'bg-green-500' : 'bg-gray-300'}`}></span>
+                      <span className="flex-1 text-sm font-medium truncate">
+                        {item.date
+                          ? new Date(item.date).toLocaleDateString('nl-NL', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            }) + ' - '
+                          : ''}
+                        {item.title}
+                      </span>
+                      <button
+                        type="button"
+                        className="text-red-500 text-xs flex-shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTimelineItems(
+                            timelineItems.filter((_, i) => i !== idx)
+                          );
+                          if (editingTlIndex === idx) setEditingTlIndex(null);
+                        }}>
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="border rounded p-4 bg-gray-50">
+                <h4 className="font-semibold mb-2">
+                  {editingTlIndex !== null ? 'Edit item' : 'New item'}
+                </h4>
+                <div className="flex flex-col gap-2">
+                  <input
+                    className="border rounded p-2"
+                    placeholder="Title"
+                    value={tlTitle}
+                    onChange={(e) => setTlTitle(e.target.value)}
+                  />
+                  <input
+                    className="border rounded p-2"
+                    type="date"
+                    value={tlDate}
+                    onChange={(e) => setTlDate(e.target.value)}
+                  />
+                  <input
+                    className="border rounded p-2"
+                    placeholder="Description"
+                    value={tlDescription}
+                    onChange={(e) => setTlDescription(e.target.value)}
+                  />
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={tlActive}
+                      onChange={(e) => setTlActive(e.target.checked)}
+                    />{' '}
+                    Active
+                  </label>
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={tlHighlighted}
+                      onChange={(e) => setTlHighlighted(e.target.checked)}
+                    />{' '}
+                    Highlighted
+                  </label>
+                  <div className="border-t pt-2 mt-1">
+                    <h5 className="text-sm font-semibold mb-1">
+                      Links ({tlLinks.length})
+                    </h5>
+                    {tlLinks.map((link, li) => (
+                      <div
+                        key={li}
+                        className="flex items-center gap-1 text-xs mb-1">
+                        <span className="flex-1 truncate">{link.title}</span>
+                        <button
+                          type="button"
+                          className="text-red-500"
+                          onClick={() =>
+                            setTlLinks(tlLinks.filter((_, i) => i !== li))
+                          }>
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                    <div className="flex gap-1 mt-1">
+                      <input
+                        className="border rounded p-1 text-xs flex-1"
+                        placeholder="Link title"
+                        value={tlLinkTitle}
+                        onChange={(e) => setTlLinkTitle(e.target.value)}
+                      />
+                      <input
+                        className="border rounded p-1 text-xs flex-1"
+                        placeholder="URL"
+                        value={tlLinkUrl}
+                        onChange={(e) => setTlLinkUrl(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className="bg-gray-200 px-2 py-1 rounded text-xs"
+                        onClick={() => {
+                          if (!tlLinkTitle || !tlLinkUrl) return;
+                          setTlLinks([
+                            ...tlLinks,
+                            {
+                              title: tlLinkTitle,
+                              url: tlLinkUrl,
+                              openInNewWindow: tlLinkNewWindow,
+                            },
+                          ]);
+                          setTlLinkTitle('');
+                          setTlLinkUrl('');
+                        }}>
+                        +
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      type="button"
+                      className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+                      onClick={() => {
+                        if (!tlTitle) return;
+                        // If user typed a link but didn't click "+", auto-append so it isn't silently lost.
+                        const pendingLinks =
+                          tlLinkTitle && tlLinkUrl
+                            ? [
+                                ...tlLinks,
+                                {
+                                  title: tlLinkTitle,
+                                  url: tlLinkUrl,
+                                  openInNewWindow: tlLinkNewWindow,
+                                },
+                              ]
+                            : tlLinks;
+                        const item: TimelineItem = {
+                          trigger:
+                            editingTlIndex !== null
+                              ? timelineItems[editingTlIndex].trigger
+                              : String(timelineItems.length),
+                          date: tlDate || undefined,
+                          title: tlTitle,
+                          description: tlDescription,
+                          active: tlActive,
+                          highlighted: tlHighlighted,
+                          links: pendingLinks,
+                        };
+                        setTimelineItems((prev) =>
+                          editingTlIndex !== null
+                            ? prev.map((it, i) =>
+                                i === editingTlIndex ? item : it
+                              )
+                            : [...prev, item]
+                        );
+                        setEditingTlIndex(null);
+                        setTlTitle('');
+                        setTlDate('');
+                        setTlDescription('');
+                        setTlActive(true);
+                        setTlHighlighted(false);
+                        setTlLinks([]);
+                        setTlLinkTitle('');
+                        setTlLinkUrl('');
+                        setTlLinkNewWindow(false);
+                      }}>
+                      {editingTlIndex !== null ? 'Update' : 'Add'}
+                    </button>
+                    {editingTlIndex !== null && (
+                      <button
+                        type="button"
+                        className="bg-gray-300 px-3 py-1 rounded text-sm"
+                        onClick={() => {
+                          setEditingTlIndex(null);
+                          setTlTitle('');
+                          setTlDate('');
+                          setTlDescription('');
+                          setTlActive(true);
+                          setTlHighlighted(false);
+                          setTlLinks([]);
+                        }}>
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="col-span-full lg:col-span-1">

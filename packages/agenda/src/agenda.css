@@ -154,3 +154,27 @@
   > :nth-last-child(1 of .osc-agenda-item)::after {
   content: none;
 }
+
+.osc-agenda-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.osc-agenda-date {
+  font-weight: 700;
+  display: inline;
+  font-size: inherit;
+  font-family: inherit;
+  line-height: inherit;
+  margin: 0;
+}
+
+.osc-agenda-content .utrecht-heading-4 {
+  display: inline;
+  margin: 0;
+}
+
+.osc-agenda-title-row .osc-agenda-date {
+  font-size: var(--utrecht-heading-4-font-size, 1.125rem);
+}

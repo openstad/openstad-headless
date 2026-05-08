@@ -1,8 +1,9 @@
+//@ts-ignore D.type def missing, will disappear when datastore is ts
+import { Agenda } from '@openstad-headless/agenda/src/agenda';
 import {
   Comments,
   CommentsWidgetProps,
 } from '@openstad-headless/comments/src/comments';
-//@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 import { MapPropsType } from '@openstad-headless/leaflet-map/src/types';
@@ -61,7 +62,8 @@ type booleanProps = {
     | 'displayEditResourceButton'
     | 'displayDeleteButton'
     | 'displayDeleteEditButtonOnTop'
-    | 'displaySocials']: boolean | undefined;
+    | 'displaySocials'
+    | 'displayTimeline']: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = {
@@ -105,6 +107,21 @@ export type ResourceDetailWidgetProps = {
       ResourceDetailMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
+    items?: Array<{
+      trigger: string;
+      title?: string;
+      description: string;
+      active: boolean;
+      highlighted?: boolean;
+      activeFrom?: string;
+      activeTo?: string;
+      links?: Array<{
+        trigger: string;
+        title: string;
+        url: string;
+        openInNewWindow: boolean;
+      }>;
+    }>;
   };
 
 type DocumentType = {
@@ -144,6 +161,7 @@ function ResourceDetail({
   urlWithResourceFormForEditing = '',
   displayDeleteButton = true,
   displayDeleteEditButtonOnTop = false,
+  displayTimeline = false,
   selectedSocialShareOptions = [
     'facebook',
     'x',
@@ -187,6 +205,10 @@ function ResourceDetail({
   };
 
   if (!resource) return null;
+
+  // Timeline items
+  const timelineItems =
+    resource?.extraData?.timeline ?? resource?.extraData?.tijdlijn ?? [];
   const shouldHaveSideColumn =
     displayLikes ||
     displayTags ||
@@ -606,6 +628,14 @@ function ResourceDetail({
                     </div>
                   ))}
               </div>
+              {displayTimeline && timelineItems.length > 0 && (
+                <Agenda
+                  items={timelineItems}
+                  displayTitle={true}
+                  title="Timeline"
+                  {...props}
+                />
+              )}
               {displayLocation && resource.location && (
                 <>
                   <Heading level={2} appearance="utrecht-heading-2">

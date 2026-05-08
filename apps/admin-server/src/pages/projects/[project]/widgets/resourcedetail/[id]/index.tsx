@@ -82,6 +82,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="display">Weergave</TabsTrigger>
+              <TabsTrigger value="timeline">Timeline</TabsTrigger>
               <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="comments">Reacties widget</TabsTrigger>
               <TabsTrigger value="likes">Likes widget</TabsTrigger>
@@ -124,6 +125,36 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                     }
                   }}
                 />
+              )}
+            </TabsContent>
+
+            <TabsContent value="timeline" className="p-0">
+              {previewConfig && (
+                <div className="p-6 bg-white rounded-md">
+                  <h3 className="text-lg font-bold mb-4">Timeline</h3>
+                  <p className="text-sm text-gray-600 mb-4">
+                    Enable or disable the timeline section on the resource
+                    detail page. Timeline items are managed per resource in the
+                    resource form.
+                  </p>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={previewConfig?.displayTimeline || false}
+                      onChange={(e) => {
+                        updateConfig({
+                          ...widget.config,
+                          displayTimeline: e.target.checked,
+                        });
+                        updatePreview({
+                          ...previewConfig,
+                          displayTimeline: e.target.checked,
+                        });
+                      }}
+                    />
+                    <span>Show timeline</span>
+                  </label>
+                </div>
               )}
             </TabsContent>
 

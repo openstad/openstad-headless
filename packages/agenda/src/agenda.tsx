@@ -26,6 +26,7 @@ export type AgendaWidgetProps = BaseProps &
     useActiveDates?: boolean;
     items?: Array<{
       trigger: string;
+      date?: string;
       title?: string;
       description: string;
       active: boolean;
@@ -114,7 +115,19 @@ function Agenda({
           aria-current={item.active ? 'true' : undefined}>
           <div className="osc-date-circle"></div>
           <div className="osc-agenda-content">
-            <Heading4>{item.title}</Heading4>
+            <div className="osc-agenda-title-row">
+              {item.date && (
+                <span className="osc-agenda-date">
+                  {new Date(item.date).toLocaleDateString('nl-NL', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
+                  {item.title ? ' - ' : ''}
+                </span>
+              )}
+              <Heading4>{item.title}</Heading4>
+            </div>
             <Paragraph>{item.description}</Paragraph>
             {item.links && item.links?.length > 0 && (
               <LinkList className="osc-agenda-list">
