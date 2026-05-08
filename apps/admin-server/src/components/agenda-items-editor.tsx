@@ -14,7 +14,7 @@ import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Switch from '@radix-ui/react-switch';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -127,12 +127,6 @@ export function AgendaItemsEditor({
   onItemsChange,
   showActiveDates = false,
 }: AgendaItemsEditorProps) {
-  const idsAssigned = useRef(false);
-  if (!idsAssigned.current) {
-    idsAssigned.current = true;
-    items = items.map(withId) as AgendaItem[];
-  }
-
   const [links, setLinks] = useState<AgendaLink[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
