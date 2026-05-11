@@ -256,5 +256,5 @@ async function resetUserToken(user) {
   await user.update({
     idpUser,
   });
-  return {};
+  return user;
 }
