@@ -1320,7 +1320,7 @@ function ResourceOverviewInner({
     </section>
   );
   const validDialogList = dialogList.filter(
-    (r) => r && (r.id || r.uniqueId) // only real resources or projects
+    (r: any) => r && (r.id || r.uniqueId) // only real resources or projects
   );
   return tagsLoading ? (
     <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
