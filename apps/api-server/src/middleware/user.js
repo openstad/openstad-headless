@@ -141,7 +141,7 @@ async function getUserInstance({
         where = Object.assign(where, {
           [db.Sequelize.Op.or]: [
             {
-              role: 'admin',
+              role: { [db.Sequelize.Op.in]: ['admin', 'editor'] },
               projectId: config.admin.projectId,
             },
             {
