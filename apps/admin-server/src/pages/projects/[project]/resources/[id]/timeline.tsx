@@ -38,6 +38,7 @@ export default function ProjectResourceTimeline() {
       await update(Number.parseInt(id as string), {
         timeline: items,
       });
+      itemsInitialized.current = false;
       mutate();
       toast.success('Tijdlijn opgeslagen');
     } catch {
