@@ -247,9 +247,6 @@ exports.check2FA = (req, res, next) => {
 
   // check two factor is validated otherwise send to 2factor screen
   if (twoFactorRoles && twoFactorRoles.includes(userRole) && twoFactorValid) {
-    console.log(
-      `[2fa-check][${new Date().toISOString()}] PASSED userId=${req.user?.id} role=${userRole}`
-    );
     return next();
   } else if (
     twoFactorRoles &&
@@ -282,10 +279,6 @@ exports.checkRequiredUserFields = (req, res, next) => {
   const requiredFields = req.client.requiredUserFields;
   const user = req.user;
   let error;
-  console.log(
-    `[required-fields-check] userId=${user?.id} requiredFields=${JSON.stringify(requiredFields)}`
-  );
-
   if (requiredFields) {
     requiredFields.forEach((field) => {
       // Consent field is a special case since it can contain multiple client IDs
@@ -320,7 +313,7 @@ exports.checkRequiredUserFields = (req, res, next) => {
   // if error redirect to register
   if (error) {
     console.log(
-      `[required-fields-check] MISSING fields for userId=${user?.id}, redirecting to required-fields`
+      `[required-fields-check][${new Date().toISOString()}] MISSING fields for userId=${user?.id}, redirecting to required-fields`
     );
     res.redirect(
       `/auth/required-fields?clientId=${
@@ -328,9 +321,6 @@ exports.checkRequiredUserFields = (req, res, next) => {
       }&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
     );
   } else {
-    console.log(
-      `[required-fields-check][${new Date().toISOString()}] all fields OK for userId=${user?.id}`
-    );
     next();
   }
 };

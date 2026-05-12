@@ -34,10 +34,11 @@ module.exports = function (app) {
     var message = err.message || err.error;
     message = message && message.replace(/Validation error:?\s*/, '');
 
-    // Always log full error server-side
-    console.log(
-      `[api-error][${new Date().toISOString()}] ${status} ${req.method} ${req.originalUrl?.substring(0, 80)}: ${message}`
-    );
+    if (status >= 500) {
+      console.log(
+        `[api-error][${new Date().toISOString()}] ${status} ${req.method} ${req.originalUrl?.substring(0, 80)}: ${message}`
+      );
+    }
 
     if (shouldLogSubmitFailure(req, status)) {
       console.error(

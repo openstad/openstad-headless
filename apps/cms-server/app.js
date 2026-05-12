@@ -352,9 +352,6 @@ async function serveSite(req, res, siteConfig, forceRestart) {
       siteConfig.config.cms &&
       siteConfig.config.cms.redirectURI;
     if (redirectURI) {
-      console.log(
-        `[cms-routing][${new Date().toISOString()}] SITE_REDIRECT domain=${domain} redirectURI=${redirectURI}`
-      );
       return res.redirect(redirectURI);
     }
 
@@ -438,29 +435,9 @@ app.use('/:sitePrefix', function (req, res, next) {
     const originalUrl = req.url;
     req.url = req.url.replace(`/${req.params.sitePrefix}`, '');
 
-    if (
-      originalUrl.includes('openstadlogintoken') ||
-      originalUrl.includes('openstadlogout') ||
-      originalUrl.includes('/login') ||
-      originalUrl.includes('/idee/delen')
-    ) {
-      console.log(
-        `[cms-routing][${new Date().toISOString()}] SITE_MATCH sitePrefix=${req.params.sitePrefix} sessionUserId=${req.session?.openstadUser?.id || null} originalUrl=${originalUrl.substring(0, 150)} rewrittenUrl=${req.url.substring(0, 150)}`
-      );
-    }
-
     // Reinitialize route parameters, so the next middleware will see the correct parameters
     req.app._router.handle(req, res, next);
   } else {
-    if (
-      req.url.includes('openstadlogintoken') ||
-      req.url.includes('/login') ||
-      req.url.includes('/idee/delen')
-    ) {
-      console.log(
-        `[cms-routing][${new Date().toISOString()}] NO_SITE_MATCH domain=${domainAndPath} sessionUserId=${req.session?.openstadUser?.id || null} url=${req.url.substring(0, 150)}`
-      );
-    }
     next();
   }
 });
@@ -505,22 +482,23 @@ app.use('/:privileged(admin)?/login', function (req, res, next) {
   if (req.params.privileged) {
     query += `${query ? '&' : ''}loginPriviliged=1`;
   }
-  console.log(
-    `[cms-login][${new Date().toISOString()}] LOGIN_ROUTE originalUrl=${req.originalUrl} sitePrefix=${req.sitePrefix} sessionUserId=${req.session?.openstadUser?.id || null} referer=${req.headers?.referer?.substring(0, 120)} redirectingTo=${url}`
-  );
   return res.redirect(url && query ? url + '?' + query : url);
 });
 
 app.get('/auth/login', (req, res, next) => {
   let returnUrl = createReturnUrl(req, res);
-  console.log(
-    `[cms-login][${new Date().toISOString()}] AUTH_LOGIN_ROUTE sitePrefix=${req.sitePrefix} sessionUserId=${req.session?.openstadUser?.id || null} returnUrl=${returnUrl.substring(0, 120)} referer=${req.headers?.referer?.substring(0, 120)}`
-  );
   returnUrl = encodeURIComponent(returnUrl + '?openstadlogintoken=[[jwt]]');
 
   const domainAndPath =
     req.openstadDomain + (req.sitePrefix ? '/' + req.sitePrefix : '');
-  const project = projects[domainAndPath] ? projects[domainAndPath] : false;
+  const project = projects[domainAndPath];
+
+  if (!project) {
+    console.log(
+      `[cms-login][${new Date().toISOString()}] AUTH_LOGIN_ROUTE no project found for domain=${domainAndPath}`
+    );
+    return res.status(404).send('Project not found');
+  }
 
   const apiUrl = process.env.API_URL;
   let url = `${apiUrl}/auth/project/${project.id}/login?redirectUri=${returnUrl}`;
@@ -528,9 +506,6 @@ app.get('/auth/login', (req, res, next) => {
     ? url + '&loginPriviliged=1'
     : url + '&forceNewLogin=1'; // ;
 
-  console.log(
-    `[cms-login][${new Date().toISOString()}] REDIRECT_TO_API projectId=${project?.id} forceNewLogin=1 redirectUri=${decodeURIComponent(returnUrl).substring(0, 120)}`
-  );
   return res.redirect(url);
 });
 
@@ -553,7 +528,14 @@ app.get('/auth/logout', (req, res, next) => {
   const projectDomain = process.env.OVERWRITE_DOMAIN
     ? process.env.OVERWRITE_DOMAIN
     : req.openstadDomain + (req.sitePrefix ? '/' + req.sitePrefix : '');
-  const project = projects[projectDomain] ? projects[projectDomain] : false;
+  const project = projects[projectDomain];
+
+  if (!project) {
+    console.log(
+      `[cms-login][${new Date().toISOString()}] AUTH_LOGOUT_ROUTE no project found for domain=${projectDomain}`
+    );
+    return res.redirect('/');
+  }
 
   const apiUrl = process.env.API_URL;
   let url = `${apiUrl}/auth/project/${project.id}/logout?redirectUri=${returnUrl}`;

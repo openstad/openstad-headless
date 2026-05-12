@@ -75,9 +75,6 @@ exports.check = (req, res, next) => {
           }
         }
 
-        console.log(
-          `[auth-check][${new Date().toISOString()}] OK for userId=${user?.id} path=${req.originalUrl} hasClientAuth=${!!req.currentClientAuth}`
-        );
         return next();
       })
       .catch((err) => {

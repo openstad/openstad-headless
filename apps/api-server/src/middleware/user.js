@@ -45,14 +45,8 @@ module.exports = async function getUser(req, res, next) {
     });
 
     if (userId === null || typeof userId === 'undefined') {
-      console.log(
-        `[user-mw][${new Date().toISOString()}] no userId from JWT for ${req.method} ${req.path}`
-      );
       return nextWithEmptyUser(req, res, next);
     }
-    console.log(
-      `[user-mw] parsed JWT: userId=${userId} authProvider=${authProvider} path=${req.path}`
-    );
 
     let projectId = req.project && req.project.id;
 
@@ -70,7 +64,7 @@ module.exports = async function getUser(req, res, next) {
     return next();
   } catch (error) {
     console.log(
-      `[user-mw] error for ${req.method} ${req.path}: ${error?.message}`
+      `[user-mw][${new Date().toISOString()}] error for ${req.method} ${req.path}: ${error?.message}`
     );
     next(error);
   }
@@ -164,9 +158,6 @@ async function getUserInstance({
     }
 
     dbUser = await db.User.findOne({ where });
-    console.log(
-      `[auth-sync] user lookup: userId=${userId} projectId=${projectId} found=${!!dbUser} dbUserId=${dbUser?.id} dbRole=${dbUser?.role}`
-    );
 
     if (!dbUser && !isFixed && projectId) {
       let adminUser = await db.User.findOne({
@@ -188,6 +179,11 @@ async function getUserInstance({
           },
           order: [['id', 'ASC']],
         });
+        if (dbUser) {
+          console.log(
+            `[auth-sync][${new Date().toISOString()}] cross-project lookup: resolved userId=${userId} to dbUserId=${dbUser.id} on projectId=${projectId}`
+          );
+        }
       }
     }
 
@@ -198,9 +194,6 @@ async function getUserInstance({
     }
 
     if (!dbUser || !dbUser.idpUser || !dbUser.idpUser.accesstoken) {
-      console.log(
-        `[auth-sync] skipping for userId=${userId} projectId=${projectId}: dbUser=${!!dbUser} idpUser=${!!dbUser?.idpUser} accesstoken=${!!dbUser?.idpUser?.accesstoken}`
-      );
       return dbUser;
     }
   } catch (err) {
@@ -271,5 +264,8 @@ async function resetUserToken(user) {
   await user.update({
     idpUser,
   });
+  console.log(
+    `[auth-sync][${new Date().toISOString()}] token reset for userId=${user.id} projectId=${user.projectId}`
+  );
   return user;
 }

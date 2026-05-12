@@ -114,12 +114,6 @@ module.exports = {
                 `error saving session: ${saveErr?.message}`,
                 req
               );
-            } else {
-              authLog(
-                'SESSION_SAVED',
-                `session saved OK, redirecting to: ${returnTo}`,
-                req
-              );
             }
             res.redirect(returnTo);
           });
@@ -164,12 +158,6 @@ module.exports = {
                 req.data.hasModeratorRights = true;
               }
 
-              authLog(
-                'SET_USER_DATA',
-                `loggedIn=${req.data.loggedIn} userId=${user?.id} role=${user?.role}`,
-                req
-              );
-
               req.session.save(() => {
                 return next();
               });
@@ -188,15 +176,9 @@ module.exports = {
               req.session.openstadUser &&
               date - dateToCheck < THIRTY_SECONDS
             ) {
-              authLog(
-                'CACHED',
-                `using cached data (${Math.round((date - dateToCheck) / 1000)}s ago), cachedUserId=${req.session.openstadUser?.id} cachedRole=${req.session.openstadUser?.role} aposUser=${req.user?.email}`,
-                req
-              );
               setUserData(req, next);
             } else {
               try {
-                authLog('FETCH_ME', `calling ${url}`, req);
                 let response = await fetch(url, {
                   headers: {
                     Accept: 'application/json',
@@ -216,22 +198,12 @@ module.exports = {
                 }
 
                 let user = await response.json();
-                authLog(
-                  'FETCH_ME_RESPONSE',
-                  `id=${user?.id} role=${user?.role} keys=${Object.keys(user || {}).length}`,
-                  req
-                );
 
                 if (user && Object.keys(user).length > 0 && user.id) {
                   req.session.openstadUser = user;
                   req.session.openStadlastJWTCheck = new Date().getTime();
 
                   req.session.save(() => {
-                    authLog(
-                      'AUTHENTICATED',
-                      `userId=${user?.id} role=${user?.role}`,
-                      req
-                    );
                     setUserData(req, next);
                   });
                 } else {
@@ -285,12 +257,6 @@ module.exports = {
         if (req.user && req.user.email === email) {
           return next();
         }
-
-        authLog(
-          'APOS_AUTH',
-          `logging in apos user: email=${email} role=${groupName}`,
-          req
-        );
 
         if (self.apos && self.apos.user) {
           let aposUser;
@@ -361,11 +327,6 @@ module.exports = {
               req.session.openstadUser = bak.openstadUser;
               req.session.openstadLoginToken = bak.openstadLoginToken;
               req.session.openstadLastJWTCheck = bak.openstadLastJWTCheck;
-              authLog(
-                'APOS_LOGGED_IN',
-                `apos login complete, redirecting to ${req.url}`,
-                req
-              );
               res.redirect(req.url);
             });
           } catch (e) {
@@ -381,7 +342,6 @@ module.exports = {
       get: {
         // GET /api/v1/openstad-auth/logout
         async logout(req, res) {
-          authLog('CMS_LOGOUT_ROUTE', `logout route hit`, req);
           // If there is no session we can redirect back safely
           if (!req.session) {
             return res.redirect('/');

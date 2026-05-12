@@ -25,9 +25,6 @@ exports.info = (req, res) => {
   // and used in access control checks.  For illustrative purposes, this
   // example simply returns the scope in the response.
 
-  console.log(
-    `[userinfo][${new Date().toISOString()}] returning info for authUserId=${req.user?.id} role=${req.currentClientRole || req.user?.role} clientId=${req?.client?.id}`
-  );
   // todo: ik denk dat hier de default role moet komen
   res.json({
     user_id: req.user.id,

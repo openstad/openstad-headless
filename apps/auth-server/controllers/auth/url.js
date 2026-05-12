@@ -313,10 +313,6 @@ exports.postAuthenticate = (req, res, next) => {
       logAuthEvent(req, 'login', {
         data: { method: 'url' },
       });
-      console.log(
-        `[url-auth] login success for userId=${user.id} clientId=${req.client?.clientId}`
-      );
-
       const upgradeAnonymousRole = () => {
         const defaultRoleId = parseInt(
           req.client.config?.defaultRoleId || authUrlConfig.defaultRoleId,
@@ -327,7 +323,11 @@ exports.postAuthenticate = (req, res, next) => {
           where: { clientId: req.client.id, userId: user.id },
         }).then((userRole) => {
           if (userRole && parseInt(userRole.roleId, 10) === anonymousRoleId) {
-            return userRole.update({ roleId: defaultRoleId });
+            return userRole.update({ roleId: defaultRoleId }).then(() => {
+              console.log(
+                `[url-auth][${new Date().toISOString()}] role upgraded from anonymous to ${defaultRoleId} for userId=${user.id} clientId=${req.client.id}`
+              );
+            });
           }
         });
       };
@@ -335,7 +335,7 @@ exports.postAuthenticate = (req, res, next) => {
       upgradeAnonymousRole()
         .catch((err) => {
           console.log(
-            `[url-auth] role upgrade failed for userId=${user.id} clientId=${req.client.id}: ${err?.message}`
+            `[url-auth][${new Date().toISOString()}] role upgrade failed for userId=${user.id} clientId=${req.client.id}: ${err?.message}`
           );
         })
         .then(() =>
@@ -347,14 +347,11 @@ exports.postAuthenticate = (req, res, next) => {
         .then(() => clientAuth.saveSession(req.session))
         .then(() => authService.logSuccessFullLogin(req))
         .then(() => {
-          console.log(
-            `[url-auth][${new Date().toISOString()}] session saved, redirecting to authorize`
-          );
           redirectToAuthorisation();
         })
         .catch((err) => {
           console.log(
-            `[url-auth] session init/save error: ${err?.message}, redirecting anyway`
+            `[url-auth][${new Date().toISOString()}] session init/save error: ${err?.message}, redirecting anyway`
           );
           redirectToAuthorisation();
         });

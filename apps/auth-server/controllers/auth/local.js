@@ -197,10 +197,6 @@ exports.logout = async (req, res) => {
     console.log(
       `[logout][${new Date().toISOString()}] destroyed ${count} access token(s) for userID=${userId} clientID=${clientId}`
     );
-  } else {
-    console.log(
-      `[logout][${new Date().toISOString()}] skipped token destroy: userID=${userId} clientID=${clientId}`
-    );
   }
 
   await req.session.destroy();

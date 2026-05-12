@@ -81,9 +81,6 @@ exports.save = (token, expirationDate, userID, clientID, scope) => {
       scope,
     })
       .then((token) => {
-        console.log(
-          `[access-token] created: jti=${id} userID=${userID} clientID=${clientID} expiresAt=${expirationDate}`
-        );
         if (!token) {
           resolve(undefined);
         }

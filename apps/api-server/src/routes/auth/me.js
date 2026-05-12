@@ -13,9 +13,6 @@ router.route('(/project/:projectId)?/me').get(async function (req, res, next) {
     );
     return res.json({});
   }
-  console.log(
-    `[/me][${new Date().toISOString()}] OK userId=${req.user.id} role=${req.user.role} projectId=${req.params.projectId}`
-  );
 
   let userNickName = '';
 
@@ -40,7 +37,7 @@ router.route('(/project/:projectId)?/me').get(async function (req, res, next) {
     complete: req.user.complete,
     idpUser: hasRole(req.user, 'admin')
       ? req.user.idpUser
-      : { provider: req.user.idpUser.provider },
+      : { provider: req.user.idpUser?.provider },
     role: req.user.role,
     email: req.user.email,
     name: req.user.name,
