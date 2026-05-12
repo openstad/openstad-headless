@@ -161,7 +161,12 @@ async function getUserInstance({
       let adminUser = await db.User.findOne({
         where: { id: userId, projectId: config.admin.projectId },
       });
-      if (adminUser && adminUser.idpUser && adminUser.idpUser.identifier) {
+      if (
+        adminUser &&
+        adminUser.idpUser &&
+        adminUser.idpUser.identifier &&
+        adminUser.idpUser.provider
+      ) {
         dbUser = await db.User.findOne({
           where: {
             idpUser: {
