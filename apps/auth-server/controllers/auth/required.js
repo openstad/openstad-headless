@@ -8,6 +8,8 @@ exports.index = (req, res, next) => {
   });
 
   requiredUserFields = requiredUserFields.filter((field) => {
+    if (!field) return false;
+
     // Consent field is a special case since it can contain multiple client IDs
     if (field?.key === 'emailNotificationConsent') {
       const clientId = String(req?.client?.id);

@@ -66,7 +66,9 @@ service.fetchUserData = async function fetchUserData({
       headers,
     });
     if (!response.ok) {
-      throw new Error('Fetch failed');
+      const error = new Error('Auth server request failed');
+      error.status = response.status;
+      throw error;
     }
 
     let userData;
@@ -91,6 +93,14 @@ service.fetchUserData = async function fetchUserData({
     mappedUserData.idpUser.provider = authConfig.provider;
     return mappedUserData;
   } catch (err) {
+    if (err?.status === 401 || err?.status === 403) {
+      throw new Error('Auth server rejected access token');
+    }
+
+    if (err?.status === 404) {
+      throw new Error('Auth server user lookup returned 404');
+    }
+
     throw new Error('Cannot connect to auth server');
   }
 };
@@ -296,8 +306,8 @@ service.createClient = async function ({ authConfig, project }) {
     if (!Array.isArray(authTypes)) authTypes = [authTypes];
     let twoFactorRoles =
       authConfig.twoFactorRoles ||
-      (authConfig.provider == 'openstad' && ['admin']);
-    if (!Array.isArray(twoFactorRoles)) twoFactorRoles = [authTypes];
+      (authConfig.provider == 'openstad' && ['admin', 'moderator', 'editor']);
+    if (!Array.isArray(twoFactorRoles)) twoFactorRoles = [twoFactorRoles];
     let requiredUserFields =
       authConfig.requiredUserFields ||
       (authConfig.provider == 'openstad' && 'name') ||

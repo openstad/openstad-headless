@@ -26,6 +26,7 @@ export function Sidenav({
   const router = useRouter();
   const [location, setLocation] = useState('');
   const sessionData = useContext(SessionContext);
+  const adminRole = sessionData?.adminRole || sessionData?.role;
 
   useEffect(() => {
     setLocation(router.pathname);
@@ -66,7 +67,7 @@ export function Sidenav({
             {narrow ? '' : 'Projecten'}
           </Button>
         </Link>
-        {sessionData?.role == 'superuser' ? (
+        {adminRole == 'superuser' ? (
           <Link href="/users">
             <Button
               variant={location.startsWith('/users') ? 'secondary' : 'ghost'}
@@ -86,7 +87,7 @@ export function Sidenav({
             </Button>
           </Link>
         ) : null}
-        {sessionData?.role == 'superuser' ? (
+        {adminRole == 'superuser' ? (
           <Link href="/issues">
             <Button
               variant={location.startsWith('/issues') ? 'secondary' : 'ghost'}
@@ -106,7 +107,7 @@ export function Sidenav({
             </Button>
           </Link>
         ) : null}
-        {sessionData?.role == 'superuser' ? (
+        {adminRole == 'superuser' ? (
           <Link href="/settings">
             <Button
               variant={location.startsWith('/settings') ? 'secondary' : 'ghost'}

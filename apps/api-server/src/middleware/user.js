@@ -214,7 +214,13 @@ async function getUserInstance({
 
     return mergedUser;
   } catch (err) {
-    console.log(err);
+    if (err?.message === 'Auth server rejected access token') {
+      console.log(
+        `[auth-sync] resetting stale access token for userId=${dbUser?.id || 'unknown'} projectId=${dbUser?.projectId || 'unknown'}`
+      );
+    } else {
+      console.log(err);
+    }
     return await resetUserToken(dbUser);
   }
 }

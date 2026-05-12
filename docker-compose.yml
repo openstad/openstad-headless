@@ -147,6 +147,7 @@ services:
       - SPAM_FILTER_ENABLED=${SPAM_FILTER_ENABLED:-false}
       - PDF_API_ENDPOINT=${PDF_API_ENDPOINT}
       - PDF_API_KEY=${PDF_API_KEY}
+      - SESSION_EXPIRE_ON_CLOSE=${SESSION_EXPIRE_ON_CLOSE:-false}
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:
@@ -232,6 +233,7 @@ services:
       - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-openstad-auth-server}
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://openstad-otel-collector:4317}
       - OTEL_ENABLED=${OTEL_ENABLED_AUTH:-false}
+      - SESSION_EXPIRE_ON_CLOSE=${SESSION_EXPIRE_ON_CLOSE:-false}
     ports:
       - '${AUTH_PORT}:${AUTH_PORT}'
     volumes:
