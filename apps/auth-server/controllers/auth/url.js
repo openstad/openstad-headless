@@ -13,6 +13,7 @@ const authUrlConfig = require('../../config/auth').get('Url');
 const clientAuth = require('../../utils/clientAuth');
 const interpolate = require('../../utils/interpolate');
 const { logAuthEvent } = require('../../middleware/auditLog');
+const anonymousRoleId = parseInt(process.env.ANONYMOUS_ROLE_ID, 10) || 3;
 
 const setNoCachHeadersMw = (req, res, next) => {
   res.setHeader('Surrogate-Control', 'no-store');
@@ -315,11 +316,34 @@ exports.postAuthenticate = (req, res, next) => {
       console.log(
         `[url-auth] login success for userId=${user.id} clientId=${req.client?.clientId}`
       );
-      clientAuth
-        .initializeClientAuth(req.session, req.client, user, {
-          authType,
-          twoFactorValid: false,
+
+      const upgradeAnonymousRole = () => {
+        const defaultRoleId = parseInt(
+          req.client.config?.defaultRoleId || authUrlConfig.defaultRoleId,
+          10
+        );
+        if (isNaN(defaultRoleId)) return Promise.resolve();
+        return db.UserRole.findOne({
+          where: { clientId: req.client.id, userId: user.id },
+        }).then((userRole) => {
+          if (userRole && parseInt(userRole.roleId, 10) === anonymousRoleId) {
+            return userRole.update({ roleId: defaultRoleId });
+          }
+        });
+      };
+
+      upgradeAnonymousRole()
+        .catch((err) => {
+          console.log(
+            `[url-auth] role upgrade failed for userId=${user.id} clientId=${req.client.id}: ${err?.message}`
+          );
         })
+        .then(() =>
+          clientAuth.initializeClientAuth(req.session, req.client, user, {
+            authType,
+            twoFactorValid: false,
+          })
+        )
         .then(() => clientAuth.saveSession(req.session))
         .then(() => authService.logSuccessFullLogin(req))
         .then(() => {

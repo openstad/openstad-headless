@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import { useMemo } from 'react';
 import useSWR from 'swr';
 
 export type CommentListOptions = {
@@ -54,7 +55,10 @@ export default function useComments(
 
   const commentListSwr = useSWR(projectNumber ? url : null);
 
-  const records = commentListSwr.data?.records || commentListSwr.data || [];
+  const records = useMemo(
+    () => commentListSwr.data?.records || commentListSwr.data || [],
+    [commentListSwr.data]
+  );
   const pagination = commentListSwr.data?.metadata || null;
 
   async function removeComment(id: number, multiple?: boolean, ids?: number[]) {

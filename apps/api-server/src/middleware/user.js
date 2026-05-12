@@ -168,6 +168,29 @@ async function getUserInstance({
       `[auth-sync] user lookup: userId=${userId} projectId=${projectId} found=${!!dbUser} dbUserId=${dbUser?.id} dbRole=${dbUser?.role}`
     );
 
+    if (!dbUser && !isFixed && projectId) {
+      let adminUser = await db.User.findOne({
+        where: { id: userId, projectId: config.admin.projectId },
+      });
+      if (
+        adminUser &&
+        adminUser.idpUser &&
+        adminUser.idpUser.identifier &&
+        adminUser.idpUser.provider
+      ) {
+        dbUser = await db.User.findOne({
+          where: {
+            idpUser: {
+              identifier: adminUser.idpUser.identifier,
+              provider: adminUser.idpUser.provider,
+            },
+            projectId: projectId,
+          },
+          order: [['id', 'ASC']],
+        });
+      }
+    }
+
     if (isFixed) {
       if (!dbUser.projectId || dbUser.projectId == config.admin.projectId)
         dbUser.role = 'superuser'; // !dbUser.projectId is backwards compatibility
@@ -248,5 +271,5 @@ async function resetUserToken(user) {
   await user.update({
     idpUser,
   });
-  return {};
+  return user;
 }

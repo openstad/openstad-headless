@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import { useMemo } from 'react';
 import useSWR from 'swr';
 
 export type ResourceListOptions = {
@@ -55,7 +56,10 @@ export default function useResources(
 
   const resourcesListSwr = useSWR(!skipFetch && projectNumber ? url : null);
 
-  const records = resourcesListSwr.data?.records || resourcesListSwr.data || [];
+  const records = useMemo(
+    () => resourcesListSwr.data?.records || resourcesListSwr.data || [],
+    [resourcesListSwr.data]
+  );
   const pagination = resourcesListSwr.data?.metadata || null;
 
   function getExistingRecords(): any[] {
