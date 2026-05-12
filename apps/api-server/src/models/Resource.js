@@ -1233,7 +1233,9 @@ module.exports = function (db, sequelize, DataTypes) {
         }
 
         moderatorOnlyExtraDataKeys.forEach((key) => {
-          delete data.extraData[key];
+          if (!alwaysPublicExtraDataKeys.includes(key)) {
+            delete data.extraData[key];
+          }
         });
       }
 
