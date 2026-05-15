@@ -33,8 +33,23 @@ module.exports = {
         try {
           return await _super(req, item);
         } catch (e) {
+          console.error(
+            `[park-slug-fix] Caught error in implementParkOne for "${item.parkedId}":`,
+            JSON.stringify({
+              code: e.code,
+              keyPattern: e.keyPattern,
+              keyValue: e.keyValue,
+              isUniqueError:
+                typeof self.apos.doc.isUniqueError === 'function'
+                  ? self.apos.doc.isUniqueError(e)
+                  : 'method missing',
+            })
+          );
+
           if (
-            !self.apos.doc.isUniqueError(e) ||
+            (typeof self.apos.doc.isUniqueError === 'function'
+              ? !self.apos.doc.isUniqueError(e)
+              : e.code !== 11000) ||
             !e.keyPattern?.slug ||
             !e.keyPattern?.aposLocale
           ) {
@@ -44,16 +59,21 @@ module.exports = {
           const conflictSlug = e.keyValue?.slug;
           const conflictLocale = e.keyValue?.aposLocale;
 
-          const parked = await self.apos.doc.db.findOne({
-            parkedId: item.parkedId,
-            aposLocale: conflictLocale,
-          });
-
           const conflict = await self.apos.doc.db.findOne({
             slug: conflictSlug,
             aposLocale: conflictLocale,
-            _id: { $ne: parked?._id },
           });
+
+          console.error(
+            `[park-slug-fix] Conflict lookup result:`,
+            JSON.stringify({
+              conflictSlug,
+              conflictLocale,
+              foundId: conflict?._id,
+              foundSlug: conflict?.slug,
+              foundParkedId: conflict?.parkedId,
+            })
+          );
 
           if (!conflict) {
             throw e;
