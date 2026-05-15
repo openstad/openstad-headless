@@ -277,6 +277,7 @@ function DocumentMap({
     onlyIncludeTagIds: filteredTagsIdsString || undefined,
     search: search || '',
     refreshKey: refreshComments,
+    sort: sort || 'createdAt_asc',
   };
 
   const { data: comments } = datastore.useComments(useCommentsData);
@@ -629,6 +630,7 @@ function DocumentMap({
   const [overridePage, setoverridePage] = useState<number | undefined>(
     undefined
   );
+  const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isScrollable = function (ele: HTMLElement) {
     const hasScrollableContent = ele.scrollHeight > ele.clientHeight;
@@ -639,29 +641,35 @@ function DocumentMap({
   };
 
   const scrollToComment = (index: number) => {
+    if (scrollIntervalRef.current) {
+      clearInterval(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
+    }
+
     let attempts = 0;
     const maxAttempts = 10;
     const interval = 100;
+
+    if (displayPagination) {
+      const currentComment = filteredComments?.findIndex(
+        (comment: any) => parseInt(comment.id) === index
+      );
+      if (typeof currentComment === 'number' && currentComment >= 0) {
+        const commentPage = Math.floor(currentComment / itemsPerPage);
+        setoverridePage(undefined);
+        requestAnimationFrame(() => setoverridePage(commentPage));
+      }
+    }
 
     const tryScrollToComment = () => {
       const getAllComments = Array.from(
         document.getElementsByClassName('comment-item')
       );
-      getAllComments.forEach((comment, i) => {
-        if (i !== index) {
+      getAllComments.forEach((comment) => {
+        if (comment.id !== `comment-${index}`) {
           comment.classList.remove('selected');
         }
       });
-
-      if (displayPagination) {
-        const currentComment = filteredComments?.findIndex(
-          (comment: any) => parseInt(comment.id) === index
-        );
-        if (typeof currentComment === 'number' && currentComment >= 0) {
-          const commentPage = Math.floor(currentComment / itemsPerPage);
-          setoverridePage(commentPage);
-        }
-      }
 
       const commentElement = document.getElementById(`comment-${index}`);
       if (commentElement) {
@@ -672,7 +680,7 @@ function DocumentMap({
         const commentEl = commentElement as HTMLElement;
         const containerEl = containerElement as HTMLElement;
 
-        if (commentElement && containerElement) {
+        if (containerElement) {
           const commentRect = commentEl.getBoundingClientRect();
           const scrollTop =
             window.pageYOffset || document.documentElement.scrollTop;
@@ -691,17 +699,23 @@ function DocumentMap({
               behavior: 'smooth',
             });
           }
-
-          commentEl.classList.add('selected');
-          clearInterval(intervalId);
-        } else if (attempts < maxAttempts) {
-          attempts++;
-        } else {
-          clearInterval(intervalId);
         }
+
+        commentEl.classList.add('selected');
+        if (scrollIntervalRef.current) {
+          clearInterval(scrollIntervalRef.current);
+          scrollIntervalRef.current = null;
+        }
+        return;
+      }
+
+      attempts++;
+      if (attempts >= maxAttempts && scrollIntervalRef.current) {
+        clearInterval(scrollIntervalRef.current);
+        scrollIntervalRef.current = null;
       }
     };
-    const intervalId = setInterval(tryScrollToComment, interval);
+    scrollIntervalRef.current = setInterval(tryScrollToComment, interval);
   };
 
   const MarkerWithId: React.FC<ExtendedMarkerProps> = ({
@@ -1496,6 +1510,7 @@ function DocumentMap({
               displayPagination={displayPagination}
               onGoToLastPage={setGoToLastPage}
               overridePage={overridePage}
+              onOverridePageConsumed={() => setoverridePage(undefined)}
               overrideSort={sort}
               searchTerm={search}
             />
