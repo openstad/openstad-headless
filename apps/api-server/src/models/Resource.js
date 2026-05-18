@@ -1111,6 +1111,8 @@ module.exports = function (db, sequelize, DataTypes) {
     // canEditAfterFirstLikeOrComment is handled in the validate hook
   };
 
+  const alwaysPublicExtraDataKeys = ['originalId', 'ranking'];
+
   let canViewModeratorOnlyExtraData = function (user, self) {
     return userHasRole(user, 'moderator', self.userId);
   };
@@ -1214,16 +1216,26 @@ module.exports = function (db, sequelize, DataTypes) {
       ) {
         if (hasResourceFormConfig) {
           Object.keys(data.extraData).forEach((key) => {
-            if (!resourceFormFieldKeys.includes(key)) {
+            if (
+              !resourceFormFieldKeys.includes(key) &&
+              !alwaysPublicExtraDataKeys.includes(key)
+            ) {
               delete data.extraData[key];
             }
           });
         } else {
-          data.extraData = {};
+          const preserved = {};
+          alwaysPublicExtraDataKeys.forEach((key) => {
+            if (data.extraData[key] !== undefined)
+              preserved[key] = data.extraData[key];
+          });
+          data.extraData = preserved;
         }
 
         moderatorOnlyExtraDataKeys.forEach((key) => {
-          delete data.extraData[key];
+          if (!alwaysPublicExtraDataKeys.includes(key)) {
+            delete data.extraData[key];
+          }
         });
       }
 

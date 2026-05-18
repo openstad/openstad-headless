@@ -5,8 +5,9 @@ import {
 import { Button } from '@/components/ui/button';
 import useResource from '@/hooks/use-resource';
 import useResources from '@/hooks/use-resources';
+import { withId } from '@/lib/widget-item-helpers';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 export default function ProjectResourceTimeline() {
@@ -23,9 +24,11 @@ export default function ProjectResourceTimeline() {
 
   const [items, setItems] = useState<AgendaItem[]>([]);
 
+  const itemsInitialized = React.useRef(false);
   useEffect(() => {
-    if (!resource) return;
-    setItems(resource?.timeline ?? []);
+    if (!resource || itemsInitialized.current) return;
+    itemsInitialized.current = true;
+    setItems((resource?.timeline ?? []).map(withId) as AgendaItem[]);
   }, [resource?.id]);
 
   async function handleSave() {
@@ -35,6 +38,7 @@ export default function ProjectResourceTimeline() {
       await update(Number.parseInt(id as string), {
         timeline: items,
       });
+      itemsInitialized.current = false;
       mutate();
       toast.success('Tijdlijn opgeslagen');
     } catch {

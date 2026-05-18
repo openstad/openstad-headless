@@ -200,7 +200,10 @@ export default function WidgetEnqueteItems(
   type FormData = z.infer<typeof formSchema>;
   const [items, setItems] = useState<Item[]>([]);
   const [options, setOptions] = useState<Option[]>([]);
-  const [selectedItem, setItem] = useState<Item | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const selectedItem = selectedItemId
+    ? items.find((i) => i.id === selectedItemId) || null
+    : null;
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
   const [file, setFile] = useState<File>();
@@ -232,10 +235,12 @@ export default function WidgetEnqueteItems(
       }
       const hasTriggerChanges = Object.keys(triggerMap).length > 0;
 
+      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+
       setItems((currentItems) =>
         currentItems.map((item) => {
           if (item.id === selectedItem.id) {
-            return { ...item, ...values };
+            return { ...item, ...valuesWithoutTrigger };
           }
           if (
             hasTriggerChanges &&
@@ -254,7 +259,7 @@ export default function WidgetEnqueteItems(
           return item;
         })
       );
-      setItem(null);
+      setSelectedItemId(null);
     } else {
       setItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
@@ -712,14 +717,17 @@ export default function WidgetEnqueteItems(
 
     if (selectedItem) {
       const values = form.getValues();
-      if (values?.options) {
-        values.options = options;
+      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+      if (valuesWithoutTrigger?.options) {
+        valuesWithoutTrigger.options = options;
       }
-      if (values?.matrix) {
-        values.matrix = matrixOptions;
+      if (valuesWithoutTrigger?.matrix) {
+        valuesWithoutTrigger.matrix = matrixOptions;
       }
       itemsToSave = itemsToSave.map((item) =>
-        item.id === selectedItem.id ? { ...item, ...values } : item
+        item.id === selectedItem.id
+          ? { ...item, ...valuesWithoutTrigger }
+          : item
       );
     }
 
@@ -734,7 +742,7 @@ export default function WidgetEnqueteItems(
 
     setItems(itemsToSave);
     props.updateConfig({ ...updatedProps, items: itemsToSave });
-    setItem(null);
+    setSelectedItemId(null);
     form.reset(defaults());
     setOptions([]);
     setMatrixOptions(matrixDefault);
@@ -773,7 +781,7 @@ export default function WidgetEnqueteItems(
     form.reset(defaults());
     setOptions([]);
     setMatrixOptions(matrixDefault);
-    setItem(null);
+    setSelectedItemId(null);
   }
 
   function handleSaveOptions() {
@@ -876,7 +884,7 @@ export default function WidgetEnqueteItems(
                               onClick={() => {
                                 if (selectedItem?.id === item.id) return;
                                 form.reset(buildFormValues(item));
-                                setItem(item);
+                                setSelectedItemId(item.id ?? null);
                                 setOptions((item.options || []).map(withId));
                                 setMatrixOptions({
                                   ...(item.matrix || matrixDefault),

@@ -59,6 +59,7 @@ export type CommentsWidgetProps = BaseProps &
     setRefreshComments?: React.Dispatch<any>;
     itemsPerPage?: number;
     overridePage?: number;
+    onOverridePageConsumed?: () => void;
     displayPagination?: boolean;
     displaySearchBar?: boolean;
     extraReplyButton?: boolean;
@@ -101,7 +102,8 @@ function CommentsInner({
   displayPagination = false,
   displaySearchBar = false,
   extraReplyButton = false,
-  overridePage = 0,
+  overridePage,
+  onOverridePageConsumed,
   setRefreshComments: parentSetRefreshComments = () => {}, // parent setter as fallback
   defaultTags,
   includeOrExclude = 'include',
@@ -200,8 +202,11 @@ function CommentsInner({
   }, [onGoToLastPage, goToLastPage]);
 
   useEffect(() => {
-    if (overridePage !== page) {
+    if (overridePage != null && overridePage !== page) {
       setPage(overridePage);
+      if (onOverridePageConsumed) {
+        onOverridePageConsumed();
+      }
     }
   }, [overridePage]);
 
