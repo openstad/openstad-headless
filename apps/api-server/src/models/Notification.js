@@ -206,11 +206,7 @@ module.exports = (db, sequelize, DataTypes) => {
                 const resourceResult = await processResourceQA(instance, db);
                 htmlContent = resourceResult.htmlContent;
 
-                if (options?.sharedPdfAttachment !== undefined) {
-                  // Pre-built PDF supplied by notification-batch helper — use as-is.
-                  // sharedPdfAttachment is null when the toggle is off for this audience.
-                  pdfAttachment = options.sharedPdfAttachment;
-                } else if (
+                if (
                   resourceResult.questionsAndAnswers.length &&
                   shouldGeneratePdf(instance.type)
                 ) {
