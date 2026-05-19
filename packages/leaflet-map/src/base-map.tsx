@@ -620,25 +620,6 @@ const BaseMap = ({
     maxZoom,
   };
 
-  useEffect(() => {
-    document.documentElement.style.setProperty('--basemap-map-width', width);
-
-    const heightValue = height
-      ? height.match(/\d+(px|%|vh|vw|em|rem|ex|ch|vmin|vmax|cm|mm|in|pt|pc)$/)
-        ? height
-        : `${height}px`
-      : 'auto';
-
-    document.documentElement.style.setProperty(
-      '--basemap-map-height',
-      heightValue
-    );
-    document.documentElement.style.setProperty(
-      '--basemap-map-aspect-ratio',
-      height ? 'unset' : '16 / 9'
-    );
-  }, [width, height]);
-
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [containerReady, setContainerReady] = useState(false);
   const containerWrapperRef = useRef<HTMLDivElement>(null);
@@ -648,6 +629,24 @@ const BaseMap = ({
       setIsTouchDevice(true);
     }
   }, []);
+
+  useEffect(() => {
+    const el = containerWrapperRef.current;
+    if (!el) return;
+
+    const heightValue = height
+      ? height.match(/\d+(px|%|vh|vw|em|rem|ex|ch|vmin|vmax|cm|mm|in|pt|pc)$/)
+        ? height
+        : `${height}px`
+      : 'auto';
+
+    el.style.setProperty('--basemap-map-width', width);
+    el.style.setProperty('--basemap-map-height', heightValue);
+    el.style.setProperty(
+      '--basemap-map-aspect-ratio',
+      height ? 'unset' : '16 / 9'
+    );
+  }, [width, height]);
 
   useEffect(() => {
     const el = containerWrapperRef.current;
