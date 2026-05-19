@@ -213,9 +213,15 @@ module.exports = (db, sequelize, DataTypes) => {
                   const project = await db.Project.scope(
                     'includeEmailConfig'
                   ).findByPk(instance.projectId);
-                  if (
-                    project?.emailConfig?.notifications?.pdfAttachmentEnabled
-                  ) {
+                  const isAdminType = [
+                    'new published resource - admin update',
+                    'updated resource - admin update',
+                  ].includes(instance.type);
+                  const toggleEnabled = isAdminType
+                    ? project?.emailConfig?.notifications
+                        ?.pdfAttachmentAdminEnabled
+                    : project?.emailConfig?.notifications?.pdfAttachmentEnabled;
+                  if (toggleEnabled) {
                     pdfAttachment = await buildPdfAttachment(
                       instance,
                       resourceResult.questionsAndAnswers,
