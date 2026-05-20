@@ -225,6 +225,9 @@ spec:
           - name: BASE_DOMAIN
             value: {{ .Values.host.base }}
 
+          - name: GTM_ENVIRONMENT
+            value: {{ .Values.api.gtmEnvironment | quote }}
+
           - name: ADMIN_DOMAIN
             value: {{ template "openstad.admin.url" . }}
 
@@ -534,6 +537,9 @@ spec:
 
             - name: BASE_DOMAIN
               value: {{ .Values.host.base }}
+
+            - name: GTM_ENVIRONMENT
+              value: {{ .Values.api.gtmEnvironment | quote }}
 
             {{- if .Values.api.extraEnvVars }}
             {{- include "common.tplvalues.render" (dict "value" .Values.api.extraEnvVars "context" $) | nindent 12 }}
