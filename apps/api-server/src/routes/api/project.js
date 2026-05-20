@@ -1408,12 +1408,13 @@ router
     project
       .authorizeData(req.body, 'update')
       .update(updateBody)
-      .then((result) => {
+      .then(async (result) => {
         req.results = result;
-        return checkHostStatus({ id: result.id });
-      })
-      .then(async () => {
-        // Re-read so response includes hostStatus written by checkHostStatus
+        try {
+          await checkHostStatus({ id: result.id });
+        } catch (err) {
+          console.log('Ignore checkHostStatus error', err);
+        }
         const fresh = await db.Project.scope('includeConfig').findByPk(
           req.results.id
         );
@@ -1425,8 +1426,7 @@ router
         return null;
       })
       .catch((err) => {
-        console.log('Ignore checkHostStatus error', err);
-        next();
+        next(err);
         return null;
       });
   })
