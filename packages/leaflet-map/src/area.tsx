@@ -146,7 +146,11 @@ export function Area({
   showHiddenPolygonsForAdmin = false,
   ...props
 }: BaseProps & AreaProps) {
-  const datastore = new DataStore({});
+  const datastore = new DataStore({
+    projectId: props.projectId,
+    api: props.api,
+    config: { api: props.api },
+  });
   const areaIds = areas?.map((item: { id: number }) => item.id);
   const { data: fetchedAreas } = datastore.useAreas(
     areaIds && areaIds.length > 0 ? { ids: areaIds } : undefined
