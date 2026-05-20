@@ -253,11 +253,17 @@ router.all('*', function (req, res, next) {
     req.query.projectIds = projectIds;
   }
 
+  if (
+    req?.query?.ids &&
+    (typeof req?.query?.ids === 'object' || typeof req?.query?.ids === 'string')
+  ) {
+    let ids = req.query.ids;
+    if (!Array.isArray(ids)) ids = [ids];
+    req.scope.push({ method: ['selectIds', ids] });
+    req.query.ids = ids;
+  }
+
   if (req.canIncludeVoteCount) req.scope.push('includeVoteCount');
-  // todo? volgens mij wordt dit niet meer gebruikt
-  // if (req.query.highlighted) {
-  //  	query = db.Resource.getHighlighted({ projectId: req.params.projectId })
-  // }
 
   return next();
 });

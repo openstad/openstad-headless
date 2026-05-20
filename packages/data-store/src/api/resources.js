@@ -125,6 +125,16 @@ export default {
     return await this.fetch(url, { method, body });
   },
 
+  fetchByIds: async function ({ projectId }, ids) {
+    if (!Array.isArray(ids) || ids.length === 0) return [];
+    const params = new URLSearchParams();
+    ids.forEach((id) => params.append('ids', id));
+    params.append('noPagination', 'true');
+    let url = `/api/project/${projectId}/resource?includeTags=1&${params.toString()}`;
+    let result = await this.fetch(url);
+    return result?.records || result || [];
+  },
+
   submitLike: async function ({ projectId }, resources) {
     if (!Array.isArray(resources)) throw new Error('Resources is geen array');
     if (resources.some((r) => !('resourceId' in r) || !('opinion' in r)))

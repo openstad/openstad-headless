@@ -149,6 +149,24 @@ function StemBegroot({
     type: '',
   });
 
+  async function fetchResourcesByIds(ids: number[]): Promise<any[]> {
+    if (!ids.length || !props.api?.url) return [];
+    const params = new URLSearchParams();
+    ids.forEach((id) => params.append('ids', String(id)));
+    params.append('noPagination', 'true');
+    params.append('includeTags', '1');
+    try {
+      const response = await fetch(
+        `${props.api.url}/api/project/${props.projectId}/resource?${params.toString()}`
+      );
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data?.records || data || [];
+    } catch {
+      return [];
+    }
+  }
+
   const [pendingVoteFetched, setPendingVoteFetched] = useState<boolean>(false);
 
   const url = new URL(window.location.href);
@@ -425,48 +443,68 @@ function StemBegroot({
       const pendingPerTag = votePendingStorage.getVotePendingPerTag();
 
       if (pendingPerTag) {
-        let totalPending = 0;
-        let totalMatched = 0;
-        setTagCounter((prevTagCounter) =>
-          prevTagCounter.map((tagObj) => {
-            const tagName = Object.keys(tagObj)[0];
-            if (pendingPerTag[tagName]) {
-              const selectedResourceIds = Object.keys(
-                pendingPerTag[tagName]
-              ).map(Number);
-              totalPending += selectedResourceIds.length;
+        const allPendingIds: number[] = [];
+        Object.values(pendingPerTag).forEach((tagData: any) => {
+          if (tagData && typeof tagData === 'object') {
+            Object.keys(tagData).forEach((id) =>
+              allPendingIds.push(Number(id))
+            );
+          }
+        });
 
-              const resourcesThatArePending: Array<any> =
-                resources?.records?.filter(
-                  (r: any) =>
-                    selectedResourceIds && selectedResourceIds.includes(r.id)
-                ) || [];
-              totalMatched += resourcesThatArePending.length;
-
-              const currentCount =
-                props.votes.voteType === 'budgetingPerTag'
-                  ? resourcesThatArePending.reduce(
-                      (total, r) => total + r.budget,
-                      0
-                    )
-                  : resourcesThatArePending.length;
-
-              return {
-                [tagName]: {
-                  ...tagObj[tagName],
-                  selectedResources: resourcesThatArePending,
-                  current: currentCount,
-                },
-              };
-            }
-
-            return tagObj;
-          })
+        const matchedIds = new Set(
+          (resources?.records || [])
+            .filter((r: any) => allPendingIds.includes(r.id))
+            .map((r: any) => r.id)
         );
-        if (totalPending > 0 && totalPending !== totalMatched) {
-          console.warn(
-            `[stem-begroot] selection mismatch after restore: pending=${totalPending} matched=${totalMatched} pageSize=${resources?.records?.length}`
+        const missingIds = allPendingIds.filter((id) => !matchedIds.has(id));
+
+        const applyTagCounter = (allResources: any[]) => {
+          setTagCounter((prevTagCounter) =>
+            prevTagCounter.map((tagObj) => {
+              const tagName = Object.keys(tagObj)[0];
+              if (pendingPerTag[tagName]) {
+                const selectedResourceIds = Object.keys(
+                  pendingPerTag[tagName]
+                ).map(Number);
+
+                const resourcesThatArePending: Array<any> =
+                  allResources.filter((r: any) =>
+                    selectedResourceIds.includes(r.id)
+                  ) || [];
+
+                const currentCount =
+                  props.votes.voteType === 'budgetingPerTag'
+                    ? resourcesThatArePending.reduce(
+                        (total, r) => total + r.budget,
+                        0
+                      )
+                    : resourcesThatArePending.length;
+
+                return {
+                  [tagName]: {
+                    ...tagObj[tagName],
+                    selectedResources: resourcesThatArePending,
+                    current: currentCount,
+                  },
+                };
+              }
+
+              return tagObj;
+            })
           );
+        };
+
+        if (missingIds.length > 0) {
+          console.warn(
+            `[stem-begroot] selection mismatch: pending=${allPendingIds.length} matched=${matchedIds.size} pageSize=${resources?.records?.length}, fetching ${missingIds.length} missing`
+          );
+          fetchResourcesByIds(missingIds).then((fetched) => {
+            const allResources = [...(resources?.records || []), ...fetched];
+            applyTagCounter(allResources);
+          });
+        } else {
+          applyTagCounter(resources?.records || []);
         }
       }
     } else {
@@ -476,14 +514,22 @@ function StemBegroot({
         resources?.records?.length > 0 &&
         selectedResources.length === 0
       ) {
-        const pendingCount = Object.keys(pending).length;
+        const pendingIds = Object.keys(pending).map(Number);
         const matched = resources?.records?.filter((r: any) => pending[r.id]);
-        if (pendingCount !== matched.length) {
-          console.warn(
-            `[stem-begroot] selection mismatch after restore: pending=${pendingCount} matched=${matched.length} pageSize=${resources?.records?.length}`
+
+        if (pendingIds.length !== matched.length) {
+          const missingIds = pendingIds.filter(
+            (id) => !matched.find((r: any) => r.id === id)
           );
+          console.warn(
+            `[stem-begroot] selection mismatch: pending=${pendingIds.length} matched=${matched.length} pageSize=${resources?.records?.length}, fetching ${missingIds.length} missing`
+          );
+          fetchResourcesByIds(missingIds).then((fetched) => {
+            setSelectedResources([...matched, ...fetched]);
+          });
+        } else {
+          setSelectedResources(matched);
         }
-        setSelectedResources(matched);
       }
     }
   }, [resources?.records, votePendingStorage]);

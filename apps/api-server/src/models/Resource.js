@@ -1050,6 +1050,20 @@ module.exports = function (db, sequelize, DataTypes) {
           },
         };
       },
+      selectIds: function (ids) {
+        if (!ids || ids.length === 0) {
+          return {};
+        }
+        const safeIds = ids
+          .map((id) => parseInt(id, 10))
+          .filter(Number.isFinite);
+        if (safeIds.length === 0) return {};
+        return {
+          where: {
+            id: { [db.Sequelize.Op.in]: safeIds },
+          },
+        };
+      },
     };
   };
 
