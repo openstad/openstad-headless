@@ -31,11 +31,11 @@ export function SidenavProject({ className }: { className?: string }) {
         className
       )}>
       <div className="flex flex-col items-start justify-center h-24">
-        <Link href="javascript:history.back();">
+        <button onClick={() => router.back()}>
           <div className="m-4 p-3 bg-secondary rounded">
             <ArrowLeft size={20} />
           </div>
-        </Link>
+        </button>
       </div>
       <div className="p-4 flex flex-col gap-2">
         <Link href={`/projects/${project}/widgets`}>
