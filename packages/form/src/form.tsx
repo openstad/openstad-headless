@@ -64,6 +64,8 @@ function Form({
   totalFieldCount = 0,
   formStyle = 'default',
   initialValues,
+  onFieldInteraction,
+  onValidationErrors,
   ...props
 }: FormProps) {
   const initialFormValues: { [key: string]: FormValue } = {};
@@ -179,7 +181,7 @@ function Form({
     }
 
     event.preventDefault();
-    const firstErrorKey = handleSubmit(
+    const { firstErrorKey, errors: validationErrors } = handleSubmit(
       fieldsToRender as unknown as Array<CombinedFieldPropsWithType>,
       formValues,
       setFormErrors,
@@ -188,6 +190,13 @@ function Form({
       pageHandler,
       submitBeforeLastPage
     );
+
+    if (firstErrorKey && onValidationErrors) {
+      const errorEntries = Object.entries(validationErrors)
+        .filter(([, msg]) => msg !== null)
+        .map(([key, msg]) => ({ fieldKey: key, errorMessage: msg }));
+      onValidationErrors(errorEntries);
+    }
 
     if (firstErrorKey && formRef.current) {
       const errorElement = formRef.current.querySelector(
@@ -246,6 +255,10 @@ function Form({
 
     if (triggerSetLastKey !== false) {
       setLastUpdatedKey(name);
+    }
+
+    if (onFieldInteraction && name) {
+      onFieldInteraction(name);
     }
   };
 

@@ -25,6 +25,7 @@ export type EnqueteProps = {
   allowedPolygons?: Array<{ id: number; name: string }>;
   enableDraftPersistence?: boolean;
   draftRetentionHours?: number;
+  gtmEnvironment?: string;
 };
 
 export type Item = {
