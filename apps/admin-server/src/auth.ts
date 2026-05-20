@@ -97,6 +97,9 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     query = query.replace(/openstadlogintoken=(?:.(?!&|$))+./, '');
     if (query == '?') query = '';
     let newUrl = `${process.env.URL}${path}${query}`;
+    console.log(
+      `[${new Date().toISOString()}][admin-auth] login token received: projectId=${targetProjectId} redirect=${path}`
+    );
     return NextResponse.redirect(newUrl, { headers: res.headers });
   }
 
@@ -128,7 +131,13 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
           role: result.role,
           jwt: jwt as string,
         };
+        console.log(
+          `[${new Date().toISOString()}][admin-auth] user authenticated: userId=${result.id} role=${result.role}`
+        );
       } catch (err) {
+        console.log(
+          `[${new Date().toISOString()}][admin-auth] user validation failed: projectId=${targetProjectId} forceNewLogin=${forceNewLogin}`
+        );
         jwt = '';
         session.user = undefined;
       }

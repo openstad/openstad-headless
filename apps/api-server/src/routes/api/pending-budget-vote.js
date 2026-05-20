@@ -19,6 +19,10 @@ router.post('/', async function (req, res, next) {
       data: req.body,
     });
 
+    const resourceCount = req.body ? Object.keys(req.body).length : 0;
+    console.log(
+      `[${new Date().toISOString()}][pending-vote] created: id=${record.id} resources=${resourceCount}`
+    );
     res.json({ id: record.id });
   } catch (err) {
     next(err);
@@ -39,18 +43,29 @@ router.get('/:id', async function (req, res, next) {
       });
 
       if (!record) {
+        console.log(
+          `[${new Date().toISOString()}][pending-vote] not found: id=${id}`
+        );
         throw createError(404, 'Pending budget vote not found');
       }
 
       const data = record.data;
       await record.destroy({ transaction });
 
+      const resourceCount = data ? Object.keys(data).length : 0;
+      console.log(
+        `[${new Date().toISOString()}][pending-vote] consumed: id=${id} resources=${resourceCount}`
+      );
       return { id, data };
     });
 
     res.json(result);
   } catch (err) {
-    console.log('Error fetching pending budget vote:', err);
+    if (err.status !== 404) {
+      console.log(
+        `[${new Date().toISOString()}][pending-vote] fetch error: id=${req.params?.id} error=${err?.message}`
+      );
+    }
     next(err);
   }
 });

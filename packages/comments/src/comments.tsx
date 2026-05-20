@@ -370,11 +370,15 @@ function CommentsInner({
           comment = parent.replies.find((c: any) => c.id == formDataCopy.id);
         }
         await comment.update(formDataCopy);
+        console.log(
+          `[comments] updated: commentId=${formDataCopy.id} resourceId=${resourceId}`
+        );
 
         notifySuccess();
         setDisableSubmit(false);
       } else {
         await comments.create(formDataCopy);
+        console.log(`[comments] created: resourceId=${resourceId}`);
 
         notifySuccess();
         setDisableSubmit(false);
@@ -382,7 +386,9 @@ function CommentsInner({
 
       refreshComments();
     } catch (err: any) {
-      console.log(err);
+      console.error(
+        `[comments] submit failed: resourceId=${resourceId} error=${err?.message}`
+      );
       notifyFailed();
       setDisableSubmit(false);
     }

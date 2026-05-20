@@ -40,7 +40,6 @@ module.exports = function (req, res, next) {
         (req.path.match('^(/api/project)$') && req.method == 'GET'))
     ) {
       url = req.headers.origin;
-      console.log('no project, allowing origin', url, req.path);
     }
   }
 

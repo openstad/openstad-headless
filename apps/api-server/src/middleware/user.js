@@ -63,7 +63,9 @@ module.exports = async function getUser(req, res, next) {
 
     return next();
   } catch (error) {
-    console.error(error);
+    console.error(
+      `[${new Date().toISOString()}][auth-middleware] getUser error: ${error?.message}`
+    );
     next(error);
   }
 };
@@ -115,7 +117,20 @@ function parseAuthHeader(authorizationHeader) {
  */
 function parseJwt(authorizationHeader) {
   let token = authorizationHeader.replace(/^bearer /i, '');
-  return jwt.verify(token, config.auth['jwtSecret']);
+  try {
+    return jwt.verify(token, config.auth['jwtSecret']);
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      console.log(
+        `[${new Date().toISOString()}][auth-middleware] JWT expired: expiredAt=${err.expiredAt?.toISOString?.() || 'unknown'}`
+      );
+    } else {
+      console.log(
+        `[${new Date().toISOString()}][auth-middleware] JWT verification failed: ${err.name}: ${err.message}`
+      );
+    }
+    throw err;
+  }
 }
 
 /**
@@ -190,7 +205,9 @@ async function getUserInstance({
       return dbUser;
     }
   } catch (err) {
-    console.log(err);
+    console.log(
+      `[${new Date().toISOString()}][auth-middleware] getUserInstance error: userId=${userId} projectId=${projectId} error=${err?.message}`
+    );
     throw err;
   }
 
@@ -214,11 +231,12 @@ async function getUserInstance({
       adapters[adapter] = await authSettings.adapter({ authConfig });
     }
   } catch (err) {
-    console.log(err);
+    console.log(
+      `[${new Date().toISOString()}][auth-middleware] adapter init failed: adapter=${authConfig?.adapter || 'unknown'} error=${err?.message}`
+    );
   }
 
   try {
-    // get userdata from auth server
     let service = adapters[adapter].service;
 
     let userData = await service.fetchUserData({
@@ -242,7 +260,9 @@ async function getUserInstance({
         `[auth-sync] resetting stale access token for userId=${dbUser?.id || 'unknown'} projectId=${dbUser?.projectId || 'unknown'}`
       );
     } else {
-      console.log(err);
+      console.log(
+        `[${new Date().toISOString()}][auth-middleware] auth server fetch failed: userId=${dbUser?.id || 'unknown'} error=${err?.message}`
+      );
     }
     return await resetUserToken(dbUser);
   }

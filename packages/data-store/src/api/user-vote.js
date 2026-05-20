@@ -11,7 +11,9 @@ export default {
   },
 
   submitVote: async function ({ projectId, type }, data) {
-    console.log('SUBMIT VOTE');
+    console.log(
+      `[osc-vote] submitting: projectId=${projectId} resources=${data?.length || 0}`
+    );
 
     let url = `/api/project/${projectId}/vote`;
     let headers = {

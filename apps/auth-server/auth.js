@@ -248,7 +248,9 @@ passport.use(
         if (err?.message === 'Access token not found') {
           return done(null, false);
         }
-        console.log('Errr in authjs token', err);
+        console.log(
+          `[${new Date().toISOString()}][auth] bearer validation failed: ${err?.message}`
+        );
         done(null, false);
       });
   })

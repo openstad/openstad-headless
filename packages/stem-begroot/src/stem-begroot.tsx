@@ -182,8 +182,7 @@ function StemBegroot({
 
         if (!pendingBudgetVote.ok || !pendingBudgetVote) {
           console.error(
-            'Failed to fetch pending budget vote from server',
-            pendingBudgetVote.statusText
+            `[stem-begroot] pending vote fetch failed: uuid=${uuid} status=${pendingBudgetVote.status}`
           );
           return;
         }
@@ -191,11 +190,17 @@ function StemBegroot({
         const pendingBudgetVoteData = await pendingBudgetVote.json();
 
         if (!pendingBudgetVoteData || !pendingBudgetVoteData.data) {
-          console.error('No pending budget vote data found on server');
+          console.error(
+            `[stem-begroot] pending vote empty response: uuid=${uuid}`
+          );
           return;
         }
 
         const { data } = pendingBudgetVoteData;
+        const pendingCount = data ? Object.keys(data).length : 0;
+        console.log(
+          `[stem-begroot] pending vote restored: uuid=${uuid} resources=${pendingCount}`
+        );
 
         if (
           props.votes.voteType === 'countPerTag' ||
@@ -205,8 +210,10 @@ function StemBegroot({
         } else {
           votePendingStorage.setVotePending(data as any);
         }
-      } catch (e) {
-        console.error('Failed to restore pending budget vote from server', e);
+      } catch (e: any) {
+        console.error(
+          `[stem-begroot] pending vote restore failed: uuid=${uuid} error=${e?.message}`
+        );
       }
     }
 
@@ -418,6 +425,8 @@ function StemBegroot({
       const pendingPerTag = votePendingStorage.getVotePendingPerTag();
 
       if (pendingPerTag) {
+        let totalPending = 0;
+        let totalMatched = 0;
         setTagCounter((prevTagCounter) =>
           prevTagCounter.map((tagObj) => {
             const tagName = Object.keys(tagObj)[0];
@@ -425,12 +434,14 @@ function StemBegroot({
               const selectedResourceIds = Object.keys(
                 pendingPerTag[tagName]
               ).map(Number);
+              totalPending += selectedResourceIds.length;
 
               const resourcesThatArePending: Array<any> =
                 resources?.records?.filter(
                   (r: any) =>
                     selectedResourceIds && selectedResourceIds.includes(r.id)
                 ) || [];
+              totalMatched += resourcesThatArePending.length;
 
               const currentCount =
                 props.votes.voteType === 'budgetingPerTag'
@@ -452,6 +463,11 @@ function StemBegroot({
             return tagObj;
           })
         );
+        if (totalPending > 0 && totalPending !== totalMatched) {
+          console.warn(
+            `[stem-begroot] selection mismatch after restore: pending=${totalPending} matched=${totalMatched} pageSize=${resources?.records?.length}`
+          );
+        }
       }
     } else {
       const pending = votePendingStorage.getVotePending();
@@ -460,9 +476,14 @@ function StemBegroot({
         resources?.records?.length > 0 &&
         selectedResources.length === 0
       ) {
-        setSelectedResources(
-          resources?.records?.filter((r: any) => pending[r.id])
-        );
+        const pendingCount = Object.keys(pending).length;
+        const matched = resources?.records?.filter((r: any) => pending[r.id]);
+        if (pendingCount !== matched.length) {
+          console.warn(
+            `[stem-begroot] selection mismatch after restore: pending=${pendingCount} matched=${matched.length} pageSize=${resources?.records?.length}`
+          );
+        }
+        setSelectedResources(matched);
       }
     }
   }, [resources?.records, votePendingStorage]);
@@ -512,6 +533,9 @@ function StemBegroot({
         setCurrentStep(3);
       }
       void (async () => {
+        console.log(
+          `[stem-begroot] auto-submit triggered: selectedResources=${selectedResources.length}`
+        );
         const submitted = await submitVoteAndCleanup();
         if (submitted) {
           setCurrentStep(4);
@@ -559,6 +583,9 @@ function StemBegroot({
 
           await doVote(uniqueResourcesToVote);
           submitted = true;
+          console.log(
+            `[stem-begroot] vote submitted: resources=${uniqueResourcesToVote.length} type=perTag`
+          );
           votePendingStorage.clearVotePendingPerTag();
           selectedResourcesStorage.clearSelectedResources();
           setSelectedResources([]);
@@ -567,12 +594,16 @@ function StemBegroot({
         if (selectedResources.length > 0) {
           votePendingStorage.clearVotePending();
           await doVote(selectedResources);
+          console.log(
+            `[stem-begroot] vote submitted: resources=${selectedResources.length}`
+          );
           selectedResourcesStorage.clearSelectedResources();
           setSelectedResources([]);
           submitted = true;
         }
       }
     } catch (err: any) {
+      console.error(`[stem-begroot] vote failed: error=${err?.message}`);
       notifyVoteMessage(err.message, true);
     } finally {
       submitInProgressRef.current = false;

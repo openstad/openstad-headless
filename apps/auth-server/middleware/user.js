@@ -41,7 +41,9 @@ exports.withAll = (req, res, next) => {
       next();
     })
     .catch((err) => {
-      console.log('error', err);
+      console.log(
+        `[${new Date().toISOString()}][auth] user fetch error: ${err?.message}`
+      );
       next(err);
     });
 };

@@ -42,7 +42,26 @@ function dispatchOscError(error) {
   document.dispatchEvent(event);
 }
 
+let oscErrorListenerAttached = false;
+function ensureOscErrorListener() {
+  if (
+    oscErrorListenerAttached ||
+    typeof document === 'undefined' ||
+    typeof document.addEventListener !== 'function'
+  ) {
+    return;
+  }
+  oscErrorListenerAttached = true;
+  document.addEventListener('osc-error', (e) => {
+    const d = e.detail || {};
+    console.error(
+      `[osc-error] ${d.method || '?'} ${d.url || '?'} status=${d.status || '?'} message=${d.message || '?'} ref=${d.referenceId || '-'}`
+    );
+  });
+}
+
 export default async function doFetch(url = '', options = {}) {
+  ensureOscErrorListener();
   let self = this;
   let json;
 

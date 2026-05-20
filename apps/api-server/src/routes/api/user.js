@@ -540,7 +540,6 @@ router
       },
       [Op.not]: { id: req.userId },
     };
-    console.log('===', where);
     db.User.scope(...req.scope)
       .findAll({
         where,

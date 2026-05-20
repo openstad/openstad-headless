@@ -496,8 +496,11 @@ app.get('/auth/login', (req, res, next) => {
   let url = `${apiUrl}/auth/project/${project.id}/login?redirectUri=${returnUrl}`;
   url = req.query.loginPriviliged
     ? url + '&loginPriviliged=1'
-    : url + '&forceNewLogin=1'; // ;
+    : url + '&forceNewLogin=1';
 
+  console.log(
+    `[${new Date().toISOString()}][cms-auth] login redirect: projectId=${project?.id} returnUrl=${decodeURIComponent(returnUrl)?.substring(0, 100)}`
+  );
   return res.redirect(url);
 });
 
@@ -523,8 +526,11 @@ app.get('/auth/logout', (req, res, next) => {
   let url = `${apiUrl}/auth/project/${project.id}/logout?redirectUri=${returnUrl}`;
   url = req.query.loginPriviliged
     ? url + '&loginPriviliged=1'
-    : url + '&forceNewLogin=1'; // ;
+    : url + '&forceNewLogin=1';
 
+  console.log(
+    `[${new Date().toISOString()}][cms-auth] logout redirect: projectId=${project?.id}`
+  );
   return res.redirect(url);
 });
 

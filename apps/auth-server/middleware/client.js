@@ -172,7 +172,9 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
           }
         })
         .catch((error) => {
-          console.log('error', error);
+          console.log(
+            `[${new Date().toISOString()}][auth] unique code validation failed: clientId=${req.client?.id || 'unknown'} error=${error?.message}`
+          );
 
           if (errorCallback) {
             try {

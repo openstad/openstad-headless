@@ -151,7 +151,9 @@ server.exchange(
         throw new Error('Error exchanging auth code for tokens');
       })
       .catch((err) => {
-        console.log('Errrrrr', err);
+        console.log(
+          `[${new Date().toISOString()}][oauth] auth code exchange failed: ${err?.message}`
+        );
         done(null, false);
       });
   })
@@ -279,7 +281,9 @@ exports.authorization = [
           }
           return done(null, client, redirectURI);
         } else {
-          console.log("===> Redirect host doesn't match the client host");
+          console.log(
+            `[${new Date().toISOString()}][oauth] redirect host not allowed: clientId=${client?.id} redirectHost=${redirectUrlHost}`
+          );
           throw new Error("Redirect host doesn't match the client host");
         }
       })
@@ -307,7 +311,9 @@ exports.authorization = [
         }
       })
       .catch((error) => {
-        console.log('error', error);
+        console.log(
+          `[${new Date().toISOString()}][oauth] authorization error: clientId=${req.oauth2?.client?.id || 'unknown'} error=${error?.message}`
+        );
 
         res.render('dialog', {
           transactionID: req.oauth2.transactionID,

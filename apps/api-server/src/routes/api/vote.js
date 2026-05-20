@@ -348,6 +348,9 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
             votes.length < req.project.config.votes.minResources ||
             votes.length > req.project.config.votes.maxResources
           ) {
+            console.log(
+              `[${new Date().toISOString()}][vote] rejected: reason="Aantal resources klopt niet" submitted=${votes.length} min=${req.project.config.votes.minResources} max=${req.project.config.votes.maxResources} userId=${req.user?.id} projectId=${req.project?.id}`
+            );
             throw createError(400, 'Aantal resources klopt niet');
           }
         }
@@ -425,6 +428,14 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
         });
 
         await Promise.all(promises);
+
+        const created = actions.filter((a) => a.action === 'create').length;
+        const deleted = actions.filter((a) => a.action === 'delete').length;
+        if (created > 0 || deleted > 0) {
+          console.log(
+            `[${new Date().toISOString()}][vote] ${req.project.config.votes.voteType}: created=${created} deleted=${deleted} userId=${req.user?.id} projectId=${req.project?.id}`
+          );
+        }
 
         const resourceIds = votes.map((entry) => entry.resourceId);
         const found = await db.Vote.findAll({

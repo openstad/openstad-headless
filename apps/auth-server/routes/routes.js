@@ -132,24 +132,12 @@ module.exports = function (app) {
    * Log urls
    */
   app.use((req, res, next) => {
-    let current_datetime = new Date();
-    let formatted_date =
-      current_datetime.getFullYear() +
-      '-' +
-      (current_datetime.getMonth() + 1) +
-      '-' +
-      current_datetime.getDate() +
-      ' ' +
-      current_datetime.getHours() +
-      ':' +
-      current_datetime.getMinutes() +
-      ':' +
-      current_datetime.getSeconds();
-    let method = req.method;
-    let url = req.url;
-    let status = res.statusCode;
-    let log = `[${formatted_date}] ${method}:${url} ${status}`;
-    console.log(log);
+    res.on('finish', () => {
+      const ts = new Date().toISOString();
+      const clientId = req.client?.id || '';
+      const log = `[${ts}] ${req.method}:${req.url} ${res.statusCode}${clientId ? ` clientId=${clientId}` : ''}`;
+      console.log(log);
+    });
     next();
   });
 
@@ -528,7 +516,9 @@ module.exports = function (app) {
     }
     // een deserialize error betekent een data fout; daar hoef je een gebruiker niet mee te belasten
     if (err && err.message && err.message.match(/^Error in deserializeUser/)) {
-      console.log(err); // do log for debugging
+      console.log(
+        `[${new Date().toISOString()}][auth] deserialize error: ${err.message}`
+      );
       await req.session.destroy();
       let querystring = '?';
       if (req.query.clientId) querystring += `&clientId=${req.query.clientId}`;
@@ -547,7 +537,9 @@ module.exports = function (app) {
         querystring += `&access_token=${req.query.access_token}`;
       return res.redirect('/logout' + querystring);
     }
-    console.log('===> err', err);
+    console.log(
+      `[${new Date().toISOString()}][auth] unhandled error: ${req.method} ${req.originalUrl?.substring(0, 80)} clientId=${req.client?.id || 'unknown'} error=${err?.message || err}`
+    );
     res.status(500).render('errors/500');
   });
 };
