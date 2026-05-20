@@ -200,24 +200,19 @@ export function Area({
 
   const multiPolygon: any[] = [];
   const safeFetchedAreas = Array.isArray(fetchedAreas) ? fetchedAreas : [];
+  const configById = new Map((areas ?? []).map((item: any) => [item.id, item]));
 
   safeFetchedAreas.forEach((item: any) => {
+    const config = configById.get(item.id);
     multiPolygon.push({
       title: item.name,
       polygon: item.polygon,
       hidePolygon: item.hidePolygon,
+      url: config?.url,
+      color: config?.color,
+      openInNewTab: config?.openInNewTab,
+      buttonText: config?.buttonText,
     });
-  });
-  areas?.forEach((item: any) => {
-    const existingItem = multiPolygon.find(
-      (polygonItem) => polygonItem.title === item.name
-    );
-    if (existingItem) {
-      existingItem.url = item.url;
-      existingItem.color = item.color;
-      existingItem.openInNewTab = item.openInNewTab;
-      existingItem.buttonText = item.buttonText;
-    }
   });
 
   const hiddenOverlayStyle = {
