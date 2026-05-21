@@ -748,6 +748,7 @@ const BaseMap = ({
               markers={currentMarkers}
               center={center}
               zoomAfterInit={zoomAfterInit}
+              customPolygonIds={customPolygon?.map((p: { id: number }) => p.id)}
             />
 
             <TileLayer {...tileLayerProps} />
