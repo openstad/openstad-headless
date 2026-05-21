@@ -200,7 +200,9 @@ export function Area({
 
   const multiPolygon: any[] = [];
   const safeFetchedAreas = Array.isArray(fetchedAreas) ? fetchedAreas : [];
-  const configById = new Map((areas ?? []).map((item: any) => [item.id, item]));
+  const configById = new Map<number, any>(
+    (areas ?? []).map((item: any) => [item.id, item])
+  );
 
   safeFetchedAreas.forEach((item: any) => {
     const config = configById.get(item.id);
