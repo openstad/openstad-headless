@@ -314,7 +314,9 @@ const ResourceOverviewMap = ({
         {...props}
         {...zoom}
         area={polygon}
-        autoZoomAndCenter={props?.map?.autoZoomAndCenter || 'area'}
+        autoZoomAndCenter={
+          props?.mapCenterMode || props?.map?.autoZoomAndCenter || 'area'
+        }
         categorize={{ categories, categorizeByField }}
         center={center}
         markers={currentMarkers}
