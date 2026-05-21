@@ -135,6 +135,19 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
           `[${new Date().toISOString()}][admin-auth] user authenticated: userId=${result.id} role=${result.role}`
         );
       } catch (err) {
+        if (!forceNewLogin && typeof jwt === 'string' && jwt.includes('.')) {
+          try {
+            const payload = JSON.parse(
+              Buffer.from(jwt.split('.')[1], 'base64').toString()
+            );
+            if (
+              typeof payload.exp === 'number' &&
+              payload.exp * 1000 < Date.now()
+            ) {
+              forceNewLogin = true;
+            }
+          } catch (e) {}
+        }
         console.log(
           `[${new Date().toISOString()}][admin-auth] user validation failed: projectId=${targetProjectId} forceNewLogin=${forceNewLogin}`
         );
