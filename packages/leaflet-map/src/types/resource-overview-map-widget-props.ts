@@ -35,6 +35,7 @@ export type ResourceOverviewMapWidgetProps = BaseProps &
     markerSets?: MarkerSetConfig[];
     markerInteractionType?: 'default' | 'direct';
     customLegend?: CustomLegendItem[];
+    mapCenterMode?: '' | 'markers' | 'area';
   };
 
 export type dataLayerArray = {
