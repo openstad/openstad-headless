@@ -330,6 +330,7 @@ services:
       - ./packages:/opt/openstad-headless/packages
 
   openstad-update-lock:
+    platform: linux/amd64
     build:
       context: .
       dockerfile: Dockerfile

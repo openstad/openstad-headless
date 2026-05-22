@@ -49,7 +49,7 @@
     "@apostrophecms/seo": "^1.4.0",
     "@apostrophecms/sitemap": "~1.2.0",
     "@openstad-headless/lib": "*",
-    "apostrophe": "~4.28.0",
+    "apostrophe": "^4.29.0",
     "compression": "^1.7.5",
     "dotenv": "^16.0.3",
     "express-basic-auth": "^1.2.1",
