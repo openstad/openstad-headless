@@ -4,7 +4,7 @@ import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { LocalStorage } from '@openstad-headless/lib/local-storage';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { ProgressBar } from '@openstad-headless/ui/src';
+import { ProgressBar, fireConfetti } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
 import {
   Button,
@@ -38,6 +38,7 @@ export type LikeProps = {
   showProgressBar?: boolean;
   progressBarDescription?: string;
   disabled?: boolean;
+  showConfetti?: boolean;
   refreshResourceLikes?: () => void;
 };
 
@@ -49,6 +50,7 @@ function Likes({
   noLabel = 'Nee',
   displayDislike = false,
   showProgressBar = true,
+  showConfetti: showConfettiOnLike = false,
   disabled = false,
   refreshResourceLikes,
   ...props
@@ -136,10 +138,14 @@ function Likes({
       opinion: value,
     });
 
-    setIsBusy(false);
+    if (showConfettiOnLike && value === 'yes') {
+      fireConfetti();
+    }
+
     if (refreshResourceLikes) {
       await refreshResourceLikes();
     }
+    setIsBusy(false);
   }
 
   if (typeof props.children === 'function') {
