@@ -7,3 +7,12 @@ export {
   getScopedSessionRandomSortSeed,
 } from './random-sort';
 export { canLikeResource } from './can-like';
+export {
+  detectEnvironment,
+  mapQuestionType,
+  pushFormStart,
+  pushFormStep,
+  pushFormSubmit,
+  pushQuestionInteract,
+  pushFormError,
+} from './gtm-datalayer';

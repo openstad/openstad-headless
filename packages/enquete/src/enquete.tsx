@@ -2,6 +2,19 @@
 import DataStore from '@openstad-headless/data-store/src';
 import Form, { FormValue } from '@openstad-headless/form/src/form';
 import { FieldProps } from '@openstad-headless/form/src/props';
+import {
+  detectEnvironment,
+  mapQuestionType,
+  pushFormError,
+  pushFormStart,
+  pushFormStep,
+  pushFormSubmit,
+  pushQuestionInteract,
+} from '@openstad-headless/lib/gtm-datalayer';
+import type {
+  DisplayType,
+  FormStatus,
+} from '@openstad-headless/lib/gtm-datalayer';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Banner, Button, Icon, Spacer } from '@openstad-headless/ui/src';
@@ -124,6 +137,8 @@ function Enquete(props: EnqueteWidgetProps) {
   const latestValuesRef = useRef<Record<string, unknown> | null>(null);
   const saveTimeoutRef = useRef<number | null>(null);
   const formStartTimeRef = useRef<number>(Date.now());
+  const formStartFiredRef = useRef(false);
+  const interactedFieldsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -317,6 +332,8 @@ function Enquete(props: EnqueteWidgetProps) {
     const result = await createSubmission(formData, props.widgetId);
 
     if (result) {
+      pushFormSubmit(getTrackingContext());
+
       if (
         typeof window !== 'undefined' &&
         props.enableDraftPersistence === true
@@ -674,8 +691,97 @@ function Enquete(props: EnqueteWidgetProps) {
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  const getTrackingContext = () => ({
+    environment: detectEnvironment(props.gtmEnvironment),
+    formId: `fid${props.widgetId || '0'}`,
+    formName: props.title || '',
+    displayType: (isFullscreen ? 'fullscreen' : 'standard') as DisplayType,
+    memberId: (currentUser as any)?.id
+      ? String((currentUser as any).id)
+      : undefined,
+  });
+
+  const getStepInfo = (pageIndex: number) => {
+    const start = pageFieldStartPositions[pageIndex] ?? 0;
+    const end = pageFieldEndPositions[pageIndex] ?? formFields.length;
+    const fieldsOnPage = formFields
+      .slice(start, end)
+      .filter((f) => f.type !== 'pagination');
+    const firstField = fieldsOnPage[0];
+    const status: FormStatus =
+      pageIndex === 0
+        ? 'started'
+        : pageIndex >= totalPages - 1
+          ? 'final_step'
+          : 'in_progress';
+    return {
+      formStep: pageIndex + 1,
+      formStepName: (firstField as any)?.title || '',
+      formStepTotal: totalPages,
+      formStatus: status,
+    };
+  };
+
+  useEffect(() => {
+    if (draftChecked) {
+      pushFormStep({ ...getTrackingContext(), ...getStepInfo(currentPage) });
+    }
+  }, [currentPage, draftChecked]);
+
+  const handleFieldInteraction = (fieldKey: string) => {
+    if (interactedFieldsRef.current.has(fieldKey)) return;
+    interactedFieldsRef.current.add(fieldKey);
+
+    const item = props.items?.find((i) => i.fieldKey === fieldKey);
+    if (
+      !item ||
+      item.questionType === 'pagination' ||
+      item.questionType === 'none'
+    )
+      return;
+
+    pushQuestionInteract({
+      ...getTrackingContext(),
+      ...getStepInfo(currentPage),
+      questionId: `qid${fieldKey}`,
+      questionName: item.title || '',
+      questionType: mapQuestionType(item.questionType || '', item.showSmileys),
+    });
+  };
+
+  const handleValidationErrors = (
+    errors: Array<{ fieldKey: string; errorMessage: string | null }>
+  ) => {
+    const context = getTrackingContext();
+    const stepInfo = getStepInfo(currentPage);
+
+    errors.forEach(({ fieldKey, errorMessage }) => {
+      const item = props.items?.find((i) => i.fieldKey === fieldKey);
+
+      pushFormError({
+        ...context,
+        ...stepInfo,
+        questionId: item ? `qid${fieldKey}` : context.formId,
+        questionName: item?.title || context.formName,
+        questionType: item
+          ? mapQuestionType(item.questionType || '', item.showSmileys)
+          : 'form_error',
+        formErrorText: errorMessage || 'Validation error',
+        formErrorType: errorMessage?.toLowerCase().includes('verplicht')
+          ? 'required_field'
+          : 'invalid_input',
+      });
+    });
+  };
+
   const handleValuesChange = (values: Record<string, unknown>) => {
     if (typeof window === 'undefined') return;
+
+    if (!formStartFiredRef.current) {
+      formStartFiredRef.current = true;
+      pushFormStart(getTrackingContext());
+    }
+
     if (props.enableDraftPersistence !== true) return;
 
     latestValuesRef.current = values;
@@ -798,6 +904,8 @@ function Enquete(props: EnqueteWidgetProps) {
               totalFieldCount={totalFieldCount}
               totalPages={totalPages}
               initialValues={initialValues}
+              onFieldInteraction={handleFieldInteraction}
+              onValidationErrors={handleValidationErrors}
             />
           )}
         </div>
