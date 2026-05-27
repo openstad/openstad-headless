@@ -42,6 +42,7 @@ import React, {
 
 import { elipsizeHTML } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
+import { findResourceIndex } from './lib/find-resource-index';
 import './resource-overview.css';
 
 export type ResourceOverviewWidgetProps = BaseProps &
@@ -1015,7 +1016,9 @@ function ResourceOverviewInner({
     fetchAll: needsAllResourcesFetch
       ? listUsesAllResources
         ? true
-        : 'markers'
+        : displayType === 'cardgrid' && displayMap
+          ? true
+          : 'markers'
       : false,
   });
 
@@ -1176,8 +1179,20 @@ function ResourceOverviewInner({
 
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
 
+  const dialogList = useMemo(
+    () =>
+      listUsesAllResources
+        ? (filteredResources ?? [])
+        : // Prefer full unsliced records when cardgrid+map fetched them; fall back
+          // to filteredResources for non-map paths where allResourcesData is empty.
+          (allResourcesData?.records ?? filteredResources ?? []),
+    [listUsesAllResources, filteredResources, allResourcesData]
+  );
+
   const onResourceClick = useCallback(
-    (resource: any, index: number) => {
+    // _index is the marker-array position; the dialog uses dialogList, which has
+    // a different order — look up the correct index via findResourceIndex below.
+    (resource: any, _index?: number) => {
       if (displayType === 'cardrow') {
         let urlToUse = props.itemLink;
 
@@ -1211,11 +1226,22 @@ function ResourceOverviewInner({
       }
 
       if (displayType === 'cardgrid') {
-        setResourceDetailIndex(index);
+        const idx = findResourceIndex(
+          resource.id ?? resource.uniqueId,
+          dialogList
+        );
+        if (idx === -1) {
+          console.warn(
+            '[resource-overview] marker click: resource not found in dialogList',
+            resource
+          );
+          return;
+        }
+        setResourceDetailIndex(idx);
         setOpen(true);
       }
     },
-    [displayType, props.itemLink]
+    [displayType, props.itemLink, dialogList, selectedProjects]
   );
 
   const filterNeccesary =
@@ -1269,7 +1295,7 @@ function ResourceOverviewInner({
         (listUsesAllResources
           ? filteredResources?.slice(page * pageSize, (page + 1) * pageSize)
           : filteredResources
-        )?.map((resource: any, index: number) => {
+        )?.map((resource: any) => {
           return (
             <React.Fragment
               key={`resource-item-${resource?.id || resource?.uniqueId}`}>
@@ -1283,7 +1309,7 @@ function ResourceOverviewInner({
                   overviewTagGroups,
                 },
                 () => {
-                  onResourceClick(resource, index);
+                  onResourceClick(resource);
                 },
                 refreshLikes
               )}
@@ -1293,10 +1319,9 @@ function ResourceOverviewInner({
       )}
     </section>
   );
-  const validFilteredResources =
-    filteredResources?.filter(
-      (r) => r && (r.id || r.uniqueId) // only real resources or projects
-    ) || [];
+  const validDialogList = dialogList.filter(
+    (r: any) => r && (r.id || r.uniqueId) // only real resources or projects
+  );
   return tagsLoading ? (
     <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
   ) : (
@@ -1307,7 +1332,7 @@ function ResourceOverviewInner({
         children={
           <Carousel
             startIndex={resourceDetailIndex}
-            items={validFilteredResources}
+            items={validDialogList}
             buttonText={{
               next: 'Volgende afbeelding',
               previous: 'Vorige afbeelding',
