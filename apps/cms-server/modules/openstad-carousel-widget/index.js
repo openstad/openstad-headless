@@ -69,6 +69,32 @@ module.exports = {
         def: 'full',
       },
 
+      fade: {
+        label: 'Overgangsanimatie (fade)',
+        type: 'boolean',
+        def: false,
+        help: 'Schakel dit in om afbeeldingen soepel in elkaar over te laten gaan.',
+      },
+
+      autoplay: {
+        label: 'Autoplay inschakelen',
+        type: 'boolean',
+        def: false,
+        help: 'Schakel dit in om de carrousel automatisch door de afbeeldingen te bladeren.',
+      },
+
+      autoplayInterval: {
+        label: 'Autoplay interval (seconden)',
+        type: 'integer',
+        def: 5,
+        min: 1,
+        max: 60,
+        help: 'Het aantal seconden tussen elke automatische overgang (1-60).',
+        if: {
+          autoplay: true,
+        },
+      },
+
       images: {
         label: 'Afbeeldingen',
         type: 'area',
