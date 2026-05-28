@@ -27,7 +27,10 @@ import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
+import {
+  filterStaleTagGroups,
+  handleTagCheckboxGroupChange,
+} from '@/lib/form-widget-helpers/TagGroupHelper';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
 import _ from 'lodash';
@@ -83,6 +86,12 @@ export default function WidgetResourceOverviewTags(
       const fetchedTags = tags as Array<Tag>;
       const groupNames = _.chain(fetchedTags).map('type').uniq().value();
       setGroupedNames(groupNames);
+
+      const currentGroups = form.getValues('tagGroups');
+      const cleaned = filterStaleTagGroups(currentGroups, groupNames);
+      if (cleaned.length !== currentGroups.length) {
+        form.setValue('tagGroups', cleaned);
+      }
     }
   }, [tags]);
 
