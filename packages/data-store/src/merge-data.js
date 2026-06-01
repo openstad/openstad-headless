@@ -95,10 +95,19 @@ export default function mergeData(currentData, newData, action) {
       } else {
         let delta = { [newData.opinion]: currentData[newData.opinion] + 1 };
         let userVote = currentData.userVote;
-        if (userVote) {
-          delta[userVote.opinion] = currentData[userVote.opinion] - 1;
+        let isToggleOff = userVote && userVote.opinion === newData.opinion;
+        if (isToggleOff) {
+          delta[newData.opinion] = currentData[newData.opinion] - 1;
+        } else {
+          if (userVote) {
+            delta[userVote.opinion] = currentData[userVote.opinion] - 1;
+          }
+          delta.userVote = { opinion: newData.opinion };
         }
         result = merge.recursive({}, currentData, delta);
+        if (isToggleOff) {
+          result.userVote = null;
+        }
       }
       break;
 

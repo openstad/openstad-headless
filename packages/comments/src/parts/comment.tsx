@@ -8,7 +8,7 @@ import {
   Paragraph,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useState } from 'react';
 
 import hasRole from '../../../lib/has-role';
@@ -69,6 +69,20 @@ function Comment({
   const [hasUserDisliked, setHasUserDisliked] = useState<boolean>(
     args.comment.hasUserDisliked || false
   );
+
+  useEffect(() => {
+    setYesVotes(args.comment.yes || 0);
+    setNoVotes(args.comment.no || 0);
+    setNetVotes(args.comment.netVotes || 0);
+    setHasUserLiked(args.comment.hasUserLiked || false);
+    setHasUserDisliked(args.comment.hasUserDisliked || false);
+  }, [
+    args.comment.yes,
+    args.comment.no,
+    args.comment.netVotes,
+    args.comment.hasUserLiked,
+    args.comment.hasUserDisliked,
+  ]);
 
   function toggleReplyForm() {
     // todo: scrollto
