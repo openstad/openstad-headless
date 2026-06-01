@@ -93,10 +93,11 @@
   .image-container
   .osc-image-footer
   .osc-resource-overview-content-item-status {
-  display: inline-block;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
   margin: 0;
   padding: 0.25rem 0.5rem;
-  border-radius: 2px;
   background-color: transparent;
   font-size: 14px;
 }
