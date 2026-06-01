@@ -28,7 +28,8 @@ L.LRMapInteraction = L.Class.extend({
     this._isTouch = this.options.isTouch;
 
     this.options.messageString =
-      this.options.messageString || 'Use two fingers to move and zoom the map.';
+      this.options.messageString ||
+      'Gebruik twee vingers om de kaart te bewegen en te zoomen.';
 
     if (this._isTouch) {
       this._map.dragging.disable();
