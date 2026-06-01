@@ -17,6 +17,7 @@ export default function useResources(
     allowMultipleProjects = false,
     fetchAll = false,
     randomSortRotationMs = 0,
+    randomSortKey = undefined,
   },
   options
 ) {
@@ -57,6 +58,7 @@ export default function useResources(
     projectIds,
     allowMultipleProjects,
     randomSortRotationMs,
+    randomSortKey,
   };
 
   // Primary paginated call
