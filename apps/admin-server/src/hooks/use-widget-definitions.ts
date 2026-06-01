@@ -5,6 +5,7 @@ type WidgetDefinitionEntry = {
   name: string;
   description: string;
   image: string;
+  hidden?: boolean;
 };
 
 export type WidgetDefinitionsMap = Record<string, WidgetDefinitionEntry>;
