@@ -296,20 +296,18 @@ exports.postSmsCode = (req, res, next) => {
               return res.redirect(authorizeUrl);
             };
 
-            req.brute.reset(() => {
-              logAuthEvent(req, 'login', {
-                data: { method: 'phonenumber' },
-              });
-              //log the succesfull login
-              authService
-                .logSuccessFullLogin(req)
-                .then(() => {
-                  redirectToAuthorisation();
-                })
-                .catch(() => {
-                  redirectToAuthorisation();
-                });
+            logAuthEvent(req, 'login', {
+              data: { method: 'phonenumber' },
             });
+            //log the succesfull login
+            authService
+              .logSuccessFullLogin(req)
+              .then(() => {
+                redirectToAuthorisation();
+              })
+              .catch(() => {
+                redirectToAuthorisation();
+              });
           })
           .catch((err) => {
             next(err);
