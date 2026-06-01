@@ -5,14 +5,32 @@ export default {
     sentiment,
     onlyIncludeTagIds,
     search,
+    page,
+    pageSize,
+    sort,
+    noPagination,
   }) {
-    let url = `/api/project/${projectId}/resource/${resourceId}/comment?sentiment=${sentiment}&includeUser=1&includeUserVote=1&includeVoteCount=1&includeRepliesOnComments=1`;
+    let url = `/api/project/${projectId}/resource/${resourceId}/comment?includeUser=1&includeUserVote=1&includeVoteCount=1&includeRepliesOnComments=1`;
+
+    if (sentiment) {
+      url += `&sentiment=${encodeURIComponent(sentiment)}`;
+    }
 
     onlyIncludeTagIds = onlyIncludeTagIds || '';
     url += `&onlyIncludeTagIds=${onlyIncludeTagIds}`;
 
     if (search) {
       url += `&search[text]=${encodeURIComponent(search)}`;
+    }
+
+    if (noPagination) {
+      url += '&noPagination=true';
+    } else if (page != null && pageSize) {
+      url += `&page=${page}&pageSize=${pageSize}`;
+    }
+
+    if (sort) {
+      url += `&sort=${encodeURIComponent(sort)}`;
     }
 
     if (!projectId || !resourceId) {

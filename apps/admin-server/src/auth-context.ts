@@ -5,6 +5,9 @@ type SessionUserType = {
   name?: string;
   role?: string;
   jwt?: string;
+  adminId?: number;
+  adminName?: string;
+  adminRole?: string;
 };
 
 async function fetchSessionUser() {

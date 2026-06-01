@@ -4,6 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -71,6 +72,7 @@ const formSchema = z.object({
   favicon: z.string().optional(),
   cssUrl: z.string().optional(),
   clientDisclaimerUrl: z.string().optional(),
+  clientDisclaimerText: z.string().optional(),
   clientStylesheets: z
     .array(
       z.object({
@@ -100,6 +102,9 @@ export default function ProjectAuthentication({
       favicon: data?.config?.auth?.provider?.openstad?.config?.styling?.favicon,
       clientDisclaimerUrl:
         data?.config?.auth?.provider?.openstad?.config?.clientDisclaimerUrl,
+      clientDisclaimerText:
+        data?.config?.auth?.provider?.openstad?.config?.clientDisclaimerText ||
+        'Privacyverklaring',
       cssUrl:
         Array.isArray(
           data?.config?.auth?.provider?.openstad?.config?.clientStylesheets
@@ -135,6 +140,7 @@ export default function ProjectAuthentication({
                 contactEmail?: string;
                 defaultRoleId?: string;
                 clientDisclaimerUrl?: string;
+                clientDisclaimerText?: string;
                 styling: {
                   logo?: string;
                   favicon?: string;
@@ -155,6 +161,7 @@ export default function ProjectAuthentication({
                 contactEmail: values.contactEmail,
                 defaultRoleId: values.defaultRoleId,
                 clientDisclaimerUrl: values.clientDisclaimerUrl,
+                clientDisclaimerText: values.clientDisclaimerText,
                 styling: {
                   logo: values.logo,
                   favicon: values.favicon,
@@ -357,6 +364,25 @@ export default function ProjectAuthentication({
                       <FormControl>
                         <Input placeholder="" {...field} />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="clientDisclaimerText"
+                  render={({ field }) => (
+                    <FormItem className="col-span-full">
+                      <FormLabel>Linktekst voor de privacyverklaring</FormLabel>
+                      <FormControl>
+                        <Input placeholder="privacyverklaring" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Deze tekst wordt gebruikt als de klikbare link bij het
+                        privacy toestemmingsveld. Standaard:
+                        &quot;privacyverklaring&quot;.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

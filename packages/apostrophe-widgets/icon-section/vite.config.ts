@@ -4,4 +4,5 @@ export default createWidgetConfig({
   name: 'ApostropheWidgetsIconSection',
   entry: 'src/section.tsx',
   usePrefix: false,
+  bundleReact: true,
 });

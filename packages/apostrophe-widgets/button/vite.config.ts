@@ -4,4 +4,5 @@ export default createWidgetConfig({
   name: 'ApostropheWidgetsButton',
   entry: 'src/button.tsx',
   usePrefix: false,
+  bundleReact: true,
 });

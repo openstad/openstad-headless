@@ -161,6 +161,18 @@ const NumberInput: FC<NumberInputProps> = ({
           onPaste={(e) => {
             e.preventDefault();
             let pastedData = e.clipboardData.getData('text').replace(/\D/g, '');
+
+            if (pastedData === '') {
+              setValue('');
+              if (onChange) {
+                onChange({
+                  name: fieldKey,
+                  value: '',
+                });
+              }
+              return;
+            }
+
             let numericValue = parseInt(pastedData, 10);
             if (numericValue > MAX_VALUE) numericValue = MAX_VALUE;
 

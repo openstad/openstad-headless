@@ -40,7 +40,6 @@ module.exports = function (req, res, next) {
         (req.path.match('^(/api/project)$') && req.method == 'GET'))
     ) {
       url = req.headers.origin;
-      console.log('no project, allowing origin', url, req.path);
     }
   }
 
@@ -79,6 +78,8 @@ module.exports = function (req, res, next) {
     res.header('Expect-CT', 'max-age=86400, enforce');
     res.header('Feature-Policy', "vibrate 'none'; geolocation 'none'");
   }
+
+  res.removeHeader('Date');
 
   if (req.method === 'OPTIONS') {
     return res.end();

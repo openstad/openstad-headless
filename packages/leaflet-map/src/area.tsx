@@ -146,7 +146,11 @@ export function Area({
   showHiddenPolygonsForAdmin = false,
   ...props
 }: BaseProps & AreaProps) {
-  const datastore = new DataStore({});
+  const datastore = new DataStore({
+    projectId: props.projectId,
+    api: props.api,
+    config: { api: props.api },
+  });
   const areaIds = areas?.map((item: { id: number }) => item.id);
   const { data: fetchedAreas } = datastore.useAreas(
     areaIds && areaIds.length > 0 ? { ids: areaIds } : undefined
@@ -196,24 +200,21 @@ export function Area({
 
   const multiPolygon: any[] = [];
   const safeFetchedAreas = Array.isArray(fetchedAreas) ? fetchedAreas : [];
+  const configById = new Map<number, any>(
+    (areas ?? []).map((item: any) => [item.id, item])
+  );
 
   safeFetchedAreas.forEach((item: any) => {
+    const config = configById.get(item.id);
     multiPolygon.push({
       title: item.name,
       polygon: item.polygon,
       hidePolygon: item.hidePolygon,
+      url: config?.url,
+      color: config?.color,
+      openInNewTab: config?.openInNewTab,
+      buttonText: config?.buttonText,
     });
-  });
-  areas?.forEach((item: any) => {
-    const existingItem = multiPolygon.find(
-      (polygonItem) => polygonItem.title === item.name
-    );
-    if (existingItem) {
-      existingItem.url = item.url;
-      existingItem.color = item.color;
-      existingItem.openInNewTab = item.openInNewTab;
-      existingItem.buttonText = item.buttonText;
-    }
   });
 
   const hiddenOverlayStyle = {

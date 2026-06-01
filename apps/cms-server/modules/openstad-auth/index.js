@@ -68,24 +68,27 @@ module.exports = {
           const parsedUrl = Url.parse(fullUrl, true);
           const fullUrlPath = parsedUrl.path;
 
-          // remove the JWT Parameter otherwise keeps redirecting
           let returnTo =
             req.session && req.session.returnTo
               ? req.session.returnTo
               : removeURLParameter(fullUrlPath, 'openstadlogintoken');
 
-          // make sure references to external urls fail, only take the path
           returnTo = Url.parse(returnTo, true);
           returnTo = returnTo.path;
           req.session.openstadLoginToken = req.query.openstadlogintoken;
           req.session.returnTo = null;
 
-          // Remove siteprefix from returnTo if returnTo starts with the siteprefix
-          // This is to prevent doubling of the siteprefix leading to 404s
           if (req.sitePrefix && returnTo.startsWith(`/${req.sitePrefix}`)) {
+            const originalReturnTo = returnTo;
             returnTo = returnTo.replace(`/${req.sitePrefix}`, '');
+            console.log(
+              `[${new Date().toISOString()}][cms-auth] sitePrefix stripped: "${originalReturnTo}" -> "${returnTo}"`
+            );
           }
 
+          console.log(
+            `[${new Date().toISOString()}][cms-auth] login token received, redirecting to: ${returnTo}`
+          );
           req.session.save(() => {
             res.redirect(returnTo);
           });
@@ -162,17 +165,25 @@ module.exports = {
                 if (user && Object.keys(user).length > 0 && user.id) {
                   req.session.openstadUser = user;
                   req.session.openStadlastJWTCheck = new Date().getTime();
+                  console.log(
+                    `[${new Date().toISOString()}][cms-auth] user authenticated: userId=${user.id} role=${user.role} projectId=${req.project?.id}`
+                  );
 
                   req.session.save(() => {
                     setUserData(req, next);
                   });
                 } else {
-                  // if not valid clear the JWT and redirect
+                  console.log(
+                    `[${new Date().toISOString()}][cms-auth] invalid user data from API, destroying session: projectId=${req.project?.id}`
+                  );
                   req.session.destroy(() => {
                     res.redirect('/');
                   });
                 }
               } catch (err) {
+                console.log(
+                  `[${new Date().toISOString()}][cms-auth] user validation failed, destroying session: projectId=${req.project?.id} error=${err?.message}`
+                );
                 req.session.destroy(() => {
                   res.redirect('/');
                 });
@@ -285,7 +296,9 @@ module.exports = {
               res.redirect(req.url);
             });
           } catch (e) {
-            console.log('errr', e);
+            console.log(
+              `[${new Date().toISOString()}][cms-auth] apostrophe login error: ${e?.message}`
+            );
             return next(e);
           }
         }

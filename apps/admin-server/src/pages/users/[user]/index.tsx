@@ -30,7 +30,7 @@ export default function CreateUser() {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Algemene instellingen</TabsTrigger>
               <TabsTrigger value="projects">Projectsrechten</TabsTrigger>
-              <TabsTrigger value="auditlog">Audit log</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               <CreateUserGeneral />

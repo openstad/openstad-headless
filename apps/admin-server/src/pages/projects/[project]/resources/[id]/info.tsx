@@ -11,7 +11,10 @@ export default function ProjectResourceCreate() {
   const router = useRouter();
   const { project } = router.query;
   const { id } = router.query;
-  const { update } = useResources(project as string, true);
+  const { update } = useResources(project as string, {
+    includeGlobalTags: true,
+    skipFetch: true,
+  });
   const { data: resource, mutate } = useResource(
     project as string,
     id as string

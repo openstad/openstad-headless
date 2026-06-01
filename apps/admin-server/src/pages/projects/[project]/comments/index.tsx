@@ -1,13 +1,6 @@
 import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useComments from '@/hooks/use-comments';
 import useResources from '@/hooks/use-resources';
@@ -88,7 +81,7 @@ export default function ProjectComments() {
     const today = new Date();
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
-    const allData = await fetchAll(totalCount, pageLimit);
+    const allData = await fetchAll();
     exportComments(allData, `${projectId}_reacties_${formattedDate}.xlsx`);
   }
 
@@ -173,10 +166,6 @@ export default function ProjectComments() {
       setAllResources(resourceArray);
     }
   }, [resources]);
-
-  const selectClick = (value: any) => {
-    setActiveResource(value);
-  };
 
   const handleSort = (field: string) => {
     if (field === sortField) {
@@ -318,21 +307,17 @@ export default function ProjectComments() {
           ]}
           action={
             <div className="flex flex-row w-full md:w-auto my-auto gap-4">
-              <Select value={activeResource} onValueChange={selectClick}>
-                <SelectTrigger className="w-auto">
-                  <SelectValue placeholder="Filter inzendingen op resource" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">
-                    Filter inzendingen op resource
-                  </SelectItem>
-                  {allResources?.map((resource: any) => (
-                    <SelectItem
-                      key={resource.id}
-                      value={`${resource.id} - ${resource.name}`}>{`${resource.id} - ${resource.name}`}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <select
+                className="h-10 max-w-[300px] rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                value={activeResource}
+                onChange={(e) => setActiveResource(e.target.value)}>
+                <option value="0">Filter inzendingen op resource</option>
+                {allResources?.map((resource: any) => (
+                  <option
+                    key={resource.id}
+                    value={`${resource.id} - ${resource.name}`}>{`${resource.id} - ${resource.name}`}</option>
+                ))}
+              </select>
               <Button
                 className="text-xs p-2 w-fit"
                 type="submit"

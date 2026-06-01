@@ -317,6 +317,9 @@ function Enquete(props: EnqueteWidgetProps) {
     const result = await createSubmission(formData, props.widgetId);
 
     if (result) {
+      console.log(
+        `[enquete] submitted: widgetId=${props.widgetId} submissionId=${result.id}`
+      );
       if (
         typeof window !== 'undefined' &&
         props.enableDraftPersistence === true

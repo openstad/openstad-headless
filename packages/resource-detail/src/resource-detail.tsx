@@ -1,3 +1,4 @@
+import { Agenda } from '@openstad-headless/agenda/src/agenda';
 import {
   Comments,
   CommentsWidgetProps,
@@ -9,6 +10,7 @@ import { MapPropsType } from '@openstad-headless/leaflet-map/src/types';
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
 import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+import { humanizeDate } from '@openstad-headless/lib/humanize-date';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
@@ -61,7 +63,8 @@ type booleanProps = {
     | 'displayEditResourceButton'
     | 'displayDeleteButton'
     | 'displayDeleteEditButtonOnTop'
-    | 'displaySocials']: boolean | undefined;
+    | 'displaySocials'
+    | 'displayTimeline']: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = {
@@ -144,6 +147,7 @@ function ResourceDetail({
   urlWithResourceFormForEditing = '',
   displayDeleteButton = true,
   displayDeleteEditButtonOnTop = false,
+  displayTimeline = false,
   selectedSocialShareOptions = [
     'facebook',
     'x',
@@ -187,6 +191,9 @@ function ResourceDetail({
   };
 
   if (!resource) return null;
+
+  const timelineItems = resource?.timeline ?? [];
+
   const shouldHaveSideColumn =
     displayLikes ||
     displayTags ||
@@ -481,22 +488,21 @@ function ResourceDetail({
                   }}></Heading>
               )}
 
-              {displayModBreak && resource.modBreak && (
-                <div className="resource-detail-modbreak-banner">
-                  <section>
-                    <Heading level={2} appearance="utrecht-heading-6">
-                      {props.resources.modbreakTitle}
-                    </Heading>
-                    <Heading level={2} appearance="utrecht-heading-6">
-                      {resource.modBreakDateHumanized}
-                    </Heading>
-                  </section>
-                  <Spacer size={1} />
-                  <Heading level={2} appearance="utrecht-heading-6">
-                    {resource.modBreak}
-                  </Heading>
-                </div>
-              )}
+              {displayModBreak &&
+                resource.modBreaks?.map((mb: any) => (
+                  <div key={mb.id} className="resource-detail-modbreak-banner">
+                    <section>
+                      <Heading level={2} appearance="utrecht-heading-6">
+                        {mb.authorName || props.resources.modbreakTitle}
+                      </Heading>
+                      <Heading level={2} appearance="utrecht-heading-6">
+                        {mb.modBreakDate && humanizeDate(mb.modBreakDate)}
+                      </Heading>
+                    </section>
+                    <Spacer size={1} />
+                    <div dangerouslySetInnerHTML={{ __html: mb.description }} />
+                  </div>
+                ))}
 
               <div className="osc-resource-detail-content-item-row">
                 {displayUser && resource?.user?.displayName && (
@@ -606,6 +612,15 @@ function ResourceDetail({
                     </div>
                   ))}
               </div>
+              {displayTimeline && timelineItems.length > 0 && (
+                <Agenda
+                  {...props}
+                  items={timelineItems}
+                  displayTitle={true}
+                  title="Tijdlijn"
+                  useActiveDates={true}
+                />
+              )}
               {displayLocation && resource.location && (
                 <>
                   <Heading level={2} appearance="utrecht-heading-2">

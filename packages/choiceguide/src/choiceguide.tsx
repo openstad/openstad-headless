@@ -156,14 +156,17 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         props.widgetId
       );
       if (result) {
+        console.log(`[choiceguide] submitted: widgetId=${widgetId}`);
         notifySuccess();
 
         if (afterUrl) {
           location.href = afterUrl || '/';
         }
       }
-    } catch (e) {
-      console.log('Error', e);
+    } catch (e: any) {
+      console.error(
+        `[choiceguide] submit failed: widgetId=${widgetId} error=${e?.message}`
+      );
       notifyFailed();
     }
   };

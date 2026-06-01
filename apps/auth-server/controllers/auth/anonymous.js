@@ -8,6 +8,7 @@ const login = require('connect-ensure-login');
 const tokenUrl = require('../../services/tokenUrl');
 const authAnonymousConfig = require('../../config/auth').get(authType);
 const url = require('url');
+const clientAuth = require('../../utils/clientAuth');
 const { logAuthEvent } = require('../../middleware/auditLog');
 
 exports.login = (req, res, next) => {
@@ -87,18 +88,29 @@ exports.register = (req, res, next) => {
           });
 
           try {
-            db.ActionLog.create(values)
+            const defaultRoleId = req.client.config.defaultRoleId
+              ? req.client.config.defaultRoleId
+              : authAnonymousConfig.defaultRoleId;
+            db.UserRole.create({
+              clientId: req.client.id,
+              roleId: defaultRoleId,
+              userId: user.id,
+            })
+              .then(() =>
+                clientAuth.initializeClientAuth(req.session, req.client, user, {
+                  authType,
+                  twoFactorValid: false,
+                })
+              )
+              .then(() => clientAuth.saveSession(req.session))
+              .then(() => db.ActionLog.create(values))
               .then(() => {
                 return res.redirect(authorizeUrl);
               })
               .catch((err) => {
-                // Redirect if it succeeds to authorize screen
                 return res.redirect(authorizeUrl);
-                //		next(err);
               });
           } catch (e) {
-            // Redirect if it succeeds to authorize screen
-
             return res.redirect(authorizeUrl);
           }
         });

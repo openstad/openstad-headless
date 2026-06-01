@@ -4,8 +4,9 @@ import React from 'react';
 
 export default function UserAuditLog() {
   const { data } = useUser();
+  const user = Array.isArray(data) ? data[0] : data;
 
-  if (!data?.id) return null;
+  if (!user?.id) return null;
 
-  return <AuditLogTable userId={data.id} />;
+  return <AuditLogTable userId={user.id} />;
 }

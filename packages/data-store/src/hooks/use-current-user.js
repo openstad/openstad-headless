@@ -19,6 +19,7 @@ export default function useCurrentUser(props) {
     const params = new URLSearchParams(window.location.search);
 
     if (params.has('openstadlogout')) {
+      console.log('[osc-auth] logout detected, clearing session');
       storage.remove('cmsUser');
       storage.remove('openStadUser');
 
@@ -29,24 +30,16 @@ export default function useCurrentUser(props) {
       return {};
     }
 
-    // console.log('GETCURRENTUSER', self.currentUser);
-    if (self.currentUser && self.currentUser.id) {
-      // just once TODO: ik denk dat het jkan met useSWRmutaion,: als ik het goedlees update die alleen met de hand
-      return self.currentUser;
-    }
-
     // get user from props
     let initialUser = {};
     try {
       initialUser = globalOpenStadUser || props.openStadUser || {};
     } catch (err) {}
 
-    if (initialUser.id && initialUser.projectId == self.projectId) {
-      return initialUser;
-    }
     let jwt;
     if (params.has('openstadlogintoken')) {
       jwt = params.get('openstadlogintoken');
+      console.log('[osc-auth] login token received from URL');
       storage.set('openStadUser', { jwt });
       let url = window.location.href;
       url = url.replace(new RegExp(`[?&]openstadlogintoken=${jwt}`), '');
@@ -74,7 +67,12 @@ export default function useCurrentUser(props) {
     let sessionUser = storage.get('openStadUser') || {};
 
     // or use existing jwt
-    jwt = jwt || initialUser.jwt || sessionUser.jwt;
+    if (!jwt && sessionUser.jwt) {
+      jwt = sessionUser.jwt;
+    }
+    if (!jwt && initialUser.jwt) {
+      jwt = initialUser.jwt;
+    }
 
     // or get jwt for cmsUser
     if (!jwt && cmsUser && cmsUser.access_token && cmsUser.iss) {
@@ -96,9 +94,13 @@ export default function useCurrentUser(props) {
           projectId: self.projectId,
         });
 
+        console.log(
+          `[osc-auth] user authenticated: userId=${openStadUser?.id} role=${openStadUser?.role}`
+        );
         storage.set('openStadUser', { ...openStadUser, jwt });
         return openStadUser;
       } catch (err) {
+        console.log(`[osc-auth] user fetch failed: ${err?.message}`);
         storage.remove('openStadUser');
         return {};
       }

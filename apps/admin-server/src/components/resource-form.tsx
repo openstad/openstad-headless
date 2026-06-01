@@ -1,5 +1,6 @@
 import ImageGalleryStyle from '@/components/image-gallery-style';
 import MapInput from '@/components/maps/leaflet-input';
+import { MapErrorBoundary } from '@/components/maps/map-error-boundary';
 import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Button } from '@/components/ui/button';
 import { CodeEditor } from '@/components/ui/code-editor';
@@ -21,7 +22,14 @@ import useResource from '@/hooks/use-resource';
 import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, ArrowRight, X } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUp,
+  Plus,
+  X,
+} from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -72,11 +80,17 @@ const baseSchema = z.object({
   startDate: z.date(),
   publishDate: z.date().optional(),
 
-  modBreak: z.coerce.string().optional(),
-  modBreakUserId: z.coerce
-    .number({ invalid_type_error: onlyNumbersMessage })
-    .optional(),
-  modBreakDate: z.date().optional(),
+  modBreaks: z
+    .array(
+      z.object({
+        id: z.string(),
+        description: z.string().default(''),
+        authorName: z.string().optional().default(''),
+        modBreakDate: z.string().optional().default(''),
+      })
+    )
+    .optional()
+    .default([]),
 
   location: z.string().optional(),
   image: z.string().optional(),
@@ -232,11 +246,23 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         ? new Date(existingData.publishDate)
         : new Date(),
 
-      modBreak: existingData?.modBreak || '',
-      modBreakUserId: existingData?.modBreakUserId || undefined,
-      modBreakDate: existingData?.modBreakDate
-        ? new Date(existingData.modBreakDate)
-        : undefined,
+      modBreaks:
+        existingData?.modBreaks
+          ?.map((mb: any) => ({
+            id: mb.id || crypto.randomUUID(),
+            description: mb.description || '',
+            authorName: mb.authorName || '',
+            modBreakDate: mb.modBreakDate
+              ? mb.modBreakDate.includes('T')
+                ? mb.modBreakDate.slice(0, 16)
+                : mb.modBreakDate + 'T00:00'
+              : '',
+          }))
+          .sort(
+            (a: any, b: any) =>
+              new Date(b.modBreakDate || 0).getTime() -
+              new Date(a.modBreakDate || 0).getTime()
+          ) || [],
 
       location: existingData?.location
         ? JSON.stringify(existingData?.location)
@@ -375,6 +401,39 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     control: form.control,
     name: 'documents',
   });
+
+  const {
+    fields: modBreakFields,
+    prepend: prependModBreak,
+    remove: removeModBreak,
+    swap: swapModBreak,
+  } = useFieldArray({
+    control: form.control,
+    name: 'modBreaks',
+  });
+
+  const [modBreakPage, setModBreakPage] = React.useState(0);
+  const modBreaksPerPage = 5;
+  const modBreakPageCount = Math.max(
+    1,
+    Math.ceil(modBreakFields.length / modBreaksPerPage)
+  );
+  const visibleModBreaks = modBreakFields.slice(
+    modBreakPage * modBreaksPerPage,
+    (modBreakPage + 1) * modBreaksPerPage
+  );
+
+  const moveUpModBreak = (index: number) => {
+    if (index <= 0) return;
+    swapModBreak(index, index - 1);
+  };
+
+  const moveDownModBreak = (index: number) => {
+    if (index >= modBreakFields.length - 1) return;
+    swapModBreak(index, index + 1);
+  };
+
+  const modbreakTitle = projectData?.config?.resources?.modbreakTitle || '';
 
   const moveUpImage = (index: number) => {
     if (index <= 0) return;
@@ -772,53 +831,183 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             control={form.control}
             name="location"
             render={({ field }) => (
-              <MapInput onSelectLocation={handleLocationSelect} field={field} />
+              <MapErrorBoundary>
+                <MapInput
+                  onSelectLocation={handleLocationSelect}
+                  field={field}
+                />
+              </MapErrorBoundary>
             )}
           />
 
           <Separator className="lg:col-span-2 my-6" />
 
-          <FormField
-            control={form.control}
-            name="modBreak"
-            render={({ field }) => (
-              <FormItem className="lg:col-span-2 col-span-2">
-                <FormLabel>Inhoud van de Modbreak</FormLabel>
-                <FormDescription>
-                  Laat dit veld leeg om geen Modbreak bij deze resource te tonen
-                </FormDescription>
-                <FormControl>
-                  <Textarea rows={5} placeholder="" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          <div className="lg:col-span-2 col-span-2">
+            <Heading size="xl">Modbreaks</Heading>
+            {!modbreakTitle && (
+              <p className="text-sm text-orange-600 mb-4">
+                Geen standaardnaam ingesteld.{' '}
+                <a
+                  href={`/projects/${project}/settings/resource`}
+                  className="underline hover:no-underline">
+                  Stel deze in bij projectinstellingen &rarr;
+                </a>
+              </p>
             )}
-          />
+            <Button
+              type="button"
+              variant="outline"
+              className="mb-4"
+              onClick={() =>
+                prependModBreak({
+                  id: crypto.randomUUID(),
+                  description: '',
+                  authorName: '',
+                  modBreakDate: (() => {
+                    const now = new Date();
+                    const pad = (n: number) => String(n).padStart(2, '0');
+                    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;
+                  })(),
+                })
+              }>
+              <Plus size={16} className="mr-2" />
+              Modbreak toevoegen
+            </Button>
+            {modBreakFields.length === 0 && (
+              <p className="text-sm text-muted-foreground mb-4">
+                Nog geen modbreaks toegevoegd.
+              </p>
+            )}
+            {visibleModBreaks.map((field, pageIndex) => {
+              const index = modBreakPage * modBreaksPerPage + pageIndex;
+              return (
+                <div key={field.id} className="border rounded-md p-4 mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium">
+                      Modbreak {index + 1}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={index === 0}
+                        onClick={() => moveUpModBreak(index)}>
+                        <ArrowUp size={16} />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        disabled={index === modBreakFields.length - 1}
+                        onClick={() => moveDownModBreak(index)}>
+                        <ArrowDown size={16} />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeModBreak(index)}>
+                        <X size={16} />
+                      </Button>
+                    </div>
+                  </div>
 
-          <FormField
-            control={form.control}
-            name="modBreakUserId"
-            render={({ field }) => (
-              <FormItem className="col-span-1">
-                <FormLabel>
-                  ID van de gebruiker die aan de Modbreak is gekoppeld
-                  (optioneel)
-                </FormLabel>
-                <FormControl>
-                  <Input placeholder="" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+                  <FormField
+                    control={form.control}
+                    name={`modBreaks.${index}.description`}
+                    render={({ field: descField }) => (
+                      <FormItem className="mb-4">
+                        <FormLabel>Inhoud</FormLabel>
+                        <FormControl>
+                          <TrixEditor
+                            value={descField.value}
+                            onChange={(val) => descField.onChange(val)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name={`modBreaks.${index}.authorName`}
+                      render={({ field: nameField }) => (
+                        <FormItem>
+                          <FormLabel>Naam</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder={
+                                modbreakTitle
+                                  ? `Laat leeg voor: ${modbreakTitle}`
+                                  : 'Naam van de auteur'
+                              }
+                              {...nameField}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name={`modBreaks.${index}.modBreakDate`}
+                      render={({ field: dateField }) => (
+                        <FormItem>
+                          <FormLabel>Datum en tijd</FormLabel>
+                          <FormDescription>
+                            Staat de tijd op 00:00? Dan wordt alleen de datum
+                            getoond.{' '}
+                            <a
+                              href="#"
+                              className="underline hover:no-underline"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                const dateOnly = dateField.value?.slice(0, 10);
+                                if (dateOnly) {
+                                  dateField.onChange(dateOnly + 'T00:00');
+                                }
+                              }}>
+                              Zet op 00:00
+                            </a>
+                          </FormDescription>
+                          <FormControl>
+                            <Input type="datetime-local" {...dateField} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+            {modBreakPageCount > 1 && (
+              <div className="flex items-center justify-center gap-2 my-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={modBreakPage === 0}
+                  onClick={() => setModBreakPage(modBreakPage - 1)}>
+                  Vorige
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  {modBreakPage + 1} / {modBreakPageCount}
+                </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={modBreakPage >= modBreakPageCount - 1}
+                  onClick={() => setModBreakPage(modBreakPage + 1)}>
+                  Volgende
+                </Button>
+              </div>
             )}
-          />
-          <div className="mt-auto col-span-full lg:col-span-1">
-            <SimpleCalendar
-              form={form}
-              fieldName="modBreakDate"
-              label="Datum van de ModBreak (optioneel)"
-              placeholder="Kies een datum"
-              withReset
-            />
           </div>
 
           <Separator className="lg:col-span-2 my-6" />

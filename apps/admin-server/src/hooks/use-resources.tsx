@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import { useMemo } from 'react';
 import useSWR from 'swr';
 
 export type ResourceListOptions = {
@@ -7,13 +8,27 @@ export type ResourceListOptions = {
   searchTerm?: string;
 };
 
+type UseResourcesConfig = {
+  includeGlobalTags?: boolean;
+  skipFetch?: boolean;
+};
+
 export default function useResources(
   projectId?: string,
-  includeGlobalTags?: boolean,
+  configOrIncludeGlobalTags?: boolean | UseResourcesConfig,
   page?: number,
   pageSize?: number,
   options?: ResourceListOptions
 ) {
+  const includeGlobalTags =
+    typeof configOrIncludeGlobalTags === 'object'
+      ? configOrIncludeGlobalTags?.includeGlobalTags
+      : configOrIncludeGlobalTags;
+  const skipFetch =
+    typeof configOrIncludeGlobalTags === 'object'
+      ? configOrIncludeGlobalTags?.skipFetch
+      : false;
+
   const projectNumber: number | undefined = validateProjectNumber(projectId);
   const baseUrl = `/api/openstad/api/project/${projectNumber}/resource`;
   const params = new URLSearchParams({
@@ -39,10 +54,19 @@ export default function useResources(
 
   const url = `${baseUrl}?${params.toString()}`;
 
-  const resourcesListSwr = useSWR(projectNumber ? url : null);
+  const resourcesListSwr = useSWR(!skipFetch && projectNumber ? url : null);
 
-  const records = resourcesListSwr.data?.records || resourcesListSwr.data || [];
+  const records = useMemo(
+    () => resourcesListSwr.data?.records || resourcesListSwr.data || [],
+    [resourcesListSwr.data]
+  );
   const pagination = resourcesListSwr.data?.metadata || null;
+
+  function getExistingRecords(): any[] {
+    return Array.isArray(resourcesListSwr.data)
+      ? resourcesListSwr.data
+      : resourcesListSwr.data?.records || [];
+  }
 
   async function create(body: any) {
     const res = await fetch(url, {
@@ -55,7 +79,7 @@ export default function useResources(
 
     if (res.ok) {
       const data = await res.json();
-      resourcesListSwr.mutate([...resourcesListSwr.data, data]);
+      resourcesListSwr.mutate([...getExistingRecords(), data]);
       return data;
     } else {
       throw new Error('Could not create the plan');
@@ -79,8 +103,9 @@ export default function useResources(
 
     if (res.ok) {
       const data = await res.json();
-      const existingData = [...resourcesListSwr.data];
-      const updatedList = existingData.filter((ed) => ed.id !== data.id);
+      const updatedList = getExistingRecords().filter(
+        (ed: any) => ed.id !== data.id
+      );
       updatedList.push(data);
       resourcesListSwr.mutate(updatedList);
       return data;
@@ -103,8 +128,9 @@ export default function useResources(
     });
 
     if (res.ok) {
-      const existingData = [...resourcesListSwr.data];
-      const updatedList = existingData.filter((ed) => ed.id !== id);
+      const updatedList = getExistingRecords().filter(
+        (ed: any) => ed.id !== id
+      );
       resourcesListSwr.mutate(updatedList);
       return updatedList;
     } else {
@@ -126,30 +152,23 @@ export default function useResources(
     if (res.ok) {
       const data = await res.json();
 
-      resourcesListSwr.mutate([...resourcesListSwr.data, ...data]);
+      resourcesListSwr.mutate([...getExistingRecords(), ...data]);
       return data;
     } else {
       throw new Error('Could not duplicate the widgets');
     }
   }
 
-  async function fetchAll(totalCount: number, pageSizeLimit: number) {
-    let allData: any[] = [];
-    const totalPagesToFetch = Math.ceil(totalCount / pageSizeLimit);
-
-    for (let currentPage = 0; currentPage < totalPagesToFetch; currentPage++) {
-      const fetchAllParams = new URLSearchParams({
-        includeUser: '1',
-        includeVoteCount: '1',
-        includeTags: '1',
-        page: currentPage.toString(),
-        pageSize: pageSizeLimit.toString(),
-      });
-      const response = await fetch(`${baseUrl}?${fetchAllParams.toString()}`);
-      const results = await response.json();
-      allData = allData.concat(results?.records || []);
-    }
-    return allData;
+  async function fetchAll() {
+    const fetchAllParams = new URLSearchParams({
+      includeUser: '1',
+      includeVoteCount: '1',
+      includeTags: '1',
+      noPagination: 'true',
+    });
+    const response = await fetch(`${baseUrl}?${fetchAllParams.toString()}`);
+    const results = await response.json();
+    return results?.records || [];
   }
 
   return {

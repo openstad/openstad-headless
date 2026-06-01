@@ -1,6 +1,15 @@
 const config = require('config');
 const URL = require('url').URL;
 
+function getParentDomains(hostname) {
+  const parts = hostname.split('.');
+  const parents = [];
+  for (let i = 1; i < parts.length - 1; i++) {
+    parents.push(parts.slice(i).join('.'));
+  }
+  return parents;
+}
+
 module.exports = function (req, res, next) {
   let origin = req.headers && req.headers.origin;
 
@@ -16,9 +25,19 @@ module.exports = function (req, res, next) {
     ? allowedDomains
     : (allowedDomains || '').split(',');
 
+  const expanded = [];
+  for (const d of whitelist) {
+    const host = (d || '').trim();
+    if (!host) continue;
+    expanded.push(host);
+    for (const parent of getParentDomains(host.split(':')[0])) {
+      expanded.push(parent);
+    }
+  }
+
   const stripWww = (d) => (d && d.startsWith('www.') ? d.slice(4) : d);
   const normalizedDomain = stripWww(domain);
-  const isDomainAllowed = whitelist.some(
+  const isDomainAllowed = expanded.some(
     (d) => stripWww(d) === normalizedDomain
   );
 

@@ -280,9 +280,15 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
       if (editMode) {
         try {
           await existingResource.update(finalFormData);
+          console.log(
+            `[resource-form] updated: resourceId=${existingResource.id}`
+          );
           notifySuccessEdit();
           redirectAfterSaveOrCreate(existingResource, true);
         } catch (e) {
+          console.error(
+            `[resource-form] update failed: resourceId=${existingResource.id} error=${e?.message}`
+          );
           notifyFailedEdit(e.message || 'Inzending bewerken mislukt');
         } finally {
           setDisableSubmit(false);
@@ -293,11 +299,17 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
       const result = await createResource(finalFormData, props.widgetId);
       if (result) {
+        console.log(
+          `[resource-form] created: resourceId=${result.id} widgetId=${props.widgetId}`
+        );
         notifySuccess();
         redirectAfterSaveOrCreate(result);
       }
       setDisableSubmit(false);
-    } catch {
+    } catch (e: any) {
+      console.error(
+        `[resource-form] create failed: widgetId=${props.widgetId} error=${e?.message}`
+      );
       notifyFailed();
       setDisableSubmit(false);
     }

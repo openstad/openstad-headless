@@ -108,6 +108,52 @@ async function canUserUseSourceProjectForDuplication({ req, sourceProjectId }) {
   return !!sourceProjectUser;
 }
 
+// Middleware: reject duplicate project URLs (case-insensitive, ignoring www and trailing slashes).
+// `removeProtocolFromUrl` already strips the protocol from req.body.url before this runs.
+// The DB index (`projects_url_unique`) enforces exact uniqueness; this middleware enforces
+// normalized uniqueness (e.g. www.example.com/ == example.com).
+function checkUniqueUrl(req, res, next) {
+  if (!req.body.url) return next();
+
+  let normalizedUrl = req.body.url
+    .trim()
+    .toLowerCase()
+    .replace(/^www\./, '');
+  while (normalizedUrl.endsWith('/')) {
+    normalizedUrl = normalizedUrl.slice(0, -1);
+  }
+
+  if (!normalizedUrl) return next();
+
+  const excludeId = req.params.projectId
+    ? parseInt(req.params.projectId)
+    : null;
+
+  const normalizedColumn = Sequelize.literal(
+    "LOWER(TRIM(TRAILING '/' FROM REPLACE(REPLACE(REPLACE(`url`, 'https://', ''), 'http://', ''), 'www.', '')))"
+  );
+
+  const whereClause = excludeId
+    ? {
+        [Op.and]: [
+          Sequelize.where(normalizedColumn, normalizedUrl),
+          { id: { [Op.ne]: excludeId } },
+        ],
+      }
+    : Sequelize.where(normalizedColumn, normalizedUrl);
+
+  db.Project.findOne({ where: whereClause })
+    .then((existing) => {
+      if (existing) {
+        return next(
+          createError(409, 'Deze URL is al in gebruik door een ander project.')
+        );
+      }
+      return next();
+    })
+    .catch(next);
+}
+
 async function getProject(req, res, next, include = []) {
   const projectId = req.params.projectId;
   let query = { where: { id: parseInt(projectId) }, include: include };
@@ -326,25 +372,6 @@ async function createResources(
       ) {
         updatedResource.userId = await getOrCreateUser(
           sourceResourceUserId,
-          userMap,
-          req.projectId,
-          req.createdUserIds
-        );
-      }
-
-      // Remap known top-level secondary user reference.
-      const sourceModBreakUserId = updatedResource.modBreakUserId;
-      if (
-        typeof sourceModBreakUserId === 'number' ||
-        (typeof sourceModBreakUserId === 'string' &&
-          /^\d+$/.test(sourceModBreakUserId))
-      ) {
-        const normalizedSourceModBreakUserId =
-          typeof sourceModBreakUserId === 'number'
-            ? sourceModBreakUserId
-            : parseInt(sourceModBreakUserId, 10);
-        updatedResource.modBreakUserId = await getOrCreateUser(
-          normalizedSourceModBreakUserId,
           userMap,
           req.projectId,
           req.createdUserIds
@@ -791,6 +818,7 @@ router
   // -----------
   .post(auth.can('Project', 'create'))
   .post(removeProtocolFromUrl)
+  .post(checkUniqueUrl)
   .post(rateLimiter(), async function (req, res, next) {
     const isDuplicationPayload = req.body.isDuplicateRequest === true;
     req.isDuplicationPayload = isDuplicationPayload;
@@ -1274,6 +1302,7 @@ router
   // -----------
   .put(auth.useReqUser)
   .put(removeProtocolFromUrl)
+  .put(checkUniqueUrl)
   .put(rateLimiter(), async function (req, res, next) {
     // update certain parts of config to the oauth client
     const project = await db.Project.findOne({ where: { id: req.results.id } });
@@ -1379,12 +1408,13 @@ router
     project
       .authorizeData(req.body, 'update')
       .update(updateBody)
-      .then((result) => {
+      .then(async (result) => {
         req.results = result;
-        return checkHostStatus({ id: result.id });
-      })
-      .then(async () => {
-        // Re-read so response includes hostStatus written by checkHostStatus
+        try {
+          await checkHostStatus({ id: result.id });
+        } catch (err) {
+          console.log('Ignore checkHostStatus error', err);
+        }
         const fresh = await db.Project.scope('includeConfig').findByPk(
           req.results.id
         );
@@ -1396,8 +1426,7 @@ router
         return null;
       })
       .catch((err) => {
-        console.log('Ignore checkHostStatus error', err);
-        next();
+        next(err);
         return null;
       });
   })
@@ -1723,6 +1752,17 @@ router
       );
       return res.status(500).json({ error: 'Certificate retry failed' });
     }
+  });
+
+// PDF availability check
+// ----------------------
+router
+  .route('/:projectId(\\d+)/pdf/status')
+  .get(auth.can('Project', 'update'))
+  .get(function (req, res) {
+    const available =
+      !!process.env.PDF_API_ENDPOINT && !!process.env.PDF_API_KEY;
+    res.json({ available });
   });
 
 module.exports = router;

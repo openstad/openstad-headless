@@ -7,7 +7,7 @@ import React from 'react';
 export default function ProjectResourceCreate() {
   const router = useRouter();
   const { project } = router.query;
-  const { create } = useResources(project as string);
+  const { create } = useResources(project as string, { skipFetch: true });
 
   return (
     <div>

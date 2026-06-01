@@ -56,8 +56,10 @@ export const Step3 = ({
 
           if (pendingVoteData) {
             let pendingBudgetVoteApiUrl = `${apiUrl}/api/pending-budget-vote`;
+            const pendingCount = pendingVoteData
+              ? Object.keys(pendingVoteData).length
+              : 0;
 
-            // post pendingVoteData to apiUrl
             const response = await fetch(pendingBudgetVoteApiUrl, {
               method: 'POST',
               headers: {
@@ -72,6 +74,9 @@ export const Step3 = ({
               const responseData = await response.json();
               const { id } = responseData;
               if (id) {
+                console.log(
+                  `[stem-begroot] pending vote saved before login: uuid=${id} resources=${pendingCount}`
+                );
                 const newRedirectUri = new URL(redirectUri);
                 newRedirectUri.searchParams.set('pendingBudgetVote', id);
 
@@ -80,6 +85,10 @@ export const Step3 = ({
                   encodeURIComponent(newRedirectUri.toString())
                 );
               }
+            } else {
+              console.error(
+                `[stem-begroot] pending vote save failed: status=${response.status} resources=${pendingCount}`
+              );
             }
           }
 

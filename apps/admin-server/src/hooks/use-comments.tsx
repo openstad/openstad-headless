@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import { useMemo } from 'react';
 import useSWR from 'swr';
 
 export type CommentListOptions = {
@@ -54,7 +55,10 @@ export default function useComments(
 
   const commentListSwr = useSWR(projectNumber ? url : null);
 
-  const records = commentListSwr.data?.records || commentListSwr.data || [];
+  const records = useMemo(
+    () => commentListSwr.data?.records || commentListSwr.data || [],
+    [commentListSwr.data]
+  );
   const pagination = commentListSwr.data?.metadata || null;
 
   async function removeComment(id: number, multiple?: boolean, ids?: number[]) {
@@ -135,20 +139,13 @@ export default function useComments(
     }
   }
 
-  async function fetchAll(totalCount: number, pageSizeLimit: number) {
-    let allData: any[] = [];
-    const totalPagesToFetch = Math.ceil(totalCount / pageSizeLimit);
-
-    for (let currentPage = 0; currentPage < totalPagesToFetch; currentPage++) {
-      const fetchAllParams = new URLSearchParams({
-        page: currentPage.toString(),
-        pageSize: pageSizeLimit.toString(),
-      });
-      const response = await fetch(`${baseUrl}&${fetchAllParams.toString()}`);
-      const results = await response.json();
-      allData = allData.concat(results?.records || []);
-    }
-    return allData;
+  async function fetchAll() {
+    const fetchAllParams = new URLSearchParams({
+      noPagination: 'true',
+    });
+    const response = await fetch(`${baseUrl}&${fetchAllParams.toString()}`);
+    const results = await response.json();
+    return results?.records || [];
   }
 
   return {

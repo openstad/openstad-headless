@@ -26,6 +26,9 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.STRING(255),
         allowNull: null,
         defaultValue: null,
+        set(value) {
+          this.setDataValue('url', value ? value : null);
+        },
       },
 
       config: {
@@ -211,7 +214,14 @@ module.exports = function (db, sequelize, DataTypes) {
             throw Error(
               'Cannot delete an active project - first anonymize all users'
             );
-          return;
+
+          if (instance.url) {
+            let config = merge.recursive(true, instance.config);
+            config.project.archivedUrl = instance.url;
+            instance.set('config', config);
+            instance.set('url', null);
+            await instance.save({ hooks: false });
+          }
         },
 
         afterCreate: async function (instance, options) {

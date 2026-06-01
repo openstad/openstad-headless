@@ -100,6 +100,10 @@ validate.clientExists = (client) => {
 validate.token = (token, accessToken) => {
   utils.verifyToken(accessToken);
 
+  if (!token) {
+    throw new Error('Access token not found');
+  }
+
   // token is a user token
   if (token.userID != null) {
     return db.User.findOne({ where: { id: token.userID } })

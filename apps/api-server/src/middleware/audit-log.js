@@ -122,7 +122,10 @@ module.exports = function auditLogMiddleware(serviceOverride) {
           }
         }
       }
-      // For deletes, previousData is already captured, newData stays null
+
+      if (method === 'PUT' && !newData) {
+        return originalJson(data);
+      }
 
       service.log(req, {
         action: method,

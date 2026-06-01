@@ -26,6 +26,7 @@ import useTags from '@/hooks/use-tags';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   ChoiceGuideProps,
@@ -189,7 +190,10 @@ export default function WidgetChoiceGuideItems(
   type FormData = z.infer<typeof formSchema>;
   const [items, setItems] = useState<Item[]>([]);
   const [options, setOptions] = useState<Option[]>([]);
-  const [selectedItem, setItem] = useState<Item | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const selectedItem = selectedItemId
+    ? items.find((i) => i.id === selectedItemId) || null
+    : null;
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('1');
@@ -266,10 +270,16 @@ export default function WidgetChoiceGuideItems(
       }
       const hasTriggerChanges = Object.keys(triggerMap).length > 0;
 
+      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+
       setItems((currentItems) =>
         currentItems.map((item) => {
-          if (item.trigger === selectedItem.trigger) {
-            return { ...item, ...values, weights: normalizedMergedWeights };
+          if (item.id === selectedItem.id) {
+            return {
+              ...item,
+              ...valuesWithoutTrigger,
+              weights: normalizedMergedWeights,
+            };
           }
           if (
             hasTriggerChanges &&
@@ -288,61 +298,64 @@ export default function WidgetChoiceGuideItems(
           return item;
         })
       );
-      setItem(null);
+      setSelectedItemId(null);
     } else {
-      setItems((currentItems) => [
-        ...currentItems,
-        {
-          trigger: `${
-            currentItems.length > 0
-              ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
-              : 1
-          }`,
-          title: values.title,
-          description: values.description,
-          type: values.type,
-          fieldRequired: values.fieldRequired || false,
-          minCharacters: values.minCharacters,
-          maxCharacters: values.maxCharacters,
-          variant: values.variant || 'text input',
-          multiple: values.multiple || false,
-          options: values.options || [],
-          showMoreInfo: values.showMoreInfo || false,
-          moreInfoButton: values.moreInfoButton || '',
-          moreInfoContent: values.moreInfoContent || '',
-          labelA: values.labelA || '',
-          labelB: values.labelB || '',
-          sliderTitleUnderA: values.sliderTitleUnderA || '',
-          sliderTitleUnderB: values.sliderTitleUnderB || '',
-          explanationA: values.explanationA || '',
-          explanationB: values.explanationB || '',
-          imageA: values.imageA || '',
-          imageB: values.imageB || '',
-          placeholder: values.placeholder || '',
-          prevPageText: values.prevPageText || '',
-          nextPageText: values.nextPageText || '',
-          maxChoices: values.maxChoices || '',
-          maxChoicesMessage: values.maxChoicesMessage || '',
-          defaultValue: values.defaultValue || '',
-          weights: normalizedValuesWeights,
-          skipQuestion: values.skipQuestion || false,
-          skipQuestionAllowExplanation:
-            values.skipQuestionAllowExplanation || false,
-          skipQuestionExplanation: values.skipQuestionExplanation || '',
-          skipQuestionLabel: values.skipQuestionLabel || 'Sla vraag over',
-          matrix: values.matrix || matrixDefault,
-          matrixMultiple: values.matrixMultiple || false,
-          routingInitiallyHide: values.routingInitiallyHide || false,
-          createImageSlider: values.createImageSlider || false,
-          imageClickable: values.imageClickable || false,
-          images: values?.images || [],
-          routingSelectedQuestion: values.routingSelectedQuestion || '',
-          routingSelectedAnswer: values.routingSelectedAnswer || '',
+      setItems((currentItems) => {
+        const maxTrigger = currentItems.reduce(
+          (max, i) => Math.max(max, parseInt(i.trigger) || 0),
+          0
+        );
+        return [
+          ...currentItems,
+          {
+            id: generateId(),
+            trigger: `${maxTrigger + 1}`,
+            title: values.title,
+            description: values.description,
+            type: values.type,
+            fieldRequired: values.fieldRequired || false,
+            minCharacters: values.minCharacters,
+            maxCharacters: values.maxCharacters,
+            variant: values.variant || 'text input',
+            multiple: values.multiple || false,
+            options: values.options || [],
+            showMoreInfo: values.showMoreInfo || false,
+            moreInfoButton: values.moreInfoButton || '',
+            moreInfoContent: values.moreInfoContent || '',
+            labelA: values.labelA || '',
+            labelB: values.labelB || '',
+            sliderTitleUnderA: values.sliderTitleUnderA || '',
+            sliderTitleUnderB: values.sliderTitleUnderB || '',
+            explanationA: values.explanationA || '',
+            explanationB: values.explanationB || '',
+            imageA: values.imageA || '',
+            imageB: values.imageB || '',
+            placeholder: values.placeholder || '',
+            prevPageText: values.prevPageText || '',
+            nextPageText: values.nextPageText || '',
+            maxChoices: values.maxChoices || '',
+            maxChoicesMessage: values.maxChoicesMessage || '',
+            defaultValue: values.defaultValue || '',
+            weights: normalizedValuesWeights,
+            skipQuestion: values.skipQuestion || false,
+            skipQuestionAllowExplanation:
+              values.skipQuestionAllowExplanation || false,
+            skipQuestionExplanation: values.skipQuestionExplanation || '',
+            skipQuestionLabel: values.skipQuestionLabel || 'Sla vraag over',
+            matrix: values.matrix || matrixDefault,
+            matrixMultiple: values.matrixMultiple || false,
+            routingInitiallyHide: values.routingInitiallyHide || false,
+            createImageSlider: values.createImageSlider || false,
+            imageClickable: values.imageClickable || false,
+            images: values?.images || [],
+            routingSelectedQuestion: values.routingSelectedQuestion || '',
+            routingSelectedAnswer: values.routingSelectedAnswer || '',
 
-          // Keeping this for backwards compatibility
-          image: values.infoImage || '',
-        },
-      ]);
+            // Keeping this for backwards compatibility
+            image: values.infoImage || '',
+          },
+        ];
+      });
     }
     form.reset(defaults);
     setOptions([]);
@@ -355,7 +368,7 @@ export default function WidgetChoiceGuideItems(
     if (selectedOption) {
       setOptions((currentOptions) =>
         currentOptions.map((option) =>
-          option.trigger === selectedOption.trigger
+          option.id === selectedOption.id
             ? {
                 ...option,
                 titles:
@@ -367,12 +380,13 @@ export default function WidgetChoiceGuideItems(
       );
       setOption(null);
     } else {
+      const maxTrigger = options.reduce(
+        (max, o) => Math.max(max, parseInt(o.trigger) || 0),
+        -1
+      );
       const newOption = {
-        trigger: `${
-          options.length > 0
-            ? parseInt(options[options.length - 1].trigger) + 1
-            : 0
-        }`,
+        id: generateId(),
+        trigger: `${maxTrigger + 1}`,
         titles: values.options?.[values.options.length - 1].titles || [],
       };
       setOptions((currentOptions) => [...currentOptions, newOption]);
@@ -389,7 +403,7 @@ export default function WidgetChoiceGuideItems(
 
         if (updatedMatrixOption === 'rows') {
           updatedMatrix.rows = updatedMatrix.rows.map((row) =>
-            row.trigger === matrixOption.trigger
+            row.id === matrixOption.id
               ? {
                   ...row,
                   text:
@@ -400,7 +414,7 @@ export default function WidgetChoiceGuideItems(
           );
         } else {
           updatedMatrix.columns = updatedMatrix.columns.map((column) =>
-            column.trigger === matrixOption.trigger
+            column.id === matrixOption.id
               ? {
                   ...column,
                   text:
@@ -437,6 +451,7 @@ export default function WidgetChoiceGuideItems(
       const newText = newTextObj?.text || '';
 
       const newMatrixOption: MatrixOption = {
+        id: generateId(),
         trigger: newTrigger.toString(),
         text: newText,
       };
@@ -505,9 +520,11 @@ export default function WidgetChoiceGuideItems(
     defaultValues: defaults(),
   });
 
+  const itemsInitialized = React.useRef(false);
   useEffect(() => {
-    if (props?.items && props?.items?.length > 0) {
-      setItems(props?.items);
+    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
+      itemsInitialized.current = true;
+      setItems(props.items.map(withId));
     }
   }, [props?.items]);
 
@@ -581,17 +598,22 @@ export default function WidgetChoiceGuideItems(
       };
 
       form.reset(formValues);
-      setOptions(selectedItem.options || []);
-      setMatrixOptions(selectedItem.matrix || matrixDefault);
+      setOptions((selectedItem.options || []).map(withId));
+      const matrix = selectedItem.matrix || matrixDefault;
+      setMatrixOptions({
+        ...matrix,
+        rows: (matrix.rows || []).map(withId),
+        columns: (matrix.columns || []).map(withId),
+      });
       setActiveTab('1');
     }
-  }, [selectedItem, form]);
+  }, [selectedItemId, form]);
 
   useEffect(() => {
     if (selectedOption) {
       const updatedOptions = [...options];
       const index = options.findIndex(
-        (option) => option.trigger === selectedOption.trigger
+        (option) => option.id === selectedOption.id
       );
       updatedOptions[index] = { ...selectedOption };
 
@@ -690,25 +712,36 @@ export default function WidgetChoiceGuideItems(
     actionType: 'moveUp' | 'moveDown' | 'delete',
     trigger: string
   ) {
-    const index = list.findIndex((entry) => entry.trigger === trigger);
-
     if (actionType === 'delete') {
-      return list.filter((entry) => entry.trigger !== trigger);
+      return list
+        .filter((entry) => entry.trigger !== trigger)
+        .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger));
     }
+
+    const sorted = [...list].sort(
+      (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
+    );
+    const index = sorted.findIndex((entry) => entry.trigger === trigger);
 
     if (
       (actionType === 'moveUp' && index > 0) ||
-      (actionType === 'moveDown' && index < list.length - 1)
+      (actionType === 'moveDown' && index < sorted.length - 1)
     ) {
-      const newItemList = [...list];
       const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
-      let tempTrigger = newItemList[swapIndex].trigger;
-      newItemList[swapIndex].trigger = newItemList[index].trigger;
-      newItemList[index].trigger = tempTrigger;
-      return newItemList;
+      const triggerA = sorted[index].trigger;
+      const triggerB = sorted[swapIndex].trigger;
+      return sorted
+        .map((entry) => {
+          if (entry.trigger === triggerA)
+            return { ...entry, trigger: triggerB };
+          if (entry.trigger === triggerB)
+            return { ...entry, trigger: triggerA };
+          return entry;
+        })
+        .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger));
     }
 
-    return list; // If no action is performed, return the original list
+    return sorted;
   }
 
   useEffect(() => {
@@ -742,16 +775,17 @@ export default function WidgetChoiceGuideItems(
 
     if (selectedItem) {
       const values = form.getValues();
-      if (values?.options) {
-        values.options = options;
+      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+      if (valuesWithoutTrigger?.options) {
+        valuesWithoutTrigger.options = options;
       }
-      if (values?.matrix) {
-        values.matrix = matrixOptions;
+      if (valuesWithoutTrigger?.matrix) {
+        valuesWithoutTrigger.matrix = matrixOptions;
       }
 
       const normalizedValuesWeights = ensureABDefaultsOnWeights(
-        values.type,
-        values.weights || {}
+        valuesWithoutTrigger.type,
+        valuesWithoutTrigger.weights || {}
       );
       const selectedItemWeights = structuredClone(selectedItem.weights || {});
       const mergedWeights = {
@@ -759,13 +793,17 @@ export default function WidgetChoiceGuideItems(
         ...structuredClone(normalizedValuesWeights),
       };
       const normalizedMergedWeights = ensureABDefaultsOnWeights(
-        values.type,
+        valuesWithoutTrigger.type,
         mergedWeights
       );
 
       itemsToSave = itemsToSave.map((item) =>
-        item.trigger === selectedItem.trigger
-          ? { ...item, ...values, weights: normalizedMergedWeights }
+        item.id === selectedItem.id
+          ? {
+              ...item,
+              ...valuesWithoutTrigger,
+              weights: normalizedMergedWeights,
+            }
           : item
       );
     }
@@ -781,7 +819,7 @@ export default function WidgetChoiceGuideItems(
 
     setItems(itemsToSave);
     props.updateConfig({ ...updatedProps, items: itemsToSave });
-    setItem(null);
+    setSelectedItemId(null);
     form.reset(defaults());
     setOptions([]);
     setMatrixOptions(matrixDefault);
@@ -816,7 +854,7 @@ export default function WidgetChoiceGuideItems(
     form.reset(defaults());
     setOptions([]);
     setMatrixOptions(matrixDefault);
-    setItem(null);
+    setSelectedItemId(null);
   }
 
   function handleSaveOptions() {
@@ -1057,8 +1095,7 @@ export default function WidgetChoiceGuideItems(
                           <div
                             key={index}
                             className={`flex cursor-pointer justify-between border border-secondary ${
-                              item.trigger == selectedItem?.trigger &&
-                              'bg-secondary'
+                              item.id === selectedItem?.id && 'bg-secondary'
                             }`}>
                             <span className="flex gap-2 py-3 px-2">
                               <ArrowUp
@@ -1077,9 +1114,8 @@ export default function WidgetChoiceGuideItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
-                                if (selectedItem?.trigger === item.trigger)
-                                  return;
-                                setItem(item);
+                                if (selectedItem?.id === item.id) return;
+                                setSelectedItemId(item.id ?? null);
                                 setOptions([]);
                                 setMatrixOptions(matrixDefault);
                                 setSettingOptions(false);
@@ -1140,8 +1176,7 @@ export default function WidgetChoiceGuideItems(
                                     <div
                                       key={index}
                                       className={`flex cursor-pointer justify-between border border-secondary ${
-                                        option.trigger ==
-                                          selectedOption?.trigger &&
+                                        option.id === selectedOption?.id &&
                                         'bg-secondary'
                                       }`}>
                                       <span className="flex gap-2 py-3 px-2">
@@ -1203,8 +1238,7 @@ export default function WidgetChoiceGuideItems(
                             const currentOption = matrixOptions?.[
                               matrixItem.type
                             ].findIndex(
-                              (option) =>
-                                option.trigger === matrixOption?.trigger
+                              (option) => option.id === matrixOption?.id
                             );
                             const activeOption =
                               currentOption !== -1
@@ -1271,8 +1305,7 @@ export default function WidgetChoiceGuideItems(
                       {hasList() &&
                         (() => {
                           const currentOption = options.findIndex(
-                            (option) =>
-                              option.trigger === selectedOption?.trigger
+                            (option) => option.id === selectedOption?.id
                           );
                           const activeOption =
                             currentOption !== -1
@@ -1494,7 +1527,7 @@ export default function WidgetChoiceGuideItems(
                               <div
                                 key={index}
                                 className={`flex cursor-pointer justify-between border border-secondary ${
-                                  option.trigger == selectedOption?.trigger &&
+                                  option.id === selectedOption?.id &&
                                   'bg-secondary'
                                 }`}>
                                 <span className="flex gap-2 py-3 px-2">

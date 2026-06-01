@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DistributionModuleProps } from '@openstad-headless/distribution-module/src/distribution-module';
 import {
@@ -35,32 +36,42 @@ export default function WidgetDistributionModuleItems(
 ) {
   type FormData = z.infer<typeof formSchema>;
   const [items, setItems] = useState<Item[]>([]);
-  const [selectedItem, setItem] = useState<Item | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const selectedItem = selectedItemId
+    ? items.find((i) => i.id === selectedItemId) || null
+    : null;
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
     if (selectedItem) {
+      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+
       setItems((currentItems) =>
         currentItems.map((item) =>
-          item.trigger === selectedItem.trigger ? { ...item, ...values } : item
+          item.id === selectedItem.id
+            ? { ...item, ...valuesWithoutTrigger }
+            : item
         )
       );
-      setItem(null);
+      setSelectedItemId(null);
     } else {
-      setItems((currentItems) => [
-        ...currentItems,
-        {
-          trigger: `${
-            currentItems.length > 0
-              ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
-              : 1
-          }`,
-          title: values.title,
-          key: values.key,
-          description: values.description,
-          placeholder: values.placeholder || '',
-        },
-      ]);
+      setItems((currentItems) => {
+        const maxTrigger = currentItems.reduce(
+          (max, i) => Math.max(max, parseInt(i.trigger) || 0),
+          0
+        );
+        return [
+          ...currentItems,
+          {
+            id: generateId(),
+            trigger: `${maxTrigger + 1}`,
+            title: values.title,
+            key: values.key,
+            description: values.description,
+            placeholder: values.placeholder || '',
+          },
+        ];
+      });
     }
 
     form.reset(defaults);
@@ -79,9 +90,11 @@ export default function WidgetDistributionModuleItems(
     defaultValues: defaults(),
   });
 
+  const itemsInitialized = React.useRef(false);
   useEffect(() => {
-    if (props?.items && props?.items?.length > 0) {
-      setItems(props?.items);
+    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
+      itemsInitialized.current = true;
+      setItems(props.items.map(withId));
     }
   }, [props?.items]);
 
@@ -100,7 +113,7 @@ export default function WidgetDistributionModuleItems(
         placeholder: selectedItem.placeholder || '',
       });
     }
-  }, [selectedItem, form]);
+  }, [selectedItemId, form]);
 
   const handleAction = (
     actionType: 'moveUp' | 'moveDown' | 'delete',
@@ -124,25 +137,36 @@ export default function WidgetDistributionModuleItems(
     actionType: 'moveUp' | 'moveDown' | 'delete',
     trigger: string
   ) {
-    const index = list.findIndex((entry) => entry.trigger === trigger);
-
     if (actionType === 'delete') {
-      return list.filter((entry) => entry.trigger !== trigger);
+      return list
+        .filter((entry) => entry.trigger !== trigger)
+        .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger));
     }
+
+    const sorted = [...list].sort(
+      (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
+    );
+    const index = sorted.findIndex((entry) => entry.trigger === trigger);
 
     if (
       (actionType === 'moveUp' && index > 0) ||
-      (actionType === 'moveDown' && index < list.length - 1)
+      (actionType === 'moveDown' && index < sorted.length - 1)
     ) {
-      const newItemList = [...list];
       const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
-      let tempTrigger = newItemList[swapIndex].trigger;
-      newItemList[swapIndex].trigger = newItemList[index].trigger;
-      newItemList[index].trigger = tempTrigger;
-      return newItemList;
+      const triggerA = sorted[index].trigger;
+      const triggerB = sorted[swapIndex].trigger;
+      return sorted
+        .map((entry) => {
+          if (entry.trigger === triggerA)
+            return { ...entry, trigger: triggerB };
+          if (entry.trigger === triggerB)
+            return { ...entry, trigger: triggerA };
+          return entry;
+        })
+        .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger));
     }
 
-    return list; // If no action is performed, return the original list
+    return sorted;
   }
 
   function handleSaveItems() {
@@ -151,7 +175,7 @@ export default function WidgetDistributionModuleItems(
 
   function resetForm() {
     form.reset(defaults());
-    setItem(null);
+    setSelectedItemId(null);
   }
 
   return (
@@ -175,8 +199,7 @@ export default function WidgetDistributionModuleItems(
                           <div
                             key={index}
                             className={`flex cursor-pointer justify-between border border-secondary ${
-                              item.trigger == selectedItem?.trigger &&
-                              'bg-secondary'
+                              item.id === selectedItem?.id && 'bg-secondary'
                             }`}>
                             <span className="flex gap-2 py-3 px-2">
                               <ArrowUp
@@ -194,7 +217,9 @@ export default function WidgetDistributionModuleItems(
                             </span>
                             <span
                               className="gap-2 py-3 px-2 w-full"
-                              onClick={() => setItem(item)}>
+                              onClick={() =>
+                                setSelectedItemId(item.id ?? null)
+                              }>
                               {`${item.title || 'Geen titel'}`}
                             </span>
                             <span className="gap-2 py-3 px-2">

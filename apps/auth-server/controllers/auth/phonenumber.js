@@ -15,6 +15,7 @@ const interpolate = require('../../utils/interpolate');
 const verificationService = require('../../services/verificationService');
 const { logAuthEvent } = require('../../middleware/auditLog');
 const URL = require('url').URL;
+const clientAuth = require('../../utils/clientAuth');
 
 /**
  * Render the index.html or index-with-code.js depending on if query param has code or not
@@ -272,6 +273,18 @@ exports.postSmsCode = (req, res, next) => {
         return tokenSMS
           .invalidateTokensForUser(user.id)
           .then((response) => {
+            return clientAuth.initializeClientAuth(
+              req.session,
+              req.client,
+              user,
+              {
+                authType: 'Phonenumber',
+                twoFactorValid: false,
+              }
+            );
+          })
+          .then(() => clientAuth.saveSession(req.session))
+          .then(() => {
             const redirectToAuthorisation = () => {
               // Redirect if it succeeds to authorize screen
               //check if allowed url will be done by authorize screen

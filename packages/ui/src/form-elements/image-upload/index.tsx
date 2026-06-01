@@ -134,7 +134,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
   imageClickable = false,
   ...props
 }) => {
-  const datastore = new DataStore({ props });
+  const datastore = new DataStore(props);
 
   const initialValue: MockImageFile[] =
     overrideDefaultValue && Array.isArray(overrideDefaultValue)

@@ -194,7 +194,7 @@ module.exports = async function seed(db) {
       );
     }
 
-    // Set auth type to URL and set twoFactorRoles to admin
+    // Set auth type to URL and require 2FA for privileged roles by default
     const adminClient = await db.Client.findOne({ where: { id: 1 } });
     if (!adminClient) {
       throw new Error('Admin client not found');
@@ -202,11 +202,11 @@ module.exports = async function seed(db) {
 
     await adminClient.update({
       authTypes: JSON.stringify(['Url']),
-      twoFactorRoles: JSON.stringify(['admin']),
+      twoFactorRoles: JSON.stringify(['admin', 'moderator', 'editor']),
     });
 
     console.log(
-      '  updated admin client to use URL auth type with twoFactorRoles admin'
+      '  updated admin client to use URL auth type with privileged twoFactorRoles'
     );
   }
 };

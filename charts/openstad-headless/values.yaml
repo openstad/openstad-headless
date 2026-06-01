@@ -75,6 +75,7 @@ rateLimit:
   existingSecret:
   windowMs: 60000
   limit: 100
+randomSortRotationMs: 0
 # Settings
 
 ##

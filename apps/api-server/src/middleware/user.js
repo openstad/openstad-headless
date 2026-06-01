@@ -63,7 +63,9 @@ module.exports = async function getUser(req, res, next) {
 
     return next();
   } catch (error) {
-    console.error(error);
+    console.error(
+      `[${new Date().toISOString()}][auth-middleware] getUser error: ${error?.message}`
+    );
     next(error);
   }
 };
@@ -115,7 +117,20 @@ function parseAuthHeader(authorizationHeader) {
  */
 function parseJwt(authorizationHeader) {
   let token = authorizationHeader.replace(/^bearer /i, '');
-  return jwt.verify(token, config.auth['jwtSecret']);
+  try {
+    return jwt.verify(token, config.auth['jwtSecret']);
+  } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      console.log(
+        `[${new Date().toISOString()}][auth-middleware] JWT expired: expiredAt=${err.expiredAt?.toISOString?.() || 'unknown'}`
+      );
+    } else {
+      console.log(
+        `[${new Date().toISOString()}][auth-middleware] JWT verification failed: ${err.name}: ${err.message}`
+      );
+    }
+    throw err;
+  }
 }
 
 /**
@@ -157,6 +172,29 @@ async function getUserInstance({
 
     dbUser = await db.User.findOne({ where });
 
+    if (!dbUser && !isFixed && projectId) {
+      let adminUser = await db.User.findOne({
+        where: { id: userId, projectId: config.admin.projectId },
+      });
+      if (
+        adminUser &&
+        adminUser.idpUser &&
+        adminUser.idpUser.identifier &&
+        adminUser.idpUser.provider
+      ) {
+        dbUser = await db.User.findOne({
+          where: {
+            idpUser: {
+              identifier: adminUser.idpUser.identifier,
+              provider: adminUser.idpUser.provider,
+            },
+            projectId: projectId,
+          },
+          order: [['id', 'ASC']],
+        });
+      }
+    }
+
     if (isFixed) {
       if (!dbUser.projectId || dbUser.projectId == config.admin.projectId)
         dbUser.role = 'superuser'; // !dbUser.projectId is backwards compatibility
@@ -167,7 +205,9 @@ async function getUserInstance({
       return dbUser;
     }
   } catch (err) {
-    console.log(err);
+    console.log(
+      `[${new Date().toISOString()}][auth-middleware] getUserInstance error: userId=${userId} projectId=${projectId} error=${err?.message}`
+    );
     throw err;
   }
 
@@ -191,11 +231,12 @@ async function getUserInstance({
       adapters[adapter] = await authSettings.adapter({ authConfig });
     }
   } catch (err) {
-    console.log(err);
+    console.log(
+      `[${new Date().toISOString()}][auth-middleware] adapter init failed: adapter=${authConfig?.adapter || 'unknown'} error=${err?.message}`
+    );
   }
 
   try {
-    // get userdata from auth server
     let service = adapters[adapter].service;
 
     let userData = await service.fetchUserData({
@@ -214,7 +255,15 @@ async function getUserInstance({
 
     return mergedUser;
   } catch (err) {
-    console.log(err);
+    if (err?.message === 'Auth server rejected access token') {
+      console.log(
+        `[auth-sync] resetting stale access token for userId=${dbUser?.id || 'unknown'} projectId=${dbUser?.projectId || 'unknown'}`
+      );
+    } else {
+      console.log(
+        `[${new Date().toISOString()}][auth-middleware] auth server fetch failed: userId=${dbUser?.id || 'unknown'} error=${err?.message}`
+      );
+    }
     return await resetUserToken(dbUser);
   }
 }
@@ -232,5 +281,5 @@ async function resetUserToken(user) {
   await user.update({
     idpUser,
   });
-  return {};
+  return user;
 }

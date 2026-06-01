@@ -73,33 +73,16 @@ function Counter({
 
   const { data: resources } = datastore.useResources({
     projectId: props.projectId,
-    pageSize: 999999,
-    includeTags: '',
+    pageSize: 1,
+    tags:
+      includeOrExclude === 'include' && tagIdsArray.length > 0
+        ? tagIdsArray
+        : [],
+    excludeTags:
+      includeOrExclude === 'exclude' && tagIdsArray.length > 0
+        ? tagIdsArray
+        : [],
   });
-
-  const filteredResources =
-    resources &&
-    resources?.records &&
-    tagIdsArray &&
-    Array.isArray(tagIdsArray) &&
-    tagIdsArray.length > 0
-      ? resources?.records?.filter((resource: any) => {
-          if (includeOrExclude === 'exclude') {
-            const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
-              tagIdsArray.includes(tag.id)
-            );
-
-            return !hasExcludedTag;
-          } else {
-            return tagIdsArray.some(
-              (tag) =>
-                resource.tags &&
-                Array.isArray(resource.tags) &&
-                resource.tags.find((o: { id: number }) => o.id === tag)
-            );
-          }
-        })
-      : resources?.records;
 
   const { data: resource } = datastore.useResource({
     projectId: props.projectId,
@@ -139,7 +122,7 @@ function Counter({
   });
 
   if (counterType === 'resource') {
-    amountDisplayed = (filteredResources || []).length;
+    amountDisplayed = resources?.metadata?.totalCount || 0;
   }
 
   if (counterType === 'vote') {

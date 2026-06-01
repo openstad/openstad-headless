@@ -30,18 +30,19 @@
               type="checkbox"
               name="{{requiredField.key}}"
               class="input-{{requiredField.key}} input-field"
-              id="input_field"
+              id="input_field_{{requiredField.key}}"
+              {% if requiredField.key === 'privacyConsent' %}required{% endif %}
             />
-            <label for="input_field"> {{requiredField.label}} </label>
+            <label for="input_field_{{requiredField.key}}"> {{requiredField.label | safe}} </label>
           {% else %}
-            <label for="input_field"> {{requiredField.label}} </label>
+            <label for="input_field_{{requiredField.key}}"> {{requiredField.label}} </label>
             <input
               type="text"
               required
               name="{{requiredField.key}}"
               class="input-{{requiredField.key}} input-field"
               {{'autofocus' if first}}
-              id="input_field"
+              id="input_field_{{requiredField.key}}"
               autocomplete="name"
             />
           {% endif %}
