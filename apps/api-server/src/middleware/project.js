@@ -14,7 +14,7 @@ module.exports = function (req, res, next) {
   // deze paden mogen dit overslaan
   if (
     req.path.match(
-      '^(/api/repo|/api/template|/api/area|/api/datalayer|/api/widget|/api/image|/api/document|/api/widget-type|/api/project/delete-duplicated-data|/api/project/0/tag|/auth/project/0/me|/widget|/api/pending-budget-vote|/$)'
+      '^(/api/repo|/api/template|/api/area|/api/datalayer|/api/widget|/api/image|/api/document|/api/widget-type|/api/project/delete-duplicated-data|/api/project/0/tag|/auth/project/0/me|/widget|/api/pending-budget-vote|/api/plugin|/$)'
     )
   )
     return next();
