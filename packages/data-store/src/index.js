@@ -99,6 +99,10 @@ function DataStore(props = {}) {
     if (options.fallbackData) swrOpts.fallbackData = options.fallbackData;
     if (options.revalidateOnMount !== undefined)
       swrOpts.revalidateOnMount = options.revalidateOnMount;
+    if (options.revalidateOnFocus !== undefined)
+      swrOpts.revalidateOnFocus = options.revalidateOnFocus;
+    if (options.revalidateOnReconnect !== undefined)
+      swrOpts.revalidateOnReconnect = options.revalidateOnReconnect;
 
     return useSWR(
       key,

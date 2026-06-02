@@ -8,7 +8,14 @@ export default function useResource(props) {
   const { data, error, isLoading } = self.useSWR(
     { projectId, resourceId },
     'resource.fetch',
-    initialData ? { fallbackData: initialData, revalidateOnMount: false } : {}
+    initialData
+      ? {
+          fallbackData: initialData,
+          revalidateOnMount: false,
+          revalidateOnFocus: false,
+          revalidateOnReconnect: false,
+        }
+      : {}
   );
 
   let resource = data || {};

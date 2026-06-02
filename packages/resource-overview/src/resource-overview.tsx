@@ -1007,6 +1007,7 @@ function ResourceOverviewInner({
     data: resourcesWithPagination,
     allData: allResourcesData,
     isLoading,
+    revalidate: revalidateResources,
   } = datastore.useResources({
     pageSize,
     ...props,
@@ -1259,7 +1260,7 @@ function ResourceOverviewInner({
   };
 
   const refreshLikes = () => {
-    datastore.refresh();
+    revalidateResources();
   };
 
   const overviewSection = (
