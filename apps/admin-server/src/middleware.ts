@@ -27,6 +27,7 @@ export default async function middleware(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith('/favicon')) return res;
   if (req.nextUrl.pathname.startsWith('/health')) return res;
   if (req.nextUrl.pathname.startsWith('/api/health')) return res;
+  if (req.nextUrl.pathname.startsWith('/login-background')) return res;
 
   // default page
   if (req.nextUrl.pathname.match(/^\/?$/)) {
