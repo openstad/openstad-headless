@@ -1375,7 +1375,7 @@ router
     req.pendingMessages = [
       { key: `project-${project.id}-update`, value: 'event' },
     ];
-    if (req.body.url && req.body.url != project.url)
+    if ('url' in req.body && req.body.url != project.url)
       req.pendingMessages.push({ key: `project-urls-update`, value: 'event' });
 
     let updateBody = req.body;
