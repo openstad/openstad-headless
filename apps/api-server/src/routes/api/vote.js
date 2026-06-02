@@ -425,7 +425,7 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
 
               const maxResources = req.project.config.votes.maxResources;
               const withExisting = req.project.config.votes.withExisting;
-              if (maxResources && withExisting === 'replace') {
+              if (maxResources && withExisting !== 'error') {
                 const createCount = actions.filter(
                   (a) => a.action === 'create'
                 ).length;

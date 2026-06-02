@@ -384,7 +384,6 @@ const defaultItemRenderer = (
     const vote = async (sentiment: string) => {
       if (doVote) {
         await doVote(sentiment);
-        refreshLikes && (await refreshLikes());
       }
     };
 

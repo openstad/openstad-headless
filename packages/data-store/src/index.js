@@ -93,7 +93,9 @@ function DataStore(props = {}) {
 
     let key = self.createKey(props, fetcherAsString);
 
-    windowGlobal.OpenStadSWR[JSON.stringify(key, null, 2)] = true;
+    if (!options.fallbackData) {
+      windowGlobal.OpenStadSWR[JSON.stringify(key, null, 2)] = true;
+    }
 
     const swrOpts = {};
     if (options.fallbackData) swrOpts.fallbackData = options.fallbackData;
