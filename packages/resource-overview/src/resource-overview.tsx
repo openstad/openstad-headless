@@ -371,7 +371,16 @@ const defaultItemRenderer = (
   const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
   const selectedOpinion = resource?.userVote?.opinion;
 
-  const TileFooter = ({ doVote }: { doVote?: (value: string) => any }) => {
+  const TileFooter = ({
+    doVote,
+    resource: likeResource,
+  }: {
+    doVote?: (value: string) => any;
+    resource?: any;
+  }) => {
+    const displayResource = likeResource || resource;
+    const opinion = displayResource?.userVote?.opinion;
+
     const vote = async (sentiment: string) => {
       if (doVote) {
         await doVote(sentiment);
@@ -389,20 +398,20 @@ const defaultItemRenderer = (
             <Icon
               icon="ri-thumb-up-line"
               variant="big"
-              text={resource.yes}
+              text={displayResource.yes}
               description="Stemmen voor"
               onClick={() => vote('yes')}
-              className={selectedOpinion === 'yes' ? 'selected' : ''}
+              className={opinion === 'yes' ? 'selected' : ''}
             />
 
             {props.likeWidget?.displayDislike && (
               <Icon
                 icon="ri-thumb-down-line"
                 variant="big"
-                text={resource.no}
+                text={displayResource.no}
                 description="Stemmen tegen"
                 onClick={() => vote('no')}
-                className={selectedOpinion === 'no' ? 'selected' : ''}
+                className={opinion === 'no' ? 'selected' : ''}
               />
             )}
           </>
@@ -412,30 +421,28 @@ const defaultItemRenderer = (
           <div className="micro-score-container">
             <Icon
               icon={`${
-                selectedOpinion === 'yes'
-                  ? 'ri-triangle-fill'
-                  : 'ri-triangle-line'
+                opinion === 'yes' ? 'ri-triangle-fill' : 'ri-triangle-line'
               } micro-score-triangle`}
               variant="big"
               description="Stemmen voor"
               onClick={() => vote('yes')}
               className={`micro-score-vote micro-score-vote--yes ${
-                selectedOpinion === 'yes' ? 'selected' : ''
+                opinion === 'yes' ? 'selected' : ''
               }`}
             />
-            <Paragraph className="votes-score">{resource.netVotes}</Paragraph>
+            <Paragraph className="votes-score">
+              {displayResource.netVotes}
+            </Paragraph>
             {props.likeWidget?.displayDislike && (
               <Icon
                 icon={`${
-                  selectedOpinion === 'no'
-                    ? 'ri-triangle-fill'
-                    : 'ri-triangle-line'
+                  opinion === 'no' ? 'ri-triangle-fill' : 'ri-triangle-line'
                 } micro-score-triangle micro-score-triangle-down`}
                 variant="big"
                 description="Stemmen tegen"
                 onClick={() => vote('no')}
                 className={`micro-score-vote micro-score-vote--no ${
-                  selectedOpinion === 'no' ? 'selected' : ''
+                  opinion === 'no' ? 'selected' : ''
                 }`}
               />
             )}
@@ -446,7 +453,7 @@ const defaultItemRenderer = (
           <Icon
             icon="ri-message-line"
             variant="big"
-            text={resource.commentCount}
+            text={displayResource.commentCount}
             description="Aantal reacties"
           />
         ) : null}
@@ -551,9 +558,13 @@ const defaultItemRenderer = (
               resourceId={resource.id}
               projectId={props.projectId}
               {...props}
+              datastore={(props as any).datastore}
+              initialResource={resource}
               disabled={!canLike}
               refreshResourceLikes={refreshLikes}>
-              {(doVote) => <TileFooter doVote={doVote} />}
+              {(doVote, likeResource) => (
+                <TileFooter doVote={doVote} resource={likeResource} />
+              )}
             </Likes>
           ) : (
             <TileFooter />
@@ -996,6 +1007,7 @@ function ResourceOverviewInner({
     data: resourcesWithPagination,
     allData: allResourcesData,
     isLoading,
+    revalidate: revalidateResources,
   } = datastore.useResources({
     pageSize,
     ...props,
@@ -1248,7 +1260,7 @@ function ResourceOverviewInner({
   };
 
   const refreshLikes = () => {
-    datastore.refresh();
+    revalidateResources();
   };
 
   const overviewSection = (
@@ -1281,6 +1293,7 @@ function ResourceOverviewInner({
                   selectedProjects,
                   displayOverviewTagGroups,
                   overviewTagGroups,
+                  datastore,
                 },
                 () => {
                   onResourceClick(resource, index);
