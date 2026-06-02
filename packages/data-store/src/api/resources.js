@@ -1,8 +1,9 @@
-function resolveRandomSortSeed(randomSortRotationMs) {
+export function resolveRandomSortSeed(randomSortRotationMs, forceNew) {
   const storedSeed = localStorage.getItem('pseudoRandomSortSeed');
   const storedTimestamp = localStorage.getItem('pseudoRandomSortSeedTimestamp');
 
   const needsNewSeed =
+    forceNew ||
     !storedSeed ||
     (randomSortRotationMs &&
       (!storedTimestamp ||

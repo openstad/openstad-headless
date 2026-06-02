@@ -634,13 +634,20 @@ const BaseMap = ({
     const el = containerWrapperRef.current;
     if (!el) return;
 
+    const unitPattern =
+      /\d+(px|%|vh|vw|em|rem|ex|ch|vmin|vmax|cm|mm|in|pt|pc)$/;
     const heightValue = height
-      ? height.match(/\d+(px|%|vh|vw|em|rem|ex|ch|vmin|vmax|cm|mm|in|pt|pc)$/)
+      ? height.match(unitPattern)
         ? height
         : `${height}px`
       : 'auto';
+    const widthValue = width
+      ? width.match(unitPattern)
+        ? width
+        : `${width}px`
+      : '100%';
 
-    el.style.setProperty('--basemap-map-width', width);
+    el.style.setProperty('--basemap-map-width', widthValue);
     el.style.setProperty('--basemap-map-height', heightValue);
     el.style.setProperty(
       '--basemap-map-aspect-ratio',

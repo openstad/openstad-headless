@@ -6,6 +6,8 @@ import {
 } from '@openstad-headless/admin-server/src/components/ui/tabs';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
+//@ts-ignore
+import { resolveRandomSortSeed } from '@openstad-headless/data-store/src/api/resources';
 import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
 import {
   ResourceOverviewMapWidgetProps,
@@ -905,6 +907,7 @@ function ResourceOverviewInner({
   const [sort, setSort] = useState<string | undefined>(
     props.defaultSorting || undefined
   );
+  const [randomSortKey, setRandomSortKey] = useState<number>(0);
   const [location, setLocation] = useState<PostcodeAutoFillLocation>(undefined);
 
   const [resources, setResources] = useState<Array<any>>([]);
@@ -1010,6 +1013,7 @@ function ResourceOverviewInner({
     lng: location?.lng,
     maxDistance: location ? (location.proximity || 999) * 1000 : undefined,
     sort,
+    randomSortKey: sort === 'random' ? randomSortKey : undefined,
     projectIds: projectIds || [],
     allowMultipleProjects: selectedProjects && selectedProjects.length > 1,
     fetchAll: needsAllResourcesFetch
@@ -1410,6 +1414,10 @@ function ResourceOverviewInner({
                     'score',
                   ].includes(f.sort)
                 ) {
+                  if (f.sort === 'random') {
+                    resolveRandomSortSeed(0, true);
+                    setRandomSortKey((k) => k + 1);
+                  }
                   setSort(f.sort);
                 }
                 setSearch(f.search.text);
