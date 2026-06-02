@@ -508,7 +508,9 @@ export default function WidgetEnqueteItems(
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    onFieldChanged('items', items);
+    if (onFieldChanged) {
+      onFieldChanged('items', items);
+    }
   }, [items]);
 
   function buildFormValues(item: Item) {

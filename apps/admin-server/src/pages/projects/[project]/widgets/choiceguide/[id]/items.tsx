@@ -531,7 +531,9 @@ export default function WidgetChoiceGuideItems(
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    onFieldChanged('items', items);
+    if (onFieldChanged) {
+      onFieldChanged('items', items);
+    }
   }, [items]);
 
   // Sets form to selected item values when item is selected
