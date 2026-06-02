@@ -198,6 +198,11 @@ export const InitializeFormFields = (
         case 'pagination':
           fieldData['type'] = 'pagination';
           break;
+        case 'sort':
+          fieldData['type'] = 'sort';
+          fieldData['options'] = item.options || [];
+          fieldData['numberingStyle'] = item.numberingStyle || 'none';
+          break;
       }
 
       formFields.push(fieldData);
