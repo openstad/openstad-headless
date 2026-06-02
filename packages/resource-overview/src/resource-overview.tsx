@@ -177,6 +177,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
+    datastore?: any;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
