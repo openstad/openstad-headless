@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { createPortal } from 'react-dom';
+
 import './index.css';
 
 type LightboxProps = {
@@ -17,9 +17,17 @@ export const Lightbox = ({ src, alt = '', onClose }: LightboxProps) => {
     return () => document.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
-  return createPortal(
-    <div className="osc-lightbox-overlay" onClick={onClose} role="dialog" aria-modal="true" aria-label="Afbeelding uitvergroot">
-      <button className="osc-lightbox-close" onClick={onClose} aria-label="Sluiten">
+  return (
+    <div
+      className="osc-lightbox-overlay"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Afbeelding uitvergroot">
+      <button
+        className="osc-lightbox-close"
+        onClick={onClose}
+        aria-label="Sluiten">
         ✕
       </button>
       <img
@@ -28,7 +36,6 @@ export const Lightbox = ({ src, alt = '', onClose }: LightboxProps) => {
         alt={alt}
         onClick={(e) => e.stopPropagation()}
       />
-    </div>,
-    document.body
+    </div>
   );
 };
