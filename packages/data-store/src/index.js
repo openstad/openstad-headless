@@ -93,23 +93,10 @@ function DataStore(props = {}) {
 
     let key = self.createKey(props, fetcherAsString);
 
-    if (!options.fallbackData) {
-      windowGlobal.OpenStadSWR[JSON.stringify(key, null, 2)] = true;
-    }
+    windowGlobal.OpenStadSWR[JSON.stringify(key, null, 2)] = true;
 
-    const swrOpts = {};
-    if (options.fallbackData) swrOpts.fallbackData = options.fallbackData;
-    if (options.revalidateOnMount !== undefined)
-      swrOpts.revalidateOnMount = options.revalidateOnMount;
-    if (options.revalidateOnFocus !== undefined)
-      swrOpts.revalidateOnFocus = options.revalidateOnFocus;
-    if (options.revalidateOnReconnect !== undefined)
-      swrOpts.revalidateOnReconnect = options.revalidateOnReconnect;
-
-    return useSWR(
-      key,
-      () => fetcher(props, { ...options, keepPreviousData: true }),
-      swrOpts
+    return useSWR(key, () =>
+      fetcher(props, { ...options, keepPreviousData: true })
     );
   };
 

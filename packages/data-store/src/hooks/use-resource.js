@@ -6,19 +6,11 @@ export default function useResource(props) {
   const initialData = props.initialData;
 
   const { data, error, isLoading } = self.useSWR(
-    { projectId, resourceId },
-    'resource.fetch',
-    initialData
-      ? {
-          fallbackData: initialData,
-          revalidateOnMount: false,
-          revalidateOnFocus: false,
-          revalidateOnReconnect: false,
-        }
-      : {}
+    initialData ? null : { projectId, resourceId },
+    'resource.fetch'
   );
 
-  let resource = data || {};
+  let resource = initialData ? { ...initialData } : data || {};
   resource.update = function (newData) {
     return self.mutate({ projectId, resourceId }, 'resource.update', newData, {
       action: 'update',
@@ -30,7 +22,7 @@ export default function useResource(props) {
     });
   };
   resource.submitLike = function (vote) {
-    self.mutate({ projectId, resourceId }, 'resource.submitLike', vote, {
+    return self.mutate({ projectId, resourceId }, 'resource.submitLike', vote, {
       action: 'submitLike',
       revalidate: true,
       populateCache: false,
