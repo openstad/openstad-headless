@@ -61,12 +61,30 @@ module.exports = {
       }
     });
 
+    // Load plugins
+    var {
+      initPluginLoader,
+      createMiddlewareApplier,
+    } = require('./services/plugin-loader-init');
+    var { pluginMiddleware, pluginRoutes } = initPluginLoader();
+    var applyPluginMiddleware = createMiddlewareApplier(
+      this.app,
+      pluginMiddleware
+    );
+
     // Register statics first...
+    applyPluginMiddleware('before:statics');
     this._initStatics();
 
     // ... then middleware everyone needs...
     this._initBasicMiddleware();
+    applyPluginMiddleware('after:basic');
+
     this._initSessionMiddleware();
+    applyPluginMiddleware('after:session');
+
+    // Apply: before:routes
+    applyPluginMiddleware('before:routes');
 
     var middleware = config.express.middleware;
 
@@ -79,6 +97,35 @@ module.exports = {
         require(entry)(this.app);
       }
     });
+
+    // Plugin registry & bundle endpoints
+    this.app.use('/api/plugin', require('./routes/plugin'));
+
+    // Plugin routes
+    for (var i = 0; i < pluginRoutes.length; i++) {
+      try {
+        this.app[pluginRoutes[i].method](
+          pluginRoutes[i].path,
+          pluginRoutes[i].handler
+        );
+        log(
+          'plugin route loaded: %s %s (%s)',
+          pluginRoutes[i].method.toUpperCase(),
+          pluginRoutes[i].path,
+          pluginRoutes[i].pluginName
+        );
+      } catch (err) {
+        console.error(
+          '[plugin-loader] Failed to load route from "' +
+            pluginRoutes[i].pluginName +
+            '":',
+          err.message
+        );
+      }
+    }
+
+    // Apply: after:routes
+    applyPluginMiddleware('after:routes');
 
     require('./middleware/error_handling')(this.app);
   },
