@@ -145,7 +145,7 @@ function DataStore(props = {}) {
         Object.keys(windowGlobal.OpenStadSWR).indexOf(
           JSON.stringify(cacheKey, null, 2)
         ) != -1,
-      async (currentData) => currentData, // optimistic ui as fetcher
+      async (currentData) => currentData,
       {
         revalidate: true,
         rollbackOnError: true,

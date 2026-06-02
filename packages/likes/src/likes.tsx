@@ -23,9 +23,11 @@ export type LikeWidgetProps = BaseProps &
   ProjectSettingProps & {
     resourceId?: string;
     resourceIdRelativePath?: string;
+    datastore?: any;
+    initialResource?: any; // pre-fetched resource data, skips individual API call
     children?:
       | React.ReactNode
-      | ((doVote: (value: string) => void) => React.ReactNode);
+      | ((doVote: (value: string) => void, resource?: any) => React.ReactNode);
   };
 
 export type LikeProps = {
@@ -65,12 +67,12 @@ function Likes({
 
   const necessaryVotes = props.resources?.minimumYesVotes || 50;
 
-  // Pass explicitely because datastore is not ts, we will not get a hint if the props have changed
-
-  const datastore: any = new DataStore({
-    projectId: props.projectId,
-    api: props.api,
-  });
+  const datastore: any =
+    props.datastore ||
+    new DataStore({
+      projectId: props.projectId,
+      api: props.api,
+    });
 
   const storage = new LocalStorage({ projectId: props.projectId });
 
@@ -78,6 +80,7 @@ function Likes({
   const { data: resource } = datastore.useResource({
     projectId: props.projectId,
     resourceId,
+    initialData: props.initialResource,
   });
 
   const [isBusy, setIsBusy] = useState(false);
@@ -134,9 +137,7 @@ function Likes({
     let change: { [key: string]: any } = {};
     if (resource.userVote) change[resource.userVote.opinion] = -1;
 
-    await resource.submitLike({
-      opinion: value,
-    });
+    await resource.submitLike({ opinion: value });
 
     if (showConfettiOnLike && value === 'yes') {
       fireConfetti();
@@ -149,7 +150,9 @@ function Likes({
   }
 
   if (typeof props.children === 'function') {
-    return <>{props.children((value: string) => doVote(null, value))}</>;
+    return (
+      <>{props.children((value: string) => doVote(null, value), resource)}</>
+    );
   }
 
   return (
