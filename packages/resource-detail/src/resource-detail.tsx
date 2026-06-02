@@ -19,6 +19,7 @@ import {
   Icon,
   IconButton,
   Image,
+  Lightbox,
   Pill,
   Spacer,
 } from '@openstad-headless/ui/src';
@@ -161,6 +162,7 @@ function ResourceDetail({
   const [refreshComments, setRefreshComments] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showAccordion, setShowAccordion] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const descriptionRef = React.useRef<HTMLDivElement>(null);
   const id = useId();
 
@@ -353,9 +355,15 @@ function ResourceDetail({
     );
 
     return clickableImage ? (
-      <a href={src} target="_blank" rel="noreferrer">
+      <div
+        style={{ cursor: 'zoom-in' }}
+        onClick={() => setLightboxSrc(src)}
+        role="button"
+        tabIndex={0}
+        aria-label="Afbeelding uitvergroot bekijken"
+        onKeyDown={(e) => e.key === 'Enter' && setLightboxSrc(src)}>
         {imageElement}
-      </a>
+      </div>
     ) : (
       imageElement
     );
@@ -454,6 +462,9 @@ function ResourceDetail({
 
   return (
     <section className="osc-resource-detail-widget-container">
+      {lightboxSrc && (
+        <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+      )}
       {displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit />}
       <div
         className={`osc ${
