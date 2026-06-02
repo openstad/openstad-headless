@@ -441,6 +441,7 @@ function getWidgetJavascriptOutput(
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ domain: currentHostname, referer: window.location.href }),
+                credentials: 'omit',
               }).catch(function() {});
             } catch(e) {}
             var warningEl = document.getElementById(randomComponentId);
@@ -461,11 +462,7 @@ function getWidgetJavascriptOutput(
           try {
             var reportLoadUrl = currentScript.src.split('?')[0] + '/report-load';
             var reportLoadBody = JSON.stringify({ url: window.location.href });
-            if (navigator.sendBeacon) {
-              navigator.sendBeacon(reportLoadUrl, new Blob([reportLoadBody], { type: 'application/json' }));
-            } else {
-              fetch(reportLoadUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: reportLoadBody, keepalive: true }).catch(function(){});
-            }
+            fetch(reportLoadUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: reportLoadBody, credentials: 'omit', keepalive: true }).catch(function(){});
           } catch (e) {}
 
           const redirectUri = new URL(encodeURI(window.location.href));
