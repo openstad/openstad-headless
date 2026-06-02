@@ -83,6 +83,10 @@ export const SimpleCalendar: React.FC<{
                       : (date) =>
                           date < new Date(new Date().setHours(0, 0, 0, 0))
                   }
+                  captionLayout="dropdown-buttons"
+                  fromYear={new Date().getFullYear() - 5}
+                  toYear={new Date().getFullYear() + 50}
+                  classNames={{ caption_label: 'hidden' }}
                   initialFocus
                 />
                 {withReset && (
