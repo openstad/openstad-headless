@@ -4,6 +4,7 @@ import { ProjectSettingProps } from '@openstad-headless/types/project-setting-pr
 import {
   IconButton,
   Image,
+  Lightbox,
   Pill,
   SecondaryButton,
   Spacer,
@@ -19,7 +20,7 @@ import {
   Paragraph,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { canLikeResource, hasRole } from '../../lib';
 import { Icon } from '../../ui/src/icon';
@@ -64,6 +65,8 @@ export const GridderResourceDetail = ({
   currentUser,
   ...props
 }: GridderResourceDetailProps) => {
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+
   // When resource is correctly typed the we will not need :any
 
   let resourceFilteredTags =
@@ -128,9 +131,15 @@ export const GridderResourceDetail = ({
     const imageComponent = <Image src={image} className="--aspectRatio-16-9" />;
 
     return clickableImage ? (
-      <a href={image} target="_blank" rel="noreferrer">
+      <div
+        style={{ cursor: 'zoom-in' }}
+        onClick={() => setLightboxSrc(image)}
+        role="button"
+        tabIndex={0}
+        aria-label="Afbeelding uitvergroot bekijken"
+        onKeyDown={(e) => e.key === 'Enter' && setLightboxSrc(image)}>
         {imageComponent}
-      </a>
+      </div>
     ) : (
       imageComponent
     );
@@ -138,6 +147,9 @@ export const GridderResourceDetail = ({
 
   return (
     <>
+      {lightboxSrc && (
+        <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+      )}
       <div className="osc-gridder-resource-detail">
         <section className={`osc-gridder-resource-detail-photo ${hasImages}`}>
           {renderImage(
