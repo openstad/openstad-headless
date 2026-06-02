@@ -36,6 +36,20 @@ export const InitializeFormFields = (items, data) => {
           : [];
       }
 
+      if (item.type === 'status') {
+        const { data: statuses } = datastore.useStatuses({
+          projectId: data.projectId,
+        });
+
+        item.options = !!statuses
+          ? statuses.map((status: any, index: number) => ({
+              trigger: `${index}`,
+              titles: [{ text: status.name, key: status.id }],
+              images: [],
+            }))
+          : [];
+      }
+
       const fieldData: any = {
         type: item.fieldType || item.type,
         title: item.title,
@@ -134,6 +148,22 @@ export const InitializeFormFields = (items, data) => {
                 trigger: option.trigger || '',
               };
             });
+          }
+          break;
+        case 'status':
+          fieldData['type'] = 'select';
+          if (item.options && item.options.length > 0) {
+            fieldData['choices'] = item.options.map((option) => {
+              return {
+                value: option.titles[0].key.toString(),
+                label: option.titles[0].text,
+                trigger: option.trigger || '',
+              };
+            });
+          } else {
+            fieldData['disabled'] = true;
+            fieldData['description'] =
+              'Geen statussen beschikbaar voor dit project.';
           }
           break;
         case 'budget':

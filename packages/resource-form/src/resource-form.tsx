@@ -39,6 +39,11 @@ const getExistingValue = (fieldKey, resource, multiple) => {
           ? filteredTags[0]
           : undefined;
     }
+
+    if (fieldKey === 'status' && resource.statuses) {
+      const firstStatus = resource.statuses[0];
+      return firstStatus ? String(firstStatus.id) : undefined;
+    }
   }
   return undefined;
 };
@@ -204,6 +209,15 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     return formData;
   };
 
+  const addStatusToFormData = (formData) => {
+    const value = formData['status'];
+    if (value !== undefined && value !== null && value !== '') {
+      formData.statuses = [Number(value)];
+    }
+    delete formData['status'];
+    return formData;
+  };
+
   const configureFormData = (formData, publish = false) => {
     const dbFixedColumns = [
       'title',
@@ -213,12 +227,14 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
       'images',
       'location',
       'tags',
+      'statuses',
       'documents',
     ];
     const extraData = {};
     let configuredFormData = { ...formData };
 
     configuredFormData = addTagsToFormData(configuredFormData);
+    configuredFormData = addStatusToFormData(configuredFormData);
 
     for (const key in configuredFormData) {
       if (configuredFormData.hasOwnProperty(key)) {

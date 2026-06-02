@@ -16,6 +16,7 @@ import useMarkers from './hooks/use-markers.js';
 import useProjectVotedUsersCount from './hooks/use-project-voted-users-count';
 import useResource from './hooks/use-resource.js';
 import useResources from './hooks/use-resources.js';
+import useStatuses from './hooks/use-statuses.js';
 import useSubmissions from './hooks/use-submissions.js';
 import useTags from './hooks/use-tags.js';
 import useUserActivity from './hooks/use-user-activity';
@@ -41,6 +42,7 @@ function DataStore(props = {}) {
   self.useDatalayer = useDatalayer.bind(self);
   self.useMarkers = useMarkers.bind(self);
   self.useAreas = useAreas.bind(self);
+  self.useStatuses = useStatuses.bind(self);
   self.useTags = useTags.bind(self);
   self.useCurrentUser = useCurrentUser.bind(self);
   self.useUserVote = useUserVote.bind(self);
