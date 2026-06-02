@@ -250,6 +250,7 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
         }
 
         const existingVotes = existing.map((entry) => entry.toJSON());
+        const replaceAll = req.query.replaceAll === 'true';
         let votes = req.body || [];
         if (!Array.isArray(votes)) votes = [votes];
 
@@ -263,7 +264,7 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
           checked: null,
         }));
 
-        if (req.project.config.votes.withExisting == 'merge') {
+        if (req.project.config.votes.withExisting == 'merge' && replaceAll) {
           if (
             existingVotes.find((newVote) =>
               votes.find((oldVote) => oldVote.resourceId == newVote.resourceId)
@@ -343,7 +344,7 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
           }
         }
 
-        if (req.project.config.votes.voteType == 'count') {
+        if (req.project.config.votes.voteType == 'count' && replaceAll) {
           if (
             votes.length < req.project.config.votes.minResources ||
             votes.length > req.project.config.votes.maxResources
@@ -398,6 +399,59 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
 
           case 'count':
           case 'countPerTag':
+            if (replaceAll) {
+              votes.map((vote) =>
+                actions.push({ action: 'create', vote: vote })
+              );
+              existingVotes.map((vote) =>
+                actions.push({ action: 'delete', vote: vote })
+              );
+            } else {
+              votes.forEach((vote) => {
+                let existingVote = existingVotes.find(
+                  (entry) => entry.resourceId == vote.resourceId
+                );
+                if (existingVote) {
+                  if (existingVote.opinion == vote.opinion) {
+                    actions.push({ action: 'delete', vote: existingVote });
+                  } else {
+                    existingVote.opinion = vote.opinion;
+                    actions.push({ action: 'update', vote: existingVote });
+                  }
+                } else {
+                  actions.push({ action: 'create', vote: vote });
+                }
+              });
+
+              const maxResources = req.project.config.votes.maxResources;
+              const withExisting = req.project.config.votes.withExisting;
+              if (maxResources && withExisting === 'replace') {
+                const createCount = actions.filter(
+                  (a) => a.action === 'create'
+                ).length;
+                const deleteCount = actions.filter(
+                  (a) => a.action === 'delete'
+                ).length;
+                const newTotal =
+                  existingVotes.length + createCount - deleteCount;
+
+                if (newTotal > maxResources) {
+                  const excess = newTotal - maxResources;
+                  const alreadyHandled = new Set(
+                    actions.map((a) => a.vote.id).filter(Boolean)
+                  );
+                  const candidates = existingVotes
+                    .filter((v) => !alreadyHandled.has(v.id))
+                    .sort((a, b) => a.id - b.id);
+
+                  for (let i = 0; i < excess && i < candidates.length; i++) {
+                    actions.push({ action: 'delete', vote: candidates[i] });
+                  }
+                }
+              }
+            }
+            break;
+
           case 'budgeting':
           case 'budgetingPerTag':
             votes.map((vote) => actions.push({ action: 'create', vote: vote }));
