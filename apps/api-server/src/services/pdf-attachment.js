@@ -10,22 +10,24 @@ const {
   fetchImageAsDataUrl,
 } = require('./pdf-service');
 
-const PDF_USER_NOTIFICATION_TYPES = [
+const PDF_ENABLED_NOTIFICATION_TYPES = [
   'new concept resource - user feedback',
   'new published resource - user feedback',
   'updated resource - user feedback',
+  'new published resource - admin update',
+  'updated resource - admin update',
 ];
 
 /**
  * Check whether PDF attachment generation could run for this notification.
  * Only checks env vars and notification type. The project-level toggle
- * (pdfAttachmentEnabled) is checked separately after fetching the project.
+ * (pdfAttachmentEnabled / pdfAttachmentAdminEnabled) is checked separately after fetching the project.
  */
 function shouldGeneratePdf(notificationType) {
   return (
     !!process.env.PDF_API_ENDPOINT &&
     !!process.env.PDF_API_KEY &&
-    PDF_USER_NOTIFICATION_TYPES.includes(notificationType)
+    PDF_ENABLED_NOTIFICATION_TYPES.includes(notificationType)
   );
 }
 
