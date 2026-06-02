@@ -95,8 +95,15 @@ function DataStore(props = {}) {
 
     windowGlobal.OpenStadSWR[JSON.stringify(key, null, 2)] = true;
 
-    return useSWR(key, () =>
-      fetcher(props, { ...options, keepPreviousData: true })
+    const swrOpts = {};
+    if (options.fallbackData) swrOpts.fallbackData = options.fallbackData;
+    if (options.revalidateOnMount !== undefined)
+      swrOpts.revalidateOnMount = options.revalidateOnMount;
+
+    return useSWR(
+      key,
+      () => fetcher(props, { ...options, keepPreviousData: true }),
+      swrOpts
     );
   };
 
@@ -143,8 +150,11 @@ function DataStore(props = {}) {
         Object.keys(windowGlobal.OpenStadSWR).indexOf(
           JSON.stringify(cacheKey, null, 2)
         ) != -1,
-      undefined,
-      { revalidate: true }
+      async (currentData) => currentData,
+      {
+        revalidate: true,
+        rollbackOnError: true,
+      }
     );
   };
 }

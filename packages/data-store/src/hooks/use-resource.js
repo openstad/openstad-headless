@@ -6,11 +6,12 @@ export default function useResource(props) {
   const initialData = props.initialData;
 
   const { data, error, isLoading } = self.useSWR(
-    initialData ? null : { projectId, resourceId },
-    'resource.fetch'
+    { projectId, resourceId },
+    'resource.fetch',
+    initialData ? { fallbackData: initialData, revalidateOnMount: false } : {}
   );
 
-  let resource = initialData ? { ...initialData } : data || {};
+  let resource = data || {};
   resource.update = function (newData) {
     return self.mutate({ projectId, resourceId }, 'resource.update', newData, {
       action: 'update',
