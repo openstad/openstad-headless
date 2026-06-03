@@ -21,6 +21,7 @@ type Props = {
   preFilterTags?: Array<number>;
   parentStopUsingDefaultValue?: boolean;
   inlineOptions?: boolean;
+  selectedParentTagIds?: number[];
 };
 
 type TagDefinition = { id: number; name: string; projectId?: any };
@@ -34,6 +35,7 @@ const MultiSelectTagFilter = ({
   preFilterTags = undefined,
   parentStopUsingDefaultValue = false,
   inlineOptions = false,
+  selectedParentTagIds = [],
   ...props
 }: Props) => {
   if (!dataStore || !dataStore.useTags) {
@@ -107,12 +109,18 @@ const MultiSelectTagFilter = ({
     }
   }, [preFilterTags]);
 
+  const filteredTags =
+    selectedParentTagIds.length > 0
+      ? tags.filter((tag: any) =>
+          selectedParentTagIds.includes(tag.extraData?.parentTagId)
+        )
+      : tags;
   const combinedSelects = stopUsingDefaultValue
     ? selected
     : Array.from(new Set([...selected, ...prefilterTagsSelected]));
 
   return (
-    tags.length > 0 && (
+    filteredTags.length > 0 && (
       <div className="form-element">
         <FormLabel id={getRandomId(props.placeholder)}>
           {props.placeholder || `Selecteer ${tagType.toLowerCase()}`}
@@ -123,7 +131,7 @@ const MultiSelectTagFilter = ({
             setStopUsingDefaultValue(true);
             onUpdateFilter && onUpdateFilter(value, label);
           }}
-          options={(tags || []).map((tag: TagDefinition) => ({
+          options={(filteredTags || []).map((tag: TagDefinition) => ({
             value: tag.id,
             label: tag.name,
             checked: combinedSelects.includes(tag.id),
