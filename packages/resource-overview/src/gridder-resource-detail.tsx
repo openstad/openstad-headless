@@ -4,6 +4,7 @@ import { ProjectSettingProps } from '@openstad-headless/types/project-setting-pr
 import {
   IconButton,
   Image,
+  Lightbox,
   Pill,
   SecondaryButton,
   Spacer,
@@ -19,7 +20,7 @@ import {
   Paragraph,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { canLikeResource, hasRole } from '../../lib';
 import { Icon } from '../../ui/src/icon';
@@ -64,6 +65,9 @@ export const GridderResourceDetail = ({
   currentUser,
   ...props
 }: GridderResourceDetailProps) => {
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightboxAlt, setLightboxAlt] = useState<string | undefined>(undefined);
+
   // When resource is correctly typed the we will not need :any
 
   let resourceFilteredTags =
@@ -124,13 +128,29 @@ export const GridderResourceDetail = ({
   const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
   const canLike = canLikeResource(resource);
 
-  const renderImage = (image: string, clickableImage: boolean) => {
+  const renderImage = (
+    image: string,
+    clickableImage: boolean,
+    alt?: string
+  ) => {
     const imageComponent = <Image src={image} className="--aspectRatio-16-9" />;
 
     return clickableImage ? (
-      <a href={image} target="_blank" rel="noreferrer">
+      <div
+        style={{ cursor: 'zoom-in' }}
+        onClick={() => {
+          setLightboxSrc(image);
+          setLightboxAlt(alt);
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label="Afbeelding uitvergroot bekijken"
+        onKeyDown={(e) =>
+          (e.key === 'Enter' || e.key === ' ') &&
+          (setLightboxSrc(image), setLightboxAlt(alt))
+        }>
         {imageComponent}
-      </a>
+      </div>
     ) : (
       imageComponent
     );
@@ -138,11 +158,19 @@ export const GridderResourceDetail = ({
 
   return (
     <>
+      {lightboxSrc && (
+        <Lightbox
+          src={lightboxSrc}
+          alt={lightboxAlt}
+          onClose={() => setLightboxSrc(null)}
+        />
+      )}
       <div className="osc-gridder-resource-detail">
         <section className={`osc-gridder-resource-detail-photo ${hasImages}`}>
           {renderImage(
             resource.images?.at(0)?.url || defaultImage,
-            clickableImage
+            clickableImage,
+            resource.images?.at(0)?.alt
           )}
 
           <div className="osc-gridder-resource-detail-budget-theme-bar">
