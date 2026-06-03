@@ -54,19 +54,25 @@ const InfoImage = ({
     imageDescription?: string
   ) => (
     <figure className="info-image-container">
-      <img
-        src={image}
-        alt={imageAlt}
-        onClick={
-          imageClickable
-            ? () => {
-                setLightboxSrc(image);
-                setLightboxAlt(imageAlt);
-              }
-            : undefined
-        }
-        className={imageClickable ? 'clickable-image' : undefined}
-      />
+      {imageClickable ? (
+        <div
+          style={{ cursor: 'zoom-in' }}
+          onClick={() => {
+            setLightboxSrc(image);
+            setLightboxAlt(imageAlt);
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Afbeelding uitvergroot bekijken"
+          onKeyDown={(e) =>
+            (e.key === 'Enter' || e.key === ' ') &&
+            (setLightboxSrc(image), setLightboxAlt(imageAlt))
+          }>
+          <img src={image} alt={imageAlt} className="clickable-image" />
+        </div>
+      ) : (
+        <img src={image} alt={imageAlt} />
+      )}
       {imageDescription && <figcaption>{imageDescription}</figcaption>}
       {addSpacer && <Spacer size={0.5} />}
     </figure>
