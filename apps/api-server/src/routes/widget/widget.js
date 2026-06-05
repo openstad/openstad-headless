@@ -12,6 +12,11 @@ const widgetDefinitions = getWidgetSettings();
 
 const reactCheck = require('../../util/react-check');
 const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
+const {
+  normalizeWidgetUrl,
+  hashWidgetUrl,
+  recordWidgetLoad,
+} = require('../../services/normalize-widget-url');
 
 let router = express.Router({ mergeParams: true });
 
@@ -453,6 +458,16 @@ function getWidgetJavascriptOutput(
               : ''
           }
 
+          try {
+            var reportLoadUrl = currentScript.src.split('?')[0] + '/report-load';
+            var reportLoadBody = JSON.stringify({ url: window.location.href });
+            if (navigator.sendBeacon) {
+              navigator.sendBeacon(reportLoadUrl, new Blob([reportLoadBody], { type: 'application/json' }));
+            } else {
+              fetch(reportLoadUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: reportLoadBody, keepalive: true }).catch(function(){});
+            }
+          } catch (e) {}
+
           const redirectUri = new URL(encodeURI(window.location.href));
           redirectUri.searchParams.delete('openstadlogout');
           redirectUri.searchParams.delete('openstadlogintoken');
@@ -614,6 +629,52 @@ router.post('/:widgetId([a-zA-Z0-9]+)/report-block', async (req, res) => {
   } catch (e) {
     console.log('[widget] Could not save domain block:', e.message);
     res.status(500).json({ error: 'Could not save domain block' });
+  }
+});
+
+const reportLoadCooldowns = new Map();
+const REPORT_LOAD_COOLDOWN_MS = 5 * 60 * 1000;
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamp] of reportLoadCooldowns) {
+    if (now - timestamp > REPORT_LOAD_COOLDOWN_MS) {
+      reportLoadCooldowns.delete(key);
+    }
+  }
+}, 60 * 1000);
+
+router.post('/:widgetId([a-zA-Z0-9]+)/report-load', async (req, res) => {
+  const { widgetId } = req.params;
+  const { url } = req.body || {};
+
+  if (!url || typeof url !== 'string') {
+    return res.status(400).json({ error: 'Missing url' });
+  }
+
+  const normalizedUrl = normalizeWidgetUrl(url);
+  if (!normalizedUrl) {
+    return res.status(400).json({ error: 'Invalid url' });
+  }
+
+  const cooldownKey = `${widgetId}:${hashWidgetUrl(normalizedUrl)}`;
+  const lastReport = reportLoadCooldowns.get(cooldownKey);
+  if (lastReport && Date.now() - lastReport < REPORT_LOAD_COOLDOWN_MS) {
+    return res.status(200).json({ ok: true });
+  }
+  reportLoadCooldowns.set(cooldownKey, Date.now());
+
+  try {
+    const result = await recordWidgetLoad(db, { widgetId, rawUrl: url });
+
+    if (result.status === 'not-found') {
+      return res.status(404).json({ error: 'Widget not found' });
+    }
+
+    res.status(200).json({ ok: true });
+  } catch (e) {
+    console.log('[widget] Could not save widget load:', e.message);
+    res.status(500).json({ error: 'Could not save widget load' });
   }
 });
 
