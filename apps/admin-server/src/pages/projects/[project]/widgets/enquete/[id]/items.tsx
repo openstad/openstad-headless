@@ -2208,13 +2208,9 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
-                    {![
-                      'pagination',
-                      'sort',
-                      'scale',
-                      'a-b-slider',
-                      'video',
-                    ].includes(form.watch('questionType') || '') && (
+                    {!['pagination', 'scale', 'a-b-slider', 'video'].includes(
+                      form.watch('questionType') || ''
+                    ) && (
                       <FormField
                         control={form.control}
                         name="fieldRequired"
