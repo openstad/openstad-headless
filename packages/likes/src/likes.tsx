@@ -137,9 +137,11 @@ function Likes({
     let change: { [key: string]: any } = {};
     if (resource.userVote) change[resource.userVote.opinion] = -1;
 
+    const previousOpinion = resource.userVote?.opinion;
+
     await resource.submitLike({ opinion: value });
 
-    if (showConfettiOnLike && value === 'yes') {
+    if (showConfettiOnLike && value === 'yes' && previousOpinion !== 'yes') {
       fireConfetti();
     }
 
