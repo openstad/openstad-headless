@@ -266,6 +266,7 @@ function setConfigsToOutput(
   }
 
   let config = merge.recursive(
+    true,
     {},
     widgetSettings.defaultConfig || {},
     defaultConfig,
