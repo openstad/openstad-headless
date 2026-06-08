@@ -1,5 +1,6 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { FormValue } from '@openstad-headless/form/src/form';
+import { fillTimelineEndDates } from '@openstad-headless/lib/timeline-dates';
 import {
   FormField,
   FormFieldDescription,
@@ -23,6 +24,7 @@ export type TimelineItem = {
   title?: string;
   description?: string;
   activeFrom: string;
+  activeTo?: string;
   links?: {
     trigger: string;
     title: string;
@@ -79,7 +81,11 @@ function normalizeItems(items: TimelineItem[]): TimelineItem[] {
     (a, b) =>
       new Date(a.activeFrom).getTime() - new Date(b.activeFrom).getTime()
   );
-  return sorted.map((item, idx) => ({ ...item, trigger: String(idx) }));
+  const renumbered = sorted.map((item, idx) => ({
+    ...item,
+    trigger: String(idx),
+  }));
+  return fillTimelineEndDates(renumbered);
 }
 
 const TimelineField: FC<TimelineFieldProps> = ({
