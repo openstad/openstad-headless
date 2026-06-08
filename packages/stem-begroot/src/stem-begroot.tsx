@@ -3,7 +3,12 @@ import DataStore from '@openstad-headless/data-store/src';
 import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Paginator, Spacer, Stepper } from '@openstad-headless/ui/src';
+import {
+  Paginator,
+  Spacer,
+  Stepper,
+  fireConfetti,
+} from '@openstad-headless/ui/src';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import '@utrecht/component-library-css';
 import { Button, ButtonLink, Heading } from '@utrecht/component-library-react';
@@ -103,6 +108,7 @@ export type StemBegrootWidgetProps = BaseProps &
     voteAfterLoggingIn?: boolean;
     displayModBreak?: boolean;
     randomSortRotationMs?: number;
+    showConfetti?: boolean;
   };
 
 function StemBegroot({
@@ -584,6 +590,9 @@ function StemBegroot({
         );
         const submitted = await submitVoteAndCleanup();
         if (submitted) {
+          if (props.showConfetti) {
+            fireConfetti();
+          }
           setCurrentStep(4);
         }
       })();
@@ -1401,6 +1410,9 @@ function StemBegroot({
                     if (currentStep === 3) {
                       const submitted = await submitVoteAndCleanup();
                       if (submitted) {
+                        if (props.showConfetti) {
+                          fireConfetti();
+                        }
                         setCurrentStep(4);
                       }
                     } else if (currentStep === 4) {
