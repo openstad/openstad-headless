@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
+  SelectContentScrollable,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -1927,7 +1928,7 @@ export default function WidgetResourceFormItems(
                                         <SelectValue placeholder="Kies een vraag" />
                                       </SelectTrigger>
                                     </FormControl>
-                                    <SelectContent>
+                                    <SelectContentScrollable>
                                       {formMultipleChoiceFields.map(
                                         (f: any) => (
                                           <SelectItem
@@ -1937,7 +1938,7 @@ export default function WidgetResourceFormItems(
                                           </SelectItem>
                                         )
                                       )}
-                                    </SelectContent>
+                                    </SelectContentScrollable>
                                   </Select>
                                 )}
 
