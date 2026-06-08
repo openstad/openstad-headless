@@ -1529,6 +1529,7 @@ router
       },
       { model: db.Tag },
       { model: db.Status },
+      { model: db.Widget },
     ]);
   })
 
