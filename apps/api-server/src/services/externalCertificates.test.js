@@ -58,18 +58,21 @@ beforeEach(() => {
 
   // Default KubeConfig implementation
   mockKubeConfigConstructor.mockReset();
-  mockKubeConfigConstructor.mockImplementation(() => ({
-    loadFromCluster: vi.fn(),
-    makeApiClient: vi.fn((ApiClass) => {
-      if (ApiClass === FakeApiextensionsV1Api) {
-        return { listCustomResourceDefinition: mockListCRD };
-      }
-      return {
-        listNamespacedCustomObject: mockListNamespacedCustomObject,
-        listClusterCustomObject: mockListClusterCustomObject,
-      };
-    }),
-  }));
+  // Regular function (not arrow) so it is usable with `new KubeConfig()`.
+  mockKubeConfigConstructor.mockImplementation(function () {
+    return {
+      loadFromCluster: vi.fn(),
+      makeApiClient: vi.fn((ApiClass) => {
+        if (ApiClass === FakeApiextensionsV1Api) {
+          return { listCustomResourceDefinition: mockListCRD };
+        }
+        return {
+          listNamespacedCustomObject: mockListNamespacedCustomObject,
+          listClusterCustomObject: mockListClusterCustomObject,
+        };
+      }),
+    };
+  });
 });
 
 afterEach(() => {
@@ -220,12 +223,14 @@ describe('externalCertificates', () => {
     });
 
     test('auto-disables on unexpected top-level error', async () => {
-      mockKubeConfigConstructor.mockImplementation(() => ({
-        loadFromCluster: vi.fn(),
-        makeApiClient: vi.fn(() => {
-          throw new Error('unexpected cluster error');
-        }),
-      }));
+      mockKubeConfigConstructor.mockImplementation(function () {
+        return {
+          loadFromCluster: vi.fn(),
+          makeApiClient: vi.fn(() => {
+            throw new Error('unexpected cluster error');
+          }),
+        };
+      });
 
       const mod = await loadModule({
         EXTERNAL_CERTIFICATES_ENABLED: 'true',
