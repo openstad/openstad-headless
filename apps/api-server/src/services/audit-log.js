@@ -29,7 +29,7 @@ function getOtlpLogger() {
     const {
       OTLPLogExporter,
     } = require('@opentelemetry/exporter-logs-otlp-grpc');
-    const { Resource } = require('@opentelemetry/resources');
+    const { resourceFromAttributes } = require('@opentelemetry/resources');
 
     const endpoint =
       process.env.AUDIT_OTLP_ENDPOINT ||
@@ -44,13 +44,15 @@ function getOtlpLogger() {
         ? `${process.env.OTEL_SERVICE_NAME}-audit`
         : 'openstad-audit');
 
-    const resource = new Resource({
+    const resource = resourceFromAttributes({
       'service.name': serviceName,
       'service.namespace': 'audit',
     });
 
-    const provider = new LoggerProvider({ resource });
-    provider.addLogRecordProcessor(new BatchLogRecordProcessor(exporter));
+    const provider = new LoggerProvider({
+      resource,
+      processors: [new BatchLogRecordProcessor(exporter)],
+    });
 
     otlpLogger = provider.getLogger('audit');
   } catch (err) {
