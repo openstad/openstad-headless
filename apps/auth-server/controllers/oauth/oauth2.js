@@ -67,6 +67,8 @@ const prefillAllowedDomains = function (inputDomains) {
   return [...new Set(allowedDomains)];
 };
 
+exports.prefillAllowedDomains = prefillAllowedDomains;
+
 // Register supported grant types.
 //
 // OAuth 2.0 specifies a framework that allows users to grant client
