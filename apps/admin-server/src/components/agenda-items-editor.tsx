@@ -10,10 +10,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { UploadDocument } from '@/hooks/upload-document';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Switch from '@radix-ui/react-switch';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -23,7 +25,7 @@ export interface AgendaItem {
   trigger: string;
   title?: string;
   description: string;
-  active: boolean;
+  active?: boolean;
   highlighted?: boolean;
   activeFrom?: string;
   activeTo?: string;
@@ -36,6 +38,8 @@ export interface AgendaLink {
   title: string;
   url: string;
   openInNewWindow: boolean;
+  soort?: 'link' | 'document';
+  documentName?: string;
 }
 
 interface AgendaItemsEditorProps {
@@ -48,8 +52,11 @@ const formSchema = z.object({
   trigger: z.string(),
   title: z.string(),
   description: z.string(),
-  active: z.boolean(),
-  highlighted: z.boolean(),
+  // Optional: timeline items submitted via the resourceform timeline field
+  // don't carry active/highlighted, and requiring them blocked the item form
+  // from saving (onSubmit never fired).
+  active: z.boolean().optional(),
+  highlighted: z.boolean().optional(),
   activeFrom: z.string().optional(),
   activeTo: z.string().optional(),
   links: z
@@ -59,6 +66,8 @@ const formSchema = z.object({
         title: z.string(),
         url: z.string(),
         openInNewWindow: z.boolean(),
+        soort: z.enum(['link', 'document']).optional(),
+        documentName: z.string().optional(),
       })
     )
     .optional(),
@@ -127,6 +136,8 @@ export function AgendaItemsEditor({
   onItemsChange,
   showActiveDates = false,
 }: AgendaItemsEditorProps) {
+  const router = useRouter();
+  const { project } = router.query;
   const [links, setLinks] = useState<AgendaLink[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
@@ -146,7 +157,7 @@ export function AgendaItemsEditor({
         trigger: selectedItem.trigger,
         title: selectedItem.title || '',
         description: selectedItem.description,
-        active: selectedItem.active,
+        active: selectedItem.active ?? true,
         highlighted: selectedItem.highlighted || false,
         activeFrom: toDateInputValue(selectedItem.activeFrom),
         activeTo: toDateInputValue(selectedItem.activeTo),
@@ -208,22 +219,18 @@ export function AgendaItemsEditor({
   function handleAddLink(values: FormData) {
     if (selectedLink) {
       setLinks((currentLinks) =>
-        currentLinks.map((link) =>
-          link.id === selectedLink.id
-            ? {
-                ...link,
-                title:
-                  values.links?.find((l) => l.trigger === link.trigger)
-                    ?.title || '',
-                url:
-                  values.links?.find((l) => l.trigger === link.trigger)?.url ||
-                  '',
-                openInNewWindow:
-                  values.links?.find((l) => l.trigger === link.trigger)
-                    ?.openInNewWindow || false,
-              }
-            : link
-        )
+        currentLinks.map((link) => {
+          if (link.id !== selectedLink.id) return link;
+          const v = values.links?.find((l) => l.trigger === link.trigger);
+          return {
+            ...link,
+            title: v?.title || '',
+            url: v?.url || '',
+            openInNewWindow: v?.openInNewWindow || false,
+            soort: v?.soort || link.soort || 'link',
+            documentName: v?.documentName ?? link.documentName,
+          };
+        })
       );
       setLink(null);
     } else {
@@ -231,13 +238,15 @@ export function AgendaItemsEditor({
         (max, l) => Math.max(max, parseInt(l.trigger) || 0),
         -1
       );
-      const newLink = {
+      const last = values.links?.[values.links.length - 1];
+      const newLink: AgendaLink = {
         id: generateId(),
         trigger: `${maxLinkTrigger + 1}`,
-        title: values.links?.[values.links.length - 1].title || '',
-        url: values.links?.[values.links.length - 1].url || '',
-        openInNewWindow:
-          values.links?.[values.links.length - 1].openInNewWindow || false,
+        title: last?.title || '',
+        url: last?.url || '',
+        openInNewWindow: last?.openInNewWindow || false,
+        soort: last?.soort || 'link',
+        documentName: last?.documentName,
       };
       setLinks((currentLinks) => [...currentLinks, newLink]);
     }
@@ -278,6 +287,16 @@ export function AgendaItemsEditor({
     form.setValue('links', links);
     setSettingLinks(false);
   }
+
+  // Index of the link currently being edited: the link selected from the list,
+  // otherwise the last (draft) row used when adding a new link. Without this the
+  // inputs were hardcoded to the last link, so selecting a link showed the wrong
+  // (last) link's data.
+  const selectedLinkIndex = selectedLink
+    ? links.findIndex((l) => l.id === selectedLink.id)
+    : -1;
+  const activeLinkIndex =
+    selectedLinkIndex >= 0 ? selectedLinkIndex : links.length - 1;
 
   return (
     <Form {...form}>
@@ -339,7 +358,32 @@ export function AgendaItemsEditor({
                   <Separator className="mt-2" />
                   <FormField
                     control={form.control}
-                    name={`links.${links.length - 1}.title`}
+                    name={`links.${activeLinkIndex}.soort`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Soort</FormLabel>
+                        <select
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          value={field.value || 'link'}
+                          onChange={(e) => {
+                            field.onChange(e.target.value);
+                            // Switching type clears the previous value
+                            form.setValue(`links.${activeLinkIndex}.url`, '');
+                            form.setValue(
+                              `links.${activeLinkIndex}.documentName`,
+                              undefined
+                            );
+                          }}>
+                          <option value="link">Link</option>
+                          <option value="document">Document</option>
+                        </select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`links.${activeLinkIndex}.title`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Link titel</FormLabel>
@@ -348,20 +392,78 @@ export function AgendaItemsEditor({
                       </FormItem>
                     )}
                   />
+                  {form.watch(`links.${activeLinkIndex}.soort`) ===
+                  'document' ? (
+                    <FormItem>
+                      <FormLabel>Document</FormLabel>
+                      <Input
+                        type="file"
+                        accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const uploaded = await UploadDocument(
+                            file,
+                            project as string
+                          );
+                          if (uploaded?.url) {
+                            form.setValue(
+                              `links.${activeLinkIndex}.url`,
+                              uploaded.url
+                            );
+                            form.setValue(
+                              `links.${activeLinkIndex}.documentName`,
+                              uploaded.name || file.name
+                            );
+                          }
+                        }}
+                      />
+                      {form.watch(`links.${activeLinkIndex}.documentName`) ? (
+                        <div className="flex items-center gap-2 mt-1 text-sm">
+                          <span className="text-muted-foreground">
+                            Huidig bestand:
+                          </span>
+                          <a
+                            href={form.watch(`links.${activeLinkIndex}.url`)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary underline">
+                            {form.watch(
+                              `links.${activeLinkIndex}.documentName`
+                            )}
+                          </a>
+                          <button
+                            type="button"
+                            className="text-destructive underline"
+                            onClick={() => {
+                              form.setValue(`links.${activeLinkIndex}.url`, '');
+                              form.setValue(
+                                `links.${activeLinkIndex}.documentName`,
+                                ''
+                              );
+                            }}>
+                            Verwijder
+                          </button>
+                        </div>
+                      ) : null}
+                      <FormMessage />
+                    </FormItem>
+                  ) : (
+                    <FormField
+                      control={form.control}
+                      name={`links.${activeLinkIndex}.url`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Link URL</FormLabel>
+                          <Input {...field} />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                   <FormField
                     control={form.control}
-                    name={`links.${links.length - 1}.url`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Link URL</FormLabel>
-                        <Input {...field} />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`links.${links.length - 1}.openInNewWindow`}
+                    name={`links.${activeLinkIndex}.openInNewWindow`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Open in nieuw venster</FormLabel>

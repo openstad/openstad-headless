@@ -1,8 +1,10 @@
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { sanitizeUrl } from '@openstad-headless/lib/sanitize-url';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Spacer } from '@openstad-headless/ui/src';
 import { Accordion } from '@openstad-headless/ui/src/accordion';
+import { formatDutchDate } from '@openstad-headless/ui/src/form-elements/timeline/format-date';
 import '@utrecht/component-library-css';
 import {
   Heading3,
@@ -114,14 +116,24 @@ function Agenda({
           aria-current={item.active ? 'true' : undefined}>
           <div className="osc-date-circle"></div>
           <div className="osc-agenda-content">
-            <Heading4>{item.title}</Heading4>
+            <Heading4>
+              {/* Timeline items store a bare ISO date as the title — show it
+                  as a Dutch long date. Real agenda titles pass through. */}
+              {item.title && /^\d{4}-\d{2}-\d{2}$/.test(item.title)
+                ? formatDutchDate(item.title)
+                : item.title}
+            </Heading4>
             <Paragraph>{item.description}</Paragraph>
             {item.links && item.links?.length > 0 && (
               <LinkList className="osc-agenda-list">
                 {item.links?.map((link, index) => (
                   <LinkListLink
-                    href={link.url}
-                    target={link.openInNewWindow ? '_blank' : '_self'}>
+                    key={index}
+                    href={sanitizeUrl(link.url)}
+                    target={link.openInNewWindow ? '_blank' : '_self'}
+                    rel={
+                      link.openInNewWindow ? 'noopener noreferrer' : undefined
+                    }>
                     {link.title}
                   </LinkListLink>
                 ))}

@@ -1,0 +1,388 @@
+/*
+ * Timeline field — design tokens and component styles.
+ * Color strategy: Restrained. Tinted neutrals + OSC/Utrecht tokens.
+ * Register: product (form element inside resource form).
+ */
+
+/* CSS variables at :root so they are available in Radix dialog portals */
+:root {
+  --tl-border: var(--nlds-default-border-color, #d1d9e6);
+  --tl-radius: 4px;
+  --tl-text: var(--utrecht-document-color, #1a1a2e);
+  --tl-muted: var(--osc-muted, #59636d);
+  --tl-bg-add: var(--nlds-default-background-color, #f0f4f8);
+  --tl-gap: 8px;
+  --tl-pad: 12px;
+}
+/*
+ * NOTE: the widget build auto-prepends ".openstad " to every selector for
+ * scoping. Do NOT write ".openstad" yourself or it compiles to
+ * ".openstad .openstad ..." which needs two nested wrappers and never matches.
+ * The dialog portal has a single ".openstad" wrapper, so plain selectors win.
+ */
+.osc-DialogContent.timeline-dialog {
+  max-width: 700px;
+}
+.question-type-timeline {
+  padding-bottom: 20px;
+}
+
+.timeline-field-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ── Header: label + description ── */
+
+.timeline-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timeline-header .utrecht-form-field__label {
+  margin: 0;
+}
+
+.timeline-header .utrecht-form-label {
+  font-weight: 700;
+  color: var(--tl-text);
+}
+
+.timeline-header .utrecht-form-field-description {
+  color: var(--tl-muted);
+  order: 1;
+}
+
+/* ── Items list ── */
+
+.timeline-items-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--tl-gap);
+}
+
+.timeline-empty {
+  color: var(--tl-muted);
+  font-style: italic;
+  font-size: 0.875rem;
+  padding: 4px 0;
+}
+
+/* ── Item row ── */
+
+.timeline-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid var(--tl-border);
+  border-radius: var(--tl-radius);
+  padding: 10px var(--tl-pad);
+}
+
+.timeline-item-info {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.timeline-item-date {
+  font-weight: 700;
+  color: var(--tl-text);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.timeline-item-desc {
+  color: var(--tl-muted);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.timeline-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+/* ── Shared action button ── */
+
+.timeline-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--tl-muted);
+  padding: 4px 6px;
+  font-size: 1.1rem;
+  line-height: 1;
+  border-radius: 3px;
+  transition:
+    color 0.15s ease-out,
+    background-color 0.15s ease-out;
+}
+
+.timeline-action-btn:focus-visible {
+  outline: 2px solid var(--utrecht-focus-outline-color, #005ea2);
+  outline-offset: 2px;
+}
+
+/* ── Add-item button ── */
+
+.timeline-field-container .timeline-add-item-btn {
+  background: var(--tl-bg-add);
+  border: 1px solid var(--tl-border);
+  border-radius: var(--tl-radius);
+  color: var(--tl-text);
+  font-weight: 600;
+  padding: 8px 14px;
+  gap: 6px;
+  display: inline-flex;
+  align-items: center;
+  min-width: auto;
+  min-height: auto;
+}
+
+.timeline-field-container .timeline-add-item-btn:hover {
+  background: #e3e8ed;
+  border-color: var(--tl-border);
+  color: var(--tl-text);
+}
+
+.timeline-field-container .timeline-add-item-btn:focus-visible {
+  outline: 2px solid var(--utrecht-focus-outline-color, #005ea2);
+  outline-offset: 2px;
+}
+
+/* ── Dialog ── */
+
+.timeline-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.timeline-dialog-content input,
+.timeline-dialog-content textarea {
+  width: 100%;
+  max-width: 100%;
+  max-inline-size: 100%;
+}
+
+.timeline-dialog-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--tl-text);
+  margin: 0;
+}
+
+/* ── Externe links section ── */
+
+.timeline-links-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.timeline-section-label {
+  font-weight: 700;
+  color: var(--tl-text);
+  margin: 0;
+  font-size: inherit;
+}
+
+/* ── Link entry card ── */
+
+.timeline-link-entry {
+  background: #fff;
+  border: 1px solid var(--tl-border);
+  border-radius: 6px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Labels row: Soort | Url/Document | Link tekst | × */
+.timeline-link-labels-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.timeline-link-col-label {
+  font-size: 0.9375rem;
+  color: var(--tl-text);
+}
+
+/* Inputs row: three equal columns that never grow past their share */
+.timeline-link-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+/* Open-in-new-tab checkbox row (links only) */
+.timeline-link-newtab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9375rem;
+  color: var(--tl-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.timeline-link-newtab input {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+}
+
+.utrecht-textbox,
+.utrecht-textarea {
+  max-width: 100%;
+}
+
+/* Native select in link cards — matches the Utrecht inputs (dark border) */
+.timeline-soort-select {
+  width: 100%;
+  padding: 9px 12px;
+  border: var(--utrecht-form-control-border-width, 1px) solid
+    var(--utrecht-form-control-border-color, var(--tl-input-border, #1a1a2e));
+  border-radius: var(--utrecht-textbox-border-radius, var(--tl-radius));
+  font-size: inherit;
+  font-family: inherit;
+  background: #fff;
+  color: var(--tl-text);
+  appearance: auto;
+  cursor: pointer;
+}
+
+.timeline-soort-select:focus {
+  outline: 2px solid var(--utrecht-focus-outline-color, #005ea2);
+  outline-offset: 1px;
+}
+
+/* Document button — replaces the document dropdown; matches the input box */
+.timeline-doc-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 12px;
+  border: var(--utrecht-form-control-border-width, 1px) solid
+    var(--utrecht-form-control-border-color, var(--tl-input-border, #1a1a2e));
+  border-radius: var(--utrecht-textbox-border-radius, var(--tl-radius));
+  background: #fff;
+  color: var(--tl-muted);
+  font-size: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  min-width: auto;
+  min-height: auto;
+  text-align: left;
+}
+
+.timeline-doc-button--filled {
+  color: var(--tl-text);
+}
+
+.timeline-doc-button:hover:not(:disabled) {
+  background: #f7f9fb;
+}
+
+.timeline-doc-button:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.timeline-doc-button:focus-visible {
+  outline: 2px solid var(--utrecht-focus-outline-color, #005ea2);
+  outline-offset: 1px;
+}
+
+.timeline-doc-button-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.timeline-doc-button i {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* ── Add-link button (full-width) ── */
+
+.timeline-links-section .timeline-add-link-btn {
+  width: 100%;
+  max-width: 100%;
+  justify-content: center;
+  background: var(--tl-bg-add);
+  border: 1px solid var(--tl-border);
+  border-radius: var(--tl-radius);
+  color: var(--tl-text);
+  font-weight: 600;
+  padding: 10px;
+  gap: 6px;
+  display: flex;
+  align-items: center;
+  min-width: auto;
+  min-height: auto;
+}
+
+.timeline-links-section .timeline-add-link-btn:hover {
+  background: #e3e8ed;
+  border-color: var(--tl-border);
+  color: var(--tl-text);
+}
+
+.timeline-links-section .timeline-add-link-btn:focus-visible {
+  outline: 2px solid var(--utrecht-focus-outline-color, #005ea2);
+  outline-offset: 2px;
+}
+
+/* ── Dialog footer ── */
+
+.timeline-dialog-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.timeline-file-input-hidden {
+  display: none;
+}
+
+/* ── Responsive: stack link card columns on narrow screens (≤ 480px / 350px mobile) ── */
+
+@media (max-width: 480px) {
+  .timeline-link-labels-row {
+    grid-template-columns: 1fr auto;
+    /* On mobile: only "Soort" label + × visible; other labels hidden via order */
+  }
+
+  .timeline-link-labels-row .timeline-link-col-label:not(:first-child) {
+    display: none;
+  }
+
+  .timeline-link-fields {
+    grid-template-columns: 1fr;
+  }
+}

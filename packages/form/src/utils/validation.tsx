@@ -190,6 +190,19 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
     case 'range':
       return undefined;
 
+    case 'timeline':
+      if (typeof field.fieldRequired !== 'undefined' && field.fieldRequired) {
+        return z
+          .array(z.any())
+          .min(
+            1,
+            'requiredWarning' in field && field.requiredWarning
+              ? field.requiredWarning
+              : 'Het veld' + fieldTitle + 'is verplicht'
+          );
+      }
+      return undefined;
+
     default:
       return undefined;
   }
