@@ -240,7 +240,11 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
           order: [['id', 'ASC']],
         });
 
+        const existingVotes = existing.map((entry) => entry.toJSON());
+        const replaceAll = req.query.replaceAll === 'true';
+
         if (
+          replaceAll &&
           req.project.config.votes.voteType !== 'likes' &&
           req.project.config.votes.withExisting == 'error' &&
           existing &&
@@ -248,9 +252,6 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
         ) {
           throw createError(403, 'Je hebt al gestemd');
         }
-
-        const existingVotes = existing.map((entry) => entry.toJSON());
-        const replaceAll = req.query.replaceAll === 'true';
         let votes = req.body || [];
         if (!Array.isArray(votes)) votes = [votes];
 
@@ -425,7 +426,7 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
 
               const maxResources = req.project.config.votes.maxResources;
               const withExisting = req.project.config.votes.withExisting;
-              if (maxResources && withExisting !== 'error') {
+              if (maxResources) {
                 const createCount = actions.filter(
                   (a) => a.action === 'create'
                 ).length;
@@ -436,6 +437,13 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
                   existingVotes.length + createCount - deleteCount;
 
                 if (newTotal > maxResources) {
+                  if (withExisting === 'error') {
+                    throw createError(
+                      403,
+                      'Je hebt het maximum aantal stemmen bereikt'
+                    );
+                  }
+
                   const excess = newTotal - maxResources;
                   const alreadyHandled = new Set(
                     actions.map((a) => a.vote.id).filter(Boolean)
