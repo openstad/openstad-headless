@@ -27,7 +27,11 @@ export default function WidgetAgendaItems(
   }, [items]);
 
   function handleSaveItems() {
-    props.updateConfig({ ...props, items });
+    const normalizedItems = items.map((item) => ({
+      ...item,
+      active: item.active ?? false,
+    }));
+    props.updateConfig({ ...props, items: normalizedItems });
   }
 
   return (
