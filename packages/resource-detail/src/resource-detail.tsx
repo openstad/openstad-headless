@@ -661,20 +661,7 @@ function ResourceDetail({
             <div className="aside--content">
               {displayLikes ? (
                 <>
-                  <Likes
-                    {...props}
-                    disabled={!canLike}
-                    title={props.likeWidget?.title}
-                    yesLabel={props.likeWidget?.yesLabel}
-                    noLabel={props.likeWidget?.noLabel}
-                    displayDislike={props.likeWidget?.displayDislike}
-                    hideCounters={props.likeWidget?.hideCounters}
-                    variant={props.likeWidget?.variant}
-                    showProgressBar={props.likeWidget?.showProgressBar}
-                    progressBarDescription={
-                      props.likeWidget?.progressBarDescription
-                    }
-                  />
+                  <Likes {...props} {...props.likeWidget} disabled={!canLike} />
                   <Spacer size={1} />
                 </>
               ) : null}
