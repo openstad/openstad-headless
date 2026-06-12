@@ -1,5 +1,7 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { hasRole } from '@openstad-headless/lib';
+import NotificationProvider from '@openstad-headless/lib/NotificationProvider/notification-provider';
+import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { LocalStorage } from '@openstad-headless/lib/local-storage';
@@ -149,6 +151,14 @@ function Likes({
       if (refreshResourceLikes) {
         await refreshResourceLikes();
       }
+    } catch (err: any) {
+      if (err?.status === 403) {
+        const message =
+          props.votes.voteType === 'likes'
+            ? 'Je hebt al gestemd'
+            : 'Je hebt het maximum aantal stemmen bereikt';
+        NotificationService.addNotification(message, 'error');
+      }
     } finally {
       setIsBusy(false);
     }
@@ -156,12 +166,16 @@ function Likes({
 
   if (typeof props.children === 'function') {
     return (
-      <>{props.children((value: string) => doVote(null, value), resource)}</>
+      <>
+        {props.children((value: string) => doVote(null, value), resource)}
+        <NotificationProvider />
+      </>
     );
   }
 
   return (
     <div className="osc">
+      <NotificationProvider />
       {variant !== 'micro-score' ? (
         <div className={`like-widget-container ${variant}`}>
           {title ? (
