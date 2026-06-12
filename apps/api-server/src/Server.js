@@ -86,6 +86,9 @@ module.exports = {
     // Apply: before:routes
     applyPluginMiddleware('before:routes');
 
+    // Restrict API token requests to reporting/stats routes only
+    this.app.use(require('./middleware/api-token-scope-guard'));
+
     var middleware = config.express.middleware;
 
     middleware.forEach((entry) => {
