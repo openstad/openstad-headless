@@ -380,11 +380,13 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
         switch (req.project.config.votes.voteType) {
           case 'likes':
             votes.forEach((vote) => {
-              let existingVote = existingVotes
-                ? existingVotes.find(
-                    (entry) => entry.resourceId == vote.resourceId
-                  )
-                : false;
+              const existingVote = existingVotes.find(
+                (entry) => entry.resourceId == vote.resourceId
+              );
+              const otherExisting = existingVotes.filter(
+                (entry) => entry.resourceId != vote.resourceId
+              );
+
               if (existingVote) {
                 if (existingVote.opinion == vote.opinion) {
                   actions.push({ action: 'delete', vote: existingVote });
@@ -392,7 +394,23 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
                   existingVote.opinion = vote.opinion;
                   actions.push({ action: 'update', vote: existingVote });
                 }
+                if (
+                  otherExisting.length > 0 &&
+                  req.project.config.votes.withExisting === 'replace'
+                ) {
+                  otherExisting.forEach((v) =>
+                    actions.push({ action: 'delete', vote: v })
+                  );
+                }
               } else {
+                if (otherExisting.length > 0) {
+                  if (req.project.config.votes.withExisting === 'error') {
+                    throw createError(403, 'Je hebt al gestemd');
+                  }
+                  otherExisting.forEach((v) =>
+                    actions.push({ action: 'delete', vote: v })
+                  );
+                }
                 actions.push({ action: 'create', vote: vote });
               }
             });

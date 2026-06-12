@@ -139,16 +139,19 @@ function Likes({
 
     const previousOpinion = resource.userVote?.opinion;
 
-    await resource.submitLike({ opinion: value });
+    try {
+      await resource.submitLike({ opinion: value });
 
-    if (showConfettiOnLike && value === 'yes' && previousOpinion !== 'yes') {
-      fireConfetti();
-    }
+      if (showConfettiOnLike && value === 'yes' && previousOpinion !== 'yes') {
+        fireConfetti();
+      }
 
-    if (refreshResourceLikes) {
-      await refreshResourceLikes();
+      if (refreshResourceLikes) {
+        await refreshResourceLikes();
+      }
+    } finally {
+      setIsBusy(false);
     }
-    setIsBusy(false);
   }
 
   if (typeof props.children === 'function') {
