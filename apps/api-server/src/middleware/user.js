@@ -1,8 +1,10 @@
 const config = require('config');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const merge = require('merge');
 const db = require('../db');
 const authSettings = require('../util/auth-settings');
+const auditLogService = require('../services/audit-log');
 
 let adapters = {};
 
@@ -17,25 +19,31 @@ module.exports = async function getUser(req, res, next) {
   try {
     if (!req.headers['authorization']) {
       return nextWithEmptyUser(req, res, next);
-    } else {
-      const allowedUploadPaths = ['/upload/images', '/upload/documents'];
-
-      const isUploadRequest = allowedUploadPaths.some((path) =>
-        req.path.endsWith(path)
-      );
-
-      if (isUploadRequest) {
-        const payload = {
-          userId: '9999999',
-          authProvider: 'upload-service',
-          exp: Math.floor(Date.now() / 1000) + 5 * 60,
-        };
-
-        const uploadJwt = jwt.sign(payload, config.auth.jwtSecret);
-
-        req.headers['authorization'] = `Bearer ${uploadJwt}`;
-      }
     }
+
+    // Opaque API token path (Bearer osr_…) — bypasses JWT and auth-server round-trip
+    if (/^bearer osr_/i.test(req.headers['authorization'])) {
+      return handleApiToken(req, res, next);
+    }
+
+    const allowedUploadPaths = ['/upload/images', '/upload/documents'];
+
+    const isUploadRequest = allowedUploadPaths.some((path) =>
+      req.path.endsWith(path)
+    );
+
+    if (isUploadRequest) {
+      const payload = {
+        userId: '9999999',
+        authProvider: 'upload-service',
+        exp: Math.floor(Date.now() / 1000) + 5 * 60,
+      };
+
+      const uploadJwt = jwt.sign(payload, config.auth.jwtSecret);
+
+      req.headers['authorization'] = `Bearer ${uploadJwt}`;
+    }
+
     let { userId, isFixed, authProvider } = parseAuthHeader(
       req.headers['authorization']
     );
@@ -69,6 +77,90 @@ module.exports = async function getUser(req, res, next) {
     next(error);
   }
 };
+
+/**
+ * Authenticate using an opaque API token (osr_…) stored hashed in api_tokens.
+ * Skips the auth-server round-trip; loads the owner User directly from DB.
+ */
+async function handleApiToken(req, res, next) {
+  try {
+    const rawToken = req.headers['authorization'].replace(/^bearer /i, '');
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
+
+    const apiToken = await db.ApiToken.findOne({ where: { tokenHash } });
+
+    if (!apiToken || apiToken.expiresAt < new Date()) {
+      if (apiToken) {
+        // Token exists but is expired: audit the first rejected use
+        logExpiredTokenUse(req, apiToken).catch(() => {});
+      }
+      return nextWithEmptyUser(req, res, next);
+    }
+
+    const owner = await db.User.findOne({ where: { id: apiToken.userId } });
+    if (!owner) {
+      return nextWithEmptyUser(req, res, next);
+    }
+
+    // Enforce the token's project binding: stats routes check role only
+    // (hasRole(req.user, 'editor')), so without this check a token from one
+    // project could read another project's stats. Only superusers (admin on
+    // the admin project) may cross project boundaries, mirroring the JWT path.
+    const isSuperUser =
+      owner.projectId == config.admin.projectId &&
+      ['admin', 'superuser'].includes(owner.role);
+    if (
+      !isSuperUser &&
+      (!req.project || req.project.id != apiToken.projectId)
+    ) {
+      return nextWithEmptyUser(req, res, next);
+    }
+
+    req.user = owner;
+    req.apiTokenScope = 'reports';
+
+    // Update lastUsedAt asynchronously — do not block the request
+    apiToken.update({ lastUsedAt: new Date() }).catch(() => {});
+
+    return next();
+  } catch (err) {
+    console.error(
+      `[${new Date().toISOString()}][auth-middleware] handleApiToken error: ${err?.message}`
+    );
+    return nextWithEmptyUser(req, res, next);
+  }
+}
+
+/**
+ * Write a single 'token_expired' audit entry the first time an expired token
+ * is used. Expiry itself is passive (no event fires when a token expires), so
+ * the first rejected use is the auditable moment. Later uses are not logged
+ * again to avoid noise from external tools that keep polling with a dead token.
+ */
+async function logExpiredTokenUse(req, apiToken) {
+  const existing = await db.AuditLog.findOne({
+    where: {
+      modelName: 'api-token',
+      modelId: apiToken.id,
+      action: 'token_expired',
+    },
+  });
+  if (existing) return;
+
+  const entry = auditLogService.buildEntry(req, {
+    action: 'token_expired',
+    modelName: 'api-token',
+    modelId: apiToken.id,
+    source: 'api',
+    statusCode: 401,
+  });
+  // req.params is not populated at middleware level; take it from the token
+  entry.projectId = apiToken.projectId;
+  auditLogService.logDirect(entry);
+}
 
 /**
  * Continue with empty user if user is not set

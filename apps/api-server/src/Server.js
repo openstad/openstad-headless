@@ -68,6 +68,9 @@ module.exports = {
     this._initBasicMiddleware();
     this._initSessionMiddleware();
 
+    // Restrict API token requests to reporting/stats routes only
+    this.app.use(require('./middleware/api-token-scope-guard'));
+
     var middleware = config.express.middleware;
 
     middleware.forEach((entry) => {

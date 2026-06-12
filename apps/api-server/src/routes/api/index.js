@@ -55,6 +55,14 @@ router.use(
   '/project/:projectId(\\d+)/user/:userId(\\d+)/activity',
   require('./user-activity')
 );
+router.use(
+  '/project/:projectId(\\d+)/user/:userId(\\d+)/api-token',
+  require('./api-token')
+);
+router.use(
+  '/project/:projectId(\\d+)/api-token',
+  require('./api-token').projectRouter
+);
 router.use('/user', require('./user'));
 
 // submissions
