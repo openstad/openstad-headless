@@ -1,3 +1,4 @@
+import { ApiTokenStatusBadge } from '@/components/api-token-status-badge';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -191,9 +192,14 @@ export default function UserApiTokens() {
           {tokens.map((token) => (
             <div
               key={token.id}
-              className="flex items-center justify-between p-3 border rounded-md">
+              className={`flex items-center justify-between p-3 border rounded-md ${
+                token.status !== 'active' ? 'opacity-60' : ''
+              }`}>
               <div className="text-sm">
-                <p className="font-mono font-medium">{maskToken(token)}</p>
+                <p className="font-mono font-medium flex items-center gap-2">
+                  {maskToken(token)}
+                  <ApiTokenStatusBadge status={token.status} />
+                </p>
                 {token.name && (
                   <p className="text-muted-foreground">{token.name}</p>
                 )}
@@ -203,13 +209,15 @@ export default function UserApiTokens() {
                     ` · Laatst gebruikt: ${formatDate(token.lastUsedAt)}`}
                 </p>
               </div>
-              <Button
-                type="button"
-                variant="destructive"
-                size="sm"
-                onClick={() => handleRevoke(token.id)}>
-                Intrekken
-              </Button>
+              {token.status !== 'revoked' && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleRevoke(token.id)}>
+                  Intrekken
+                </Button>
+              )}
             </div>
           ))}
         </div>
