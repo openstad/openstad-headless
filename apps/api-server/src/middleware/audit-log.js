@@ -7,6 +7,17 @@ const WRITE_METHODS = ['POST', 'PUT', 'DELETE'];
 function resolveModelFromPath(path) {
   const segments = path.replace(/^\//, '').split('/');
 
+  // api-token routes are nested under /project/:id/user/:id/api-token and
+  // /project/:id/api-token — the generic project rule below would resolve
+  // them as 'user' (or 'api-token' without the token id), so handle them first
+  const apiTokenIdx = segments.indexOf('api-token');
+  if (apiTokenIdx !== -1) {
+    return {
+      modelName: 'api-token',
+      modelId: segments[apiTokenIdx + 1] || null,
+    };
+  }
+
   // /api/project/:projectId/<model>/...
   const projectIdx = segments.indexOf('project');
   if (projectIdx !== -1 && segments.length > projectIdx + 2) {
