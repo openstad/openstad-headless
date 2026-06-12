@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import * as React from 'react';
 
 import { PageLayout } from '../../../components/ui/page-layout';
+import UserApiTokens from './api-tokens';
 import UserAuditLog from './audit-log';
 import CreateUserGeneral from './general';
 import CreateUserProjects from './projects';
@@ -31,6 +32,7 @@ export default function CreateUser() {
               <TabsTrigger value="general">Algemene instellingen</TabsTrigger>
               <TabsTrigger value="projects">Projectsrechten</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="apitokens">API-tokens</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               <CreateUserGeneral />
@@ -40,6 +42,9 @@ export default function CreateUser() {
             </TabsContent>
             <TabsContent value="auditlog" className="p-0">
               <UserAuditLog />
+            </TabsContent>
+            <TabsContent value="apitokens" className="p-0">
+              <UserApiTokens />
             </TabsContent>
           </Tabs>
         </div>
