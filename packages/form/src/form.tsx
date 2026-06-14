@@ -15,6 +15,7 @@ import SelectField from '@openstad-headless/ui/src/form-elements/select';
 import SortField from '@openstad-headless/ui/src/form-elements/sort';
 import TextInput from '@openstad-headless/ui/src/form-elements/text';
 import TickmarkSlider from '@openstad-headless/ui/src/form-elements/tickmark-slider';
+import TimelineField from '@openstad-headless/ui/src/form-elements/timeline';
 import VideoField from '@openstad-headless/video/src/video';
 import '@utrecht/component-library-css';
 import {
@@ -367,6 +368,7 @@ function Form({
     sort: SortField as React.ComponentType<ComponentFieldProps>,
     dilemma: DilemmaField as React.ComponentType<ComponentFieldProps>,
     video: VideoField as React.ComponentType<ComponentFieldProps>,
+    timeline: TimelineField as React.ComponentType<ComponentFieldProps>,
   };
 
   const renderField = (

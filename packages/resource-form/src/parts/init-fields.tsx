@@ -162,6 +162,20 @@ export const InitializeFormFields = (items, data) => {
           fieldData['matrixMultiple'] = item?.matrixMultiple || false;
           fieldData['defaultValue'] = [];
           break;
+        case 'timeline':
+          fieldData['type'] = 'timeline';
+          fieldData['allowedTypes'] = item.allowedTypes || [
+            'image/*',
+            'application/pdf',
+            'application/msword',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          ];
+          // Default to empty array; in edit mode the value is filled in by
+          // resource-form.tsx, which reads it from the resource.timeline column.
+          if (!fieldData['defaultValue']) {
+            fieldData['defaultValue'] = [];
+          }
+          break;
       }
 
       formFields.push(fieldData);

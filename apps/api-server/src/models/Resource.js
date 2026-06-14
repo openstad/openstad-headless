@@ -236,10 +236,12 @@ module.exports = function (db, sequelize, DataTypes) {
 
       timeline: {
         type: DataTypes.JSON,
-        auth: {
-          createableBy: 'editor',
-          updateableBy: 'editor',
-        },
+        // Timeline is a resource content field that can be filled through the
+        // resourceform timeline field by submitters (owner) as well as by
+        // moderators/editors. It therefore inherits the model-level auth
+        // (createableBy: 'all', updateableBy: ['admin','editor','owner','moderator'])
+        // rather than being editor-only, so citizen submissions persist to this
+        // column instead of being stripped and pushed into extraData.
         allowNull: true,
         defaultValue: null,
       },
