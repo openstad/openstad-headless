@@ -13,6 +13,7 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { Button, SecondaryButton } from '../../button';
 import { Dialog } from '../../dialog';
+import { formatFileSize, getFileFormat } from '../../lib/format-file-size';
 import RteContent from '../../rte-formatting/rte-content';
 import { formatDutchDate } from './format-date';
 import './timeline.css';
@@ -32,6 +33,8 @@ export type TimelineItem = {
     openInNewWindow: boolean;
     soort?: LinkSoort;
     documentName?: string;
+    fileFormat?: string;
+    fileSize?: string;
   }[];
 };
 
@@ -62,6 +65,8 @@ type LinkItem = {
   openInNewWindow: boolean;
   soort: LinkSoort;
   documentName?: string;
+  fileFormat?: string;
+  fileSize?: string;
 };
 
 type ItemFormState = {
@@ -152,6 +157,8 @@ const TimelineField: FC<TimelineFieldProps> = ({
         openInNewWindow: l.openInNewWindow,
         soort: l.soort ?? 'link',
         documentName: l.documentName,
+        fileFormat: l.fileFormat,
+        fileSize: l.fileSize,
       })),
     });
     setDialogOpen(true);
@@ -226,6 +233,8 @@ const TimelineField: FC<TimelineFieldProps> = ({
       soort,
       url: '',
       documentName: undefined,
+      fileFormat: undefined,
+      fileSize: undefined,
       openInNewWindow: soort === 'document',
     });
   };
@@ -247,6 +256,9 @@ const TimelineField: FC<TimelineFieldProps> = ({
     const trigger = pendingUploadTrigger.current;
     if (!file || !imageUrl || trigger === null) return;
 
+    const fileFormat = getFileFormat(file.name);
+    const fileSize = file.size > 0 ? formatFileSize(file.size) : undefined;
+
     setUploadingTrigger(trigger);
     try {
       const formData = new FormData();
@@ -265,6 +277,8 @@ const TimelineField: FC<TimelineFieldProps> = ({
           updateLink(trigger, {
             url: result[0].url,
             documentName: result[0].name,
+            fileFormat,
+            fileSize,
           });
         }
       }

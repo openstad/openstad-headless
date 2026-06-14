@@ -2,7 +2,7 @@
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { sanitizeUrl } from '@openstad-headless/lib/sanitize-url';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Spacer } from '@openstad-headless/ui/src';
+import { Spacer, getFileFormat } from '@openstad-headless/ui/src';
 import { Accordion } from '@openstad-headless/ui/src/accordion';
 import { formatDutchDate } from '@openstad-headless/ui/src/form-elements/timeline/format-date';
 import '@utrecht/component-library-css';
@@ -39,6 +39,9 @@ export type AgendaWidgetProps = BaseProps &
         title: string;
         url: string;
         openInNewWindow: boolean;
+        soort?: string;
+        fileFormat?: string;
+        fileSize?: string;
       }>;
     }>;
     displayToggle?: boolean;
@@ -126,17 +129,32 @@ function Agenda({
             <Paragraph>{item.description}</Paragraph>
             {item.links && item.links?.length > 0 && (
               <LinkList className="osc-agenda-list">
-                {item.links?.map((link, index) => (
-                  <LinkListLink
-                    key={index}
-                    href={sanitizeUrl(link.url)}
-                    target={link.openInNewWindow ? '_blank' : '_self'}
-                    rel={
-                      link.openInNewWindow ? 'noopener noreferrer' : undefined
-                    }>
-                    {link.title}
-                  </LinkListLink>
-                ))}
+                {item.links?.map((link, index) => {
+                  // Only fall back to deriving the format from the URL for
+                  // document links; a manually entered link URL would otherwise
+                  // yield a nonsensical "extension" from its domain (e.g.
+                  // "example.com" -> "COM").
+                  const fmt =
+                    link.fileFormat ||
+                    (link.soort === 'document'
+                      ? getFileFormat(link.url)
+                      : undefined);
+                  const size = link.fileSize;
+                  const meta =
+                    fmt && size ? ` (${fmt}, ${size})` : fmt ? ` (${fmt})` : '';
+                  return (
+                    <LinkListLink
+                      key={index}
+                      href={sanitizeUrl(link.url)}
+                      target={link.openInNewWindow ? '_blank' : '_self'}
+                      rel={
+                        link.openInNewWindow ? 'noopener noreferrer' : undefined
+                      }>
+                      {link.title}
+                      {meta}
+                    </LinkListLink>
+                  );
+                })}
               </LinkList>
             )}
           </div>
