@@ -150,10 +150,11 @@ export const GridderResourceDetail = ({
               <>
                 <Heading4>Budget</Heading4>
                 <Paragraph>
-                  &euro;{' '}
-                  {resource.budget > 0
-                    ? resource.budget.toLocaleString('nl-NL')
-                    : 0}
+                  {`€ ${
+                    resource.budget > 0
+                      ? resource.budget.toLocaleString('nl-NL')
+                      : 0
+                  }`}
                 </Paragraph>
                 <Spacer size={1} />
               </>
