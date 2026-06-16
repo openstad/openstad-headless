@@ -132,6 +132,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
     onLocationChange?: (location: PostcodeAutoFillLocation) => void;
     onMarkerResourceClick?: (resource: any, index: number) => void;
+    onResourceClickHandlerRegister?: (
+      handler: (resource: any, index?: number) => void
+    ) => void;
     displayLikeButton?: boolean;
     displayDislike?: boolean;
     clickableImage?: boolean;
@@ -796,6 +799,53 @@ const defaultItemRenderer = (
   );
 };
 
+type DialogResourceItemProps = {
+  item: any;
+  datastore: any;
+  projectId?: string;
+  currentUser?: any;
+  displayDocuments?: boolean;
+  documentsTitle?: string;
+  documentsDesc?: string;
+  displayTags?: boolean;
+  dialogTagGroups?: string[];
+  displayBudget?: boolean;
+  displayLikeButton?: boolean;
+  displayDislike?: boolean;
+  clickableImage?: boolean;
+  onRemoveClick: (resource: any) => void;
+  forwardProps: ResourceOverviewWidgetProps;
+};
+
+function DialogResourceItem({
+  item,
+  datastore,
+  projectId,
+  onRemoveClick,
+  forwardProps,
+  ...gridderProps
+}: DialogResourceItemProps) {
+  const itemIsFull =
+    !!item && ('summary' in item || 'description' in item || 'images' in item);
+
+  const { data } = datastore.useResource({
+    projectId,
+    resourceId: item?.id,
+    initialData: itemIsFull ? item : undefined,
+  });
+
+  const resource = itemIsFull ? item : data && data.id ? data : item;
+
+  return (
+    <GridderResourceDetail
+      resource={resource}
+      onRemoveClick={onRemoveClick}
+      {...gridderProps}
+      {...forwardProps}
+    />
+  );
+}
+
 function ResourceOverviewInner({
   renderItem = defaultItemRenderer,
   allowFiltering = true,
@@ -1040,6 +1090,7 @@ function ResourceOverviewInner({
   });
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
+  const [dialogSource, setDialogSource] = useState<'list' | 'marker'>('list');
 
   useEffect(() => {
     if (
@@ -1196,19 +1247,43 @@ function ResourceOverviewInner({
 
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
 
-  const dialogList = useMemo(
+  const markerDialogList = useMemo(
     () =>
       listUsesAllResources
         ? (filteredResources ?? [])
-        : // Prefer full unsliced records when cardgrid+map fetched them; fall back
-          // to filteredResources for non-map paths where allResourcesData is empty.
-          (allResourcesData?.records ?? filteredResources ?? []),
+        : (allResourcesData?.records ?? filteredResources ?? []),
     [listUsesAllResources, filteredResources, allResourcesData]
   );
 
+  const dialogList = useMemo(
+    () =>
+      dialogSource === 'marker' ? markerDialogList : (filteredResources ?? []),
+    [dialogSource, markerDialogList, filteredResources]
+  );
+
+  const openDialogForResource = useCallback(
+    (resource: any, source: 'list' | 'marker') => {
+      const listForSource =
+        source === 'marker' ? markerDialogList : (filteredResources ?? []);
+      const idx = findResourceIndex(
+        resource.id ?? resource.uniqueId,
+        listForSource
+      );
+      if (idx === -1) {
+        console.warn(
+          '[resource-overview] dialog open: resource not found in list',
+          { source, resource }
+        );
+        return;
+      }
+      setDialogSource(source);
+      setResourceDetailIndex(idx);
+      setOpen(true);
+    },
+    [filteredResources, markerDialogList]
+  );
+
   const onResourceClick = useCallback(
-    // _index is the marker-array position; the dialog uses dialogList, which has
-    // a different order — look up the correct index via findResourceIndex below.
     (resource: any, _index?: number) => {
       if (displayType === 'cardrow') {
         let urlToUse = props.itemLink;
@@ -1243,23 +1318,23 @@ function ResourceOverviewInner({
       }
 
       if (displayType === 'cardgrid') {
-        const idx = findResourceIndex(
-          resource.id ?? resource.uniqueId,
-          dialogList
-        );
-        if (idx === -1) {
-          console.warn(
-            '[resource-overview] marker click: resource not found in dialogList',
-            resource
-          );
-          return;
-        }
-        setResourceDetailIndex(idx);
-        setOpen(true);
+        openDialogForResource(resource, 'list');
       }
     },
-    [displayType, props.itemLink, dialogList, selectedProjects]
+    [displayType, props.itemLink, selectedProjects, openDialogForResource]
   );
+
+  const onMarkerClickInternal = useCallback(
+    (resource: any) => {
+      if (displayType !== 'cardgrid') return;
+      openDialogForResource(resource, 'marker');
+    },
+    [displayType, openDialogForResource]
+  );
+
+  useEffect(() => {
+    props.onResourceClickHandlerRegister?.(onMarkerClickInternal);
+  }, [onMarkerClickInternal, props.onResourceClickHandlerRegister]);
 
   const filterNeccesary =
     allowFiltering &&
@@ -1356,8 +1431,10 @@ function ResourceOverviewInner({
               previous: 'Vorige afbeelding',
             }}
             itemRenderer={(item) => (
-              <GridderResourceDetail
-                resource={item}
+              <DialogResourceItem
+                item={item}
+                datastore={datastore}
+                projectId={props.projectId}
                 currentUser={currentUser}
                 displayDocuments={displayDocuments}
                 documentsTitle={documentsTitle}
@@ -1368,7 +1445,7 @@ function ResourceOverviewInner({
                 displayLikeButton={displayLikeButton}
                 displayDislike={displayDislike}
                 clickableImage={clickableImage}
-                onRemoveClick={(resource) => {
+                onRemoveClick={(resource: any) => {
                   try {
                     resource
                       .delete(resource.id)
@@ -1380,7 +1457,7 @@ function ResourceOverviewInner({
                     console.error(e);
                   }
                 }}
-                {...props}
+                forwardProps={props}
               />
             )}></Carousel>
         }
@@ -1392,7 +1469,7 @@ function ResourceOverviewInner({
               {
                 ...props,
                 displayType,
-                onMarkerResourceClick: onResourceClick,
+                onMarkerResourceClick: onMarkerClickInternal,
               },
               allResourcesData?.records || filteredResources || [],
               bannerText,
