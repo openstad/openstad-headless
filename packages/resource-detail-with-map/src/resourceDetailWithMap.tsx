@@ -293,24 +293,26 @@ function ResourceDetailWithMap({
               </div>
             ) : null}
           </article>
-          {displayLocation && resource.location && (
-            <div className="map-container--buttons">
-              <ResourceDetailMap
-                resourceId={
-                  props.resourceId || resourceId || resource.id || '0'
-                }
-                {...props}
-                center={resource.location}
-                area={props.resourceDetailMap?.area}
-                resourceIdRelativePath={
-                  props.resourceIdRelativePath || 'openstadResourceId'
-                }></ResourceDetailMap>
-              <div className="map-buttons">
-                {ctaButtonElement}
-                {countButtonElement}
+          {displayLocation &&
+            resource.location?.lat &&
+            resource.location?.lng && (
+              <div className="map-container--buttons">
+                <ResourceDetailMap
+                  resourceId={
+                    props.resourceId || resourceId || resource.id || '0'
+                  }
+                  {...props}
+                  center={resource.location}
+                  area={props.resourceDetailMap?.area}
+                  resourceIdRelativePath={
+                    props.resourceIdRelativePath || 'openstadResourceId'
+                  }></ResourceDetailMap>
+                <div className="map-buttons">
+                  {ctaButtonElement}
+                  {countButtonElement}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </>
       ) : (
         <span>resource niet gevonden..</span>
