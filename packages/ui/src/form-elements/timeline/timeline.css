@@ -1,10 +1,3 @@
-/*
- * Timeline field — design tokens and component styles.
- * Color strategy: Restrained. Tinted neutrals + OSC/Utrecht tokens.
- * Register: product (form element inside resource form).
- */
-
-/* CSS variables at :root so they are available in Radix dialog portals */
 :root {
   --tl-border: var(--nlds-default-border-color, #d1d9e6);
   --tl-radius: 4px;
@@ -33,8 +26,6 @@
   gap: 0.75rem;
 }
 
-/* ── Header: label + description ── */
-
 .timeline-header {
   display: flex;
   flex-direction: column;
@@ -55,8 +46,6 @@
   order: 1;
 }
 
-/* ── Items list ── */
-
 .timeline-items-list {
   list-style: none;
   margin: 0;
@@ -72,8 +61,6 @@
   font-size: 0.875rem;
   padding: 4px 0;
 }
-
-/* ── Item row ── */
 
 .timeline-item-row {
   display: flex;
@@ -116,8 +103,6 @@
   flex-shrink: 0;
 }
 
-/* ── Shared action button ── */
-
 .timeline-action-btn {
   background: none;
   border: none;
@@ -136,8 +121,6 @@
   outline: 2px solid var(--utrecht-focus-outline-color, #005ea2);
   outline-offset: 2px;
 }
-
-/* ── Add-item button ── */
 
 .timeline-field-container .timeline-add-item-btn {
   background: var(--tl-bg-add);
@@ -164,8 +147,6 @@
   outline-offset: 2px;
 }
 
-/* ── Dialog ── */
-
 .timeline-dialog-content {
   display: flex;
   flex-direction: column;
@@ -186,8 +167,6 @@
   margin: 0;
 }
 
-/* ── Externe links section ── */
-
 .timeline-links-section {
   display: flex;
   flex-direction: column;
@@ -201,8 +180,6 @@
   font-size: inherit;
 }
 
-/* ── Link entry card ── */
-
 .timeline-link-entry {
   background: #fff;
   border: 1px solid var(--tl-border);
@@ -213,7 +190,6 @@
   gap: 8px;
 }
 
-/* Labels row: Soort | Url/Document | Link tekst | × */
 .timeline-link-labels-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) auto;
@@ -226,7 +202,6 @@
   color: var(--tl-text);
 }
 
-/* Inputs row: three equal columns that never grow past their share */
 .timeline-link-fields {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -234,7 +209,6 @@
   align-items: stretch;
 }
 
-/* Open-in-new-tab checkbox row (links only) */
 .timeline-link-newtab {
   display: flex;
   align-items: center;
@@ -265,7 +239,6 @@
   font-size: 0.9em;
 }
 
-/* Native select in link cards — matches the Utrecht inputs (dark border) */
 .timeline-link-kind-select {
   width: 100%;
   padding: 9px 12px;
@@ -285,7 +258,6 @@
   outline-offset: 1px;
 }
 
-/* Document button — replaces the document dropdown; matches the input box */
 .timeline-doc-button {
   width: 100%;
   display: flex;
@@ -336,8 +308,6 @@
   line-height: 1;
 }
 
-/* ── Add-link button (full-width) ── */
-
 .timeline-links-section .timeline-add-link-btn {
   width: 100%;
   max-width: 100%;
@@ -366,8 +336,6 @@
   outline-offset: 2px;
 }
 
-/* ── Dialog footer ── */
-
 .timeline-dialog-actions {
   display: flex;
   justify-content: flex-start;
@@ -379,12 +347,9 @@
   display: none;
 }
 
-/* ── Responsive: stack link card columns on narrow screens (≤ 480px / 350px mobile) ── */
-
 @media (max-width: 480px) {
   .timeline-link-labels-row {
     grid-template-columns: 1fr auto;
-    /* On mobile: only "Soort" label + × visible; other labels hidden via order */
   }
 
   .timeline-link-labels-row .timeline-link-col-label:not(:first-child) {
