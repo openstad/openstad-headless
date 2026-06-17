@@ -220,6 +220,7 @@ const BaseMap = ({
   defaultIcon = undefined,
 
   area = undefined,
+  areaId = undefined,
   renderArea = undefined,
   areaPolygonStyle = undefined,
 
@@ -751,6 +752,7 @@ const BaseMap = ({
             <AutoZoom
               autoZoomAndCenter={autoZoomAndCenter}
               area={area}
+              areaId={areaId}
               markers={currentMarkers}
               center={center}
               zoomAfterInit={zoomAfterInit}

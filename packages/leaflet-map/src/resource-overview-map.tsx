@@ -314,6 +314,7 @@ const ResourceOverviewMap = ({
         {...props}
         {...zoom}
         area={polygon}
+        areaId={areaId}
         autoZoomAndCenter={
           props?.mapCenterMode || props?.map?.autoZoomAndCenter || 'area'
         }

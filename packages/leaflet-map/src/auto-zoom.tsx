@@ -14,6 +14,7 @@ import type { MarkerProps } from './types/marker-props';
 type AutoZoomProps = {
   autoZoomAndCenter?: 'area' | 'markers';
   area?: AreaShape;
+  areaId?: number | string | false;
   markers?: Array<MarkerProps>;
   center?: LocationType;
   zoomAfterInit?: boolean;
@@ -61,6 +62,7 @@ function buildMarkerFingerprint(markers?: Array<MarkerProps>): string {
 export function AutoZoom({
   autoZoomAndCenter,
   area,
+  areaId,
   markers,
   center,
   zoomAfterInit = true,
@@ -116,18 +118,18 @@ export function AutoZoom({
 
     prevMarkerFingerprint.current = fingerprint;
     zoomTo('markers', 0);
-  }, [autoZoomAndCenter, area, markers, customPolygonAreas]);
+  }, [autoZoomAndCenter, area, areaId, markers, customPolygonAreas]);
 
   function zoomTo(mode: 'area' | 'markers', depth: number): boolean {
     if (mode === 'area') {
-      return zoomToArea();
+      return zoomToArea(depth);
     } else if (mode === 'markers') {
       return zoomToMarkers(depth);
     }
     return false;
   }
 
-  function zoomToArea(): boolean {
+  function zoomToArea(depth: number = 0): boolean {
     if (
       hasCustomPolygons &&
       Array.isArray(customPolygonAreas) &&
@@ -152,6 +154,16 @@ export function AutoZoom({
       const normalizedArea = Array.isArray(area[0]) ? area : [area];
       return fitArea(normalizedArea);
     }
+    const hasAreaConfigured =
+      areaId !== undefined &&
+      areaId !== null &&
+      areaId !== false &&
+      areaId !== '' &&
+      areaId !== 0 &&
+      areaId !== '0';
+    if (!hasAreaConfigured && !hasCustomPolygons && depth < 2) {
+      return zoomToMarkers(depth + 1);
+    }
     return false;
   }
 
@@ -163,7 +175,7 @@ export function AutoZoom({
 
     if (validMarkers.length === 0) {
       if (depth < 2) {
-        return zoomToArea();
+        return zoomToArea(depth + 1);
       }
       return false;
     }
