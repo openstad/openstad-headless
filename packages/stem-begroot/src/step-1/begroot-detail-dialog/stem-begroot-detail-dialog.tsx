@@ -343,11 +343,11 @@ export const StemBegrootResourceDetailDialog = ({
                           </>
                         ) : null}
 
-                        {displayRanking ? (
+                        {displayRanking && resource?.extraData?.ranking ? (
                           <Icon
                             icon="ri-trophy-line"
                             variant="regular"
-                            text={resource?.extraData?.ranking || 0}
+                            text={resource?.extraData?.ranking}
                           />
                         ) : null}
                       </div>

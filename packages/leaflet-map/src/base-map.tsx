@@ -220,6 +220,7 @@ const BaseMap = ({
   defaultIcon = undefined,
 
   area = undefined,
+  areaId = undefined,
   renderArea = undefined,
   areaPolygonStyle = undefined,
 
@@ -634,18 +635,24 @@ const BaseMap = ({
     const el = containerWrapperRef.current;
     if (!el) return;
 
-    const heightValue = height
-      ? height.match(/\d+(px|%|vh|vw|em|rem|ex|ch|vmin|vmax|cm|mm|in|pt|pc)$/)
-        ? height
-        : `${height}px`
-      : 'auto';
+    const unitPattern =
+      /\d+(px|%|vh|vw|em|rem|ex|ch|vmin|vmax|cm|mm|in|pt|pc)$/;
 
-    el.style.setProperty('--basemap-map-width', width);
-    el.style.setProperty('--basemap-map-height', heightValue);
-    el.style.setProperty(
-      '--basemap-map-aspect-ratio',
-      height ? 'unset' : '16 / 9'
-    );
+    if (width) {
+      const widthValue = width.match(unitPattern) ? width : `${width}px`;
+      el.style.setProperty('--basemap-map-width', widthValue);
+    } else {
+      el.style.removeProperty('--basemap-map-width');
+    }
+
+    if (height) {
+      const heightValue = height.match(unitPattern) ? height : `${height}px`;
+      el.style.setProperty('--basemap-map-height', heightValue);
+      el.style.setProperty('--basemap-map-aspect-ratio', 'unset');
+    } else {
+      el.style.removeProperty('--basemap-map-height');
+      el.style.removeProperty('--basemap-map-aspect-ratio');
+    }
   }, [width, height]);
 
   useEffect(() => {
@@ -745,6 +752,7 @@ const BaseMap = ({
             <AutoZoom
               autoZoomAndCenter={autoZoomAndCenter}
               area={area}
+              areaId={areaId}
               markers={currentMarkers}
               center={center}
               zoomAfterInit={zoomAfterInit}

@@ -193,7 +193,8 @@ export default function RenderContent(content, options = {}) {
           <Link
             key={index}
             href={node.attribs.href}
-            target={node.attribs.target}>
+            target={node.attribs.target}
+            rel={node.attribs.rel}>
             {children}
           </Link>
         );

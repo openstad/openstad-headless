@@ -3,9 +3,9 @@ import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import useSWR from 'swr';
 
-export function useWidgetConfig<R>() {
+export function useWidgetConfig<R>(idOverride?: string) {
   const router = useRouter();
-  let id = router.query.id;
+  let id = idOverride ?? router.query.id;
   let projectId = router.query.project;
 
   let projectNumber: number | undefined = validateProjectNumber(projectId);

@@ -79,6 +79,21 @@ export const defaultFormValues = [
     fieldType: 'select',
   },
   {
+    trigger: '14',
+    title: 'Status',
+    description: 'Selecteer de status van je inzending.',
+    type: 'status',
+    fieldKey: 'status',
+    fieldRequired: false,
+    onlyForModerator: false,
+    minCharacters: '',
+    maxCharacters: '',
+    variant: 'text input',
+    multiple: false,
+    options: [],
+    fieldType: 'select',
+  },
+  {
     trigger: '6',
     title: 'Locatie',
     description:

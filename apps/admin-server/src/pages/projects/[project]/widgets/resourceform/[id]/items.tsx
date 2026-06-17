@@ -14,12 +14,14 @@ import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
+  SelectContentScrollable,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
@@ -54,6 +56,9 @@ const TrixEditor = dynamic(
     ),
   }
 );
+
+const stripHtml = (html: string): string =>
+  html?.replace(/<[^>]*>/g, '').trim() || '';
 
 const formSchema = z.object({
   trigger: z.string(),
@@ -166,6 +171,7 @@ export default function WidgetResourceFormItems(
   const router = useRouter();
   const { project } = router.query;
 
+  const { data: allStatuses } = useStatuses(project as string);
   const { data: allTags } = useTags(project as string);
   const firstTagType = allTags?.[0]?.type ?? '';
 
@@ -408,7 +414,9 @@ export default function WidgetResourceFormItems(
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    onFieldChanged('items', items);
+    if (onFieldChanged) {
+      onFieldChanged('items', items);
+    }
   }, [items]);
 
   // Sets form to selected item values when item is selected
@@ -1204,6 +1212,9 @@ export default function WidgetResourceFormItems(
                               <SelectItem value="tags">
                                 Inzending: Tags
                               </SelectItem>
+                              <SelectItem value="status">
+                                Inzending: Status
+                              </SelectItem>
                               <SelectItem value="location">
                                 Inzending: Locatie
                               </SelectItem>
@@ -1514,6 +1525,20 @@ export default function WidgetResourceFormItems(
                         )}
                       </>
                     )}
+                    {form.watch('type') === 'status' &&
+                      (!allStatuses || allStatuses.length === 0) && (
+                        <p
+                          style={{
+                            fontSize: '14px',
+                            margin: '20px 0',
+                            color: 'red',
+                          }}>
+                          <strong>
+                            Geen statussen gevonden om te selecteren. Maak dit
+                            aan onder het kopje &apos;Statussen&apos;
+                          </strong>
+                        </p>
+                      )}
                     {![
                       'none',
                       'pagination',
@@ -1927,17 +1952,17 @@ export default function WidgetResourceFormItems(
                                         <SelectValue placeholder="Kies een vraag" />
                                       </SelectTrigger>
                                     </FormControl>
-                                    <SelectContent>
+                                    <SelectContentScrollable>
                                       {formMultipleChoiceFields.map(
                                         (f: any) => (
                                           <SelectItem
                                             key={f.trigger}
                                             value={f.trigger}>
-                                            {f.title || f.fieldKey}
+                                            {stripHtml(f.title) || f.fieldKey}
                                           </SelectItem>
                                         )
                                       )}
-                                    </SelectContent>
+                                    </SelectContentScrollable>
                                   </Select>
                                 )}
 

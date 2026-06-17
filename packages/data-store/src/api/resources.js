@@ -1,8 +1,9 @@
-function resolveRandomSortSeed(randomSortRotationMs) {
+export function resolveRandomSortSeed(randomSortRotationMs, forceNew) {
   const storedSeed = localStorage.getItem('pseudoRandomSortSeed');
   const storedTimestamp = localStorage.getItem('pseudoRandomSortSeedTimestamp');
 
   const needsNewSeed =
+    forceNew ||
     !storedSeed ||
     (randomSortRotationMs &&
       (!storedTimestamp ||
@@ -140,7 +141,7 @@ export default {
     if (resources.some((r) => !('resourceId' in r) || !('opinion' in r)))
       throw new Error('Ontbrekende velden resourceId of opinion');
 
-    let url = `/api/project/${projectId}/vote`;
+    let url = `/api/project/${projectId}/vote?replaceAll=true`;
     let headers = {
       'Content-Type': 'application/json',
     };

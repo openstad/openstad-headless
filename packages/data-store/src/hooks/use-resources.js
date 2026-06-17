@@ -17,6 +17,7 @@ export default function useResources(
     allowMultipleProjects = false,
     fetchAll = false,
     randomSortRotationMs = 0,
+    randomSortKey = undefined,
   },
   options
 ) {
@@ -57,10 +58,16 @@ export default function useResources(
     projectIds,
     allowMultipleProjects,
     randomSortRotationMs,
+    randomSortKey,
   };
 
   // Primary paginated call
-  const { data, error, isLoading } = self.useSWR(
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: revalidateList,
+  } = self.useSWR(
     { ...filterParams, page, pageSize },
     'resources.fetch',
     options
@@ -142,5 +149,6 @@ export default function useResources(
     isLoading: isLoading || (fetchAll && allIsLoading),
     submitVotes,
     create,
+    revalidate: () => revalidateList(),
   };
 }

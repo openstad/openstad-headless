@@ -1,10 +1,12 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { hasRole } from '@openstad-headless/lib';
+import NotificationProvider from '@openstad-headless/lib/NotificationProvider/notification-provider';
+import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { LocalStorage } from '@openstad-headless/lib/local-storage';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { ProgressBar } from '@openstad-headless/ui/src';
+import { ProgressBar, fireConfetti } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
 import {
   Button,
@@ -23,9 +25,11 @@ export type LikeWidgetProps = BaseProps &
   ProjectSettingProps & {
     resourceId?: string;
     resourceIdRelativePath?: string;
+    datastore?: any;
+    initialResource?: any; // pre-fetched resource data, skips individual API call
     children?:
       | React.ReactNode
-      | ((doVote: (value: string) => void) => React.ReactNode);
+      | ((doVote: (value: string) => void, resource?: any) => React.ReactNode);
   };
 
 export type LikeProps = {
@@ -38,6 +42,7 @@ export type LikeProps = {
   showProgressBar?: boolean;
   progressBarDescription?: string;
   disabled?: boolean;
+  showConfetti?: boolean;
   refreshResourceLikes?: () => void;
 };
 
@@ -49,6 +54,7 @@ function Likes({
   noLabel = 'Nee',
   displayDislike = false,
   showProgressBar = true,
+  showConfetti: showConfettiOnLike = false,
   disabled = false,
   refreshResourceLikes,
   ...props
@@ -63,12 +69,12 @@ function Likes({
 
   const necessaryVotes = props.resources?.minimumYesVotes || 50;
 
-  // Pass explicitely because datastore is not ts, we will not get a hint if the props have changed
-
-  const datastore: any = new DataStore({
-    projectId: props.projectId,
-    api: props.api,
-  });
+  const datastore: any =
+    props.datastore ||
+    new DataStore({
+      projectId: props.projectId,
+      api: props.api,
+    });
 
   const storage = new LocalStorage({ projectId: props.projectId });
 
@@ -76,6 +82,7 @@ function Likes({
   const { data: resource } = datastore.useResource({
     projectId: props.projectId,
     resourceId,
+    initialData: props.initialResource,
   });
 
   const [isBusy, setIsBusy] = useState(false);
@@ -132,22 +139,43 @@ function Likes({
     let change: { [key: string]: any } = {};
     if (resource.userVote) change[resource.userVote.opinion] = -1;
 
-    await resource.submitLike({
-      opinion: value,
-    });
+    const previousOpinion = resource.userVote?.opinion;
 
-    setIsBusy(false);
-    if (refreshResourceLikes) {
-      await refreshResourceLikes();
+    try {
+      await resource.submitLike({ opinion: value });
+
+      if (showConfettiOnLike && value === 'yes' && previousOpinion !== 'yes') {
+        fireConfetti();
+      }
+
+      if (refreshResourceLikes) {
+        await refreshResourceLikes();
+      }
+    } catch (err: any) {
+      if (err?.status === 403) {
+        const message =
+          props.votes.voteType === 'likes'
+            ? 'Je hebt al gestemd'
+            : 'Je hebt het maximum aantal stemmen bereikt';
+        NotificationService.addNotification(message, 'error');
+      }
+    } finally {
+      setIsBusy(false);
     }
   }
 
   if (typeof props.children === 'function') {
-    return <>{props.children((value: string) => doVote(null, value))}</>;
+    return (
+      <>
+        {props.children((value: string) => doVote(null, value), resource)}
+        <NotificationProvider />
+      </>
+    );
   }
 
   return (
     <div className="osc">
+      <NotificationProvider />
       {variant !== 'micro-score' ? (
         <div className={`like-widget-container ${variant}`}>
           {title ? (

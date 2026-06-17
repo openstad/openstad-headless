@@ -19,6 +19,9 @@ interface Item {
   size?: string;
   fit?: string;
   imagesize?: string;
+  fade?: string;
+  autoplay?: string;
+  autoplayInterval?: string;
 }
 
 function Carousel({
@@ -27,6 +30,9 @@ function Carousel({
   size = 'large',
   fit = 'cover',
   imagesize = 'full',
+  fade,
+  autoplay,
+  autoplayInterval,
 }: Item) {
   const image = JSON.parse(images);
   const titleVisible = title === 'true' ? true : false;
@@ -49,6 +55,11 @@ function Carousel({
     <div className={`carousel${getSize(size)}${getCover(fit)}`}>
       <Slider
         items={image.items.length > 0 ? image.items : []}
+        fade={fade === 'true'}
+        autoplay={autoplay === 'true'}
+        autoplayInterval={
+          autoplayInterval ? parseInt(autoplayInterval) * 1000 : 5000
+        }
         itemRenderer={(i) =>
           i._image.length > 0 ? (
             <Image

@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
+  SelectContentScrollable,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -530,7 +531,9 @@ export default function WidgetChoiceGuideItems(
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    onFieldChanged('items', items);
+    if (onFieldChanged) {
+      onFieldChanged('items', items);
+    }
   }, [items]);
 
   // Sets form to selected item values when item is selected
@@ -2634,7 +2637,7 @@ export default function WidgetChoiceGuideItems(
                                               <SelectValue placeholder="Kies een vraag" />
                                             </SelectTrigger>
                                           </FormControl>
-                                          <SelectContent>
+                                          <SelectContentScrollable>
                                             {formMultipleChoiceFields.map(
                                               (f: any) => (
                                                 <SelectItem
@@ -2644,7 +2647,7 @@ export default function WidgetChoiceGuideItems(
                                                 </SelectItem>
                                               )
                                             )}
-                                          </SelectContent>
+                                          </SelectContentScrollable>
                                         </Select>
                                       )}
 
