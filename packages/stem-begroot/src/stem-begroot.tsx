@@ -1018,6 +1018,27 @@ function StemBegroot({
     }
   };
 
+  const stepsRef = useRef<HTMLDivElement | null>(null);
+  const scrollToSteps = () => {
+    if (stepsRef.current) {
+      const targetPosition =
+        stepsRef.current.getBoundingClientRect().top + window.scrollY;
+
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  const prevStepRef = useRef(currentStep);
+  useEffect(() => {
+    if (prevStepRef.current !== currentStep) {
+      prevStepRef.current = currentStep;
+      scrollToSteps();
+    }
+  }, [currentStep]);
+
   // Keep previous totalPages while loading to prevent UI flicker
   const totalPagesRef = useRef(1);
   if (!isLoading && resources?.metadata?.pageCount) {
@@ -1157,11 +1178,13 @@ function StemBegroot({
       />
 
       <div className="osc">
-        <Stepper
-          currentStep={currentStep}
-          steps={steps}
-          isSimpleView={props.isSimpleView}
-        />
+        <div ref={stepsRef}>
+          <Stepper
+            currentStep={currentStep}
+            steps={steps}
+            isSimpleView={props.isSimpleView}
+          />
+        </div>
         <Spacer size={1} />
 
         {props.votes.voteType === 'budgeting' ||
