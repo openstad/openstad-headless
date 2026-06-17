@@ -7,6 +7,7 @@ export type AreaShape = AreaRing | AreaPolygon | AreaMultiPolygon;
 
 export type AreaProps = {
   area?: AreaShape;
+  areaId?: number | string | false;
   renderArea?: AreaShape;
   areas?: any;
   areaPolygonStyle?: any;

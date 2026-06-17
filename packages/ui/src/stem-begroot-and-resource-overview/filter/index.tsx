@@ -652,14 +652,14 @@ export function Filters({
             <p>Huidige filterinstellingen:</p>
 
             {props.displaySearch && (
-              <p>Zoekterm: {activeFilter.search.text || 'geen'}</p>
+              <p>{`Zoekterm: ${activeFilter.search.text || 'geen'}`}</p>
             )}
             {props.displaySorting &&
               (() => {
                 const sortLabel =
                   sorting.find((sort) => sort.value === activeFilter.sort)
                     ?.label || activeFilter.sort;
-                return <p>Sorteer op: {sortLabel}</p>;
+                return <p>{`Sorteer op: ${sortLabel}`}</p>;
               })()}
 
             {props.displayLocationFilter &&
@@ -676,7 +676,7 @@ export function Filters({
               ))}
             {props.displayTagFilters && (
               <>
-                <p>Tags: {activeFilter.tags.length > 0 ? '' : 'geen'}</p>
+                <p>{`Tags: ${activeFilter.tags.length > 0 ? '' : 'geen'}`}</p>
                 {activeFilter.tags.length > 0 && (
                   <ul>
                     {activeTags.map((tag) => (

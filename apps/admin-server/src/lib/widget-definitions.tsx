@@ -5,7 +5,7 @@ type WidgetDefinitionEntry = {
   hidden?: boolean;
 };
 
-export const WidgetDefinitions: Record<string, WidgetDefinitionEntry> = {
+export const CoreWidgetDefinitions: Record<string, WidgetDefinitionEntry> = {
   agenda: {
     name: 'Agenda',
     description:
@@ -154,7 +154,7 @@ export const WidgetDefinitions: Record<string, WidgetDefinitionEntry> = {
   // },
 };
 
-export type WidgetDefinition = keyof typeof WidgetDefinitions;
+export type WidgetDefinition = keyof typeof CoreWidgetDefinitions;
 
 // export const WidgetDefinitions = {
 //   agenda: 'Agenda',

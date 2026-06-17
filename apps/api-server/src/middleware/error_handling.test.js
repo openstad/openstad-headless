@@ -1,6 +1,11 @@
-import { describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 const registerErrorHandling = require('./error_handling');
+
+// Restore console spies between tests so call counts don't accumulate.
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 function createHarness() {
   const handlers = [];
