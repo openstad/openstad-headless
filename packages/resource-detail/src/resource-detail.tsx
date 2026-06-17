@@ -86,6 +86,8 @@ export type ResourceDetailWidgetProps = {
     backUrlText?: string;
     urlWithResourceFormForEditing?: string;
     displayDeleteButton?: boolean;
+    collapseTagType?: string;
+    collapseTagLabel?: string;
   } & MapPropsType &
   booleanProps & {
     likeWidget?: Omit<
@@ -148,6 +150,8 @@ function ResourceDetail({
   displayDeleteButton = true,
   displayDeleteEditButtonOnTop = false,
   displayTimeline = false,
+  collapseTagType = '',
+  collapseTagLabel = '',
   selectedSocialShareOptions = [
     'facebook',
     'x',
@@ -184,6 +188,13 @@ function ResourceDetail({
   } = datastore.useResource({
     projectId: props.projectId,
     resourceId: resourceId,
+  });
+
+  // Tags of the type configured for "collapse": when a resource holds the full
+  // set, the Tags section renders a single label pill instead of every tag.
+  const { data: collapseTags } = datastore.useTags({
+    projectId: props.projectId,
+    type: collapseTagType,
   });
 
   const showDate = (date: string) => {
@@ -693,23 +704,56 @@ function ResourceDetail({
 
                   <Spacer size={0.5} />
                   <div className="resource-detail-pil-list-content">
-                    {(
-                      resource.tags as Array<{
+                    {(() => {
+                      type TagItem = {
                         type: string;
                         name: string;
                         seqnr?: number;
-                      }>
-                    )
-                      ?.filter((t) => t.type !== 'status')
-                      ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+                      };
+                      const sortBySeqnr = (
+                        a: { seqnr?: number },
+                        b: { seqnr?: number }
+                      ) => {
                         if (a.seqnr === undefined || a.seqnr === null) return 1;
                         if (b.seqnr === undefined || b.seqnr === null)
                           return -1;
                         return a.seqnr - b.seqnr;
-                      })
-                      ?.map((t) => (
-                        <Pill text={t.name} />
-                      ))}
+                      };
+
+                      const visibleTags = (
+                        (resource.tags as Array<TagItem>) || []
+                      ).filter((t) => t.type !== 'status');
+
+                      // Collapse: when the resource holds every tag of the
+                      // configured type, show a single label pill instead.
+                      const tagsOfCollapseType = visibleTags.filter(
+                        (t) => t.type === collapseTagType
+                      );
+                      const shouldCollapse =
+                        !!collapseTagType &&
+                        !!collapseTagLabel &&
+                        Array.isArray(collapseTags) &&
+                        collapseTags.length > 0 &&
+                        tagsOfCollapseType.length === collapseTags.length;
+
+                      if (shouldCollapse) {
+                        const remaining = visibleTags
+                          .filter((t) => t.type !== collapseTagType)
+                          .sort(sortBySeqnr);
+                        return (
+                          <>
+                            <Pill text={collapseTagLabel} />
+                            {remaining.map((t) => (
+                              <Pill text={t.name} />
+                            ))}
+                          </>
+                        );
+                      }
+
+                      return visibleTags
+                        .sort(sortBySeqnr)
+                        .map((t) => <Pill text={t.name} />);
+                    })()}
                   </div>
                   <Spacer size={2} />
                 </div>
