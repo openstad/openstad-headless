@@ -54,6 +54,9 @@ const formSchema = z.object({
   displayTagGroupName: z.boolean(),
   filterBehavior: z.string().optional(),
   onlyShowTheseTagIds: z.string().optional(),
+  collapseFullySelectedTagGroups: z
+    .array(z.object({ type: z.string(), label: z.string() }))
+    .optional(),
 });
 
 type Tag = {
@@ -99,6 +102,8 @@ export default function WidgetResourceOverviewTags(
       tagGroups: props.tagGroups || [],
       displayTagGroupName: props?.displayTagGroupName || false,
       onlyShowTheseTagIds: props?.onlyShowTheseTagIds || '',
+      collapseFullySelectedTagGroups:
+        props?.collapseFullySelectedTagGroups || [],
     },
   });
 
@@ -414,6 +419,85 @@ export default function WidgetResourceOverviewTags(
                 ),
               },
             ]}
+          />
+
+          <Spacer />
+
+          <FormField
+            control={form.control}
+            name="collapseFullySelectedTagGroups"
+            render={({ field }) => (
+              <FormItem className="col-span-full">
+                <FormLabel>
+                  Volledig geselecteerde tag groep samenvoegen
+                </FormLabel>
+                <FormDescription>
+                  Als een inzending alle tags van een groep heeft, toon dan
+                  alleen het ingestelde label (bijv. &ldquo;Hele stad&rdquo;) in
+                  plaats van de individuele tags.
+                </FormDescription>
+                <div className="flex flex-col gap-2">
+                  {(field.value || []).map((entry, i) => (
+                    <div key={i} className="flex gap-2 items-center">
+                      <Input
+                        placeholder="Tag groep type"
+                        value={entry.type}
+                        onChange={(e) => {
+                          const updated = [...(field.value || [])];
+                          updated[i] = { ...updated[i], type: e.target.value };
+                          field.onChange(updated);
+                          props.onFieldChanged(
+                            'collapseFullySelectedTagGroups',
+                            updated
+                          );
+                        }}
+                      />
+                      <Input
+                        placeholder="Label (bijv. Hele stad)"
+                        value={entry.label}
+                        onChange={(e) => {
+                          const updated = [...(field.value || [])];
+                          updated[i] = { ...updated[i], label: e.target.value };
+                          field.onChange(updated);
+                          props.onFieldChanged(
+                            'collapseFullySelectedTagGroups',
+                            updated
+                          );
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => {
+                          const updated = (field.value || []).filter(
+                            (_, j) => j !== i
+                          );
+                          field.onChange(updated);
+                          props.onFieldChanged(
+                            'collapseFullySelectedTagGroups',
+                            updated
+                          );
+                        }}>
+                        ✕
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    type="button"
+                    className="w-fit bg-secondary text-black hover:text-white"
+                    onClick={() => {
+                      const updated = [
+                        ...(field.value || []),
+                        { type: '', label: '' },
+                      ];
+                      field.onChange(updated);
+                    }}>
+                    Groep toevoegen
+                  </Button>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
           />
 
           <Button className="w-fit col-span-full" type="submit">

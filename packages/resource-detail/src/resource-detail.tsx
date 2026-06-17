@@ -76,6 +76,7 @@ export type ResourceDetailWidgetProps = {
   selectedSocialShareOptions?: Array<
     'facebook' | 'x' | 'mail' | 'whatsapp' | 'linkedin' | 'copylink'
   >;
+  collapseFullySelectedTagGroups?: { type: string; label: string }[];
 } & BaseProps &
   ProjectSettingProps & {
     projectId?: string;
@@ -184,6 +185,11 @@ function ResourceDetail({
   } = datastore.useResource({
     projectId: props.projectId,
     resourceId: resourceId,
+  });
+
+  const { data: allProjectTags } = datastore.useTags({
+    projectId: props.projectId,
+    type: '',
   });
 
   const showDate = (date: string) => {
@@ -693,23 +699,57 @@ function ResourceDetail({
 
                   <Spacer size={0.5} />
                   <div className="resource-detail-pil-list-content">
-                    {(
-                      resource.tags as Array<{
+                    {(() => {
+                      type TagItem = {
+                        id?: number;
                         type: string;
                         name: string;
                         seqnr?: number;
-                      }>
-                    )
-                      ?.filter((t) => t.type !== 'status')
-                      ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
-                        if (a.seqnr === undefined || a.seqnr === null) return 1;
-                        if (b.seqnr === undefined || b.seqnr === null)
-                          return -1;
-                        return a.seqnr - b.seqnr;
-                      })
-                      ?.map((t) => (
-                        <Pill text={t.name} />
-                      ))}
+                      };
+                      const resourceTags = (resource.tags as TagItem[]) || [];
+                      const collapseGroups =
+                        props.collapseFullySelectedTagGroups || [];
+                      const suppressedTypes = new Set<string>();
+                      const collapsePills: { type: string; name: string }[] =
+                        [];
+
+                      collapseGroups.forEach(({ type, label }) => {
+                        const allOfType =
+                          (allProjectTags as TagItem[])?.filter(
+                            (t) => t.type === type
+                          ) || [];
+                        if (!allOfType.length) return;
+                        const resourceOfTypeIds = new Set(
+                          resourceTags
+                            .filter((t) => t.type === type)
+                            .map((t) => t.id)
+                        );
+                        const hasAll = allOfType.every((t) =>
+                          resourceOfTypeIds.has(t.id)
+                        );
+                        if (hasAll) {
+                          suppressedTypes.add(type);
+                          collapsePills.push({ type, name: label });
+                        }
+                      });
+
+                      const visibleTags = resourceTags
+                        .filter(
+                          (t) =>
+                            t.type !== 'status' && !suppressedTypes.has(t.type)
+                        )
+                        .sort((a, b) => {
+                          if (a.seqnr === undefined || a.seqnr === null)
+                            return 1;
+                          if (b.seqnr === undefined || b.seqnr === null)
+                            return -1;
+                          return a.seqnr - b.seqnr;
+                        });
+
+                      return [...collapsePills, ...visibleTags].map((t, i) => (
+                        <Pill key={i} text={t.name} />
+                      ));
+                    })()}
                   </div>
                   <Spacer size={2} />
                 </div>

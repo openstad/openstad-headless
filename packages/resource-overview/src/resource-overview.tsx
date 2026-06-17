@@ -176,6 +176,12 @@ export type ResourceOverviewWidgetProps = BaseProps &
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
+    collapseFullySelectedTagGroups?: { type: string; label: string }[];
+    /** Internal: all project tags grouped by type, passed to the renderer */
+    allTagsByType?: Record<
+      string,
+      { id: number; name: string; type: string }[]
+    >;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -485,16 +491,35 @@ const defaultItemRenderer = (
               <>
                 <Spacer size={0.5} />
                 <div className="pill-grid">
-                  {(
-                    resourceFilteredTags as Array<{
-                      type: string;
-                      name: string;
-                    }>
-                  )
-                    ?.filter((t) => t.type !== 'status')
-                    ?.map((t) => (
-                      <Pill text={t.name} />
-                    ))}
+                  {(() => {
+                    type TagItem = { id?: number; type: string; name: string };
+                    const collapseGroups =
+                      props.collapseFullySelectedTagGroups || [];
+                    const atByType = props.allTagsByType || {};
+                    const suppressedTypes = new Set<string>();
+                    const collapsePills: TagItem[] = [];
+                    collapseGroups.forEach(({ type, label }) => {
+                      const allOfType = atByType[type] || [];
+                      if (!allOfType.length) return;
+                      const resourceOfTypeIds = new Set(
+                        resourceFilteredTags
+                          .filter((t: TagItem) => t.type === type)
+                          .map((t: TagItem) => t.id)
+                      );
+                      if (allOfType.every((t) => resourceOfTypeIds.has(t.id))) {
+                        suppressedTypes.add(type);
+                        collapsePills.push({ type, name: label });
+                      }
+                    });
+                    const visibleTags = (
+                      resourceFilteredTags as TagItem[]
+                    ).filter(
+                      (t) => t.type !== 'status' && !suppressedTypes.has(t.type)
+                    );
+                    return [...collapsePills, ...visibleTags].map((t, i) => (
+                      <Pill key={i} text={t.name} />
+                    ));
+                  })()}
                 </div>
               </>
             )}
@@ -633,16 +658,35 @@ const defaultItemRenderer = (
               <>
                 <Spacer size={0.5} />
                 <div className="pill-grid">
-                  {(
-                    resourceFilteredTags as Array<{
-                      type: string;
-                      name: string;
-                    }>
-                  )
-                    ?.filter((t) => t.type !== 'status')
-                    ?.map((t) => (
-                      <Pill text={t.name} />
-                    ))}
+                  {(() => {
+                    type TagItem = { id?: number; type: string; name: string };
+                    const collapseGroups =
+                      props.collapseFullySelectedTagGroups || [];
+                    const atByType = props.allTagsByType || {};
+                    const suppressedTypes = new Set<string>();
+                    const collapsePills: TagItem[] = [];
+                    collapseGroups.forEach(({ type, label }) => {
+                      const allOfType = atByType[type] || [];
+                      if (!allOfType.length) return;
+                      const resourceOfTypeIds = new Set(
+                        resourceFilteredTags
+                          .filter((t: TagItem) => t.type === type)
+                          .map((t: TagItem) => t.id)
+                      );
+                      if (allOfType.every((t) => resourceOfTypeIds.has(t.id))) {
+                        suppressedTypes.add(type);
+                        collapsePills.push({ type, name: label });
+                      }
+                    });
+                    const visibleTags = (
+                      resourceFilteredTags as TagItem[]
+                    ).filter(
+                      (t) => t.type !== 'status' && !suppressedTypes.has(t.type)
+                    );
+                    return [...collapsePills, ...visibleTags].map((t, i) => (
+                      <Pill key={i} text={t.name} />
+                    ));
+                  })()}
                 </div>
               </>
             )}
@@ -845,6 +889,17 @@ function ResourceOverviewInner({
     projectId: props.projectId,
     type: '',
   });
+
+  // Build a type → tags map for configured collapse groups
+  const allTagsByType = useMemo(() => {
+    const map: Record<string, { id: number; name: string; type: string }[]> =
+      {};
+    if (!props.collapseFullySelectedTagGroups?.length) return map;
+    props.collapseFullySelectedTagGroups.forEach(({ type }) => {
+      map[type] = (allTags as any[]).filter((t: any) => t.type === type);
+    });
+    return map;
+  }, [allTags, props.collapseFullySelectedTagGroups]);
 
   // Order limitation tags by their type so it can be directly used to filter shown tags in their type
   const groupedTagsForLimitation: { [key: string]: number[] } = useMemo(() => {
@@ -1285,6 +1340,7 @@ function ResourceOverviewInner({
                   selectedProjects,
                   displayOverviewTagGroups,
                   overviewTagGroups,
+                  allTagsByType,
                 },
                 () => {
                   onResourceClick(resource, index);
