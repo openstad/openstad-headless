@@ -236,6 +236,7 @@ services:
       - OTEL_SERVICE_NAME=${OTEL_SERVICE_NAME:-openstad-auth-server}
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-http://openstad-otel-collector:4317}
       - OTEL_ENABLED=${OTEL_ENABLED_AUTH:-false}
+      - VERBOSE_LOGGING=${VERBOSE_LOGGING:-false}
     ports:
       - '${AUTH_PORT}:${AUTH_PORT}'
     volumes:
