@@ -11,6 +11,18 @@ const sanitize = require('../util/sanitize');
 
 const merge = require('merge');
 
+function sanitizeTimelineUrl(url) {
+  if (!url) return '';
+  const trimmed = String(url).trim();
+  if (!trimmed) return '';
+  if (/^\/\//.test(trimmed)) return '';
+  if (/^(\/|\.\/|\.\.\/|#|\?)/.test(trimmed)) return trimmed;
+  const stripped = trimmed.replace(/[^\x21-\x7e]/g, '');
+  if (/^(https?:|mailto:|tel:)/i.test(stripped)) return trimmed;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(stripped)) return '';
+  return trimmed;
+}
+
 const commentVoteThreshold =
   config.resources && config.resources.commentVoteThreshold;
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
@@ -236,14 +248,78 @@ module.exports = function (db, sequelize, DataTypes) {
 
       timeline: {
         type: DataTypes.JSON,
-        // Timeline is a resource content field that can be filled through the
-        // resourceform timeline field by submitters (owner) as well as by
-        // moderators/editors. It therefore inherits the model-level auth
-        // (createableBy: 'all', updateableBy: ['admin','editor','owner','moderator'])
-        // rather than being editor-only, so citizen submissions persist to this
-        // column instead of being stripped and pushed into extraData.
         allowNull: true,
         defaultValue: null,
+        set: function (value) {
+          if (!Array.isArray(value) || value.length === 0) {
+            this.setDataValue('timeline', null);
+            return;
+          }
+
+          const asString = (v) =>
+            typeof v === 'string' ? v : v == null ? '' : String(v);
+
+          const sanitized = value
+            .filter((item) => item && typeof item === 'object')
+            .map((item) => {
+              const links = Array.isArray(item.links)
+                ? item.links
+                    .filter((link) => link && typeof link === 'object')
+                    .map((link) => {
+                      const cleaned = {
+                        trigger: asString(link.trigger),
+                        title: link.title
+                          ? sanitize.noTags(asString(link.title).trim())
+                          : '',
+                        url: sanitizeTimelineUrl(link.url),
+                        openInNewWindow: !!link.openInNewWindow,
+                        kind:
+                          link.kind === 'document' || link.soort === 'document'
+                            ? 'document'
+                            : 'link',
+                      };
+                      if (link.documentName) {
+                        cleaned.documentName = sanitize.noTags(
+                          asString(link.documentName).trim()
+                        );
+                      }
+                      if (link.fileFormat) {
+                        cleaned.fileFormat = sanitize.noTags(
+                          asString(link.fileFormat).trim()
+                        );
+                      }
+                      if (link.fileSize) {
+                        cleaned.fileSize = sanitize.noTags(
+                          asString(link.fileSize).trim()
+                        );
+                      }
+                      return cleaned;
+                    })
+                : [];
+
+              const cleanedItem = {
+                trigger: asString(item.trigger),
+                activeFrom: /^\d{4}-\d{2}-\d{2}$/.test(
+                  asString(item.activeFrom)
+                )
+                  ? item.activeFrom
+                  : '',
+                title: item.title
+                  ? sanitize.noTags(asString(item.title).trim())
+                  : '',
+                description: item.description
+                  ? sanitize.content(asString(item.description).trim())
+                  : '',
+                links,
+              };
+              if (/^\d{4}-\d{2}-\d{2}$/.test(asString(item.activeTo))) {
+                cleanedItem.activeTo = item.activeTo;
+              }
+              return cleanedItem;
+            });
+
+          this.setDataValue('timeline', sanitized);
+        },
       },
 
       location: {

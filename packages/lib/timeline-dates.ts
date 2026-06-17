@@ -1,16 +1,31 @@
-/**
- * Pure, timezone-free helpers for timeline item date ranges.
- *
- * All dates are YYYY-MM-DD strings. Arithmetic is done via Date.UTC so that
- * daylight-saving transitions never shift the result — the same approach used
- * in packages/ui/src/form-elements/timeline/format-date.ts.
- */
+const DUTCH_MONTHS = [
+  'januari',
+  'februari',
+  'maart',
+  'april',
+  'mei',
+  'juni',
+  'juli',
+  'augustus',
+  'september',
+  'oktober',
+  'november',
+  'december',
+];
 
-/** Subtract one calendar day from a YYYY-MM-DD string and return the result. */
+/** Format a YYYY-MM-DD string as a Dutch long date ("17 juni 2026"). */
+export function formatDutchDate(isoDate: string): string {
+  if (!isoDate) return '';
+  const [year, month, day] = isoDate.split('-').map(Number);
+  if (!year || !month || !day) return isoDate;
+  return `${day} ${DUTCH_MONTHS[month - 1]} ${year}`;
+}
+
+/** Subtract one day from a YYYY-MM-DD string; returns '' for invalid input. */
 export function subtractOneDay(iso: string): string {
-  if (!iso) return '';
+  if (!iso || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return '';
   const [year, month, day] = iso.split('-').map(Number);
-  if (!year || !month || !day) return iso;
+  if (!year || !month || !day) return '';
   const utcMs = Date.UTC(year, month - 1, day - 1);
   const d = new Date(utcMs);
   const y = d.getUTCFullYear();
@@ -24,18 +39,7 @@ type DateRangeItem = {
   activeTo?: string;
 };
 
-/**
- * Derive each item's end date from the next item's start date.
- *
- * Rule (applied after sorting chronologically by activeFrom):
- * - Item has a later neighbour with a different activeFrom → activeTo is set to
- *   subtractOneDay(nextStart).
- * - Last item (or next item has the same activeFrom) → left open-ended.
- *
- * End dates are always recomputed from the start dates, so deleting, inserting,
- * or moving an item never leaves a stale activeTo behind. Returns a new array;
- * the originals are not mutated.
- */
+/** Set each item's activeTo to the day before the next item's activeFrom. */
 export function fillTimelineEndDates<T extends DateRangeItem>(items: T[]): T[] {
   if (!items || items.length === 0) return items;
 
@@ -52,7 +56,6 @@ export function fillTimelineEndDates<T extends DateRangeItem>(items: T[]): T[] {
     const nextStart = next?.activeFrom ?? '';
     const currentStart = item.activeFrom ?? '';
 
-    // No later item, or a sibling starting the same day → open-ended.
     if (!nextStart || nextStart === currentStart) {
       const { activeTo, ...rest } = item;
       return rest as T;

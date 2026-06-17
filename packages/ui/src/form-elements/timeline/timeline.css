@@ -251,13 +251,22 @@
   cursor: pointer;
 }
 
-.utrecht-textbox,
-.utrecht-textarea {
+.timeline-field-container .utrecht-textbox,
+.timeline-field-container .utrecht-textarea,
+.timeline-dialog .utrecht-textbox,
+.timeline-dialog .utrecht-textarea {
   max-width: 100%;
 }
 
+.timeline-field-warning,
+.timeline-dialog-error {
+  margin: 8px 0 0;
+  color: var(--utrecht-form-field-error-color, #d4351c);
+  font-size: 0.9em;
+}
+
 /* Native select in link cards — matches the Utrecht inputs (dark border) */
-.timeline-soort-select {
+.timeline-link-kind-select {
   width: 100%;
   padding: 9px 12px;
   border: var(--utrecht-form-control-border-width, 1px) solid
@@ -271,7 +280,7 @@
   cursor: pointer;
 }
 
-.timeline-soort-select:focus {
+.timeline-link-kind-select:focus {
   outline: 2px solid var(--utrecht-focus-outline-color, #005ea2);
   outline-offset: 1px;
 }

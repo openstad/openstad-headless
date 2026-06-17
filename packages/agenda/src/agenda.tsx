@@ -1,10 +1,10 @@
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { sanitizeUrl } from '@openstad-headless/lib/sanitize-url';
+import { formatDutchDate } from '@openstad-headless/lib/timeline-dates';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Spacer, getFileFormat } from '@openstad-headless/ui/src';
 import { Accordion } from '@openstad-headless/ui/src/accordion';
-import { formatDutchDate } from '@openstad-headless/ui/src/form-elements/timeline/format-date';
 import '@utrecht/component-library-css';
 import {
   Heading3,
@@ -39,6 +39,7 @@ export type AgendaWidgetProps = BaseProps &
         title: string;
         url: string;
         openInNewWindow: boolean;
+        kind?: string;
         soort?: string;
         fileFormat?: string;
         fileSize?: string;
@@ -119,24 +120,43 @@ function Agenda({
           aria-current={item.active ? 'true' : undefined}>
           <div className="osc-date-circle"></div>
           <div className="osc-agenda-content">
-            <Heading4>
-              {/* Timeline items store a bare ISO date as the title — show it
-                  as a Dutch long date. Real agenda titles pass through. */}
-              {item.title && /^\d{4}-\d{2}-\d{2}$/.test(item.title)
-                ? formatDutchDate(item.title)
-                : item.title}
-            </Heading4>
+            {(() => {
+              const isoRegex = /^\d{4}-\d{2}-\d{2}$/;
+              const dateLabel =
+                item.activeFrom && isoRegex.test(item.activeFrom)
+                  ? formatDutchDate(item.activeFrom)
+                  : null;
+              const titleIsDate = !!item.title && isoRegex.test(item.title);
+              const customTitle = titleIsDate ? null : item.title || null;
+              if (customTitle) {
+                return (
+                  <>
+                    {dateLabel && (
+                      <Paragraph className="osc-agenda-date-label">
+                        {dateLabel}
+                      </Paragraph>
+                    )}
+                    <Heading4>{customTitle}</Heading4>
+                  </>
+                );
+              }
+              return (
+                <Heading4>
+                  {dateLabel ||
+                    (titleIsDate
+                      ? formatDutchDate(item.title as string)
+                      : item.title)}
+                </Heading4>
+              );
+            })()}
             <Paragraph>{item.description}</Paragraph>
             {item.links && item.links?.length > 0 && (
               <LinkList className="osc-agenda-list">
                 {item.links?.map((link, index) => {
-                  // Only fall back to deriving the format from the URL for
-                  // document links; a manually entered link URL would otherwise
-                  // yield a nonsensical "extension" from its domain (e.g.
-                  // "example.com" -> "COM").
+                  const linkKind = link.kind ?? link.soort;
                   const fmt =
                     link.fileFormat ||
-                    (link.soort === 'document'
+                    (linkKind === 'document'
                       ? getFileFormat(link.url)
                       : undefined);
                   const size = link.fileSize;

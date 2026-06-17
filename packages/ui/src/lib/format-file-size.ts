@@ -10,9 +10,6 @@ export function getFileFormat(
   filename: string | undefined
 ): string | undefined {
   if (!filename) return undefined;
-  // Only look at the last path segment (ignoring any query/hash) so a URL such
-  // as "https://example.com/page" doesn't treat the domain's dot as an
-  // extension separator. For a plain file name this is a no-op.
   const segment = filename.split(/[?#]/)[0].split('/').pop() || '';
   const lastDot = segment.lastIndexOf('.');
   if (lastDot === -1 || lastDot === segment.length - 1) return undefined;

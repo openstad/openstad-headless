@@ -36,8 +36,6 @@ export default function ProjectResourceTimeline() {
     );
   }, [resource?.id]);
 
-  // Recompute end dates on every change so the "Actief t/m" field shows the
-  // derived value immediately, not only after saving and reloading.
   function handleItemsChange(next: AgendaItem[]) {
     setItems(fillTimelineEndDates(next));
   }
@@ -65,6 +63,7 @@ export default function ProjectResourceTimeline() {
         items={items}
         onItemsChange={handleItemsChange}
         showActiveDates={true}
+        timelineMode={true}
       />
       <div className="flex gap-2 mt-4">
         <Button type="button" onClick={handleSave}>
