@@ -38,6 +38,7 @@ export interface AgendaLink {
   title: string;
   url: string;
   openInNewWindow: boolean;
+  kind?: 'link' | 'document';
   soort?: 'link' | 'document';
   documentName?: string;
 }
@@ -46,15 +47,13 @@ interface AgendaItemsEditorProps {
   items: AgendaItem[];
   onItemsChange: (items: AgendaItem[]) => void;
   showActiveDates?: boolean;
+  timelineMode?: boolean;
 }
 
 const formSchema = z.object({
   trigger: z.string(),
   title: z.string(),
   description: z.string(),
-  // Optional: timeline items submitted via the resourceform timeline field
-  // don't carry active/highlighted, and requiring them blocked the item form
-  // from saving (onSubmit never fired).
   active: z.boolean().optional(),
   highlighted: z.boolean().optional(),
   activeFrom: z.string().optional(),
@@ -66,7 +65,7 @@ const formSchema = z.object({
         title: z.string(),
         url: z.string(),
         openInNewWindow: z.boolean(),
-        soort: z.enum(['link', 'document']).optional(),
+        kind: z.enum(['link', 'document']).optional(),
         documentName: z.string().optional(),
       })
     )
@@ -135,6 +134,7 @@ export function AgendaItemsEditor({
   items,
   onItemsChange,
   showActiveDates = false,
+  timelineMode = false,
 }: AgendaItemsEditorProps) {
   const router = useRouter();
   const { project } = router.query;
@@ -153,6 +153,10 @@ export function AgendaItemsEditor({
 
   useEffect(() => {
     if (selectedItem) {
+      const normalizedLinks = (selectedItem.links || []).map((link) => ({
+        ...link,
+        kind: link.kind ?? link.soort,
+      }));
       form.reset({
         trigger: selectedItem.trigger,
         title: selectedItem.title || '',
@@ -161,9 +165,9 @@ export function AgendaItemsEditor({
         highlighted: selectedItem.highlighted || false,
         activeFrom: toDateInputValue(selectedItem.activeFrom),
         activeTo: toDateInputValue(selectedItem.activeTo),
-        links: selectedItem.links || [],
+        links: normalizedLinks,
       });
-      setLinks((selectedItem.links || []).map(withId));
+      setLinks(normalizedLinks.map(withId));
     }
   }, [selectedItemId, form]);
 
@@ -227,7 +231,7 @@ export function AgendaItemsEditor({
             title: v?.title || '',
             url: v?.url || '',
             openInNewWindow: v?.openInNewWindow || false,
-            soort: v?.soort || link.soort || 'link',
+            kind: v?.kind || link.kind || link.soort || 'link',
             documentName: v?.documentName ?? link.documentName,
           };
         })
@@ -245,7 +249,7 @@ export function AgendaItemsEditor({
         title: last?.title || '',
         url: last?.url || '',
         openInNewWindow: last?.openInNewWindow || false,
-        soort: last?.soort || 'link',
+        kind: last?.kind || 'link',
         documentName: last?.documentName,
       };
       setLinks((currentLinks) => [...currentLinks, newLink]);
@@ -288,10 +292,6 @@ export function AgendaItemsEditor({
     setSettingLinks(false);
   }
 
-  // Index of the link currently being edited: the link selected from the list,
-  // otherwise the last (draft) row used when adding a new link. Without this the
-  // inputs were hardcoded to the last link, so selecting a link showed the wrong
-  // (last) link's data.
   const selectedLinkIndex = selectedLink
     ? links.findIndex((l) => l.id === selectedLink.id)
     : -1;
@@ -358,7 +358,7 @@ export function AgendaItemsEditor({
                   <Separator className="mt-2" />
                   <FormField
                     control={form.control}
-                    name={`links.${activeLinkIndex}.soort`}
+                    name={`links.${activeLinkIndex}.kind`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Soort</FormLabel>
@@ -367,7 +367,6 @@ export function AgendaItemsEditor({
                           value={field.value || 'link'}
                           onChange={(e) => {
                             field.onChange(e.target.value);
-                            // Switching type clears the previous value
                             form.setValue(`links.${activeLinkIndex}.url`, '');
                             form.setValue(
                               `links.${activeLinkIndex}.documentName`,
@@ -392,7 +391,7 @@ export function AgendaItemsEditor({
                       </FormItem>
                     )}
                   />
-                  {form.watch(`links.${activeLinkIndex}.soort`) ===
+                  {form.watch(`links.${activeLinkIndex}.kind`) ===
                   'document' ? (
                     <FormItem>
                       <FormLabel>Document</FormLabel>
@@ -613,28 +612,30 @@ export function AgendaItemsEditor({
                       )}
                     />
                   )}
-                  <FormField
-                    control={form.control}
-                    name="highlighted"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Extra uitlichten</FormLabel>
-                        <FormDescription>
-                          Dit item wordt weergegeven als een gekleurd blok met
-                          de primaire kleuren.
-                        </FormDescription>
-                        <Switch.Root
-                          className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                          onCheckedChange={(e: boolean) => {
-                            field.onChange(e);
-                          }}
-                          checked={field.value}>
-                          <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                        </Switch.Root>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {!timelineMode && (
+                    <FormField
+                      control={form.control}
+                      name="highlighted"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Extra uitlichten</FormLabel>
+                          <FormDescription>
+                            Dit item wordt weergegeven als een gekleurd blok met
+                            de primaire kleuren.
+                          </FormDescription>
+                          <Switch.Root
+                            className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                            onCheckedChange={(e: boolean) => {
+                              field.onChange(e);
+                            }}
+                            checked={field.value}>
+                            <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                          </Switch.Root>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                   {showActiveDates && (
                     <>
                       <FormField
@@ -661,12 +662,21 @@ export function AgendaItemsEditor({
                         render={({ field }) => (
                           <FormItem className="items-start md:col-span-full">
                             <FormLabel>
-                              Actief t/m (hele dag) - laat leeg voor geen
-                              einddatum
+                              {timelineMode
+                                ? 'Actief t/m (hele dag)'
+                                : 'Actief t/m (hele dag) - laat leeg voor geen einddatum'}
                             </FormLabel>
+                            {timelineMode && (
+                              <FormDescription>
+                                Wordt automatisch berekend uit de startdatum van
+                                het volgende item.
+                              </FormDescription>
+                            )}
                             <Input
                               type="date"
                               {...field}
+                              readOnly={timelineMode}
+                              disabled={timelineMode}
                               className="inline-block !w-auto"
                             />
                             <FormMessage />

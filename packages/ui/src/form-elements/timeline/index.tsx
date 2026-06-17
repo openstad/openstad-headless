@@ -1,6 +1,11 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { FormValue } from '@openstad-headless/form/src/form';
-import { fillTimelineEndDates } from '@openstad-headless/lib/timeline-dates';
+import NotificationProvider from '@openstad-headless/lib/NotificationProvider/notification-provider';
+import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
+import {
+  fillTimelineEndDates,
+  formatDutchDate,
+} from '@openstad-headless/lib/timeline-dates';
 import {
   FormField,
   FormFieldDescription,
@@ -9,16 +14,15 @@ import {
   Textarea,
   Textbox,
 } from '@utrecht/component-library-react';
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { FC, useEffect, useId, useRef, useState } from 'react';
 
 import { Button, SecondaryButton } from '../../button';
 import { Dialog } from '../../dialog';
 import { formatFileSize, getFileFormat } from '../../lib/format-file-size';
 import RteContent from '../../rte-formatting/rte-content';
-import { formatDutchDate } from './format-date';
 import './timeline.css';
 
-type LinkSoort = 'link' | 'document';
+type LinkKind = 'link' | 'document';
 
 export type TimelineItem = {
   trigger: string;
@@ -31,7 +35,8 @@ export type TimelineItem = {
     title: string;
     url: string;
     openInNewWindow: boolean;
-    soort?: LinkSoort;
+    kind?: LinkKind;
+    soort?: LinkKind;
     documentName?: string;
     fileFormat?: string;
     fileSize?: string;
@@ -63,7 +68,7 @@ type LinkItem = {
   title: string;
   url: string;
   openInNewWindow: boolean;
-  soort: LinkSoort;
+  kind: LinkKind;
   documentName?: string;
   fileFormat?: string;
   fileSize?: string;
@@ -71,20 +76,23 @@ type LinkItem = {
 
 type ItemFormState = {
   activeFrom: string;
+  title: string;
   description: string;
   links: LinkItem[];
 };
 
 const emptyForm = (): ItemFormState => ({
   activeFrom: '',
+  title: '',
   description: '',
   links: [],
 });
 
+const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
 function normalizeItems(items: TimelineItem[]): TimelineItem[] {
-  const sorted = [...items].sort(
-    (a, b) =>
-      new Date(a.activeFrom).getTime() - new Date(b.activeFrom).getTime()
+  const sorted = [...items].sort((a, b) =>
+    a.activeFrom < b.activeFrom ? -1 : a.activeFrom > b.activeFrom ? 1 : 0
   );
   const renumbered = sorted.map((item, idx) => ({
     ...item,
@@ -98,7 +106,12 @@ const TimelineField: FC<TimelineFieldProps> = ({
   title,
   description,
   fieldRequired,
-  allowedTypes,
+  allowedTypes = [
+    'image/*',
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ],
   imageUrl,
   defaultValue = [],
   overrideDefaultValue,
@@ -129,33 +142,51 @@ const TimelineField: FC<TimelineFieldProps> = ({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTrigger, setEditingTrigger] = useState<string | null>(null);
   const [form, setForm] = useState<ItemFormState>(emptyForm());
+  const [formError, setFormError] = useState<string | null>(null);
   const [uploadingTrigger, setUploadingTrigger] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const pendingUploadTrigger = useRef<string | null>(null);
 
+  const baseId = useId();
+  const titleId = `${baseId}-title`;
+  const dateId = `${baseId}-date`;
+  const descriptionId = `${baseId}-description`;
+  const warningId = `${baseId}-warning`;
+
+  const notifyFailed = (message: string) =>
+    NotificationService.addNotification(message, 'error');
+
+  const onChangeRef = useRef(onChange);
   useEffect(() => {
-    if (onChange) {
-      onChange({ name: fieldKey, value: items });
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    if (onChangeRef.current) {
+      onChangeRef.current({ name: fieldKey, value: items });
     }
-  }, [items]);
+  }, [items, fieldKey]);
 
   const openAddDialog = () => {
     setEditingTrigger(null);
     setForm(emptyForm());
+    setFormError(null);
     setDialogOpen(true);
   };
 
   const openEditDialog = (item: TimelineItem) => {
     setEditingTrigger(item.trigger);
+    setFormError(null);
     setForm({
       activeFrom: item.activeFrom,
+      title: item.title && !DATE_ONLY_REGEX.test(item.title) ? item.title : '',
       description: item.description || '',
       links: (item.links || []).map((l) => ({
         trigger: l.trigger,
         title: l.title,
         url: l.url,
         openInNewWindow: l.openInNewWindow,
-        soort: l.soort ?? 'link',
+        kind: l.kind ?? l.soort ?? 'link',
         documentName: l.documentName,
         fileFormat: l.fileFormat,
         fileSize: l.fileSize,
@@ -168,15 +199,21 @@ const TimelineField: FC<TimelineFieldProps> = ({
     setDialogOpen(false);
     setEditingTrigger(null);
     setForm(emptyForm());
+    setFormError(null);
   };
 
   const saveItem = () => {
-    if (!form.activeFrom) return;
+    if (!DATE_ONLY_REGEX.test(form.activeFrom)) {
+      setFormError('Vul een geldige datum in (jjjj-mm-dd).');
+      return;
+    }
+    setFormError(null);
 
+    const trimmedTitle = form.title.trim();
     const newItem: TimelineItem = {
       trigger: editingTrigger ?? '0',
       activeFrom: form.activeFrom,
-      title: form.activeFrom,
+      title: trimmedTitle || form.activeFrom,
       description: form.description,
       links: form.links,
     };
@@ -213,7 +250,7 @@ const TimelineField: FC<TimelineFieldProps> = ({
           title: '',
           url: '',
           openInNewWindow: false,
-          soort: 'link',
+          kind: 'link',
         },
       ],
     }));
@@ -228,14 +265,14 @@ const TimelineField: FC<TimelineFieldProps> = ({
     }));
   };
 
-  const handleSoortChange = (trigger: string, soort: LinkSoort) => {
+  const handleLinkKindChange = (trigger: string, kind: LinkKind) => {
     updateLink(trigger, {
-      soort,
+      kind,
       url: '',
       documentName: undefined,
       fileFormat: undefined,
       fileSize: undefined,
-      openInNewWindow: soort === 'document',
+      openInNewWindow: kind === 'document',
     });
   };
 
@@ -281,9 +318,11 @@ const TimelineField: FC<TimelineFieldProps> = ({
             fileSize,
           });
         }
+      } else {
+        notifyFailed('Document uploaden mislukt. Probeer het opnieuw.');
       }
     } catch {
-      // silent fail — document won't be attached
+      notifyFailed('Document uploaden mislukt. Probeer het opnieuw.');
     } finally {
       setUploadingTrigger(null);
       pendingUploadTrigger.current = null;
@@ -292,8 +331,10 @@ const TimelineField: FC<TimelineFieldProps> = ({
   };
 
   return (
-    <div className="timeline-field-container">
-      {/* Label + description */}
+    <div
+      className="timeline-field-container"
+      aria-invalid={fieldInvalid || undefined}
+      aria-describedby={fieldInvalid ? warningId : undefined}>
       <div className="timeline-header">
         {title && (
           <Paragraph className="utrecht-form-field__label">
@@ -314,7 +355,6 @@ const TimelineField: FC<TimelineFieldProps> = ({
         )}
       </div>
 
-      {/* Item list */}
       <ul className="timeline-items-list" role="list">
         {items.length === 0 && (
           <li className="timeline-empty">Nog geen items toegevoegd.</li>
@@ -357,18 +397,23 @@ const TimelineField: FC<TimelineFieldProps> = ({
         Voeg een item toe
       </SecondaryButton>
 
-      {/* Add / edit dialog */}
+      {fieldInvalid && requiredWarning && (
+        <p id={warningId} className="timeline-field-warning" role="alert">
+          {requiredWarning}
+        </p>
+      )}
+
       <Dialog
         open={dialogOpen}
         onOpenChange={(open) => !open && closeDialog()}
         className="timeline-dialog">
         <div className="timeline-dialog-content">
-          {/* Date field */}
           <FormField type="text">
             <Paragraph className="utrecht-form-field__label">
-              <FormLabel>Datum</FormLabel>
+              <FormLabel htmlFor={dateId}>Datum</FormLabel>
             </Paragraph>
             <Textbox
+              id={dateId}
               type="date"
               value={form.activeFrom}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -377,12 +422,26 @@ const TimelineField: FC<TimelineFieldProps> = ({
             />
           </FormField>
 
-          {/* Description field */}
           <FormField type="text">
             <Paragraph className="utrecht-form-field__label">
-              <FormLabel>Omschrijving</FormLabel>
+              <FormLabel htmlFor={titleId}>Titel</FormLabel>
+            </Paragraph>
+            <Textbox
+              id={titleId}
+              value={form.title}
+              placeholder="Laat leeg om de datum te tonen"
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setForm((f) => ({ ...f, title: e.target.value }))
+              }
+            />
+          </FormField>
+
+          <FormField type="text">
+            <Paragraph className="utrecht-form-field__label">
+              <FormLabel htmlFor={descriptionId}>Omschrijving</FormLabel>
             </Paragraph>
             <Textarea
+              id={descriptionId}
               rows={4}
               value={form.description}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
@@ -391,19 +450,17 @@ const TimelineField: FC<TimelineFieldProps> = ({
             />
           </FormField>
 
-          {/* External links — unified 3-column card layout */}
           <div className="timeline-links-section">
             <p className="timeline-section-label">Externe links</p>
             {form.links.map((link) => {
-              const soort = link.soort ?? 'link';
+              const kind = link.kind ?? 'link';
               const isUploading = uploadingTrigger === link.trigger;
               return (
                 <div key={link.trigger} className="timeline-link-entry">
-                  {/* Column labels + close button */}
                   <div className="timeline-link-labels-row">
                     <span className="timeline-link-col-label">Soort</span>
                     <span className="timeline-link-col-label">
-                      {soort === 'document' ? 'Document' : 'Url'}
+                      {kind === 'document' ? 'Document' : 'Url'}
                     </span>
                     <span className="timeline-link-col-label">Link tekst</span>
                     <button
@@ -415,22 +472,22 @@ const TimelineField: FC<TimelineFieldProps> = ({
                     </button>
                   </div>
 
-                  {/* Input row: Soort select | URL/Document | Link tekst */}
                   <div className="timeline-link-fields">
                     <select
-                      className="timeline-soort-select"
-                      value={soort}
+                      className="timeline-link-kind-select"
+                      aria-label="Soort link"
+                      value={kind}
                       onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                        handleSoortChange(
+                        handleLinkKindChange(
                           link.trigger,
-                          e.target.value as LinkSoort
+                          e.target.value as LinkKind
                         )
                       }>
                       <option value="link">Link</option>
                       <option value="document">Document</option>
                     </select>
 
-                    {soort === 'document' ? (
+                    {kind === 'document' ? (
                       <button
                         type="button"
                         className={
@@ -439,6 +496,7 @@ const TimelineField: FC<TimelineFieldProps> = ({
                             : 'timeline-doc-button'
                         }
                         disabled={isUploading}
+                        aria-label="Document toevoegen"
                         title={link.documentName || 'Document toevoegen'}
                         onClick={() => triggerDocumentUpload(link.trigger)}>
                         <span className="timeline-doc-button-label">
@@ -457,10 +515,9 @@ const TimelineField: FC<TimelineFieldProps> = ({
                       </button>
                     ) : (
                       <Textbox
-                        // type="text" (not "url") so relative/internal paths
-                        // like "/over-ons" are accepted, not flagged invalid.
                         type="text"
                         inputMode="url"
+                        aria-label="Link URL"
                         placeholder="/interne-pagina of https://..."
                         value={link.url}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -470,6 +527,7 @@ const TimelineField: FC<TimelineFieldProps> = ({
                     )}
 
                     <Textbox
+                      aria-label="Link tekst"
                       value={link.title}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         updateLink(link.trigger, { title: e.target.value })
@@ -477,8 +535,7 @@ const TimelineField: FC<TimelineFieldProps> = ({
                     />
                   </div>
 
-                  {/* Open-in-new-tab choice — only relevant for links */}
-                  {soort === 'link' && (
+                  {kind === 'link' && (
                     <label className="timeline-link-newtab">
                       <input
                         type="checkbox"
@@ -504,7 +561,6 @@ const TimelineField: FC<TimelineFieldProps> = ({
             </SecondaryButton>
           </div>
 
-          {/* Shared hidden file input — drives per-link document uploads */}
           <input
             ref={fileInputRef}
             type="file"
@@ -513,7 +569,12 @@ const TimelineField: FC<TimelineFieldProps> = ({
             onChange={handleFileUpload}
           />
 
-          {/* Dialog actions */}
+          {formError && (
+            <p className="timeline-dialog-error" role="alert">
+              {formError}
+            </p>
+          )}
+
           <div className="timeline-dialog-actions">
             <Button
               type="button"
@@ -524,6 +585,8 @@ const TimelineField: FC<TimelineFieldProps> = ({
           </div>
         </div>
       </Dialog>
+
+      <NotificationProvider />
     </div>
   );
 };
