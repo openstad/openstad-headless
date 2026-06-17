@@ -1,9 +1,9 @@
-export function sanitizeUrl(url: string | undefined | null): string {
+function sanitizeUrl(url) {
   if (!url) return '';
   const trimmed = String(url).trim();
   if (!trimmed) return '';
 
-  if (/^\/\//.test(trimmed)) return '';
+  if (/^[/][/]/.test(trimmed)) return '';
   if (/^(\/|\.\/|\.\.\/|#|\?)/.test(trimmed)) return trimmed;
 
   const stripped = trimmed.replace(/[^\x21-\x7e]/g, '');
@@ -13,3 +13,5 @@ export function sanitizeUrl(url: string | undefined | null): string {
 
   return trimmed;
 }
+
+module.exports = { sanitizeUrl };
