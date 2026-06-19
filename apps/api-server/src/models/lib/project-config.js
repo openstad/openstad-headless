@@ -48,6 +48,51 @@ module.exports = {
     },
   },
 
+  // Reporting API data scope (#1647). Controls which raw components and fields
+  // are exposed through reporting (bearer) tokens. Secure default: every component
+  // disabled and no personal fields opted in, so a token only reaches /stats.
+  // The field catalog lives in @openstad-headless/lib/report-data-scope.
+  dataScope: {
+    type: 'object',
+    subset: {
+      plans: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      votes: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      comments: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      surveys: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      choiceguides: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+    },
+  },
+
   auth: {
     type: 'object',
     subset: {

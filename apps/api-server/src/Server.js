@@ -89,6 +89,9 @@ module.exports = {
     // Restrict API token requests to reporting/stats routes only
     this.app.use(require('./middleware/api-token-scope-guard'));
 
+    // Filter raw component responses for reporting tokens to the project's data scope
+    this.app.use(require('./middleware/report-field-filter'));
+
     var middleware = config.express.middleware;
 
     middleware.forEach((entry) => {

@@ -177,6 +177,20 @@ export function SidenavProject({ className }: { className?: string }) {
                 <span className="truncate">Tags</span>
               </Button>
             </Link>
+            {HasAccess(sessionData) && (
+              <Link href={`/projects/${project}/settings/data-scope`}>
+                <Button
+                  variant={
+                    location.includes('/settings/data-scope')
+                      ? 'secondary'
+                      : 'ghost'
+                  }
+                  size="default"
+                  className="w-full flex justify-start pl-8">
+                  <span className="truncate">Data via API</span>
+                </Button>
+              </Link>
+            )}
             {externalCertificatesEnabled && (
               <Link href={`/projects/${project}/settings/certificates`}>
                 <Button
