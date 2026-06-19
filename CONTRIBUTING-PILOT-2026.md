@@ -62,7 +62,7 @@ If you need early feedback — a sanity check on the approach, a look at the dif
 
 ### Reviewing
 
-Invest the time to understand the PR change fully. Read the title and description, check out the branch locally, and test the functionality. For this pilot at least one of the other participants (Draad or Amsterdam) should review the PR.
+Invest the time to fully understand the PR. Read the title and description, check out the branch locally, and test the functionality. For this pilot, each PR must be reviewed by at least one participant from the other organization (Draad or Amsterdam).
 
 Use GitHub’s **suggestion** feature to propose specific changes inline. The author can apply them with one click, which is clearer and faster than describing a change in prose.
 
