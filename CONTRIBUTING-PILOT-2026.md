@@ -18,7 +18,7 @@ Once you have pushed a branch to the remote, do not rebase it. Rebasing rewrites
 
 ### Branch Naming
 
-Name branches start with the Issue Type and Issue ID followed by a slash with a brief description of the work. Use Issue types that are used in GitHub (feature, bug, task).
+Branch names should start with the issue type and issue ID, followed by a slash and a brief description of the work. Use issue types that are used in GitHub (feature, bug, task).
 
 ```text
 feature-6803/add-tests-to-map-widget
