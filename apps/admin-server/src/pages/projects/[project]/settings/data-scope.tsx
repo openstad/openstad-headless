@@ -1,34 +1,103 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import {
-  COMPONENTS,
-  COMPONENT_KEYS,
-} from '@openstad-headless/lib/report-data-scope';
+import { zodResolver } from '@hookform/resolvers/zod';
 import * as Switch from '@radix-ui/react-switch';
+import { AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/router';
-import { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
 
-type ComponentScope = { enabled: boolean; personalFields: string[] };
-type DataScope = Record<string, ComponentScope>;
+// Component definitions mirrored from packages/lib/report-data-scope.js
+// so the admin UI never imports a Node-only CJS module.
+const COMPONENTS = {
+  resources: {
+    label: 'Plannen',
+    personalFields: [
+      { key: 'title', label: 'Titel' },
+      { key: 'summary', label: 'Samenvatting' },
+      { key: 'description', label: 'Beschrijving' },
+      { key: 'images', label: 'Afbeeldingen' },
+      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
+      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
+    ],
+  },
+  votes: {
+    label: 'Stemmen',
+    personalFields: [
+      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
+      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
+    ],
+  },
+  comments: {
+    label: 'Reacties',
+    personalFields: [
+      { key: 'description', label: 'Reactietekst' },
+      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
+      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
+    ],
+  },
+  submissions: {
+    label: 'Enquêtes',
+    personalFields: [
+      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
+      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
+    ],
+  },
+  choiceguides: {
+    label: 'Keuzewijzers',
+    personalFields: [
+      { key: 'result', label: 'Keuzewijzer antwoorden' },
+      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
+      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
+    ],
+  },
+} as const;
 
-function buildDefaults(saved: any): DataScope {
-  const out: DataScope = {};
-  COMPONENT_KEYS.forEach((key) => {
-    out[key] = {
-      enabled: !!saved?.[key]?.enabled,
-      personalFields: Array.isArray(saved?.[key]?.personalFields)
-        ? saved[key].personalFields
-        : [],
-    };
-  });
-  return out;
+type ComponentKey = keyof typeof COMPONENTS;
+
+const componentSchema = z.object({
+  enabled: z.boolean().default(false),
+  personalFields: z.array(z.string()).default([]),
+});
+
+const formSchema = z.object({
+  resources: componentSchema,
+  votes: componentSchema,
+  comments: componentSchema,
+  submissions: componentSchema,
+  choiceguides: componentSchema,
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+function buildDefaults(dataScopeConfig: any): FormValues {
+  return (Object.keys(COMPONENTS) as ComponentKey[]).reduce(
+    (acc, key) => ({
+      ...acc,
+      [key]: {
+        enabled: dataScopeConfig?.[key]?.enabled ?? false,
+        personalFields: dataScopeConfig?.[key]?.personalFields ?? [],
+      },
+    }),
+    {} as FormValues
+  );
 }
 
 export default function ProjectSettingsDataScope() {
@@ -36,46 +105,30 @@ export default function ProjectSettingsDataScope() {
   const { project } = router.query;
   const { data, updateProject } = useProject();
 
-  const [scope, setScope] = useState<DataScope>(() => buildDefaults(undefined));
+  const defaults = useCallback(
+    () => buildDefaults(data?.config?.dataScope),
+    [data?.config?.dataScope]
+  );
 
-  // Seed local state from the server only once, when the project first loads.
-  // Re-seeding on every SWR revalidation (e.g. window refocus) would silently
-  // discard in-progress toggles, so we deliberately skip later `data` changes.
-  const seededRef = useRef(false);
+  const form = useForm<FormValues>({
+    resolver: zodResolver<any>(formSchema),
+    defaultValues: defaults(),
+  });
+
   useEffect(() => {
-    if (seededRef.current || !data) return;
-    setScope(buildDefaults(data?.config?.dataScope));
-    seededRef.current = true;
-  }, [data]);
+    form.reset(defaults());
+  }, [form, defaults]);
 
-  function toggleComponent(key: string, enabled: boolean) {
-    setScope((prev) => ({ ...prev, [key]: { ...prev[key], enabled } }));
-  }
-
-  function togglePersonalField(
-    key: string,
-    fieldKey: string,
-    checked: boolean
-  ) {
-    setScope((prev) => {
-      const current = prev[key].personalFields;
-      const next = checked
-        ? [...current, fieldKey]
-        : current.filter((f) => f !== fieldKey);
-      return { ...prev, [key]: { ...prev[key], personalFields: next } };
-    });
-  }
-
-  async function onSave() {
+  async function onSubmit(values: FormValues) {
     try {
-      const updated = await updateProject({ dataScope: scope });
-      if (updated) {
+      const result = await updateProject({ dataScope: values });
+      if (result) {
         toast.success('Project aangepast!');
       } else {
         toast.error('Er is helaas iets mis gegaan.');
       }
     } catch (error) {
-      console.error('could not update', error);
+      console.error('Could not update dataScope', error);
       toast.error('Er is helaas iets mis gegaan.');
     }
   }
@@ -84,124 +137,135 @@ export default function ProjectSettingsDataScope() {
     <div>
       <PageLayout
         breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Instellingen',
-            url: `/projects/${project}/settings`,
-          },
+          { name: 'Projecten', url: '/projects' },
+          { name: 'Instellingen', url: `/projects/${project}/settings` },
           {
             name: 'Data via API',
             url: `/projects/${project}/settings/data-scope`,
           },
         ]}>
         <div className="container py-6">
-          <div className="p-6 bg-white rounded-md">
-            <Heading size="xl">Data via API</Heading>
-            <Separator className="my-4" />
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="w-full lg:w-5/6">
+              <Heading size="xl">Data via API</Heading>
+              <Separator className="my-4" />
 
-            <Alert variant="info">
-              <AlertTitle>Wat deelt de rapportage-API?</AlertTitle>
-              <AlertDescription>
-                Standaard deelt een rapportage-token alleen geaggregeerde
-                cijfers (de <code>/stats</code>-endpoints). Zet hieronder per
-                onderdeel aan welke ruwe data via de API beschikbaar mag zijn.
-                Persoonsgegevens blijven standaard uitgesloten en kun je per
-                veld bewust aanzetten.
-              </AlertDescription>
-            </Alert>
+              <Alert className="mb-6 border-yellow-400 bg-yellow-50">
+                <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                <AlertTitle className="text-yellow-800">
+                  Let op: persoonsgegevens
+                </AlertTitle>
+                <AlertDescription className="text-yellow-700">
+                  De aangevinkte persoonsvelden worden via de API beschikbaar
+                  gesteld. E-mailadressen, telefoonnummers, adressen en
+                  IP-adressen worden nooit gedeeld, ongeacht de instelling.
+                </AlertDescription>
+              </Alert>
 
-            <div className="grid grid-cols-1 gap-6 mt-4">
-              {COMPONENT_KEYS.map((key) => {
-                const definition = COMPONENTS[key];
-                const componentScope = scope[key];
-                if (!componentScope) return null;
-
-                return (
-                  <div
-                    key={key}
-                    className="border border-stone-200 rounded-md p-4">
-                    <div className="flex items-center justify-between">
-                      <Heading size="lg">{definition.label}</Heading>
-                      <Switch.Root
-                        aria-label={`${definition.label} via de API beschikbaar maken`}
-                        className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                        onCheckedChange={(checked: boolean) =>
-                          toggleComponent(key, checked)
-                        }
-                        checked={componentScope.enabled}>
-                        <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                      </Switch.Root>
-                    </div>
-
-                    {componentScope.enabled ? (
-                      <div className="mt-4">
-                        <p className="text-sm text-stone-600 mb-3">
-                          De volgende niet-persoonlijke velden worden gedeeld:{' '}
-                          <span className="font-mono">
-                            {definition.safeFields.join(', ')}
-                          </span>
-                          .
-                        </p>
-
-                        {definition.personalFields.length > 0 ? (
-                          <>
-                            <Alert variant="warning">
-                              <AlertTitle>Persoonsgegevens</AlertTitle>
-                              <AlertDescription>
-                                Onderstaande velden kunnen persoonsgegevens
-                                bevatten. Zet ze alleen aan als delen via de API
-                                echt nodig is.
-                              </AlertDescription>
-                            </Alert>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                              {definition.personalFields.map(
-                                (personalField) => {
-                                  const checked =
-                                    componentScope.personalFields.includes(
-                                      personalField.key
-                                    );
-                                  return (
-                                    <label
-                                      key={personalField.key}
-                                      className="flex items-center gap-2 cursor-pointer">
-                                      <Checkbox
-                                        checked={checked}
-                                        onCheckedChange={(value) =>
-                                          togglePersonalField(
-                                            key,
-                                            personalField.key,
-                                            value === true
-                                          )
-                                        }
-                                      />
-                                      <span>
-                                        {personalField.label}{' '}
-                                        <span className="font-mono text-stone-500">
-                                          ({personalField.key})
-                                        </span>
-                                      </span>
-                                    </label>
-                                  );
-                                }
-                              )}
+              <div className="grid grid-cols-1 gap-8">
+                {(
+                  Object.entries(COMPONENTS) as [
+                    ComponentKey,
+                    (typeof COMPONENTS)[ComponentKey],
+                  ][]
+                ).map(([key, def]) => {
+                  const enabled = form.watch(`${key}.enabled` as any);
+                  return (
+                    <div
+                      key={key}
+                      className="rounded-md border p-5 bg-white space-y-4">
+                      <FormField
+                        control={form.control}
+                        name={`${key}.enabled` as any}
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center justify-between">
+                            <div>
+                              <FormLabel className="text-base font-semibold">
+                                {def.label}
+                              </FormLabel>
+                              <FormDescription>
+                                Maak {def.label.toLowerCase()} beschikbaar via
+                                de rapportage-API
+                              </FormDescription>
                             </div>
-                          </>
-                        ) : null}
-                      </div>
-                    ) : null}
-                  </div>
-                );
-              })}
-            </div>
+                            <FormControl>
+                              <Switch.Root
+                                className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                                onCheckedChange={(checked: boolean) =>
+                                  field.onChange(checked)
+                                }
+                                checked={field.value}>
+                                <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                              </Switch.Root>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
 
-            <Button type="button" className="w-fit mt-6" onClick={onSave}>
-              Opslaan
-            </Button>
-          </div>
+                      {enabled && def.personalFields.length > 0 && (
+                        <div className="pl-2 border-l-2 border-yellow-300 space-y-2">
+                          <p className="text-sm font-medium text-muted-foreground">
+                            Optionele persoonsvelden (gepseudonimiseerd)
+                          </p>
+                          <FormField
+                            control={form.control}
+                            name={`${key}.personalFields` as any}
+                            render={() => (
+                              <FormItem className="space-y-2">
+                                {def.personalFields.map((pf) => (
+                                  <FormField
+                                    key={pf.key}
+                                    control={form.control}
+                                    name={`${key}.personalFields` as any}
+                                    render={({ field }) => {
+                                      const currentValues: string[] =
+                                        field.value || [];
+                                      return (
+                                        <FormItem
+                                          key={pf.key}
+                                          className="flex flex-row items-start space-x-3 space-y-0">
+                                          <FormControl>
+                                            <Checkbox
+                                              checked={currentValues.includes(
+                                                pf.key
+                                              )}
+                                              onCheckedChange={(checked) => {
+                                                const next = checked
+                                                  ? [...currentValues, pf.key]
+                                                  : currentValues.filter(
+                                                      (v) => v !== pf.key
+                                                    );
+                                                field.onChange(next);
+                                              }}
+                                            />
+                                          </FormControl>
+                                          <FormLabel className="font-normal cursor-pointer">
+                                            {pf.label}
+                                          </FormLabel>
+                                        </FormItem>
+                                      );
+                                    }}
+                                  />
+                                ))}
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <Button type="submit" className="mt-6 w-fit">
+                Opslaan
+              </Button>
+            </form>
+          </Form>
         </div>
       </PageLayout>
     </div>

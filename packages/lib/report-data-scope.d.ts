@@ -1,39 +1,49 @@
-// Type declarations for report-data-scope.js (reporting API data scope, #1647).
-
-export interface PersonalField {
-  key: string;
-  label: string;
-}
-
 export interface ComponentDefinition {
   label: string;
-  pathPattern: RegExp;
+  pathPattern: string;
   safeFields: string[];
-  personalFields: PersonalField[];
+  personalFields: string[];
 }
 
 export type ComponentKey =
-  | 'plans'
+  | 'resources'
   | 'votes'
   | 'comments'
-  | 'surveys'
+  | 'submissions'
   | 'choiceguides';
 
-export interface ComponentConfig {
-  enabled?: boolean;
-  personalFields?: string[];
-}
+export declare const COMPONENTS: Record<ComponentKey, ComponentDefinition>;
+export declare const ALWAYS_BLOCKED_TOP_LEVEL: Set<string>;
+export declare const ALWAYS_BLOCKED_USER_KEYS: Set<string>;
+export declare const ALWAYS_BLOCKED_BLOBS: Set<string>;
 
-export const COMPONENTS: Record<ComponentKey, ComponentDefinition>;
-export const COMPONENT_KEYS: ComponentKey[];
+/**
+ * Returns the component key for the given URL path segment, or null if no match.
+ */
+export declare function matchComponent(urlPath: string): ComponentKey | null;
 
-export function matchComponent(path: string): ComponentKey | null;
-export function getExposedFields(
-  componentKey: string,
-  componentConfig: ComponentConfig | undefined | null
-): string[] | null;
-export function filterRecord<T extends object>(
-  record: T,
-  allowedFields: string[]
-): Partial<T>;
-export function filterPayload(payload: unknown, allowedFields: string[]): unknown;
+/**
+ * Returns the combined list of fields allowed for a component given
+ * the admin-configured opt-in personal fields.
+ */
+export declare function getExposedFields(
+  componentKey: ComponentKey,
+  enabledPersonalFields: string[],
+): string[];
+
+/**
+ * Projects a single record object down to allowed fields and strips PII.
+ */
+export declare function filterRecord(
+  record: Record<string, unknown>,
+  allowedFields: string[],
+): Record<string, unknown>;
+
+/**
+ * Filters an API payload: array, paginated { data, metadata } wrapper,
+ * or single record.
+ */
+export declare function filterPayload(
+  payload: unknown,
+  allowedFields: string[],
+): unknown;

@@ -1,209 +1,223 @@
-import { describe, expect, it } from 'vitest';
+import path from 'path';
+import { describe, expect, it, vi } from 'vitest';
 
-const filter = require('./report-field-filter');
-const {
-  getExposedFields,
-  matchComponent,
-} = require('@openstad-headless/lib/report-data-scope');
+// Redirect the package import to the local worktree file so tests can run
+// before npm install has updated the shared node_modules.
+vi.mock('@openstad-headless/lib/report-data-scope', () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  return require(
+    path.resolve(__dirname, '../../../../packages/lib/report-data-scope')
+  );
+});
 
-function runFilter(req, payload) {
-  let captured;
+const reportFieldFilter = require('./report-field-filter');
+
+function applyFilter(
+  payload,
+  { apiTokenScope = 'reports', reportingScope } = {}
+) {
+  const captured = { body: null };
+
+  const req = { apiTokenScope, reportingScope };
   const res = {
-    json(value) {
-      captured = value;
+    _jsonFn: null,
+    json(body) {
+      captured.body = body;
+      return res;
+    },
+    status(code) {
+      return res;
     },
   };
-  filter(req, res, () => {});
+
+  const next = vi.fn();
+
+  // Apply the middleware — it wraps res.json synchronously then calls next.
+  reportFieldFilter(req, res, next);
+
+  // Simulate the downstream route handler calling res.json(payload).
   res.json(payload);
-  return captured;
+
+  return captured.body;
 }
 
-function reqFor(path, dataScope, apiTokenScope = 'reports') {
-  return { path, apiTokenScope, project: { config: { dataScope } } };
-}
+describe('reportFieldFilter', () => {
+  describe('non-reporting requests are not filtered', () => {
+    it('does not wrap res.json for normal requests', () => {
+      const req = { apiTokenScope: undefined };
+      const res = {
+        json: vi.fn(),
+      };
+      const next = vi.fn();
 
-describe('report-data-scope catalog', () => {
-  it('matches nested resource comment route as comments, not plans', () => {
-    expect(matchComponent('/api/project/2/resource/5/comment')).toBe(
-      'comments'
-    );
-    expect(matchComponent('/api/project/2/resource/5')).toBe('plans');
-  });
+      reportFieldFilter(req, res, next);
 
-  it('returns null exposed fields when a component is disabled', () => {
-    expect(getExposedFields('votes', undefined)).toBeNull();
-    expect(getExposedFields('votes', { enabled: false })).toBeNull();
-  });
-
-  it('ignores opted-in personal fields that are not in the catalog', () => {
-    const fields = getExposedFields('votes', {
-      enabled: true,
-      personalFields: ['ip', 'bogus'],
+      expect(next).toHaveBeenCalledOnce();
+      // res.json should not be overwritten
+      res.json({ foo: 'bar' });
+      expect(res.json).toHaveBeenCalledWith({ foo: 'bar' });
     });
-    expect(fields).toContain('ip');
-    expect(fields).not.toContain('bogus');
-  });
-});
-
-describe('report-field-filter middleware', () => {
-  it('does not touch requests without a reporting token', () => {
-    const payload = [{ id: 1, ip: '1.2.3.4' }];
-    const out = runFilter(
-      reqFor('/api/project/2/vote', { votes: { enabled: true } }, null),
-      payload
-    );
-    expect(out).toEqual(payload);
   });
 
-  it('keeps safe fields and opted-in personal fields, drops the rest', () => {
-    const out = runFilter(
-      reqFor('/api/project/2/vote', {
-        votes: { enabled: true, personalFields: ['ip'] },
-      }),
-      [
-        {
-          id: 1,
-          opinion: 'yes',
-          checked: true,
-          ip: '1.2.3.4',
-          userId: 9,
-          user: { email: 'a@b.nl' },
-        },
-      ]
-    );
-    expect(out).toEqual([
-      { id: 1, opinion: 'yes', checked: true, ip: '1.2.3.4' },
-    ]);
-  });
-
-  it('filters paginated { records } wrappers and preserves metadata', () => {
-    const out = runFilter(
-      reqFor('/api/project/2/vote', {
-        votes: { enabled: true, personalFields: [] },
-      }),
-      { records: [{ id: 1, opinion: 'no', ip: '9.9.9.9' }], count: 1, page: 0 }
-    );
-    expect(out.records).toEqual([{ id: 1, opinion: 'no' }]);
-    expect(out.count).toBe(1);
-  });
-
-  it('keeps only opted-in nested user fields', () => {
-    const out = runFilter(
-      reqFor('/api/project/2/vote', {
-        votes: { enabled: true, personalFields: ['user.email'] },
-      }),
-      [{ id: 1, user: { email: 'a@b.nl', name: 'Secret', postcode: '1000AA' } }]
-    );
-    expect(out).toEqual([{ id: 1, user: { email: 'a@b.nl' } }]);
-  });
-
-  it('leaves /stats responses untouched', () => {
-    const out = runFilter(reqFor('/stats/project/2/vote/total', {}), {
-      count: 42,
-    });
-    expect(out).toEqual({ count: 42 });
-  });
-});
-
-describe('report-field-filter — choiceguides and wrapper shapes', () => {
-  const enableGuides = (personalFields = []) => ({
-    choiceguides: { enabled: true, personalFields },
-  });
-
-  it('does not expose raw submitted answers (result) by default', () => {
-    const out = runFilter(
-      reqFor('/api/project/2/choicesguide', enableGuides()),
-      [
-        {
-          id: 1,
-          result: { answer: 'secret', ipAddress: 'hashed' },
-          extraData: { email: 'a@b.nl' },
-          createdAt: 't',
-        },
-      ]
-    );
-    expect(out).toEqual([{ id: 1, createdAt: 't' }]);
-  });
-
-  it('exposes result only when explicitly opted in', () => {
-    const out = runFilter(
-      reqFor('/api/project/2/choicesguide', enableGuides(['result'])),
-      [{ id: 1, result: { answer: 'x' }, extraData: { email: 'a@b.nl' } }]
-    );
-    expect(out).toEqual([{ id: 1, result: { answer: 'x' } }]);
-  });
-
-  it('filters the choiceguide list { data, pagination } wrapper', () => {
-    const out = runFilter(
-      reqFor('/api/project/2/choicesguide', enableGuides()),
-      {
-        data: [{ id: 1, result: { answer: 'x' }, createdAt: 't' }],
-        pagination: { page: 0, totalPages: 1, totalCount: 1 },
-      }
-    );
-    expect(out.data).toEqual([{ id: 1, createdAt: 't' }]);
-    expect(out.pagination).toEqual({ page: 0, totalPages: 1, totalCount: 1 });
-  });
-
-  it('passes a { count } aggregate through untouched', () => {
-    const out = runFilter(
-      reqFor('/api/project/2/submission', {
-        surveys: { enabled: true, personalFields: [] },
-      }),
-      { count: 7 }
-    );
-    expect(out).toEqual({ count: 7 });
-  });
-
-  it('fails closed on an id-less non-metadata object (no leak)', () => {
-    const out = runFilter(
-      reqFor('/api/project/2/submission', {
-        surveys: { enabled: true, personalFields: [] },
-      }),
-      { email: 'a@b.nl', name: 'Secret' }
-    );
-    expect(out).toEqual({});
-  });
-
-  it('treats plan free-text (description/summary) as opt-in', () => {
-    const rec = {
-      id: 1,
-      title: 'Plan',
-      summary: 'samenvatting',
-      description: 'Bel mij op 06-12345678',
-      status: 'OPEN',
+  describe('component endpoint filtering', () => {
+    const scope = {
+      componentKey: 'votes',
+      enabledPersonalFields: [],
     };
-    const without = runFilter(
-      reqFor('/api/project/2/resource', {
-        plans: { enabled: true, personalFields: [] },
-      }),
-      [rec]
-    );
-    expect(without).toEqual([{ id: 1, title: 'Plan', status: 'OPEN' }]);
 
-    const withText = runFilter(
-      reqFor('/api/project/2/resource', {
-        plans: { enabled: true, personalFields: ['description'] },
-      }),
-      [rec]
-    );
-    expect(withText).toEqual([
-      {
+    it('keeps only safe fields on a single vote record', () => {
+      const payload = {
         id: 1,
-        title: 'Plan',
-        status: 'OPEN',
-        description: 'Bel mij op 06-12345678',
-      },
-    ]);
+        ip: '127.0.0.1',
+        userId: 99,
+        opinion: 'yes',
+        createdAt: '2024-01-01',
+        extraData: { secret: 'hidden' },
+      };
+
+      const result = applyFilter(payload, { reportingScope: scope });
+
+      expect(result.id).toBe(1);
+      expect(result.opinion).toBe('yes');
+      expect(result.createdAt).toBe('2024-01-01');
+      // PII always stripped
+      expect(result.ip).toBeUndefined();
+      expect(result.userId).toBeUndefined();
+      expect(result.extraData).toBeUndefined();
+    });
+
+    it('keeps user.displayName only when opted in', () => {
+      const scopeWithPersonal = {
+        componentKey: 'votes',
+        enabledPersonalFields: ['user.displayName'],
+      };
+      const payload = {
+        id: 1,
+        opinion: 'yes',
+        userId: 99,
+        user: {
+          displayName: 'User-42',
+          email: 'real@email.com',
+          phoneNumber: '0612345678',
+        },
+      };
+
+      const result = applyFilter(payload, {
+        reportingScope: scopeWithPersonal,
+      });
+
+      expect(result.user).toBeDefined();
+      expect(result.user.displayName).toBe('User-42');
+      // PII in user always stripped
+      expect(result.user.email).toBeUndefined();
+      expect(result.user.phoneNumber).toBeUndefined();
+      // userId at top level still stripped
+      expect(result.userId).toBeUndefined();
+    });
+
+    it('never returns user.email even when not in personal fields list', () => {
+      const scopeResources = {
+        componentKey: 'resources',
+        enabledPersonalFields: ['title'],
+      };
+      const payload = {
+        id: 1,
+        title: 'My plan',
+        userId: 5,
+        user: { email: 'owner@example.com', displayName: 'Someone' },
+      };
+
+      const result = applyFilter(payload, { reportingScope: scopeResources });
+
+      expect(result.title).toBe('My plan');
+      expect(result.userId).toBeUndefined();
+      // user not in allowedFields at all → user block absent
+      expect(result.user).toBeUndefined();
+    });
+
+    it('filters an array of records', () => {
+      const records = [
+        { id: 1, opinion: 'yes', ip: '1.1.1.1', userId: 10 },
+        { id: 2, opinion: 'no', ip: '2.2.2.2', userId: 20 },
+      ];
+
+      const result = applyFilter(records, { reportingScope: scope });
+
+      expect(result).toHaveLength(2);
+      result.forEach((r) => {
+        expect(r.ip).toBeUndefined();
+        expect(r.userId).toBeUndefined();
+        expect(r.opinion).toBeDefined();
+      });
+    });
+
+    it('filters paginated wrapper { data, metadata }', () => {
+      const payload = {
+        metadata: { total: 5, page: 1 },
+        data: [{ id: 1, opinion: 'yes', ip: '1.2.3.4', userId: 7 }],
+      };
+
+      const result = applyFilter(payload, { reportingScope: scope });
+
+      expect(result.metadata).toEqual({ total: 5, page: 1 });
+      expect(result.data[0].opinion).toBe('yes');
+      expect(result.data[0].ip).toBeUndefined();
+      expect(result.data[0].userId).toBeUndefined();
+    });
   });
 
-  it('filters a single record identified by id', () => {
-    const out = runFilter(
-      reqFor('/api/project/2/submission', {
-        surveys: { enabled: true, personalFields: [] },
-      }),
-      { id: 'uuid-1', status: 'approved', submittedData: { email: 'a@b.nl' } }
-    );
-    expect(out).toEqual({ id: 'uuid-1', status: 'approved' });
+  describe('aggregate / metadata endpoint (componentKey === null)', () => {
+    const aggregateScope = { componentKey: null, enabledPersonalFields: [] };
+
+    it('passes through primitive-only objects (counts)', () => {
+      const payload = { count: 123 };
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+      expect(result).toEqual({ count: 123 });
+    });
+
+    it('passes through an array of aggregate rows', () => {
+      const payload = [
+        { counted: 5, date: '2024-01-01' },
+        { counted: 8, date: '2024-01-02' },
+      ];
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+      expect(result).toEqual(payload);
+    });
+
+    it('blocks an unexpected object payload on aggregate endpoint', () => {
+      const payload = { counted: 5, secret: { nested: 'object' } };
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+      expect(result.error).toBeDefined();
+    });
+  });
+
+  describe('registry — PII fields never in safe universe', () => {
+    it('exposable-fields registry does not include ip', () => {
+      const {
+        getExposedFields,
+      } = require('@openstad-headless/lib/report-data-scope');
+      const fields = getExposedFields('votes', []);
+      expect(fields).not.toContain('ip');
+    });
+
+    it('exposable-fields registry does not include userId in safe fields', () => {
+      const {
+        getExposedFields,
+      } = require('@openstad-headless/lib/report-data-scope');
+      const fields = getExposedFields('votes', []);
+      expect(fields).not.toContain('userId');
+    });
+
+    it('exposable-fields registry does not include email in any component', () => {
+      const {
+        COMPONENTS,
+        getExposedFields,
+      } = require('@openstad-headless/lib/report-data-scope');
+      for (const key of Object.keys(COMPONENTS)) {
+        const all = getExposedFields(key, COMPONENTS[key].personalFields);
+        expect(all).not.toContain('email');
+        expect(all.find((f) => f.includes('email'))).toBeUndefined();
+      }
+    });
   });
 });

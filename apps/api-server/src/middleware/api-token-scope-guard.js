@@ -1,58 +1,79 @@
-const createError = require('http-errors');
+'use strict';
+
 const { matchComponent } = require('@openstad-headless/lib/report-data-scope');
 
-// OpenStad has a few GET routes that mutate state (e.g. /vote/:id/toggle). A
-// method check alone would let a reporting token trigger those, so component
-// paths containing one of these action segments are rejected outright. Add any
-// future mutating-GET segment here to keep reporting tokens read-only.
-const FORBIDDEN_ACTION_SEGMENTS = ['toggle'];
-
-function hasForbiddenActionSegment(path) {
-  const segments = path.split('/');
-  return FORBIDDEN_ACTION_SEGMENTS.some((segment) =>
-    segments.includes(segment)
-  );
-}
+// GET-routed paths that actually mutate state — must be blocked even for
+// reporting tokens that only send GET requests.
+const MUTATING_GET_SEGMENTS = ['/toggle', '/confirm', '/like', '/dislike'];
 
 /**
- * Restrict requests authenticated with a reporting API token (scope 'reports',
- * set in the user middleware) to the data they are allowed to read:
+ * Enforces data-scope access rules for reporting API requests.
  *
- *  - the aggregated /stats endpoints are always allowed (safe by default);
- *  - a raw component route (plans/votes/comments/surveys/choiceguides) is only
- *    allowed when the project has explicitly enabled that component in its
- *    dataScope config, and only for read (GET) requests;
- *  - everything else is rejected with 403.
+ * Activated only when req.apiTokenScope === 'reports' (set by user.js when a
+ * reporting bearer token is resolved).  All other requests pass through
+ * unmodified so existing behaviour is unchanged.
  *
- * The secure default (no dataScope config) therefore exposes nothing raw — a
- * reporting token then only reaches /stats. See #1647.
+ * Enforced rules:
+ *  1. Only GET requests are allowed (reporting tokens are read-only).
+ *  2. Paths that mutate state via GET (toggle, confirm, like …) are blocked
+ *     with 403 regardless of project config.
+ *  3. For component-specific paths the component must be enabled in the
+ *     project's config.dataScope.  Disabled or unconfigured → 403.
+ *  4. Resolved scope info is attached to req.reportingScope so the
+ *     downstream field-filter middleware can project responses correctly.
  */
-module.exports = function apiTokenScopeGuard(req, res, next) {
+function apiTokenScopeGuard(req, res, next) {
+  // Only apply to requests that carry a reporting-scope token.
   if (req.apiTokenScope !== 'reports') {
     return next();
   }
 
-  // Aggregated reporting endpoints: always allowed.
-  if (req.path.startsWith('/stats/') || req.path === '/stats') {
-    return next();
+  // Reporting tokens are strictly read-only.
+  if (req.method !== 'GET') {
+    return res
+      .status(403)
+      .json({ error: 'Reporting tokens only allow GET requests' });
   }
 
-  // Raw component data: allowed only when the project enabled it, read-only.
-  const componentKey = matchComponent(req.path);
-  if (
-    componentKey &&
-    req.method === 'GET' &&
-    !hasForbiddenActionSegment(req.path)
-  ) {
-    const dataScope =
-      req.project && req.project.config && req.project.config.dataScope;
-    const componentConfig = dataScope && dataScope[componentKey];
-    if (componentConfig && componentConfig.enabled) {
-      return next();
+  // Block GET paths that mutate state (exact path-segment matching).
+  const pathLower = req.path.toLowerCase();
+  for (const segment of MUTATING_GET_SEGMENTS) {
+    const idx = pathLower.indexOf(segment);
+    if (idx !== -1) {
+      const after = pathLower[idx + segment.length];
+      if (after === undefined || after === '/' || after === '?') {
+        return res
+          .status(403)
+          .json({ error: 'Path not allowed for reporting tokens' });
+      }
     }
   }
 
-  return next(
-    createError(403, 'API token is only valid for reporting endpoints')
-  );
-};
+  const componentKey = matchComponent(req.path);
+
+  if (componentKey) {
+    const dataScope =
+      req.project && req.project.config && req.project.config.dataScope;
+
+    const componentCfg = dataScope && dataScope[componentKey];
+
+    if (!componentCfg || !componentCfg.enabled) {
+      return res.status(403).json({
+        error: `Component '${componentKey}' is not enabled for this project's reporting scope`,
+      });
+    }
+
+    req.reportingScope = {
+      componentKey,
+      enabledPersonalFields: componentCfg.personalFields || [],
+    };
+  } else {
+    // Non-component path (e.g. /overview, aggregate root) — allowed without
+    // component checks; no field filtering needed.
+    req.reportingScope = { componentKey: null, enabledPersonalFields: [] };
+  }
+
+  return next();
+}
+
+module.exports = apiTokenScopeGuard;

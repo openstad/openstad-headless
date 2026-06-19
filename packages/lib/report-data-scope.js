@@ -1,190 +1,197 @@
 'use strict';
 
-/**
- * Single source of truth for the reporting API data scope (#1647).
- *
- * Consumed by:
- *  - api-server: middleware/api-token-scope-guard.js  (component gate)
- *                middleware/report-field-filter.js     (field filtering)
- *  - admin-server: settings/data-scope.tsx             (admin UI)
- *
- * Each component defines:
- *  - label:          Dutch display label for the admin UI
- *  - pathPattern:    RegExp matching the request path (including the /api prefix)
- *                    that serves this component's raw data
- *  - safeFields:     non-personal fields, always exposed once the component is enabled
- *  - personalFields: fields that may contain personal data. Excluded by default and
- *                    opt-in per field. Dot-paths (e.g. 'user.email') target one level
- *                    of nesting. Each carries a Dutch label for the warning UI.
- *
- * Secure default: a project with no dataScope config exposes nothing raw — a reporting
- * token then only reaches the aggregated /stats endpoints.
- */
+// User account sub-fields that are ALWAYS removed — can never be opt-in.
+const ALWAYS_BLOCKED_USER_KEYS = new Set([
+  'email',
+  'name',
+  'firstname',
+  'firstName',
+  'lastname',
+  'lastName',
+  'phoneNumber',
+  'address',
+  'city',
+  'postcode',
+]);
 
+// Top-level record fields that are ALWAYS removed regardless of configuration.
+// 'ip' is a voter IP address; 'userId' links a row to a person.
+const ALWAYS_BLOCKED_TOP_LEVEL = new Set(['ip', 'userId']);
+
+// Free-form JSON blobs that are ALWAYS removed.
+// These can contain arbitrary PII typed in by end-users.
+const ALWAYS_BLOCKED_BLOBS = new Set(['submittedData', 'extraData']);
+
+/**
+ * The complete catalog of reportable components.
+ *
+ * safeFields   — fields that are never PII; exposed without any admin opt-in.
+ * personalFields — user-authored text or identifiers that require explicit
+ *                  admin opt-in.  Free text (description/summary/result) and
+ *                  user.* dot-paths live here.
+ * pathPattern  — URL path segment used in /stats routing to match this component.
+ */
 const COMPONENTS = {
-  plans: {
+  resources: {
     label: 'Plannen',
-    pathPattern: /^\/api\/project\/\d+\/resource(?:\/|$)/,
+    pathPattern: '/resource',
     safeFields: [
       'id',
       'projectId',
-      'status',
-      'startDate',
-      'publishDate',
-      'title',
-      'budget',
-      'score',
-      'yes',
-      'no',
+      'widgetId',
       'createdAt',
       'updatedAt',
+      'publishDate',
+      'startDate',
+      'endDate',
+      'status',
+      'budget',
+      'tags',
+      'location',
     ],
+    // title/summary/description are free text authored by the submitter.
     personalFields: [
-      // Free-text fields: publicly shown, but may contain personal info typed by
-      // the submitter, so they are opt-in.
-      { key: 'summary', label: 'Samenvatting (vrije tekst)' },
-      { key: 'description', label: 'Omschrijving (vrije tekst)' },
-      { key: 'userId', label: 'Gebruikers-ID' },
-      { key: 'extraData', label: 'Extra formuliervelden' },
-      { key: 'location', label: 'Locatie' },
-      { key: 'user.name', label: 'Naam' },
-      { key: 'user.email', label: 'E-mailadres' },
-      { key: 'user.phoneNumber', label: 'Telefoonnummer' },
-      { key: 'user.address', label: 'Adres' },
-      { key: 'user.city', label: 'Plaats' },
-      { key: 'user.postcode', label: 'Postcode' },
+      'title',
+      'summary',
+      'description',
+      'images',
+      'user.displayName',
+      'user.nickName',
     ],
   },
 
   votes: {
     label: 'Stemmen',
-    pathPattern: /^\/api\/project\/\d+\/vote(?:\/|$)/,
+    pathPattern: '/vote',
     safeFields: [
       'id',
+      'projectId',
       'resourceId',
-      'opinion',
-      'confirmed',
-      'checked',
       'createdAt',
       'updatedAt',
+      'opinion',
+      'checked',
+      'confirmed',
     ],
-    personalFields: [
-      { key: 'ip', label: 'IP-adres' },
-      { key: 'userId', label: 'Gebruikers-ID' },
-      { key: 'user.name', label: 'Naam' },
-      { key: 'user.email', label: 'E-mailadres' },
-      { key: 'user.phoneNumber', label: 'Telefoonnummer' },
-      { key: 'user.address', label: 'Adres' },
-      { key: 'user.city', label: 'Plaats' },
-      { key: 'user.postcode', label: 'Postcode' },
-    ],
+    // ip and userId are always blocked — not listed here.
+    personalFields: ['user.displayName', 'user.nickName'],
   },
 
   comments: {
     label: 'Reacties',
-    pathPattern: /^\/api\/project\/\d+(?:\/resource\/\d+)?\/comment(?:\/|$)/,
+    pathPattern: '/comment',
     safeFields: [
       'id',
-      'parentId',
+      'projectId',
       'resourceId',
-      'sentiment',
-      'label',
-      'yes',
-      'no',
+      'parentId',
       'createdAt',
       'updatedAt',
+      'sentiment',
+      'label',
+      'status',
+      'modBreak',
+      'modBreakDatetime',
     ],
-    personalFields: [
-      // The comment body is publicly shown, but may contain personal info typed
-      // by the author, so it is opt-in.
-      { key: 'description', label: 'Reactietekst (vrije tekst)' },
-      { key: 'userId', label: 'Gebruikers-ID' },
-      { key: 'location', label: 'Locatie' },
-      { key: 'user.name', label: 'Naam' },
-      { key: 'user.email', label: 'E-mailadres' },
-      { key: 'user.phoneNumber', label: 'Telefoonnummer' },
-      { key: 'user.address', label: 'Adres' },
-      { key: 'user.city', label: 'Plaats' },
-      { key: 'user.postcode', label: 'Postcode' },
-    ],
+    // description is free text authored by the commenter.
+    personalFields: ['description', 'user.displayName', 'user.nickName'],
   },
 
-  surveys: {
+  submissions: {
     label: 'Enquêtes',
-    pathPattern: /^\/api\/project\/\d+\/submission(?:\/|$)/,
-    safeFields: ['id', 'status', 'createdAt', 'updatedAt'],
-    personalFields: [
-      { key: 'submittedData', label: 'Ingezonden antwoorden' },
-      { key: 'userId', label: 'Gebruikers-ID' },
-      { key: 'user.name', label: 'Naam' },
-      { key: 'user.email', label: 'E-mailadres' },
-      { key: 'user.phoneNumber', label: 'Telefoonnummer' },
-      { key: 'user.address', label: 'Adres' },
-      { key: 'user.city', label: 'Plaats' },
-      { key: 'user.postcode', label: 'Postcode' },
+    pathPattern: '/submission',
+    safeFields: [
+      'id',
+      'projectId',
+      'widgetId',
+      'createdAt',
+      'updatedAt',
+      'status',
+      'isSpam',
     ],
+    // submittedData is always blocked — arbitrary user JSON, not listed here.
+    personalFields: ['user.displayName', 'user.nickName'],
   },
 
   choiceguides: {
     label: 'Keuzewijzers',
-    pathPattern: /^\/api\/project\/\d+\/choicesguide(?:\/|$)/,
-    // `result` holds the raw submitted answers (and a hashed IP when enabled),
-    // so it is personal/opt-in — not part of the safe preset.
-    safeFields: ['id', 'createdAt', 'updatedAt'],
-    personalFields: [
-      { key: 'result', label: 'Ingezonden antwoorden' },
-      { key: 'extraData', label: 'Extra formuliervelden' },
-      { key: 'userFingerprint', label: 'Gebruiker-fingerprint' },
-      { key: 'userId', label: 'Gebruikers-ID' },
+    pathPattern: '/choicesguides',
+    safeFields: [
+      'id',
+      'projectId',
+      'widgetId',
+      'createdAt',
+      'updatedAt',
+      'isSpam',
     ],
+    // result is user-authored quiz data; kept as opt-in personal field.
+    personalFields: ['result', 'user.displayName', 'user.nickName'],
   },
 };
 
-// Display order for the admin UI.
-const COMPONENT_KEYS = Object.keys(COMPONENTS);
-
-// Match order: 'comments' must be tested before 'plans' because the comment route
-// can be nested under a resource path (/api/project/:id/resource/:id/comment),
-// which would otherwise be matched by the plans pattern first.
-const MATCH_ORDER = ['comments', 'plans', 'votes', 'surveys', 'choiceguides'];
-
 /**
- * Return the component key whose route matches the given request path, or null.
- * @param {string} path req.path including the /api prefix (no query string)
+ * Returns the component key matching the given URL path, or null.
+ *
+ * @param {string} urlPath
  * @returns {string|null}
  */
-function matchComponent(path) {
-  if (typeof path !== 'string') return null;
-  for (const key of MATCH_ORDER) {
-    if (COMPONENTS[key] && COMPONENTS[key].pathPattern.test(path)) return key;
+function matchComponent(urlPath) {
+  for (const [key, def] of Object.entries(COMPONENTS)) {
+    if (urlPath.includes(def.pathPattern)) {
+      return key;
+    }
   }
   return null;
 }
 
 /**
- * Build the list of fields that may be exposed for a component, given the project's
- * saved dataScope config for that component ({ enabled, personalFields }).
- * Returns null when the component is not enabled (caller should not expose anything).
+ * Returns the list of fields that may be exposed for a component.
+ * Always includes safeFields; adds the intersection of the admin's
+ * opted-in personalFields with the defined personalFields universe.
+ *
  * @param {string} componentKey
- * @param {{enabled?: boolean, personalFields?: string[]}} componentConfig
- * @returns {string[]|null}
+ * @param {string[]} enabledPersonalFields - admin-configured opt-in fields
+ * @returns {string[]}
  */
-function getExposedFields(componentKey, componentConfig) {
+function getExposedFields(componentKey, enabledPersonalFields) {
   const def = COMPONENTS[componentKey];
-  if (!def || !componentConfig || !componentConfig.enabled) return null;
-  const optedIn = Array.isArray(componentConfig.personalFields)
-    ? componentConfig.personalFields
-    : [];
-  // Only honour personal fields that exist in the catalog (ignore unknown keys).
-  const allowedPersonal = def.personalFields
-    .map((field) => field.key)
-    .filter((key) => optedIn.includes(key));
-  return def.safeFields.concat(allowedPersonal);
+  if (!def) return [];
+
+  const allowedPersonal = new Set(def.personalFields);
+  const personalToInclude = (enabledPersonalFields || []).filter((f) =>
+    allowedPersonal.has(f)
+  );
+
+  return [...def.safeFields, ...personalToInclude];
 }
 
 /**
- * Filter a single plain record down to the allowed fields.
- * Supports one level of dot-path nesting (e.g. 'user.email').
+ * Hard-removes always-blocked fields from a single record in-place.
+ * Runs as a safety pass regardless of the allowed-fields list.
+ */
+function stripAlwaysBlocked(record) {
+  if (!record || typeof record !== 'object') return record;
+
+  for (const key of ALWAYS_BLOCKED_TOP_LEVEL) {
+    delete record[key];
+  }
+  for (const key of ALWAYS_BLOCKED_BLOBS) {
+    delete record[key];
+  }
+  if (record.user && typeof record.user === 'object') {
+    for (const key of ALWAYS_BLOCKED_USER_KEYS) {
+      delete record.user[key];
+    }
+  }
+
+  return record;
+}
+
+/**
+ * Projects a single record down to only the allowed fields, then strips PII.
+ *
+ * Top-level keys and user.* dot-paths are handled separately.
+ *
  * @param {object} record
  * @param {string[]} allowedFields
  * @returns {object}
@@ -192,106 +199,72 @@ function getExposedFields(componentKey, componentConfig) {
 function filterRecord(record, allowedFields) {
   if (!record || typeof record !== 'object') return record;
 
-  const topLevel = new Set();
-  const nested = {}; // { user: Set(['email', 'name']) }
+  const topLevelKeys = new Set(allowedFields.filter((f) => !f.includes('.')));
 
-  for (const field of allowedFields) {
-    const dot = field.indexOf('.');
-    if (dot === -1) {
-      topLevel.add(field);
-    } else {
-      const parent = field.slice(0, dot);
-      const child = field.slice(dot + 1);
-      (nested[parent] = nested[parent] || new Set()).add(child);
+  const allowedUserKeys = new Set(
+    allowedFields
+      .filter((f) => f.startsWith('user.'))
+      .map((f) => f.slice('user.'.length))
+  );
+
+  const result = {};
+
+  for (const key of topLevelKeys) {
+    if (typeof record[key] !== 'undefined') {
+      result[key] = record[key];
     }
   }
 
-  const out = {};
-  for (const key of topLevel) {
-    if (Object.prototype.hasOwnProperty.call(record, key)) {
-      out[key] = record[key];
-    }
-  }
-  for (const parent of Object.keys(nested)) {
-    const sub = record[parent];
-    if (sub && typeof sub === 'object') {
-      const filteredSub = {};
-      for (const child of nested[parent]) {
-        if (Object.prototype.hasOwnProperty.call(sub, child)) {
-          filteredSub[child] = sub[child];
-        }
+  if (
+    allowedUserKeys.size > 0 &&
+    record.user &&
+    typeof record.user === 'object'
+  ) {
+    result.user = {};
+    for (const key of allowedUserKeys) {
+      if (typeof record.user[key] !== 'undefined') {
+        result.user[key] = record.user[key];
       }
-      out[parent] = filteredSub;
     }
   }
-  return out;
+
+  return stripAlwaysBlocked(result);
 }
 
-// Keys under which list endpoints nest their record array (e.g. { records: [...] }
-// from pagination, or { data: [...], pagination } from the choiceguide list).
-const RECORD_ARRAY_KEYS = ['records', 'data', 'rows'];
-
-// Keys that make up pure metadata/aggregate responses (e.g. { count }). An object
-// made up exclusively of these may pass through untouched; anything else without a
-// record shape is filtered (fail closed) so an unexpected payload cannot leak.
-const METADATA_KEYS = [
-  'count',
-  'page',
-  'pageSize',
-  'limit',
-  'offset',
-  'total',
-  'totalCount',
-  'totalPages',
-  'pagination',
-];
-
 /**
- * Filter a JSON payload to the allowed fields. Handles the response shapes the
- * api-server emits on reporting routes:
- *  - a plain array of records;
- *  - a paginated wrapper nesting the records under `records`/`data`/`rows`, with
- *    sibling metadata (e.g. pagination) preserved untouched;
- *  - a single record object (identified by an `id`);
- *  - a pure metadata/aggregate object such as `{ count }`, passed through.
- * Anything else is run through filterRecord, which fails closed (strips unknown
- * fields) rather than leaking an unexpected payload.
- * @param {*} payload
+ * Filters a full API payload: array, paginated wrapper { data, metadata },
+ * or a single record object.
+ *
+ * Metadata (count, totals) passes through unmodified.
+ *
+ * @param {any} payload
  * @param {string[]} allowedFields
- * @returns {*}
+ * @returns {any}
  */
 function filterPayload(payload, allowedFields) {
   if (Array.isArray(payload)) {
     return payload.map((record) => filterRecord(record, allowedFields));
   }
+
+  if (payload && typeof payload === 'object' && Array.isArray(payload.data)) {
+    return {
+      metadata: payload.metadata,
+      data: payload.data.map((record) => filterRecord(record, allowedFields)),
+    };
+  }
+
   if (payload && typeof payload === 'object') {
-    for (const key of RECORD_ARRAY_KEYS) {
-      if (Array.isArray(payload[key])) {
-        return Object.assign({}, payload, {
-          [key]: payload[key].map((record) =>
-            filterRecord(record, allowedFields)
-          ),
-        });
-      }
-    }
-    // A single record is identified by an `id` and filtered field-by-field.
-    if (Object.prototype.hasOwnProperty.call(payload, 'id')) {
-      return filterRecord(payload, allowedFields);
-    }
-    // Pure metadata/aggregate objects (e.g. { count: 5 }) pass through. Anything
-    // else without a record shape is filtered (fail closed) to avoid leaking.
-    const keys = Object.keys(payload);
-    if (keys.length > 0 && keys.every((key) => METADATA_KEYS.includes(key))) {
-      return payload;
-    }
     return filterRecord(payload, allowedFields);
   }
+
   return payload;
 }
 
 module.exports = {
   COMPONENTS,
-  COMPONENT_KEYS,
+  ALWAYS_BLOCKED_TOP_LEVEL,
+  ALWAYS_BLOCKED_USER_KEYS,
+  ALWAYS_BLOCKED_BLOBS,
   matchComponent,
   getExposedFields,
   filterRecord,

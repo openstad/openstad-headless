@@ -1,53 +1,94 @@
+'use strict';
+
 const {
-  matchComponent,
   getExposedFields,
   filterPayload,
 } = require('@openstad-headless/lib/report-data-scope');
 
 /**
- * For requests authenticated with a reporting API token (scope 'reports'), strip
- * the JSON response down to the fields the project has allowed for that component:
- * the component's safe (non-personal) preset plus any personal fields explicitly
- * opted in via the project's dataScope config. See #1647.
+ * Middleware that wraps res.json for reporting-token requests so that only
+ * allowed fields are included in the response.
  *
- * This runs as a safety net regardless of what the route handler returns, so it
- * does not depend on the token owner's role or per-route field logic. Requests
- * without a reporting token, and the aggregated /stats endpoints, are untouched.
+ * Must be mounted AFTER api-token-scope-guard, which sets req.reportingScope.
+ *
+ * Applied only when req.apiTokenScope === 'reports'.  Non-reporting requests
+ * are unaffected.
+ *
+ * Filtering rules:
+ *  - Non-component paths (req.reportingScope.componentKey === null): only
+ *    primitive / numeric metadata is allowed through.  Full object responses
+ *    on unknown components are blocked (fail-closed).
+ *  - Component paths: response is projected to safeFields + opted-in
+ *    personalFields, then PII is stripped by filterPayload.
+ *  - Metadata keys on paginated wrappers (count, total, …) pass through.
  */
-module.exports = function reportFieldFilter(req, res, next) {
+function reportFieldFilter(req, res, next) {
   if (req.apiTokenScope !== 'reports') {
     return next();
   }
 
-  const componentKey = matchComponent(req.path);
-  if (!componentKey) {
-    // Not a raw component route (e.g. /stats) — no field filtering.
+  const scope = req.reportingScope;
+  if (!scope) {
+    // Guard should have set this — if missing, block the response for safety.
+    const originalJson = res.json.bind(res);
+    res.json = function blockedJson() {
+      return originalJson.call(res, { error: 'Reporting scope not resolved' });
+    };
     return next();
   }
 
-  const dataScope =
-    req.project && req.project.config && req.project.config.dataScope;
-  const allowedFields = getExposedFields(
-    componentKey,
-    dataScope && dataScope[componentKey]
-  );
-  if (!allowedFields) {
-    // Component not enabled; the scope guard will already have blocked it.
-    return next();
-  }
+  const allowedFields = scope.componentKey
+    ? getExposedFields(scope.componentKey, scope.enabledPersonalFields)
+    : null;
 
   const originalJson = res.json.bind(res);
-  res.json = function (payload) {
-    let plain;
-    try {
-      // Serialize first so Sequelize model instances and nested includes become
-      // plain objects before filtering.
-      plain = JSON.parse(JSON.stringify(payload));
-    } catch (err) {
-      plain = payload;
+
+  res.json = function filteredJson(payload) {
+    if (scope.componentKey === null) {
+      // Aggregate / metadata endpoint — allow only if every value at the top
+      // level is a primitive (number, string, boolean) or an array of those.
+      // Full object payloads on an unknown component are blocked.
+      if (payload && typeof payload === 'object' && !Array.isArray(payload)) {
+        const isMetadataOnly = Object.values(payload).every(
+          (v) =>
+            typeof v === 'number' ||
+            typeof v === 'string' ||
+            typeof v === 'boolean' ||
+            v === null ||
+            (Array.isArray(v) &&
+              v.every(
+                (item) =>
+                  typeof item === 'number' ||
+                  typeof item === 'string' ||
+                  typeof item === 'boolean' ||
+                  (typeof item === 'object' &&
+                    item !== null &&
+                    // Allow simple aggregate objects like {counted: 5, date: '2024-01-01'}
+                    Object.values(item).every(
+                      (iv) =>
+                        typeof iv === 'number' ||
+                        typeof iv === 'string' ||
+                        typeof iv === 'boolean' ||
+                        iv === null
+                    ))
+              ))
+        );
+
+        if (!isMetadataOnly) {
+          return originalJson({
+            error: 'Response blocked: unexpected object on aggregate endpoint',
+          });
+        }
+      }
+      return originalJson(payload);
     }
-    return originalJson(filterPayload(plain, allowedFields));
+
+    // Component endpoint — project to allowed fields.
+    const filtered = filterPayload(payload, allowedFields);
+    return originalJson(filtered);
   };
 
   return next();
-};
+}
+
+module.exports = reportFieldFilter;

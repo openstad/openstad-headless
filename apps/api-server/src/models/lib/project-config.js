@@ -1,7 +1,7 @@
 module.exports = {
   allowedDomains: {
     type: 'arrayOfStrings',
-    default: [],
+    default: ['api.openstad.org'],
   },
 
   project: {
@@ -44,51 +44,6 @@ module.exports = {
       anonymizeUserName: {
         type: 'string',
         default: 'Gebruiker is geanonimiseerd',
-      },
-    },
-  },
-
-  // Reporting API data scope (#1647). Controls which raw components and fields
-  // are exposed through reporting (bearer) tokens. Secure default: every component
-  // disabled and no personal fields opted in, so a token only reaches /stats.
-  // The field catalog lives in @openstad-headless/lib/report-data-scope.
-  dataScope: {
-    type: 'object',
-    subset: {
-      plans: {
-        type: 'object',
-        subset: {
-          enabled: { type: 'boolean', default: false },
-          personalFields: { type: 'arrayOfStrings', default: [] },
-        },
-      },
-      votes: {
-        type: 'object',
-        subset: {
-          enabled: { type: 'boolean', default: false },
-          personalFields: { type: 'arrayOfStrings', default: [] },
-        },
-      },
-      comments: {
-        type: 'object',
-        subset: {
-          enabled: { type: 'boolean', default: false },
-          personalFields: { type: 'arrayOfStrings', default: [] },
-        },
-      },
-      surveys: {
-        type: 'object',
-        subset: {
-          enabled: { type: 'boolean', default: false },
-          personalFields: { type: 'arrayOfStrings', default: [] },
-        },
-      },
-      choiceguides: {
-        type: 'object',
-        subset: {
-          enabled: { type: 'boolean', default: false },
-          personalFields: { type: 'arrayOfStrings', default: [] },
-        },
       },
     },
   },
@@ -379,5 +334,50 @@ module.exports = {
   ignoreBruteForce: {
     type: 'arrayOfStrings',
     default: [],
+  },
+
+  // Controls which data components are exposed via the /stats reporting API.
+  // Each component has an 'enabled' flag and an optional list of personal fields
+  // (user-authored text / identifiers) that the admin has explicitly opted in to.
+  // Default: all components disabled — a token with no config reaches /stats only.
+  dataScope: {
+    type: 'object',
+    subset: {
+      resources: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      votes: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      comments: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      submissions: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      choiceguides: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+    },
   },
 };
