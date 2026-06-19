@@ -63,7 +63,8 @@
 }
 
 .timeline-item-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 12px;
   background: #fff;
