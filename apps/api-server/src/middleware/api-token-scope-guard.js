@@ -1,6 +1,19 @@
 const createError = require('http-errors');
 const { matchComponent } = require('@openstad-headless/lib/report-data-scope');
 
+// OpenStad has a few GET routes that mutate state (e.g. /vote/:id/toggle). A
+// method check alone would let a reporting token trigger those, so component
+// paths containing one of these action segments are rejected outright. Add any
+// future mutating-GET segment here to keep reporting tokens read-only.
+const FORBIDDEN_ACTION_SEGMENTS = ['toggle'];
+
+function hasForbiddenActionSegment(path) {
+  const segments = path.split('/');
+  return FORBIDDEN_ACTION_SEGMENTS.some((segment) =>
+    segments.includes(segment)
+  );
+}
+
 /**
  * Restrict requests authenticated with a reporting API token (scope 'reports',
  * set in the user middleware) to the data they are allowed to read:
@@ -26,7 +39,11 @@ module.exports = function apiTokenScopeGuard(req, res, next) {
 
   // Raw component data: allowed only when the project enabled it, read-only.
   const componentKey = matchComponent(req.path);
-  if (componentKey && req.method === 'GET') {
+  if (
+    componentKey &&
+    req.method === 'GET' &&
+    !hasForbiddenActionSegment(req.path)
+  ) {
     const dataScope =
       req.project && req.project.config && req.project.config.dataScope;
     const componentConfig = dataScope && dataScope[componentKey];

@@ -155,6 +155,16 @@ describe('report-field-filter — choiceguides and wrapper shapes', () => {
     expect(out).toEqual({ count: 7 });
   });
 
+  it('fails closed on an id-less non-metadata object (no leak)', () => {
+    const out = runFilter(
+      reqFor('/api/project/2/submission', {
+        surveys: { enabled: true, personalFields: [] },
+      }),
+      { email: 'a@b.nl', name: 'Secret' }
+    );
+    expect(out).toEqual({});
+  });
+
   it('treats plan free-text (description/summary) as opt-in', () => {
     const rec = {
       id: 1,

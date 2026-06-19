@@ -67,4 +67,15 @@ describe('api-token-scope-guard', () => {
     const error = run(reqFor({ path: '/api/project/2/widgets' }));
     expect(error.status).toBe(403);
   });
+
+  it('rejects mutating GET action routes even on an enabled component', () => {
+    const error = run(
+      reqFor({
+        path: '/api/project/2/vote/5/toggle',
+        method: 'GET',
+        project: { config: { dataScope: { votes: { enabled: true } } } },
+      })
+    );
+    expect(error.status).toBe(403);
+  });
 });

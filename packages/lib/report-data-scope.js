@@ -231,6 +231,21 @@ function filterRecord(record, allowedFields) {
 // from pagination, or { data: [...], pagination } from the choiceguide list).
 const RECORD_ARRAY_KEYS = ['records', 'data', 'rows'];
 
+// Keys that make up pure metadata/aggregate responses (e.g. { count }). An object
+// made up exclusively of these may pass through untouched; anything else without a
+// record shape is filtered (fail closed) so an unexpected payload cannot leak.
+const METADATA_KEYS = [
+  'count',
+  'page',
+  'pageSize',
+  'limit',
+  'offset',
+  'total',
+  'totalCount',
+  'totalPages',
+  'pagination',
+];
+
 /**
  * Filter a JSON payload to the allowed fields. Handles the response shapes the
  * api-server emits on reporting routes:
@@ -263,13 +278,10 @@ function filterPayload(payload, allowedFields) {
     if (Object.prototype.hasOwnProperty.call(payload, 'id')) {
       return filterRecord(payload, allowedFields);
     }
-    // Pure metadata/aggregate objects (only scalar values, e.g. { count: 5 })
-    // carry no record data and pass through. Objects with nested structure but
-    // no record shape are filtered (fail closed) to avoid leaking.
-    const hasNestedValue = Object.values(payload).some(
-      (value) => value && typeof value === 'object'
-    );
-    if (!hasNestedValue) {
+    // Pure metadata/aggregate objects (e.g. { count: 5 }) pass through. Anything
+    // else without a record shape is filtered (fail closed) to avoid leaking.
+    const keys = Object.keys(payload);
+    if (keys.length > 0 && keys.every((key) => METADATA_KEYS.includes(key))) {
       return payload;
     }
     return filterRecord(payload, allowedFields);
