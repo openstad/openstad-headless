@@ -1,6 +1,6 @@
 # Contributing Guidelines Project - Pilot Uitvoeringskracht 2026
 
-These guidelines describe how we collaborate on GitHub during the Pilot Uitvoeringskracht 2026. When succesful, we incorporate this way of working into the general contributing docs.
+These guidelines describe how we collaborate on GitHub during the Pilot Uitvoeringskracht 2026. When successful, we incorporate this way of working into the general contributing docs.
 
 They exist to keep our codebase consistent, our history readable, and our collaboration smooth. They are not bureaucracy for its own sake — each rule has a reason, and understanding that reason is more useful than following it blindly.
 
