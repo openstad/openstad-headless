@@ -10,7 +10,7 @@ Please read this document before opening your first pull request.
 
 Our code is open source and used by dozens of municipalities. This context makes it vital to keep our decisions and change history transparent. A clear version control strategy helps with this.
 
-We follow [GitHub flow](https://docs.github.com/en/get-started/using-github/github-flow): all work happens on short-lived feature branches. For the pilot we branch from a separate from main to isolate work don for the pilot and in each sprint. So a feature branch should be branched from `branch-sprint-1` and merged back into `branch-sprint-1` via a pull request.
+We follow [GitHub flow](https://docs.github.com/en/get-started/using-github/github-flow): all work happens on short-lived feature branches. For the pilot, we work from a sprint branch that is cut from `main` to isolate pilot work per sprint. Feature branches should be branched from `branch-sprint-1` and merged back into `branch-sprint-1` via a pull request.
 
 Feature branches should be small and focused. This keeps continuous integration fast, reduces the chance of merge conflicts, and limits the scope of code reviews. Aim to merge within days, not weeks.
 
