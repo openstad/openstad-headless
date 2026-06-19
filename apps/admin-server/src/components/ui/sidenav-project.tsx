@@ -1,6 +1,6 @@
 'use client';
 
-import { SessionContext } from '@/auth';
+import { SessionContext } from '@/auth-context';
 import { useExternalCertificatesEnabled } from '@/hooks/use-external-certificates';
 import { HasAccess } from '@/lib/hasAccess';
 import { cn } from '@/lib/utils';
