@@ -21,6 +21,7 @@ import useTags from './hooks/use-tags.js';
 import useUserActivity from './hooks/use-user-activity';
 import useUserVote from './hooks/use-user-vote.js';
 import useWidget from './hooks/use-widget';
+import useWidgets from './hooks/use-widgets';
 import mergeData from './merge-data';
 
 const windowGlobal = typeof window !== 'undefined' ? window : {};
@@ -52,6 +53,7 @@ function DataStore(props = {}) {
   self.useProjectVotedUsersCount = useProjectVotedUsersCount.bind(self);
   self.useUserActivity = useUserActivity.bind(self);
   self.useWidget = useWidget.bind(self);
+  self.useWidgets = useWidgets.bind(self);
 
   // current user
   const {
