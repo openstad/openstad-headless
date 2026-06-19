@@ -44,7 +44,7 @@ For more information, see [How to Write a Git Commit Message](https://cbea.ms/gi
 
 ### PR Template
 
-The PR title records _what_ changed; the PR description records _why_. Please fill out [the template](../.github/PULL_REQUEST_TEMPLATE.md) — both sections matter.
+The PR title records _what_ changed; the PR description records _why_. Please fill out [the template](.github/PULL_REQUEST_TEMPLATE.md) — both sections matter.
 
 Most IDEs can navigate from any line of code to the commit that last changed it, and from there directly to the PR. A well-filled template means that when someone traces a specific line of code years from now, they can immediately understand the reasoning behind the change, not just what it was.
 
