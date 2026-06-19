@@ -14,7 +14,7 @@ We follow [GitHub flow](https://docs.github.com/en/get-started/using-github/gith
 
 Feature branches should be small and focused. This keeps continuous integration fast, reduces the chance of merge conflicts, and limits the scope of code reviews. Aim to merge within days, not weeks.
 
-Once you have pushed a branch to the remote, do not rebase it. Rebasing rewrites history and forces your collaborators to reset their local copies. If you need to incorporate upstream changes, merge `main` into your branch instead.
+Once you have pushed a branch to the remote, do not rebase it. Rebasing rewrites history and forces your collaborators to reset their local copies. If you need to incorporate upstream changes, merge `branch-sprint-1` into your branch instead.
 
 ### Branch Naming
 
