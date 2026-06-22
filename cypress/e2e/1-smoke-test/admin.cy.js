@@ -1,7 +1,7 @@
 describe('Can log into admin server', () => {
   it('Allows us to log in as an admin', () => {
     cy.visit(Cypress.expose('ADMIN_URL'));
-    cy.contains('Welcome bij OpenStad');
+    cy.contains('Welkom bij OpenStad');
     cy.contains('Inloggen').click();
 
     cy.origin(Cypress.expose('AUTH_APP_URL'), () => {
