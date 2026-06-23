@@ -14,6 +14,7 @@ import {
 } from '@utrecht/component-library-react';
 import React, { FC, useEffect, useRef, useState } from 'react';
 
+import { ClickableImage } from '../../clickable-image';
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
 import { Spacer } from '../../spacer';
@@ -213,7 +214,13 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                     type="radio"
                     className={isSelected ? 'selected' : ''}>
                     <figure>
-                      <img src={choice.imageSrc} alt={choice.imageAlt} />
+                      <ClickableImage
+                        clickable={imageClickable}
+                        src={choice.imageSrc}
+                        alt={choice.imageAlt}
+                        variant="overlay">
+                        <img src={choice.imageSrc} alt={choice.imageAlt} />
+                      </ClickableImage>
                       <figcaption>
                         <ChoiceComponent
                           className="radio-field-input"

@@ -10,6 +10,7 @@ import {
 } from '@utrecht/component-library-react';
 import React, { FC, useEffect, useRef, useState } from 'react';
 
+import { ClickableImage } from '../../clickable-image';
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
 import { Spacer } from '../../spacer';
@@ -249,7 +250,12 @@ const RangeSlider: FC<RangeSliderProps> = ({
               {descriptionA && <HtmlContent html={descriptionA} />}
               {!!imageA && (
                 <figure>
-                  <img src={imageA} alt={`${titleA} - ${descriptionA}`} />
+                  <ClickableImage
+                    clickable={imageClickable}
+                    src={imageA}
+                    alt={`${titleA} - ${descriptionA}`}>
+                    <img src={imageA} alt={`${titleA} - ${descriptionA}`} />
+                  </ClickableImage>
                 </figure>
               )}
             </div>
@@ -263,7 +269,12 @@ const RangeSlider: FC<RangeSliderProps> = ({
               {descriptionB && <HtmlContent html={descriptionB} />}
               {!!imageB && (
                 <figure>
-                  <img src={imageB} alt={`${titleB} - ${descriptionB}`} />
+                  <ClickableImage
+                    clickable={imageClickable}
+                    src={imageB}
+                    alt={`${titleB} - ${descriptionB}`}>
+                    <img src={imageB} alt={`${titleB} - ${descriptionB}`} />
+                  </ClickableImage>
                 </figure>
               )}
             </div>

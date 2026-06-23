@@ -2,6 +2,7 @@ import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-d
 import { humanizeDate } from '@openstad-headless/lib/humanize-date';
 import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import {
+  ClickableImage,
   Icon,
   IconButton,
   Image,
@@ -54,6 +55,7 @@ export const StemBegrootResourceDetailDialog = ({
   displayTitle = true,
   displaySummary = true,
   displayDescription = true,
+  clickableImage = false,
 }: {
   openDetailDialog: boolean;
   setOpenDetailDialog: (condition: boolean) => void;
@@ -81,6 +83,7 @@ export const StemBegrootResourceDetailDialog = ({
   displayTitle?: boolean;
   displaySummary?: boolean;
   displayDescription?: boolean;
+  clickableImage?: boolean;
 }) => {
   const [carouselIndexSetter, setCarouselIndexSetter] = useState<
     ((index: number) => void) | null
@@ -199,7 +202,13 @@ export const StemBegrootResourceDetailDialog = ({
                       setIndexInParent={setCarouselIndexSetter}
                       itemRenderer={(i) => {
                         if (i.url) {
-                          return <Image src={i.url} />;
+                          return (
+                            <ClickableImage
+                              clickable={clickableImage}
+                              src={i.url}>
+                              <Image src={i.url} />
+                            </ClickableImage>
+                          );
                         } else if (resource?.location) {
                           return (
                             <ResourceDetailMap

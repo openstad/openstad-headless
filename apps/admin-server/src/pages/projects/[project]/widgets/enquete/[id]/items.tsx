@@ -2359,6 +2359,39 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
+                    {['images', 'dilemma', 'swipe'].includes(
+                      form.watch('questionType') || ''
+                    ) && (
+                      <FormField
+                        control={form.control}
+                        name="imageClickable"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Moeten de afbeeldingen uitvergroot worden als erop
+                              geklikt wordt?
+                            </FormLabel>
+                            <Select
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
+                              value={field.value ? 'true' : 'false'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="false">Nee</SelectItem>
+                                <SelectItem value="true">Ja</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
                     {![
                       'pagination',
                       'sort',

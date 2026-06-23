@@ -121,6 +121,7 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
                         displayTitle={props?.displayTitle}
                         displayDescription={props?.displayDescription}
                         displayImage={props?.displayImage}
+                        imageClickable={props?.imageClickable}
                       />
                     </li>
                   )
