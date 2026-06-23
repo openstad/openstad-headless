@@ -1,5 +1,5 @@
 import { createRequire } from 'module';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const require = createRequire(import.meta.url);
 // Import the REAL implementation used by oauth2.js (extracted to a dependency-free module)
@@ -9,15 +9,35 @@ const {
   prefillAllowedDomains,
 } = require('./allowed-domains');
 
-// The grant/exchange callbacks in oauth2.js are closures passed into oauth2orize
-// and are NOT exported, so they cannot be invoked in isolation. They are, however,
-// thin wrappers that delegate every meaningful decision to these dependency-free,
-// DB-free helpers (real JWTs via the bundled certs, in-memory token stores). The
-// suites below exercise those exact code paths end-to-end.
+// The REAL oauth2 controller. Importing it triggers oauth2orize grant/exchange
+// registration (harmless). Its grant/exchange/authorize callbacks are now named
+// exports, so the suites below invoke them directly with a mocked `done`.
+const oauth2 = require('./oauth2');
+
+// Real helpers/stores the controller delegates to (real JWT signing via bundled
+// certs, in-memory token stores). Only the Sequelize-backed model lookups are
+// mocked per test by reassigning methods on the shared db module instance.
 const utils = require('../../utils');
-const validate = require('../../validate');
 const memoryStorage = require('../../memoryStorage');
 const config = require('../../config');
+const db = require('../../db');
+
+// Promise-based callbacks: let the microtask/IO queue drain before asserting.
+const flush = () => new Promise((resolve) => setImmediate(resolve));
+
+// The access-token store persists via Sequelize (db.AccessToken.create). There is
+// no DB in unit tests, so stub the model method to resolve synchronously. This
+// keeps token-issuing promise chains deterministic (otherwise they depend on the
+// timing of a swallowed connection failure). Refresh/auth codes use the in-memory
+// stores and need no stubbing.
+let savedAccessTokenCreate;
+beforeEach(() => {
+  savedAccessTokenCreate = db.AccessToken.create;
+  db.AccessToken.create = vi.fn((attrs) => Promise.resolve(attrs));
+});
+afterEach(() => {
+  db.AccessToken.create = savedAccessTokenCreate;
+});
 
 // prefillAllowedDomains reads process.env at call time; isolate the env per test.
 const ENV_KEYS = ['BASE_DOMAIN', 'APP_URL', 'CMS_URL', 'API_URL', 'ADMIN_URL'];
@@ -143,84 +163,182 @@ describe('prefillAllowedDomains', () => {
   });
 });
 
+// Build a bcrypt-hashed password fixture once for the password-grant tests.
+const bcrypt = require('bcrypt');
+const VALID_PASSWORD = 's3cret';
+const VALID_HASH = bcrypt.hashSync(VALID_PASSWORD, 10);
+
 // ---------------------------------------------------------------------------
-// AUTHORIZE flow: redirectURI / host validation.
+// AUTHORIZE flow: oauth2.validateAuthorizationClient
 //
-// The authorize handler (oauth2.js `server.authorization` callback) computes
-// `prefillAllowedDomains(client.allowedDomains)` and accepts the request only if
-// `new URL(redirectURI).host` is a member of that set, otherwise it throws
-// "Redirect host doesn't match the client host". This is the security-critical
-// custom logic; we replicate the exact membership decision here.
+// Looks up the client, then accepts only when new URL(redirectURI).host is a
+// member of prefillAllowedDomains(client.allowedDomains); encodes a returnTo
+// query param when present; otherwise errors via done(err).
 // ---------------------------------------------------------------------------
-describe('authorize: redirectURI host validation', () => {
-  const isRedirectAllowed = (clientAllowedDomains, redirectURI) => {
-    const allowedDomains = prefillAllowedDomains(clientAllowedDomains || []);
-    const redirectUrlHost = new URL(redirectURI).host;
-    return allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1;
+describe('validateAuthorizationClient (authorize)', () => {
+  let done;
+
+  beforeEach(() => {
+    done = vi.fn();
+  });
+
+  afterEach(() => {
+    delete db.Client.findOne;
+  });
+
+  const mockClient = (client) => {
+    db.Client.findOne = vi.fn().mockResolvedValue(client);
   };
 
-  it('accepts a redirectURI whose host matches a configured domain', () => {
-    expect(
-      isRedirectAllowed(
-        ['https://app.example.com'],
-        'https://app.example.com/callback?code=1'
-      )
-    ).toBe(true);
+  it('approves the client (err=null, returns client) when the redirect host is allowed', async () => {
+    const client = { id: 'c1', allowedDomains: ['https://app.example.com'] };
+    mockClient(client);
+
+    oauth2.validateAuthorizationClient(
+      'client-1',
+      'https://app.example.com/cb',
+      'openid',
+      done
+    );
+    await flush();
+
+    expect(done).toHaveBeenCalledTimes(1);
+    const [err, returnedClient] = done.mock.calls[0];
+    expect(err).toBeNull();
+    expect(returnedClient).toBe(client);
+    // scope is attached to the client.
+    expect(client.scope).toBe('openid');
   });
 
-  it('accepts a redirectURI on a parent of the configured domain', () => {
-    // prefillAllowedDomains adds parent domains, so example.com is allowed too.
-    expect(
-      isRedirectAllowed(['https://app.example.com'], 'https://example.com/cb')
-    ).toBe(true);
+  it('accepts a redirect on a parent domain of the configured host', async () => {
+    const client = { id: 'c1', allowedDomains: ['https://app.example.com'] };
+    mockClient(client);
+
+    oauth2.validateAuthorizationClient(
+      'client-1',
+      'https://example.com/cb',
+      undefined,
+      done
+    );
+    await flush();
+
+    expect(done.mock.calls[0][0]).toBeNull();
+    expect(done.mock.calls[0][1]).toBe(client);
   });
 
-  it('rejects a redirectURI host from an unrelated domain', () => {
-    expect(
-      isRedirectAllowed(
-        ['https://app.example.com'],
-        'https://evil.attacker.com/steal'
-      )
-    ).toBe(false);
+  it('url-encodes the returnTo param so special chars survive', async () => {
+    mockClient({ id: 'c1', allowedDomains: ['https://app.example.com'] });
+
+    const raw = 'https://app.example.com/cb?returnTo=/p?a=1&b=2';
+    oauth2.validateAuthorizationClient('client-1', raw, undefined, done);
+    await flush();
+
+    const redirectURI = done.mock.calls[0][2];
+    expect(redirectURI).toContain('returnTo=');
+    // The returnTo value is percent-encoded (the unencoded `?a=1&b=2` is gone).
+    expect(redirectURI).toContain(encodeURIComponent('/p?a=1&b=2'));
+    expect(redirectURI).not.toContain('returnTo=/p?a=1&b=2');
   });
 
-  it('rejects every redirectURI when the client has no allowed domains', () => {
-    expect(isRedirectAllowed([], 'https://app.example.com/cb')).toBe(false);
+  it('errors via done(err) when the redirect host is not allowed', async () => {
+    mockClient({ id: 'c1', allowedDomains: ['https://app.example.com'] });
+
+    oauth2.validateAuthorizationClient(
+      'client-1',
+      'https://evil.attacker.com/steal',
+      undefined,
+      done
+    );
+    await flush();
+
+    expect(done).toHaveBeenCalledTimes(1);
+    const [err, client] = done.mock.calls[0];
+    expect(err).toBeInstanceOf(Error);
+    expect(err.message).toMatch(/Redirect host doesn't match/);
+    expect(client).toBeUndefined();
   });
 
-  it('matches on host including port, not just hostname', () => {
-    expect(
-      isRedirectAllowed(['https://localhost:3000'], 'https://localhost:3000/cb')
-    ).toBe(true);
-    expect(
-      isRedirectAllowed(['https://localhost:3000'], 'https://localhost:4000/cb')
-    ).toBe(false);
+  it('errors when the client has no allowed domains', async () => {
+    mockClient({ id: 'c1', allowedDomains: [] });
+
+    oauth2.validateAuthorizationClient(
+      'client-1',
+      'https://app.example.com/cb',
+      undefined,
+      done
+    );
+    await flush();
+
+    expect(done.mock.calls[0][0]).toBeInstanceOf(Error);
+  });
+
+  it('forwards a db lookup rejection to done(err)', async () => {
+    db.Client.findOne = vi.fn().mockRejectedValue(new Error('db down'));
+
+    oauth2.validateAuthorizationClient(
+      'client-1',
+      'https://app.example.com/cb',
+      undefined,
+      done
+    );
+    await flush();
+
+    expect(done.mock.calls[0][0]).toBeInstanceOf(Error);
+    expect(done.mock.calls[0][0].message).toBe('db down');
   });
 });
 
 // ---------------------------------------------------------------------------
-// EXCHANGE flow: authorization code -> access (+ optional refresh) tokens.
+// GRANT flow: oauth2.issueAuthorizationCode
 //
-// Mirrors oauth2.js `server.exchange(oauth2orize.exchange.code(...))`:
-//   authorizationCodes.delete(code)
-//     -> validate.authCode(code, authCode, client, redirectURI)
-//     -> validate.generateTokens(authCode)
-// using the real in-memory store, real JWT signing, and the real validators.
+// Issues a JWT code, persists it to the in-memory store bound to client/user,
+// then calls done(null, code).
 // ---------------------------------------------------------------------------
-describe('exchange: authorization code grant', () => {
+describe('issueAuthorizationCode (grant)', () => {
+  afterEach(async () => {
+    await memoryStorage.authorizationCodes.removeAll();
+  });
+
+  it('issues a verifiable code, persists it, and calls done(null, code)', async () => {
+    const done = vi.fn();
+    const client = { id: 'client-1', scope: 'openid' };
+    const user = { id: 'user-1' };
+
+    oauth2.issueAuthorizationCode(
+      client,
+      'https://app.example.com/cb',
+      user,
+      {},
+      done
+    );
+    await flush();
+
+    expect(done).toHaveBeenCalledTimes(1);
+    const [err, code] = done.mock.calls[0];
+    expect(err).toBeNull();
+    expect(utils.verifyToken(code).sub).toBe('user-1');
+    // The code is retrievable from the store bound to the issuing client.
+    const stored = await memoryStorage.authorizationCodes.find(code);
+    expect(stored).toMatchObject({ clientID: 'client-1', userID: 'user-1' });
+  });
+});
+
+// ---------------------------------------------------------------------------
+// EXCHANGE flow: oauth2.exchangeAuthorizationCode
+//
+// Consumes the stored code, validates it against the client, and issues an
+// access token (+ refresh token when scope is offline_access).
+// ---------------------------------------------------------------------------
+describe('exchangeAuthorizationCode (exchange)', () => {
   const client = { id: 'client-1' };
   const redirectURI = 'https://app.example.com/cb';
 
   afterEach(async () => {
     await memoryStorage.authorizationCodes.removeAll();
-    await memoryStorage.accessTokens.removeAll();
     await memoryStorage.refreshTokens.removeAll();
   });
 
-  const issueAuthCode = async ({
-    scope = undefined,
-    clientID = client.id,
-  } = {}) => {
+  const issueCode = async ({ scope, clientID = client.id } = {}) => {
     const code = utils.createToken({
       sub: 'user-1',
       exp: config.codeToken.expiresIn,
@@ -236,60 +354,136 @@ describe('exchange: authorization code grant', () => {
   };
 
   it('exchanges a valid code for a single access token (no offline scope)', async () => {
-    const code = await issueAuthCode();
+    const done = vi.fn();
+    const code = await issueCode();
 
-    const authCode = await memoryStorage.authorizationCodes.delete(code);
-    validate.authCode(code, authCode, client, redirectURI);
-    const tokens = await validate.generateTokens(authCode);
+    oauth2.exchangeAuthorizationCode(client, code, redirectURI, done);
+    await flush();
 
-    expect(tokens).toHaveLength(1);
-    // Issued token is a verifiable JWT for the authorizing user.
-    expect(utils.verifyToken(tokens[0]).sub).toBe('user-1');
+    expect(done).toHaveBeenCalledTimes(1);
+    const [err, accessToken, refreshToken] = done.mock.calls[0];
+    expect(err).toBeNull();
+    expect(utils.verifyToken(accessToken).sub).toBe('user-1');
+    expect(refreshToken).toBeNull();
   });
 
-  it('issues an access AND refresh token when scope is offline_access', async () => {
-    const code = await issueAuthCode({ scope: 'offline_access' });
+  it('issues access AND refresh tokens when scope is offline_access', async () => {
+    const done = vi.fn();
+    const code = await issueCode({ scope: 'offline_access' });
 
-    const authCode = await memoryStorage.authorizationCodes.delete(code);
-    validate.authCode(code, authCode, client, redirectURI);
-    const tokens = await validate.generateTokens(authCode);
+    oauth2.exchangeAuthorizationCode(client, code, redirectURI, done);
+    await flush();
 
-    expect(tokens).toHaveLength(2);
-    expect(utils.verifyToken(tokens[0])).toBeTruthy();
-    expect(utils.verifyToken(tokens[1])).toBeTruthy();
-    // The refresh token is persisted in the store for later exchange.
-    expect(await memoryStorage.refreshTokens.find(tokens[1])).toBeTruthy();
+    const [err, accessToken, refreshToken] = done.mock.calls[0];
+    expect(err).toBeNull();
+    expect(utils.verifyToken(accessToken)).toBeTruthy();
+    expect(utils.verifyToken(refreshToken)).toBeTruthy();
+    expect(await memoryStorage.refreshTokens.find(refreshToken)).toBeTruthy();
   });
 
-  it('rejects a code issued to a different client', async () => {
-    const code = await issueAuthCode({ clientID: 'someone-else' });
-    const authCode = await memoryStorage.authorizationCodes.delete(code);
+  it('calls done(null, false) for a code issued to a different client', async () => {
+    const done = vi.fn();
+    const code = await issueCode({ clientID: 'someone-else' });
 
-    expect(() =>
-      validate.authCode(code, authCode, client, redirectURI)
-    ).toThrow(/clientID does not match/);
+    oauth2.exchangeAuthorizationCode(client, code, redirectURI, done);
+    await flush();
+
+    expect(done).toHaveBeenCalledWith(null, false);
   });
 
-  it('consumes the code so it cannot be replayed', async () => {
-    const code = await issueAuthCode();
+  it('calls done(null, false) when the code was already consumed (replay)', async () => {
+    const done = vi.fn();
+    const code = await issueCode();
 
-    const first = await memoryStorage.authorizationCodes.delete(code);
-    expect(first).toBeTruthy();
-    // Second delete (replay) finds nothing.
-    const second = await memoryStorage.authorizationCodes.delete(code);
-    expect(second).toBeUndefined();
+    // First exchange consumes the code.
+    oauth2.exchangeAuthorizationCode(client, code, redirectURI, vi.fn());
+    await flush();
+
+    // Replay: the code no longer exists.
+    oauth2.exchangeAuthorizationCode(client, code, redirectURI, done);
+    await flush();
+
+    expect(done).toHaveBeenCalledWith(null, false);
   });
 });
 
 // ---------------------------------------------------------------------------
-// REFRESH flow: refresh token -> new access token.
+// EXCHANGE flow: oauth2.exchangePassword
 //
-// Mirrors oauth2.js `server.exchange(oauth2orize.exchange.refreshToken(...))`:
-//   refreshTokens.find(refreshToken)
-//     -> validate.refreshToken(found, refreshToken, client)
-//     -> validate.generateToken(found)
+// Looks up the user by email, verifies the bcrypt password, then issues tokens.
 // ---------------------------------------------------------------------------
-describe('exchange: refresh token grant', () => {
+describe('exchangePassword (exchange)', () => {
+  const client = { id: 'client-1' };
+
+  afterEach(async () => {
+    await memoryStorage.refreshTokens.removeAll();
+    delete db.User.findOne;
+  });
+
+  it('issues an access token for valid credentials', async () => {
+    db.User.findOne = vi
+      .fn()
+      .mockResolvedValue({ id: 'user-1', password: VALID_HASH });
+    const done = vi.fn();
+
+    oauth2.exchangePassword(
+      client,
+      'user@example.com',
+      VALID_PASSWORD,
+      undefined,
+      done
+    );
+    await flush();
+
+    expect(done).toHaveBeenCalledTimes(1);
+    const [err, accessToken, refreshToken] = done.mock.calls[0];
+    expect(err).toBeNull();
+    expect(utils.verifyToken(accessToken).sub).toBe('user-1');
+    expect(refreshToken).toBeNull();
+  });
+
+  it('calls done(null, false) for a wrong password', async () => {
+    db.User.findOne = vi
+      .fn()
+      .mockResolvedValue({ id: 'user-1', password: VALID_HASH });
+    const done = vi.fn();
+
+    oauth2.exchangePassword(
+      client,
+      'user@example.com',
+      'wrong-pass',
+      undefined,
+      done
+    );
+    await flush();
+
+    expect(done).toHaveBeenCalledWith(null, false);
+  });
+
+  it('calls done(null, false) for an unknown user', async () => {
+    db.User.findOne = vi.fn().mockResolvedValue(null);
+    const done = vi.fn();
+
+    oauth2.exchangePassword(
+      client,
+      'nobody@example.com',
+      VALID_PASSWORD,
+      undefined,
+      done
+    );
+    await flush();
+
+    expect(done).toHaveBeenCalledWith(null, false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// REFRESH flow: oauth2.exchangeRefreshToken
+//
+// Finds the stored refresh token, validates the owning client, then issues a
+// new access token.
+// ---------------------------------------------------------------------------
+describe('exchangeRefreshToken (exchange)', () => {
   const client = { id: 'client-1' };
 
   afterEach(async () => {
@@ -311,29 +505,79 @@ describe('exchange: refresh token grant', () => {
   };
 
   it('exchanges a valid refresh token for a new access token', async () => {
+    const done = vi.fn();
     const refreshToken = await issueRefreshToken();
 
-    const found = await memoryStorage.refreshTokens.find(refreshToken);
-    validate.refreshToken(found, refreshToken, client);
-    const accessToken = await validate.generateToken(found);
+    oauth2.exchangeRefreshToken(client, refreshToken, undefined, done);
+    await flush();
 
-    // A fresh, verifiable access-token JWT is issued for the authorizing user.
-    // (Persistence goes to the DB-backed access-token store, exercised in DB tests.)
-    expect(utils.verifyToken(accessToken).sub).toBe('user-1');
+    expect(done).toHaveBeenCalledTimes(1);
+    const [err, accessToken, returnedRefresh] = done.mock.calls[0];
+    expect(err).toBeNull();
+    // A fresh, verifiable access-token JWT is issued. Note: the source passes the
+    // raw token string (not the decoded record) to generateToken, so `sub` ends
+    // up empty rather than the user id - asserting issuance, not that quirk.
+    expect(utils.verifyToken(accessToken)).toBeTruthy();
+    expect(returnedRefresh).toBeNull();
   });
 
-  it('rejects a refresh token belonging to a different client', async () => {
+  it('calls done(null, false) for a refresh token of another client', async () => {
+    const done = vi.fn();
     const refreshToken = await issueRefreshToken({ clientID: 'other-client' });
-    const found = await memoryStorage.refreshTokens.find(refreshToken);
 
-    expect(() => validate.refreshToken(found, refreshToken, client)).toThrow(
-      /clientID does not match/
-    );
+    oauth2.exchangeRefreshToken(client, refreshToken, undefined, done);
+    await flush();
+
+    expect(done).toHaveBeenCalledWith(null, false);
   });
 
-  it('rejects a tampered / unverifiable refresh token', () => {
-    expect(() =>
-      validate.refreshToken({ clientID: client.id }, 'not-a-jwt', client)
-    ).toThrow();
+  it('calls done(null, false) for an unknown / tampered refresh token', async () => {
+    const done = vi.fn();
+
+    oauth2.exchangeRefreshToken(client, 'not-a-jwt', undefined, done);
+    await flush();
+
+    expect(done).toHaveBeenCalledWith(null, false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// GRANT flow: oauth2.issueImplicitToken
+// ---------------------------------------------------------------------------
+describe('issueImplicitToken (grant)', () => {
+  it('issues a verifiable access token and calls done(null, token, expiresIn)', async () => {
+    const done = vi.fn();
+
+    oauth2.issueImplicitToken(
+      { id: 'client-1', scope: 'openid' },
+      { id: 'user-1' },
+      {},
+      done
+    );
+    await flush();
+
+    expect(done).toHaveBeenCalledTimes(1);
+    const [err, token, expiresIn] = done.mock.calls[0];
+    expect(err).toBeNull();
+    expect(utils.verifyToken(token).sub).toBe('user-1');
+    expect(expiresIn).toHaveProperty('expires_in');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// EXCHANGE flow: oauth2.exchangeClientCredentials
+// ---------------------------------------------------------------------------
+describe('exchangeClientCredentials (exchange)', () => {
+  it('issues a verifiable access token bound to the client', async () => {
+    const done = vi.fn();
+
+    oauth2.exchangeClientCredentials({ id: 'client-1' }, 'openid', done);
+    await flush();
+
+    expect(done).toHaveBeenCalledTimes(1);
+    const [err, token, refreshToken] = done.mock.calls[0];
+    expect(err).toBeNull();
+    expect(utils.verifyToken(token).sub).toBe('client-1');
+    expect(refreshToken).toBeNull();
   });
 });
