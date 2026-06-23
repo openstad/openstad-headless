@@ -40,6 +40,9 @@ export default defineConfig({
         // #1640 PR3: resource route split into services (each unit-tested).
         'apps/api-server/src/services/resourceExtraData.js',
         'apps/api-server/src/services/resourceTagsStatuses.js',
+        // #1640 PR4: user route split into services (each unit-tested).
+        'apps/api-server/src/services/userDeduplication.js',
+        'apps/api-server/src/services/userUnsubscribe.js',
         'apps/auth-server/controllers/oauth/oauth2.js',
         'apps/auth-server/controllers/oauth/allowed-domains.js',
         'apps/auth-server/controllers/auth/local.js',
