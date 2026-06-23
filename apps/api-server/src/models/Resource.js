@@ -17,22 +17,10 @@ const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 const roles = require('../lib/sequelize-authorization/lib/roles');
 const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
 const htmlToText = require('html-to-text');
-
-function hideEmailsForNormalUsers(comments) {
-  return comments.map((comment) => {
-    delete comment.user.email;
-
-    if (comment.replies) {
-      comment.replies = comment.replies.map((reply) => {
-        delete reply.user.email;
-
-        return reply;
-      });
-    }
-
-    return comment;
-  });
-}
+const {
+  hideEmailsForNormalUsers,
+  filterModeratorOnlyExtraData,
+} = require('../services/resourceSerialization');
 
 module.exports = function (db, sequelize, DataTypes) {
   var Resource = sequelize.define(
@@ -1234,38 +1222,14 @@ module.exports = function (db, sequelize, DataTypes) {
         ? self.resourceFormFieldKeys
         : [];
       const hasResourceFormConfig = !!self.hasResourceFormConfig;
-      if (
-        user &&
-        user.role &&
-        user.role !== 'all' &&
-        !canViewModeratorOnlyExtraData(user, self) &&
-        data.extraData &&
-        typeof data.extraData === 'object'
-      ) {
-        if (hasResourceFormConfig) {
-          Object.keys(data.extraData).forEach((key) => {
-            if (
-              !resourceFormFieldKeys.includes(key) &&
-              !alwaysPublicExtraDataKeys.includes(key)
-            ) {
-              delete data.extraData[key];
-            }
-          });
-        } else {
-          const preserved = {};
-          alwaysPublicExtraDataKeys.forEach((key) => {
-            if (data.extraData[key] !== undefined)
-              preserved[key] = data.extraData[key];
-          });
-          data.extraData = preserved;
-        }
-
-        moderatorOnlyExtraDataKeys.forEach((key) => {
-          if (!alwaysPublicExtraDataKeys.includes(key)) {
-            delete data.extraData[key];
-          }
-        });
-      }
+      filterModeratorOnlyExtraData(data, {
+        userRole: user && user.role,
+        canViewModerator: canViewModeratorOnlyExtraData(user, self),
+        hasResourceFormConfig,
+        resourceFormFieldKeys,
+        moderatorOnlyExtraDataKeys,
+        alwaysPublicExtraDataKeys,
+      });
 
       if (data.commentsAgainst) {
         data.commentsAgainst = hideEmailsForNormalUsers(data.commentsAgainst);
