@@ -4,10 +4,8 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['**/*.test.{js,ts}'],
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'lcov'],
-      reportsDirectory: './coverage',
-    },
+    // Coverage (include scope + thresholds) is configured once at the repo root
+    // (/vitest.config.ts). Vitest ignores per-project coverage config in projects
+    // mode, so defining it here would be dead, misleading config.
   },
 });

@@ -8,27 +8,8 @@ export default defineConfig({
     env: {
       NODE_CONFIG_DIR: path.resolve(__dirname, 'config'),
     },
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'lcov'],
-      reportsDirectory: './coverage',
-      // Scope to files that have corresponding test coverage
-      include: [
-        'src/middleware/user.js',
-        'src/middleware/project.js',
-        'src/lib/deadlock-retry.js',
-        'src/lib/sequelize-authorization/lib/hasRole.js',
-        'src/lib/sequelize-authorization/middleware/index.js',
-        'src/routes/api/vote.js',
-        'src/routes/api/pending-budget-vote.js',
-        'src/routes/api/resource.js',
-      ],
-      thresholds: {
-        lines: 50,
-        statements: 50,
-        branches: 45,
-        functions: 50,
-      },
-    },
+    // Coverage (include scope + thresholds) is configured once at the repo root
+    // (/vitest.config.ts). Vitest ignores per-project coverage config in projects
+    // mode, so defining it here would be dead, misleading config.
   },
 });
