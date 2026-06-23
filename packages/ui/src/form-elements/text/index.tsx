@@ -205,9 +205,8 @@ const TrixEditor: React.FC<{
                   editor?.composition?.currentAttributes?.href;
                 if (!currentHref) return;
 
-                const template = document.createElement('template');
-                template.innerHTML = html;
-                const link = template.content.querySelector(
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+                const link = doc.body.querySelector(
                   `a[href="${CSS.escape(currentHref)}"]`
                 );
                 if (!link) return;
@@ -222,9 +221,10 @@ const TrixEditor: React.FC<{
                   targetBlankHrefsRef.current.delete(currentHref);
                 }
 
-                inputEl.value = template.innerHTML;
+                const updatedHtml = doc.body.innerHTML;
+                inputEl.value = updatedHtml;
                 const syntheticEvent = {
-                  target: { value: template.innerHTML },
+                  target: { value: updatedHtml },
                 } as React.ChangeEvent<HTMLInputElement>;
                 onChangeRef.current(syntheticEvent);
               }, 0);
@@ -246,11 +246,10 @@ const TrixEditor: React.FC<{
         targetBlankHrefsRef.current.size > 0 &&
         typeof document !== 'undefined'
       ) {
-        const template = document.createElement('template');
-        template.innerHTML = html;
+        const doc = new DOMParser().parseFromString(html, 'text/html');
         let changed = false;
         targetBlankHrefsRef.current.forEach((href) => {
-          const link = template.content.querySelector(
+          const link = doc.body.querySelector(
             `a[href="${CSS.escape(href)}"]`
           );
           if (link && !link.hasAttribute('target')) {
@@ -260,7 +259,7 @@ const TrixEditor: React.FC<{
           }
         });
         if (changed) {
-          html = template.innerHTML;
+          html = doc.body.innerHTML;
           inputEl.value = html;
         }
       }
