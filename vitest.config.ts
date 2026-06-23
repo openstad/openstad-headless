@@ -33,6 +33,10 @@ export default defineConfig({
         'apps/api-server/src/routes/api/vote.js',
         'apps/api-server/src/routes/api/pending-budget-vote.js',
         'apps/api-server/src/routes/api/resource.js',
+        // #1640 PR1: project route split into services (each unit-tested).
+        'apps/api-server/src/services/projectDuplication.js',
+        'apps/api-server/src/services/authClientSync.js',
+        'apps/api-server/src/services/projectCertificates.js',
         'apps/auth-server/controllers/oauth/oauth2.js',
         'apps/auth-server/controllers/oauth/allowed-domains.js',
         'apps/auth-server/controllers/auth/local.js',
