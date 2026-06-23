@@ -3,10 +3,10 @@ import {
   Paragraph,
   Strong,
 } from '@utrecht/component-library-react';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { Carousel } from '../carousel';
-import { Lightbox } from '../lightbox';
+import { ClickableImage } from '../clickable-image';
 import { Spacer } from '../spacer';
 import './index.css';
 
@@ -35,9 +35,6 @@ const InfoImage = ({
   addSpacer = false,
   imageClickable = false,
 }: InfoImageProps) => {
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const [lightboxAlt, setLightboxAlt] = useState<string | undefined>(undefined);
-
   let imageArray: ImageType[] = images && images.length > 0 ? images : [];
   if (!imageArray.length && imageFallback) {
     imageArray = [
@@ -55,19 +52,13 @@ const InfoImage = ({
     imageDescription?: string
   ) => (
     <figure className="info-image-container">
-      <img
-        src={image}
-        alt={imageAlt}
-        onClick={
-          imageClickable
-            ? () => {
-                setLightboxSrc(image);
-                setLightboxAlt(imageAlt);
-              }
-            : undefined
-        }
-        className={imageClickable ? 'clickable-image' : undefined}
-      />
+      <ClickableImage clickable={imageClickable} src={image} alt={imageAlt}>
+        <img
+          src={image}
+          alt={imageAlt}
+          className={imageClickable ? 'clickable-image' : undefined}
+        />
+      </ClickableImage>
       {imageDescription && <figcaption>{imageDescription}</figcaption>}
       {addSpacer && <Spacer size={0.5} />}
     </figure>
@@ -75,13 +66,6 @@ const InfoImage = ({
 
   return (
     <>
-      {lightboxSrc && (
-        <Lightbox
-          src={lightboxSrc}
-          alt={lightboxAlt}
-          onClose={() => setLightboxSrc(null)}
-        />
-      )}
       {createImageSlider && imageArray.length > 0 ? (
         <Carousel
           items={images}

@@ -353,6 +353,7 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['type'] = 'imageChoice';
           fieldData['multiple'] = item.multiple || false;
           fieldData['infoField'] = item.infoField || '';
+          fieldData['imageClickable'] = item?.imageClickable || false;
 
           if (item.options && item.options.length > 0) {
             fieldData['choices'] = item.options.map((option) => {
@@ -490,6 +491,7 @@ function Enquete(props: EnqueteWidgetProps) {
         case 'swipe':
           fieldData['type'] = 'swipe';
           fieldData['required'] = item?.fieldRequired || false;
+          fieldData['imageClickable'] = item?.imageClickable || false;
           fieldData['cards'] = item?.options?.map((card) => {
             return {
               id: card.trigger,
@@ -509,6 +511,7 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['type'] = 'dilemma';
           fieldData['title'] = item?.title || '';
           fieldData['required'] = item?.fieldRequired || false;
+          fieldData['imageClickable'] = item?.imageClickable || false;
           fieldData['infoField'] = item?.infoField || '';
           fieldData['infofieldExplanation'] =
             item?.infofieldExplanation || false;

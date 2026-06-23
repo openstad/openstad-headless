@@ -67,6 +67,7 @@ export type StemBegrootWidgetProps = BaseProps &
     displayTitle?: boolean;
     displaySummary?: boolean;
     displayDescription?: boolean;
+    clickableImage?: boolean;
     displayTagFilters?: boolean;
     tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     displayTagGroupName?: boolean;
@@ -1090,6 +1091,7 @@ function StemBegroot({
         displayTitle={props.displayTitle ?? true}
         displaySummary={props.displaySummary ?? true}
         displayDescription={props.displayDescription ?? true}
+        clickableImage={props.clickableImage ?? false}
         resources={resourcesToUse}
         resourceBtnEnabled={resourceSelectable}
         resourceBtnTextHandler={createItemBtnString}
@@ -1583,6 +1585,7 @@ function StemBegroot({
               originalResourceUrl={props.originalResourceUrl}
               displayTitle={props.displayTitle ?? true}
               displaySummary={props.displaySummary ?? true}
+              clickableImage={props.clickableImage ?? false}
               resourceListColumns={resourceListColumns || 3}
               onResourcePrimaryClicked={(resource) => {
                 votePendingStorage.clearAllVotePending();

@@ -1,5 +1,6 @@
 import { FormValue } from '@openstad-headless/form/src/form';
 import type { BaseProps } from '@openstad-headless/types';
+import { ClickableImage } from '@openstad-headless/ui/src';
 import { Button, Heading, Paragraph } from '@utrecht/component-library-react';
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -29,6 +30,7 @@ export type DilemmaProps = {
   title?: string;
   infoField?: string;
   infofieldExplanation?: boolean;
+  imageClickable?: boolean;
   setCurrentPage?: any;
   currentPage?: number;
   dilemmas?: DilemmaCard[];
@@ -52,6 +54,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   title,
   infoField,
   infofieldExplanation,
+  imageClickable = false,
   dilemmas = [],
   setCurrentPage,
   currentPage = 0,
@@ -461,7 +464,16 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           />
           <label htmlFor={`option-${currentDilemma.id}-a`}>
             <figure className="dilemma-option-image">
-              <img src={currentDilemma.a.image} alt={currentDilemma.a.title} />
+              <ClickableImage
+                clickable={imageClickable}
+                src={currentDilemma.a.image}
+                alt={currentDilemma.a.title}
+                variant="overlay">
+                <img
+                  src={currentDilemma.a.image}
+                  alt={currentDilemma.a.title}
+                />
+              </ClickableImage>
             </figure>
             <div className="dilemma-option-content">
               <Heading
@@ -498,7 +510,16 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           />
           <label htmlFor={`option-${currentDilemma.id}-b`}>
             <figure className="dilemma-option-image">
-              <img src={currentDilemma.b.image} alt={currentDilemma.b.title} />
+              <ClickableImage
+                clickable={imageClickable}
+                src={currentDilemma.b.image}
+                alt={currentDilemma.b.title}
+                variant="overlay">
+                <img
+                  src={currentDilemma.b.image}
+                  alt={currentDilemma.b.title}
+                />
+              </ClickableImage>
             </figure>
             <div className="dilemma-option-content">
               <Heading

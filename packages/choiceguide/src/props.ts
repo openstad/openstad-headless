@@ -73,6 +73,7 @@ export type ChoiceGuideSidebarProps = {
   hiddenFields?: string[];
   items?: Array<Item>;
   stickyBarDefaultOpen?: boolean;
+  imageClickable?: boolean;
 };
 
 export type Score = {

@@ -1,6 +1,7 @@
 import { Heading4 } from '@utrecht/component-library-react';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { ClickableImage } from '../../../ui/src/clickable-image';
 import RteContent from '../../../ui/src/rte-formatting/rte-content';
 import { calculateColor, calculateScoreForItem } from '../parts/scoreUtils';
 import { ChoiceOptions, Item, Score } from '../props';
@@ -21,6 +22,7 @@ type ChoiceItemProps = {
   showPageCountAndCurrentPageInButton?: boolean;
   hiddenFields?: string[];
   items?: Array<Item>;
+  imageClickable?: boolean;
 };
 
 const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
@@ -31,6 +33,7 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
     displayScore = true,
     displayDescription = false,
     displayImage = false,
+    imageClickable = false,
   } = props || {};
 
   // Calculate score for this item
@@ -118,11 +121,16 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
           )}
           {displayImage && props.choiceOption?.image && (
             <div className="osc-choice-image-container">
-              <img
+              <ClickableImage
+                clickable={imageClickable}
                 src={props.choiceOption.image}
-                alt={props.choiceOption.title}
-                className="osc-choice-image"
-              />
+                alt={props.choiceOption.title}>
+                <img
+                  src={props.choiceOption.image}
+                  alt={props.choiceOption.title}
+                  className="osc-choice-image"
+                />
+              </ClickableImage>
             </div>
           )}
         </div>

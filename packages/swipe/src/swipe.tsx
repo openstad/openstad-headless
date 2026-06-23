@@ -1,5 +1,6 @@
 import { FormValue } from '@openstad-headless/form/src/form';
 import type { BaseProps } from '@openstad-headless/types';
+import { ClickableImage } from '@openstad-headless/ui/src';
 import { Button, Heading, Paragraph } from '@utrecht/component-library-react';
 import React, {
   FC,
@@ -33,6 +34,7 @@ export type SwipeProps = {
   onSwipeLeft?: (card: SwipeCard) => void;
   showButtons?: boolean;
   enableKeyboard?: boolean;
+  imageClickable?: boolean;
   fieldKey: string;
   type?: string;
   required?: boolean;
@@ -57,6 +59,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   onSwipeRight,
   showButtons = true,
   enableKeyboard = true,
+  imageClickable = false,
   required = false,
   onChange,
   fieldKey,
@@ -910,10 +913,16 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                     aria-describedby={`swipe-card-desc-${card.id}`}>
                     {card.image && (
                       <div className="swipe-card-image">
-                        <img
+                        <ClickableImage
+                          clickable={imageClickable}
                           src={card.image}
                           alt={card.title || `afbeelding voor: ${card.title}`}
-                        />
+                          variant="overlay">
+                          <img
+                            src={card.image}
+                            alt={card.title || `afbeelding voor: ${card.title}`}
+                          />
+                        </ClickableImage>
                       </div>
                     )}
                     <div className="swipe-card-content">

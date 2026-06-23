@@ -312,6 +312,7 @@ let moduleDefinitions = {
       projectId: null,
       displayRanking: false,
       displayPriceLabel: false,
+      clickableImage: false,
       showVoteCount: false,
       notEnoughBudgetText: 'Niet genoeg budget',
       showOriginalResource: false,

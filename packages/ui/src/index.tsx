@@ -22,3 +22,4 @@ export { Pill } from './pill';
 export { Separator } from './separator';
 export { fireConfetti } from './fire-confetti';
 export { Lightbox } from './lightbox';
+export { ClickableImage } from './clickable-image';
