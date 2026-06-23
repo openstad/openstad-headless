@@ -1,0 +1,41 @@
+.osc-clickable-image--wrapper {
+  cursor: zoom-in;
+}
+
+.osc-clickable-image--wrapper:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.osc-clickable-image--overlay {
+  position: relative;
+  display: inline-block;
+}
+
+.osc-clickable-image-zoom {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  cursor: zoom-in;
+  transition: background 150ms ease;
+}
+
+.osc-clickable-image-zoom:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.osc-clickable-image-zoom:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
