@@ -14,6 +14,7 @@ const origResourceDestroy = db.Resource.destroy;
 const origWidgetFindAll = db.Widget.findAll;
 const origStatusFindAll = db.Status.findAll;
 const origTagFindAll = db.Tag.findAll;
+const origProjectScope = db.Project.scope;
 
 afterEach(() => {
   db.Resource.can = origResourceCan;
@@ -24,6 +25,7 @@ afterEach(() => {
   db.Widget.findAll = origWidgetFindAll;
   db.Status.findAll = origStatusFindAll;
   db.Tag.findAll = origTagFindAll;
+  db.Project.scope = origProjectScope;
   delete process.env.IMAGE_APP_URL;
 });
 
@@ -172,6 +174,14 @@ describe('POST / — create resource guards', () => {
     db.Resource.scope = vi.fn().mockReturnValue({
       findAndCountAll: vi.fn(),
       findOne: vi.fn(),
+    });
+    // The source returns the 400 from inside an images.forEach() callback, which
+    // does not halt createResource — it still issues the create afterwards. Stub
+    // the create so this does not hit a real DB (the 400 response is already
+    // sent). NOTE: latent source bug — a rejected image should not still create
+    // the resource; worth a separate fix.
+    db.Resource.authorizeData = vi.fn().mockReturnValue({
+      create: vi.fn(() => new Promise(() => {})),
     });
 
     const app = createApp({ project: makeProject(), user: makeUser() });
@@ -364,6 +374,11 @@ describe('PUT /:id — update resource guards', () => {
     db.Resource.can = vi.fn().mockReturnValue(true);
     db.Resource.scope = vi.fn().mockReturnValue({
       findOne: vi.fn().mockResolvedValue(resource),
+    });
+    // The update notification step reads the project's emailConfig; stub the
+    // lookup so it does not hit a real DB (which would log a connection error).
+    db.Project.scope = vi.fn().mockReturnValue({
+      findByPk: vi.fn().mockResolvedValue(null),
     });
 
     const app = createApp({ project: makeProject(), user: makeUser() });
