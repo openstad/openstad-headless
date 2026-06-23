@@ -82,21 +82,26 @@ export const ClickableImage = ({
     );
   }
 
+  // ponytail: lightbox is a sibling, not a child, of the clickable wrapper.
+  // React events bubble through the React tree (not the DOM), so a close-button
+  // click inside a child lightbox would bubble to onClick and re-open it.
   return (
-    <div
-      className="osc-clickable-image osc-clickable-image--wrapper"
-      role="button"
-      tabIndex={0}
-      aria-label={label}
-      onClick={() => setOpen(true)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          setOpen(true);
-        }
-      }}>
-      {children}
+    <>
+      <div
+        className="osc-clickable-image osc-clickable-image--wrapper"
+        role="button"
+        tabIndex={0}
+        aria-label={label}
+        onClick={() => setOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setOpen(true);
+          }
+        }}>
+        {children}
+      </div>
       {lightbox}
-    </div>
+    </>
   );
 };
