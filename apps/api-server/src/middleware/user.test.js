@@ -15,11 +15,26 @@ const JWT_SECRET = config.auth.jwtSecret;
 const originalUserFindOne = db.User.findOne;
 const originalProjectFindOne = db.Project.findOne;
 const originalAuthSettingsConfig = authSettings.config;
+const originalFixedAuthTokens = config.auth.fixedAuthTokens;
+
+// The `config` module forbids direct assignment to its properties at runtime
+// (immutable unless ALLOW_CONFIG_MUTATIONS is set), but the underlying property
+// is `configurable`, so Object.defineProperty can override it for a test.
+function setFixedAuthTokens(value) {
+  Object.defineProperty(config.auth, 'fixedAuthTokens', {
+    value,
+    writable: true,
+    enumerable: true,
+    configurable: true,
+  });
+}
 
 afterEach(() => {
   db.User.findOne = originalUserFindOne;
   db.Project.findOne = originalProjectFindOne;
   authSettings.config = originalAuthSettingsConfig;
+  // Restore fixedAuthTokens in case a test mutated the shared config singleton
+  setFixedAuthTokens(originalFixedAuthTokens);
 });
 
 function createMockReq(overrides = {}) {
@@ -122,6 +137,37 @@ describe('user middleware', () => {
       expect(next).toHaveBeenCalledWith();
     });
 
+    it('calls next with a TokenExpiredError on an expired JWT', async () => {
+      authSettings.config = vi.fn().mockResolvedValue({
+        provider: {},
+        adapter: 'openstad',
+        default: 'openstad',
+      });
+      // exp in the past => jsonwebtoken throws TokenExpiredError on verify
+      const token = jwt.sign(
+        {
+          userId: 10,
+          authProvider: 'openstad',
+          exp: Math.floor(Date.now() / 1000) - 60,
+        },
+        JWT_SECRET
+      );
+
+      const req = createMockReq({
+        headers: { authorization: `Bearer ${token}` },
+      });
+      const res = createMockRes();
+      const next = vi.fn();
+
+      await getUserMiddleware(req, res, next);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      const error = next.mock.calls[0][0];
+      expect(error).toBeInstanceOf(Error);
+      expect(error.name).toBe('TokenExpiredError');
+      expect(req.user).toBeUndefined();
+    });
+
     it('calls next with error on invalid JWT', async () => {
       authSettings.config = vi.fn().mockResolvedValue({
         provider: {},
@@ -141,13 +187,21 @@ describe('user middleware', () => {
   });
 
   describe('fixed token', () => {
-    it('resolves userId from fixedAuthTokens and attaches db user as superuser', async () => {
-      const fixedTokens = config.auth && config.auth.fixedAuthTokens;
-      if (!fixedTokens || !fixedTokens[0]) {
-        return; // No fixed tokens configured in this environment
-      }
+    // The source reads config.auth.fixedAuthTokens fresh on each call from the
+    // shared `config` singleton, so we inject a token by mutating it here and
+    // restore it in afterEach. The header is a raw token (no "Bearer " prefix),
+    // matching the fixed-token branch in parseAuthHeader.
+    it('resolves userId from fixedAuthTokens and promotes the db user to superuser', async () => {
+      setFixedAuthTokens([
+        { token: 'fixed-secret-token', userId: 42, authProvider: 'openstad' },
+      ]);
 
-      const fakeUser = { id: 42, role: 'admin', projectId: 1 };
+      // dbUser on config.admin.projectId (1) => promoted to superuser
+      const fakeUser = {
+        id: 42,
+        role: 'admin',
+        projectId: config.admin.projectId,
+      };
       authSettings.config = vi.fn().mockResolvedValue({
         provider: {},
         adapter: 'openstad',
@@ -156,15 +210,49 @@ describe('user middleware', () => {
       db.User.findOne = vi.fn().mockResolvedValue(fakeUser);
 
       const req = createMockReq({
-        headers: { authorization: fixedTokens[0].token },
+        headers: { authorization: 'fixed-secret-token' },
       });
       const res = createMockRes();
       const next = vi.fn();
 
       await getUserMiddleware(req, res, next);
 
-      expect(req.user).toBeDefined();
-      expect(next).toHaveBeenCalled();
+      // findOne is queried by the fixed token's userId only (isFixed bypasses project scoping)
+      expect(db.User.findOne).toHaveBeenCalledWith({ where: { id: 42 } });
+      expect(req.user).toBe(fakeUser);
+      expect(req.user.role).toBe('superuser');
+      expect(next).toHaveBeenCalledWith();
+    });
+
+    it('keeps the db user role for a fixed token user scoped to a non-admin project', async () => {
+      setFixedAuthTokens([
+        { token: 'fixed-secret-token', userId: 77, authProvider: 'openstad' },
+      ]);
+
+      // projectId differs from config.admin.projectId => role is NOT promoted
+      const fakeUser = {
+        id: 77,
+        role: 'member',
+        projectId: config.admin.projectId + 1000,
+      };
+      authSettings.config = vi.fn().mockResolvedValue({
+        provider: {},
+        adapter: 'openstad',
+        default: 'openstad',
+      });
+      db.User.findOne = vi.fn().mockResolvedValue(fakeUser);
+
+      const req = createMockReq({
+        headers: { authorization: 'fixed-secret-token' },
+      });
+      const res = createMockRes();
+      const next = vi.fn();
+
+      await getUserMiddleware(req, res, next);
+
+      expect(req.user).toBe(fakeUser);
+      expect(req.user.role).toBe('member');
+      expect(next).toHaveBeenCalledWith();
     });
   });
 });

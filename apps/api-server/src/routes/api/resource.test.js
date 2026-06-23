@@ -138,6 +138,27 @@ describe('GET /:id — view single resource', () => {
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('id', 42);
   });
+
+  // NOTE: the source rejects view permission via auth.can('Resource','view'),
+  // which throws a bare Error (status 500). Ideally this should be a 4xx (401/403),
+  // but we assert current behavior here without changing the source.
+  it('rejects read when user lacks view permission', async () => {
+    const resource = makeResource();
+    // list/findOne pass, but the 'view' check fails
+    // auth.can('Resource', action) invokes the static as can(action, user)
+    db.Resource.can = vi
+      .fn()
+      .mockImplementation((action) => (action === 'view' ? false : true));
+    db.Resource.scope = vi.fn().mockReturnValue({
+      findOne: vi.fn().mockResolvedValue(resource),
+    });
+
+    const app = createApp({ project: makeProject(), user: makeUser() });
+    const res = await request(app).get('/1/42');
+
+    expect(res.status).not.toBe(200);
+    expect(res.body.error).toMatch(/cannot view/i);
+  });
 });
 
 // ----------------------------------------------------------------------------------------------------
@@ -194,6 +215,78 @@ describe('POST / — create resource guards', () => {
     expect(res.status).toBe(500);
     expect(res.body.error).toMatch(/image server/i);
   });
+
+  // NOTE: the source rejects create permission via auth.can('Resource','create'),
+  // which throws a bare Error (status 500). Ideally this should be a 4xx (401/403),
+  // but we assert current behavior here without changing the source.
+  it('rejects create when user lacks create permission', async () => {
+    process.env.IMAGE_APP_URL = 'https://images.allowed.com';
+    // auth.can('Resource', action) invokes the static as can(action, user)
+    db.Resource.can = vi
+      .fn()
+      .mockImplementation((action) => (action === 'create' ? false : true));
+    const createSpy = vi.fn();
+    db.Resource.create = createSpy;
+
+    const app = createApp({ project: makeProject(), user: makeUser() });
+    const res = await request(app).post('/1/').send({ title: 'New' });
+
+    expect(res.status).not.toBe(200);
+    expect(res.body.error).toMatch(/cannot create/i);
+    expect(createSpy).not.toHaveBeenCalled();
+  });
+
+  it('creates a resource on the happy path and returns the authorized resource', async () => {
+    process.env.IMAGE_APP_URL = 'https://images.allowed.com';
+
+    const createdInstance = makeResource({ id: 99 });
+    const createSpy = vi.fn().mockResolvedValue(createdInstance);
+    // authorizeData returns the model with .create chained off it
+    db.Resource.authorizeData = vi.fn().mockReturnValue({ create: createSpy });
+
+    db.Resource.can = vi.fn().mockReturnValue(true);
+    db.Status.findAll = vi.fn().mockResolvedValue([]);
+    db.Tag.findAll = vi.fn().mockResolvedValue([]);
+
+    // findByPk (after create) then findOne (after tags/statuses refetch)
+    const refetched = makeResource({
+      id: 99,
+      getTags: vi.fn().mockResolvedValue([]),
+    });
+    db.Resource.scope = vi.fn().mockReturnValue({
+      findByPk: vi.fn().mockResolvedValue(createdInstance),
+      findOne: vi.fn().mockResolvedValue(refetched),
+    });
+
+    const app = createApp({ project: makeProject(), user: makeUser() });
+    const res = await request(app).post('/1/').send({ title: 'New Resource' });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('id', 99);
+
+    // authorizeData called with the create action, the user and the project
+    expect(db.Resource.authorizeData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'New Resource',
+        projectId: '1',
+        userId: 1,
+      }),
+      'create',
+      expect.objectContaining({ id: 1 }),
+      null,
+      expect.objectContaining({ id: 1 })
+    );
+    // create called with the assembled data payload
+    expect(createSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'New Resource',
+        projectId: '1',
+        userId: 1,
+        widgetId: null,
+        isSpam: false,
+      })
+    );
+  });
 });
 
 // ----------------------------------------------------------------------------------------------------
@@ -227,6 +320,67 @@ describe('PUT /:id — update resource guards', () => {
 
     expect(res.status).toBe(401);
     expect(res.body.error).toMatch(/gesloten/i);
+  });
+
+  // NOTE: the source rejects update via resource.can('update') with a bare Error
+  // (status 500). Ideally this should be a 4xx (401/403), but we assert current
+  // behavior here without changing the source.
+  it('rejects update when resource.can("update") is false', async () => {
+    const updateSpy = vi.fn();
+    const resource = makeResource({
+      dataValues: { publishDate: '2026-01-01' },
+      can: vi.fn().mockReturnValue(false),
+      authorizeData: vi.fn().mockReturnValue({ update: updateSpy }),
+    });
+
+    db.Resource.can = vi.fn().mockReturnValue(true);
+    db.Resource.scope = vi.fn().mockReturnValue({
+      findOne: vi.fn().mockResolvedValue(resource),
+    });
+
+    const app = createApp({ project: makeProject(), user: makeUser() });
+    const res = await request(app).put('/1/42').send({ title: 'Updated' });
+
+    expect(res.status).not.toBe(200);
+    expect(res.body.error).toMatch(/cannot update/i);
+    expect(updateSpy).not.toHaveBeenCalled();
+  });
+
+  it('updates a resource on the happy path with the submitted data', async () => {
+    const updatedInstance = makeResource({
+      id: 42,
+      title: 'Updated',
+      auth: { canMutateStatus: vi.fn().mockReturnValue(false) },
+    });
+    const updateSpy = vi.fn().mockResolvedValue(updatedInstance);
+    const authorizeDataSpy = vi.fn().mockReturnValue({ update: updateSpy });
+
+    const resource = makeResource({
+      dataValues: { publishDate: '2026-01-01' },
+      can: vi.fn().mockReturnValue(true),
+      authorizeData: authorizeDataSpy,
+    });
+
+    db.Resource.can = vi.fn().mockReturnValue(true);
+    db.Resource.scope = vi.fn().mockReturnValue({
+      findOne: vi.fn().mockResolvedValue(resource),
+    });
+
+    const app = createApp({ project: makeProject(), user: makeUser() });
+    const res = await request(app).put('/1/42').send({ title: 'Updated' });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty('id', 42);
+
+    // authorizeData called with the update action
+    expect(authorizeDataSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Updated' }),
+      'update'
+    );
+    // update called with the submitted payload
+    expect(updateSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Updated' })
+    );
   });
 });
 
