@@ -37,6 +37,9 @@ export default defineConfig({
         'apps/api-server/src/services/projectDuplication.js',
         'apps/api-server/src/services/authClientSync.js',
         'apps/api-server/src/services/projectCertificates.js',
+        // #1640 PR3: resource route split into services (each unit-tested).
+        'apps/api-server/src/services/resourceExtraData.js',
+        'apps/api-server/src/services/resourceTagsStatuses.js',
         'apps/auth-server/controllers/oauth/oauth2.js',
         'apps/auth-server/controllers/oauth/allowed-domains.js',
         'apps/auth-server/controllers/auth/local.js',
