@@ -33,6 +33,7 @@ import { Step3 } from './step-3';
 import { Step3Success } from './step-3-success';
 import { Step4 } from './step-4';
 import { createSelectedResourcesStorage } from './utils/selected-resources-storage';
+import { createVoteCompletedStorage } from './utils/vote-completed-storage';
 import { createVotePendingStorage } from './utils/vote-pending-storage';
 
 type TagTypeSingle = {
@@ -148,6 +149,11 @@ function StemBegroot({
 
   const selectedResourcesStorage = React.useMemo(
     () => createSelectedResourcesStorage(props.projectId),
+    [props.projectId]
+  );
+
+  const voteCompletedStorage = React.useMemo(
+    () => createVoteCompletedStorage(props.projectId),
     [props.projectId]
   );
 
@@ -599,7 +605,7 @@ function StemBegroot({
           if (props.showConfetti) {
             fireConfetti();
           }
-          setCurrentStep(4);
+          await moveToStep4AndLogout();
         }
       })();
     }
@@ -935,6 +941,45 @@ function StemBegroot({
   const resourcesToUse = filteredResources.length
     ? filteredResources
     : resources?.records || [];
+
+  useEffect(() => {
+    const shouldShowStep4 = voteCompletedStorage.consumeShowStep4AfterLogout();
+    if (shouldShowStep4) {
+      setCurrentStep(4);
+    }
+  }, [voteCompletedStorage]);
+
+  function clearPlanSelection() {
+    votePendingStorage.clearAllVotePending();
+    selectedResourcesStorage.clearSelectedResources();
+    setSelectedResources([]);
+    setTagCounter((prevTagCounter) =>
+      prevTagCounter.map((tagObj) => {
+        const tagName = Object.keys(tagObj)[0];
+        return {
+          [tagName]: {
+            ...tagObj[tagName],
+            current: 0,
+            selectedResources: [],
+          },
+        };
+      })
+    );
+  }
+
+  async function moveToStep4AndLogout() {
+    clearPlanSelection();
+    voteCompletedStorage.setState({ showStep4AfterLogout: true });
+    setCurrentStep(4);
+
+    if (!currentUser?.logout) return;
+
+    const currentUrl = new URL(location.href);
+    const params = currentUrl.searchParams;
+    params.delete('openstadlogintoken');
+
+    await currentUser.logout({ url: currentUrl.toString() });
+  }
 
   const computeCanAddMore = useCallback((): boolean => {
     let canAddMore = true;
@@ -1372,6 +1417,13 @@ function StemBegroot({
                 <Button
                   appearance="primary-action-button"
                   onClick={async () => {
+                    if (currentStep === 4) {
+                      clearPlanSelection();
+                      voteCompletedStorage.clearState();
+                      setCurrentStep(startingStep);
+                      return;
+                    }
+
                     if (currentStep === 0) {
                       if (
                         props.votes.voteType === 'countPerTag' ||
@@ -1430,18 +1482,17 @@ function StemBegroot({
                         if (props.showConfetti) {
                           fireConfetti();
                         }
-                        setCurrentStep(4);
+                        await moveToStep4AndLogout();
                       }
-                    } else if (currentStep === 4) {
-                      const currentUrl = new URL(location.href);
-                      const params = currentUrl.searchParams;
-                      params.delete('openstadlogintoken');
-                      await currentUser.logout({ url: currentUrl.toString() });
                     } else {
                       setCurrentStep(currentStep + 1);
                     }
                   }}
                   disabled={(() => {
+                    if (currentStep === 4) {
+                      return false;
+                    }
+
                     if (
                       props.votes.voteType === 'count' &&
                       selectedResources.length < props.votes.minResources
