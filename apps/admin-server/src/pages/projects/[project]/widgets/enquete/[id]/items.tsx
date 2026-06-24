@@ -113,6 +113,10 @@ const formSchema = z.object({
     })
     .optional(),
   multiple: z.boolean().optional(),
+  maxUploadSizeMB: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number().positive().optional()
+  ),
   randomizeItems: z.boolean().optional(),
   image: z.string().optional(),
   imageUpload: z.string().optional(),
@@ -284,6 +288,7 @@ export default function WidgetEnqueteItems(
             variant: values.variant || 'text input',
             options: values.options || [],
             multiple: values.multiple || false,
+            maxUploadSizeMB: values.maxUploadSizeMB || 25,
             randomizeItems: values.randomizeItems || false,
             image_b: values.image_b || '',
             description_b: values.description_b || '',
@@ -456,6 +461,7 @@ export default function WidgetEnqueteItems(
     variant: 'text input',
     options: [],
     multiple: false,
+    maxUploadSizeMB: 25,
     randomizeItems: false,
     infoBlockStyle: 'default',
     infoBlockShareButton: false,
@@ -538,6 +544,7 @@ export default function WidgetEnqueteItems(
       variant: item.variant || '',
       options: item.options || [],
       multiple: item.multiple || false,
+      maxUploadSizeMB: item.maxUploadSizeMB || 25,
       randomizeItems: item.randomizeItems || false,
       infoBlockStyle: item.infoBlockStyle || 'default',
       infoBlockShareButton: item.infoBlockShareButton || false,
@@ -2208,9 +2215,37 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
-                    {!['pagination', 'scale', 'a-b-slider', 'video'].includes(
-                      form.watch('questionType') || ''
-                    ) && (
+                    {(form.watch('questionType') === 'imageUpload' ||
+                      form.watch('questionType') === 'documentUpload') && (
+                      <FormField
+                        control={form.control}
+                        name="maxUploadSizeMB"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Maximale uploadgrootte (MB)</FormLabel>
+                            <FormDescription>
+                              <em className="text-xs">
+                                De maximale bestandsgrootte die een gebruiker
+                                mag uploaden. Standaard 25 MB. Let op: de server
+                                hanteert een absolute bovengrens (standaard 25
+                                MB); hogere waarden kunnen alsnog door de server
+                                geweigerd worden.
+                              </em>
+                            </FormDescription>
+                            <Input type="number" min="1" {...field} />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {![
+                      'pagination',
+                      'sort',
+                      'scale',
+                      'a-b-slider',
+                      'video',
+                    ].includes(form.watch('questionType') || '') && (
                       <FormField
                         control={form.control}
                         name="fieldRequired"
