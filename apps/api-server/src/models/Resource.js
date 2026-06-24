@@ -876,9 +876,10 @@ module.exports = function (db, sequelize, DataTypes) {
         return {
           where: {
             // A resource matches the postcode filter when it is within the
-            // requested distance OR when it is flagged as a city-wide project.
-            // City-wide projects have no pin near the postcode, so they would
-            // otherwise drop out of the results; the flag keeps them visible.
+            // requested distance OR when it is flagged as location-independent.
+            // Location-independent resources have no pin near the postcode, so
+            // they would otherwise drop out of the results; the flag keeps them
+            // visible.
             [db.Sequelize.Op.or]: [
               {
                 [db.Sequelize.Op.and]: [
@@ -917,7 +918,7 @@ module.exports = function (db, sequelize, DataTypes) {
                 // Qualify with the model alias: several joined models (user,
                 // comment, tag, status) also have an `extraData` column, so an
                 // unqualified reference is ambiguous in the count/list query.
-                "JSON_EXTRACT(`resource`.`extraData`, '$.cityWide') = true"
+                "JSON_EXTRACT(`resource`.`extraData`, '$.locationIndependent') = true"
               ),
             ],
           },

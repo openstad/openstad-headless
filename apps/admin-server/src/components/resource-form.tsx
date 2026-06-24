@@ -119,7 +119,7 @@ const baseSchema = z.object({
       originalId: z.coerce
         .number({ invalid_type_error: onlyNumbersMessage })
         .optional(),
-      cityWide: z.boolean().optional(),
+      locationIndependent: z.boolean().optional(),
     })
     .default({}),
   tags: z.number().array().default([]),
@@ -275,7 +275,8 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       documents: existingData?.documents || [],
       extraData: {
         originalId: existingData?.extraData?.originalId || undefined,
-        cityWide: existingData?.extraData?.cityWide || false,
+        locationIndependent:
+          existingData?.extraData?.locationIndependent || false,
       },
     }),
     [existingData]
@@ -327,9 +328,9 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   });
 
   function onSubmit(values: FormType) {
-    // Capture the city-wide flag from the checkbox before the CodeEditor state
-    // potentially overwrites the whole extraData object below.
-    const cityWide = !!values.extraData?.cityWide;
+    // Capture the location-independent flag from the checkbox before the
+    // CodeEditor state potentially overwrites the whole extraData object below.
+    const locationIndependent = !!values.extraData?.locationIndependent;
 
     // Add extraData if its valid JSON
     try {
@@ -338,9 +339,9 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       }
     } catch (e) {}
 
-    // Re-apply the city-wide flag so it survives the JSON overwrite.
+    // Re-apply the location-independent flag so it survives the JSON overwrite.
     if (values.extraData && typeof values.extraData === 'object') {
-      values.extraData.cityWide = cityWide;
+      values.extraData.locationIndependent = locationIndependent;
     }
 
     onFormSubmit(values)
@@ -855,15 +856,14 @@ export default function ResourceForm({ onFormSubmit }: Props) {
 
             <FormField
               control={form.control}
-              name="extraData.cityWide"
+              name="extraData.locationIndependent"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Stadsbreed project</FormLabel>
+                  <FormLabel>Locatieonafhankelijk</FormLabel>
                   <FormDescription>
-                    Vink dit aan voor projecten die de hele stad bestrijken.
-                    Deze worden dan altijd getoond bij het filteren op postcode,
-                    ongeacht de afstand. Je hoeft hiervoor geen wijken aan te
-                    vinken.
+                    Vink dit aan voor inzendingen die niet aan één specifieke
+                    locatie gebonden zijn. Ze worden dan altijd getoond bij het
+                    filteren op postcode, ongeacht de afstand.
                   </FormDescription>
                   <FormControl>
                     <div className="flex items-center gap-2">
@@ -875,7 +875,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                         }
                       />
                       <label htmlFor={field.name} className="cursor-pointer">
-                        Stadsbreed project (altijd tonen bij postcodefilter)
+                        Altijd tonen bij postcodefilter
                       </label>
                     </div>
                   </FormControl>
