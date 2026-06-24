@@ -3,6 +3,7 @@ import MapInput from '@/components/maps/leaflet-input';
 import { MapErrorBoundary } from '@/components/maps/map-error-boundary';
 import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CodeEditor } from '@/components/ui/code-editor';
 import {
   Form,
@@ -118,6 +119,7 @@ const baseSchema = z.object({
       originalId: z.coerce
         .number({ invalid_type_error: onlyNumbersMessage })
         .optional(),
+      cityWide: z.boolean().optional(),
     })
     .default({}),
   tags: z.number().array().default([]),
@@ -273,6 +275,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       documents: existingData?.documents || [],
       extraData: {
         originalId: existingData?.extraData?.originalId || undefined,
+        cityWide: existingData?.extraData?.cityWide || false,
       },
     }),
     [existingData]
@@ -324,12 +327,21 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   });
 
   function onSubmit(values: FormType) {
+    // Capture the city-wide flag from the checkbox before the CodeEditor state
+    // potentially overwrites the whole extraData object below.
+    const cityWide = !!values.extraData?.cityWide;
+
     // Add extraData if its valid JSON
     try {
       if (extraData !== values.extraData) {
         values.extraData = JSON.parse(extraData);
       }
     } catch (e) {}
+
+    // Re-apply the city-wide flag so it survives the JSON overwrite.
+    if (values.extraData && typeof values.extraData === 'object') {
+      values.extraData.cityWide = cityWide;
+    }
 
     onFormSubmit(values)
       .then(() => {
@@ -827,18 +839,51 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             )}
           /> */}
 
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <MapErrorBoundary>
-                <MapInput
-                  onSelectLocation={handleLocationSelect}
-                  field={field}
-                />
-              </MapErrorBoundary>
-            )}
-          />
+          <div className="col-span-full lg:col-span-1 flex flex-col gap-4">
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <MapErrorBoundary>
+                  <MapInput
+                    onSelectLocation={handleLocationSelect}
+                    field={field}
+                  />
+                </MapErrorBoundary>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="extraData.cityWide"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Stadsbreed project</FormLabel>
+                  <FormDescription>
+                    Vink dit aan voor projecten die de hele stad bestrijken.
+                    Deze worden dan altijd getoond bij het filteren op postcode,
+                    ongeacht de afstand. Je hoeft hiervoor geen wijken aan te
+                    vinken.
+                  </FormDescription>
+                  <FormControl>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id={field.name}
+                        checked={!!field.value}
+                        onCheckedChange={(checked) =>
+                          field.onChange(Boolean(checked))
+                        }
+                      />
+                      <label htmlFor={field.name} className="cursor-pointer">
+                        Stadsbreed project (altijd tonen bij postcodefilter)
+                      </label>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <Separator className="lg:col-span-2 my-6" />
 
