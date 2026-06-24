@@ -156,6 +156,10 @@ export const InitializeFormFields = (
           break;
         case 'imageUpload':
           fieldData['allowedTypes'] = item.allowedTypes || ['image/*'];
+          fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
+          break;
+        case 'documentUpload':
+          fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
           break;
         case 'text':
           if (item.defaultValue) {

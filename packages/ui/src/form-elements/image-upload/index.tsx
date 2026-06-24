@@ -1,5 +1,7 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { FormValue } from '@openstad-headless/form/src/form';
+import NotificationProvider from '@openstad-headless/lib/NotificationProvider/notification-provider';
+import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
 import {
   AccordionProvider,
   FormField,
@@ -59,8 +61,6 @@ const filePondSettings = {
   labelButtonRetryItemProcessing: 'Retry',
   labelButtonProcessItem: 'Upload',
   labelFileTypeNotAllowed: 'Bestandstype is niet toegestaan',
-  allowFileSizeValidation: true,
-  maxFileSize: '8mb',
   name: 'image',
   maxParallelUploads: 1,
 };
@@ -87,6 +87,7 @@ export type ImageUploadProps = {
   allowedTypes?: string[];
   disabled?: boolean;
   multiple?: boolean;
+  maxUploadSizeMB?: number;
   type?: string;
   onChange?: (
     e: { name: string; value: { name: string; url: string }[] },
@@ -135,6 +136,13 @@ const ImageUploadField: FC<ImageUploadProps> = ({
   ...props
 }) => {
   const datastore = new DataStore(props);
+
+  // Client-side upload limit (in MB). Falls back to 25 MB so existing widgets
+  // without a stored value immediately get the new limit.
+  const maxMB = props.maxUploadSizeMB ?? 25;
+  const maxBytes = maxMB * 1024 * 1024;
+  const notifyFailed = (message: string) =>
+    NotificationService.addNotification(message, 'error');
 
   const initialValue: MockImageFile[] =
     overrideDefaultValue && Array.isArray(overrideDefaultValue)
@@ -235,6 +243,10 @@ const ImageUploadField: FC<ImageUploadProps> = ({
           <RteContent content={description} unwrapSingleRootDiv={true} />
         </FormFieldDescription>
       )}
+
+      <FormFieldDescription className="openstad-max-upload-size">
+        Maximale bestandsgrootte: {maxMB} MB
+      </FormFieldDescription>
 
       {showMoreInfo && (
         <>
@@ -343,10 +355,25 @@ const ImageUploadField: FC<ImageUploadProps> = ({
               ? [acceptAttribute]
               : acceptAttribute
           }
+          beforeAddFile={(fileItem) => {
+            return new Promise<boolean>((resolve, reject) => {
+              if (fileItem.file.size > maxBytes) {
+                reject(
+                  `Het bestand is te groot. De maximale bestandsgrootte is ${maxMB} MB.`
+                );
+              } else {
+                resolve(true);
+              }
+            }).catch((error) => {
+              notifyFailed(error);
+              return false;
+            });
+          }}
           aria-invalid={fieldInvalid}
           aria-describedby={`${randomId}_error`}
           {...filePondSettings}
         />
+        <NotificationProvider />
       </div>
     </FormField>
   );
