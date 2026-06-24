@@ -33,6 +33,7 @@ import { Step3 } from './step-3';
 import { Step3Success } from './step-3-success';
 import { Step4 } from './step-4';
 import { createSelectedResourcesStorage } from './utils/selected-resources-storage';
+import { createVoteCompletedStorage } from './utils/vote-completed-storage';
 import { createVotePendingStorage } from './utils/vote-pending-storage';
 
 type TagTypeSingle = {
@@ -148,6 +149,11 @@ function StemBegroot({
 
   const selectedResourcesStorage = React.useMemo(
     () => createSelectedResourcesStorage(props.projectId),
+    [props.projectId]
+  );
+
+  const voteCompletedStorage = React.useMemo(
+    () => createVoteCompletedStorage(props.projectId),
     [props.projectId]
   );
 
@@ -599,7 +605,7 @@ function StemBegroot({
           if (props.showConfetti) {
             fireConfetti();
           }
-          setCurrentStep(4);
+          await moveToStep4AndLogout();
         }
       })();
     }
@@ -935,6 +941,27 @@ function StemBegroot({
   const resourcesToUse = filteredResources.length
     ? filteredResources
     : resources?.records || [];
+
+  useEffect(() => {
+    const shouldShowStep4 = voteCompletedStorage.consumeShowStep4AfterLogout();
+    if (shouldShowStep4) {
+      setCurrentStep(4);
+    }
+  }, [voteCompletedStorage]);
+
+  async function moveToStep4AndLogout() {
+    console.log('moveToStep4AndLogout');
+    voteCompletedStorage.setState({ showStep4AfterLogout: true });
+    setCurrentStep(4);
+
+    if (!currentUser?.logout) return;
+
+    const currentUrl = new URL(location.href);
+    const params = currentUrl.searchParams;
+    params.delete('openstadlogintoken');
+
+    await currentUser.logout({ url: currentUrl.toString() });
+  }
 
   const computeCanAddMore = useCallback((): boolean => {
     let canAddMore = true;
@@ -1369,159 +1396,158 @@ function StemBegroot({
                     {props.newsLetterTitle}
                   </ButtonLink>
                 )}
-                <Button
-                  appearance="primary-action-button"
-                  onClick={async () => {
-                    if (currentStep === 0) {
-                      if (
-                        props.votes.voteType === 'countPerTag' ||
-                        props.votes.voteType === 'budgetingPerTag'
-                      ) {
-                        const unmetTags = tagCounter.filter((tagObj) => {
-                          const key = Object.keys(tagObj)[0];
+                {currentStep !== 4 && (
+                  <Button
+                    appearance="primary-action-button"
+                    onClick={async () => {
+                      if (currentStep === 0) {
+                        if (
+                          props.votes.voteType === 'countPerTag' ||
+                          props.votes.voteType === 'budgetingPerTag'
+                        ) {
+                          const unmetTags = tagCounter.filter((tagObj) => {
+                            const key = Object.keys(tagObj)[0];
 
-                          if (
-                            tagObj[key].min === 0 &&
-                            tagObj[key].current === 0 &&
-                            key !== activeTagTab &&
-                            !visitedTagTabs.includes(key)
-                          ) {
-                            return true;
+                            if (
+                              tagObj[key].min === 0 &&
+                              tagObj[key].current === 0 &&
+                              key !== activeTagTab &&
+                              !visitedTagTabs.includes(key)
+                            ) {
+                              return true;
+                            }
+
+                            return tagObj[key].current < tagObj[key].min;
+                          });
+
+                          const nextUnmetTag = unmetTags.find((tagObj) => {
+                            const key = Object.keys(tagObj)[0];
+                            return key !== activeTagTab;
+                          });
+
+                          if (nextUnmetTag) {
+                            const tagName = Object.keys(nextUnmetTag)[0];
+                            setActiveTagTab(tagName);
+                            return;
                           }
 
-                          return tagObj[key].current < tagObj[key].min;
-                        });
-
-                        const nextUnmetTag = unmetTags.find((tagObj) => {
-                          const key = Object.keys(tagObj)[0];
-                          return key !== activeTagTab;
-                        });
-
-                        if (nextUnmetTag) {
-                          const tagName = Object.keys(nextUnmetTag)[0];
-                          setActiveTagTab(tagName);
-                          return;
-                        }
-
-                        const notOneTagSelected = tagCounter.every((tagObj) => {
-                          const key = Object.keys(tagObj)[0];
-                          return tagObj[key].current === 0;
-                        });
-
-                        if (notOneTagSelected) {
-                          notifyVoteMessage(
-                            'Maak een keuze om verder te kunnen gaan.',
-                            true
+                          const notOneTagSelected = tagCounter.every(
+                            (tagObj) => {
+                              const key = Object.keys(tagObj)[0];
+                              return tagObj[key].current === 0;
+                            }
                           );
-                          return;
+
+                          if (notOneTagSelected) {
+                            notifyVoteMessage(
+                              'Maak een keuze om verder te kunnen gaan.',
+                              true
+                            );
+                            return;
+                          }
                         }
+
+                        prepareForVote(null);
                       }
 
-                      prepareForVote(null);
-                    }
+                      if (isAllowedToVote) {
+                        setNavAfterLogin(true);
+                      }
 
-                    if (isAllowedToVote) {
-                      setNavAfterLogin(true);
-                    }
-
-                    if (currentStep === 3) {
-                      const submitted = await submitVoteAndCleanup();
-                      if (submitted) {
-                        if (props.showConfetti) {
-                          fireConfetti();
+                      if (currentStep === 3) {
+                        const submitted = await submitVoteAndCleanup();
+                        if (submitted) {
+                          if (props.showConfetti) {
+                            fireConfetti();
+                          }
+                          await moveToStep4AndLogout();
                         }
-                        setCurrentStep(4);
+                      } else {
+                        setCurrentStep(currentStep + 1);
                       }
-                    } else if (currentStep === 4) {
-                      const currentUrl = new URL(location.href);
-                      const params = currentUrl.searchParams;
-                      params.delete('openstadlogintoken');
-                      await currentUser.logout({ url: currentUrl.toString() });
-                    } else {
-                      setCurrentStep(currentStep + 1);
-                    }
-                  }}
-                  disabled={(() => {
-                    if (
-                      props.votes.voteType === 'count' &&
-                      selectedResources.length < props.votes.minResources
-                    )
-                      return true;
-
-                    if (
-                      props.votes.voteType === 'budgeting' &&
-                      budgetUsed < props.votes.minBudget
-                    )
-                      return true;
-
-                    if (
-                      (props.votes.voteType === 'countPerTag' ||
-                        props.votes.voteType === 'budgetingPerTag') &&
-                      currentStep === 0
-                    ) {
-                      const unmetTags = tagCounter.filter((tagObj) => {
-                        const key = Object.keys(tagObj)[0];
-                        return tagObj[key].current < tagObj[key].min;
-                      });
-
-                      if (unmetTags.length === 0) {
-                        return false;
-                      }
-
+                    }}
+                    disabled={(() => {
                       if (
-                        unmetTags.length === 1 &&
-                        Object.keys(unmetTags[0])[0] === activeTagTab
-                      ) {
+                        props.votes.voteType === 'count' &&
+                        selectedResources.length < props.votes.minResources
+                      )
                         return true;
-                      }
-                    }
 
-                    return (
-                      (props?.votes?.voteType === 'likes' ||
-                        props?.votes?.voteType === 'budgeting') &&
-                      selectedResources.length === 0 &&
-                      currentStep === 0
-                    );
-                  })()}>
-                  {(() => {
-                    if (currentStep < 3) {
                       if (
-                        props.votes.voteType === 'countPerTag' ||
-                        props.votes.voteType === 'budgetingPerTag'
+                        props.votes.voteType === 'budgeting' &&
+                        budgetUsed < props.votes.minBudget
+                      )
+                        return true;
+
+                      if (
+                        (props.votes.voteType === 'countPerTag' ||
+                          props.votes.voteType === 'budgetingPerTag') &&
+                        currentStep === 0
                       ) {
                         const unmetTags = tagCounter.filter((tagObj) => {
                           const key = Object.keys(tagObj)[0];
-
-                          if (
-                            tagObj[key].min === 0 &&
-                            tagObj[key].current === 0 &&
-                            key !== activeTagTab &&
-                            !visitedTagTabs.includes(key)
-                          ) {
-                            return true;
-                          }
-
                           return tagObj[key].current < tagObj[key].min;
                         });
 
-                        const nextUnmetTag = unmetTags.find((tagObj) => {
-                          const key = Object.keys(tagObj)[0];
-                          return key !== activeTagTab;
-                        });
+                        if (unmetTags.length === 0) {
+                          return false;
+                        }
 
-                        if (nextUnmetTag) {
-                          const tagName = Object.keys(nextUnmetTag)[0];
-                          return `Kies voor ${
-                            tagName.charAt(0).toUpperCase() + tagName.slice(1)
-                          }`;
+                        if (
+                          unmetTags.length === 1 &&
+                          Object.keys(unmetTags[0])[0] === activeTagTab
+                        ) {
+                          return true;
                         }
                       }
-                      return 'Volgende';
-                    }
-                    if (currentStep === 3) return 'Stem indienen';
-                    if (currentStep === 4) return 'Klaar';
-                  })()}
-                </Button>
+
+                      return (
+                        (props?.votes?.voteType === 'likes' ||
+                          props?.votes?.voteType === 'budgeting') &&
+                        selectedResources.length === 0 &&
+                        currentStep === 0
+                      );
+                    })()}>
+                    {(() => {
+                      if (currentStep < 3) {
+                        if (
+                          props.votes.voteType === 'countPerTag' ||
+                          props.votes.voteType === 'budgetingPerTag'
+                        ) {
+                          const unmetTags = tagCounter.filter((tagObj) => {
+                            const key = Object.keys(tagObj)[0];
+
+                            if (
+                              tagObj[key].min === 0 &&
+                              tagObj[key].current === 0 &&
+                              key !== activeTagTab &&
+                              !visitedTagTabs.includes(key)
+                            ) {
+                              return true;
+                            }
+
+                            return tagObj[key].current < tagObj[key].min;
+                          });
+
+                          const nextUnmetTag = unmetTags.find((tagObj) => {
+                            const key = Object.keys(tagObj)[0];
+                            return key !== activeTagTab;
+                          });
+
+                          if (nextUnmetTag) {
+                            const tagName = Object.keys(nextUnmetTag)[0];
+                            return `Kies voor ${
+                              tagName.charAt(0).toUpperCase() + tagName.slice(1)
+                            }`;
+                          }
+                        }
+                        return 'Volgende';
+                      }
+                      if (currentStep === 3) return 'Stem indienen';
+                      if (currentStep === 4) return 'Klaar';
+                    })()}
+                  </Button>
+                )}
               </>
             ) : null}
           </div>
