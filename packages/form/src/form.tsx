@@ -30,6 +30,7 @@ import type {
   ComponentFieldProps,
   FormProps,
 } from './props';
+import { resolveFieldInteraction } from './utils/interaction';
 import { updateRouting } from './utils/routing';
 import { handleSubmit } from './utils/submit';
 
@@ -247,7 +248,12 @@ function Form({
   };
 
   const handleInputChange = (
-    event: { name: string; value: any },
+    event: {
+      name: string;
+      value: any;
+      isInitial?: boolean;
+      interactionKey?: string;
+    },
     triggerSetLastKey?: boolean
   ) => {
     const { name, value } = event;
@@ -257,8 +263,11 @@ function Form({
       setLastUpdatedKey(name);
     }
 
-    if (onFieldInteraction && name) {
-      onFieldInteraction(name);
+    // Programmatic initialisation (the onChange that fields fire on mount
+    // to register their default value) does not count as user interaction.
+    const interaction = resolveFieldInteraction(event);
+    if (onFieldInteraction && interaction.track && interaction.key) {
+      onFieldInteraction(interaction.key);
     }
   };
 

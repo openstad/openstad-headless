@@ -27,6 +27,7 @@ import NotificationService from '../../lib/NotificationProvider/notification-ser
 import hasRole from '../../lib/has-role';
 import RteContent from '../../ui/src/rte-formatting/rte-content';
 import './enquete.scss';
+import { buildQuestionIdMap, resolveQuestionId } from './gtm-helpers';
 import { EnquetePropsType } from './types/';
 
 // Helper types and functions for draft persistence
@@ -571,6 +572,7 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['type'] = 'pagination';
           fieldData['prevPageText'] = item?.prevPageText || '1';
           fieldData['nextPageText'] = item?.nextPageText || '2';
+          fieldData['stepName'] = item?.stepName || '';
           break;
         case 'sort':
           fieldData['options'] = item?.options || [];
@@ -698,6 +700,9 @@ function Enquete(props: EnqueteWidgetProps) {
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Positional question_id map (qid1..qidN) based on the question order.
+  const questionIdMap = buildQuestionIdMap(props.items);
+
   const getTrackingContext = () => ({
     environment: detectEnvironment(props.gtmEnvironment),
     formId: `fid${props.widgetId || '0'}`,
@@ -709,21 +714,29 @@ function Enquete(props: EnqueteWidgetProps) {
   });
 
   const getStepInfo = (pageIndex: number) => {
-    const start = pageFieldStartPositions[pageIndex] ?? 0;
-    const end = pageFieldEndPositions[pageIndex] ?? formFields.length;
-    const fieldsOnPage = formFields
-      .slice(start, end)
-      .filter((f) => f.type !== 'pagination');
-    const firstField = fieldsOnPage[0];
     const status: FormStatus =
       pageIndex === 0
         ? 'started'
         : pageIndex >= totalPages - 1
           ? 'final_step'
           : 'in_progress';
+
+    // Dedicated, stable step name: the pagination item that introduces a
+    // page carries the name of that next page (page 1 = the
+    // pagination before page 1, etc.). Falls back to "Stap N" when no
+    // name is set, so the name does not move along with the first question.
+    const paginationFields = formFields.filter((f) => f.type === 'pagination');
+    const configuredName =
+      pageIndex > 0
+        ? (paginationFields[pageIndex - 1] as any)?.stepName
+        : undefined;
+    const formStepName =
+      (typeof configuredName === 'string' && configuredName.trim()) ||
+      `Stap ${pageIndex + 1}`;
+
     return {
       formStep: pageIndex + 1,
-      formStepName: (firstField as any)?.title || '',
+      formStepName,
       formStepTotal: totalPages,
       formStatus: status,
     };
@@ -735,13 +748,26 @@ function Enquete(props: EnqueteWidgetProps) {
     }
   }, [currentPage, draftChecked]);
 
-  const handleFieldInteraction = (fieldKey: string) => {
-    if (interactedFieldsRef.current.has(fieldKey)) return;
-    interactedFieldsRef.current.add(fieldKey);
+  const handleFieldInteraction = (interactionKey: string) => {
+    // form_start fires on the first real user interaction, before the
+    // first question_interact event.
+    if (!formStartFiredRef.current) {
+      formStartFiredRef.current = true;
+      pushFormStart(getTrackingContext());
+    }
 
-    const item = props.items?.find((i) => i.fieldKey === fieldKey);
+    if (interactedFieldsRef.current.has(interactionKey)) return;
+    interactedFieldsRef.current.add(interactionKey);
+
+    const { baseKey, questionId, isExplanation } = resolveQuestionId(
+      questionIdMap,
+      interactionKey
+    );
+
+    const item = props.items?.find((i) => i.fieldKey === baseKey);
     if (
       !item ||
+      !questionId ||
       item.questionType === 'pagination' ||
       item.questionType === 'none'
     )
@@ -750,8 +776,10 @@ function Enquete(props: EnqueteWidgetProps) {
     pushQuestionInteract({
       ...getTrackingContext(),
       ...getStepInfo(currentPage),
-      questionId: `qid${fieldKey}`,
-      questionName: item.title || '',
+      questionId,
+      questionName: isExplanation
+        ? `${item.title || ''} (explanation)`
+        : item.title || '',
       questionType: mapQuestionType(item.questionType || '', item.showSmileys),
     });
   };
@@ -768,7 +796,9 @@ function Enquete(props: EnqueteWidgetProps) {
       pushFormError({
         ...context,
         ...stepInfo,
-        questionId: item ? `qid${fieldKey}` : context.formId,
+        questionId: item
+          ? questionIdMap[fieldKey] || context.formId
+          : context.formId,
         questionName: item?.title || context.formName,
         questionType: item
           ? mapQuestionType(item.questionType || '', item.showSmileys)
@@ -784,10 +814,8 @@ function Enquete(props: EnqueteWidgetProps) {
   const handleValuesChange = (values: Record<string, unknown>) => {
     if (typeof window === 'undefined') return;
 
-    if (!formStartFiredRef.current) {
-      formStartFiredRef.current = true;
-      pushFormStart(getTrackingContext());
-    }
+    // form_start has been moved to handleFieldInteraction so it only fires on
+    // a real user interaction, not on the mount initialisation.
 
     if (props.enableDraftPersistence !== true) return;
 
@@ -817,7 +845,9 @@ function Enquete(props: EnqueteWidgetProps) {
   }, []);
 
   return (
-    <div className={`osc${isFullscreen ? ' --fullscreen' : ''}`}>
+    <div
+      className={`osc${isFullscreen ? ' --fullscreen' : ''}`}
+      data-form-name={props.title || ''}>
       <div className="container">
         {formOnlyVisibleForUsers && !hasRole(currentUser, 'member') && (
           <>

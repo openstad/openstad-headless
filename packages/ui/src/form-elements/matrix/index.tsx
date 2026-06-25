@@ -18,7 +18,7 @@ import {
   TableHeaderCell,
   TableRow,
 } from '@utrecht/component-library-react';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
@@ -34,7 +34,11 @@ export type MatrixFieldProps = {
   disabled?: boolean;
   type?: string;
   onChange?: (
-    e: { name: string; value: string | Record<number, never> | [] | string[] },
+    e: {
+      name: string;
+      value: string | Record<number, never> | [] | string[];
+      isInitial?: boolean;
+    },
     triggerSetLastKey?: boolean
   ) => void;
   showMoreInfo?: boolean;
@@ -94,13 +98,17 @@ const MatrixField: FC<MatrixFieldProps> = ({
   const maxReached =
     maxChoicesNum > 0 && selectedChoices.length >= maxChoicesNum;
 
+  const didInitRef = useRef(false);
   useEffect(() => {
     if (onChange) {
       onChange({
         name: fieldKey,
         value: selectedChoices,
+        // The first emit is the mount initialisation, not a user interaction.
+        isInitial: !didInitRef.current,
       });
     }
+    didInitRef.current = true;
   }, [JSON.stringify(selectedChoices)]);
 
   class HtmlContent extends React.Component<{ html: any }> {

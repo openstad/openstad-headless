@@ -66,6 +66,7 @@ const formSchema = z.object({
   maxCharacters: z.string().optional(),
   nextPageText: z.string().optional(),
   prevPageText: z.string().optional(),
+  stepName: z.string().optional(),
   variant: z.string().optional(),
   key_b: z.string().optional(),
   description_b: z.string().optional(),
@@ -272,6 +273,7 @@ export default function WidgetEnqueteItems(
           maxCharacters: values.maxCharacters,
           nextPageText: values.nextPageText || '',
           prevPageText: values.prevPageText || '',
+          stepName: values.stepName || '',
           variant: values.variant || 'text input',
           options: values.options || [],
           multiple: values.multiple || false,
@@ -441,6 +443,7 @@ export default function WidgetEnqueteItems(
     maxCharacters: '',
     nextPageText: 'Volgende',
     prevPageText: 'Vorige',
+    stepName: '',
     variant: 'text input',
     options: [],
     multiple: false,
@@ -519,6 +522,7 @@ export default function WidgetEnqueteItems(
       maxCharacters: item.maxCharacters || '',
       nextPageText: item.nextPageText || '',
       prevPageText: item.prevPageText || '',
+      stepName: item.stepName || '',
       variant: item.variant || '',
       options: item.options || [],
       multiple: item.multiple || false,
@@ -1751,6 +1755,22 @@ export default function WidgetEnqueteItems(
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Tekst voor: Volgende pagina</FormLabel>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="stepName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Stapnaam (analytics)</FormLabel>
+                              <FormDescription>
+                                Stabiele naam van de pagina die hierna volgt,
+                                gebruikt als form_step_name in de dataLayer.
+                                Laat leeg voor de standaard &quot;Stap N&quot;.
+                              </FormDescription>
                               <Input {...field} />
                               <FormMessage />
                             </FormItem>

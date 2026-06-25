@@ -39,6 +39,7 @@ export type Item = {
   maxCharacters?: string;
   nextPageText?: string;
   prevPageText?: string;
+  stepName?: string;
   variant?: string;
   options?: Array<Option>;
   imageUpload?: string;

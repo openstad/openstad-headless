@@ -17,7 +17,7 @@ import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orien
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 import 'filepond/dist/filepond.min.css';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { FilePond, registerPlugin } from 'react-filepond';
 
 import { InfoImage } from '../../infoImage';
@@ -89,7 +89,11 @@ export type ImageUploadProps = {
   multiple?: boolean;
   type?: string;
   onChange?: (
-    e: { name: string; value: { name: string; url: string }[] },
+    e: {
+      name: string;
+      value: { name: string; url: string }[];
+      isInitial?: boolean;
+    },
     triggerSetLastKey?: boolean
   ) => void;
   imageUrl?: string;
@@ -168,6 +172,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     }
   }
 
+  const didInitRef = useRef(false);
   useEffect(() => {
     const images = [...uploadedImages];
     for (let i = 0; i < mockImages.length; i++) {
@@ -179,8 +184,11 @@ const ImageUploadField: FC<ImageUploadProps> = ({
       onChange({
         name: fieldKey,
         value: images,
+        // The first emit is the mount initialisation, not a user interaction.
+        isInitial: !didInitRef.current,
       });
     }
+    didInitRef.current = true;
   }, [uploadedImages.length, mockImages.length, setImages, setUploadedImages]);
 
   const acceptAttribute = allowedTypes ? allowedTypes : '';

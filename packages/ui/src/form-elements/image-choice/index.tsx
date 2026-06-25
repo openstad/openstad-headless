@@ -12,7 +12,7 @@ import {
   Paragraph,
   RadioButton,
 } from '@utrecht/component-library-react';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
@@ -29,7 +29,7 @@ export type ImageChoiceFieldProps = {
   disabled?: boolean;
   type?: string;
   onChange?: (
-    e: { name: string; value: FormValue },
+    e: { name: string; value: FormValue; isInitial?: boolean },
     triggerSetLastKey?: boolean
   ) => void;
   showMoreInfo?: boolean;
@@ -121,13 +121,17 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     }
   };
 
+  const didInitRef = useRef(false);
   useEffect(() => {
     if (onChange) {
       onChange({
         name: fieldKey,
         value: JSON.stringify(selectedChoices),
+        // The first emit is the mount initialisation, not a user interaction.
+        isInitial: !didInitRef.current,
       });
     }
+    didInitRef.current = true;
   }, [selectedChoices]);
 
   class HtmlContent extends React.Component<{ html: any }> {
