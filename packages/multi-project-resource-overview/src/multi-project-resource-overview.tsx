@@ -21,6 +21,7 @@ export type MultiProjectResourceOverviewProps = ResourceOverviewWidgetProps & {
     overviewImage?: string;
     overviewUrl?: string;
     overviewMarkerIcon?: string;
+    overviewSortDate?: string;
     projectLat?: string;
     projectLng?: string;
     includeProjectsInOverview?: boolean;
