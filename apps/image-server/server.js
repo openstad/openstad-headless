@@ -65,6 +65,13 @@ const path = require('path');
 
 console.log('S3 enabled:', s3.isEnabled());
 
+// Absolute server-side upload cap (safety net). Defaults to 25 MB and can be
+// overridden via the MAX_FILE_UPLOAD_SIZE_MB env var. This is independent of any
+// per-widget client-side limit and protects the server from oversized uploads
+// that would otherwise stream until a socket timeout and hang without feedback.
+const maxFileUploadBytes =
+  (Number(process.env.MAX_FILE_UPLOAD_SIZE_MB) || 25) * 1024 * 1024;
+
 const swapLastDotUnderscore = (name) => {
   if (!name) return null;
   const match = name.match(/^(.*)([._])([a-z0-9]+)$/i);
@@ -74,6 +81,7 @@ const swapLastDotUnderscore = (name) => {
 };
 
 const imageMulterConfig = {
+  limits: { fileSize: maxFileUploadBytes },
   onError: function (err, next) {
     console.error(err);
     next(err);
@@ -350,6 +358,7 @@ app.get('/image/*', rateLimiter(), async function (req, res, next) {
 });
 
 const documentMulterConfig = {
+  limits: { fileSize: maxFileUploadBytes },
   onError: function (err, next) {
     console.error(err);
     next(err);
@@ -666,6 +675,18 @@ app.post(
 );
 
 app.use(function (err, req, res, next) {
+  // Multer rejects oversized uploads with a LIMIT_FILE_SIZE error. Map it to a
+  // clear HTTP 413 instead of a generic 500 so the upload fails fast with a
+  // readable message rather than hanging.
+  if (err && err.code === 'LIMIT_FILE_SIZE') {
+    const maxMB = Math.round(maxFileUploadBytes / (1024 * 1024));
+    return res.status(413).send(
+      JSON.stringify({
+        error: `File too large. The maximum upload size is ${maxMB} MB.`,
+      })
+    );
+  }
+
   const status = err.status ? err.status : 500;
   console.error(err);
   // if (!res.headerSent) {

@@ -39,7 +39,11 @@ type DateRangeItem = {
   activeTo?: string;
 };
 
-/** Set each item's activeTo to the day before the next item's activeFrom. */
+/**
+ * Set each item's activeTo to the day before the next item's activeFrom.
+ * The last item keeps its own (manually entered) end date, which may be empty
+ * for an open-ended final phase.
+ */
 export function fillTimelineEndDates<T extends DateRangeItem>(items: T[]): T[] {
   if (!items || items.length === 0) return items;
 
@@ -53,9 +57,16 @@ export function fillTimelineEndDates<T extends DateRangeItem>(items: T[]): T[] {
 
   return sorted.map((item, index) => {
     const next = sorted[index + 1];
-    const nextStart = next?.activeFrom ?? '';
+
+    // Last item: keep its manually entered end date (may be open-ended).
+    if (!next) {
+      return item;
+    }
+
+    const nextStart = next.activeFrom ?? '';
     const currentStart = item.activeFrom ?? '';
 
+    // Two items share a start date: no valid range to derive, leave end open.
     if (!nextStart || nextStart === currentStart) {
       const { activeTo, ...rest } = item;
       return rest as T;

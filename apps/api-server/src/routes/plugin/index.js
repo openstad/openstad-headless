@@ -224,7 +224,8 @@ router.get('/bundle/:pluginName/:bundleType', function (req, res) {
     res.sendFile(bundlePath);
   } catch (err) {
     console.error(
-      '[plugin-routes] Error serving bundle for "' + pluginName + '":',
+      '[plugin-routes] Error serving bundle for "%s": %s',
+      pluginName,
       err.message
     );
     res.status(500).json({ error: 'Failed to load plugin bundle' });

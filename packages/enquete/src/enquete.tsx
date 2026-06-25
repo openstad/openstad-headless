@@ -394,10 +394,12 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['allowedTypes'] = ['image/*'];
           fieldData['imageUrl'] = props?.imageUrl;
           fieldData['multiple'] = item.multiple;
+          fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
           break;
         case 'documentUpload':
           fieldData['type'] = 'documentUpload';
           fieldData['multiple'] = item.multiple;
+          fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
           break;
         case 'scale': {
           fieldData['type'] = 'tickmark-slider';

@@ -13,6 +13,7 @@ import { Heading } from '@/components/ui/typography';
 import { UploadDocument } from '@/hooks/upload-document';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { formatDutchDate } from '@openstad-headless/lib/timeline-dates';
 import * as Switch from '@radix-ui/react-switch';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import { useRouter } from 'next/router';
@@ -143,6 +144,12 @@ export function AgendaItemsEditor({
   const selectedItem = selectedItemId
     ? items.find((i) => i.id === selectedItemId) || null
     : null;
+  // The last item (by start date) keeps a manually-editable end date;
+  // all earlier items have their end date auto-computed in timeline mode.
+  const lastItemId = [...items].sort((a, b) =>
+    (a.activeFrom ?? '').localeCompare(b.activeFrom ?? '')
+  )[items.length - 1]?.id;
+  const isLastItemSelected = !!selectedItem && selectedItem.id === lastItemId;
   const [selectedLink, setLink] = useState<AgendaLink | null>(null);
   const [settingLinks, setSettingLinks] = useState<boolean>(false);
 
@@ -334,6 +341,13 @@ export function AgendaItemsEditor({
                             className="gap-2 py-3 px-2 w-full"
                             onClick={() => setSelectedItemId(item.id ?? null)}>
                             {item.title || item.description || '(geen titel)'}
+                            {item.activeFrom && (
+                              <span className="block text-sm text-muted-foreground">
+                                {formatDutchDate(
+                                  toDateInputValue(item.activeFrom)
+                                )}
+                              </span>
+                            )}
                           </span>
                           <span className="gap-2 py-3 px-2">
                             <X
@@ -662,11 +676,11 @@ export function AgendaItemsEditor({
                         render={({ field }) => (
                           <FormItem className="items-start md:col-span-full">
                             <FormLabel>
-                              {timelineMode
+                              {timelineMode && !isLastItemSelected
                                 ? 'Actief t/m (hele dag)'
                                 : 'Actief t/m (hele dag) - laat leeg voor geen einddatum'}
                             </FormLabel>
-                            {timelineMode && (
+                            {timelineMode && !isLastItemSelected && (
                               <FormDescription>
                                 Wordt automatisch berekend uit de startdatum van
                                 het volgende item.
@@ -675,8 +689,8 @@ export function AgendaItemsEditor({
                             <Input
                               type="date"
                               {...field}
-                              readOnly={timelineMode}
-                              disabled={timelineMode}
+                              readOnly={timelineMode && !isLastItemSelected}
+                              disabled={timelineMode && !isLastItemSelected}
                               className="inline-block !w-auto"
                             />
                             <FormMessage />

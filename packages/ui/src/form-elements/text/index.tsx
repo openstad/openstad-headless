@@ -9,6 +9,7 @@ import {
   Textarea,
   Textbox,
 } from '@utrecht/component-library-react';
+import DOMPurify from 'dompurify';
 import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
@@ -38,13 +39,23 @@ declare global {
   }
 }
 
+// Parse editor HTML into an inert, sanitized document body. DOMPurify breaks
+// the untrusted-text -> HTML flow before it reaches the parser; target/rel are
+// kept so existing "open in new tab" links survive a round-trip.
+function parseEditorHtml(html: string): HTMLElement | null {
+  if (typeof document === 'undefined') return null;
+  const clean = DOMPurify.sanitize(html || '', {
+    ADD_ATTR: ['target', 'rel'],
+  });
+  return new DOMParser().parseFromString(clean, 'text/html').body;
+}
+
 function getTargetBlankHrefs(html: string): Set<string> {
   const hrefs = new Set<string>();
-  if (!html || typeof document === 'undefined' || !html.includes('target'))
-    return hrefs;
-  const template = document.createElement('template');
-  template.innerHTML = html;
-  template.content.querySelectorAll('a[target="_blank"]').forEach((link) => {
+  if (!html || !html.includes('target')) return hrefs;
+  const body = parseEditorHtml(html);
+  if (!body) return hrefs;
+  body.querySelectorAll('a[target="_blank"]').forEach((link) => {
     const href = link.getAttribute('href');
     if (href) hrefs.add(href);
   });
@@ -205,9 +216,9 @@ const TrixEditor: React.FC<{
                   editor?.composition?.currentAttributes?.href;
                 if (!currentHref) return;
 
-                const template = document.createElement('template');
-                template.innerHTML = html;
-                const link = template.content.querySelector(
+                const body = parseEditorHtml(html);
+                if (!body) return;
+                const link = body.querySelector(
                   `a[href="${CSS.escape(currentHref)}"]`
                 );
                 if (!link) return;
@@ -222,9 +233,10 @@ const TrixEditor: React.FC<{
                   targetBlankHrefsRef.current.delete(currentHref);
                 }
 
-                inputEl.value = template.innerHTML;
+                const updatedHtml = body.innerHTML;
+                inputEl.value = updatedHtml;
                 const syntheticEvent = {
-                  target: { value: template.innerHTML },
+                  target: { value: updatedHtml },
                 } as React.ChangeEvent<HTMLInputElement>;
                 onChangeRef.current(syntheticEvent);
               }, 0);
@@ -242,26 +254,22 @@ const TrixEditor: React.FC<{
     const handleTrixChange = () => {
       let html = inputEl.value;
 
-      if (
-        targetBlankHrefsRef.current.size > 0 &&
-        typeof document !== 'undefined'
-      ) {
-        const template = document.createElement('template');
-        template.innerHTML = html;
-        let changed = false;
-        targetBlankHrefsRef.current.forEach((href) => {
-          const link = template.content.querySelector(
-            `a[href="${CSS.escape(href)}"]`
-          );
-          if (link && !link.hasAttribute('target')) {
-            link.setAttribute('target', '_blank');
-            link.setAttribute('rel', 'noopener noreferrer');
-            changed = true;
+      if (targetBlankHrefsRef.current.size > 0) {
+        const body = parseEditorHtml(html);
+        if (body) {
+          let changed = false;
+          targetBlankHrefsRef.current.forEach((href) => {
+            const link = body.querySelector(`a[href="${CSS.escape(href)}"]`);
+            if (link && !link.hasAttribute('target')) {
+              link.setAttribute('target', '_blank');
+              link.setAttribute('rel', 'noopener noreferrer');
+              changed = true;
+            }
+          });
+          if (changed) {
+            html = body.innerHTML;
+            inputEl.value = html;
           }
-        });
-        if (changed) {
-          html = template.innerHTML;
-          inputEl.value = html;
         }
       }
 

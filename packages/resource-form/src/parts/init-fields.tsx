@@ -138,6 +138,10 @@ export const InitializeFormFields = (items, data) => {
           break;
         case 'imageUpload':
           fieldData['allowedTypes'] = item.allowedTypes || ['image/*'];
+          fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
+          break;
+        case 'documentUpload':
+          fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
           break;
         case 'tags':
           if (item.options && item.options.length > 0) {

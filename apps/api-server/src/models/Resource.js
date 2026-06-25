@@ -953,35 +953,50 @@ module.exports = function (db, sequelize, DataTypes) {
           return {};
         return {
           where: {
-            [db.Sequelize.Op.and]: [
-              db.Sequelize.literal(
-                `location IS NOT NULL AND JSON_EXTRACT(location, '$.lat') IS NOT NULL AND JSON_EXTRACT(location, '$.lng') IS NOT NULL`
-              ),
-              db.Sequelize.where(
-                db.Sequelize.fn(
-                  'ST_Distance_Sphere',
-                  db.Sequelize.fn(
-                    'POINT',
-                    db.Sequelize.cast(
-                      db.Sequelize.fn(
-                        'JSON_EXTRACT',
-                        db.Sequelize.col('location'),
-                        db.Sequelize.literal("'$.lng'")
-                      ),
-                      'DECIMAL(10,7)'
-                    ),
-                    db.Sequelize.cast(
-                      db.Sequelize.fn(
-                        'JSON_EXTRACT',
-                        db.Sequelize.col('location'),
-                        db.Sequelize.literal("'$.lat'")
-                      ),
-                      'DECIMAL(10,7)'
-                    )
+            // A resource matches the postcode filter when it is within the
+            // requested distance OR when it is flagged as location-independent.
+            // Location-independent resources have no pin near the postcode, so
+            // they would otherwise drop out of the results; the flag keeps them
+            // visible.
+            [db.Sequelize.Op.or]: [
+              {
+                [db.Sequelize.Op.and]: [
+                  db.Sequelize.literal(
+                    `location IS NOT NULL AND JSON_EXTRACT(location, '$.lat') IS NOT NULL AND JSON_EXTRACT(location, '$.lng') IS NOT NULL`
                   ),
-                  db.Sequelize.fn('POINT', safeLng, safeLat)
-                ),
-                { [db.Sequelize.Op.lte]: safeDistance }
+                  db.Sequelize.where(
+                    db.Sequelize.fn(
+                      'ST_Distance_Sphere',
+                      db.Sequelize.fn(
+                        'POINT',
+                        db.Sequelize.cast(
+                          db.Sequelize.fn(
+                            'JSON_EXTRACT',
+                            db.Sequelize.col('location'),
+                            db.Sequelize.literal("'$.lng'")
+                          ),
+                          'DECIMAL(10,7)'
+                        ),
+                        db.Sequelize.cast(
+                          db.Sequelize.fn(
+                            'JSON_EXTRACT',
+                            db.Sequelize.col('location'),
+                            db.Sequelize.literal("'$.lat'")
+                          ),
+                          'DECIMAL(10,7)'
+                        )
+                      ),
+                      db.Sequelize.fn('POINT', safeLng, safeLat)
+                    ),
+                    { [db.Sequelize.Op.lte]: safeDistance }
+                  ),
+                ],
+              },
+              db.Sequelize.literal(
+                // Qualify with the model alias: several joined models (user,
+                // comment, tag, status) also have an `extraData` column, so an
+                // unqualified reference is ambiguous in the count/list query.
+                "JSON_EXTRACT(`resource`.`extraData`, '$.locationIndependent') = true"
               ),
             ],
           },

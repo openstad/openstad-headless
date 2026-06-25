@@ -82,6 +82,10 @@ const formSchema = z.object({
   maxChoicesMessage: z.string().optional(),
   variant: z.string().optional(),
   multiple: z.boolean().optional(),
+  maxUploadSizeMB: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number().positive().optional()
+  ),
   prevPageText: z.string().optional(),
   nextPageText: z.string().optional(),
   options: z
@@ -319,6 +323,7 @@ export default function WidgetChoiceGuideItems(
             maxCharacters: values.maxCharacters,
             variant: values.variant || 'text input',
             multiple: values.multiple || false,
+            maxUploadSizeMB: values.maxUploadSizeMB || 25,
             options: values.options || [],
             showMoreInfo: values.showMoreInfo || false,
             moreInfoButton: values.moreInfoButton || '',
@@ -480,6 +485,7 @@ export default function WidgetChoiceGuideItems(
     maxCharacters: '',
     variant: 'text input',
     multiple: false,
+    maxUploadSizeMB: 25,
     prevPageText: '',
     nextPageText: '',
     options: [],
@@ -564,6 +570,7 @@ export default function WidgetChoiceGuideItems(
         maxCharacters: selectedItem.maxCharacters || '',
         variant: selectedItem.variant || '',
         multiple: selectedItem.multiple || false,
+        maxUploadSizeMB: selectedItem.maxUploadSizeMB || 25,
         showMoreInfo: selectedItem.showMoreInfo || false,
         moreInfoButton: selectedItem.moreInfoButton || '',
         moreInfoContent: selectedItem.moreInfoContent || '',
@@ -2180,6 +2187,33 @@ export default function WidgetChoiceGuideItems(
                                       <SelectItem value="false">Nee</SelectItem>
                                     </SelectContent>
                                   </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
+
+                          {(form.watch('type') === 'imageUpload' ||
+                            form.watch('type') === 'documentUpload') && (
+                            <FormField
+                              control={form.control}
+                              name="maxUploadSizeMB"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>
+                                    Maximale uploadgrootte (MB)
+                                  </FormLabel>
+                                  <FormDescription>
+                                    <em className="text-xs">
+                                      De maximale bestandsgrootte die een
+                                      gebruiker mag uploaden. Standaard 25 MB.
+                                      Let op: de server hanteert een absolute
+                                      bovengrens (standaard 25 MB); hogere
+                                      waarden kunnen alsnog door de server
+                                      geweigerd worden.
+                                    </em>
+                                  </FormDescription>
+                                  <Input type="number" min="1" {...field} />
                                   <FormMessage />
                                 </FormItem>
                               )}

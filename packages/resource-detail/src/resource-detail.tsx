@@ -40,6 +40,7 @@ import React, { useEffect, useId, useState } from 'react';
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 import { canLikeResource, hasRole } from '../../lib';
 import './resource-detail.css';
+import { formatDocumentLabel } from './utils';
 
 type booleanProps = {
   [K in
@@ -746,8 +747,8 @@ function ResourceDetail({
                             download
                             href={document.url}
                             key={index}>
-                            <Icon icon="ri-download-2-fill" />
-                            {document.name}
+                            <Icon icon="ri-download-2-fill" iconOnly />
+                            {formatDocumentLabel(document.name, document.url)}
                           </ButtonLink>
                         )
                       )}

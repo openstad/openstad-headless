@@ -3,6 +3,7 @@ import MapInput from '@/components/maps/leaflet-input';
 import { MapErrorBoundary } from '@/components/maps/map-error-boundary';
 import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { CodeEditor } from '@/components/ui/code-editor';
 import {
   Form,
@@ -118,6 +119,7 @@ const baseSchema = z.object({
       originalId: z.coerce
         .number({ invalid_type_error: onlyNumbersMessage })
         .optional(),
+      locationIndependent: z.boolean().optional(),
     })
     .default({}),
   tags: z.number().array().default([]),
@@ -273,6 +275,8 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       documents: existingData?.documents || [],
       extraData: {
         originalId: existingData?.extraData?.originalId || undefined,
+        locationIndependent:
+          existingData?.extraData?.locationIndependent || false,
       },
     }),
     [existingData]
@@ -324,12 +328,21 @@ export default function ResourceForm({ onFormSubmit }: Props) {
   });
 
   function onSubmit(values: FormType) {
+    // Capture the location-independent flag from the checkbox before the
+    // CodeEditor state potentially overwrites the whole extraData object below.
+    const locationIndependent = !!values.extraData?.locationIndependent;
+
     // Add extraData if its valid JSON
     try {
       if (extraData !== values.extraData) {
         values.extraData = JSON.parse(extraData);
       }
     } catch (e) {}
+
+    // Re-apply the location-independent flag so it survives the JSON overwrite.
+    if (values.extraData && typeof values.extraData === 'object') {
+      values.extraData.locationIndependent = locationIndependent;
+    }
 
     onFormSubmit(values)
       .then(() => {
@@ -827,18 +840,50 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             )}
           /> */}
 
-          <FormField
-            control={form.control}
-            name="location"
-            render={({ field }) => (
-              <MapErrorBoundary>
-                <MapInput
-                  onSelectLocation={handleLocationSelect}
-                  field={field}
-                />
-              </MapErrorBoundary>
-            )}
-          />
+          <div className="col-span-full lg:col-span-1 flex flex-col gap-4">
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <MapErrorBoundary>
+                  <MapInput
+                    onSelectLocation={handleLocationSelect}
+                    field={field}
+                  />
+                </MapErrorBoundary>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="extraData.locationIndependent"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Locatieonafhankelijk</FormLabel>
+                  <FormDescription>
+                    Vink dit aan voor inzendingen die niet aan één specifieke
+                    locatie gebonden zijn. Ze worden dan altijd getoond bij het
+                    filteren op postcode, ongeacht de afstand.
+                  </FormDescription>
+                  <FormControl>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id={field.name}
+                        checked={!!field.value}
+                        onCheckedChange={(checked) =>
+                          field.onChange(Boolean(checked))
+                        }
+                      />
+                      <label htmlFor={field.name} className="cursor-pointer">
+                        Altijd tonen bij postcodefilter
+                      </label>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <Separator className="lg:col-span-2 my-6" />
 
