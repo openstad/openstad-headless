@@ -157,6 +157,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
       overviewImage?: string;
       overviewUrl?: string;
       overviewMarkerIcon?: string;
+      overviewSortDate?: string;
       projectLat?: string;
       projectLng?: string;
       includeProjectsInOverview?: boolean;
@@ -1131,7 +1132,7 @@ function ResourceOverviewInner({
             images: [{ url: project?.overviewImage || '' }],
             overviewUrl: project?.overviewUrl || '',
             projectId: project.id,
-            createdAt: project?.createdAt || '',
+            createdAt: project?.overviewSortDate || project?.createdAt || '',
             tags: projectTags,
             uniqueId: `project-${project.id}`,
           };
