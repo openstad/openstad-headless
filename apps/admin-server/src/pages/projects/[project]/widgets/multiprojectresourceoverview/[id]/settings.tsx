@@ -390,6 +390,7 @@ export default function WidgetMultiProjectSettings(
                                 placeholder="Kies een datum"
                                 allowPast
                                 withReset
+                                resetValue=""
                               />
 
                               <FormField

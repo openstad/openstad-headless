@@ -27,6 +27,7 @@ export const SimpleCalendar: React.FC<{
   label: string;
   placeholder?: string;
   withReset?: boolean;
+  resetValue?: any;
   allowPast?: boolean;
 }> = ({
   form,
@@ -34,6 +35,7 @@ export const SimpleCalendar: React.FC<{
   label,
   placeholder,
   withReset,
+  resetValue,
   allowPast,
   fieldInfo,
   description,
@@ -91,7 +93,7 @@ export const SimpleCalendar: React.FC<{
                 />
                 {withReset && (
                   <Button
-                    onClick={() => form.setValue(field.name, undefined)}
+                    onClick={() => form.setValue(field.name, resetValue)}
                     type="button"
                     variant={'ghost'}
                     className="w-full rounded-none text-xs font-normal">
