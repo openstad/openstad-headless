@@ -140,6 +140,9 @@ function Enquete(props: EnqueteWidgetProps) {
   const formStartTimeRef = useRef<number>(Date.now());
   const formStartFiredRef = useRef(false);
   const interactedFieldsRef = useRef<Set<string>>(new Set());
+  // Skip the form_step when loading the first page; it only fires on
+  // the first interaction (together with form_start).
+  const stepMountSkippedRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -742,19 +745,37 @@ function Enquete(props: EnqueteWidgetProps) {
     };
   };
 
+  // Fires form_start once and then the form_step of the current page,
+  // so form_step comes together with form_start (not on load).
+  const ensureFormStarted = () => {
+    if (formStartFiredRef.current) return;
+    formStartFiredRef.current = true;
+    pushFormStart(getTrackingContext());
+    pushFormStep({ ...getTrackingContext(), ...getStepInfo(currentPage) });
+  };
+
   useEffect(() => {
-    if (draftChecked) {
-      pushFormStep({ ...getTrackingContext(), ...getStepInfo(currentPage) });
+    if (!draftChecked) return;
+
+    // The first run is loading page 1; we skip that form_step.
+    if (!stepMountSkippedRef.current) {
+      stepMountSkippedRef.current = true;
+      return;
     }
+
+    // Navigation to a next step. Should the user navigate without
+    // interaction, we still start the form here (form_start first).
+    if (!formStartFiredRef.current) {
+      ensureFormStarted();
+      return;
+    }
+    pushFormStep({ ...getTrackingContext(), ...getStepInfo(currentPage) });
   }, [currentPage, draftChecked]);
 
   const handleFieldInteraction = (interactionKey: string) => {
-    // form_start fires on the first real user interaction, before the
-    // first question_interact event.
-    if (!formStartFiredRef.current) {
-      formStartFiredRef.current = true;
-      pushFormStart(getTrackingContext());
-    }
+    // form_start (+ form_step of the current page) fires on the first real
+    // user interaction, before the first question_interact event.
+    ensureFormStarted();
 
     if (interactedFieldsRef.current.has(interactionKey)) return;
     interactedFieldsRef.current.add(interactionKey);
