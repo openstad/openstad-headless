@@ -750,7 +750,11 @@ function ResourceDetail({
                             href={document.url}
                             key={index}>
                             <Icon icon="ri-download-2-fill" iconOnly />
-                            {formatDocumentLabel(document.name, document.url, document.size)}
+                            {formatDocumentLabel(
+                              document.name,
+                              document.url,
+                              document.size
+                            )}
                           </ButtonLink>
                         )
                       )}

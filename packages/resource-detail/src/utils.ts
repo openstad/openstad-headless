@@ -1,6 +1,19 @@
 const KNOWN_EXTENSIONS = [
-  'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
-  'csv', 'txt', 'zip', 'png', 'jpg', 'jpeg', 'gif', 'svg',
+  'pdf',
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'ppt',
+  'pptx',
+  'csv',
+  'txt',
+  'zip',
+  'png',
+  'jpg',
+  'jpeg',
+  'gif',
+  'svg',
 ];
 
 // Removes the query string and hash fragment from a URL.
@@ -87,8 +100,9 @@ export function formatDocumentLabel(
   const rawName = name || '';
   const documentUrl = url || '';
 
-  const { base: strippedBase, extension: suffixExtension } =
-    stripKnownSuffix(stripDottedExtension(rawName));
+  const { base: strippedBase, extension: suffixExtension } = stripKnownSuffix(
+    stripDottedExtension(rawName)
+  );
 
   const base = strippedBase || getFileNameFromUrl(documentUrl);
 
