@@ -35,7 +35,7 @@ const formSchema = z.object({
   displayMap: z.boolean(),
   displayAsTabs: z.boolean(),
   displayTitle: z.boolean(),
-  headingLevel: z.string(),
+  headingLevel: z.string().optional(),
   titleMaxLength: z.coerce.number(),
   displayDescription: z.boolean(),
   descriptionMaxLength: z.coerce.number(),
@@ -55,6 +55,10 @@ const formSchema = z.object({
   clickableImage: z.boolean(),
   displayBudget: z.boolean(),
   displayLocationFilter: z.boolean(),
+  locationLabel: z.string().optional(),
+  displayLocationHint: z.boolean().optional(),
+  locationHint: z.string().optional(),
+  locationPlaceholder: z.string().optional(),
   listTabTitle: z.string().optional(),
   mapTabTitle: z.string().optional(),
   autoApply: z.boolean().optional(),
@@ -115,6 +119,10 @@ export default function WidgetResourceOverviewDisplay(
       displayTags: props?.displayTags !== false,
       displayTagIcon: props?.displayTagIcon || false,
       displayLocationFilter: props?.displayLocationFilter === true,
+      locationLabel: props?.locationLabel || 'Vul een postcode in',
+      displayLocationHint: props?.displayLocationHint || false,
+      locationHint: props?.locationHint || '',
+      locationPlaceholder: props?.locationPlaceholder || '',
       listTabTitle:
         typeof props?.listTabTitle === 'undefined'
           ? 'Lijst'
@@ -345,6 +353,78 @@ export default function WidgetResourceOverviewDisplay(
               <FormItem>
                 <FormLabel>Locatie filter weergeven</FormLabel>
                 {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="locationLabel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Label voor het postcodeveld</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayLocationHint"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hint onder het postcodeveld weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="locationHint"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hinttekst voor het postcodeveld</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="locationPlaceholder"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tekst voor postcodeveld placeholder</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
