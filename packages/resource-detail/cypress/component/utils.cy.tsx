@@ -37,4 +37,28 @@ describe('formatDocumentLabel', () => {
   it('omits the type suffix when no extension can be derived', () => {
     expect(formatDocumentLabel('Toelichting bewonersavond', '')).to.equal('Toelichting bewonersavond');
   });
+
+  it('appends a human-readable size in MB with Dutch notation', () => {
+    expect(
+      formatDocumentLabel('rapport_pdf', 'https://example.com/r.pdf', 1300000)
+    ).to.equal('Rapport (PDF, 1,2 MB)');
+  });
+
+  it('formats sizes under 1 MB in kB', () => {
+    expect(
+      formatDocumentLabel('nota_pdf', 'https://example.com/n.pdf', 5000)
+    ).to.equal('Nota (PDF, 5 kB)');
+  });
+
+  it('omits the size when it is not provided', () => {
+    expect(
+      formatDocumentLabel('nota_pdf', 'https://example.com/n.pdf')
+    ).to.equal('Nota (PDF)');
+  });
+
+  it('omits the size when it is zero or invalid', () => {
+    expect(
+      formatDocumentLabel('nota_pdf', 'https://example.com/n.pdf', 0)
+    ).to.equal('Nota (PDF)');
+  });
 });

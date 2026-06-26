@@ -108,7 +108,12 @@ const baseSchema = z.object({
   document: z.string().optional(),
   documents: z
     .array(
-      z.object({ url: z.string().optional(), name: z.string().optional() })
+      z.object({
+        url: z.string().optional(),
+        name: z.string().optional(),
+        size: z.number().optional(),
+        mimeType: z.string().optional(),
+      })
     )
     .optional()
     .default([]),

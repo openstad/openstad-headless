@@ -14,7 +14,7 @@ import { Input } from './ui/input';
 export const DocumentUploader: React.FC<{
   form: UseFormReturn<any>;
   fieldName: Path<FieldValues>;
-  onDocumentUploaded?: (documentObject: { url: string; name?: string }) => void;
+  onDocumentUploaded?: (documentObject: { url: string; name?: string; size?: number; mimeType?: string }) => void;
   documentLabel?: string;
   allowedTypes?: string[];
   project?: string;
@@ -53,6 +53,8 @@ export const DocumentUploader: React.FC<{
     onDocumentUploaded?.({
       url: uploadedDocumentUrl,
       name: uploadedDocument?.name,
+      size: uploadedDocument?.size,
+      mimeType: uploadedDocument?.mimeType,
     });
   }
 
