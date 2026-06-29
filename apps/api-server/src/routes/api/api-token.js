@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const createError = require('http-errors');
 const db = require('../../db');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const { computeStatus } = require('../../lib/api-token-status');
 
 const router = express.Router({ mergeParams: true });
 
@@ -24,13 +25,6 @@ function computeExpiresAt(months) {
   return d;
 }
 
-function computeStatus(apiToken) {
-  if (apiToken.deletedAt) return 'revoked';
-  if (apiToken.expiresAt && new Date(apiToken.expiresAt) < new Date())
-    return 'expired';
-  return 'active';
-}
-
 function maskToken(apiToken) {
   return {
     id: apiToken.id,
@@ -46,9 +40,11 @@ function maskToken(apiToken) {
   };
 }
 
-// Require admin or editor role on all api-token endpoints
-function requireProjectAdminOrEditor(req, res, next) {
-  if (!hasRole(req.user, ['admin', 'editor'])) {
+// Require admin role on all api-token endpoints. Mirrors the ApiToken model
+// auth (createableBy/deleteableBy: 'admin'); a reporting token inherits its
+// owner's permissions, so minting/revoking is an admin-only action.
+function requireProjectAdmin(req, res, next) {
+  if (!hasRole(req.user, ['admin'])) {
     return next(createError(403, 'Insufficient permissions'));
   }
   if (!req.project) {
@@ -57,7 +53,7 @@ function requireProjectAdminOrEditor(req, res, next) {
   return next();
 }
 
-router.use(requireProjectAdminOrEditor);
+router.use(requireProjectAdmin);
 
 // POST /project/:projectId/user/:userId/api-token — create a token (returned in plaintext once)
 router.post('/', async function (req, res, next) {
@@ -66,11 +62,25 @@ router.post('/', async function (req, res, next) {
     const projectId = req.project.id;
     const { months: monthsStr, name } = req.body;
 
-    const months = VALID_MONTHS[String(monthsStr)];
-    if (!months) {
-      return next(
-        createError(400, 'Invalid validity period. Choose 1, 3, or 12 months.')
-      );
+    // Validity period is optional: an empty / 'none' value means the token
+    // never expires. A provided value must be one of the allowed presets.
+    let expiresAt = null;
+    const hasPeriod =
+      monthsStr !== undefined &&
+      monthsStr !== null &&
+      monthsStr !== '' &&
+      monthsStr !== 'none';
+    if (hasPeriod) {
+      const months = VALID_MONTHS[String(monthsStr)];
+      if (!months) {
+        return next(
+          createError(
+            400,
+            'Invalid validity period. Choose 1, 3, or 12 months, or none.'
+          )
+        );
+      }
+      expiresAt = computeExpiresAt(months);
     }
 
     // Verify the target user belongs to this project
@@ -82,7 +92,6 @@ router.post('/', async function (req, res, next) {
     }
 
     const { plaintext, tokenHash, tokenPrefix, lastFour } = mintToken();
-    const expiresAt = computeExpiresAt(months);
 
     const token = await db.ApiToken.create({
       userId,
@@ -147,7 +156,7 @@ router.delete('/:tokenId(\\d+)', async function (req, res, next) {
 // Project-level overview routes: /project/:projectId/api-token
 const projectRouter = express.Router({ mergeParams: true });
 
-projectRouter.use(requireProjectAdminOrEditor);
+projectRouter.use(requireProjectAdmin);
 
 // GET /project/:projectId/api-token — all tokens for the project, including
 // revoked and expired ones, with owner name and computed status
@@ -191,7 +200,7 @@ projectRouter.get('/', async function (req, res, next) {
           ? {
               id: token.owner.id,
               name:
-                token.owner.displayName ||
+                token.owner.nickName ||
                 token.owner.name ||
                 token.owner.email ||
                 null,
@@ -206,7 +215,7 @@ projectRouter.get('/', async function (req, res, next) {
 
 // DELETE below intentionally matches on the viewed project's id only: a
 // superuser token shown in another project's overview cannot be revoked by
-// that project's admins/editors — only from the admin project or the owner's
+// that project's admins — only from the admin project or the owner's
 // user page.
 
 // DELETE /project/:projectId/api-token/:tokenId — revoke from the overview

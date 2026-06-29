@@ -184,10 +184,37 @@ describe('reportFieldFilter', () => {
       expect(result).toEqual(payload);
     });
 
+    it('passes through real /overview rows (key/description/result[])', () => {
+      const payload = [
+        {
+          key: 'resourceTotal',
+          description: 'Amount of resources',
+          result: [{ counted: 8 }],
+        },
+        {
+          key: 'voteTotal',
+          description: 'Amount of votes',
+          result: [{ counted: 3 }, { counted: 5 }],
+        },
+      ];
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+      expect(result).toEqual(payload);
+    });
+
     it('blocks an unexpected object payload on aggregate endpoint', () => {
       const payload = { counted: 5, secret: { nested: 'object' } };
       const result = applyFilter(payload, { reportingScope: aggregateScope });
       expect(result.error).toBeDefined();
+    });
+
+    it('blocks an array of rich records (e.g. a user list) — PII leak guard', () => {
+      const payload = [
+        { id: 1, email: 'jan@example.com', postcode: '1234AB' },
+        { id: 2, email: 'piet@example.com', user: { email: 'x@y.nl' } },
+      ];
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+      expect(result.error).toBeDefined();
+      expect(Array.isArray(result)).toBe(false);
     });
   });
 

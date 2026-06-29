@@ -5,6 +5,7 @@ const merge = require('merge');
 const db = require('../db');
 const authSettings = require('../util/auth-settings');
 const auditLogService = require('../services/audit-log');
+const { isExpired } = require('../lib/api-token-status');
 
 let adapters = {};
 
@@ -92,7 +93,9 @@ async function handleApiToken(req, res, next) {
 
     const apiToken = await db.ApiToken.findOne({ where: { tokenHash } });
 
-    if (!apiToken || apiToken.expiresAt < new Date()) {
+    // A null expiresAt means the token never expires; only treat a token as
+    // expired when it has an expiry date that is in the past (shared helper).
+    if (!apiToken || isExpired(apiToken)) {
       if (apiToken) {
         // Token exists but is expired: audit the first rejected use
         logExpiredTokenUse(req, apiToken).catch(() => {});
@@ -121,6 +124,10 @@ async function handleApiToken(req, res, next) {
 
     req.user = owner;
     req.apiTokenScope = 'reports';
+    // Expose the token identity so the scope guard can attribute blocked-path
+    // audit entries to the right token/project.
+    req.apiTokenId = apiToken.id;
+    req.apiTokenProjectId = apiToken.projectId;
 
     // Update lastUsedAt asynchronously — do not block the request
     apiToken.update({ lastUsedAt: new Date() }).catch(() => {});

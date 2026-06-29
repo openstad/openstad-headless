@@ -9,7 +9,8 @@ export type ApiToken = {
   name: string | null;
   tokenPrefix: string;
   lastFour: string;
-  expiresAt: string;
+  // null = the token never expires
+  expiresAt: string | null;
   lastUsedAt: string | null;
   createdAt: string;
   status: ApiTokenStatus;
@@ -30,7 +31,7 @@ export default function useApiTokens(projectId?: number, userId?: number) {
 
   const swr = useSWR<ApiToken[]>(url);
 
-  async function createToken(body: { months: number; name?: string }) {
+  async function createToken(body: { months?: number; name?: string }) {
     if (!projectId || !userId)
       throw new Error('Project of gebruiker ontbreekt');
 

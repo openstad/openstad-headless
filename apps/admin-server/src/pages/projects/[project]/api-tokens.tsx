@@ -15,11 +15,21 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('nl-NL');
 }
 
+function formatExpiry(iso: string | null) {
+  if (!iso) return 'Geen einddatum';
+  return new Date(iso).toLocaleDateString('nl-NL');
+}
+
 export default function ProjectApiTokens() {
   const router = useRouter();
   const { project } = router.query;
 
-  const { data: tokens, revokeToken } = useProjectApiTokens(project as string);
+  const {
+    data: tokens,
+    error,
+    isLoading,
+    revokeToken,
+  } = useProjectApiTokens(project as string);
 
   async function handleRevoke(tokenId: number) {
     if (!confirm('Weet je zeker dat je dit token wilt intrekken?')) return;
@@ -73,7 +83,22 @@ export default function ProjectApiTokens() {
               </ListHeading>
             </div>
             <ul className="admin-overview">
-              {(!tokens || tokens.length === 0) && (
+              {error && (
+                <li className="py-3 px-2">
+                  <Paragraph className="text-red-700">
+                    Tokens konden niet worden geladen. Probeer het later
+                    opnieuw.
+                  </Paragraph>
+                </li>
+              )}
+              {!error && isLoading && (
+                <li className="py-3 px-2">
+                  <Paragraph className="text-muted-foreground">
+                    Tokens laden…
+                  </Paragraph>
+                </li>
+              )}
+              {!error && !isLoading && (!tokens || tokens.length === 0) && (
                 <li className="py-3 px-2">
                   <Paragraph className="text-muted-foreground">
                     Geen tokens gevonden.
@@ -104,7 +129,7 @@ export default function ProjectApiTokens() {
                     {formatDate(token.createdAt)}
                   </Paragraph>
                   <Paragraph className="hidden lg:flex truncate lg:col-span-1">
-                    {formatDate(token.expiresAt)}
+                    {formatExpiry(token.expiresAt)}
                   </Paragraph>
                   <div className="lg:col-span-1">
                     <ApiTokenStatusBadge status={token.status} />

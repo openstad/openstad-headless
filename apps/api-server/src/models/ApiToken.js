@@ -28,8 +28,9 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: false,
       },
       expiresAt: {
+        // null = token never expires
         type: DataTypes.DATE,
-        allowNull: false,
+        allowNull: true,
       },
       lastUsedAt: {
         type: DataTypes.DATE,

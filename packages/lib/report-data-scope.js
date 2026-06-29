@@ -130,16 +130,43 @@ const COMPONENTS = {
 };
 
 /**
- * Returns the component key matching the given URL path, or null.
+ * Maps a single URL path segment to a component key. Includes singular and
+ * plural spellings because the main API and the /stats routes are inconsistent
+ * (e.g. main API uses /choicesguide, /stats uses /choicesguides).
+ */
+const SEGMENT_TO_COMPONENT = {
+  resource: 'resources',
+  resources: 'resources',
+  vote: 'votes',
+  votes: 'votes',
+  comment: 'comments',
+  comments: 'comments',
+  submission: 'submissions',
+  submissions: 'submissions',
+  choicesguide: 'choiceguides',
+  choicesguides: 'choiceguides',
+  choiceguide: 'choiceguides',
+};
+
+/**
+ * Returns the component key for the given URL path, or null.
+ *
+ * Anchors on whole path segments (not substring) and returns the LAST matching
+ * segment, so nested routes attribute correctly:
+ *  - /project/1/resource/5/comment  → 'comments' (not 'resources')
+ *  - /project/1/resources-evil      → null       (no false-positive substring)
+ *  - /project/1/choicesguide        → 'choiceguides' (singular main-API route)
  *
  * @param {string} urlPath
  * @returns {string|null}
  */
 function matchComponent(urlPath) {
-  for (const [key, def] of Object.entries(COMPONENTS)) {
-    if (urlPath.includes(def.pathPattern)) {
-      return key;
-    }
+  const segments = String(urlPath || '')
+    .split('/')
+    .filter(Boolean);
+  for (let i = segments.length - 1; i >= 0; i--) {
+    const component = SEGMENT_TO_COMPONENT[segments[i].toLowerCase()];
+    if (component) return component;
   }
   return null;
 }
@@ -262,6 +289,7 @@ function filterPayload(payload, allowedFields) {
 
 module.exports = {
   COMPONENTS,
+  SEGMENT_TO_COMPONENT,
   ALWAYS_BLOCKED_TOP_LEVEL,
   ALWAYS_BLOCKED_USER_KEYS,
   ALWAYS_BLOCKED_BLOBS,
