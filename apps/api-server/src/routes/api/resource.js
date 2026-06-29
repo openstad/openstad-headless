@@ -121,6 +121,34 @@ async function shouldSendUpdatedResourceAdminEmail(req) {
   }
 }
 
+function normalizeContributedUrl(value) {
+  if (typeof value !== 'string' || value.replace(/ /g, ' ').trim() === '') {
+    return { ok: true, value: value };
+  }
+
+  let normalized = value
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/[–—]/g, '-')
+    .replace(/ /g, ' ')
+    .trim();
+
+  if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
+    normalized = 'https://' + normalized;
+  }
+
+  try {
+    const parsed = new URL(normalized);
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return { ok: false };
+    }
+  } catch (_) {
+    return { ok: false };
+  }
+
+  return { ok: true, value: normalized };
+}
+
 // scopes: for all get requests
 router.all('*', function (req, res, next) {
   req.scope = [
@@ -487,6 +515,19 @@ router
       });
     }
 
+    if (data.extraData && typeof data.extraData.url !== 'undefined') {
+      const urlResult = normalizeContributedUrl(data.extraData.url);
+      if (!urlResult.ok) {
+        return next(
+          createError(
+            400,
+            'De ingevulde URL is ongeldig. Controleer of de link correct is en begin met https://'
+          )
+        );
+      }
+      data.extraData.url = urlResult.value;
+    }
+
     let responseData;
     db.Resource.authorizeData(data, 'create', req.user, null, req.project)
       .create(data)
@@ -784,6 +825,19 @@ router
 
     if (!userhasModeratorRights(req.user)) {
       delete data.modBreaks;
+    }
+
+    if (data.extraData && typeof data.extraData.url !== 'undefined') {
+      const urlResult = normalizeContributedUrl(data.extraData.url);
+      if (!urlResult.ok) {
+        return next(
+          createError(
+            400,
+            'De ingevulde URL is ongeldig. Controleer of de link correct is en begin met https://'
+          )
+        );
+      }
+      data.extraData.url = urlResult.value;
     }
 
     resource
