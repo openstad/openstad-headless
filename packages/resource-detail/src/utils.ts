@@ -1,6 +1,19 @@
 const KNOWN_EXTENSIONS = [
-  'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
-  'csv', 'txt', 'zip', 'png', 'jpg', 'jpeg', 'gif', 'svg',
+  'pdf',
+  'doc',
+  'docx',
+  'xls',
+  'xlsx',
+  'ppt',
+  'pptx',
+  'csv',
+  'txt',
+  'zip',
+  'png',
+  'jpg',
+  'jpeg',
+  'gif',
+  'svg',
 ];
 
 // Returns the lowercase extension of a path, or '' if there is none.
@@ -20,7 +33,12 @@ function getExtensionFromUrl(url: string): string {
 function getFileNameFromUrl(url: string): string {
   const path = url.split('?')[0].split('#')[0];
   if (!path) return '';
-  return path.split('/').pop()?.replace(/\.[^.]+$/, '') ?? '';
+  return (
+    path
+      .split('/')
+      .pop()
+      ?.replace(/\.[^.]+$/, '') ?? ''
+  );
 }
 
 // Removes a trailing "_pdf" / "-docx" style suffix, but only when it
@@ -61,8 +79,9 @@ export function formatDocumentLabel(name?: string, url?: string): string {
   const documentUrl = url || '';
 
   const withoutDottedExtension = rawName.replace(/\.[^.]+$/, '');
-  const { base: strippedBase, extension: suffixExtension } =
-    stripKnownSuffix(withoutDottedExtension);
+  const { base: strippedBase, extension: suffixExtension } = stripKnownSuffix(
+    withoutDottedExtension
+  );
 
   const base = strippedBase || getFileNameFromUrl(documentUrl);
 
