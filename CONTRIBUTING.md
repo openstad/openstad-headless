@@ -1,5 +1,7 @@
 # Hoe kun je bijdragen?
 
+Test de copilot auto review
+
 ## Problemen, suggesties en vragen
 
 <!-- Een globaal overzicht van de ontwikkeling die we al hebben geschetst, vind je in de roadmap. -->
