@@ -28,19 +28,9 @@ The ID lets you quickly find the branch belonging to a given Issue. The short de
 
 ## Pull Requests
 
-### PR Title
+### PR Title & Commit Messages
 
-We squash-merge all PRs, which means the PR title becomes the commit message in `branch-sprint-1`’s history. When you trace a specific line of code years from now, a well-written title makes it immediately clear what exactly was changed.
-
-A good PR title should complete the sentence _“If applied, this commit will…”_:
-
-1. Use the imperative mood (example: “Update spacing values”)
-2. Capitalize the first word
-3. Do not end with a period
-
-All together, a good PR title looks like this: _“Enable sorting on users in the admin”_
-
-For more information, see [How to Write a Git Commit Message](https://cbea.ms/git-commit/).
+We use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) for the PR titel and commit messages. For exampe: `feat(resource-detail): add file size and mime type to document links`
 
 ### PR Template
 
