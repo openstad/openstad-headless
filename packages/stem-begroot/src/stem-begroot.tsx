@@ -949,7 +949,7 @@ function StemBegroot({
     }
   }, [voteCompletedStorage]);
 
-  function clearPlanSelection() {
+  function clearResourcesSelection() {
     votePendingStorage.clearAllVotePending();
     selectedResourcesStorage.clearSelectedResources();
     setSelectedResources([]);
@@ -968,7 +968,7 @@ function StemBegroot({
   }
 
   async function moveToStep4AndLogout() {
-    clearPlanSelection();
+    clearResourcesSelection();
     voteCompletedStorage.setState({ showStep4AfterLogout: true });
     setCurrentStep(4);
 
@@ -1418,7 +1418,7 @@ function StemBegroot({
                   appearance="primary-action-button"
                   onClick={async () => {
                     if (currentStep === 4) {
-                      clearPlanSelection();
+                      clearResourcesSelection();
                       voteCompletedStorage.clearState();
                       setCurrentStep(startingStep);
                       return;
