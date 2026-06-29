@@ -22,6 +22,7 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
       serviceAccountName: openstad-headless-ingress-sa
+      {{- include "openstad.podAntiAffinity" (dict "Values" .Values "Release" .Release "appLabel" .Values.admin.label) | nindent 6 }}
       containers:
       - name: {{ template "openstad.admin.fullname" . }}
         securityContext:

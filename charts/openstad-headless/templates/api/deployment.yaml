@@ -23,6 +23,7 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
       serviceAccountName: openstad-headless-ingress-sa
+      {{- include "openstad.podAntiAffinity" (dict "Values" .Values "Release" .Release "appLabel" .Values.api.label) | nindent 6 }}
       containers:
         - securityContext:
             allowPrivilegeEscalation: false
@@ -171,6 +172,9 @@ spec:
                 key: pdfApiKey
                 name: {{ template "openstad.pdf.secret.fullname" . }}
                 optional: true
+
+          - name: USE_KUBERNETES_CRONJOBS
+            value: "{{ .Values.api.useKubernetesCronjobs }}"
 
           - name: AUTH_JWTSECRET
             valueFrom:

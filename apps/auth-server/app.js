@@ -12,14 +12,14 @@ setupGracefulShutdown(telemetryManager);
 
 const initializeApp = require('./app-init');
 const config = require('./config');
-const memoryStorage = require('./memoryStorage');
+const databaseStorage = require('./databaseStorage');
 
 /**
  * From time to time we need to clean up any expired tokens
  * in the database
  */
 setInterval(() => {
-  memoryStorage.accessTokens
+  databaseStorage.accessTokens
     .removeExpired()
     .catch((err) =>
       console.error('Error trying to remove expired tokens:', err.stack)

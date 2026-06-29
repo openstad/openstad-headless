@@ -23,6 +23,7 @@ spec:
         runAsGroup: 1000
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
+      {{- include "openstad.podAntiAffinity" (dict "Values" .Values "Release" .Release "appLabel" .Values.cms.label) | nindent 6 }}
 {{- if ne .Values.cms.useS3 "true" }}
       initContainers:
       - name: {{ template "openstad.cms.fullname" . }}-uploads-migration
