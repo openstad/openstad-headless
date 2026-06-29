@@ -126,8 +126,11 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     NotificationService.addNotification('Inzending indienen gelukt', 'success');
   const notifySuccessEdit = () =>
     NotificationService.addNotification('Inzending bewerken gelukt', 'success');
-  const notifyFailed = () =>
-    NotificationService.addNotification('Inzending indienen mislukt', 'error');
+  const notifyFailed = (message?: string) =>
+    NotificationService.addNotification(
+      message || 'Inzending indienen mislukt',
+      'error'
+    );
   const notifyFailedEdit = (message: string) =>
     NotificationService.addNotification(message, 'error');
 
@@ -310,7 +313,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
       console.error(
         `[resource-form] create failed: widgetId=${props.widgetId} error=${e?.message}`
       );
-      notifyFailed();
+      notifyFailed(e?.message);
       setDisableSubmit(false);
     }
   }
