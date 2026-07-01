@@ -28,24 +28,37 @@ import * as Switch from '@radix-ui/react-switch';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import * as z from 'zod';
 
-const formSchema = z.object({
-  displayTagFilters: z.boolean(),
-  tagGroups: z
-    .array(
+const formSchema = z
+  .object({
+    displayTagFilters: z.boolean(),
+    tagGroups: z.array(
       z.object({
         type: z.string(),
         label: z.string().optional(),
         multiple: z.boolean(),
       })
-    )
-    .refine((value) => value.some((item) => item), {
-      message: 'You have to select at least one item.',
-    }),
-  displayTagGroupName: z.boolean(),
-  filterBehavior: z.string().optional(),
-});
+    ),
+    displayTagGroupName: z.boolean(),
+    filterBehavior: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    // Only require at least one tag group when the tag filter is actually
+    // enabled; otherwise the toggle can be turned off / groups cleared freely.
+    if (
+      data.displayTagFilters === true &&
+      (!data.tagGroups || data.tagGroups.length === 0)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['tagGroups'],
+        message:
+          "Selecteer minimaal één tag groep of schakel 'Filteren op tags weergeven' uit.",
+      });
+    }
+  });
 
 type Tag = {
   id: number;
@@ -72,6 +85,12 @@ export default function WidgetStemBegrootOverviewTags(
     props.updateConfig({ ...props, ...values });
   }
 
+  function onError() {
+    toast.error(
+      "Selecteer minimaal één tag groep of schakel 'Filteren op tags weergeven' uit."
+    );
+  }
+
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
@@ -88,7 +107,7 @@ export default function WidgetStemBegrootOverviewTags(
         <Heading size="xl">Tags</Heading>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(onSubmit, onError)}
           className="lg:w-3/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
@@ -291,6 +310,7 @@ export default function WidgetStemBegrootOverviewTags(
                     </>
                   ))}
                 </div>
+                <FormMessage />
               </FormItem>
             )}
           />
