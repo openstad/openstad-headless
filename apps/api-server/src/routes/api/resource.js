@@ -19,6 +19,7 @@ const {
   removeSpamMetaFields,
 } = require('../../services/spam-detector');
 const { stripVisibilityScope } = require('../../lib/resource-create-scope');
+const { normalizeContributedUrl } = require('../../util/normalize-url');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -119,34 +120,6 @@ async function shouldSendUpdatedResourceAdminEmail(req) {
     );
     return false;
   }
-}
-
-function normalizeContributedUrl(value) {
-  if (typeof value !== 'string' || value.replace(/ /g, ' ').trim() === '') {
-    return { ok: true, value: value };
-  }
-
-  let normalized = value
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
-    .replace(/[–—]/g, '-')
-    .replace(/ /g, ' ')
-    .trim();
-
-  if (!normalized.startsWith('http://') && !normalized.startsWith('https://')) {
-    normalized = 'https://' + normalized;
-  }
-
-  try {
-    const parsed = new URL(normalized);
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      return { ok: false };
-    }
-  } catch (_) {
-    return { ok: false };
-  }
-
-  return { ok: true, value: normalized };
 }
 
 // scopes: for all get requests
