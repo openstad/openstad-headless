@@ -48,6 +48,10 @@ type Props = {
     inlineOptions?: boolean;
   }>;
   tagsLimitation?: Array<number> | { [key: string]: number[] };
+  searchLabel?: string;
+  displaySearchHint?: boolean;
+  searchHint?: string;
+  displaySearchPlaceholder?: boolean;
   searchPlaceholder: string;
   resetText: string;
   applyText: string;
@@ -59,6 +63,10 @@ type Props = {
     name: string;
   }>;
   displayLocationFilter?: boolean;
+  locationLabel?: string;
+  displayLocationHint?: boolean;
+  locationHint?: string;
+  locationPlaceholder?: string;
   displayCollapsibleFilter?: boolean;
   closeFiltersOnAutoApply?: boolean;
 };
@@ -492,6 +500,7 @@ export function Filters({
         <div className="button-group">
           <Button
             appearance="secondary-action-button"
+            aria-label={`${props.resetText}: alle aangepaste filters wissen`}
             onClick={() => {
               const filterParent = document.querySelector(
                 '#stem-begroot-filter'
@@ -532,6 +541,7 @@ export function Filters({
             <Button
               type="submit"
               appearance="primary-action-button"
+              aria-label={`${props.applyText}: de geselecteerde filters toepassen`}
               test-id={'filter-apply-button'}>
               {props.applyText}
             </Button>
@@ -555,7 +565,14 @@ export function Filters({
         }>
         {props.displaySearch ? (
           <div className="form-element">
-            <FormLabel htmlFor="search">Zoeken</FormLabel>
+            <FormLabel htmlFor="search">
+              {props.searchLabel || 'Zoeken'}
+            </FormLabel>
+            {props.displaySearchHint && props.searchHint ? (
+              <p id="search-hint" className="form-element-hint">
+                {props.searchHint}
+              </p>
+            ) : null}
             <Input
               value={searchValue}
               onChange={(e) => {
@@ -563,8 +580,17 @@ export function Filters({
                 search(e.target.value);
               }}
               className="osc-filter-search-bar"
-              placeholder={props.searchPlaceholder}
+              placeholder={
+                props.displaySearchPlaceholder === false
+                  ? undefined
+                  : props.searchPlaceholder
+              }
               id="search"
+              aria-describedby={
+                props.displaySearchHint && props.searchHint
+                  ? 'search-hint'
+                  : undefined
+              }
             />
           </div>
         ) : null}
