@@ -500,7 +500,7 @@ export function Filters({
         <div className="button-group">
           <Button
             appearance="secondary-action-button"
-            title="Wist de aangepaste filters"
+            aria-label={`${props.resetText}: alle aangepaste filters wissen`}
             onClick={() => {
               const filterParent = document.querySelector(
                 '#stem-begroot-filter'
@@ -541,7 +541,7 @@ export function Filters({
             <Button
               type="submit"
               appearance="primary-action-button"
-              title="Past de geselecteerde filters toe"
+              aria-label={`${props.applyText}: de geselecteerde filters toepassen`}
               test-id={'filter-apply-button'}>
               {props.applyText}
             </Button>

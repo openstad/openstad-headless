@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Select } from '../select';
 import { PostcodeAutoFillLocation } from '../stem-begroot-and-resource-overview/filter';
 import './index.css';
+import { sanitizeZipInput } from './sanitize-zip';
 
 const proximityOptions = [
   { label: '100 meter', value: '0.1' },
@@ -62,7 +63,6 @@ export default function PostcodeAutoFill({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const sanitizeZipInput = (value: string) => value.replace(/\s+/g, '');
 
   useEffect(() => {
     if (!locationDefault && input !== '') {
