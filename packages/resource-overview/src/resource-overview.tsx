@@ -988,11 +988,6 @@ function ResourceOverviewInner({
   const needsAllResourcesFetch =
     listUsesAllResources || !!displayMap || !!onFilteredResourcesChange;
 
-  // Build API filter params — always send filters to the API
-  const apiTags = useMemo(
-    () => [...(includeTags.length > 0 ? includeTags : []), ...tags],
-    [includeTags, tags]
-  );
   const apiExcludeTags = useMemo(() => excludeTags, [excludeTags]);
   const apiStatuses = useMemo(
     () => (includeOrExcludeStatusIds === 'include' ? statuses : []),
@@ -1017,25 +1012,25 @@ function ResourceOverviewInner({
     return tagsMap;
   }, [allTags]);
 
-  // When AND behavior is needed, group selected tags by their type for the API.
-  // Handle includeTags and user tags separately — they can have different behavior settings.
   const apiTagGroups = useMemo(() => {
     const groups: number[][] = [];
 
-    // includeTags: group by type when filterBehaviorInclude is 'and'
-    if (filterBehaviorInclude === 'and' && includeTags.length > 0) {
-      Object.keys(groupedTags).forEach((tagType) => {
-        const tagsOfType = groupedTags[tagType];
-        const selectedOfType = includeTags.filter((tagId) =>
-          tagsOfType.includes(tagId)
-        );
-        if (selectedOfType.length > 0) {
-          groups.push(selectedOfType);
-        }
-      });
+    if (includeTags.length > 0) {
+      if (filterBehaviorInclude === 'and') {
+        Object.keys(groupedTags).forEach((tagType) => {
+          const tagsOfType = groupedTags[tagType];
+          const selectedOfType = includeTags.filter((tagId) =>
+            tagsOfType.includes(tagId)
+          );
+          if (selectedOfType.length > 0) {
+            groups.push(selectedOfType);
+          }
+        });
+      } else {
+        groups.push(includeTags);
+      }
     }
 
-    // user-selected tags: group by type when filterBehavior is 'and'
     if (filterBehavior === 'and' && tags.length > 0) {
       Object.keys(groupedTags).forEach((tagType) => {
         const tagsOfType = groupedTags[tagType];
@@ -1051,13 +1046,10 @@ function ResourceOverviewInner({
     return groups;
   }, [filterBehavior, filterBehaviorInclude, tags, includeTags, groupedTags]);
 
-  // When tag groups handle the AND logic, send only the remaining OR tags as flat params
   const flatApiTags = useMemo(() => {
-    if (filterBehaviorInclude === 'and' && filterBehavior === 'and') return [];
-    if (filterBehaviorInclude === 'and') return tags;
-    if (filterBehavior === 'and') return includeTags;
-    return apiTags;
-  }, [filterBehavior, filterBehaviorInclude, tags, includeTags, apiTags]);
+    if (filterBehavior === 'and') return [];
+    return tags;
+  }, [filterBehavior, tags]);
 
   const {
     data: resourcesWithPagination,
