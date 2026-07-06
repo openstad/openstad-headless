@@ -3,6 +3,7 @@
 const {
   getExposedFields,
   filterPayload,
+  ALWAYS_BLOCKED_USER_KEYS,
 } = require('@openstad-headless/lib/report-data-scope');
 
 const isPrimitive = (v) =>
@@ -36,6 +37,38 @@ const isAggregateRow = (r) =>
     typeof r === 'object' &&
     !Array.isArray(r) &&
     Object.values(r).every(isAggregateValue));
+
+// Defense in depth for aggregate endpoints: even a shape-valid flat row must
+// never carry a personal-data key (email, postcode, name, …). isAggregateRow
+// accepts any flat object of primitives, so a row like {id, email, postcode}
+// would otherwise pass — this catches it. Also scans flat objects nested in
+// array values (e.g. an aggregate row's `result: [{…}]`).
+const hasBlockedKey = (obj) => {
+  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
+  for (const [key, value] of Object.entries(obj)) {
+    if (ALWAYS_BLOCKED_USER_KEYS.has(key)) return true;
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        if (hasBlockedKey(item)) return true;
+      }
+    }
+  }
+  return false;
+};
+
+// Validates that a payload is a genuine aggregate response (counts/dates) and
+// carries no personal-data keys. Returns true when safe to pass through.
+const isSafeAggregate = (payload) => {
+  if (Array.isArray(payload)) {
+    return payload.every((row) => isAggregateRow(row) && !hasBlockedKey(row));
+  }
+  if (payload && typeof payload === 'object') {
+    return (
+      Object.values(payload).every(isAggregateValue) && !hasBlockedKey(payload)
+    );
+  }
+  return true; // primitive
+};
 
 /**
  * Middleware that wraps res.json for reporting-token requests so that only
@@ -76,29 +109,27 @@ function reportFieldFilter(req, res, next) {
   const originalJson = res.json.bind(res);
 
   res.json = function filteredJson(payload) {
-    if (scope.componentKey === null) {
-      // Aggregate / metadata endpoint — only primitive counts/dates may pass.
-      // A top-level array must contain only aggregate rows (primitives or flat
-      // primitive objects); a top-level object must be metadata-only. Anything
-      // richer (e.g. an array of user records) is blocked (fail-closed).
-      const blocked = () =>
-        originalJson({
+    // Error responses pass through untouched so reporting clients keep the
+    // status message; projecting the body to safeFields would empty it and
+    // make a 404 indistinguishable from a 500 or a scope block.
+    if (res.statusCode >= 400) {
+      return originalJson(payload);
+    }
+
+    // Aggregate endpoints — the /overview allowlist (componentKey === null) and
+    // the /stats component counts (scope.aggregate). Both return counts/dates,
+    // not records, so field projection would empty them. Validate by shape and
+    // screen for PII instead (fail-closed on anything richer, e.g. a user list).
+    if (scope.componentKey === null || scope.aggregate) {
+      if (!isSafeAggregate(payload)) {
+        return originalJson({
           error: 'Response blocked: unexpected payload on aggregate endpoint',
         });
-
-      if (Array.isArray(payload)) {
-        if (!payload.every(isAggregateRow)) {
-          return blocked();
-        }
-      } else if (payload && typeof payload === 'object') {
-        if (!Object.values(payload).every(isAggregateValue)) {
-          return blocked();
-        }
       }
       return originalJson(payload);
     }
 
-    // Component endpoint — project to allowed fields.
+    // Component record endpoint — project to allowed fields.
     const filtered = filterPayload(payload, allowedFields);
     return originalJson(filtered);
   };

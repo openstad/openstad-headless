@@ -259,8 +259,9 @@ function filterRecord(record, allowedFields) {
 }
 
 /**
- * Filters a full API payload: array, paginated wrapper { data, metadata },
- * or a single record object.
+ * Filters a full API payload: array, paginated wrapper ({ records, metadata }
+ * — the shape produced by middleware/pagination.js — or the legacy
+ * { data, metadata } shape), or a single record object.
  *
  * Metadata (count, totals) passes through unmodified.
  *
@@ -273,6 +274,21 @@ function filterPayload(payload, allowedFields) {
     return payload.map((record) => filterRecord(record, allowedFields));
   }
 
+  // Real pagination wrapper from middleware/pagination.js: { metadata, records }.
+  if (
+    payload &&
+    typeof payload === 'object' &&
+    Array.isArray(payload.records)
+  ) {
+    return {
+      ...payload,
+      records: payload.records.map((record) =>
+        filterRecord(record, allowedFields)
+      ),
+    };
+  }
+
+  // Legacy { data, metadata } wrapper.
   if (payload && typeof payload === 'object' && Array.isArray(payload.data)) {
     return {
       metadata: payload.metadata,

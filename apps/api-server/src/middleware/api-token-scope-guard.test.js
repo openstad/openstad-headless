@@ -184,7 +184,44 @@ describe('apiTokenScopeGuard', () => {
   });
 
   describe('reporting token — allowlisted non-component path', () => {
-    it('allows /overview without component config check', () => {
+    it('allows /overview when at least one component is enabled', () => {
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path: '/project/1/overview',
+        projectDataScope: {
+          votes: { enabled: true, personalFields: [] },
+          resources: { enabled: false, personalFields: [] },
+        },
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
+      expect(next).toHaveBeenCalledOnce();
+      expect(req.reportingScope).toMatchObject({ componentKey: null });
+      // Only enabled components are exposed to the overview route.
+      expect(req.reportingScope.enabledComponents).toEqual(['votes']);
+    });
+
+    it('blocks /overview when no component is enabled (fail-closed)', () => {
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path: '/project/1/overview',
+        projectDataScope: { votes: { enabled: false, personalFields: [] } },
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
+      expect(res._status).toBe(403);
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('blocks /overview when dataScope is unconfigured (fail-closed)', () => {
       const req = makeReq({
         apiTokenScope: 'reports',
         method: 'GET',
@@ -196,8 +233,48 @@ describe('apiTokenScopeGuard', () => {
 
       apiTokenScopeGuard(req, res, next);
 
+      expect(res._status).toBe(403);
+      expect(next).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('reporting token — stats aggregate paths are flagged', () => {
+    it('sets aggregate:true for a /stats component count path', () => {
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path: '/stats/project/1/vote/total',
+        projectDataScope: { votes: { enabled: true, personalFields: [] } },
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
       expect(next).toHaveBeenCalledOnce();
-      expect(req.reportingScope).toMatchObject({ componentKey: null });
+      expect(req.reportingScope).toMatchObject({
+        componentKey: 'votes',
+        aggregate: true,
+      });
+    });
+
+    it('sets aggregate:false for a main-API record path', () => {
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path: '/api/project/1/vote',
+        projectDataScope: { votes: { enabled: true, personalFields: [] } },
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
+      expect(next).toHaveBeenCalledOnce();
+      expect(req.reportingScope).toMatchObject({
+        componentKey: 'votes',
+        aggregate: false,
+      });
     });
   });
 

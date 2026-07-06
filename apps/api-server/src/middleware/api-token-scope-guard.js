@@ -1,6 +1,9 @@
 'use strict';
 
-const { matchComponent } = require('@openstad-headless/lib/report-data-scope');
+const {
+  matchComponent,
+  COMPONENTS,
+} = require('@openstad-headless/lib/report-data-scope');
 const auditLogService = require('../services/audit-log');
 const db = require('../db');
 
@@ -25,10 +28,14 @@ async function logBlockedReportingPath(req) {
   const tokenId = req.apiTokenId || null;
   const routePath = (req.path || '').substring(0, 500);
 
+  // modelName is included so the (modelName, modelId, createdAt) index
+  // (idx_audit_model_created) can serve this lookup; without it the query
+  // would full-scan audit_logs on every blocked request.
   const existing = await db.AuditLog.findOne({
     where: {
-      action: 'reporting_path_blocked',
+      modelName: 'api-token',
       modelId: tokenId,
+      action: 'reporting_path_blocked',
       routePath,
     },
   });
@@ -47,6 +54,20 @@ async function logBlockedReportingPath(req) {
   // Dedup key is the path without query string; store the same value.
   entry.routePath = routePath;
   auditLogService.logDirect(entry);
+}
+
+/**
+ * Returns the component keys the project has explicitly enabled for reporting.
+ * Restricted to known catalog components so an unrelated dataScope key can
+ * never widen access.
+ */
+function getEnabledComponents(req) {
+  const dataScope =
+    req.project && req.project.config && req.project.config.dataScope;
+  if (!dataScope) return [];
+  return Object.keys(COMPONENTS).filter(
+    (key) => dataScope[key] && dataScope[key].enabled
+  );
 }
 
 /**
@@ -97,6 +118,11 @@ function apiTokenScopeGuard(req, res, next) {
 
   const componentKey = matchComponent(req.path);
 
+  // /stats routes return aggregates ({count}, [{date, counted}]), not records.
+  // The field filter must screen these by shape rather than project them to a
+  // component's safeFields (which would empty a {count} payload).
+  const isStatsPath = req.path.startsWith('/stats/');
+
   if (componentKey) {
     const dataScope =
       req.project && req.project.config && req.project.config.dataScope;
@@ -112,6 +138,7 @@ function apiTokenScopeGuard(req, res, next) {
     req.reportingScope = {
       componentKey,
       enabledPersonalFields: componentCfg.personalFields || [],
+      aggregate: isStatsPath,
     };
   } else {
     // Non-component path: deny by default. Only explicitly allowlisted
@@ -130,7 +157,22 @@ function apiTokenScopeGuard(req, res, next) {
         .json({ error: 'Path not allowed for reporting tokens' });
     }
 
-    req.reportingScope = { componentKey: null, enabledPersonalFields: [] };
+    // Aggregate endpoints (e.g. /overview) derive their numbers from the
+    // component data. If the project enabled no components, the token must
+    // reach nothing — fail-closed, consistent with the per-component gate.
+    const enabledComponents = getEnabledComponents(req);
+    if (enabledComponents.length === 0) {
+      logBlockedReportingPath(req).catch(() => {});
+      return res.status(403).json({
+        error: 'No reporting components are enabled for this project',
+      });
+    }
+
+    req.reportingScope = {
+      componentKey: null,
+      enabledPersonalFields: [],
+      enabledComponents,
+    };
   }
 
   return next();

@@ -14,18 +14,20 @@ const reportFieldFilter = require('./report-field-filter');
 
 function applyFilter(
   payload,
-  { apiTokenScope = 'reports', reportingScope } = {}
+  { apiTokenScope = 'reports', reportingScope, statusCode = 200 } = {}
 ) {
   const captured = { body: null };
 
   const req = { apiTokenScope, reportingScope };
   const res = {
     _jsonFn: null,
+    statusCode,
     json(body) {
       captured.body = body;
       return res;
     },
     status(code) {
+      this.statusCode = code;
       return res;
     },
   };
@@ -164,6 +166,70 @@ describe('reportFieldFilter', () => {
       expect(result.data[0].ip).toBeUndefined();
       expect(result.data[0].userId).toBeUndefined();
     });
+
+    it('filters the real pagination wrapper { records, metadata }', () => {
+      // middleware/pagination.js produces { metadata, records } — not { data }.
+      const payload = {
+        metadata: { totalCount: 5, page: 0 },
+        records: [{ id: 1, opinion: 'yes', ip: '1.2.3.4', userId: 7 }],
+      };
+
+      const result = applyFilter(payload, { reportingScope: scope });
+
+      expect(result.metadata).toEqual({ totalCount: 5, page: 0 });
+      expect(result.records).toHaveLength(1);
+      expect(result.records[0].opinion).toBe('yes');
+      // PII still stripped inside the wrapped records.
+      expect(result.records[0].ip).toBeUndefined();
+      expect(result.records[0].userId).toBeUndefined();
+    });
+  });
+
+  describe('stats component aggregate paths (scope.aggregate)', () => {
+    // /stats/project/:id/vote/total resolves componentKey 'votes' but returns
+    // { count: n }, not vote records — projecting it to safeFields would empty
+    // it. The aggregate flag makes the filter pass it through by shape instead.
+    const statsScope = {
+      componentKey: 'votes',
+      enabledPersonalFields: [],
+      aggregate: true,
+    };
+
+    it('passes a { count } payload through unchanged', () => {
+      const result = applyFilter({ count: 42 }, { reportingScope: statsScope });
+      expect(result).toEqual({ count: 42 });
+    });
+
+    it('passes an array of { date, counted } rows through unchanged', () => {
+      const payload = [
+        { date: '2024-01-01', counted: 3 },
+        { date: '2024-01-02', counted: 5 },
+      ];
+      const result = applyFilter(payload, { reportingScope: statsScope });
+      expect(result).toEqual(payload);
+    });
+
+    it('blocks a rich record payload on a stats path (fail-closed)', () => {
+      const payload = [{ id: 1, user: { email: 'x@y.nl' } }];
+      const result = applyFilter(payload, { reportingScope: statsScope });
+      expect(result.error).toBeDefined();
+    });
+  });
+
+  describe('error responses pass through untouched (statusCode >= 400)', () => {
+    it('does not strip a 404 error body on a component path', () => {
+      const scope = { componentKey: 'votes', enabledPersonalFields: [] };
+      const payload = { status: 404, message: 'Vote not found' };
+
+      const result = applyFilter(payload, {
+        reportingScope: scope,
+        statusCode: 404,
+      });
+
+      // The message survives so clients can tell a 404 from a scope block.
+      expect(result.message).toBe('Vote not found');
+      expect(result.status).toBe(404);
+    });
   });
 
   describe('aggregate / metadata endpoint (componentKey === null)', () => {
@@ -215,6 +281,23 @@ describe('reportFieldFilter', () => {
       const result = applyFilter(payload, { reportingScope: aggregateScope });
       expect(result.error).toBeDefined();
       expect(Array.isArray(result)).toBe(false);
+    });
+
+    it('blocks flat rows carrying PII keys even without a nested object', () => {
+      // Every value is a primitive, so the shape check alone would pass; the
+      // PII-key screen (email/postcode) must still block it.
+      const payload = [{ id: 1, email: 'jan@example.com', postcode: '1234AB' }];
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+      expect(result.error).toBeDefined();
+      expect(Array.isArray(result)).toBe(false);
+    });
+
+    it('blocks PII nested inside an aggregate row result array', () => {
+      const payload = [
+        { key: 'leak', description: 'x', result: [{ email: 'a@b.nl' }] },
+      ];
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+      expect(result.error).toBeDefined();
     });
   });
 
