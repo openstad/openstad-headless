@@ -60,4 +60,14 @@ export const DATA_SCOPE_COMPONENTS = {
     label: 'Keuzewijzer vragen',
     personalFields: [],
   },
+  // Dedicated opt-in for the anonymized/aggregated participant endpoints
+  // (/reports/users/anonymized, /reports/users/aggregates). Deliberately
+  // separate from every other component's toggle: those endpoints return a
+  // project-wide participant roster across ALL data sources, so enabling e.g.
+  // only 'votes' reporting must NOT also unlock this. No personal fields to
+  // opt into — the exposed shape is fixed (pseudonymized id, role, timestamps).
+  users: {
+    label: 'Deelnemers (geanonimiseerd)',
+    personalFields: [],
+  },
 } as const;
