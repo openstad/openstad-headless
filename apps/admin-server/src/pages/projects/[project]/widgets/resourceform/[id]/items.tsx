@@ -14,12 +14,14 @@ import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
+  SelectContentScrollable,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
@@ -55,6 +57,9 @@ const TrixEditor = dynamic(
   }
 );
 
+const stripHtml = (html: string): string =>
+  html?.replace(/<[^>]*>/g, '').trim() || '';
+
 const formSchema = z.object({
   trigger: z.string(),
   fieldType: z.string(),
@@ -71,6 +76,10 @@ const formSchema = z.object({
   maxChoicesMessage: z.string().optional(),
   variant: z.string().optional(),
   multiple: z.boolean().optional(),
+  maxUploadSizeMB: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number().positive().optional()
+  ),
   prevPageText: z.string().optional(),
   nextPageText: z.string().optional(),
   placeholder: z.string().optional(),
@@ -166,6 +175,7 @@ export default function WidgetResourceFormItems(
   const router = useRouter();
   const { project } = router.query;
 
+  const { data: allStatuses } = useStatuses(project as string);
   const { data: allTags } = useTags(project as string);
   const firstTagType = allTags?.[0]?.type ?? '';
 
@@ -234,6 +244,7 @@ export default function WidgetResourceFormItems(
             maxChoicesMessage: values.maxChoicesMessage || '',
             variant: values.variant || 'text input',
             multiple: values.multiple || false,
+            maxUploadSizeMB: values.maxUploadSizeMB || 25,
             prevPageText: values.prevPageText || '',
             nextPageText: values.nextPageText || '',
             options: values.options || [],
@@ -381,6 +392,7 @@ export default function WidgetResourceFormItems(
     maxChoicesMessage: '',
     variant: 'text input',
     multiple: false,
+    maxUploadSizeMB: 25,
     prevPageText: '',
     nextPageText: '',
     options: [],
@@ -408,7 +420,9 @@ export default function WidgetResourceFormItems(
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    onFieldChanged('items', items);
+    if (onFieldChanged) {
+      onFieldChanged('items', items);
+    }
   }, [items]);
 
   // Sets form to selected item values when item is selected
@@ -433,6 +447,7 @@ export default function WidgetResourceFormItems(
         maxChoicesMessage: selectedItem.maxChoicesMessage || '',
         variant: selectedItem.variant || '',
         multiple: selectedItem.multiple || false,
+        maxUploadSizeMB: selectedItem.maxUploadSizeMB || 25,
         prevPageText: selectedItem.prevPageText || '',
         nextPageText: selectedItem.nextPageText || '',
         matrix: selectedItem.matrix || matrixDefault,
@@ -1204,6 +1219,9 @@ export default function WidgetResourceFormItems(
                               <SelectItem value="tags">
                                 Inzending: Tags
                               </SelectItem>
+                              <SelectItem value="status">
+                                Inzending: Status
+                              </SelectItem>
                               <SelectItem value="location">
                                 Inzending: Locatie
                               </SelectItem>
@@ -1514,6 +1532,20 @@ export default function WidgetResourceFormItems(
                         )}
                       </>
                     )}
+                    {form.watch('type') === 'status' &&
+                      (!allStatuses || allStatuses.length === 0) && (
+                        <p
+                          style={{
+                            fontSize: '14px',
+                            margin: '20px 0',
+                            color: 'red',
+                          }}>
+                          <strong>
+                            Geen statussen gevonden om te selecteren. Maak dit
+                            aan onder het kopje &apos;Statussen&apos;
+                          </strong>
+                        </p>
+                      )}
                     {![
                       'none',
                       'pagination',
@@ -1775,6 +1807,30 @@ export default function WidgetResourceFormItems(
                       />
                     )}
 
+                    {(form.watch('type') === 'imageUpload' ||
+                      form.watch('type') === 'documentUpload') && (
+                      <FormField
+                        control={form.control}
+                        name="maxUploadSizeMB"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Maximale uploadgrootte (MB)</FormLabel>
+                            <FormDescription>
+                              <em className="text-xs">
+                                De maximale bestandsgrootte die een gebruiker
+                                mag uploaden. Standaard 25 MB. Let op: de server
+                                hanteert een absolute bovengrens (standaard 25
+                                MB); hogere waarden kunnen alsnog door de server
+                                geweigerd worden.
+                              </em>
+                            </FormDescription>
+                            <Input type="number" min="1" {...field} />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
                     {form.watch('type') !== 'pagination' && (
                       <FormField
                         control={form.control}
@@ -1927,17 +1983,17 @@ export default function WidgetResourceFormItems(
                                         <SelectValue placeholder="Kies een vraag" />
                                       </SelectTrigger>
                                     </FormControl>
-                                    <SelectContent>
+                                    <SelectContentScrollable>
                                       {formMultipleChoiceFields.map(
                                         (f: any) => (
                                           <SelectItem
                                             key={f.trigger}
                                             value={f.trigger}>
-                                            {f.title || f.fieldKey}
+                                            {stripHtml(f.title) || f.fieldKey}
                                           </SelectItem>
                                         )
                                       )}
-                                    </SelectContent>
+                                    </SelectContentScrollable>
                                   </Select>
                                 )}
 

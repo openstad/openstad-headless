@@ -14,6 +14,7 @@ const db = require('../../db');
 const authLocalConfig = require('../../config/auth').get('Local');
 const URL = require('url').URL;
 const clientAuth = require('../../utils/clientAuth');
+const { prefillAllowedDomains } = require('../oauth/oauth2');
 const authType = 'Local';
 const { logAuthEvent } = require('../../middleware/auditLog');
 
@@ -199,34 +200,39 @@ exports.logout = async (req, res) => {
   await req.session.destroy();
 
   const config = req.client.config;
-  const allowedDomains = req.client.allowedDomains
-    ? [...req.client.allowedDomains]
-    : [];
-
-  // Always allow the admin domain for logout redirects
-  if (process.env.ADMIN_URL) {
-    try {
-      allowedDomains.push(new URL(process.env.ADMIN_URL).hostname);
-    } catch (e) {
-      console.warn('Invalid ADMIN_URL env var:', process.env.ADMIN_URL);
-    }
-  }
+  const allowedDomains = prefillAllowedDomains(req.client.allowedDomains || []);
 
   let redirectURL = req.query.redirectUrl;
+  let redirectUrlHost = null;
 
   try {
-    const redirectUrlHost = redirectURL ? new URL(redirectURL).hostname : false;
-    redirectURL =
-      redirectUrlHost && allowedDomains.includes(redirectUrlHost)
-        ? redirectURL
-        : false;
+    redirectUrlHost = redirectURL ? new URL(redirectURL).host : null;
+    if (!redirectUrlHost || allowedDomains.indexOf(redirectUrlHost) === -1) {
+      redirectURL = false;
+    }
   } catch (e) {
     redirectURL = null;
   }
 
   if (!redirectURL) {
+    console.log(
+      `[${new Date().toISOString()}][auth-logout] redirect host not allowed: clientId=${req.client?.id} redirectHost=${redirectUrlHost} requested=${req.query.redirectUrl?.substring(0, 120)}`
+    );
     redirectURL =
       config && config.logoutUrl ? config.logoutUrl : req.client.redirectUrl;
+  }
+
+  if (!redirectURL && process.env.ADMIN_URL) {
+    redirectURL = process.env.ADMIN_URL;
+  }
+
+  if (!redirectURL) {
+    console.log(
+      `[${new Date().toISOString()}][auth-logout] no valid redirect URL after fallbacks: clientId=${req.client?.id}`
+    );
+    return res
+      .status(500)
+      .send('Logout completed, but no valid redirect URL was configured.');
   }
 
   res.redirect(redirectURL);

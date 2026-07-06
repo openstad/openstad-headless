@@ -67,9 +67,11 @@ router
         },
         (err, token) => {
           if (err) return next(err);
-          return res.json({
-            jwt: token,
-          });
+          const response = { jwt: token };
+          if (sessionDuration.shouldExpireOnClose(openStadUser.role)) {
+            response.expireOnClose = true;
+          }
+          return res.json(response);
         }
       );
     } catch (err) {
@@ -414,6 +416,10 @@ router
           return next(err);
         }
         req.redirectUrl = req.redirectUrl.replace('[[jwt]]', token);
+        if (sessionDuration.shouldExpireOnClose(req.userData.role)) {
+          req.redirectUrl +=
+            (req.redirectUrl.includes('?') ? '&' : '?') + 'expireOnClose=1';
+        }
         console.log(
           `[${new Date().toISOString()}][digest-login] complete: userId=${req.userData?.id} projectId=${req.project?.id} role=${req.userData?.role} redirect=${req.redirectUrl?.substring(0, 80)}`
         );

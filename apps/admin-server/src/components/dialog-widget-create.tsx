@@ -1,6 +1,6 @@
 import InfoDialog from '@/components/ui/info-hover';
+import { useWidgetDefinitions } from '@/hooks/use-widget-definitions';
 import { useWidgetsHook } from '@/hooks/use-widgets';
-import { WidgetDefinitions } from '@/lib/widget-definitions';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus } from 'lucide-react';
 import { useRouter } from 'next/router';
@@ -61,7 +61,8 @@ type FormData = z.infer<typeof formSchema>;
 export function CreateWidgetDialog({ projectId }: Props) {
   const [open, setOpen] = useState<boolean>(false);
   const router = useRouter();
-  const widgetTypes = Object.entries(WidgetDefinitions);
+  const widgetDefinitions = useWidgetDefinitions();
+  const widgetTypes = Object.entries(widgetDefinitions);
   const { createWidget } = useWidgetsHook(projectId);
 
   async function onSubmit(values: FormData) {

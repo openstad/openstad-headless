@@ -46,6 +46,7 @@ const formSchema = z.object({
   fromName: z.string().optional(),
   sendUpdatedResourceAdminEmail: z.boolean().optional(),
   pdfAttachmentEnabled: z.boolean().optional(),
+  pdfAttachmentAdminEnabled: z.boolean().optional(),
   pdfTitle: z.string().optional(),
   pdfDescription: z.string().optional(),
 });
@@ -68,6 +69,8 @@ export default function ProjectSettingsNotifications({
         data?.emailConfig?.[category]?.sendUpdatedResourceAdminEmail || false,
       pdfAttachmentEnabled:
         data?.emailConfig?.[category]?.pdfAttachmentEnabled || false,
+      pdfAttachmentAdminEnabled:
+        data?.emailConfig?.[category]?.pdfAttachmentAdminEnabled || false,
       pdfTitle: data?.emailConfig?.[category]?.pdfTitle ?? '',
       pdfDescription: data?.emailConfig?.[category]?.pdfDescription ?? '',
     }),
@@ -93,6 +96,7 @@ export default function ProjectSettingsNotifications({
           sendUpdatedResourceAdminEmail:
             values.sendUpdatedResourceAdminEmail || false,
           pdfAttachmentEnabled: values.pdfAttachmentEnabled || false,
+          pdfAttachmentAdminEnabled: values.pdfAttachmentAdminEnabled || false,
           pdfTitle: values.pdfTitle || '',
           pdfDescription: values.pdfDescription || '',
         },
@@ -263,6 +267,45 @@ export default function ProjectSettingsNotifications({
                             htmlFor={field.name}
                             className="cursor-pointer">
                             PDF bijlage meesturen bij bevestigingsmails
+                          </Label>
+                        </div>
+                        {pdfAvailable === false && (
+                          <p className="text-sm text-orange-600">
+                            PDF generatie is niet beschikbaar. De benodigde
+                            server-configuratie ontbreekt.
+                          </p>
+                        )}
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="pdfAttachmentAdminEnabled"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>PDF bijlage naar beheerder</FormLabel>
+                    <FormDescription>
+                      Wanneer ingeschakeld wordt de PDF ook meegestuurd met de
+                      beheerdersmail na het indienen van een inzending.
+                    </FormDescription>
+                    <FormControl>
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id={field.name}
+                            checked={field.value}
+                            disabled={pdfAvailable === false}
+                            onCheckedChange={(checked) =>
+                              field.onChange(Boolean(checked))
+                            }
+                          />
+                          <Label
+                            htmlFor={field.name}
+                            className="cursor-pointer">
+                            PDF bijlage meesturen met de beheerdersmail
                           </Label>
                         </div>
                         {pdfAvailable === false && (

@@ -37,6 +37,23 @@ exports.check = (req, res, next) => {
       .then(async (user) => {
         req.user = user;
 
+        if (req.client?.id === 1 && !req.currentClientAuth?.authenticatedAt) {
+          let url = '/login?clientId=' + req.client.clientId;
+
+          if (req.query.redirect_uri) {
+            url =
+              url +
+              '&redirect_uri=' +
+              encodeURIComponent(req.query.redirect_uri);
+          }
+
+          if (req.session) {
+            req.session.returnTo = req.originalUrl || req.url;
+          }
+
+          return res.redirect(url);
+        }
+
         if (req.client && req.currentClientAuth) {
           const currentRole = await clientAuth.resolveRoleForClient(
             req.user,

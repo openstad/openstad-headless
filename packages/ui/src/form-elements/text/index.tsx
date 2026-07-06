@@ -9,6 +9,7 @@ import {
   Textarea,
   Textbox,
 } from '@utrecht/component-library-react';
+import DOMPurify from 'dompurify';
 import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
@@ -36,6 +37,29 @@ declare global {
       >;
     }
   }
+}
+
+// Parse editor HTML into an inert, sanitized document body. DOMPurify breaks
+// the untrusted-text -> HTML flow before it reaches the parser; target/rel are
+// kept so existing "open in new tab" links survive a round-trip.
+function parseEditorHtml(html: string): HTMLElement | null {
+  if (typeof document === 'undefined') return null;
+  const clean = DOMPurify.sanitize(html || '', {
+    ADD_ATTR: ['target', 'rel'],
+  });
+  return new DOMParser().parseFromString(clean, 'text/html').body;
+}
+
+function getTargetBlankHrefs(html: string): Set<string> {
+  const hrefs = new Set<string>();
+  if (!html || !html.includes('target')) return hrefs;
+  const body = parseEditorHtml(html);
+  if (!body) return hrefs;
+  body.querySelectorAll('a[target="_blank"]').forEach((link) => {
+    const href = link.getAttribute('href');
+    if (href) hrefs.add(href);
+  });
+  return hrefs;
 }
 
 export type TextInputProps = {
@@ -101,6 +125,8 @@ const TrixEditor: React.FC<{
   const onBlurRef = useRef(onBlur);
   const valueRef = useRef(value);
 
+  const targetBlankHrefsRef = useRef<Set<string>>(new Set());
+
   const idRef = useRef(
     `trix-editor-${Math.random().toString(36).substring(2, 9)}`
   );
@@ -112,8 +138,9 @@ const TrixEditor: React.FC<{
         await import('trix');
         await import('trix/dist/trix.css');
 
-        // Use semantic paragraphs for new blocks created with Enter.
         const trix = (window as any).Trix;
+
+        // Use semantic paragraphs for new blocks created with Enter.
         if (trix?.config?.blockAttributes?.default) {
           trix.config.blockAttributes.default.tagName = 'p';
         }
@@ -146,7 +173,6 @@ const TrixEditor: React.FC<{
     const handleTrixInitialize = () => {
       editorInstance.current = (editorEl as any).editor;
 
-      // Remove the file attachment button from the toolbar
       const toolbar = editorEl.parentElement?.querySelector('trix-toolbar');
       if (toolbar) {
         const fileButton = toolbar.querySelector(
@@ -155,21 +181,117 @@ const TrixEditor: React.FC<{
         if (fileButton) {
           fileButton.remove();
         }
+
+        const dialog = toolbar.querySelector('[data-trix-dialog="href"]');
+        const linkFields = dialog?.querySelector('.trix-dialog__link-fields');
+        if (
+          linkFields &&
+          !linkFields.querySelector('.trix-target-blank-label')
+        ) {
+          const label = document.createElement('label');
+          label.className = 'trix-target-blank-label';
+
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.className = 'trix-target-blank-checkbox';
+
+          label.appendChild(checkbox);
+          label.appendChild(
+            document.createTextNode(' Openen in nieuw tabblad')
+          );
+
+          const buttonGroup = linkFields.querySelector('.trix-button-group');
+          linkFields.insertBefore(label, buttonGroup);
+
+          const linkButton = linkFields.querySelector(
+            '[data-trix-method="setAttribute"]'
+          );
+          if (linkButton) {
+            linkButton.addEventListener('click', () => {
+              const checked = checkbox.checked;
+              setTimeout(() => {
+                const html = inputEl.value || '';
+                const editor = (editorEl as any).editor;
+                const currentHref =
+                  editor?.composition?.currentAttributes?.href;
+                if (!currentHref) return;
+
+                const body = parseEditorHtml(html);
+                if (!body) return;
+                const link = body.querySelector(
+                  `a[href="${CSS.escape(currentHref)}"]`
+                );
+                if (!link) return;
+
+                if (checked) {
+                  link.setAttribute('target', '_blank');
+                  link.setAttribute('rel', 'noopener noreferrer');
+                  targetBlankHrefsRef.current.add(currentHref);
+                } else {
+                  link.removeAttribute('target');
+                  link.removeAttribute('rel');
+                  targetBlankHrefsRef.current.delete(currentHref);
+                }
+
+                const updatedHtml = body.innerHTML;
+                inputEl.value = updatedHtml;
+                const syntheticEvent = {
+                  target: { value: updatedHtml },
+                } as React.ChangeEvent<HTMLInputElement>;
+                onChangeRef.current(syntheticEvent);
+              }, 0);
+            });
+          }
+        }
       }
 
-      // Load initial content
       if (valueRef.current && editorInstance.current) {
+        targetBlankHrefsRef.current = getTargetBlankHrefs(valueRef.current);
         editorInstance.current.loadHTML(valueRef.current);
       }
     };
 
     const handleTrixChange = () => {
-      const html = inputEl.value;
+      let html = inputEl.value;
+
+      if (targetBlankHrefsRef.current.size > 0) {
+        const body = parseEditorHtml(html);
+        if (body) {
+          let changed = false;
+          targetBlankHrefsRef.current.forEach((href) => {
+            const link = body.querySelector(`a[href="${CSS.escape(href)}"]`);
+            if (link && !link.hasAttribute('target')) {
+              link.setAttribute('target', '_blank');
+              link.setAttribute('rel', 'noopener noreferrer');
+              changed = true;
+            }
+          });
+          if (changed) {
+            html = body.innerHTML;
+            inputEl.value = html;
+          }
+        }
+      }
+
       const syntheticEvent = {
         target: { value: html },
       } as React.ChangeEvent<HTMLInputElement>;
 
       onChangeRef.current(syntheticEvent);
+    };
+
+    const handleDialogShow = () => {
+      const toolbar = editorEl.parentElement?.querySelector('trix-toolbar');
+      const checkbox = toolbar?.querySelector(
+        '.trix-target-blank-checkbox'
+      ) as HTMLInputElement | null;
+      const editor = (editorEl as any).editor;
+      if (!checkbox || !editor) return;
+
+      const currentHref = editor.composition?.currentAttributes?.href;
+      checkbox.checked = !!(
+        currentHref && targetBlankHrefsRef.current.has(currentHref)
+      );
     };
 
     const handleTrixFocus = () => {
@@ -182,12 +304,17 @@ const TrixEditor: React.FC<{
 
     editorEl.addEventListener('trix-initialize', handleTrixInitialize);
     editorEl.addEventListener('trix-change', handleTrixChange);
+    editorEl.addEventListener('trix-toolbar-dialog-show', handleDialogShow);
     inputEl.addEventListener('input', handleTrixChange);
     editorEl.addEventListener('trix-focus', handleTrixFocus);
     editorEl.addEventListener('trix-blur', handleTrixBlur);
     return () => {
       editorEl.removeEventListener('trix-initialize', handleTrixInitialize);
       editorEl.removeEventListener('trix-change', handleTrixChange);
+      editorEl.removeEventListener(
+        'trix-toolbar-dialog-show',
+        handleDialogShow
+      );
       inputEl.removeEventListener('input', handleTrixChange);
       editorEl.removeEventListener('trix-focus', handleTrixFocus);
       editorEl.removeEventListener('trix-blur', handleTrixBlur);
@@ -199,6 +326,10 @@ const TrixEditor: React.FC<{
     if (!editorInstance.current || !inputRef.current) return;
     const currentHTML = inputRef.current.value;
     if (currentHTML !== value) {
+      const newHrefs = getTargetBlankHrefs(value || '');
+      if (newHrefs.size > 0) {
+        newHrefs.forEach((h) => targetBlankHrefsRef.current.add(h));
+      }
       editorInstance.current.loadHTML(value || '');
     }
   }, [value]);

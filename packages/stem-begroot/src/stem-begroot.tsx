@@ -3,12 +3,23 @@ import DataStore from '@openstad-headless/data-store/src';
 import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Paginator, Spacer, Stepper } from '@openstad-headless/ui/src';
+import {
+  Paginator,
+  Spacer,
+  Stepper,
+  fireConfetti,
+} from '@openstad-headless/ui/src';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import '@utrecht/component-library-css';
 import { Button, ButtonLink, Heading } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
 import NotificationService from '../../lib/NotificationProvider/notification-service';
@@ -103,6 +114,7 @@ export type StemBegrootWidgetProps = BaseProps &
     voteAfterLoggingIn?: boolean;
     displayModBreak?: boolean;
     randomSortRotationMs?: number;
+    showConfetti?: boolean;
   };
 
 function StemBegroot({
@@ -584,6 +596,9 @@ function StemBegroot({
         );
         const submitted = await submitVoteAndCleanup();
         if (submitted) {
+          if (props.showConfetti) {
+            fireConfetti();
+          }
           setCurrentStep(4);
         }
       })();
@@ -921,6 +936,63 @@ function StemBegroot({
     ? filteredResources
     : resources?.records || [];
 
+  const computeCanAddMore = useCallback((): boolean => {
+    let canAddMore = true;
+
+    if (
+      props?.votes?.voteType === 'countPerTag' ||
+      props?.votes?.voteType === 'budgetingPerTag'
+    ) {
+      const activeTagData = tagCounter.find((tagObj) => tagObj[activeTagTab]);
+      if (!activeTagData) return false;
+
+      const activeTag = activeTagData[activeTagTab];
+      const maxLimit = activeTag.max;
+      const currentCount = activeTag.current;
+
+      if (props.votes.voteType === 'countPerTag') {
+        canAddMore = currentCount < maxLimit;
+      }
+
+      if (props.votes.voteType === 'budgetingPerTag') {
+        const notUsedResources = filteredResources.filter(
+          (allR: { id: number }) =>
+            !selectedResources.find((selectedR) => allR.id === selectedR.id)
+        );
+
+        canAddMore = notUsedResources.some(
+          (r: { budget: number }) => r.budget <= maxLimit - currentCount
+        );
+      }
+    } else {
+      const notUsedResources = resources?.records.filter(
+        (allR: { id: number }) =>
+          !selectedResources.find((selectedR) => allR.id === selectedR.id)
+      );
+
+      canAddMore =
+        props.votes.voteType === 'budgeting'
+          ? notUsedResources.some(
+              (r: { budget: number }) =>
+                r.budget <= props.votes.maxBudget - budgetUsed
+            )
+          : Math.max(props.votes.maxResources - selectedResources.length, 0) >
+            0;
+    }
+
+    return canAddMore;
+  }, [
+    props.votes.voteType,
+    props.votes.maxBudget,
+    props.votes.maxResources,
+    tagCounter,
+    activeTagTab,
+    filteredResources,
+    selectedResources,
+    resources?.records,
+    budgetUsed,
+  ]);
+
   const step1ContainerRef = useRef<HTMLDivElement | null>(null);
   const scrollToElement = () => {
     if (step1ContainerRef.current) {
@@ -973,6 +1045,18 @@ function StemBegroot({
       scrollToTop();
     }
   }, [isLoading]);
+
+  const scrollInitRef = useRef(false);
+  useEffect(() => {
+    if (isLoading) return;
+    if (!scrollInitRef.current) {
+      scrollInitRef.current = true;
+      return;
+    }
+    if (!scrollWhenMaxReached) return;
+    if (computeCanAddMore()) return;
+    scrollToElement();
+  }, [selectedResources, isLoading, scrollWhenMaxReached, computeCanAddMore]);
 
   // Reset to first page when filters change (skip initial render)
   const filtersInitialised = useRef(false);
@@ -1189,65 +1273,7 @@ function StemBegroot({
                     }
                   }
                 }}
-                decideCanAddMore={() => {
-                  let canAddMore = true;
-
-                  if (
-                    props?.votes?.voteType === 'countPerTag' ||
-                    props?.votes?.voteType === 'budgetingPerTag'
-                  ) {
-                    const activeTagData = tagCounter.find(
-                      (tagObj) => tagObj[activeTagTab]
-                    );
-                    if (!activeTagData) return false;
-
-                    const activeTag = activeTagData[activeTagTab];
-                    const maxLimit = activeTag.max;
-                    const currentCount = activeTag.current;
-
-                    if (props.votes.voteType === 'countPerTag') {
-                      canAddMore = currentCount < maxLimit;
-                    }
-
-                    if (props.votes.voteType === 'budgetingPerTag') {
-                      let notUsedResources = filteredResources.filter(
-                        (allR: { id: number }) =>
-                          !selectedResources.find(
-                            (selectedR) => allR.id === selectedR.id
-                          )
-                      );
-
-                      canAddMore = notUsedResources.some(
-                        (r: { budget: number }) =>
-                          r.budget <= maxLimit - currentCount
-                      );
-                    }
-                  } else {
-                    let notUsedResources = resources?.records.filter(
-                      (allR: { id: number }) =>
-                        !selectedResources.find(
-                          (selectedR) => allR.id === selectedR.id
-                        )
-                    );
-
-                    canAddMore =
-                      props.votes.voteType === 'budgeting'
-                        ? notUsedResources.some(
-                            (r: { budget: number }) =>
-                              r.budget <= props.votes.maxBudget - budgetUsed
-                          )
-                        : Math.max(
-                            props.votes.maxResources - selectedResources.length,
-                            0
-                          ) > 0;
-                  }
-
-                  if (!canAddMore && scrollWhenMaxReached) {
-                    scrollToElement();
-                  }
-
-                  return canAddMore;
-                }}
+                decideCanAddMore={computeCanAddMore}
               />
             </>
           ) : null}
@@ -1401,6 +1427,9 @@ function StemBegroot({
                     if (currentStep === 3) {
                       const submitted = await submitVoteAndCleanup();
                       if (submitted) {
+                        if (props.showConfetti) {
+                          fireConfetti();
+                        }
                         setCurrentStep(4);
                       }
                     } else if (currentStep === 4) {

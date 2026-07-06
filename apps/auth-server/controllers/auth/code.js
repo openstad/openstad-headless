@@ -48,6 +48,12 @@ exports.login = (req, res, next) => {
 };
 
 exports.postLogin = (req, res, next) => {
+  const config = req.client.config ? req.client.config : {};
+  const configAuthType =
+    config.authTypes && config.authTypes[authType]
+      ? config.authTypes[authType]
+      : {};
+
   passport.authenticate(
     'uniqueCode',
     { session: false },
@@ -57,7 +63,9 @@ exports.postLogin = (req, res, next) => {
         logAuthEvent(req, 'login_failed', {
           data: { method: 'uniqueCode' },
         });
-        req.flash('error', { msg: authCodeConfig.errorMessage });
+        req.flash('error', {
+          msg: configAuthType.errorMessage || authCodeConfig.errorMessage,
+        });
         const redirectUrl = req.query.redirect_uri
           ? req.query.redirect_uri
           : req.client.redirectUrl;

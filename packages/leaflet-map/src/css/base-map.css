@@ -6,6 +6,7 @@
 
 .map-container.osc-map {
   width: var(--basemap-map-width);
+  max-width: 100%;
   height: var(--basemap-map-height);
   aspect-ratio: var(--basemap-map-aspect-ratio);
 }

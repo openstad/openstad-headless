@@ -2,6 +2,7 @@ $(function () {
   initFormsValidation();
   initHideFlash();
   initRemoveErrorLabelOnType();
+  initSubmitOnEnter();
 });
 
 $.validator.addMethod(
@@ -68,6 +69,31 @@ function initFormsValidation() {
       },
     });
   });
+}
+
+// Ensure pressing Enter in a single-line field submits the form. On some
+// fields (e.g. type="email" with autocomplete) the browser's suggestion popup
+// swallows the Enter key, so implicit form submission never happens.
+function initSubmitOnEnter() {
+  $('.validate-form').on(
+    'keydown',
+    'input:not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"])',
+    function (e) {
+      if (e.key !== 'Enter' && e.keyCode !== 13) {
+        return;
+      }
+      e.preventDefault();
+      var form = $(this).closest('form').get(0);
+      if (!form) {
+        return;
+      }
+      if (typeof form.requestSubmit === 'function') {
+        form.requestSubmit();
+      } else {
+        $(form).submit();
+      }
+    }
+  );
 }
 
 function initRemoveErrorLabelOnType() {

@@ -13,6 +13,7 @@ import projectVotedUsersCount from './projectVotedUsersCount';
 import resource from './resource';
 import resourceMarkers from './resource-markers';
 import resources from './resources';
+import statuses from './statuses';
 import submissions from './submissions';
 import tags from './tags';
 import user from './user';
@@ -105,6 +106,10 @@ function API(props = {}) {
   self.submissions = {
     fetch: submissions.fetch.bind(self),
     create: submissions.create.bind(self),
+  };
+
+  self.statuses = {
+    fetch: statuses.fetch.bind(self),
   };
 
   self.tags = {

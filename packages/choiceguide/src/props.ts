@@ -103,6 +103,7 @@ export type Item = {
   maxCharacters?: string;
   variant?: string;
   multiple?: boolean;
+  maxUploadSizeMB?: number;
   options?: Array<Option>;
   sliderTitleUnderA?: string;
   sliderTitleUnderB?: string;

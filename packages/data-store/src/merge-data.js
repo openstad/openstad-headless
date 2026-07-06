@@ -1,6 +1,8 @@
 import merge from 'merge';
 
 export default function mergeData(currentData, newData, action) {
+  if (currentData == null) return newData;
+
   let result;
 
   switch (action) {

@@ -156,6 +156,10 @@ export const InitializeFormFields = (
           break;
         case 'imageUpload':
           fieldData['allowedTypes'] = item.allowedTypes || ['image/*'];
+          fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
+          break;
+        case 'documentUpload':
+          fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
           break;
         case 'text':
           if (item.defaultValue) {
@@ -197,6 +201,11 @@ export const InitializeFormFields = (
           break;
         case 'pagination':
           fieldData['type'] = 'pagination';
+          break;
+        case 'sort':
+          fieldData['type'] = 'sort';
+          fieldData['options'] = item.options || [];
+          fieldData['numberingStyle'] = item.numberingStyle || 'none';
           break;
       }
 

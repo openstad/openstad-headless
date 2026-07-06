@@ -81,7 +81,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
 
   // session
   const session = await getSession(req, res);
-  let jwt = session[`project-${targetProjectId}`] || session[`project-1`];
+  let jwt = session['project-1'];
 
   // store login token
   const searchParams = req.nextUrl?.searchParams;
