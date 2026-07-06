@@ -248,6 +248,8 @@ describe('apiTokenScopeGuard', () => {
     });
 
     it('blocks /reports/users/anonymized (#442) when only an unrelated component is enabled', () => {
+      // Enabling e.g. 'votes' must NOT unlock the project-wide participant
+      // roster — that requires its own dedicated dataScope.users.enabled.
       const req = makeReq({
         apiTokenScope: 'reports',
         method: 'GET',
