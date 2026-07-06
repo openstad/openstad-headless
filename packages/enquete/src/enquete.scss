@@ -981,6 +981,15 @@ label.utrecht-form-label {
         justify-content: start !important;
       }
 
+      // Verberg de vraag-brede 'Overslaan' knop terwijl het dilemma loopt;
+      // per-dilemma overslaan gebeurt via .dilemma-skip-button. De knop komt
+      // terug op het overzichtsscherm om naar de volgende vraag te gaan.
+      &:not(:has(.dilemma-finished)) {
+        + .button-group .utrecht-button--submit.utrecht-button--primary-action {
+          display: none;
+        }
+      }
+
       .dilemma-field > .utrecht-button--primary-action {
         @include utrecht-button-appearance;
         position: fixed;
