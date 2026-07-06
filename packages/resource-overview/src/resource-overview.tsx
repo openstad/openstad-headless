@@ -1164,7 +1164,22 @@ function ResourceOverviewInner({
         }
       );
 
-      const combined = [...uniqueResources, ...allRecords].sort(
+      const filteredProjectCards = uniqueResources.filter((card: any) => {
+        const cardTagIds: number[] =
+          card.tags?.map((tag: { id: number }) => tag.id) ?? [];
+        if (cardTagIds.some((id) => excludeTags.includes(id))) return false;
+        if (
+          flatApiTags.length > 0 &&
+          !flatApiTags.some((id: number) => cardTagIds.includes(id))
+        )
+          return false;
+        return apiTagGroups.every(
+          (group: number[]) =>
+            group.length === 0 || group.some((id) => cardTagIds.includes(id))
+        );
+      });
+
+      const combined = [...filteredProjectCards, ...allRecords].sort(
         (a: any, b: any) => {
           if (sort === 'createdAt_desc')
             return (
@@ -1200,6 +1215,9 @@ function ResourceOverviewInner({
     allTags,
     search,
     sort,
+    excludeTags,
+    flatApiTags,
+    apiTagGroups,
   ]);
 
   useEffect(() => {
