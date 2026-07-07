@@ -92,7 +92,7 @@ export const CheckboxList = <T extends { [key: string]: any }>({
                     ? 'flex flex-col'
                     : 'flex flex-row flex-wrap'
                 }`}>
-                {items?.map((item: any) => (
+                {items?.map((item) => (
                   <FormField
                     key={keyPerItem(item)}
                     control={form.control}
@@ -149,7 +149,7 @@ export const CheckboxList = <T extends { [key: string]: any }>({
                       <legend className="sr-only">{fieldLabel}</legend>
                       {items
                         ?.filter((t) => t[keyForGrouping] === groupName)
-                        .map((item: any) => {
+                        .map((item) => {
                           return (
                             <FormField
                               key={keyPerItem(item)}
