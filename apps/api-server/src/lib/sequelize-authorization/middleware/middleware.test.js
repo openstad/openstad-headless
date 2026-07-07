@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 // Use createRequire so we get the same CJS module.exports reference as the source modules do
 const require = createRequire(import.meta.url);
 const db = require('../../../db');
-const { can, hasRole, toAuthorizedJSON, useReqUser } = require('./index.js');
+const { can, toAuthorizedJSON, useReqUser } = require('./index.js');
 
 // Store originals for clean restoration
 const origVoteCan = db.Vote.can;
@@ -147,36 +147,4 @@ describe('toAuthorizedJSON middleware', () => {
   });
 });
 
-// ----------------------------------------------------------------------------------------------------
-// hasRole utility
-// ----------------------------------------------------------------------------------------------------
-
-describe('hasRole', () => {
-  it('returns truthy when user role satisfies minRole', () => {
-    expect(hasRole({ role: 'admin' }, 'member')).toBeTruthy();
-    expect(hasRole({ role: 'admin' }, 'admin')).toBeTruthy();
-    expect(hasRole({ role: 'superuser' }, 'admin')).toBeTruthy();
-    expect(hasRole({ role: 'moderator' }, 'member')).toBeTruthy();
-  });
-
-  it('returns falsy when user role does not satisfy minRole', () => {
-    expect(hasRole({ role: 'member' }, 'admin')).toBeFalsy();
-    expect(hasRole({ role: 'anonymous' }, 'member')).toBeFalsy();
-  });
-
-  it('defaults to requiring admin when no minRole given', () => {
-    expect(hasRole({ role: 'admin' })).toBeTruthy();
-    expect(hasRole({ role: 'member' })).toBeFalsy();
-  });
-
-  it('allows owner when ownerId matches user.id', () => {
-    const user = { id: 5, role: 'member' };
-    expect(hasRole(user, 'owner', 5)).toBeTruthy();
-    expect(hasRole(user, 'owner', 6)).toBeFalsy();
-  });
-
-  it('returns falsy for null/undefined user', () => {
-    expect(hasRole(null, 'member')).toBeFalsy();
-    expect(hasRole(undefined, 'member')).toBeFalsy();
-  });
-});
+// hasRole is unit-tested comprehensively in ../lib/hasRole.test.js

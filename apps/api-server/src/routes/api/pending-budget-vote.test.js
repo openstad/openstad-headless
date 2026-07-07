@@ -8,10 +8,12 @@ const db = require('../../db');
 
 // Originals for restoration
 const origCreate = db.PendingBudgetVote.create;
+const origFindOne = db.PendingBudgetVote.findOne;
 const origTransaction = db.sequelize.transaction;
 
 afterEach(() => {
   db.PendingBudgetVote.create = origCreate;
+  db.PendingBudgetVote.findOne = origFindOne;
   db.sequelize.transaction = origTransaction;
 });
 
@@ -68,16 +70,12 @@ describe('GET /:id — fetch and delete pending budget vote', () => {
     });
     db.PendingBudgetVote.findOne = vi.fn().mockResolvedValue(fakeRecord);
 
-    const origFindOne = db.PendingBudgetVote.findOne;
-
     const app = createApp();
     const res = await request(app).get('/uuid-5678');
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ id: 'uuid-5678', data: storedData });
     expect(fakeRecord.destroy).toHaveBeenCalled();
-
-    db.PendingBudgetVote.findOne = origFindOne;
   });
 
   it('returns 404 when record is not found', async () => {
@@ -86,14 +84,11 @@ describe('GET /:id — fetch and delete pending budget vote', () => {
       return fn(fakeTransaction);
     });
 
-    const origFindOne = db.PendingBudgetVote.findOne;
     db.PendingBudgetVote.findOne = vi.fn().mockResolvedValue(null);
 
     const app = createApp();
     const res = await request(app).get('/nonexistent-id');
 
     expect(res.status).toBe(404);
-
-    db.PendingBudgetVote.findOne = origFindOne;
   });
 });
