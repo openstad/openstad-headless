@@ -174,7 +174,7 @@ export default function WidgetResourceOverviewSorting(
                                     (el) => el.value === item.value
                                   ) > -1
                                 }
-                                onCheckedChange={(checked: any) => {
+                                onCheckedChange={(checked) => {
                                   return checked
                                     ? (props.onFieldChanged(field.name, [
                                         ...field.value,

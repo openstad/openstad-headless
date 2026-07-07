@@ -181,7 +181,7 @@ export default function WidgetStemBegrootOverviewTags(
                                   <FormLabel>{groupName}</FormLabel>
                                   <Switch.Root
                                     className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                                    onCheckedChange={(checked: any) => {
+                                    onCheckedChange={(checked) => {
                                       const groups =
                                         handleTagCheckboxGroupChange(
                                           groupName,
@@ -266,7 +266,7 @@ export default function WidgetStemBegrootOverviewTags(
                                   </FormLabel>
                                   <Switch.Root
                                     className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                                    onCheckedChange={(checked: any) => {
+                                    onCheckedChange={(checked) => {
                                       const groups =
                                         handleTagCheckboxGroupChange(
                                           groupName,

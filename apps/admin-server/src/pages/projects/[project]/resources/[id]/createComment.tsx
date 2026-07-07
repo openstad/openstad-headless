@@ -92,7 +92,7 @@ export default function ProjectResourceCreateArgument() {
       } else {
         notifyFailed(newComment?.error);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.log(err);
       notifyError();
     } finally {

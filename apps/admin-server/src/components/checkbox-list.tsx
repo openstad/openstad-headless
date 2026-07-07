@@ -105,8 +105,8 @@ export const CheckboxList = <T extends { [key: string]: any }>({
                           <FormControl>
                             <Checkbox
                               checked={selectedPredicate(item)}
-                              onCheckedChange={(checked: any) =>
-                                onValueChange(item, checked)
+                              onCheckedChange={(checked) =>
+                                onValueChange(item, checked === true)
                               }
                             />
                           </FormControl>
@@ -163,8 +163,8 @@ export const CheckboxList = <T extends { [key: string]: any }>({
                                     <FormControl>
                                       <Checkbox
                                         checked={selectedPredicate(item)}
-                                        onCheckedChange={(checked: any) =>
-                                          onValueChange(item, checked)
+                                        onCheckedChange={(checked) =>
+                                          onValueChange(item, checked === true)
                                         }
                                       />
                                     </FormControl>
