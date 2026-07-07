@@ -248,6 +248,7 @@ describe('POST / — vote creation', () => {
 
     const res = await request(app)
       .post('/')
+      .query({ replaceAll: 'true' })
       .send([{ resourceId: 1 }]);
 
     expect(res.status).toBe(403);
@@ -369,6 +370,7 @@ describe('POST / — count min/max resources', () => {
 
     const res = await request(app)
       .post('/')
+      .query({ replaceAll: 'true' })
       .send([{ resourceId: 1 }]);
 
     expect(res.status).toBe(400);
@@ -382,6 +384,7 @@ describe('POST / — count min/max resources', () => {
 
     const res = await request(app)
       .post('/')
+      .query({ replaceAll: 'true' })
       .send([{ resourceId: 1 }, { resourceId: 2 }, { resourceId: 3 }]);
 
     expect(res.status).toBe(400);
@@ -515,6 +518,7 @@ describe('POST / — merge duplicate rejection', () => {
 
     const res = await request(app)
       .post('/')
+      .query({ replaceAll: 'true' })
       .send([{ resourceId: 1 }]);
 
     expect(res.status).toBe(403);
@@ -555,6 +559,7 @@ describe('POST / — merge duplicate rejection', () => {
 
     const res = await request(app)
       .post('/')
+      .query({ replaceAll: 'true' })
       .send([{ resourceId: 1 }]);
 
     expect(res.status).toBe(200);

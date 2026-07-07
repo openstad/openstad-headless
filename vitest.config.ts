@@ -2,7 +2,18 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    projects: ['apps/*', 'packages/*', 'packages/apostrophe-widgets/*'],
+    // Reference each app's config file explicitly. A bare directory glob
+    // (e.g. 'apps/*') does NOT load the nested vitest.config.ts, so per-project
+    // `env` (NODE_CONFIG_DIR) and `exclude` settings are silently dropped.
+    // Pointing at the config files makes those settings take effect.
+    projects: [
+      'apps/api-server/vitest.config.ts',
+      'apps/auth-server/vitest.config.ts',
+      'apps/cms-server/vitest.config.ts',
+      'apps/image-server',
+      'packages/*',
+      'packages/apostrophe-widgets/*',
+    ],
     // Coverage MUST be configured at the workspace root: in Vitest projects mode
     // per-project `coverage` blocks are ignored, so the thresholds below are the
     // single source of truth that gates CI.
