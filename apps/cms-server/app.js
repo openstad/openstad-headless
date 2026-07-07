@@ -103,6 +103,12 @@ async function setupProject(project) {
 
   const domain = url.host + (url.path && url.path != '/' ? url.path : '');
 
+  const sitePrefixPath =
+    url.path && url.path !== '/' ? url.path.replace(/^\/+|\/+$/g, '') : '';
+  if (sitePrefixPath) {
+    project.sitePrefix = sitePrefixPath;
+  }
+
   // for convenience and speed we set the domain name as the key
   projects[domain] = project;
 
