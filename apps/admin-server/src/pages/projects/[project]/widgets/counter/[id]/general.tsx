@@ -49,7 +49,7 @@ const formSchema = z.object({
   ]),
   opinion: z.string().optional(),
   amount: z.coerce.number().optional(),
-  rigCounter: z.any().optional(),
+  rigCounter: z.string().optional(),
   id: z.string().optional(),
   widgetToFetchId: z.string().optional(),
   resourceId: z.string().optional(),

@@ -28,6 +28,9 @@ const formSchema = z.object({
   selectedProjects: z
     .array(
       z.object({
+        // any: admin stores a numeric project.id while the widget prop types
+        // this as string — reconciling that mismatch is out of scope for #1641.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         id: z.any(),
         name: z.string(),
         detailPageLink: z.string().optional(),
