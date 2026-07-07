@@ -1133,13 +1133,7 @@ module.exports = function (db, sequelize, DataTypes) {
         }
         return {
           where: {
-            [db.Sequelize.Op.or]: [
-              ...projectIds.map((projectId) => {
-                return {
-                  projectId: projectId,
-                };
-              }),
-            ],
+            projectId: { [db.Sequelize.Op.in]: projectIds },
           },
         };
       },
