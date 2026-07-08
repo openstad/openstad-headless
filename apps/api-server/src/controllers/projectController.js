@@ -231,9 +231,9 @@ async function deleteDuplicatedData(req, res, next) {
     }
 
     // Delete duplicated users that were newly created in this rollback session.
-    const userIds = (Array.isArray(createdUserIds) ? createdUserIds : []).filter(
-      Boolean
-    );
+    const userIds = (
+      Array.isArray(createdUserIds) ? createdUserIds : []
+    ).filter(Boolean);
     if (userIds.length > 0) {
       await db.User.destroy({
         where: { id: userIds, projectId: sessionProjectId },
