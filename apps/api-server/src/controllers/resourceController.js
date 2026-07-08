@@ -315,7 +315,9 @@ function createResource(req, res, next) {
     req.body.location = req.body.location
       ? JSON.parse(req.body.location)
       : null;
-  } catch (err) {}
+  } catch (err) {
+    console.error('[resource-create] Could not parse location:', err.message);
+  }
 
   if (
     req.body.location &&
@@ -376,7 +378,7 @@ function createResource(req, res, next) {
   }
   const hostname = new URL(imageServer).hostname;
   if (data.images && Array.isArray(data.images) && data.images.length > 0) {
-    data.images.forEach((image) => {
+    for (const image of data.images) {
       try {
         // Add protocol to image URL for `new URL` to work correctly.
         if (
@@ -392,10 +394,9 @@ function createResource(req, res, next) {
       } catch (err) {
         return next(createError(400, 'Invalid image url'));
       }
-    });
+    }
   }
 
-  let responseData;
   db.Resource.authorizeData(data, 'create', req.user, null, req.project)
     .create(data)
     .then((resourceInstance) => {
@@ -658,7 +659,9 @@ function updateResource(req, res, next) {
   if (req.body.location) {
     try {
       req.body.location = JSON.parse(req.body.location || null);
-    } catch (err) {}
+    } catch (err) {
+      console.error('[resource-update] Could not parse location:', err.message);
+    }
 
     if (
       req.body.location &&
@@ -699,7 +702,7 @@ async function updateResourceTags(req, res, next) {
   if (!Array.isArray(tags)) return next();
 
   if (!tags.every((t) => Number.isInteger(t))) {
-    next('Tags zijn niet gegeven in het juiste formaat');
+    return next('Tags zijn niet gegeven in het juiste formaat');
   }
 
   const projectId = req.params.projectId;
@@ -707,30 +710,33 @@ async function updateResourceTags(req, res, next) {
   const tagEntities = await getValidTags(projectId, tags, canBeGlobal);
 
   const resourceInstance = req.results;
-  resourceInstance.setTags(tagEntities).then((result) => {
-    // refetch. now with tags
-    let scope = [...req.scope, 'includeTags'];
-    if (req.canIncludeVoteCount) scope.push('includeVoteCount');
-    return db.Resource.scope(...scope)
-      .findOne({
-        where: { id: resourceInstance.id, projectId: req.params.projectId },
-      })
-      .then(async (found) => {
-        if (!found) {
-          return next(createError(404, 'Resource not found'));
-        }
+  resourceInstance
+    .setTags(tagEntities)
+    .then((result) => {
+      // refetch. now with tags
+      let scope = [...req.scope, 'includeTags'];
+      if (req.canIncludeVoteCount) scope.push('includeVoteCount');
+      return db.Resource.scope(...scope)
+        .findOne({
+          where: { id: resourceInstance.id, projectId: req.params.projectId },
+        })
+        .then(async (found) => {
+          if (!found) {
+            return next(createError(404, 'Resource not found'));
+          }
 
-        if (req.query.includePoll) {
-          // TODO: naar poll hooks
-          if (found.poll) found.poll.countVotes(!req.query.includeVotes);
-        }
-        found.project = req.project;
-        await attachModeratorOnlyExtraDataKeys(found);
-        req.results = found;
-        next();
-      })
-      .catch(next);
-  });
+          if (req.query.includePoll) {
+            // TODO: naar poll hooks
+            if (found.poll) found.poll.countVotes(!req.query.includeVotes);
+          }
+          found.project = req.project;
+          await attachModeratorOnlyExtraDataKeys(found);
+          req.results = found;
+          next();
+        })
+        .catch(next);
+    })
+    .catch(next);
 }
 
 async function updateResourceStatuses(req, res, next) {
@@ -739,37 +745,40 @@ async function updateResourceStatuses(req, res, next) {
   if (!Array.isArray(statuses)) return next();
 
   if (!statuses.every((t) => Number.isInteger(t))) {
-    next('Statuses zijn niet gegeven in het juiste formaat');
+    return next('Statuses zijn niet gegeven in het juiste formaat');
   }
 
   const projectId = req.params.projectId;
   const statusEntities = await getValidStatuses(projectId, statuses, req.user);
 
   const resourceInstance = req.results;
-  resourceInstance.setStatuses(statusEntities).then((result) => {
-    // refetch. now with statuses
-    let scope = [...req.scope, 'includeStatuses'];
-    if (req.canIncludeVoteCount) scope.push('includeVoteCount');
-    return db.Resource.scope(...scope)
-      .findOne({
-        where: { id: resourceInstance.id, projectId: req.params.projectId },
-      })
-      .then(async (found) => {
-        if (!found) {
-          return next(createError(404, 'Resource not found'));
-        }
+  resourceInstance
+    .setStatuses(statusEntities)
+    .then((result) => {
+      // refetch. now with statuses
+      let scope = [...req.scope, 'includeStatuses'];
+      if (req.canIncludeVoteCount) scope.push('includeVoteCount');
+      return db.Resource.scope(...scope)
+        .findOne({
+          where: { id: resourceInstance.id, projectId: req.params.projectId },
+        })
+        .then(async (found) => {
+          if (!found) {
+            return next(createError(404, 'Resource not found'));
+          }
 
-        if (req.query.includePoll) {
-          // TODO: naar poll hooks
-          if (found.poll) found.poll.countVotes(!req.query.includeVotes);
-        }
-        found.project = req.project;
-        await attachModeratorOnlyExtraDataKeys(found);
-        req.results = found;
-        next();
-      })
-      .catch(next);
-  });
+          if (req.query.includePoll) {
+            // TODO: naar poll hooks
+            if (found.poll) found.poll.countVotes(!req.query.includeVotes);
+          }
+          found.project = req.project;
+          await attachModeratorOnlyExtraDataKeys(found);
+          req.results = found;
+          next();
+        })
+        .catch(next);
+    })
+    .catch(next);
 }
 
 async function sendUpdateNotifications(req, res, next) {
@@ -915,12 +924,12 @@ async function duplicateResources(req, res, next) {
           finalStatuses = await getValidStatuses(projectId, statuses);
         }
 
-        return db.Resource.create(newResourceData).then((result) => {
+        return db.Resource.create(newResourceData).then(async (result) => {
           if (Array.isArray(finalTags) && finalTags.length > 0) {
-            result.setTags(finalTags);
+            await result.setTags(finalTags);
           }
           if (Array.isArray(finalStatuses) && finalStatuses.length > 0) {
-            result.setStatuses(finalStatuses);
+            await result.setStatuses(finalStatuses);
           }
 
           return result;
