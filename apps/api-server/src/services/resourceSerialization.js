@@ -9,11 +9,11 @@
 // Strip user e-mail addresses from comments (and their replies).
 function hideEmailsForNormalUsers(comments) {
   return comments.map((comment) => {
-    delete comment.user.email;
+    if (comment.user) delete comment.user.email;
 
     if (comment.replies) {
       comment.replies = comment.replies.map((reply) => {
-        delete reply.user.email;
+        if (reply.user) delete reply.user.email;
 
         return reply;
       });
