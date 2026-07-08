@@ -273,8 +273,8 @@ function getWidgetJavascriptOutput(
 
             renderedWidgets[randomComponentId] = true;
 
-            const React = window.React = window.OpenStadReact;
-            const ReactDOM = window.ReactDOM = window.OpenStadReactDOM;
+            const React = window.OpenStadReact;
+            const ReactDOM = window.OpenStadReactDOM;
 
             ${widgetOutput}
             ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget(randomComponentId, config);
