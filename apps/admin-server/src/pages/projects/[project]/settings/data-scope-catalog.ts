@@ -61,4 +61,15 @@ export const DATA_SCOPE_COMPONENTS = {
     label: 'Projecten',
     personalFields: [],
   },
+  // ADDITIVE (reporting endpoints, issue #1653): choice-guide definition
+  // content (guide + question definitions) is admin-authored structure, not
+  // participant data — no personal fields.
+  choiceguideguides: {
+    label: 'Keuzewijzers (definitie)',
+    personalFields: [],
+  },
+  choiceguidequestions: {
+    label: 'Keuzewijzer vragen',
+    personalFields: [],
+  },
 } as const;

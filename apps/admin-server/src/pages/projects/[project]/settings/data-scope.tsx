@@ -43,6 +43,9 @@ const formSchema = z.object({
   comments: componentSchema,
   submissions: componentSchema,
   choiceguides: componentSchema,
+  projects: componentSchema,
+  choiceguideguides: componentSchema,
+  choiceguidequestions: componentSchema,
 });
 
 type FormValues = z.infer<typeof formSchema>;

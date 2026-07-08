@@ -16,6 +16,11 @@
  * ALWAYS_BLOCKED_BLOBS); these flattened columns are injected AFTER the field
  * filter via makeReportEndpoint's `extraColumns` + report-finalize, the same
  * mechanism votes.js uses for `voteId`.
+ *
+ * Reused as-is by #441's choice-guide-results: ChoicesGuideResult.result is
+ * the same shape (a JSON blob keyed by each question item's fieldKey — see
+ * packages/choiceguide/src/choiceguide.tsx's onSubmit), just with the
+ * `answer_` column prefix instead of `field_`.
  */
 
 // Confirmation/meta config (packages/enquete Confirmation type) — not form
@@ -40,6 +45,28 @@ function fieldKeyOf(item) {
 }
 
 /**
+ * Normalizes the answers blob to a plain object. Submission.submittedData is
+ * a native JSON column (already an object in plain mode); ChoicesGuideResult
+ * (#441) stores `result` as TEXT with a custom get()ter that JSON.parses it —
+ * `toPlain()`'s `.get({plain:true})` bypasses that getter, so it can still
+ * arrive here as a raw JSON string.
+ * @param {*} blob
+ * @returns {object}
+ */
+function normalizeBlob(blob) {
+  if (blob && typeof blob === 'object') return blob;
+  if (typeof blob === 'string') {
+    try {
+      const parsed = JSON.parse(blob);
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  return {};
+}
+
+/**
  * @param {*} value
  * @returns {string|number|boolean|null}
  */
@@ -51,13 +78,23 @@ function normalizeValue(value) {
 
 /**
  * @param {object|null|undefined} submittedData - Submission.submittedData
+ *   (or, reused for #441, a ChoicesGuideResult.result — same shape: a JSON
+ *   blob keyed by each form item's fieldKey)
  * @param {Array<object>} formItems - Widget.config.items (the form definition)
- * @param {string[]} enabledFieldKeys - dataScope.submissions.formFields allowlist
- * @returns {Record<string, string|number|boolean|null>} { [`field_${key}`]: value }
+ * @param {string[]} enabledFieldKeys - the relevant dataScope opt-in allowlist
+ *   (e.g. dataScope.submissions.formFields / dataScope.choiceguides.answerFields)
+ * @param {string} [columnPrefix='field_'] - column prefix; #441's
+ *   choice-guide-results reuses this with 'answer_' so answer columns read
+ *   as `answer_<key>` instead of `field_<key>`.
+ * @returns {Record<string, string|number|boolean|null>} { [`${columnPrefix}${key}`]: value }
  */
-function flattenSubmission(submittedData, formItems, enabledFieldKeys) {
-  const data =
-    submittedData && typeof submittedData === 'object' ? submittedData : {};
+function flattenSubmission(
+  submittedData,
+  formItems,
+  enabledFieldKeys,
+  columnPrefix = 'field_'
+) {
+  const data = normalizeBlob(submittedData);
   const items = Array.isArray(formItems) ? formItems : [];
   const enabled = new Set(enabledFieldKeys || []);
 
@@ -72,7 +109,7 @@ function flattenSubmission(submittedData, formItems, enabledFieldKeys) {
     seen.add(key);
     if (!enabled.has(key)) continue; // per-field opt-in — PII by default
 
-    out[`field_${key}`] = normalizeValue(data[key]);
+    out[`${columnPrefix}${key}`] = normalizeValue(data[key]);
   }
   return out;
 }

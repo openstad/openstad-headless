@@ -385,6 +385,28 @@ module.exports = {
         subset: {
           enabled: { type: 'boolean', default: false },
           personalFields: { type: 'arrayOfStrings', default: [] },
+          // Per-field opt-in allowlist (#441) for the flattened
+          // answer_<key> columns exposed by /reports/choice-guide-results —
+          // same rationale as submissions.formFields above (dynamic,
+          // per-widget question keys can't live in the static catalog).
+          answerFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      // ADDITIVE (#441): choice-guide definition content (safe-only, no
+      // personalFields — see report-data-scope.js's choiceguideguides /
+      // choiceguidequestions comments).
+      choiceguideguides: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      choiceguidequestions: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
         },
       },
     },

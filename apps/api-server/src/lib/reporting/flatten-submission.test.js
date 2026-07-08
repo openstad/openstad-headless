@@ -77,4 +77,21 @@ describe('flattenSubmission', () => {
     expect(flattenSubmission({ name: 'Jan' }, null, ['name'])).toEqual({});
     expect(flattenSubmission({ name: 'Jan' }, FORM, null)).toEqual({});
   });
+
+  it('accepts a JSON string blob (#441 ChoicesGuideResult.result in plain mode)', () => {
+    const out = flattenSubmission(JSON.stringify({ name: 'Jan' }), FORM, [
+      'name',
+    ]);
+    expect(out).toEqual({ field_name: 'Jan' });
+  });
+
+  it('an unparseable string blob is treated as empty (never throws)', () => {
+    const out = flattenSubmission('not json', FORM, ['name']);
+    expect(out).toEqual({ field_name: null });
+  });
+
+  it('applies a custom column prefix (#441 answer_<key>)', () => {
+    const out = flattenSubmission({ name: 'Jan' }, FORM, ['name'], 'answer_');
+    expect(out).toEqual({ answer_name: 'Jan' });
+  });
 });

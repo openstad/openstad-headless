@@ -14,6 +14,10 @@ const COMPONENT_MODEL = {
   submissions: 'Submission',
   choiceguides: 'ChoicesGuideResult',
   projects: 'Project',
+  // ADDITIVE (#441): choice-guide definition content is backed by Widget
+  // (type='choiceguide'), not the unused ChoicesGuide model — see the
+  // report-data-scope.js comment on choiceguideguides for why.
+  choiceguideguides: 'Widget',
 };
 
 /**
@@ -34,6 +38,7 @@ const PROJECT_SCOPE = {
   submissions: { type: 'column', column: 'projectId' },
   choiceguides: { type: 'column', column: 'projectId' },
   projects: { type: 'column', column: 'id' },
+  choiceguideguides: { type: 'column', column: 'projectId' },
 };
 
 /**

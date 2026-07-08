@@ -138,6 +138,41 @@ const COMPONENTS = {
     safeFields: ['id', 'name', 'title', 'url', 'createdAt', 'updatedAt'],
     personalFields: [],
   },
+
+  // ADDITIVE (reporting endpoints, issue #1653): choice-guide DEFINITION
+  // content (the guide itself + its question definitions) — safe-only, same
+  // rationale as `projects` above. This is admin-authored form structure, not
+  // participant data: no PII, so no personalFields to opt into.
+  //
+  // Backed by the Widget model (type='choiceguide'), NOT the separate
+  // ChoicesGuide/ChoicesGuideQuestion(Group) tables — verified against the
+  // live schema while building #441: ChoicesGuideResult has no
+  // `choicesGuideId` column (only `widgetId`), those tables are empty in this
+  // deployment, have no admin UI, and the one route that queries
+  // ChoicesGuideResult by `choicesGuideId` (routes/api/choicesguide.js) would
+  // error against a nonexistent column if it were ever hit — i.e. dead code.
+  // The live choiceguide widget stores its question definitions in
+  // Widget.config.items, exactly like enquete/submissions (#440), and
+  // ChoicesGuideResult.widgetId is the only real join key. `widgetId` (on
+  // choiceguideguides' own `id` / choiceguidequestions' `widgetId`) therefore
+  // takes the place of the plan's assumed `choicesGuideId`.
+  choiceguideguides: {
+    label: 'Keuzewijzers (definitie)',
+    pathPattern: '/reports/choice-guides',
+    // Widget has no separate `title` column — `description` is the
+    // admin-facing guide name (the existing GET /choicesguide/widgets admin
+    // route already treats it as such). Widget.config (introTitle etc.) is a
+    // free-form JSON blob, excluded from safeFields like every other
+    // component's config/result blob.
+    safeFields: ['id', 'projectId', 'description', 'createdAt', 'updatedAt'],
+    personalFields: [],
+  },
+  choiceguidequestions: {
+    label: 'Keuzewijzer vragen',
+    pathPattern: '/reports/choice-guide-questions',
+    safeFields: ['id', 'widgetId', 'fieldKey', 'title', 'type', 'seqnr'],
+    personalFields: [],
+  },
 };
 
 /**
@@ -164,6 +199,14 @@ const SEGMENT_TO_COMPONENT = {
   // so the trailing `projects`/`enquiries` segment wins).
   enquiries: 'submissions',
   projects: 'projects',
+  // ADDITIVE (#441). Hyphenated path segments, matched whole (matchComponent
+  // splits on '/', not '-').
+  'choice-guides': 'choiceguideguides',
+  'choice-guide-questions': 'choiceguidequestions',
+  // choice-guide-results reuses the existing `choiceguides` component
+  // (ChoicesGuideResult) — same model/safeFields as the legacy
+  // /choicesguides `/stats` path, just a new URL segment.
+  'choice-guide-results': 'choiceguides',
 };
 
 /**
