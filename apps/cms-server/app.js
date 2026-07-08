@@ -22,8 +22,8 @@ const Url = require('node:url');
 const messageStreaming = require('./services/message-streaming');
 
 const compression = require('compression');
-const basicAuth = require('express-basic-auth');
 const path = require('node:path');
+const crypto = require('node:crypto');
 
 let projects = {};
 let subscriptions = {};
@@ -451,23 +451,147 @@ app.use((req, res, next) => {
   next();
 });
 
+const SITE_ACCESS_COOKIE = 'openstadSiteAccess';
+const SITE_ACCESS_PATH = '/openstad-site-access';
+const SITE_ACCESS_MAX_AGE = 1000 * 60 * 60 * 24;
+const parseSiteAccessBody = express.urlencoded({ extended: false });
+
+function siteAccessToken(site) {
+  return crypto
+    .createHmac('sha256', String(site.config.basicAuth.password))
+    .update(`${SITE_ACCESS_COOKIE}:${site.id}`)
+    .digest('hex');
+}
+
+function parseCookies(header) {
+  const cookies = {};
+  if (!header) return cookies;
+  header.split(';').forEach((part) => {
+    const index = part.indexOf('=');
+    if (index < 0) return;
+    const key = part.slice(0, index).trim();
+    if (!key) return;
+    const raw = part.slice(index + 1).trim();
+    try {
+      cookies[key] = decodeURIComponent(raw);
+    } catch {
+      cookies[key] = raw;
+    }
+  });
+  return cookies;
+}
+
+function safeEqual(a, b) {
+  const key = crypto.randomBytes(32);
+  const hashA = crypto.createHmac('sha256', key).update(String(a)).digest();
+  const hashB = crypto.createHmac('sha256', key).update(String(b)).digest();
+  return crypto.timingSafeEqual(hashA, hashB);
+}
+
+function safeReturnPath(value, fallback) {
+  if (typeof value !== 'string' || !value) return fallback;
+  try {
+    const base = 'http://site.invalid';
+    const parsed = new URL(value, base);
+    if (parsed.origin !== base) return fallback;
+    return parsed.pathname + parsed.search;
+  } catch {
+    return fallback;
+  }
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/`/g, '&#96;');
+}
+
+function renderSiteAccessForm(action, returnTo, hasError) {
+  const errorBlock = hasError
+    ? `<p class="error" role="alert">Onjuist wachtwoord.</p>`
+    : '';
+  return `<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Toegang</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #f4f5f7; margin: 0; display: flex; min-height: 100vh; align-items: center; justify-content: center; }
+  form { background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,.15); width: 100%; max-width: 320px; }
+  h1 { font-size: 1.25rem; margin: 0 0 1rem; }
+  label { display: block; font-size: .875rem; margin: .75rem 0 .25rem; }
+  input { width: 100%; padding: .5rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+  button { margin-top: 1.25rem; width: 100%; padding: .6rem; border: 0; border-radius: 4px; background: #1f2937; color: #fff; font-size: 1rem; cursor: pointer; }
+  .error { color: #b91c1c; font-size: .875rem; margin: 0 0 .5rem; }
+</style>
+</head>
+<body>
+<form method="post" action="${escapeHtml(action)}">
+  <h1>Deze site is afgeschermd</h1>
+  ${errorBlock}
+  <input type="hidden" name="returnTo" value="${escapeHtml(returnTo)}">
+  <label for="site-access-password">Wachtwoord</label>
+  <input id="site-access-password" name="password" type="password" autocomplete="current-password" autofocus required>
+  <button type="submit">Doorgaan</button>
+</form>
+</body>
+</html>`;
+}
+
 app.use((req, res, next) => {
-  if (
-    req.site &&
-    req.site.config?.basicAuth?.active &&
-    req.site.config?.basicAuth?.username &&
-    req.site.config?.basicAuth?.password
-  ) {
-    return basicAuth({
-      users: {
-        [req.site.config.basicAuth.username]:
-          req.site.config.basicAuth.password,
-      },
-      challenge: true,
-    })(req, res, next);
+  const basicAuth = req.site?.config?.basicAuth;
+  const prefix = req.sitePrefix ? '/' + req.sitePrefix : '';
+
+  if (!req.site || !basicAuth?.active || !basicAuth?.password?.trim()) {
+    if (req.site && parseCookies(req.headers.cookie)[SITE_ACCESS_COOKIE]) {
+      res.clearCookie(SITE_ACCESS_COOKIE, { path: prefix || '/' });
+    }
+    return next();
   }
 
-  next();
+  const formAction = prefix + SITE_ACCESS_PATH;
+  const expectedToken = siteAccessToken(req.site);
+  const presentedToken = parseCookies(req.headers.cookie)[SITE_ACCESS_COOKIE];
+
+  if (presentedToken && safeEqual(presentedToken, expectedToken)) {
+    return next();
+  }
+
+  if (req.method === 'POST' && req.path === SITE_ACCESS_PATH) {
+    return parseSiteAccessBody(req, res, () => {
+      const returnTo = safeReturnPath(req.body?.returnTo, prefix + '/');
+      const validPassword = safeEqual(
+        req.body?.password || '',
+        basicAuth.password
+      );
+      if (validPassword) {
+        const secure =
+          (req.headers['x-forwarded-proto'] || req.protocol) === 'https';
+        res.cookie(SITE_ACCESS_COOKIE, expectedToken, {
+          httpOnly: true,
+          secure,
+          sameSite: 'lax',
+          path: prefix || '/',
+          maxAge: SITE_ACCESS_MAX_AGE,
+        });
+        return res.redirect(returnTo);
+      }
+      return res
+        .status(401)
+        .send(renderSiteAccessForm(formAction, returnTo, true));
+    });
+  }
+
+  const returnTo = safeReturnPath(req.originalUrl, prefix + '/');
+  return res
+    .status(401)
+    .send(renderSiteAccessForm(formAction, returnTo, false));
 });
 
 app.use('/:privileged(admin)?/login', function (req, res, next) {
@@ -543,16 +667,6 @@ app.use(async function (req, res, next) {
       projects[completeDomain],
       req.forceRestart
     );
-  }
-
-  function escapeHtml(input) {
-    return String(input)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;')
-      .replace(/`/g, '&#96;');
   }
 
   // fallback to generic 404
