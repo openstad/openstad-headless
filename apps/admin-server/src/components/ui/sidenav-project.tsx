@@ -205,6 +205,20 @@ export function SidenavProject({ className }: { className?: string }) {
                 </Button>
               </Link>
             )}
+            {HasAccess(sessionData) && (
+              <Link href={`/projects/${project}/settings/api-tokens`}>
+                <Button
+                  variant={
+                    location.includes('/settings/api-tokens')
+                      ? 'secondary'
+                      : 'ghost'
+                  }
+                  size="default"
+                  className="w-full flex justify-start pl-8">
+                  <span className="truncate">API-tokens</span>
+                </Button>
+              </Link>
+            )}
           </>
         ) : null}
         <Link href={`/projects/${project}/authentication`}>
