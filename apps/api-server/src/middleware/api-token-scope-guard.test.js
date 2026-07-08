@@ -95,6 +95,7 @@ describe('apiTokenScopeGuard', () => {
       expect(res._status).toBe(403);
       expect(next).not.toHaveBeenCalled();
       expect(res._headers['Content-Type']).toBe('application/problem+json');
+      expect(res._headers['API-Version']).toBe('1.0.0');
       expect(res._body).toEqual({
         type: 'https://developer.overheid.nl/api-design-rules/problem/403',
         title: 'Reporting tokens only allow GET requests',
@@ -201,6 +202,23 @@ describe('apiTokenScopeGuard', () => {
         componentKey: 'resources',
         enabledPersonalFields: ['title'],
       });
+    });
+
+    it('sets API-Version even on the pass-through path (not just on 403s)', () => {
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path: '/project/1/resource/total',
+        projectDataScope: {
+          resources: { enabled: true, personalFields: ['title'] },
+        },
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
+      expect(res._headers['API-Version']).toBe('1.0.0');
     });
   });
 

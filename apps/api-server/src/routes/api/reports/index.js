@@ -3,8 +3,7 @@
 const express = require('express');
 const requireReportingToken = require('../../../middleware/require-reporting-token');
 const { problemJsonWrapper } = require('../../../lib/reporting/problem-json');
-
-const API_VERSION = '1.0.0';
+const { API_VERSION } = require('../../../lib/reporting/api-version');
 
 // Reporting router — mounted at /api/project/:projectId/reports/v1 (see
 // routes/api/index.js). mergeParams so req.params.projectId is available; the
@@ -35,7 +34,25 @@ router.use((req, res, next) => {
 // api-token-scope-guard, since /openapi.json matches no known reporting
 // component — a narrow, documented edge case, not a security gap: the spec
 // stays reachable for the unauthenticated case that matters.)
-router.get('/openapi.json', require('./openapi'));
+//
+// Access-Control-Allow-Origin is hardcoded to '*' here specifically (not left
+// to the app-wide, allowlist-based security-headers.js middleware) because
+// the ADR requires the spec itself to be fetchable cross-origin by any tool —
+// unlike every other reporting response, this one carries no per-project data
+// to protect, so a wildcard is safe precisely because it's this narrow. Must
+// also clear Access-Control-Allow-Credentials (set unconditionally to 'true'
+// by the globally-mounted security-headers.js) — the Fetch/CORS spec forbids
+// combining a wildcard origin with credentials:true, and browsers reject the
+// response outright for any client that fetches with credentials included.
+router.get(
+  '/openapi.json',
+  (req, res, next) => {
+    res.set('Access-Control-Allow-Origin', '*');
+    res.removeHeader('Access-Control-Allow-Credentials');
+    next();
+  },
+  require('./openapi')
+);
 
 // Fail-closed authentication gate: the globally-mounted reporting middleware
 // only CONSTRAINS a valid reporting token (they no-op when apiTokenScope is not

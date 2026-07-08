@@ -17,6 +17,14 @@ const reportsRouter = require('./index');
 
 function makeApp() {
   const app = express();
+  // Mirrors security-headers.js, which is mounted globally in Server.js
+  // BEFORE this router and unconditionally sets this header on every
+  // response — needed to exercise the /openapi.json wildcard-CORS fix
+  // against the same conflict it has to clear in the real app.
+  app.use((req, res, next) => {
+    res.set('Access-Control-Allow-Credentials', 'true');
+    next();
+  });
   app.use('/api/project/:projectId/reports/v1', reportsRouter);
   return app;
 }
@@ -36,6 +44,20 @@ describe('reports router — cross-cutting wiring', () => {
       '/api/project/1/reports/v1/openapi.json'
     );
     expect(res.headers['api-version']).toBe('1.0.0');
+  });
+
+  it('sets a wildcard Access-Control-Allow-Origin on /openapi.json regardless of environment (NLgov ADR: the spec must be fetchable cross-origin)', async () => {
+    const res = await request(makeApp()).get(
+      '/api/project/1/reports/v1/openapi.json'
+    );
+    expect(res.headers['access-control-allow-origin']).toBe('*');
+  });
+
+  it('clears Access-Control-Allow-Credentials on /openapi.json — the Fetch/CORS spec forbids combining it with a wildcard origin', async () => {
+    const res = await request(makeApp()).get(
+      '/api/project/1/reports/v1/openapi.json'
+    );
+    expect(res.headers['access-control-allow-credentials']).toBeUndefined();
   });
 
   it('401s a data endpoint with no reporting token, as application/problem+json', async () => {

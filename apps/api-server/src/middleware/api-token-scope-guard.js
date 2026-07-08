@@ -9,6 +9,7 @@ const {
   fromPlainError,
   sendProblem,
 } = require('../lib/reporting/problem-json');
+const { API_VERSION } = require('../lib/reporting/api-version');
 
 // GET-routed paths that actually mutate state — must be blocked even for
 // reporting tokens that only send GET requests.
@@ -121,6 +122,12 @@ function apiTokenScopeGuard(req, res, next) {
   if (req.apiTokenScope !== 'reports') {
     return next();
   }
+
+  // NLgov API Design Rules: every reporting response must carry API-Version,
+  // not just the URI's /v1 segment. This guard is mounted globally, BEFORE
+  // routes/api/reports/index.js (see Server.js), so a 403 sent from here
+  // would otherwise never reach that router's own API-Version middleware.
+  res.set('API-Version', API_VERSION);
 
   // Reporting tokens are strictly read-only.
   if (req.method !== 'GET') {
