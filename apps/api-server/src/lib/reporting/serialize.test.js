@@ -57,7 +57,6 @@ describe('serializeRecord', () => {
     budget: 'DECIMAL',
     tags: 'JSON',
     location: 'JSON',
-    status: 'STRING',
     widgetId: 'INTEGER',
   };
 
@@ -98,7 +97,6 @@ describe('serializeRecord', () => {
       { enabledPersonalFields: [] },
       { fieldTypes }
     );
-    expect(out).toHaveProperty('status', null);
     expect(out).toHaveProperty('budget', null);
     expect(out).toHaveProperty('location', null);
   });

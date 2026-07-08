@@ -51,7 +51,6 @@ const COMPONENTS = {
       'publishDate',
       'startDate',
       'endDate',
-      'status',
       'budget',
       'tags',
       'location',
@@ -89,9 +88,6 @@ const COMPONENTS = {
       'updatedAt',
       'sentiment',
       'label',
-      'status',
-      'modBreak',
-      'modBreakDatetime',
     ],
     // description is free text authored by the commenter.
     personalFields: ['description'],
