@@ -63,7 +63,7 @@
     "fast-xml-parser": "5.7.2",
     "knox": "file:vendor/knox-0.9.3.tar.gz",
     "react-leaflet": "^4.2.1",
-    "tar": "7.5.11",
+    "tar": "7.5.19",
     "uuid": "^14.0.0"
   },
   "overrides": {
@@ -72,7 +72,7 @@
     },
     "parse-node-version": "^1.0.1",
     "vega-lite": "^5.23.0",
-    "tar": "7.5.11",
+    "tar": "7.5.19",
     "sqlite3": {
       "tar": "$tar"
     },
@@ -95,7 +95,7 @@
       "fast-xml-parser": "$fast-xml-parser"
     },
     "apostrophe": {
-      "nodemailer": "8.0.7",
+      "nodemailer": "9.0.3",
       "oembetter": {
         "fast-xml-parser": "$fast-xml-parser"
       }
@@ -141,8 +141,26 @@
     "lodash": "4.18.1",
     "postcss": "8.5.12",
     "uuid": "$uuid",
-    "nodemailer": "8.0.7",
+    "nodemailer": "9.0.3",
     "@tootallnate/once": "3.0.1",
-    "ajv@>=7.0.0-alpha.0 <8.18.0": "8.18.0"
+    "ajv@>=7.0.0-alpha.0 <8.18.0": "8.18.0",
+    "@opentelemetry/core@<2.8.0": "2.9.0",
+    "undici@>=7.0.0 <7.28.0": "7.28.0",
+    "undici@<6.27.0": "6.27.0",
+    "ws@>=7.0.0 <7.5.11": "7.5.11",
+    "form-data@<2.5.6": "2.5.6",
+    "form-data@>=3.0.0 <3.0.5": "3.0.5",
+    "form-data@>=4.0.0 <4.0.6": "4.0.6",
+    "http-proxy-middleware@>=0.16.0 <2.0.10": "2.0.10",
+    "http-proxy-middleware@>=3.0.0 <3.0.7": "3.0.7",
+    "linkify-it@<=5.0.0": "5.0.2",
+    "shell-quote@1.1.0 - 1.8.3": "1.8.4",
+    "dompurify@<=3.4.10": "3.4.11",
+    "js-yaml@<3.15.0": "3.15.0",
+    "js-yaml@>=4.0.0 <=4.1.1": "4.2.0",
+    "markdown-it@<=14.1.1": "14.2.0",
+    "protobufjs@<=7.6.2": "7.6.3",
+    "@babel/core@<=7.29.0": "7.29.7",
+    "i18next-http-middleware@<3.9.7": "3.9.7"
   }
 }
