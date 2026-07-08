@@ -1222,7 +1222,7 @@ module.exports = function (db, sequelize, DataTypes) {
         ? self.resourceFormFieldKeys
         : [];
       const hasResourceFormConfig = !!self.hasResourceFormConfig;
-      filterModeratorOnlyExtraData(data, {
+      data = filterModeratorOnlyExtraData(data, {
         userRole: user && user.role,
         canViewModerator: canViewModeratorOnlyExtraData(user, self),
         hasResourceFormConfig,
