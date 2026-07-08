@@ -291,6 +291,46 @@ describe('reportFieldFilter', () => {
       expect(result.error).toBeDefined();
     });
 
+    it('passes through the real /reports/users/anonymized shape (#442)', () => {
+      const payload = {
+        data: [
+          {
+            participantId: 'abc123',
+            role: 'member',
+            projectId: 2,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            lastLogin: '2026-02-01T00:00:00.000Z',
+          },
+        ],
+        nextLink: null,
+      };
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+      expect(result).toEqual(payload);
+    });
+
+    it('passes through the real /reports/users/aggregates shape (#442)', () => {
+      const payload = {
+        uniqueParticipants: 12,
+        byType: [
+          { type: 'votes', count: 5 },
+          { type: 'comments', count: 3 },
+          { type: 'submissions', count: 2 },
+          { type: 'choiceGuides', count: 1 },
+        ],
+      };
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+      expect(result).toEqual(payload);
+    });
+
+    it('blocks /reports/users/anonymized rows if a PII key ever leaked in (defense in depth)', () => {
+      const payload = {
+        data: [{ participantId: 'abc', role: 'member', email: 'leak@x.nl' }],
+        nextLink: null,
+      };
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+      expect(result.error).toBeDefined();
+    });
+
     it('blocks an array of rich records (e.g. a user list) — PII leak guard', () => {
       const payload = [
         { id: 1, email: 'jan@example.com', postcode: '1234AB' },

@@ -12,7 +12,16 @@ const MUTATING_GET_SEGMENTS = ['/toggle', '/confirm', '/like', '/dislike'];
 
 // Non-component path segments a reporting token may still reach. Everything
 // else is denied (fail-closed). Only aggregate/stats endpoints belong here.
-const ALLOWED_NON_COMPONENT_SEGMENTS = new Set(['overview']);
+// ADDITIVE (#442): /reports/users/anonymized + /reports/users/aggregates are
+// deliberately NOT a normal report-data-scope component — there is no raw
+// user-id/PII exposure to gate per-field (rows are hand-built with a fixed,
+// pseudonymized field set; see users-anonymized.js), so they belong here
+// alongside 'overview' rather than in the COMPONENTS catalog.
+const ALLOWED_NON_COMPONENT_SEGMENTS = new Set([
+  'overview',
+  'anonymized',
+  'aggregates',
+]);
 
 /**
  * Records a blocked non-component request so operators can later decide to add
