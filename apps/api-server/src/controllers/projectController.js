@@ -200,59 +200,44 @@ async function deleteDuplicatedData(req, res, next) {
   }
 
   try {
-    // Delete duplicated tags
-    if (Object.keys(tagMap).length > 0) {
-      for (const tagId of Object.values(tagMap)) {
-        if (tagId) {
-          await db.Tag.destroy({
-            where: { id: tagId, projectId: sessionProjectId },
-          });
-        }
-      }
+    // Bulk delete duplicated data; individualHooks on these models still run
+    // the per-row destroy hooks.
+    const tagIds = Object.values(tagMap).filter(Boolean);
+    if (tagIds.length > 0) {
+      await db.Tag.destroy({
+        where: { id: tagIds, projectId: sessionProjectId },
+      });
     }
 
-    // Delete duplicated statuses
-    if (Object.keys(statusMap).length > 0) {
-      for (const statusId of Object.values(statusMap)) {
-        if (statusId) {
-          await db.Status.destroy({
-            where: { id: statusId, projectId: sessionProjectId },
-          });
-        }
-      }
+    const statusIds = Object.values(statusMap).filter(Boolean);
+    if (statusIds.length > 0) {
+      await db.Status.destroy({
+        where: { id: statusIds, projectId: sessionProjectId },
+      });
     }
 
-    // Delete duplicated widgets
-    if (Object.keys(widgetMap).length > 0) {
-      for (const widgetId of Object.values(widgetMap)) {
-        if (widgetId) {
-          await db.Widget.destroy({
-            where: { id: widgetId, projectId: sessionProjectId },
-          });
-        }
-      }
+    const widgetIds = Object.values(widgetMap).filter(Boolean);
+    if (widgetIds.length > 0) {
+      await db.Widget.destroy({
+        where: { id: widgetIds, projectId: sessionProjectId },
+      });
     }
 
-    // Delete duplicated resources
-    if (Object.keys(resourceMap).length > 0) {
-      for (const resourceId of Object.values(resourceMap)) {
-        if (resourceId) {
-          await db.Resource.destroy({
-            where: { id: resourceId, projectId: sessionProjectId },
-          });
-        }
-      }
+    const resourceIds = Object.values(resourceMap).filter(Boolean);
+    if (resourceIds.length > 0) {
+      await db.Resource.destroy({
+        where: { id: resourceIds, projectId: sessionProjectId },
+      });
     }
 
     // Delete duplicated users that were newly created in this rollback session.
-    if (Array.isArray(createdUserIds) && createdUserIds.length > 0) {
-      for (const userId of createdUserIds) {
-        if (userId) {
-          await db.User.destroy({
-            where: { id: userId, projectId: sessionProjectId },
-          });
-        }
-      }
+    const userIds = (Array.isArray(createdUserIds) ? createdUserIds : []).filter(
+      Boolean
+    );
+    if (userIds.length > 0) {
+      await db.User.destroy({
+        where: { id: userIds, projectId: sessionProjectId },
+      });
     }
 
     // Delete the duplicated project
@@ -895,7 +880,6 @@ async function updateAuthClients(req, res, next) {
   if (!hasRole(req.user, 'admin')) return next();
   try {
     let providers = await authSettings.providers({ project });
-    const configData = req.body.config?.auth?.provider?.openstad?.config || {};
     let allowedDomains = req.body.config?.allowedDomains || false;
     if (Array.isArray(allowedDomains)) {
       allowedDomains = allowedDomains.map((d) =>
@@ -903,8 +887,6 @@ async function updateAuthClients(req, res, next) {
       );
       req.body.config.allowedDomains = allowedDomains;
     }
-    const twoFactorRoles =
-      req.body.config?.auth?.provider?.openstad?.twoFactorRoles;
 
     for (let provider of providers) {
       // Get provider-specific config data
@@ -1031,20 +1013,6 @@ async function publishProjectUpdateMessages(req, res, next) {
 }
 
 function respondUpdatedProject(req, res, next) {
-  // Check if updating allowedDomains
-  if (typeof req?.results?.config?.allowedDomains !== 'undefined') {
-    let proj = req.results.dataValues;
-
-    // Check if allowedDomains exists
-    if (
-      typeof req?.results?.config?.allowedDomains !== 'undefined' &&
-      req.results.config.allowedDomains.length > 0
-    ) {
-      proj.config.allowedDomains = req.results.config.allowedDomains;
-    }
-  }
-
-  // when succesfull return project JSON
   res.json(req.results);
 }
 
@@ -1159,7 +1127,12 @@ function getWidgetCss(req, res, next) {
         require.resolve(`${widgetSettings.packageName}/${file}`),
         'utf8'
       );
-    } catch (e) {}
+    } catch (err) {
+      console.error(
+        `Could not read widget css file ${widgetSettings.packageName}/${file}:`,
+        err.message
+      );
+    }
   });
 
   res.setHeader('Content-Type', 'text/css');
@@ -1255,6 +1228,8 @@ async function getBranding(req, res) {
 
     return res.json({});
   } catch (err) {
+    // Branding is non-critical; fail soft with an empty response but do log
+    console.error('Could not fetch project branding:', err.message);
     return res.json({});
   }
 }
