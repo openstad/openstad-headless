@@ -1,5 +1,10 @@
 'use strict';
 
+const {
+  fromPlainError,
+  sendProblem,
+} = require('../lib/reporting/problem-json');
+
 /**
  * require-reporting-token — fail-closed authentication gate for the reporting
  * API (mounted at the top of routes/api/reports; covers /reports/*).
@@ -25,9 +30,11 @@
 function requireReportingToken(req, res, next) {
   if (req.apiTokenScope !== 'reports') {
     res.set('WWW-Authenticate', 'Bearer');
-    return res
-      .status(401)
-      .json({ error: 'A valid reporting API token is required' });
+    return sendProblem(
+      res,
+      401,
+      fromPlainError(401, 'A valid reporting API token is required')
+    );
   }
   return next();
 }

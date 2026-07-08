@@ -35,7 +35,35 @@ function widgetItemsOf(plainRow) {
   return Array.isArray(items) ? items : [];
 }
 
-// GET /api/project/:projectId/reports/submissions
+/**
+ * @openapi
+ * /submissions:
+ *   get:
+ *     summary: List form submissions, with answer fields flattened per opted-in field
+ *     tags: [Reports]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - $ref: '#/components/parameters/dateFrom'
+ *       - $ref: '#/components/parameters/dateTo'
+ *       - $ref: '#/components/parameters/status'
+ *       - $ref: '#/components/parameters/page'
+ *       - $ref: '#/components/parameters/pageSize'
+ *       - name: widgetId
+ *         in: query
+ *         required: false
+ *         schema: { type: string }
+ *         description: Restricts to submissions on one form/widget. Omit to union across every form.
+ *     responses:
+ *       200:
+ *         description: A page of submissions.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ReportEnvelope' }
+ *       400: { $ref: '#/components/responses/BadRequest' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
+ */
+// GET /api/project/:projectId/reports/v1/submissions
 //
 // Optional ?widgetId= restricts to one form, giving a strict single-form
 // schema (recommended for Power BI). Without it, submissions across

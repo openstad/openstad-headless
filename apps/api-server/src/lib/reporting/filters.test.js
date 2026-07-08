@@ -5,6 +5,7 @@ const {
   buildReportingWhere,
   respondFilterError,
   ReportingFilterError,
+  ReportingValidationErrors,
 } = require('./filters');
 
 const TYPES_WITH_STATUS = { status: 'ENUM', createdAt: 'DATE' };
@@ -165,14 +166,89 @@ describe('buildReportingWhere', () => {
     );
     expect(where.status).toBe('anything-goes');
   });
+
+  it('collects independent invalid dateFrom + dateTo into one ReportingValidationErrors (NLgov ADR: report all validation errors together)', () => {
+    let err;
+    try {
+      buildReportingWhere(
+        req({ dateFrom: 'nope', dateTo: 'also-nope' }),
+        'resources',
+        { fieldTypes: TYPES_WITH_STATUS }
+      );
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(ReportingValidationErrors);
+    expect(err.errors).toHaveLength(2);
+    expect(err.errors.map((e) => e.param)).toEqual(['dateFrom', 'dateTo']);
+  });
+
+  it('collects an invalid dateFrom together with an unsupported status filter', () => {
+    let err;
+    try {
+      buildReportingWhere(req({ dateFrom: 'nope', status: 'x' }), 'votes', {
+        fieldTypes: TYPES_NO_STATUS,
+      });
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(ReportingValidationErrors);
+    expect(err.errors.map((e) => e.code)).toEqual([
+      'invalid_date',
+      'unsupported_status_filter',
+    ]);
+  });
+
+  it('collects an invalid dateFrom together with an unknown status value', () => {
+    let err;
+    try {
+      buildReportingWhere(
+        req({ dateFrom: 'nope', status: 'bogus' }),
+        'submissions',
+        {
+          fieldTypes: TYPES_WITH_STATUS,
+          statusEnumValues: ['approved', 'pending', 'unapproved'],
+        }
+      );
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(ReportingValidationErrors);
+    expect(err.errors.map((e) => e.code)).toEqual([
+      'invalid_date',
+      'unknown_status',
+    ]);
+  });
+
+  it('does not double-report an inverted range when one side is also individually invalid', () => {
+    // dateTo is unparseable — the range-order check must not ALSO fire,
+    // since it can't meaningfully compare an invalid value.
+    let err;
+    try {
+      buildReportingWhere(
+        req({ dateFrom: '2026-02-01', dateTo: 'nope' }),
+        'resources',
+        { fieldTypes: TYPES_WITH_STATUS }
+      );
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(ReportingFilterError);
+    expect(err.code).toBe('invalid_date');
+    expect(err.param).toBe('dateTo');
+  });
 });
 
 describe('respondFilterError', () => {
-  it('sends HTTP 400 with { error: { code, message, param, hint } }', () => {
-    const captured = {};
+  it('sends HTTP 400 as an application/problem+json body (NLgov ADR)', () => {
+    const captured = { headers: {} };
     const res = {
       status(c) {
         captured.status = c;
+        return res;
+      },
+      set(k, v) {
+        captured.headers[k] = v;
         return res;
       },
       json(b) {
@@ -185,13 +261,57 @@ describe('respondFilterError', () => {
       new ReportingFilterError('invalid_date', 'bad', 'dateFrom', 'use ISO')
     );
     expect(captured.status).toBe(400);
+    expect(captured.headers['Content-Type']).toBe('application/problem+json');
     expect(captured.body).toEqual({
-      error: {
-        code: 'invalid_date',
-        message: 'bad',
-        param: 'dateFrom',
-        hint: 'use ISO',
+      type: 'https://developer.overheid.nl/api-design-rules/problem/400',
+      title: 'bad',
+      status: 400,
+      detail: 'use ISO',
+      code: 'invalid_date',
+      param: 'dateFrom',
+    });
+  });
+
+  it('sends multiple validation errors together as one problem+json body with an errors array', () => {
+    const captured = { headers: {} };
+    const res = {
+      status(c) {
+        captured.status = c;
+        return res;
       },
+      set(k, v) {
+        captured.headers[k] = v;
+        return res;
+      },
+      json(b) {
+        captured.body = b;
+        return res;
+      },
+    };
+    respondFilterError(
+      res,
+      new ReportingValidationErrors([
+        new ReportingFilterError(
+          'invalid_date',
+          'bad dateFrom',
+          'dateFrom',
+          'hint1'
+        ),
+        new ReportingFilterError(
+          'invalid_date',
+          'bad dateTo',
+          'dateTo',
+          'hint2'
+        ),
+      ])
+    );
+    expect(captured.status).toBe(400);
+    expect(captured.body.errors).toHaveLength(2);
+    expect(captured.body.errors[0]).toEqual({
+      code: 'invalid_date',
+      title: 'bad dateFrom',
+      param: 'dateFrom',
+      detail: 'hint1',
     });
   });
 

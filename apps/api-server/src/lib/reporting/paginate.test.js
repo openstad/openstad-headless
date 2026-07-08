@@ -22,7 +22,7 @@ const serialize = (_componentKey, row) => ({ id: row.id });
 function makeReq(query = {}) {
   return {
     query,
-    baseUrl: '/api/project/1/reports',
+    baseUrl: '/api/project/1/reports/v1',
     path: '/resources',
     reportingScope: { componentKey: 'resources', enabledPersonalFields: [] },
     project: { id: 1 },
@@ -68,7 +68,7 @@ describe('buildNextLink', () => {
       foo: 'bar',
     });
     expect(buildNextLink(req, 2)).toBe(
-      'api/project/1/reports/resources?dateFrom=2026-01-01&page=2&pageSize=100'
+      'api/project/1/reports/v1/resources?dateFrom=2026-01-01&page=2&pageSize=100'
     );
   });
 
@@ -94,7 +94,9 @@ describe('paginateReporting', () => {
     });
     expect(data).toHaveLength(2);
     expect(data.map((d) => d.id)).toEqual([1, 2]);
-    expect(nextLink).toBe('api/project/1/reports/resources?page=2&pageSize=2');
+    expect(nextLink).toBe(
+      'api/project/1/reports/v1/resources?page=2&pageSize=2'
+    );
   });
 
   it('exactly pageSize rows → nextLink null (last page)', () => {

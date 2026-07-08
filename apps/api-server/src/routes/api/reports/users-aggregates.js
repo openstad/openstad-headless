@@ -48,7 +48,33 @@ async function countDistinct(query, bindvars) {
   return (rows && rows.counted) || 0;
 }
 
-// GET /api/project/:projectId/reports/users/aggregates
+/**
+ * @openapi
+ * /users/aggregates:
+ *   get:
+ *     summary: Get unique-participant counts across every data source
+ *     tags: [Reports]
+ *     security: [{ bearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: Aggregate participant counts (not paginated).
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 uniqueParticipants: { type: integer }
+ *                 byType:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       type: { type: string }
+ *                       count: { type: integer }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
+ */
+// GET /api/project/:projectId/reports/v1/users/aggregates
 //
 // Mandatory aggregation (#442 AC: "Not optional, this is a requirement") —
 // number of unique participants, overall and per data source. Non-component

@@ -33,7 +33,29 @@ function buildQuestionRows(widgets) {
   return data;
 }
 
-// GET /api/project/:projectId/reports/choice-guide-questions?widgetId=
+/**
+ * @openapi
+ * /choice-guide-questions:
+ *   get:
+ *     summary: List choice-guide question rows, flattened from the guide's widget config
+ *     tags: [Reports]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - name: widgetId
+ *         in: query
+ *         required: false
+ *         schema: { type: string }
+ *         description: Restricts to one guide. Omit to flatten every choice-guide in the project.
+ *     responses:
+ *       200:
+ *         description: Question rows (not paginated — bounded by the number of questions per guide).
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ReportEnvelope' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
+ */
+// GET /api/project/:projectId/reports/v1/choice-guide-questions?widgetId=
 //
 // Flat guide -> question rows (#441). Not a real DB table — choice-guide
 // question definitions live in Widget.config.items (Widget.type='choiceguide'),

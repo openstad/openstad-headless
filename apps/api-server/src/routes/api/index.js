@@ -77,8 +77,10 @@ router.use('/project/:projectId(\\d+)/choicesguide', require('./choicesguide'));
 // actions
 router.use('/project/:projectId(\\d+)/action', require('./action'));
 
-// reporting endpoints (Power BI) — path-scoped by projectId (issue #1651)
-router.use('/project/:projectId(\\d+)/reports', require('./reports'));
+// reporting endpoints (Power BI) — path-scoped by projectId (issue #1651).
+// Versioned per NLgov API Design Rules (brain 444); no external consumers on
+// an unversioned path existed yet, so this is a straight move, not a dual-mount.
+router.use('/project/:projectId(\\d+)/reports/v1', require('./reports'));
 
 //widgets
 router.use('/project/:projectId(\\d+)/widgets', require('./widget'));

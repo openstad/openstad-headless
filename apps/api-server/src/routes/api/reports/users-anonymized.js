@@ -39,7 +39,26 @@ function toParticipantRow(row) {
   };
 }
 
-// GET /api/project/:projectId/reports/users/anonymized
+/**
+ * @openapi
+ * /users/anonymized:
+ *   get:
+ *     summary: List pseudonymized participant rows across every data source
+ *     tags: [Reports]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - $ref: '#/components/parameters/page'
+ *       - $ref: '#/components/parameters/pageSize'
+ *     responses:
+ *       200:
+ *         description: A page of pseudonymized participants (participantId, role, projectId, createdAt, lastLogin). No raw user id is ever exposed.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ReportEnvelope' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
+ */
+// GET /api/project/:projectId/reports/v1/users/anonymized
 //
 // Pseudonymized participant rows — NOT a normal report-data-scope component
 // (see api-token-scope-guard.js ALLOWED_NON_COMPONENT_SEGMENTS): there is no

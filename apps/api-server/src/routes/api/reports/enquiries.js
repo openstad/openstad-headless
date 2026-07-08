@@ -5,7 +5,30 @@ const {
   makeReportEndpoint,
 } = require('../../../lib/reporting/make-report-endpoint');
 
-// GET /api/project/:projectId/reports/enquiries
+/**
+ * @openapi
+ * /enquiries:
+ *   get:
+ *     summary: List enquiry submissions (submissions on an enquete widget)
+ *     tags: [Reports]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - $ref: '#/components/parameters/dateFrom'
+ *       - $ref: '#/components/parameters/dateTo'
+ *       - $ref: '#/components/parameters/status'
+ *       - $ref: '#/components/parameters/page'
+ *       - $ref: '#/components/parameters/pageSize'
+ *     responses:
+ *       200:
+ *         description: A page of enquiry submissions.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ReportEnvelope' }
+ *       400: { $ref: '#/components/responses/BadRequest' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
+ */
+// GET /api/project/:projectId/reports/v1/enquiries
 // ASSUMPTION (documented in the plan): "enquiries" == submissions whose Widget
 // has type 'enquete'. Reuses the `submissions` data-scope/fields; the path
 // segment `enquiries` is mapped to the `submissions` component in

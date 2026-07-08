@@ -6,6 +6,11 @@ const { Op } = require('sequelize');
 // getProjectScope/getFieldTypes here does not load the database layer — unit
 // tests that inject opts.fieldTypes still never need a real DB connection.
 const { getProjectScope } = require('./component-registry');
+const {
+  fromFilterError,
+  fromFilterErrors,
+  sendProblem,
+} = require('./problem-json');
 
 // Query params the reporting endpoints understand. Everything else is ignored
 // (no error) — e.g. a stray projectId query param (projectId comes from the path).
@@ -28,6 +33,20 @@ class ReportingFilterError extends Error {
     this.code = code;
     this.param = param;
     this.hint = hint;
+  }
+}
+
+/**
+ * Wraps 2+ independent ReportingFilterErrors found on the same request (e.g.
+ * an invalid dateFrom AND an unsupported status param). NLgov API Design
+ * Rules require every validation error to be reported together in one
+ * response, not one-at-a-time across repeated requests.
+ */
+class ReportingValidationErrors extends Error {
+  constructor(errors) {
+    super('Multiple validation errors');
+    this.name = 'ReportingValidationErrors';
+    this.errors = errors;
   }
 }
 
@@ -113,24 +132,43 @@ function buildReportingWhere(req, componentKey, opts = {}) {
     );
   }
 
-  // Date range on createdAt — half-open [from, to)
+  // Collected across every independent check below so a single response can
+  // report ALL validation errors at once (NLgov API Design Rules), rather
+  // than the caller discovering them one request at a time.
+  const errors = [];
+
+  // Date range on createdAt — half-open [from, to). dateFrom/dateTo are
+  // parsed independently so an invalid dateFrom doesn't hide an invalid
+  // dateTo; the ordering check only runs once both individually parsed OK.
   const createdAt = {};
+  let dateFromValue;
+  let dateToValue;
   if (q.dateFrom !== undefined && q.dateFrom !== '') {
-    createdAt[Op.gte] = parseDateParam(q.dateFrom, 'dateFrom');
+    try {
+      dateFromValue = parseDateParam(q.dateFrom, 'dateFrom');
+    } catch (err) {
+      if (!(err instanceof ReportingFilterError)) throw err;
+      errors.push(err);
+    }
   }
   if (q.dateTo !== undefined && q.dateTo !== '') {
-    createdAt[Op.lt] = parseDateParam(q.dateTo, 'dateTo');
+    try {
+      dateToValue = parseDateParam(q.dateTo, 'dateTo');
+    } catch (err) {
+      if (!(err instanceof ReportingFilterError)) throw err;
+      errors.push(err);
+    }
   }
-  if (
-    createdAt[Op.gte] &&
-    createdAt[Op.lt] &&
-    createdAt[Op.gte] >= createdAt[Op.lt]
-  ) {
-    throw new ReportingFilterError(
-      'invalid_date_range',
-      'dateFrom must be strictly before dateTo',
-      'dateFrom',
-      'The range is half-open [dateFrom, dateTo); ensure dateFrom < dateTo'
+  if (dateFromValue) createdAt[Op.gte] = dateFromValue;
+  if (dateToValue) createdAt[Op.lt] = dateToValue;
+  if (dateFromValue && dateToValue && dateFromValue >= dateToValue) {
+    errors.push(
+      new ReportingFilterError(
+        'invalid_date_range',
+        'dateFrom must be strictly before dateTo',
+        'dateFrom',
+        'The range is half-open [dateFrom, dateTo); ensure dateFrom < dateTo'
+      )
     );
   }
   if (Object.getOwnPropertySymbols(createdAt).length > 0) {
@@ -155,55 +193,62 @@ function buildReportingWhere(req, componentKey, opts = {}) {
       opts.fieldTypes ||
       require('./component-registry').getFieldTypes(componentKey);
     if (!Object.prototype.hasOwnProperty.call(fieldTypes, 'status')) {
-      throw new ReportingFilterError(
-        'unsupported_status_filter',
-        `The '${componentKey}' report has no status field to filter on`,
-        'status',
-        'Remove the status parameter for this endpoint'
+      errors.push(
+        new ReportingFilterError(
+          'unsupported_status_filter',
+          `The '${componentKey}' report has no status field to filter on`,
+          'status',
+          'Remove the status parameter for this endpoint'
+        )
       );
+    } else {
+      // Validate against the component's real status set (e.g. Submission's
+      // ENUM) when there is one. Components without a fixed enum (free-text,
+      // or a per-project status set that isn't a plain column — resources
+      // never reach this branch at all, see getFieldEnumValues) skip this
+      // check rather than enforce a hardcoded list.
+      const allowedStatuses =
+        opts.statusEnumValues !== undefined
+          ? opts.statusEnumValues
+          : require('./component-registry').getFieldEnumValues(
+              componentKey,
+              'status'
+            );
+      if (
+        Array.isArray(allowedStatuses) &&
+        !allowedStatuses.includes(q.status)
+      ) {
+        errors.push(
+          new ReportingFilterError(
+            'unknown_status',
+            `'${q.status}' is not a valid status for the '${componentKey}' report`,
+            'status',
+            `Valid values: ${allowedStatuses.join(', ')}`
+          )
+        );
+      } else {
+        where.status = q.status;
+      }
     }
-
-    // Validate against the component's real status set (e.g. Submission's
-    // ENUM) when there is one. Components without a fixed enum (free-text,
-    // or a per-project status set that isn't a plain column — resources
-    // never reach this branch at all, see getFieldEnumValues) skip this
-    // check rather than enforce a hardcoded list.
-    const allowedStatuses =
-      opts.statusEnumValues !== undefined
-        ? opts.statusEnumValues
-        : require('./component-registry').getFieldEnumValues(
-            componentKey,
-            'status'
-          );
-    if (Array.isArray(allowedStatuses) && !allowedStatuses.includes(q.status)) {
-      throw new ReportingFilterError(
-        'unknown_status',
-        `'${q.status}' is not a valid status for the '${componentKey}' report`,
-        'status',
-        `Valid values: ${allowedStatuses.join(', ')}`
-      );
-    }
-
-    where.status = q.status;
   }
+
+  if (errors.length === 1) throw errors[0];
+  if (errors.length > 1) throw new ReportingValidationErrors(errors);
 
   return { where, include };
 }
 
 /**
- * Sends a ReportingFilterError as an HTTP 400 with the agreed body shape.
- * Re-throws anything that is not a ReportingFilterError so the caller can 500.
+ * Sends a ReportingFilterError (or ReportingValidationErrors, for 2+ errors
+ * found at once) as an HTTP 400 in the RFC 9457 problem+json shape (NLgov API
+ * Design Rules). Re-throws anything else so the caller can 500.
  */
 function respondFilterError(res, err) {
+  if (err instanceof ReportingValidationErrors) {
+    return sendProblem(res, 400, fromFilterErrors(err.errors));
+  }
   if (!(err instanceof ReportingFilterError)) throw err;
-  return res.status(400).json({
-    error: {
-      code: err.code,
-      message: err.message,
-      param: err.param,
-      hint: err.hint,
-    },
-  });
+  return sendProblem(res, 400, fromFilterError(err));
 }
 
 module.exports = {
@@ -211,5 +256,6 @@ module.exports = {
   respondFilterError,
   parseDateParam,
   ReportingFilterError,
+  ReportingValidationErrors,
   KNOWN_PARAMS,
 };

@@ -39,8 +39,13 @@ function makeRes() {
   const res = {
     _status: null,
     _body: null,
+    _headers: {},
     status(code) {
       this._status = code;
+      return this;
+    },
+    set(key, value) {
+      this._headers[key] = value;
       return this;
     },
     json(body) {
@@ -89,6 +94,12 @@ describe('apiTokenScopeGuard', () => {
 
       expect(res._status).toBe(403);
       expect(next).not.toHaveBeenCalled();
+      expect(res._headers['Content-Type']).toBe('application/problem+json');
+      expect(res._body).toEqual({
+        type: 'https://developer.overheid.nl/api-design-rules/problem/403',
+        title: 'Reporting tokens only allow GET requests',
+        status: 403,
+      });
     });
 
     it('blocks PUT with 403', () => {

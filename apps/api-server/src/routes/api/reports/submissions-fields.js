@@ -5,6 +5,10 @@ const {
   fieldKeyOf,
   CONTROL_FIELD_KEYS,
 } = require('../../../lib/reporting/flatten-submission');
+const {
+  buildProblem,
+  sendProblem,
+} = require('../../../lib/reporting/problem-json');
 
 // questionType values (packages/enquete/.../items.tsx hasOptions() switch)
 // that render as a choice list.
@@ -119,7 +123,42 @@ async function resolveSubmissionFields({
   return { fields: buildFieldRows(items, enabledFormFields) };
 }
 
-// GET /api/project/:projectId/reports/submissions/fields?widgetId=
+/**
+ * @openapi
+ * /submissions/fields:
+ *   get:
+ *     summary: Describe the opted-in fields exposed by /submissions for one form
+ *     tags: [Reports]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - name: widgetId
+ *         in: query
+ *         required: true
+ *         schema: { type: string }
+ *         description: The form/widget to describe fields for.
+ *     responses:
+ *       200:
+ *         description: Form structure (name/label/type per field) — not participant data.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   name: { type: string }
+ *                   label: { type: string }
+ *                   type: { type: string, enum: [text, number, choice, date] }
+ *       400: { $ref: '#/components/responses/BadRequest' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
+ *       404:
+ *         description: Widget not found for this project.
+ *         content:
+ *           application/problem+json:
+ *             schema: { $ref: '#/components/schemas/Problem' }
+ */
+// GET /api/project/:projectId/reports/v1/submissions/fields?widgetId=
 //
 // Metadata endpoint (#440 AC): describes the fields /reports/submissions
 // exposes for one form, including type. Treated as SCHEMA (form structure),
@@ -135,13 +174,15 @@ module.exports = async function submissionsFields(req, res, next) {
   try {
     const widgetId = req.query.widgetId;
     if (!widgetId) {
-      return res.status(400).json({
-        error: {
+      return sendProblem(
+        res,
+        400,
+        buildProblem(400, {
+          title: '?widgetId= is required',
           code: 'missing_widget_id',
-          message: '?widgetId= is required',
           param: 'widgetId',
-        },
-      });
+        })
+      );
     }
 
     const result = await resolveSubmissionFields({
@@ -151,12 +192,14 @@ module.exports = async function submissionsFields(req, res, next) {
       enabledFormFields: getEnabledFormFields(req),
     });
     if (result.notFound) {
-      return res.status(404).json({
-        error: {
+      return sendProblem(
+        res,
+        404,
+        buildProblem(404, {
+          title: 'Widget not found for this project',
           code: 'widget_not_found',
-          message: 'Widget not found for this project',
-        },
-      });
+        })
+      );
     }
 
     req.reportSchemaResponse = true;

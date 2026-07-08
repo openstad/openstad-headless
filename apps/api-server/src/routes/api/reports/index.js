@@ -2,13 +2,40 @@
 
 const express = require('express');
 const requireReportingToken = require('../../../middleware/require-reporting-token');
+const { problemJsonWrapper } = require('../../../lib/reporting/problem-json');
 
-// Reporting router — mounted at /api/project/:projectId/reports (see
+const API_VERSION = '1.0.0';
+
+// Reporting router — mounted at /api/project/:projectId/reports/v1 (see
 // routes/api/index.js). mergeParams so req.params.projectId is available; the
 // project middleware sets req.project, and the (globally mounted)
 // api-token-scope-guard + report-field-filter + report-finalize handle
 // reporting-token access control, PII stripping and envelope finalization.
 const router = express.Router({ mergeParams: true });
+
+// NLgov API Design Rules: every error response must be application/problem+json
+// (RFC 9457). Must be the FIRST router.use — it monkey-patches res.json so it
+// also catches the app-wide error_handling.js 500 (mounted outside this router
+// entirely, so it can't be edited directly here without affecting every
+// non-reporting endpoint too). filters.js, require-reporting-token.js and
+// api-token-scope-guard.js already send RFC 9457 bodies directly.
+router.use(problemJsonWrapper);
+
+// NLgov API Design Rules: the major version must be reflected in a response
+// header too, not just the URI.
+router.use((req, res, next) => {
+  res.set('API-Version', API_VERSION);
+  next();
+});
+
+// NLgov API Design Rules: publish OpenAPI 3.x at a fixed location. Mounted
+// BEFORE the auth gate below — an integrator must be able to read the API
+// shape before they can request a reporting token for it. (A request that
+// DOES carry a valid reporting token still 403s here via the globally-mounted
+// api-token-scope-guard, since /openapi.json matches no known reporting
+// component — a narrow, documented edge case, not a security gap: the spec
+// stays reachable for the unauthenticated case that matters.)
+router.get('/openapi.json', require('./openapi'));
 
 // Fail-closed authentication gate: the globally-mounted reporting middleware
 // only CONSTRAINS a valid reporting token (they no-op when apiTokenScope is not

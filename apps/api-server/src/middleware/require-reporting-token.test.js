@@ -33,8 +33,11 @@ describe('requireReportingToken', () => {
 
     expect(next).not.toHaveBeenCalled();
     expect(res._status).toBe(401);
+    expect(res._headers['Content-Type']).toBe('application/problem+json');
     expect(res._body).toEqual({
-      error: 'A valid reporting API token is required',
+      type: 'https://developer.overheid.nl/api-design-rules/problem/401',
+      title: 'A valid reporting API token is required',
+      status: 401,
     });
     expect(res._headers['WWW-Authenticate']).toBe('Bearer');
   });
@@ -49,7 +52,9 @@ describe('requireReportingToken', () => {
     expect(next).not.toHaveBeenCalled();
     expect(res._status).toBe(401);
     expect(res._body).toEqual({
-      error: 'A valid reporting API token is required',
+      type: 'https://developer.overheid.nl/api-design-rules/problem/401',
+      title: 'A valid reporting API token is required',
+      status: 401,
     });
   });
 

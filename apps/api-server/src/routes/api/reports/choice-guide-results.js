@@ -35,7 +35,34 @@ function widgetItemsOf(plainRow) {
   return Array.isArray(items) ? items : [];
 }
 
-// GET /api/project/:projectId/reports/choice-guide-results
+/**
+ * @openapi
+ * /choice-guide-results:
+ *   get:
+ *     summary: List choice-guide results, with answers flattened per opted-in field
+ *     tags: [Reports]
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - $ref: '#/components/parameters/dateFrom'
+ *       - $ref: '#/components/parameters/dateTo'
+ *       - $ref: '#/components/parameters/page'
+ *       - $ref: '#/components/parameters/pageSize'
+ *       - name: widgetId
+ *         in: query
+ *         required: false
+ *         schema: { type: string }
+ *         description: Restricts to results on one guide. Omit to union across every guide.
+ *     responses:
+ *       200:
+ *         description: A page of choice-guide results.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/ReportEnvelope' }
+ *       400: { $ref: '#/components/responses/BadRequest' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
+ */
+// GET /api/project/:projectId/reports/v1/choice-guide-results
 //
 // Reuses the existing `choiceguides` component (ChoicesGuideResult) — same
 // safeFields (id, projectId, widgetId, createdAt, updatedAt, isSpam) as the
