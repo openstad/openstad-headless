@@ -164,6 +164,7 @@ function ResourceDetail({
   const [expanded, setExpanded] = useState(false);
   const [showAccordion, setShowAccordion] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightboxAlt, setLightboxAlt] = useState<string | undefined>(undefined);
   const descriptionRef = React.useRef<HTMLDivElement>(null);
   const id = useId();
 
@@ -322,7 +323,8 @@ function ResourceDetail({
   const renderImage = (
     src: string,
     clickableImage: boolean,
-    imageDescription?: string
+    imageDescription?: string,
+    imageAlt?: string
   ) => {
     const imageElement = (
       <>
@@ -358,11 +360,17 @@ function ResourceDetail({
     return clickableImage ? (
       <div
         style={{ cursor: 'zoom-in' }}
-        onClick={() => setLightboxSrc(src)}
+        onClick={() => {
+          setLightboxSrc(src);
+          setLightboxAlt(imageAlt);
+        }}
         role="button"
         tabIndex={0}
         aria-label="Afbeelding uitvergroot bekijken"
-        onKeyDown={(e) => e.key === 'Enter' && setLightboxSrc(src)}>
+        onKeyDown={(e) =>
+          (e.key === 'Enter' || e.key === ' ') &&
+          (setLightboxSrc(src), setLightboxAlt(imageAlt))
+        }>
         {imageElement}
       </div>
     ) : (
@@ -464,7 +472,11 @@ function ResourceDetail({
   return (
     <section className="osc-resource-detail-widget-container">
       {lightboxSrc && (
-        <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+        <Lightbox
+          src={lightboxSrc}
+          alt={lightboxAlt}
+          onClose={() => setLightboxSrc(null)}
+        />
       )}
       {displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit />}
       <div
@@ -486,7 +498,7 @@ function ResourceDetail({
                     previous: 'Vorige afbeelding',
                   }}
                   itemRenderer={(i) =>
-                    renderImage(i.url, clickableImage, i.description)
+                    renderImage(i.url, clickableImage, i.description, i.alt)
                   }
                 />
               )}
