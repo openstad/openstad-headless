@@ -18,21 +18,23 @@ import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links
 import './resourceDetailWithMap.css';
 
 type booleanProps = {
-  [K in
-    | 'displayImage'
-    | 'displayTitle'
-    | 'displaySummary'
-    | 'displayDescription'
-    | 'displayUser'
-    | 'displayDate'
-    | 'displayBudget'
-    | 'displayLocation'
-    | 'displayBudgetDocuments'
-    | 'displayLikes'
-    | 'displayTags'
-    | 'displayStatus'
-    | 'displayDocuments'
-    | 'displaySocials']: boolean | undefined;
+  [
+    K in
+      | 'displayImage'
+      | 'displayTitle'
+      | 'displaySummary'
+      | 'displayDescription'
+      | 'displayUser'
+      | 'displayDate'
+      | 'displayBudget'
+      | 'displayLocation'
+      | 'displayBudgetDocuments'
+      | 'displayLikes'
+      | 'displayTags'
+      | 'displayStatus'
+      | 'displayDocuments'
+      | 'displaySocials'
+  ]: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = {
