@@ -55,4 +55,10 @@ export const DATA_SCOPE_COMPONENTS = {
       { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
     ],
   },
+  // ADDITIVE (reporting endpoints, issue #1651): the project's own metadata is
+  // public and has no personal fields.
+  projects: {
+    label: 'Projecten',
+    personalFields: [],
+  },
 } as const;

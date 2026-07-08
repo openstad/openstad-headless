@@ -127,6 +127,17 @@ const COMPONENTS = {
     // result is user-authored quiz data; kept as opt-in personal field.
     personalFields: ['result', 'user.displayName', 'user.nickName'],
   },
+
+  // ADDITIVE (reporting endpoints, issue #1651): the project's own metadata.
+  // Safe-only — public project config content, no participant PII. Does NOT
+  // loosen any existing PII rule. Project.config (JSON) is intentionally
+  // excluded from safeFields.
+  projects: {
+    label: 'Projecten',
+    pathPattern: '/reports/projects',
+    safeFields: ['id', 'name', 'title', 'url', 'createdAt', 'updatedAt'],
+    personalFields: [],
+  },
 };
 
 /**
@@ -146,6 +157,13 @@ const SEGMENT_TO_COMPONENT = {
   choicesguide: 'choiceguides',
   choicesguides: 'choiceguides',
   choiceguide: 'choiceguides',
+  // ADDITIVE (reporting endpoints). `enquiries` reuses the submissions
+  // component (enquete-type submissions). Only the plural `projects` segment is
+  // mapped — NOT the singular `project`, which would collide with the
+  // ubiquitous /api/project/:id path segment (matchComponent scans from the end,
+  // so the trailing `projects`/`enquiries` segment wins).
+  enquiries: 'submissions',
+  projects: 'projects',
 };
 
 /**

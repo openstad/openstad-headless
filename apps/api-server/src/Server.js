@@ -89,6 +89,13 @@ module.exports = {
     // Restrict API token requests to reporting/stats routes only
     this.app.use(require('./middleware/api-token-scope-guard'));
 
+    // Finalize the reporting envelope AFTER the field filter runs. Mounted
+    // BEFORE report-field-filter on purpose: its res.json wrapper is installed
+    // first, so it executes last (innermost) — re-attaching the {data,nextLink}
+    // envelope, the pseudonymous userId and any extra columns that the field
+    // filter would otherwise drop, without touching the data-scope catalog.
+    this.app.use(require('./middleware/report-finalize'));
+
     // Filter raw component responses for reporting tokens to the project's data scope
     this.app.use(require('./middleware/report-field-filter'));
 

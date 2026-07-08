@@ -37,7 +37,8 @@ function applyFilter(
   // Apply the middleware — it wraps res.json synchronously then calls next.
   reportFieldFilter(req, res, next);
 
-  // Simulate the downstream route handler calling res.json(payload).
+  // Simulate the downstream route handler calling res.status(x).json(payload).
+  if (statusCode !== undefined) res.status(statusCode);
   res.json(payload);
 
   return captured.body;
@@ -315,6 +316,53 @@ describe('reportFieldFilter', () => {
       ];
       const result = applyFilter(payload, { reportingScope: aggregateScope });
       expect(result.error).toBeDefined();
+    });
+  });
+
+  describe('error responses (4xx/5xx) pass through unfiltered', () => {
+    const scope = { componentKey: 'votes', enabledPersonalFields: [] };
+
+    it('does not mangle a 400 filter-error body on a component endpoint', () => {
+      const payload = {
+        error: {
+          code: 'unsupported_status_filter',
+          message: "The 'votes' report has no status field to filter on",
+          param: 'status',
+          hint: 'Remove the status parameter for this endpoint',
+        },
+      };
+
+      const result = applyFilter(payload, {
+        reportingScope: scope,
+        statusCode: 400,
+      });
+
+      expect(result).toEqual(payload);
+    });
+
+    it('still filters a normal 200 component response', () => {
+      const payload = { id: 1, opinion: 'yes', ip: '1.2.3.4', userId: 9 };
+
+      const result = applyFilter(payload, {
+        reportingScope: scope,
+        statusCode: 200,
+      });
+
+      expect(result.ip).toBeUndefined();
+      expect(result.userId).toBeUndefined();
+      expect(result.opinion).toBe('yes');
+    });
+
+    it('does not mangle a 400 body on an aggregate (componentKey null) endpoint either', () => {
+      const aggregateScope = { componentKey: null, enabledPersonalFields: [] };
+      const payload = { error: { code: 'bad_request', message: 'nope' } };
+
+      const result = applyFilter(payload, {
+        reportingScope: aggregateScope,
+        statusCode: 400,
+      });
+
+      expect(result).toEqual(payload);
     });
   });
 

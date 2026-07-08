@@ -109,9 +109,11 @@ function reportFieldFilter(req, res, next) {
   const originalJson = res.json.bind(res);
 
   res.json = function filteredJson(payload) {
-    // Error responses pass through untouched so reporting clients keep the
-    // status message; projecting the body to safeFields would empty it and
-    // make a 404 indistinguishable from a 500 or a scope block.
+    // Error responses (4xx/5xx) pass through untouched. They are synthesized by
+    // this app — e.g. the reporting filter's { error: {code,message,param,hint} }
+    // shape (filters.js) or the error-handler's { status, message, … } — never
+    // raw DB records, so they carry no PII. Projecting them to safeFields would
+    // empty the body and make a 404 indistinguishable from a 500 or a scope block.
     if (res.statusCode >= 400) {
       return originalJson(payload);
     }
