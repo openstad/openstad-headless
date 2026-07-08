@@ -366,6 +366,42 @@ describe('reportFieldFilter', () => {
     });
   });
 
+  describe('schema/metadata responses bypass the field filter (#440)', () => {
+    it('passes through a {name,label,type} field-metadata array unfiltered', () => {
+      const scope = { componentKey: 'submissions', enabledPersonalFields: [] };
+      const payload = [{ name: 'field_name', label: 'Naam', type: 'text' }];
+
+      const captured = { body: null };
+      const req = {
+        apiTokenScope: 'reports',
+        reportingScope: scope,
+        reportSchemaResponse: true,
+      };
+      const res = {
+        statusCode: 200,
+        json(body) {
+          captured.body = body;
+          return res;
+        },
+      };
+      const next = vi.fn();
+      require('./report-field-filter')(req, res, next);
+      res.json(payload);
+
+      expect(captured.body).toEqual(payload);
+    });
+
+    it('still filters normally when reportSchemaResponse is not set', () => {
+      const scope = { componentKey: 'submissions', enabledPersonalFields: [] };
+      const payload = { id: 1, status: 'approved', userId: 9 };
+
+      const result = applyFilter(payload, { reportingScope: scope });
+
+      expect(result.status).toBe('approved');
+      expect(result.userId).toBeUndefined();
+    });
+  });
+
   describe('registry — PII fields never in safe universe', () => {
     it('exposable-fields registry does not include ip', () => {
       const {

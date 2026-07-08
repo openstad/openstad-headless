@@ -87,7 +87,7 @@ function buildNextLink(req, nextPage) {
  *   pageSize: number,
  *   serialize: (componentKey:string, row:any, scope:any)=>object,
  *   includeUserId?: boolean,
- *   extraColumns?: (plainRow:object)=>object,
+ *   extraColumns?: (plainRow:object, req:import('express').Request, allPlainRows:object[])=>object,
  * }} args
  * @returns {{data: object[], nextLink: string|null}}
  */
@@ -108,13 +108,18 @@ function paginateReporting({
   if (includeUserId && !req.reportUserPseudonyms) req.reportUserPseudonyms = {};
   if (extraColumns && !req.reportExtraColumns) req.reportExtraColumns = {};
 
+  // Pre-computed once so extraColumns callbacks that need cross-row context
+  // (e.g. #440's multi-form field union) don't each re-derive it themselves.
+  const allPlainRows = extraColumns ? pageRows.map(toPlain) : null;
+
   const data = pageRows.map((row) => {
     const plain = toPlain(row);
     if (includeUserId) {
       req.reportUserPseudonyms[plain.id] = pseudonymizeUserId(plain.userId);
     }
     if (extraColumns) {
-      req.reportExtraColumns[plain.id] = extraColumns(plain) || {};
+      req.reportExtraColumns[plain.id] =
+        extraColumns(plain, req, allPlainRows) || {};
     }
     return serialize(componentKey, plain, req.reportingScope);
   });

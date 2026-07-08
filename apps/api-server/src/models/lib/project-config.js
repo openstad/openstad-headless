@@ -369,6 +369,15 @@ module.exports = {
         subset: {
           enabled: { type: 'boolean', default: false },
           personalFields: { type: 'arrayOfStrings', default: [] },
+          // Separate per-field opt-in allowlist (#440) for the dynamic form
+          // answer columns (field_<key>) exposed by /reports/submissions and
+          // /reports/submissions/fields. Distinct from personalFields above
+          // (which lists fixed, cross-project field names from
+          // report-data-scope's static catalog) — form fields are dynamic,
+          // defined per project/widget, so they can't live in that catalog.
+          // Default empty: no form answers are exposed until explicitly
+          // opted in per field key.
+          formFields: { type: 'arrayOfStrings', default: [] },
         },
       },
       choiceguides: {

@@ -135,4 +135,30 @@ describe('paginateReporting', () => {
     expect(req.reportExtraColumns[7]).toEqual({ voteId: 7 });
     expect(req.reportUserPseudonyms[7]).toBeNull(); // anonymous
   });
+
+  it('passes req and the full page of plain rows as the 2nd/3rd extraColumns args (#440 cross-row union)', () => {
+    const req = makeReq({ pageSize: '10' });
+    const rows = [
+      { id: 1, widgetId: 5 },
+      { id: 2, widgetId: 6 },
+    ];
+    const seenArgs = [];
+    paginateReporting({
+      req,
+      componentKey: 'submissions',
+      rows,
+      page: 1,
+      pageSize: 10,
+      serialize,
+      includeUserId: false,
+      extraColumns: (row, passedReq, allRows) => {
+        seenArgs.push({ row, passedReq, allRows });
+        return {};
+      },
+    });
+    expect(seenArgs).toHaveLength(2);
+    expect(seenArgs[0].passedReq).toBe(req);
+    expect(seenArgs[0].allRows).toEqual(rows);
+    expect(seenArgs[1].allRows).toBe(seenArgs[0].allRows); // same page-wide array both calls
+  });
 });

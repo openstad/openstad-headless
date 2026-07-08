@@ -118,6 +118,15 @@ function reportFieldFilter(req, res, next) {
       return originalJson(payload);
     }
 
+    // Schema/metadata responses (e.g. /submissions/fields, #440): the route
+    // itself sets this because it returns form STRUCTURE (field name/label/
+    // type), not participant data, so projecting it to the component's
+    // safeFields would empty it out. Still gated by the scope-guard's normal
+    // component-enabled check, same as any other reporting request.
+    if (req.reportSchemaResponse) {
+      return originalJson(payload);
+    }
+
     // Aggregate endpoints — the /overview allowlist (componentKey === null) and
     // the /stats component counts (scope.aggregate). Both return counts/dates,
     // not records, so field projection would empty them. Validate by shape and
