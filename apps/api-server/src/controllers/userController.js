@@ -123,7 +123,7 @@ async function unsubscribe(req, res, next) {
       return next(new Error('Users: invalid unsubscribe link'));
 
     user.emailNotificationConsent = false;
-    const updatedUser = await user.save();
+    await user.save();
 
     req.authConfig = await authSettings.config({
       project: req.project,
@@ -350,7 +350,7 @@ function ensureUserNotExists(req, res, next) {
     })
     .then((found) => {
       if (found) {
-        console.log('user already exists', found);
+        console.log(`user already exists: id=${found.id}`);
         throw new Error('User already exists');
       } else {
         next();
@@ -523,7 +523,7 @@ async function parseOnlyUserIds(req, res, next) {
     let ids = req.body && req.body.onlyUserIds;
     if (!ids) return next();
     if (!Array.isArray(ids)) ids = [ids];
-    ids = ids.map((id) => parseInt(id)).filter((id) => typeof id == 'number');
+    ids = ids.map((id) => parseInt(id)).filter((id) => Number.isInteger(id));
     if (ids.length) req.onlyUserIds = ids;
   } catch (err) {
     return next(err);
@@ -537,7 +537,7 @@ async function parseOnlyProjectIds(req, res, next) {
     let ids = req.body && req.body.onlyProjectIds;
     if (!ids) return next();
     if (!Array.isArray(ids)) ids = [ids];
-    ids = ids.map((id) => parseInt(id)).filter((id) => typeof id == 'number');
+    ids = ids.map((id) => parseInt(id)).filter((id) => Number.isInteger(id));
     if (ids.length) {
       let users = [req.targetUser, ...req.linkedUsers];
       let userIds = ids
@@ -844,7 +844,7 @@ async function deleteUser(req, res, next) {
     });
     let adapter = await authSettings.adapter({ authConfig: req.authConfig });
     if (adapter.service.deleteUser) {
-      adapter.service.deleteUser({
+      await adapter.service.deleteUser({
         authConfig,
         userData: {
           id: user.idpUser.identifier,
