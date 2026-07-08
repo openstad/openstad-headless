@@ -310,7 +310,9 @@ function requireCanAddResources(req, res, next) {
   return next();
 }
 
-function createResource(req, res, next) {
+// Build the create payload from the request: parse location, merge submitted
+// data and run spam detection (sets req.isSpamSubmission).
+function prepareCreateResourceData(req) {
   try {
     req.body.location = req.body.location
       ? JSON.parse(req.body.location)
@@ -352,7 +354,7 @@ function createResource(req, res, next) {
     req.body.publishDate = null;
   }
 
-  const data = {
+  return {
     ...req.body,
     projectId: req.params.projectId,
     userId,
@@ -360,6 +362,10 @@ function createResource(req, res, next) {
     widgetId: req.body.widgetId || null,
     isSpam: req.isSpamSubmission,
   };
+}
+
+function createResource(req, res, next) {
+  const data = prepareCreateResourceData(req);
 
   // Check if resource has images and if so, check their domains
   let imageServer = process.env.IMAGE_APP_URL;
@@ -455,10 +461,10 @@ async function applyDefaultStatuses(req, res, next) {
   let statuses = req.body.statuses || [];
   if (!Array.isArray(statuses)) statuses = [statuses];
   statuses = statuses.filter((status) => Number.isInteger(status));
-  let defaultStatusses = await db.Status.findAll({
+  let defaultStatuses = await db.Status.findAll({
     where: { projectId: req.project.id, addToNewResources: true },
   });
-  statuses = statuses.concat(defaultStatusses.map((status) => status.id));
+  statuses = statuses.concat(defaultStatuses.map((status) => status.id));
   statuses = statuses.filter(
     (value, index) => statuses.indexOf(value) === index
   ); // unique
@@ -672,7 +678,7 @@ function updateResource(req, res, next) {
     }
   } else {
     if (req.body.location === null) {
-      req.body.location = JSON.parse(null);
+      req.body.location = null;
     }
   }
 
