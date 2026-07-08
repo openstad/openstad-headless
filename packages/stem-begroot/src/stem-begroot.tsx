@@ -969,9 +969,9 @@ function StemBegroot({
 
   async function moveToStep4AndLogout() {
     clearPlanSelection();
-    setCurrentStep(4);
 
     if (!currentUser?.logout) {
+      setCurrentStep(4);
       if (props.showConfetti) {
         fireConfetti();
       }
