@@ -1,4 +1,9 @@
-export function fireConfetti(): void {
+let active = false;
+
+export function fireConfetti() {
+  if (active) return;
+  active = true;
+
   const canvas = document.createElement('canvas');
   canvas.style.position = 'fixed';
   canvas.style.top = '0';
@@ -13,9 +18,12 @@ export function fireConfetti(): void {
   document.body.appendChild(canvas);
 
   const ctx = canvas.getContext('2d');
-  if (!ctx) return;
+  if (!ctx) {
+    cleanup();
+    return;
+  }
 
-  const particles: Array<{
+  let particles: Array<{
     x: number;
     y: number;
     vx: number;
@@ -50,10 +58,17 @@ export function fireConfetti(): void {
     });
   }
 
+  function cleanup() {
+    active = false;
+    if (document.body.contains(canvas)) {
+      document.body.removeChild(canvas);
+    }
+  }
+
   const animate = () => {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    particles.forEach((particle, index) => {
+    for (const particle of particles) {
       particle.x += particle.vx;
       particle.y += particle.vy;
       particle.vy += 0.1;
@@ -70,24 +85,18 @@ export function fireConfetti(): void {
         particle.size
       );
       ctx.restore();
+    }
 
-      if (particle.y > canvas.height + 10) {
-        particles.splice(index, 1);
-      }
-    });
+    particles = particles.filter((p) => p.y <= canvas.height + 10);
 
     if (particles.length > 0) {
       requestAnimationFrame(animate);
     } else {
-      document.body.removeChild(canvas);
+      cleanup();
     }
   };
 
   animate();
 
-  setTimeout(() => {
-    if (document.body.contains(canvas)) {
-      document.body.removeChild(canvas);
-    }
-  }, 8000);
+  setTimeout(cleanup, 8000);
 }

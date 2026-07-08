@@ -602,9 +602,6 @@ function StemBegroot({
         );
         const submitted = await submitVoteAndCleanup();
         if (submitted) {
-          if (props.showConfetti) {
-            fireConfetti();
-          }
           await moveToStep4AndLogout();
         }
       })();
@@ -946,8 +943,11 @@ function StemBegroot({
     const shouldShowStep4 = voteCompletedStorage.consumeShowStep4AfterLogout();
     if (shouldShowStep4) {
       setCurrentStep(4);
+      if (props.showConfetti) {
+        fireConfetti();
+      }
     }
-  }, [voteCompletedStorage]);
+  }, [voteCompletedStorage, props.showConfetti]);
 
   function clearPlanSelection() {
     votePendingStorage.clearAllVotePending();
@@ -969,10 +969,16 @@ function StemBegroot({
 
   async function moveToStep4AndLogout() {
     clearPlanSelection();
-    voteCompletedStorage.setState({ showStep4AfterLogout: true });
     setCurrentStep(4);
 
-    if (!currentUser?.logout) return;
+    if (!currentUser?.logout) {
+      if (props.showConfetti) {
+        fireConfetti();
+      }
+      return;
+    }
+
+    voteCompletedStorage.setState({ showStep4AfterLogout: true });
 
     const currentUrl = new URL(location.href);
     const params = currentUrl.searchParams;
@@ -1479,9 +1485,6 @@ function StemBegroot({
                     if (currentStep === 3) {
                       const submitted = await submitVoteAndCleanup();
                       if (submitted) {
-                        if (props.showConfetti) {
-                          fireConfetti();
-                        }
                         await moveToStep4AndLogout();
                       }
                     } else {
