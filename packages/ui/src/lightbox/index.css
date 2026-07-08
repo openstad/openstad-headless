@@ -8,27 +8,16 @@
 
 .osc-lightbox-content {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset: 0;
   z-index: 10000;
-  outline: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
 .osc-lightbox-content:focus {
   outline: none;
-}
-
-.osc-lightbox-title {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
 }
 
 .osc-lightbox-image {
@@ -37,7 +26,8 @@
   object-fit: contain;
   border-radius: 4px;
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6);
-  display: block;
+  cursor: default;
+  pointer-events: auto;
 }
 
 .osc-lightbox-close {
@@ -57,10 +47,23 @@
   align-items: center;
   justify-content: center;
   transition: background 150ms ease;
+  pointer-events: auto;
 }
 
 .osc-lightbox-close:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+.osc-lightbox-srtitle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 @keyframes osc-lightbox-fade-in {

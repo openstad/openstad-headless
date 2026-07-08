@@ -40,6 +40,7 @@ import React, { useEffect, useId, useState } from 'react';
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 import { canLikeResource, hasRole } from '../../lib';
 import './resource-detail.css';
+import { formatDocumentLabel } from './utils';
 
 type booleanProps = {
   [K in
@@ -644,24 +645,26 @@ function ResourceDetail({
                   useActiveDates={true}
                 />
               )}
-              {displayLocation && resource.location && (
-                <>
-                  <Heading level={2} appearance="utrecht-heading-2">
-                    Plaats
-                  </Heading>
-                  <ResourceDetailMap
-                    resourceId={resource.id || resourceId || '0'}
-                    resourceIdRelativePath={
-                      props.resourceIdRelativePath || 'openstadResourceId'
-                    }
-                    {...resourceOverviewMapWidget}
-                    {...props}
-                    dataLayerSettings={dataLayerSettings}
-                    center={resource.location}
-                    area={props.resourceDetailMap?.area}
-                  />
-                </>
-              )}
+              {displayLocation &&
+                resource.location?.lat &&
+                resource.location?.lng && (
+                  <>
+                    <Heading level={2} appearance="utrecht-heading-2">
+                      Plaats
+                    </Heading>
+                    <ResourceDetailMap
+                      resourceId={resource.id || resourceId || '0'}
+                      resourceIdRelativePath={
+                        props.resourceIdRelativePath || 'openstadResourceId'
+                      }
+                      {...resourceOverviewMapWidget}
+                      {...props}
+                      dataLayerSettings={dataLayerSettings}
+                      center={resource.location}
+                      area={props.resourceDetailMap?.area}
+                    />
+                  </>
+                )}
             </article>
           ) : (
             <span>resource niet gevonden..</span>
@@ -673,20 +676,7 @@ function ResourceDetail({
             <div className="aside--content">
               {displayLikes ? (
                 <>
-                  <Likes
-                    {...props}
-                    disabled={!canLike}
-                    title={props.likeWidget?.title}
-                    yesLabel={props.likeWidget?.yesLabel}
-                    noLabel={props.likeWidget?.noLabel}
-                    displayDislike={props.likeWidget?.displayDislike}
-                    hideCounters={props.likeWidget?.hideCounters}
-                    variant={props.likeWidget?.variant}
-                    showProgressBar={props.likeWidget?.showProgressBar}
-                    progressBarDescription={
-                      props.likeWidget?.progressBarDescription
-                    }
-                  />
+                  <Likes {...props} {...props.likeWidget} disabled={!canLike} />
                   <Spacer size={1} />
                 </>
               ) : null}
@@ -769,8 +759,8 @@ function ResourceDetail({
                             download
                             href={document.url}
                             key={index}>
-                            <Icon icon="ri-download-2-fill" />
-                            {document.name}
+                            <Icon icon="ri-download-2-fill" iconOnly />
+                            {formatDocumentLabel(document.name, document.url)}
                           </ButtonLink>
                         )
                       )}

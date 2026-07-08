@@ -15,7 +15,10 @@ import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
+import {
+  filterStaleTagGroups,
+  handleTagCheckboxGroupChange,
+} from '@/lib/form-widget-helpers/TagGroupHelper';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
 import _ from 'lodash';
@@ -58,6 +61,12 @@ export default function DocumentExtraFields(
       const fetchedTags = tags as Array<Tag>;
       const groupNames = _.chain(fetchedTags).map('type').uniq().value();
       setGroupedNames(groupNames);
+
+      const currentGroups = form.getValues('extraFieldsTagGroups');
+      const cleaned = filterStaleTagGroups(currentGroups, groupNames);
+      if (cleaned.length !== currentGroups.length) {
+        form.setValue('extraFieldsTagGroups', cleaned);
+      }
     }
   }, [tags]);
 

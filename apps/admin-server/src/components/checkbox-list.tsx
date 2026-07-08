@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { Fragment, useEffect } from 'react';
+import React, { Fragment, useEffect, useRef } from 'react';
 
 import { Checkbox } from './ui/checkbox';
 import {
@@ -37,10 +37,42 @@ export const CheckboxList = <T extends { [key: string]: any }>({
 }: Props<T>) => {
   const [groupNames, setGroupedNames] = React.useState<string[]>([]);
 
+  const prevCleanedRef = useRef<string>('');
+
   useEffect(() => {
     if (Array.isArray(items) && keyForGrouping) {
       const groupNames = _.chain(items).map(keyForGrouping).uniq().value();
       setGroupedNames(groupNames);
+    }
+  }, [items]);
+
+  useEffect(() => {
+    if (!items || items.length === 0) return;
+
+    const currentValue = form.getValues(fieldName);
+    if (currentValue == null) return;
+
+    const validKeys = new Set(items.map((item) => keyPerItem(item)));
+
+    if (typeof currentValue === 'string') {
+      const ids = currentValue.split(',').filter(Boolean);
+      const cleaned = ids.filter((id) => validKeys.has(id)).join(',');
+      if (cleaned !== currentValue && cleaned !== prevCleanedRef.current) {
+        prevCleanedRef.current = cleaned;
+        form.setValue(fieldName, cleaned);
+      }
+    } else if (Array.isArray(currentValue)) {
+      const cleaned = currentValue.filter((id) =>
+        validKeys.has(typeof id === 'number' ? `${id}` : id)
+      );
+      const cleanedKey = JSON.stringify(cleaned);
+      if (
+        cleaned.length !== currentValue.length &&
+        cleanedKey !== prevCleanedRef.current
+      ) {
+        prevCleanedRef.current = cleanedKey;
+        form.setValue(fieldName, cleaned);
+      }
     }
   }, [items]);
 

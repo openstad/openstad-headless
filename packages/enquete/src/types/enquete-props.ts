@@ -43,6 +43,7 @@ export type Item = {
   options?: Array<Option>;
   imageUpload?: string;
   multiple?: boolean;
+  maxUploadSizeMB?: number;
   randomizeItems?: boolean;
   image?: string;
   imageAlt?: string;

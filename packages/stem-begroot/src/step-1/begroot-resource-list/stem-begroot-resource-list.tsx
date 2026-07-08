@@ -207,7 +207,7 @@ export const StemBegrootResourceList = ({
                 {displayPriceLabel ? (
                   <div className="price">
                     <Heading level={3} appearance="utrecht-heading-5">
-                      &euro;{resource.budget?.toLocaleString('nl-NL') || 0}
+                      {`€${resource.budget?.toLocaleString('nl-NL') || 0}`}
                     </Heading>
                   </div>
                 ) : null}

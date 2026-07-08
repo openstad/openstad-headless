@@ -80,6 +80,8 @@ export function useProject(scopes?: Array<string>) {
     const body: { config: any; name?: string; url?: string } = { config };
     if (name) {
       body.name = name;
+    }
+    if (url !== undefined) {
       body.url = url;
     }
 

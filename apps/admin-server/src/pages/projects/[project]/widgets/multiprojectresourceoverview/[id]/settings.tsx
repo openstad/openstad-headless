@@ -1,4 +1,5 @@
 import { ImageUploader } from '@/components/image-uploader';
+import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -36,6 +37,7 @@ const formSchema = z.object({
         overviewDescription: z.string().optional(),
         overviewImage: z.string().optional(),
         overviewMarkerIcon: z.string().optional(),
+        overviewSortDate: z.union([z.string(), z.date()]).optional(),
         overviewUrl: z.string().optional(),
         projectLat: z.string().optional(),
         projectLng: z.string().optional(),
@@ -58,6 +60,10 @@ export default function WidgetMultiProjectSettings(
   const defaultValues = {
     selectedProjects: (props.selectedProjects || []).map((project) => ({
       ...project,
+
+      overviewSortDate: project.overviewSortDate
+        ? new Date(project.overviewSortDate)
+        : undefined,
 
       // Get value from props for backwards compatibility
       includeProjectsInOverview:
@@ -83,6 +89,10 @@ export default function WidgetMultiProjectSettings(
         values.selectedProjects?.map((project) => ({
           ...project,
           id: project.id || 0,
+          overviewSortDate:
+            project.overviewSortDate instanceof Date
+              ? project.overviewSortDate.toISOString()
+              : project.overviewSortDate,
         })) || [],
 
       // Turn off for backwards compatibility. If the value was set, it has been set in selectedProjects
@@ -366,6 +376,21 @@ export default function WidgetMultiProjectSettings(
                                     <FormMessage />
                                   </FormItem>
                                 )}
+                              />
+
+                              <SimpleCalendar
+                                form={form}
+                                fieldName={`selectedProjects.${
+                                  field.value?.findIndex(
+                                    (p) => p.id === project.id
+                                  ) ?? 0
+                                }.overviewSortDate`}
+                                label="Sorteerdatum van de project tegel"
+                                description="Bepaalt de positie van de project tegel bij sorteren op datum. Laat leeg om de aanmaakdatum van het project te gebruiken."
+                                placeholder="Kies een datum"
+                                allowPast
+                                withReset
+                                resetValue=""
                               />
 
                               <FormField

@@ -1,5 +1,4 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
-import { WidgetDefinition } from '@/lib/widget-definitions';
 import useSWR from 'swr';
 
 export function useWidgetsHook(projectId?: string) {
@@ -100,7 +99,7 @@ export type Widget = {
   description: string;
 
   config: object;
-  type: WidgetDefinition;
+  type: string;
 
   createdAt: string;
   updatedAt: string;

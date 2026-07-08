@@ -72,6 +72,7 @@ export type Item = {
   maxCharacters?: string;
   variant?: string;
   multiple?: boolean;
+  maxUploadSizeMB?: number;
   images?: Array<{
     image?: never;
     src: string;

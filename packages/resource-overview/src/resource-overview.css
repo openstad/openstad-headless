@@ -93,10 +93,11 @@
   .image-container
   .osc-image-footer
   .osc-resource-overview-content-item-status {
-  display: inline-block;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
   margin: 0;
   padding: 0.25rem 0.5rem;
-  border-radius: 2px;
   background-color: transparent;
   font-size: 14px;
 }
@@ -231,6 +232,12 @@ p.osc-searchtext {
   padding: 0;
   margin: 0;
 }
+
+.resource-card--link_trigger,
+.resource-card--link p,
+.osc-resource-overview-content-item-description {
+  overflow-wrap: anywhere;
+}
 .resource-card--link_trigger:before {
   content: '';
   position: absolute;
@@ -260,6 +267,7 @@ p.osc-searchtext {
 
 .osc-resource-overview-resource-collection .resource-card--link {
   display: grid;
+  min-width: 0;
 }
 
 .osc-carousel.osc-carousel-container {

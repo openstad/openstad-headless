@@ -220,10 +220,11 @@ export const StemBegrootResourceDetailDialog = ({
                       <div className="osc-gridder-resource-detail-budget-theme-bar">
                         <Heading4>Budget</Heading4>
                         <Paragraph>
-                          &euro;{' '}
-                          {resource?.budget > 0
-                            ? resource?.budget?.toLocaleString('nl-NL')
-                            : 0}
+                          {`€ ${
+                            resource?.budget > 0
+                              ? resource?.budget?.toLocaleString('nl-NL')
+                              : 0
+                          }`}
                         </Paragraph>
                         <Spacer size={1} />
                         <Heading4>Tags</Heading4>
@@ -342,11 +343,11 @@ export const StemBegrootResourceDetailDialog = ({
                           </>
                         ) : null}
 
-                        {displayRanking ? (
+                        {displayRanking && resource?.extraData?.ranking ? (
                           <Icon
                             icon="ri-trophy-line"
                             variant="regular"
-                            text={resource?.extraData?.ranking || 0}
+                            text={resource?.extraData?.ranking}
                           />
                         ) : null}
                       </div>

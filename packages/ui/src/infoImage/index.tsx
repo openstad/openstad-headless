@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { Carousel } from '../carousel';
 import { Lightbox } from '../lightbox';
 import { Spacer } from '../spacer';
+import './index.css';
 
 type ImageType = {
   url: string;
