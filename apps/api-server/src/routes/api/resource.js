@@ -14,6 +14,7 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const {
   analyzeSpamPayload,
+  isSpamFilterEnabled,
   logSpamAnalysis,
   removeSpamMetaFields,
 } = require('../../services/spam-detector');
@@ -22,6 +23,102 @@ const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
   return hasRole(user, 'editor');
 };
+
+function getResourceFormExtraDataConfig(widgetConfig) {
+  const items = Array.isArray(widgetConfig?.items) ? widgetConfig.items : [];
+  const uniqueFieldKeys = new Set();
+  const moderatorOnlyFieldKeys = new Set();
+
+  for (const item of items) {
+    if (typeof item.fieldKey !== 'string') continue;
+    uniqueFieldKeys.add(item.fieldKey);
+    if (item?.onlyForModerator) {
+      moderatorOnlyFieldKeys.add(item.fieldKey);
+    }
+  }
+
+  return {
+    fieldKeys: Array.from(uniqueFieldKeys),
+    moderatorOnlyFieldKeys: Array.from(moderatorOnlyFieldKeys),
+  };
+}
+
+async function attachModeratorOnlyExtraDataKeys(resources) {
+  const records = Array.isArray(resources) ? resources : [resources];
+  const activeRecords = records.filter(Boolean);
+  if (!activeRecords.length) return;
+
+  const projectIds = Array.from(
+    new Set(
+      activeRecords
+        .map((resource) => Number(resource.projectId))
+        .filter((id) => Number.isInteger(id) && id > 0)
+    )
+  );
+  const widgetIds = Array.from(
+    new Set(
+      activeRecords
+        .map((resource) => Number(resource.widgetId))
+        .filter((widgetId) => Number.isInteger(widgetId) && widgetId > 0)
+    )
+  );
+
+  if (!widgetIds.length || !projectIds.length) {
+    activeRecords.forEach((resource) => {
+      resource.hasResourceFormConfig = false;
+      resource.resourceFormFieldKeys = [];
+      resource.moderatorOnlyExtraDataKeys = [];
+    });
+    return;
+  }
+
+  const widgets = await db.Widget.findAll({
+    where: {
+      id: { [Op.in]: widgetIds },
+      projectId: { [Op.in]: projectIds },
+      type: 'resourceform',
+    },
+    attributes: ['id', 'projectId', 'config'],
+  });
+
+  const extraDataConfigByWidgetId = new Map();
+  widgets.forEach((widget) => {
+    const widgetLookupKey = `${widget.projectId}:${widget.id}`;
+    extraDataConfigByWidgetId.set(
+      widgetLookupKey,
+      getResourceFormExtraDataConfig(widget.config || {})
+    );
+  });
+
+  activeRecords.forEach((resource) => {
+    const resourceLookupKey = `${resource.projectId}:${resource.widgetId}`;
+    const extraDataConfig = extraDataConfigByWidgetId.get(resourceLookupKey);
+    resource.hasResourceFormConfig = !!extraDataConfig;
+    resource.resourceFormFieldKeys = extraDataConfig?.fieldKeys || [];
+    resource.moderatorOnlyExtraDataKeys =
+      extraDataConfig?.moderatorOnlyFieldKeys || [];
+  });
+}
+
+async function shouldSendUpdatedResourceAdminEmail(req) {
+  const projectId = req.project?.id || Number(req.params.projectId);
+
+  try {
+    const project =
+      await db.Project.scope('includeEmailConfig').findByPk(projectId);
+    const value =
+      project?.emailConfig?.notifications?.sendUpdatedResourceAdminEmail ===
+      true;
+
+    return value;
+  } catch (err) {
+    console.error(
+      `Failed to read sendUpdatedResourceAdminEmail for project ${projectId}:`,
+      err
+    );
+    return false;
+  }
+}
 
 // scopes: for all get requests
 router.all('*', function (req, res, next) {
@@ -99,11 +196,45 @@ router.all('*', function (req, res, next) {
     req.scope.push('includeTags');
   }
 
+  if (req.query.excludeTags) {
+    let excludeTags = req.query.excludeTags;
+    if (!Array.isArray(excludeTags)) excludeTags = [excludeTags];
+    req.scope.push({ method: ['excludeTags', excludeTags] });
+  }
+
   if (req.query.statuses) {
     let statuses = req.query.statuses;
     // if statuses is not an array, make it an array
     if (!Array.isArray(statuses)) statuses = [statuses];
     req.scope.push({ method: ['selectStatuses', statuses] });
+  }
+
+  if (req.query.excludeStatuses) {
+    let excludeStatuses = req.query.excludeStatuses;
+    if (!Array.isArray(excludeStatuses)) excludeStatuses = [excludeStatuses];
+    req.scope.push({ method: ['excludeStatuses', excludeStatuses] });
+  }
+
+  if (req.query.tagGroups) {
+    try {
+      const tagGroups = JSON.parse(req.query.tagGroups);
+      if (Array.isArray(tagGroups) && tagGroups.length > 0) {
+        req.scope.push({ method: ['selectTagGroups', tagGroups] });
+      }
+    } catch (e) {
+      // invalid JSON, ignore
+    }
+  }
+
+  if (req.query.lat && req.query.lng && req.query.maxDistance) {
+    req.scope.push({
+      method: [
+        'withinDistance',
+        req.query.lat,
+        req.query.lng,
+        req.query.maxDistance,
+      ],
+    });
   }
 
   if (req.query.includeUser) {
@@ -122,14 +253,66 @@ router.all('*', function (req, res, next) {
     req.query.projectIds = projectIds;
   }
 
+  if (
+    req?.query?.ids &&
+    (typeof req?.query?.ids === 'object' || typeof req?.query?.ids === 'string')
+  ) {
+    let ids = req.query.ids;
+    if (!Array.isArray(ids)) ids = [ids];
+    req.scope.push({ method: ['selectIds', ids] });
+    req.query.ids = ids;
+  }
+
   if (req.canIncludeVoteCount) req.scope.push('includeVoteCount');
-  // todo? volgens mij wordt dit niet meer gebruikt
-  // if (req.query.highlighted) {
-  //  	query = db.Resource.getHighlighted({ projectId: req.params.projectId })
-  // }
 
   return next();
 });
+
+router
+  .route('/markers')
+  .get(auth.can('Resource', 'list'))
+  .get(function (req, res, next) {
+    if (req.query.search) {
+      req.scope.push('markerFieldsWithSearch');
+    } else {
+      req.scope.push('markerFields');
+    }
+    req.scope.push('includeTags');
+
+    let { dbQuery } = req;
+
+    dbQuery.where = {
+      ...req.queryConditions,
+      ...dbQuery.where,
+      deletedAt: null,
+    };
+
+    let projectIds = req?.query?.projectIds || [];
+
+    if (
+      !Array.isArray(projectIds) ||
+      (Array.isArray(projectIds) && projectIds.length === 0)
+    ) {
+      dbQuery.where.projectId = req.params.projectId;
+    }
+
+    db.Resource.scope(...req.scope)
+      .findAll(dbQuery)
+      .then(function (resources) {
+        req.results = resources;
+        return next();
+      })
+      .catch(next);
+  })
+  .get(auth.useReqUser)
+  .get(
+    searchInResults({
+      searchfields: ['id', 'title', 'summary', 'description', 'createdAt'],
+    })
+  )
+  .get(function (req, res, next) {
+    res.json(req.results);
+  });
 
 router
   .route('/')
@@ -171,12 +354,13 @@ router
 
     db.Resource.scope(...req.scope)
       .findAndCountAll(dbQuery)
-      .then(function (result) {
+      .then(async function (result) {
         result.rows.forEach((resource) => {
           resource.project = req.project;
           if (req.query.includePoll && resource.poll)
             resource.poll.countVotes(!req.query.includeVotes);
         });
+        await attachModeratorOnlyExtraDataKeys(result.rows);
         const { rows } = result;
         req.results = rows;
         req.dbQuery.count = result.count;
@@ -186,7 +370,19 @@ router
       .catch(next);
   })
   .get(auth.useReqUser)
-  .get(searchInResults({}))
+  .get(
+    searchInResults({
+      searchfields: [
+        'id',
+        'title',
+        'summary',
+        'description',
+        'createdAt',
+        'yes',
+        'no',
+      ],
+    })
+  )
   .get(pagination.paginateResults)
   .get(function (req, res, next) {
     res.json(req.results);
@@ -232,10 +428,15 @@ router
       delete req.body.submittedData;
     }
 
+    if (isSpamFilterEnabled()) {
+      const analysis = analyzeSpamPayload(req.body, { withDetails: true });
+      logSpamAnalysis({ routeName: 'resource', req, analysis });
+      req.isSpamSubmission = analysis.isProbablySpam;
+    } else {
+      req.isSpamSubmission = false;
+    }
+
     req.body = removeSpamMetaFields(req.body);
-    const analysis = analyzeSpamPayload(req.body, { withDetails: true });
-    logSpamAnalysis({ routeName: 'resource', req, analysis });
-    req.isSpamSubmission = analysis.isProbablySpam;
     if (req.isSpamSubmission) {
       req.body.publishDate = null;
     }
@@ -291,32 +492,41 @@ router
       .then((resourceInstance) => {
         db.Resource.scope(...req.scope)
           .findByPk(resourceInstance.id)
-          .then((result) => {
+          .then(async (result) => {
             result.project = req.project;
+            await attachModeratorOnlyExtraDataKeys(result);
             req.results = result;
             return next();
-          });
+          })
+          .catch(next);
       })
       .catch(function (error) {
-        // todo: dit komt uit de oude routes; maak het generieker
         if (
           typeof error == 'object' &&
           error instanceof Sequelize.ValidationError
         ) {
           let errors = [];
           error.errors.forEach(function (error) {
-            // notNull kent geen custom messages in deze versie van sequelize; zie https://github.com/sequelize/sequelize/issues/1500
-            // TODO: we zitten op een nieuwe versie van seq; vermoedelijk kan dit nu wel
             errors.push(
               error.type === 'notNull Violation' && error.path === 'location'
                 ? 'Kies een locatie op de kaart'
                 : error.message
             );
           });
-          //	res.status(422).json(errors);
+
+          console.error('[resource-create] Validation error:', {
+            projectId: req.params.projectId,
+            widgetId: req.body?.widgetId || null,
+            errors: errors,
+          });
 
           next(createError(422, errors.join(', ')));
         } else {
+          console.error('[resource-create] Failed:', {
+            projectId: req.params.projectId,
+            widgetId: req.body?.widgetId || null,
+            error: error.message || error,
+          });
           next(error);
         }
       });
@@ -369,13 +579,16 @@ router
       .findOne({
         where: { id: req.results.id, projectId: req.params.projectId },
       })
-      .then((result) => {
+      .then(async (result) => {
+        await attachModeratorOnlyExtraDataKeys(result);
         req.results = result;
         return next();
-      });
+      })
+      .catch(next);
   })
 
   // TODO: Add notifications
+  .post(auth.useReqUser)
   .post(async function (req, res, next) {
     const sendConfirmationToUser =
       typeof req.body['confirmationUser'] !== 'undefined'
@@ -391,9 +604,10 @@ router
 
     if (!req.query.nomail && req.body['publishDate']) {
       const tags = await req.results.getTags();
+      let emailReceivers = [];
+
       if (tags && tags.length > 0) {
-        // Convert to csv string
-        const emailReceivers = (
+        emailReceivers = (
           await Promise.all(
             tags.flatMap(async (tag) => {
               const { useDifferentSubmitAddress, newSubmitAddress } =
@@ -409,18 +623,18 @@ router
         )
           .filter((data) => data !== null && data.length > 0)
           .flat();
+      }
 
-        if (emailReceivers.length > 0) {
-          db.Notification.create({
-            type: 'new published resource - admin update',
-            projectId: req.project.id,
-            data: {
-              userId: req.user.id,
-              resourceId: req.results.id,
-              emailReceivers: emailReceivers,
-            },
-          });
-        }
+      if (emailReceivers.length > 0) {
+        db.Notification.create({
+          type: 'new published resource - admin update',
+          projectId: req.project.id,
+          data: {
+            userId: req.user.id,
+            resourceId: req.results.id,
+            emailReceivers: emailReceivers,
+          },
+        });
       }
 
       if (sendConfirmationToAdmin) {
@@ -472,11 +686,12 @@ router
       .findOne({
         where: { id: resourceId, projectId: req.params.projectId },
       })
-      .then((found) => {
+      .then(async (found) => {
         if (!found) {
           return next(createError(404, 'Resource not found'));
         }
         found.project = req.project;
+        await attachModeratorOnlyExtraDataKeys(found);
         if (req.query.includePoll) {
           // TODO: naar poll hooks
           if (found.poll) found.poll.countVotes(!req.query.includeVotes);
@@ -560,18 +775,16 @@ router
       ...req.body,
     };
 
-    if (userhasModeratorRights(req.user)) {
-      if (data.modBreak) {
-        data.modBreakUserId = req.body.modBreakUserId = req.user.id;
-        data.modBreakDate = req.body.modBreakDate = new Date().toString();
-      }
+    if (!userhasModeratorRights(req.user)) {
+      delete data.modBreaks;
     }
 
     resource
       .authorizeData(data, 'update')
       .update(data)
-      .then((result) => {
+      .then(async (result) => {
         result.project = req.project;
+        await attachModeratorOnlyExtraDataKeys(result);
         req.results = result;
         next();
       })
@@ -599,7 +812,7 @@ router
         .findOne({
           where: { id: resourceInstance.id, projectId: req.params.projectId },
         })
-        .then((found) => {
+        .then(async (found) => {
           if (!found) {
             return next(createError(404, 'Resource not found'));
           }
@@ -609,6 +822,7 @@ router
             if (found.poll) found.poll.countVotes(!req.query.includeVotes);
           }
           found.project = req.project;
+          await attachModeratorOnlyExtraDataKeys(found);
           req.results = found;
           next();
         })
@@ -647,7 +861,7 @@ router
         .findOne({
           where: { id: resourceInstance.id, projectId: req.params.projectId },
         })
-        .then((found) => {
+        .then(async (found) => {
           if (!found) {
             return next(createError(404, 'Resource not found'));
           }
@@ -657,21 +871,24 @@ router
             if (found.poll) found.poll.countVotes(!req.query.includeVotes);
           }
           found.project = req.project;
+          await attachModeratorOnlyExtraDataKeys(found);
           req.results = found;
           next();
         })
         .catch(next);
     });
   })
-  .put(function (req, res, next) {
-    db.Notification.create({
-      type: 'updated resource - admin update',
-      projectId: req.project.id,
-      data: {
-        userId: req.user.id,
-        resourceId: req.results.id,
-      },
-    });
+  .put(async function (req, res, next) {
+    if (await shouldSendUpdatedResourceAdminEmail(req)) {
+      db.Notification.create({
+        type: 'updated resource - admin update',
+        projectId: req.project.id,
+        data: {
+          userId: req.user.id,
+          resourceId: req.results.id,
+        },
+      });
+    }
     if (req.changedToPublished) {
       db.Notification.create({
         type: 'new published resource - user feedback',
@@ -682,8 +899,10 @@ router
         },
       });
     }
+
     next();
   })
+  .put(auth.useReqUser)
   .put(function (req, res, next) {
     res.json(req.results);
   })

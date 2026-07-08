@@ -1,3 +1,4 @@
+import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
@@ -22,9 +23,10 @@ import {
 } from '../../../../../../components/ui/tabs';
 import { ResourceOverviewMapWidgetTabProps } from '../../resourcesmap/[id]';
 import WidgetResourcesMapButton from '../../resourcesmap/[id]/buttons';
-import WidgetResourcesMapContent from '../../resourcesmap/[id]/content';
 import WidgetResourcesMapDatalayers from '../../resourcesmap/[id]/datalayers';
+import WidgetResourcesMapLegend from '../../resourcesmap/[id]/legend';
 import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
+import WidgetResourcesMapMarkers from '../../resourcesmap/[id]/markers';
 import WidgetResourcesMapPolygons from '../../resourcesmap/[id]/polygons';
 import WidgetResourceOverviewDisplay from './display';
 import WidgetResourceOverviewGeneral from './general';
@@ -79,7 +81,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
             url: `/projects/${projectId}/widgets`,
           },
           {
-            name: 'Inzending overzicht tegels',
+            name: 'Inzendingen overzicht',
             url: `/projects/${projectId}/widgets/resourceoverview/${id}`,
           },
         ]}>
@@ -96,6 +98,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="likes">Likes widget</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             {previewConfig ? (
               <>
@@ -112,6 +115,8 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                       <TabsTrigger value="general">Kaart</TabsTrigger>
                       <TabsTrigger value="polygons">Polygonen</TabsTrigger>
                       <TabsTrigger value="datalayers">Kaartlagen</TabsTrigger>
+                      <TabsTrigger value="markerSets">Markers</TabsTrigger>
+                      <TabsTrigger value="legend">Legenda</TabsTrigger>
                       <TabsTrigger value="buttons">Knoppen</TabsTrigger>
                     </TabsList>
                     <TabsContent value="general" className="p-0">
@@ -155,6 +160,32 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     </TabsContent>
                     <TabsContent value="polygons" className="p-0">
                       <WidgetResourcesMapPolygons
+                        {...extractConfig<
+                          MultiProjectResourceOverviewProps,
+                          ResourceOverviewMapWidgetTabProps
+                        >({
+                          previewConfig,
+                          subWidgetKey: 'resourceOverviewMapWidget',
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
+                    </TabsContent>
+                    <TabsContent value="markerSets" className="p-0">
+                      <WidgetResourcesMapMarkers
+                        {...extractConfig<
+                          MultiProjectResourceOverviewProps,
+                          ResourceOverviewMapWidgetTabProps
+                        >({
+                          previewConfig,
+                          subWidgetKey: 'resourceOverviewMapWidget',
+                          updateConfig,
+                          updatePreview,
+                        })}
+                      />
+                    </TabsContent>
+                    <TabsContent value="legend" className="p-0">
+                      <WidgetResourcesMapLegend
                         {...extractConfig<
                           MultiProjectResourceOverviewProps,
                           ResourceOverviewMapWidgetTabProps
@@ -228,6 +259,13 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                 </TabsContent>
               </>
             ) : null}
+            <TabsContent value="auditlog" className="p-0">
+              <AuditLogTable
+                modelName="widgets"
+                modelId={id as string}
+                projectId={projectId as string}
+              />
+            </TabsContent>
           </Tabs>
 
           <div className="py-6 mt-6 bg-white rounded-md">

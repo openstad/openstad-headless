@@ -1,5 +1,15 @@
 require('dotenv').config();
 
+const {
+  createTelemetry,
+  setupGracefulShutdown,
+} = require('@openstad-headless/lib/telemetry');
+const telemetryManager = createTelemetry({
+  serviceName: process.env.OTEL_SERVICE_NAME || 'openstad-cms-server',
+});
+telemetryManager.initialize();
+setupGracefulShutdown(telemetryManager);
+
 const apostrophe = require('apostrophe');
 const express = require('express');
 const app = express();
@@ -11,6 +21,7 @@ const REFRESH_PROJECTS_INTERVAL = 60000 * 5;
 const Url = require('node:url');
 const messageStreaming = require('./services/message-streaming');
 
+const compression = require('compression');
 const basicAuth = require('express-basic-auth');
 const path = require('node:path');
 
@@ -31,6 +42,13 @@ if (
   app.use(rateLimiter());
 }
 
+app.use(
+  compression({
+    level: 6,
+    threshold: 1024,
+  })
+);
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'UP',
@@ -39,6 +57,10 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.use(
+  '/widget-assets',
+  express.static(path.join(__dirname, 'public', 'widget-assets'))
+);
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/:sitePrefix?/config-reset', async function (req, res, next) {
@@ -113,10 +135,9 @@ async function loadProject(projectId) {
 
 async function loadProjects() {
   try {
-    projects = {};
-
     const allProjects = await projectService.fetchAll();
 
+    projects = {};
     allProjects.forEach(async (project) => {
       setupProject(project);
     });
@@ -193,6 +214,7 @@ async function run(id, projectData, options, callback) {
   // Get host from projectData url
   const url = Url.parse(projectData.url);
   const protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+  projectData.fullUrl = projectData.url;
   projectData.url = protocol + url.hostname + (url.port ? ':' + url.port : '');
 
   const sessionSecret = await getSessionSecret(projectData.url, projectData.id);
@@ -473,8 +495,11 @@ app.get('/auth/login', (req, res, next) => {
   let url = `${apiUrl}/auth/project/${project.id}/login?redirectUri=${returnUrl}`;
   url = req.query.loginPriviliged
     ? url + '&loginPriviliged=1'
-    : url + '&forceNewLogin=1'; // ;
+    : url + '&forceNewLogin=1';
 
+  console.log(
+    `[${new Date().toISOString()}][cms-auth] login redirect: projectId=${project?.id} returnUrl=${decodeURIComponent(returnUrl)?.substring(0, 100)}`
+  );
   return res.redirect(url);
 });
 
@@ -500,8 +525,11 @@ app.get('/auth/logout', (req, res, next) => {
   let url = `${apiUrl}/auth/project/${project.id}/logout?redirectUri=${returnUrl}`;
   url = req.query.loginPriviliged
     ? url + '&loginPriviliged=1'
-    : url + '&forceNewLogin=1'; // ;
+    : url + '&forceNewLogin=1';
 
+  console.log(
+    `[${new Date().toISOString()}][cms-auth] logout redirect: projectId=${project?.id}`
+  );
   return res.redirect(url);
 });
 
@@ -531,7 +559,9 @@ app.use(async function (req, res, next) {
   res
     .status(404)
     .send(
-      `Error: No project found for given URL ${escapeHtml(req.openstadDomain)}${escapeHtml(req.url)}`
+      `Error: No project found for given URL ${escapeHtml(
+        req.openstadDomain
+      )}${escapeHtml(req.url)}`
     );
 });
 

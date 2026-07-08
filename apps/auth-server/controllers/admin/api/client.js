@@ -1,5 +1,12 @@
+const configAuthTypes = require('../../../config/auth').types;
+
 const outputClient = (req, res, next) => {
-  res.json(req.client);
+  const client = req.client.toJSON ? req.client.toJSON() : { ...req.client };
+  client.authTypeDefaults = {};
+  for (const type of configAuthTypes) {
+    client.authTypeDefaults[type.key] = { ...type };
+  }
+  res.json(client);
 };
 
 exports.all = (req, res, next) => {

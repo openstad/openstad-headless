@@ -6,17 +6,23 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import WidgetPreview from '@/components/widget-preview';
+import {
+  WidgetDefinitionsMap,
+  useWidgetDefinitions,
+} from '@/hooks/use-widget-definitions';
 import { Widget, useWidgetsHook } from '@/hooks/use-widgets';
-import { WidgetDefinition, WidgetDefinitions } from '@/lib/widget-definitions';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 
-const RESOURCE_DETAIL_TYPES: WidgetDefinition[] = ['resourcedetail'];
+const RESOURCE_DETAIL_TYPES: string[] = ['resourcedetail'];
 
-function getWidgetLabel(widget: Widget): string {
+function getWidgetLabel(
+  widget: Widget,
+  definitions: WidgetDefinitionsMap
+): string {
   return (
     widget.description ||
-    `${WidgetDefinitions[widget.type]?.name || widget.type} (Widget ${widget.id})`
+    `${definitions[widget.type]?.name || widget.type} (Widget ${widget.id})`
   );
 }
 
@@ -24,6 +30,7 @@ export default function ProjectResourcePreview() {
   const router = useRouter();
   const projectId = router.query.project as string;
   const resourceId = router.query.id as string;
+  const widgetDefinitions = useWidgetDefinitions();
 
   const { data: widgets, isLoading } = useWidgetsHook(projectId);
   const [selectedWidgetId, setSelectedWidgetId] = useState<string>();
@@ -78,7 +85,7 @@ export default function ProjectResourcePreview() {
           <SelectContent className="overflow-y-auto max-h-[16rem]">
             {resourceDetailWidgets.map((w) => (
               <SelectItem key={w.id} value={String(w.id)}>
-                {getWidgetLabel(w)}
+                {getWidgetLabel(w, widgetDefinitions)}
               </SelectItem>
             ))}
           </SelectContent>

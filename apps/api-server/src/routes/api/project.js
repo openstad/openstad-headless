@@ -19,6 +19,12 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const removeProtocolFromUrl = require('../../middleware/remove-protocol-from-url');
 const messageStreaming = require('../../services/message-streaming');
 const service = require('../../adapter/openstad/service');
+const {
+  normalizeConfigForOpenstadClientSync,
+} = require('../../util/project-duplication-auth');
+const {
+  createDuplicateRollbackSessionStore,
+} = require('../../util/duplicate-rollback-session');
 const fs = require('fs');
 const getWidgetSettings = require('./../widget/widget-settings');
 const widgetDefinitions = getWidgetSettings();
@@ -32,6 +38,121 @@ const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const certRetryCooldowns = new Map();
 const CERT_RETRY_COOLDOWN_MS =
   (parseInt(process.env.EXTERNAL_CERT_RETRY_COOLDOWN) || 60) * 1000;
+const DUPLICATE_ROLLBACK_SESSION_TTL_MS = 60 * 60 * 1000;
+const duplicateRollbackSessionStore = createDuplicateRollbackSessionStore({
+  projectModel: db.Project,
+  ttlMs: DUPLICATE_ROLLBACK_SESSION_TTL_MS,
+});
+
+async function buildAuthProviderSyncConfig({
+  sourceProject,
+  fallbackProviderConfig = {},
+}) {
+  const providerConfigForSync = merge.recursive(
+    {},
+    fallbackProviderConfig || {}
+  );
+  if (!sourceProject) return providerConfigForSync;
+
+  const providers = await authSettings.providers({
+    project: sourceProject,
+    useOnlyDefinedOnProject: true,
+  });
+
+  for (const provider of providers) {
+    const authConfig = await authSettings.config({
+      project: sourceProject,
+      useAuth: provider,
+    });
+    const adapter = await authSettings.adapter({ authConfig });
+    const base = providerConfigForSync[provider] || {};
+
+    if (adapter.service.fetchClient) {
+      const client = await adapter.service.fetchClient({
+        authConfig,
+        project: sourceProject,
+      });
+      providerConfigForSync[provider] = {
+        ...base,
+        config: client?.config || base.config || {},
+        authTypes: client?.authTypes || base.authTypes,
+        requiredUserFields:
+          client?.requiredUserFields || base.requiredUserFields,
+        twoFactorRoles: client?.twoFactorRoles || base.twoFactorRoles,
+        allowedDomains: client?.allowedDomains || base.allowedDomains,
+      };
+    } else {
+      providerConfigForSync[provider] = base;
+    }
+  }
+
+  return providerConfigForSync;
+}
+
+async function canUserUseSourceProjectForDuplication({ req, sourceProjectId }) {
+  if (!sourceProjectId) return true;
+  if (hasRole(req.user, 'superuser')) return true;
+
+  const identifier = req.user?.idpUser?.identifier;
+  const provider = req.user?.idpUser?.provider;
+  if (!identifier || !provider) return false;
+
+  const sourceProjectUser = await db.User.findOne({
+    where: {
+      projectId: sourceProjectId,
+      idpUser: { identifier, provider },
+      [Op.or]: [{ role: 'admin' }, { role: 'editor' }],
+    },
+  });
+
+  return !!sourceProjectUser;
+}
+
+// Middleware: reject duplicate project URLs (case-insensitive, ignoring www and trailing slashes).
+// `removeProtocolFromUrl` already strips the protocol from req.body.url before this runs.
+// The DB index (`projects_url_unique`) enforces exact uniqueness; this middleware enforces
+// normalized uniqueness (e.g. www.example.com/ == example.com).
+function checkUniqueUrl(req, res, next) {
+  if (!req.body.url) return next();
+
+  let normalizedUrl = req.body.url
+    .trim()
+    .toLowerCase()
+    .replace(/^www\./, '');
+  while (normalizedUrl.endsWith('/')) {
+    normalizedUrl = normalizedUrl.slice(0, -1);
+  }
+
+  if (!normalizedUrl) return next();
+
+  const excludeId = req.params.projectId
+    ? parseInt(req.params.projectId)
+    : null;
+
+  const normalizedColumn = Sequelize.literal(
+    "LOWER(TRIM(TRAILING '/' FROM REPLACE(REPLACE(REPLACE(`url`, 'https://', ''), 'http://', ''), 'www.', '')))"
+  );
+
+  const whereClause = excludeId
+    ? {
+        [Op.and]: [
+          Sequelize.where(normalizedColumn, normalizedUrl),
+          { id: { [Op.ne]: excludeId } },
+        ],
+      }
+    : Sequelize.where(normalizedColumn, normalizedUrl);
+
+  db.Project.findOne({ where: whereClause })
+    .then((existing) => {
+      if (existing) {
+        return next(
+          createError(409, 'Deze URL is al in gebruik door een ander project.')
+        );
+      }
+      return next();
+    })
+    .catch(next);
+}
 
 async function getProject(req, res, next, include = []) {
   const projectId = req.params.projectId;
@@ -51,7 +172,7 @@ async function getProject(req, res, next, include = []) {
           useAuth: provider,
         });
         let adapter = await authSettings.adapter({ authConfig });
-        if (adapter.service.fetchClient) {
+        if (adapter.service.fetchClient && authConfig.clientId) {
           let client = await adapter.service.fetchClient({
             authConfig,
             project,
@@ -68,6 +189,8 @@ async function getProject(req, res, next, include = []) {
           project.config.auth.provider[provider].allowedDomains =
             client.allowedDomains;
           project.config.auth.provider[provider].config = client.config;
+          project.config.auth.provider[provider].authTypeDefaults =
+            client.authTypeDefaults;
           project.config.auth.provider[provider].client = client;
         }
       }
@@ -105,6 +228,27 @@ async function createStatuses(req, statusMap, errors) {
   }
 }
 
+// Function to create notification templates
+async function createNotificationTemplates(req, errors) {
+  for (const template of req.notificationTemplates) {
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const { originalId, ...templateData } = template;
+      // Skip afterCreate hooks: auth client sync is already handled by the
+      // auth provider sync earlier in the duplication flow.
+      await db.NotificationTemplate.create(
+        { ...templateData, projectId: req.projectId },
+        { hooks: false }
+      );
+    } catch (error) {
+      errors.push({
+        step: 'Create notification templates',
+        error: error.message,
+      });
+    }
+  }
+}
+
 // Function to create widgets
 async function createWidgets(req, widgetMap, newWidgets, errors) {
   for (const widget of req.widgets) {
@@ -122,27 +266,72 @@ async function createWidgets(req, widgetMap, newWidgets, errors) {
 }
 
 // Function to get or create a user
-async function getOrCreateUser(userId, userMap, projectId) {
-  if (userMap[userId]) {
-    return userMap[userId];
+async function getOrCreateUser(userId, userMap, projectId, createdUserIds) {
+  const mapKey = String(userId);
+  if (userMap[mapKey]) {
+    return userMap[mapKey];
   }
 
-  const user = await db.User.findOne({ where: { id: userId }, raw: true });
+  const normalizedUserId =
+    typeof userId === 'number' && Number.isInteger(userId)
+      ? userId
+      : typeof userId === 'string' && /^\d+$/.test(userId)
+        ? parseInt(userId, 10)
+        : null;
+  const user =
+    normalizedUserId === null
+      ? null
+      : await db.User.findOne({ where: { id: normalizedUserId }, raw: true });
+
+  const findExistingByIdpUser = async (idpUser) => {
+    if (!idpUser || !idpUser.identifier || !idpUser.provider) return null;
+
+    return db.User.findOne({
+      where: Sequelize.and(
+        {
+          idpUser: {
+            identifier: idpUser.identifier,
+            provider: idpUser.provider,
+          },
+        },
+        { projectId }
+      ),
+    });
+  };
 
   if (!user) {
-    const newUser = await db.User.create({
-      idpUser: { provider: 'anonymous', identifier: 'anonymous' },
+    const anonymousIdentity = {
+      provider: 'anonymous',
+      identifier: 'anonymous',
+    };
+    const existingAnonymousUser =
+      await findExistingByIdpUser(anonymousIdentity);
+    if (existingAnonymousUser) {
+      userMap[mapKey] = existingAnonymousUser.id;
+      return existingAnonymousUser.id;
+    }
+
+    const newAnonymousUser = await db.User.create({
+      idpUser: anonymousIdentity,
       projectId,
     });
-    userMap[userId] = newUser.id;
-    return newUser.id;
+    userMap[mapKey] = newAnonymousUser.id;
+    if (createdUserIds) createdUserIds.add(newAnonymousUser.id);
+    return newAnonymousUser.id;
+  }
+
+  const existingUser = await findExistingByIdpUser(user.idpUser);
+  if (existingUser) {
+    userMap[mapKey] = existingUser.id;
+    return existingUser.id;
   }
 
   delete user.id;
   user.projectId = projectId;
   const newUser = await db.User.create(user);
 
-  userMap[userId] = newUser.id;
+  userMap[mapKey] = newUser.id;
+  if (createdUserIds) createdUserIds.add(newUser.id);
   return newUser.id;
 }
 
@@ -174,13 +363,20 @@ async function createResources(
 
       const updatedResource = updateWidgetIds(resource);
 
-      // Retrieve or create the user and update the userId in the resource
-      const newUserId = await getOrCreateUser(
-        updatedResource.userId,
-        userMap,
-        req.projectId
-      );
-      updatedResource.userId = newUserId;
+      // Remap the top-level resource.userId.
+      const sourceResourceUserId = updatedResource.userId;
+      if (
+        sourceResourceUserId !== null &&
+        sourceResourceUserId !== undefined &&
+        sourceResourceUserId !== ''
+      ) {
+        updatedResource.userId = await getOrCreateUser(
+          sourceResourceUserId,
+          userMap,
+          req.projectId,
+          req.createdUserIds
+        );
+      }
 
       const newResource = await db.Resource.create({
         ...updatedResource,
@@ -325,20 +521,108 @@ async function revertConfigResourceSettings(req, errors) {
   }
 }
 
+function sanitizeAuthConfigForDuplication(config = {}) {
+  const sanitizedConfig = merge.recursive({}, config || {});
+  const auth =
+    sanitizedConfig && sanitizedConfig.auth ? sanitizedConfig.auth : {};
+  const providers = auth && auth.provider ? auth.provider : {};
+
+  Object.keys(providers).forEach((providerKey) => {
+    const providerConfig = providers[providerKey];
+    if (!providerConfig || typeof providerConfig !== 'object') return;
+
+    // Project-specific credentials and provider IDs must be regenerated.
+    delete providerConfig.clientId;
+    delete providerConfig.clientSecret;
+    delete providerConfig.client;
+    delete providerConfig.authProviderId;
+
+    if (providerConfig.config && typeof providerConfig.config === 'object') {
+      delete providerConfig.config.clientId;
+      delete providerConfig.config.clientSecret;
+      delete providerConfig.config.authProviderId;
+    }
+  });
+
+  return sanitizedConfig;
+}
+
+function stripAuthClientManagedFieldsFromProjectConfig(config = {}) {
+  if (!config || !config.auth || !config.auth.provider) return config;
+
+  const providersForConfigStrip = config._providersForConfigStrip || {};
+
+  Object.keys(config.auth.provider).forEach((providerKey) => {
+    const providerConfig = config.auth.provider[providerKey];
+    if (!providerConfig || typeof providerConfig !== 'object') return;
+
+    // These fields are managed by auth clients and should not be persisted
+    // in project config; includeAuthConfig can fetch them from auth server.
+    delete providerConfig.client;
+    delete providerConfig.name;
+    delete providerConfig.description;
+    delete providerConfig.siteUrl;
+    delete providerConfig.allowedDomains;
+    // Strip provider config only for providers that support client sync.
+    // For providers without fetch/update client support (e.g. some OIDC setups),
+    // provider.config remains source of truth and must be preserved.
+    if (providersForConfigStrip[providerKey]) {
+      delete providerConfig.config;
+    }
+  });
+
+  delete config._providersForConfigStrip;
+
+  return config;
+}
+
 // Endpoint to delete duplicated project and its associated data
 router
   .route('/delete-duplicated-data')
   .post(auth.can('Project', 'delete'))
   .post(rateLimiter(), async function (req, res, next) {
-    const { projectId, tagMap, statusMap, widgetMap, resourceMap, userMap } =
-      req.body;
+    const { rollbackSessionId } = req.body || {};
+    const parsedProjectId = parseInt(req.body?.projectId, 10);
+    const projectId = Number.isNaN(parsedProjectId) ? null : parsedProjectId;
+    if (!rollbackSessionId) {
+      return next(new Error('Rollback session id is required'));
+    }
+    if (!projectId) {
+      return next(new Error('Project id is required'));
+    }
+
+    const rollbackSession = await duplicateRollbackSessionStore.getSession({
+      rollbackSessionId,
+      projectId,
+    });
+    if (!rollbackSession) {
+      return next(new Error('Rollback session not found or expired'));
+    }
+    if (String(rollbackSession.userId) !== String(req.user.id)) {
+      return next(new Error('You cannot use this rollback session'));
+    }
+
+    const {
+      projectId: sessionProjectId,
+      tagMap = {},
+      statusMap = {},
+      widgetMap = {},
+      resourceMap = {},
+      createdUserIds = [],
+    } = rollbackSession.data || {};
+
+    if (parseInt(sessionProjectId, 10) !== projectId) {
+      return next(new Error('Rollback session does not match this project'));
+    }
 
     try {
       // Delete duplicated tags
       if (Object.keys(tagMap).length > 0) {
         for (const tagId of Object.values(tagMap)) {
           if (tagId) {
-            await db.Tag.destroy({ where: { id: tagId } });
+            await db.Tag.destroy({
+              where: { id: tagId, projectId: sessionProjectId },
+            });
           }
         }
       }
@@ -347,7 +631,9 @@ router
       if (Object.keys(statusMap).length > 0) {
         for (const statusId of Object.values(statusMap)) {
           if (statusId) {
-            await db.Status.destroy({ where: { id: statusId } });
+            await db.Status.destroy({
+              where: { id: statusId, projectId: sessionProjectId },
+            });
           }
         }
       }
@@ -356,7 +642,9 @@ router
       if (Object.keys(widgetMap).length > 0) {
         for (const widgetId of Object.values(widgetMap)) {
           if (widgetId) {
-            await db.Widget.destroy({ where: { id: widgetId } });
+            await db.Widget.destroy({
+              where: { id: widgetId, projectId: sessionProjectId },
+            });
           }
         }
       }
@@ -365,22 +653,28 @@ router
       if (Object.keys(resourceMap).length > 0) {
         for (const resourceId of Object.values(resourceMap)) {
           if (resourceId) {
-            await db.Resource.destroy({ where: { id: resourceId } });
+            await db.Resource.destroy({
+              where: { id: resourceId, projectId: sessionProjectId },
+            });
           }
         }
       }
 
-      // Delete duplicated resources
-      if (Object.keys(userMap).length > 0) {
-        for (const userId of Object.values(userMap)) {
+      // Delete duplicated users that were newly created in this rollback session.
+      if (Array.isArray(createdUserIds) && createdUserIds.length > 0) {
+        for (const userId of createdUserIds) {
           if (userId) {
-            await db.User.destroy({ where: { id: userId } });
+            await db.User.destroy({
+              where: { id: userId, projectId: sessionProjectId },
+            });
           }
         }
       }
 
       // Delete the duplicated project
-      const project = await db.Project.findOne({ where: { id: projectId } });
+      const project = await db.Project.findOne({
+        where: { id: sessionProjectId },
+      });
       if (!project) return next(new Error('Project not found'));
       if (!project?.config?.project?.projectHasEnded) {
         const updatedConfig = {
@@ -395,6 +689,10 @@ router
       }
 
       await project.destroy();
+      await duplicateRollbackSessionStore.removeSession({
+        rollbackSessionId,
+        projectId: sessionProjectId,
+      });
 
       res.json({ success: true });
     } catch (err) {
@@ -520,19 +818,62 @@ router
   // -----------
   .post(auth.can('Project', 'create'))
   .post(removeProtocolFromUrl)
+  .post(checkUniqueUrl)
   .post(rateLimiter(), async function (req, res, next) {
+    const isDuplicationPayload = req.body.isDuplicateRequest === true;
+    req.isDuplicationPayload = isDuplicationPayload;
+    delete req.body.isDuplicateRequest;
+    const parsedSourceProjectId = parseInt(req.body.sourceProjectId, 10);
+    req.sourceProjectId = Number.isNaN(parsedSourceProjectId)
+      ? null
+      : parsedSourceProjectId;
+    delete req.body.sourceProjectId;
     req.widgets = req.body.widgets || [];
     req.tags = req.body.tags || [];
     req.statuses = req.body.statuses || [];
     req.resources = req.body.resources || [];
     req.resourceSettings = req.body.resourceSettings || {};
     req.skipDefaultStatuses = req.body.skipDefaultStatuses || false;
+    req.notificationTemplates = req.body.notificationTemplates || [];
 
     delete req.body.widgets;
     delete req.body.tags;
     delete req.body.statuses;
     delete req.body.resources;
     delete req.body.resourceSettings;
+    delete req.body.notificationTemplates;
+    req.authProviderConfigForSync = {};
+    if (isDuplicationPayload) {
+      req.body.config = sanitizeAuthConfigForDuplication(req.body.config || {});
+      const fallbackProviderConfig = merge.recursive(
+        {},
+        req.body?.config?.auth?.provider || {}
+      );
+      let sourceProjectForAuthSync = null;
+      if (req.sourceProjectId) {
+        const canUseSourceProject = await canUserUseSourceProjectForDuplication(
+          {
+            req,
+            sourceProjectId: req.sourceProjectId,
+          }
+        );
+        if (!canUseSourceProject) {
+          return next(
+            new Error('Not allowed to duplicate from this source project')
+          );
+        }
+        sourceProjectForAuthSync = await db.Project.findByPk(
+          req.sourceProjectId
+        );
+        if (!sourceProjectForAuthSync) {
+          return next(new Error('Source project not found'));
+        }
+      }
+      req.authProviderConfigForSync = await buildAuthProviderSyncConfig({
+        sourceProject: sourceProjectForAuthSync,
+        fallbackProviderConfig,
+      });
+    }
 
     // create an oauth client if nessecary
     let project = {
@@ -562,6 +903,9 @@ router
         if (!providersDone[authConfig.provider]) {
           // filter for duplicates like 'default'
           let adapter = await authSettings.adapter({ authConfig });
+          req.providersForConfigStrip = req.providersForConfigStrip || {};
+          req.providersForConfigStrip[authConfig.provider] =
+            !!adapter.service.updateClient;
           if (adapter.service.createClient) {
             let client = await adapter.service.createClient({
               authConfig,
@@ -578,11 +922,18 @@ router
               .twoFactorRoles;
             delete project.config.auth.provider[authConfig.provider]
               .requiredUserFields;
+            providersDone[authConfig.provider] = true;
           }
-          providersDone[authConfig.provider] = true;
         }
       }
-      if (Object.keys(providersDone).length) {
+      if (req.body.config && req.body.config.auth) {
+        if (req.isDuplicationPayload) {
+          req.body.config._providersForConfigStrip =
+            req.providersForConfigStrip;
+          req.body.config = stripAuthClientManagedFieldsFromProjectConfig(
+            req.body.config || {}
+          );
+        }
         req.body.config.auth = project.config.auth;
       }
       return next();
@@ -608,6 +959,95 @@ router
       .catch(next);
   })
   .post(async function (req, res, next) {
+    // Sync full auth provider settings to auth clients after project is created.
+    // During creation we store a reduced auth config in project.config, so use the
+    // original incoming provider settings captured before normalization.
+    if (!req.isDuplicationPayload) return next();
+    const project = await db.Project.findOne({ where: { id: req.results.id } });
+    if (!project || !hasRole(req.user, 'admin')) return next();
+
+    try {
+      let providers = await authSettings.providers({ project });
+
+      for (let provider of providers) {
+        const providerConfig = req.authProviderConfigForSync?.[provider] || {};
+        const configData = providerConfig.config || {};
+        const normalizedConfigData =
+          normalizeConfigForOpenstadClientSync(configData);
+        const requiredUserFields = providerConfig.requiredUserFields;
+        const twoFactorRoles = providerConfig.twoFactorRoles;
+        const authTypes = providerConfig.authTypes;
+        let allowedDomains =
+          providerConfig.allowedDomains ?? req.body?.config?.allowedDomains;
+
+        if (Array.isArray(allowedDomains)) {
+          allowedDomains = allowedDomains.map((d) =>
+            typeof d === 'string' ? d.trim() : d
+          );
+        }
+
+        if (
+          Object.keys(normalizedConfigData).length === 0 &&
+          !requiredUserFields &&
+          !twoFactorRoles &&
+          !authTypes &&
+          !!!allowedDomains
+        ) {
+          continue;
+        }
+
+        let authConfig = await authSettings.config({
+          project,
+          useAuth: provider,
+        });
+        let adapter = await authSettings.adapter({ authConfig });
+
+        if (!!allowedDomains) {
+          authConfig.allowedDomains = allowedDomains;
+        }
+
+        if (adapter.service.updateClient) {
+          let merged = merge.recursive({}, authConfig, {
+            config: normalizedConfigData,
+            authTypes: authTypes || authConfig.authTypes,
+            requiredUserFields:
+              requiredUserFields || authConfig.requiredUserFields,
+            twoFactorRoles: twoFactorRoles || authConfig.twoFactorRoles,
+          });
+          await adapter.service.updateClient({ authConfig: merged, project });
+        }
+      }
+
+      return next();
+    } catch (err) {
+      const rollbackData = {
+        projectId: req.results.id,
+        tagMap: {},
+        statusMap: {},
+        widgetMap: {},
+        resourceMap: {},
+        createdUserIds: [],
+      };
+      const rollbackSessionId = duplicateRollbackSessionStore.createSession({
+        userId: req.user.id,
+        data: rollbackData,
+      });
+      await duplicateRollbackSessionStore.saveSessionOnProject({
+        projectId: req.results.id,
+        sessionId: rollbackSessionId,
+        userId: req.user.id,
+        data: rollbackData,
+      });
+      return res.status(500).json({
+        errors: [{ step: 'Sync auth provider settings', error: err.message }],
+        duplicatedData: {
+          rollbackSessionId,
+          projectId: req.results.id,
+        },
+      });
+    }
+  })
+  .post(async function (req, res, next) {
     const errors = [];
 
     try {
@@ -617,12 +1057,14 @@ router
       const statusMap = {};
       const widgetMap = {};
       const userMap = {};
+      req.createdUserIds = new Set();
       const newWidgets = [];
       const resourceMap = {};
 
       await createTags(req, tagMap, errors);
       await createStatuses(req, statusMap, errors);
       await createWidgets(req, widgetMap, newWidgets, errors);
+      await createNotificationTemplates(req, errors);
       await createResources(
         req,
         resourceMap,
@@ -644,22 +1086,35 @@ router
       await revertConfigResourceSettings(req, errors);
 
       if (errors.length > 0) {
+        const rollbackData = {
+          projectId: req.projectId,
+          tagMap,
+          statusMap,
+          widgetMap,
+          resourceMap,
+          createdUserIds: Array.from(req.createdUserIds || []),
+          newWidgets,
+        };
+        const rollbackSessionId = duplicateRollbackSessionStore.createSession({
+          userId: req.user.id,
+          data: rollbackData,
+        });
+        await duplicateRollbackSessionStore.saveSessionOnProject({
+          projectId: req.projectId,
+          sessionId: rollbackSessionId,
+          userId: req.user.id,
+          data: rollbackData,
+        });
         return res.status(500).json({
           errors: errors,
           duplicatedData: {
+            rollbackSessionId,
             projectId: req.projectId,
-            tagMap: tagMap,
-            statusMap: statusMap,
-            widgetMap: widgetMap,
-            userMap: userMap,
-            resourceMap: resourceMap,
-            newWidgets: newWidgets,
           },
         });
       }
 
-      res.json(req.projectId);
-      next();
+      return next();
     } catch (error) {
       errors.push({ step: 'Overall', error: error.message });
       res.status(500).json({ errors });
@@ -669,15 +1124,37 @@ router
     // Add current user as admin to the newly made project
     const project = await db.Project.findOne({ where: { id: req.results.id } });
     if (!project) return next(new Error('Project not found'));
-    const user = await db.User.findOne({
+    const sourceUser = await db.User.findOne({
       where: { id: req.user.id },
       raw: true,
     });
 
-    if (user && req.user) {
-      delete user.id;
-      user.projectId = project.id;
-      await db.User.create(user);
+    if (sourceUser && req.user) {
+      const userData = { ...sourceUser };
+      delete userData.id;
+      userData.projectId = project.id;
+
+      const existingProjectUser = await db.User.findOne({
+        where: Sequelize.and(
+          {
+            idpUser: {
+              identifier:
+                sourceUser &&
+                sourceUser.idpUser &&
+                sourceUser.idpUser.identifier,
+              provider:
+                sourceUser && sourceUser.idpUser && sourceUser.idpUser.provider,
+            },
+          },
+          { projectId: project.id }
+        ),
+      });
+
+      if (existingProjectUser) {
+        await existingProjectUser.update(userData);
+      } else {
+        await db.User.create(userData);
+      }
 
       // Sync user role to auth server so user_roles entry is created
       try {
@@ -686,12 +1163,16 @@ router
           useAuth: 'default',
         });
         const adapter = await authSettings.adapter({ authConfig });
-        if (user.idpUser?.identifier && adapter.service.updateUser) {
+        if (
+          userData.idpUser &&
+          userData.idpUser.identifier &&
+          adapter.service.updateUser
+        ) {
           await adapter.service.updateUser({
             authConfig,
             userData: {
-              id: user.idpUser.identifier,
-              role: user.role,
+              id: userData.idpUser.identifier,
+              role: userData.role,
             },
           });
         }
@@ -716,7 +1197,7 @@ router
   })
   .post(auth.useReqUser)
   .post(function (req, res, next) {
-    return res.json(req.results);
+    return res.json(req.isDuplicationPayload ? req.projectId : req.results);
   });
 
 // list projects with issues
@@ -761,13 +1242,37 @@ router
       })
       .catch(next);
   })
+  .get(async function (req, res, next) {
+    // blocked domains (last 24h)
+    try {
+      let blockedByProject = await projectsWithIssues.blockedDomains();
+      for (let projectId of Object.keys(blockedByProject)) {
+        let { project, blocks } = blockedByProject[projectId];
+        let entry = project.toJSON();
+        entry.issue = 'blocked-domains';
+        entry.domainBlocks = blocks.map((b) => ({
+          widgetId: b.widgetId,
+          domain: b.domain,
+          referer: b.referer,
+          count: b.count,
+          lastSeen: b.lastSeen,
+        }));
+        req.results.push(entry);
+        req.dbQuery.count += 1;
+      }
+    } catch (e) {
+      console.log('[issues] Could not fetch blocked domains:', e.message);
+    }
+    return next();
+  })
   .get(searchInResults({ searchfields: ['name', 'title'] }))
   .get(auth.useReqUser)
   .get(pagination.paginateResults)
   .get(function (req, res, next) {
     let records = req.results.records || req.results;
     records.forEach((record, i) => {
-      let project = record.toJSON();
+      let project =
+        typeof record.toJSON === 'function' ? record.toJSON() : record;
       if (!(req.user && hasRole(req.user, 'admin'))) {
         project.config = undefined;
       }
@@ -797,6 +1302,7 @@ router
   // -----------
   .put(auth.useReqUser)
   .put(removeProtocolFromUrl)
+  .put(checkUniqueUrl)
   .put(rateLimiter(), async function (req, res, next) {
     // update certain parts of config to the oauth client
     const project = await db.Project.findOne({ where: { id: req.results.id } });
@@ -869,47 +1375,46 @@ router
     req.pendingMessages = [
       { key: `project-${project.id}-update`, value: 'event' },
     ];
-    if (req.body.url && req.body.url != project.url)
+    if ('url' in req.body && req.body.url != project.url)
       req.pendingMessages.push({ key: `project-urls-update`, value: 'event' });
 
-    // Update allowedDomains if creating a new site
     let updateBody = req.body;
-    const hasInitDomain =
-      project?.config?.allowedDomains !== undefined &&
-      project.config.allowedDomains.length === 1 &&
-      project.config.allowedDomains[0] == 'api.openstad.org';
-    if (
-      ((project?.config?.allowedDomains || []).length === 0 || hasInitDomain) &&
-      req?.body?.url
-    ) {
-      // Check if url has protocol
-      let reqUrl = req.body.url;
-      if (!reqUrl.includes('http://') && !reqUrl.includes('https://')) {
-        reqUrl = 'http://' + reqUrl;
+
+    if (req.body.url && req.body.url !== project.url) {
+      try {
+        let providers = await authSettings.providers({ project });
+        for (let provider of providers) {
+          let authConfig = await authSettings.config({
+            project,
+            useAuth: provider,
+          });
+          let adapter = await authSettings.adapter({ authConfig });
+          if (adapter.service.updateClient) {
+            let projectWithNewUrl = { ...project.toJSON(), url: req.body.url };
+            await adapter.service.updateClient({
+              authConfig,
+              project: projectWithNewUrl,
+            });
+          }
+        }
+      } catch (err) {
+        console.log(
+          '[allowedDomains] Could not sync auth client after url change:',
+          err.message
+        );
       }
-      let url = new URL(reqUrl);
-      let host = url.host;
-
-      updateBody.config = updateBody.config || {};
-      updateBody.config.allowedDomains = [host];
-
-      // Update client (auth-db)
-      let adminAuthConfig = await authSettings.config({ project: project });
-      service.updateClient({
-        authConfig: adminAuthConfig,
-        project: updateBody,
-      });
     }
 
     project
       .authorizeData(req.body, 'update')
       .update(updateBody)
-      .then((result) => {
+      .then(async (result) => {
         req.results = result;
-        return checkHostStatus({ id: result.id });
-      })
-      .then(async () => {
-        // Re-read so response includes hostStatus written by checkHostStatus
+        try {
+          await checkHostStatus({ id: result.id });
+        } catch (err) {
+          console.log('Ignore checkHostStatus error', err);
+        }
         const fresh = await db.Project.scope('includeConfig').findByPk(
           req.results.id
         );
@@ -921,8 +1426,7 @@ router
         return null;
       })
       .catch((err) => {
-        console.log('Ignore checkHostStatus error', err);
-        next();
+        next(err);
         return null;
       });
   })
@@ -1249,5 +1753,46 @@ router
       return res.status(500).json({ error: 'Certificate retry failed' });
     }
   });
+
+// PDF availability check
+// ----------------------
+router
+  .route('/:projectId(\\d+)/pdf/status')
+  .get(auth.can('Project', 'update'))
+  .get(function (req, res) {
+    const available =
+      !!process.env.PDF_API_ENDPOINT && !!process.env.PDF_API_KEY;
+    res.json({ available });
+  });
+
+router.route('/:projectId(\\d+)/branding').get(async function (req, res) {
+  try {
+    let project = req.project;
+    if (!project) return res.json({});
+
+    let providers = await authSettings.providers({ project });
+    for (let provider of providers) {
+      if (provider === 'default') continue;
+      let authConfig = await authSettings.config({
+        project,
+        useAuth: provider,
+      });
+      let adapter = await authSettings.adapter({ authConfig });
+      if (adapter.service.fetchClient && authConfig.clientId) {
+        let client = await adapter.service.fetchClient({
+          authConfig,
+          project,
+        });
+        return res.json({
+          logo: client?.config?.styling?.logo || null,
+        });
+      }
+    }
+
+    return res.json({});
+  } catch (err) {
+    return res.json({});
+  }
+});
 
 module.exports = router;

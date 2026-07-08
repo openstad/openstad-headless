@@ -9,11 +9,23 @@ import {
   Textarea,
   Textbox,
 } from '@utrecht/component-library-react';
+import DOMPurify from 'dompurify';
 import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
 import './style.css';
+
+declare module 'react' {
+  namespace JSX {
+    interface IntrinsicElements {
+      'trix-editor': React.DetailedHTMLProps<
+        React.HTMLAttributes<HTMLElement> & { input?: string },
+        HTMLElement
+      >;
+    }
+  }
+}
 
 // Temporary TypeScript declaration for 'trix-editor'
 declare global {
@@ -27,6 +39,29 @@ declare global {
   }
 }
 
+// Parse editor HTML into an inert, sanitized document body. DOMPurify breaks
+// the untrusted-text -> HTML flow before it reaches the parser; target/rel are
+// kept so existing "open in new tab" links survive a round-trip.
+function parseEditorHtml(html: string): HTMLElement | null {
+  if (typeof document === 'undefined') return null;
+  const clean = DOMPurify.sanitize(html || '', {
+    ADD_ATTR: ['target', 'rel'],
+  });
+  return new DOMParser().parseFromString(clean, 'text/html').body;
+}
+
+function getTargetBlankHrefs(html: string): Set<string> {
+  const hrefs = new Set<string>();
+  if (!html || !html.includes('target')) return hrefs;
+  const body = parseEditorHtml(html);
+  if (!body) return hrefs;
+  body.querySelectorAll('a[target="_blank"]').forEach((link) => {
+    const href = link.getAttribute('href');
+    if (href) hrefs.add(href);
+  });
+  return hrefs;
+}
+
 export type TextInputProps = {
   title: string;
   overrideDefaultValue?: FormValue;
@@ -38,7 +73,7 @@ export type TextInputProps = {
   fieldRequired?: boolean;
   requiredWarning?: string;
   fieldKey: string;
-  variant?: 'text input' | 'textarea' | 'richtext';
+  variant?: 'text input' | 'textarea' | 'richtext' | 'email';
   placeholder?: string;
   defaultValue?: string;
   disabled?: boolean;
@@ -79,10 +114,18 @@ const TrixEditor: React.FC<{
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
-}> = ({ value, onChange }) => {
-  const editorRef = useRef<HTMLDivElement>(null);
+  onFocus?: () => void;
+  onBlur?: () => void;
+}> = ({ value, onChange, onFocus, onBlur }) => {
+  const editorRef = useRef<HTMLElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const editorInstance = useRef<any>(null);
+  const onChangeRef = useRef(onChange);
+  const onFocusRef = useRef(onFocus);
+  const onBlurRef = useRef(onBlur);
+  const valueRef = useRef(value);
+
+  const targetBlankHrefsRef = useRef<Set<string>>(new Set());
 
   const idRef = useRef(
     `trix-editor-${Math.random().toString(36).substring(2, 9)}`
@@ -93,17 +136,33 @@ const TrixEditor: React.FC<{
       if (typeof window !== 'undefined') {
         // @ts-expect-error: trix has no types
         await import('trix');
-        // @ts-expect-error: trix has no types
         await import('trix/dist/trix.css');
 
-        // Use semantic paragraphs for new blocks created with Enter.
         const trix = (window as any).Trix;
+
+        // Use semantic paragraphs for new blocks created with Enter.
         if (trix?.config?.blockAttributes?.default) {
           trix.config.blockAttributes.default.tagName = 'p';
         }
       }
     })();
   }, []);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    onFocusRef.current = onFocus;
+  }, [onFocus]);
+
+  useEffect(() => {
+    onBlurRef.current = onBlur;
+  }, [onBlur]);
+
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -114,7 +173,6 @@ const TrixEditor: React.FC<{
     const handleTrixInitialize = () => {
       editorInstance.current = (editorEl as any).editor;
 
-      // Remove the file attachment button from the toolbar
       const toolbar = editorEl.parentElement?.querySelector('trix-toolbar');
       if (toolbar) {
         const fileButton = toolbar.querySelector(
@@ -123,39 +181,155 @@ const TrixEditor: React.FC<{
         if (fileButton) {
           fileButton.remove();
         }
-      }
 
-      // Load initial content
-      if (value && editorInstance.current) {
-        editorInstance.current.loadHTML(value);
-      }
+        const dialog = toolbar.querySelector('[data-trix-dialog="href"]');
+        const linkFields = dialog?.querySelector('.trix-dialog__link-fields');
+        if (
+          linkFields &&
+          !linkFields.querySelector('.trix-target-blank-label')
+        ) {
+          const label = document.createElement('label');
+          label.className = 'trix-target-blank-label';
 
-      // Listen for changes and send change event
-      editorEl.addEventListener('trix-change', () => {
-        if (editorInstance.current && inputEl) {
-          const html = inputEl.value;
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.className = 'trix-target-blank-checkbox';
 
-          // Create a synthetic React-like ChangeEvent
-          const syntheticEvent = {
-            target: { value: html },
-          } as React.ChangeEvent<HTMLInputElement>;
+          label.appendChild(checkbox);
+          label.appendChild(
+            document.createTextNode(' Openen in nieuw tabblad')
+          );
 
-          onChange(syntheticEvent);
+          const buttonGroup = linkFields.querySelector('.trix-button-group');
+          linkFields.insertBefore(label, buttonGroup);
+
+          const linkButton = linkFields.querySelector(
+            '[data-trix-method="setAttribute"]'
+          );
+          if (linkButton) {
+            linkButton.addEventListener('click', () => {
+              const checked = checkbox.checked;
+              setTimeout(() => {
+                const html = inputEl.value || '';
+                const editor = (editorEl as any).editor;
+                const currentHref =
+                  editor?.composition?.currentAttributes?.href;
+                if (!currentHref) return;
+
+                const body = parseEditorHtml(html);
+                if (!body) return;
+                const link = body.querySelector(
+                  `a[href="${CSS.escape(currentHref)}"]`
+                );
+                if (!link) return;
+
+                if (checked) {
+                  link.setAttribute('target', '_blank');
+                  link.setAttribute('rel', 'noopener noreferrer');
+                  targetBlankHrefsRef.current.add(currentHref);
+                } else {
+                  link.removeAttribute('target');
+                  link.removeAttribute('rel');
+                  targetBlankHrefsRef.current.delete(currentHref);
+                }
+
+                const updatedHtml = body.innerHTML;
+                inputEl.value = updatedHtml;
+                const syntheticEvent = {
+                  target: { value: updatedHtml },
+                } as React.ChangeEvent<HTMLInputElement>;
+                onChangeRef.current(syntheticEvent);
+              }, 0);
+            });
+          }
         }
-      });
+      }
+
+      if (valueRef.current && editorInstance.current) {
+        targetBlankHrefsRef.current = getTargetBlankHrefs(valueRef.current);
+        editorInstance.current.loadHTML(valueRef.current);
+      }
+    };
+
+    const handleTrixChange = () => {
+      let html = inputEl.value;
+
+      if (targetBlankHrefsRef.current.size > 0) {
+        const body = parseEditorHtml(html);
+        if (body) {
+          let changed = false;
+          targetBlankHrefsRef.current.forEach((href) => {
+            const link = body.querySelector(`a[href="${CSS.escape(href)}"]`);
+            if (link && !link.hasAttribute('target')) {
+              link.setAttribute('target', '_blank');
+              link.setAttribute('rel', 'noopener noreferrer');
+              changed = true;
+            }
+          });
+          if (changed) {
+            html = body.innerHTML;
+            inputEl.value = html;
+          }
+        }
+      }
+
+      const syntheticEvent = {
+        target: { value: html },
+      } as React.ChangeEvent<HTMLInputElement>;
+
+      onChangeRef.current(syntheticEvent);
+    };
+
+    const handleDialogShow = () => {
+      const toolbar = editorEl.parentElement?.querySelector('trix-toolbar');
+      const checkbox = toolbar?.querySelector(
+        '.trix-target-blank-checkbox'
+      ) as HTMLInputElement | null;
+      const editor = (editorEl as any).editor;
+      if (!checkbox || !editor) return;
+
+      const currentHref = editor.composition?.currentAttributes?.href;
+      checkbox.checked = !!(
+        currentHref && targetBlankHrefsRef.current.has(currentHref)
+      );
+    };
+
+    const handleTrixFocus = () => {
+      if (onFocusRef.current) onFocusRef.current();
+    };
+
+    const handleTrixBlur = () => {
+      if (onBlurRef.current) onBlurRef.current();
     };
 
     editorEl.addEventListener('trix-initialize', handleTrixInitialize);
+    editorEl.addEventListener('trix-change', handleTrixChange);
+    editorEl.addEventListener('trix-toolbar-dialog-show', handleDialogShow);
+    inputEl.addEventListener('input', handleTrixChange);
+    editorEl.addEventListener('trix-focus', handleTrixFocus);
+    editorEl.addEventListener('trix-blur', handleTrixBlur);
     return () => {
       editorEl.removeEventListener('trix-initialize', handleTrixInitialize);
+      editorEl.removeEventListener('trix-change', handleTrixChange);
+      editorEl.removeEventListener(
+        'trix-toolbar-dialog-show',
+        handleDialogShow
+      );
+      inputEl.removeEventListener('input', handleTrixChange);
+      editorEl.removeEventListener('trix-focus', handleTrixFocus);
+      editorEl.removeEventListener('trix-blur', handleTrixBlur);
     };
-  }, [onChange]);
+  }, []);
 
   // Keep editor content in sync with external value
   useEffect(() => {
     if (!editorInstance.current || !inputRef.current) return;
     const currentHTML = inputRef.current.value;
     if (currentHTML !== value) {
+      const newHrefs = getTargetBlankHrefs(value || '');
+      if (newHrefs.size > 0) {
+        newHrefs.forEach((h) => targetBlankHrefsRef.current.add(h));
+      }
       editorInstance.current.loadHTML(value || '');
     }
   }, [value]);
@@ -201,8 +375,9 @@ const TextInput: FC<TextInputProps> = ({
     'text input': Textbox,
     textarea: Textarea,
     richtext: TrixEditor,
+    email: Textbox,
   };
-  const InputComponent = variantMap[variant];
+  const InputComponent = variantMap[variant] || Textbox;
 
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
@@ -301,6 +476,7 @@ const TextInput: FC<TextInputProps> = ({
 
   const getAutocomplete = (fieldKey: string) => {
     switch (fieldKey?.toLocaleLowerCase()) {
+      case 'email':
       case 'mail':
         return 'email';
       case 'tel':
@@ -327,6 +503,43 @@ const TextInput: FC<TextInputProps> = ({
   const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
   const isOverCharacterLimit = !!maxCharacters && value.length > maxCharacters;
   const helpTextId = `${randomId}_help`;
+  const updateFieldValue = (nextValue: string) => {
+    setValue(nextValue);
+    const valueLength = nextValue.length;
+    const hasMax = maxCharacters > 0;
+    const exceedsMax = hasMax && valueLength > maxCharacters;
+
+    if (fieldRequired && valueLength === 0) {
+      setCheckInvalid(true);
+    } else if (exceedsMax) {
+      setCheckInvalid(true);
+    } else {
+      setCheckInvalid(false);
+    }
+
+    if (onChange) {
+      onChange({
+        name: fieldKey,
+        value: nextValue,
+      });
+    }
+
+    characterHelpText(valueLength);
+  };
+
+  const handleFieldChange = (
+    e:
+      | React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      | React.FormEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const nextValue =
+      (e.currentTarget as HTMLInputElement | HTMLTextAreaElement | undefined)
+        ?.value ??
+      (e.target as HTMLInputElement | HTMLTextAreaElement | undefined)?.value ??
+      '';
+    updateFieldValue(nextValue);
+  };
+
   return (
     <FormField type="text">
       {title && (
@@ -374,38 +587,28 @@ const TextInput: FC<TextInputProps> = ({
       })}
 
       <div
-        className={`utrecht-form-field__input ${fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''}`}
+        className={`utrecht-form-field__input ${
+          fieldHasMaxOrMinCharacterRules ? 'help-text-active' : ''
+        }`}
         aria-invalid={checkInvalid}>
         <InputComponent
           id={randomId}
           name={fieldKey}
           required={fieldRequired}
-          type={getType(fieldKey)}
+          type={variant === 'email' ? 'email' : getType(fieldKey)}
           placeholder={placeholder}
           value={value}
           onChange={(
             e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
           ) => {
-            setValue(e.target.value);
-            const valueLength = e.target.value.length;
-            const hasMax = maxCharacters > 0;
-            const exceedsMax = hasMax && valueLength > maxCharacters;
-
-            if (fieldRequired && valueLength === 0) {
-              setCheckInvalid(true);
-            } else if (exceedsMax) {
-              setCheckInvalid(true);
-            } else {
-              setCheckInvalid(false);
-            }
-
-            if (onChange) {
-              onChange({
-                name: fieldKey,
-                value: e.target.value,
-              });
-            }
-            characterHelpText(valueLength);
+            if (variant === 'textarea') return;
+            handleFieldChange(e);
+          }}
+          onInput={(
+            e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>
+          ) => {
+            if (variant !== 'textarea') return;
+            handleFieldChange(e);
           }}
           disabled={disabled}
           rows={rows}
@@ -414,13 +617,21 @@ const TextInput: FC<TextInputProps> = ({
             setIsFocused(false);
             setHasBlurred(true);
           }}
-          autoComplete={getAutocomplete(fieldKey)}
-          aria-describedby={`${randomId}_error${(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText ? ` ${helpTextId}` : ''}`}
+          autoComplete={
+            variant === 'email' ? 'email' : getAutocomplete(fieldKey)
+          }
+          aria-describedby={`${randomId}_error${
+            (isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText
+              ? ` ${helpTextId}`
+              : ''
+          }`}
           aria-invalid={checkInvalid}
         />
         {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText && (
           <FormFieldDescription
-            className={`help-text${isOverCharacterLimit ? ' help-text--error' : ''}`}
+            className={`help-text${
+              isOverCharacterLimit ? ' help-text--error' : ''
+            }`}
             id={helpTextId}
             aria-live="polite"
             aria-atomic="true">

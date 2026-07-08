@@ -1,3 +1,4 @@
+import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
@@ -17,7 +18,6 @@ import {
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
 import WidgetRawGeneral from './general';
-import WidgetRawStylingClasses from './styling';
 
 export const getServerSideProps = withApiUrl;
 export default function WidgetRawResource({ apiUrl }: WithApiUrlProps) {
@@ -54,6 +54,7 @@ export default function WidgetRawResource({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig && (
@@ -75,6 +76,13 @@ export default function WidgetRawResource({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
+            </TabsContent>
+            <TabsContent value="auditlog" className="p-0">
+              <AuditLogTable
+                modelName="widgets"
+                modelId={id as string}
+                projectId={projectId as string}
+              />
             </TabsContent>
           </Tabs>
 

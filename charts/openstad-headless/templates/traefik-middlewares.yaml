@@ -54,6 +54,16 @@ spec:
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
+  name: {{ include "openstad.fullname" . }}-compress-response
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "openstad.labels" . | nindent 4 }}
+spec:
+  compress: {}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
   name: {{ include "openstad.fullname" . }}-www-redirect
   namespace: {{ .Release.Namespace }}
   labels:

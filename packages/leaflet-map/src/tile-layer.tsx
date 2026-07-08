@@ -73,6 +73,7 @@ export default function TileLayer({
           attribution="<a href='https://www.openstreetmap.org/copyright'>© OpenStreetMap contributors</a>"
           maxZoom={typeof maxZoom != 'undefined' ? maxZoom : 19}
           minZoom={typeof minZoom != 'undefined' ? minZoom : 0}
+          referrerPolicy="no-referrer-when-downgrade"
           subdomains="abc"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />

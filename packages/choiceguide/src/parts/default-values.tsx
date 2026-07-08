@@ -61,6 +61,7 @@ export const defaultFormValues = [
     multiple: true,
     options: [],
     allowedTypes: ['image/*'],
+    maxUploadSizeMB: 25,
     fieldType: 'upload',
   },
   {

@@ -4,7 +4,13 @@ import Form, { FormValue } from '@openstad-headless/form/src/form';
 import { FieldProps } from '@openstad-headless/form/src/props';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Banner, Button, Icon, Spacer } from '@openstad-headless/ui/src';
+import {
+  Banner,
+  Button,
+  Icon,
+  Spacer,
+  fireConfetti,
+} from '@openstad-headless/ui/src';
 import { Heading2, Heading6 } from '@utrecht/component-library-react';
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
@@ -153,105 +159,6 @@ function Enquete(props: EnqueteWidgetProps) {
     props.draftRetentionHours,
   ]);
 
-  // Confetti function for youth outro page
-  const fireConfetti = () => {
-    const canvas = document.createElement('canvas');
-    canvas.style.position = 'fixed';
-    canvas.style.top = '0';
-    canvas.style.left = '0';
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.style.pointerEvents = 'none';
-    canvas.style.zIndex = '9999';
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    document.body.appendChild(canvas);
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const particles: Array<{
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      color: string;
-      size: number;
-      rotation: number;
-      rotationSpeed: number;
-    }> = [];
-
-    const colors = [
-      '#ff6b6b',
-      '#4ecdc4',
-      '#45b7d1',
-      '#f9ca24',
-      '#f0932b',
-      '#eb4d4b',
-      '#6c5ce7',
-      '#fd79a8',
-    ];
-
-    // Create particles - more particles with staggered timing
-    for (let i = 0; i < 300; i++) {
-      particles.push({
-        x: Math.random() * canvas.width * 1.2 - canvas.width * 0.1, // Spread beyond screen width
-        y: -Math.random() * 600 - 10, // Much more spread out height above screen
-        vx: (Math.random() - 0.5) * 30, // Increased horizontal spread
-        vy: Math.random() * 3 + 2,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        size: Math.random() * 8 + 4,
-        rotation: Math.random() * 360,
-        rotationSpeed: (Math.random() - 0.5) * 10,
-      });
-    }
-
-    const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      particles.forEach((particle, index) => {
-        particle.x += particle.vx;
-        particle.y += particle.vy;
-        particle.vy += 0.1; // gravity
-        particle.rotation += particle.rotationSpeed;
-
-        ctx.save();
-        ctx.translate(particle.x, particle.y);
-        ctx.rotate((particle.rotation * Math.PI) / 180);
-        ctx.fillStyle = particle.color;
-        ctx.fillRect(
-          -particle.size / 2,
-          -particle.size / 2,
-          particle.size,
-          particle.size
-        );
-        ctx.restore();
-
-        // Remove particles that are off screen
-        if (particle.y > canvas.height + 10) {
-          particles.splice(index, 1);
-        }
-      });
-
-      if (particles.length > 0) {
-        requestAnimationFrame(animate);
-      } else {
-        // Clean up
-        document.body.removeChild(canvas);
-      }
-    };
-
-    animate();
-
-    // Also remove after 8 seconds as a safety measure - longer duration
-    setTimeout(() => {
-      if (document.body.contains(canvas)) {
-        document.body.removeChild(canvas);
-      }
-    }, 8000);
-  };
-
   const { create: createSubmission } = datastore.useSubmissions({
     projectId: props.projectId,
   });
@@ -317,6 +224,9 @@ function Enquete(props: EnqueteWidgetProps) {
     const result = await createSubmission(formData, props.widgetId);
 
     if (result) {
+      console.log(
+        `[enquete] submitted: widgetId=${props.widgetId} submissionId=${result.id}`
+      );
       if (
         typeof window !== 'undefined' &&
         props.enableDraftPersistence === true
@@ -484,10 +394,12 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['allowedTypes'] = ['image/*'];
           fieldData['imageUrl'] = props?.imageUrl;
           fieldData['multiple'] = item.multiple;
+          fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
           break;
         case 'documentUpload':
           fieldData['type'] = 'documentUpload';
           fieldData['multiple'] = item.multiple;
+          fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
           break;
         case 'scale': {
           fieldData['type'] = 'tickmark-slider';
@@ -514,6 +426,15 @@ function Enquete(props: EnqueteWidgetProps) {
             return {
               value: currentValue.toString(),
               label: item.showSmileys ? label : currentValue,
+            };
+          });
+
+          fieldData['choices'] = labelOptions.map((label, index) => {
+            const currentValue = index + 1;
+            return {
+              value: currentValue.toString(),
+              label: currentValue.toString(),
+              trigger: `scale-${currentValue}`,
             };
           });
 
@@ -663,13 +584,6 @@ function Enquete(props: EnqueteWidgetProps) {
     formFields.length,
   ];
 
-  const getPrevPageTitle =
-    formFields.filter((field) => field.type === 'pagination')[currentPage]
-      ?.prevPageText || 'Vorige';
-  const getNextPageTitle =
-    formFields.filter((field) => field.type === 'pagination')[currentPage]
-      ?.nextPageText || 'Volgende';
-
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const handleValuesChange = (values: Record<string, unknown>) => {
@@ -785,15 +699,13 @@ function Enquete(props: EnqueteWidgetProps) {
                 !hasRole(currentUser, 'member') && formOnlyVisibleForUsers
               }
               submitHandler={onSubmit}
-              submitText={
-                currentPage < totalPages - 1 ? getNextPageTitle : 'Versturen'
-              }
+              submitText="Versturen"
               title=""
               currentPage={currentPage}
               pageFieldEndPositions={pageFieldEndPositions}
               pageFieldStartPositions={pageFieldStartPositions}
               prevPage={currentPage > 0 ? currentPage - 1 : null}
-              prevPageText={getPrevPageTitle}
+              prevPageText="Vorige"
               setCurrentPage={setCurrentPage}
               totalFieldCount={totalFieldCount}
               totalPages={totalPages}

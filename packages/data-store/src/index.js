@@ -12,9 +12,11 @@ import useComments from './hooks/use-comments.js';
 import useCurrentUser from './hooks/use-current-user.js';
 import useDatalayer from './hooks/use-datalayer.js';
 import useEnqueteResultCount from './hooks/use-enquete-result-count';
+import useMarkers from './hooks/use-markers.js';
 import useProjectVotedUsersCount from './hooks/use-project-voted-users-count';
 import useResource from './hooks/use-resource.js';
 import useResources from './hooks/use-resources.js';
+import useStatuses from './hooks/use-statuses.js';
 import useSubmissions from './hooks/use-submissions.js';
 import useTags from './hooks/use-tags.js';
 import useUserActivity from './hooks/use-user-activity';
@@ -38,7 +40,9 @@ function DataStore(props = {}) {
   self.useResources = useResources.bind(self);
   self.useArea = useArea.bind(self);
   self.useDatalayer = useDatalayer.bind(self);
+  self.useMarkers = useMarkers.bind(self);
   self.useAreas = useAreas.bind(self);
+  self.useStatuses = useStatuses.bind(self);
   self.useTags = useTags.bind(self);
   self.useCurrentUser = useCurrentUser.bind(self);
   self.useUserVote = useUserVote.bind(self);
@@ -82,6 +86,11 @@ function DataStore(props = {}) {
       // otherwise, fetcherAsString is the name of the fetcher function and we use that directly
     } else {
       fetcher = self.api[fetcherAsString];
+    }
+
+    // Allow hooks to pass null to skip the fetch entirely
+    if (props === null) {
+      return useSWR(null, null);
     }
 
     let key = self.createKey(props, fetcherAsString);
@@ -136,7 +145,7 @@ function DataStore(props = {}) {
         Object.keys(windowGlobal.OpenStadSWR).indexOf(
           JSON.stringify(cacheKey, null, 2)
         ) != -1,
-      async (currentData) => currentData, // optimistic ui as fetcher
+      async (currentData) => currentData,
       {
         revalidate: true,
         rollbackOnError: true,

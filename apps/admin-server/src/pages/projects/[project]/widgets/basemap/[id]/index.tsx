@@ -1,4 +1,4 @@
-import WidgetPreview from '@/components/widget-preview';
+import AuditLogTable from '@/components/audit-log-table';
 import WidgetPublish from '@/components/widget-publish';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
@@ -53,9 +53,17 @@ export default function WidgetBaseMap({ apiUrl }: WithApiUrlProps) {
           <Tabs defaultValue="publish">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
+            </TabsContent>
+            <TabsContent value="auditlog" className="p-0">
+              <AuditLogTable
+                modelName="widgets"
+                modelId={id as string}
+                projectId={projectId as string}
+              />
             </TabsContent>
           </Tabs>
 

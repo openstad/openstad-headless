@@ -1,3 +1,4 @@
+import { Agenda } from '@openstad-headless/agenda/src/agenda';
 import {
   Comments,
   CommentsWidgetProps,
@@ -9,6 +10,7 @@ import { MapPropsType } from '@openstad-headless/leaflet-map/src/types';
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
 import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
+import { humanizeDate } from '@openstad-headless/lib/humanize-date';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
@@ -17,6 +19,7 @@ import {
   Icon,
   IconButton,
   Image,
+  Lightbox,
   Pill,
   Spacer,
 } from '@openstad-headless/ui/src';
@@ -37,6 +40,7 @@ import React, { useEffect, useId, useState } from 'react';
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 import { canLikeResource, hasRole } from '../../lib';
 import './resource-detail.css';
+import { formatDocumentLabel } from './utils';
 
 type booleanProps = {
   [K in
@@ -61,7 +65,8 @@ type booleanProps = {
     | 'displayEditResourceButton'
     | 'displayDeleteButton'
     | 'displayDeleteEditButtonOnTop'
-    | 'displaySocials']: boolean | undefined;
+    | 'displaySocials'
+    | 'displayTimeline']: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = {
@@ -144,6 +149,7 @@ function ResourceDetail({
   urlWithResourceFormForEditing = '',
   displayDeleteButton = true,
   displayDeleteEditButtonOnTop = false,
+  displayTimeline = false,
   selectedSocialShareOptions = [
     'facebook',
     'x',
@@ -157,6 +163,7 @@ function ResourceDetail({
   const [refreshComments, setRefreshComments] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showAccordion, setShowAccordion] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const descriptionRef = React.useRef<HTMLDivElement>(null);
   const id = useId();
 
@@ -187,6 +194,9 @@ function ResourceDetail({
   };
 
   if (!resource) return null;
+
+  const timelineItems = resource?.timeline ?? [];
+
   const shouldHaveSideColumn =
     displayLikes ||
     displayTags ||
@@ -346,9 +356,15 @@ function ResourceDetail({
     );
 
     return clickableImage ? (
-      <a href={src} target="_blank" rel="noreferrer">
+      <div
+        style={{ cursor: 'zoom-in' }}
+        onClick={() => setLightboxSrc(src)}
+        role="button"
+        tabIndex={0}
+        aria-label="Afbeelding uitvergroot bekijken"
+        onKeyDown={(e) => e.key === 'Enter' && setLightboxSrc(src)}>
         {imageElement}
-      </a>
+      </div>
     ) : (
       imageElement
     );
@@ -447,6 +463,9 @@ function ResourceDetail({
 
   return (
     <section className="osc-resource-detail-widget-container">
+      {lightboxSrc && (
+        <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+      )}
       {displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit />}
       <div
         className={`osc ${
@@ -481,22 +500,21 @@ function ResourceDetail({
                   }}></Heading>
               )}
 
-              {displayModBreak && resource.modBreak && (
-                <div className="resource-detail-modbreak-banner">
-                  <section>
-                    <Heading level={2} appearance="utrecht-heading-6">
-                      {props.resources.modbreakTitle}
-                    </Heading>
-                    <Heading level={2} appearance="utrecht-heading-6">
-                      {resource.modBreakDateHumanized}
-                    </Heading>
-                  </section>
-                  <Spacer size={1} />
-                  <Heading level={2} appearance="utrecht-heading-6">
-                    {resource.modBreak}
-                  </Heading>
-                </div>
-              )}
+              {displayModBreak &&
+                resource.modBreaks?.map((mb: any) => (
+                  <div key={mb.id} className="resource-detail-modbreak-banner">
+                    <section>
+                      <Heading level={2} appearance="utrecht-heading-6">
+                        {mb.authorName || props.resources.modbreakTitle}
+                      </Heading>
+                      <Heading level={2} appearance="utrecht-heading-6">
+                        {mb.modBreakDate && humanizeDate(mb.modBreakDate)}
+                      </Heading>
+                    </section>
+                    <Spacer size={1} />
+                    <div dangerouslySetInnerHTML={{ __html: mb.description }} />
+                  </div>
+                ))}
 
               <div className="osc-resource-detail-content-item-row">
                 {displayUser && resource?.user?.displayName && (
@@ -606,24 +624,35 @@ function ResourceDetail({
                     </div>
                   ))}
               </div>
-              {displayLocation && resource.location && (
-                <>
-                  <Heading level={2} appearance="utrecht-heading-2">
-                    Plaats
-                  </Heading>
-                  <ResourceDetailMap
-                    resourceId={resource.id || resourceId || '0'}
-                    resourceIdRelativePath={
-                      props.resourceIdRelativePath || 'openstadResourceId'
-                    }
-                    {...resourceOverviewMapWidget}
-                    {...props}
-                    dataLayerSettings={dataLayerSettings}
-                    center={resource.location}
-                    area={props.resourceDetailMap?.area}
-                  />
-                </>
+              {displayTimeline && timelineItems.length > 0 && (
+                <Agenda
+                  {...props}
+                  items={timelineItems}
+                  displayTitle={true}
+                  title="Tijdlijn"
+                  useActiveDates={true}
+                />
               )}
+              {displayLocation &&
+                resource.location?.lat &&
+                resource.location?.lng && (
+                  <>
+                    <Heading level={2} appearance="utrecht-heading-2">
+                      Plaats
+                    </Heading>
+                    <ResourceDetailMap
+                      resourceId={resource.id || resourceId || '0'}
+                      resourceIdRelativePath={
+                        props.resourceIdRelativePath || 'openstadResourceId'
+                      }
+                      {...resourceOverviewMapWidget}
+                      {...props}
+                      dataLayerSettings={dataLayerSettings}
+                      center={resource.location}
+                      area={props.resourceDetailMap?.area}
+                    />
+                  </>
+                )}
             </article>
           ) : (
             <span>resource niet gevonden..</span>
@@ -635,20 +664,7 @@ function ResourceDetail({
             <div className="aside--content">
               {displayLikes ? (
                 <>
-                  <Likes
-                    {...props}
-                    disabled={!canLike}
-                    title={props.likeWidget?.title}
-                    yesLabel={props.likeWidget?.yesLabel}
-                    noLabel={props.likeWidget?.noLabel}
-                    displayDislike={props.likeWidget?.displayDislike}
-                    hideCounters={props.likeWidget?.hideCounters}
-                    variant={props.likeWidget?.variant}
-                    showProgressBar={props.likeWidget?.showProgressBar}
-                    progressBarDescription={
-                      props.likeWidget?.progressBarDescription
-                    }
-                  />
+                  <Likes {...props} {...props.likeWidget} disabled={!canLike} />
                   <Spacer size={1} />
                 </>
               ) : null}
@@ -731,8 +747,8 @@ function ResourceDetail({
                             download
                             href={document.url}
                             key={index}>
-                            <Icon icon="ri-download-2-fill" />
-                            {document.name}
+                            <Icon icon="ri-download-2-fill" iconOnly />
+                            {formatDocumentLabel(document.name, document.url)}
                           </ButtonLink>
                         )
                       )}

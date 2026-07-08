@@ -28,6 +28,7 @@ export type EnqueteProps = {
 };
 
 export type Item = {
+  id?: string;
   trigger: string;
   title?: string;
   key: string;
@@ -42,6 +43,7 @@ export type Item = {
   options?: Array<Option>;
   imageUpload?: string;
   multiple?: boolean;
+  maxUploadSizeMB?: number;
   randomizeItems?: boolean;
   image?: string;
   imageAlt?: string;
@@ -61,7 +63,7 @@ export type Item = {
   matrixMultiple?: boolean;
   routingInitiallyHide?: boolean;
   routingSelectedQuestion?: string;
-  routingSelectedAnswer?: string;
+  routingSelectedAnswer?: string | string[];
   infoField?: string;
   infofieldExplanation?: boolean;
   key_b?: string;
@@ -90,6 +92,7 @@ export type Item = {
 };
 
 export type Option = {
+  id?: string;
   trigger: string;
   titles: Array<Title>;
 };
@@ -123,6 +126,7 @@ export type Matrix = {
 };
 
 export type MatrixOption = {
+  id?: string;
   trigger: string;
   text?: string;
 };

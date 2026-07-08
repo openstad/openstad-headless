@@ -3,6 +3,10 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { authMiddleware, getSession } from './auth';
 import { HasAccess } from './lib/hasAccess';
 
+export const config = {
+  runtime: 'nodejs',
+};
+
 const restrictedPaths = [
   '/areas',
   '/duplicate',
@@ -23,6 +27,8 @@ export default async function middleware(req: NextRequest) {
   if (req.nextUrl.pathname.startsWith('/favicon')) return res;
   if (req.nextUrl.pathname.startsWith('/health')) return res;
   if (req.nextUrl.pathname.startsWith('/api/health')) return res;
+  if (req.nextUrl.pathname.startsWith('/login-background')) return res;
+  if (req.nextUrl.pathname.startsWith('/api/plugin-menu-items')) return res;
 
   // default page
   if (req.nextUrl.pathname.match(/^\/?$/)) {

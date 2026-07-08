@@ -62,8 +62,6 @@ const filePondSettings = {
   labelButtonRetryItemProcessing: 'Retry',
   labelButtonProcessItem: 'Upload',
   labelFileTypeNotAllowed: 'Bestandstype is niet toegestaan',
-  allowFileSizeValidation: true,
-  maxFileSize: '8mb',
   name: 'document',
   maxParallelUploads: 1,
 };
@@ -78,6 +76,7 @@ export type DocumentUploadProps = {
   allowedTypes?: string[];
   disabled?: boolean;
   multiple?: boolean;
+  maxUploadSizeMB?: number;
   type?: string;
   onChange?: (
     e: { name: string; value: { name: string; url: string }[] },
@@ -145,7 +144,12 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
   imageClickable = false,
   ...props
 }) => {
-  const datastore = new DataStore({ props });
+  const datastore = new DataStore(props);
+
+  // Client-side upload limit (in MB). Falls back to 25 MB so existing widgets
+  // without a stored value immediately get the new limit.
+  const maxMB = props.maxUploadSizeMB ?? 25;
+  const maxBytes = maxMB * 1024 * 1024;
 
   const initialValue: MockDocFile[] =
     overrideDefaultValue && Array.isArray(overrideDefaultValue)
@@ -288,6 +292,11 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
           <RteContent content={description} unwrapSingleRootDiv={true} />
         </FormFieldDescription>
       )}
+
+      <FormFieldDescription className="openstad-max-upload-size">
+        Maximale bestandsgrootte: {maxMB} MB
+      </FormFieldDescription>
+
       {showMoreInfo && (
         <AccordionProvider
           sections={[
@@ -360,7 +369,11 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
               const fileName = fileItem.file.name;
               const forbiddenChar = fileName.match(forbiddenCharsRegex);
 
-              if (forbiddenChar) {
+              if (fileItem.file.size > maxBytes) {
+                reject(
+                  `Het bestand is te groot. De maximale bestandsgrootte is ${maxMB} MB.`
+                );
+              } else if (forbiddenChar) {
                 const forbiddenCharName = forbiddenChar[0];
                 const forbiddenCharIndex =
                   fileName.indexOf(forbiddenCharName) + 1;

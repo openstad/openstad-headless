@@ -7,7 +7,10 @@ import {
 import React, { FC } from 'react';
 
 import { InfoImage } from '../../infoImage';
-import RteContent from '../../rte-formatting/rte-content';
+import RteContent, {
+  hasBlockLevelContent,
+} from '../../rte-formatting/rte-content';
+import { unwrapSingleRootDiv } from '../../rte-formatting/rte-formatting';
 import { Spacer } from '../../spacer';
 
 export type InfoFieldProps = {
@@ -74,16 +77,16 @@ const InfoField: FC<InfoFieldProps> = ({
           />
         </Paragraph>
       )}
-      {description && (
-        <Paragraph className="info-field-description">
-          <RteContent
-            content={description}
-            inlineComponent="span"
-            unwrapSingleRootDiv={true}
-            forceInline={true}
-          />
-        </Paragraph>
-      )}
+      {description &&
+        (hasBlockLevelContent(unwrapSingleRootDiv(description)) ? (
+          <div className="info-field-description">
+            <RteContent content={description} unwrapSingleRootDiv={true} />
+          </div>
+        ) : (
+          <Paragraph className="info-field-description">
+            <RteContent content={description} unwrapSingleRootDiv={true} />
+          </Paragraph>
+        ))}
 
       {showMoreInfo && (
         <>

@@ -12,6 +12,7 @@ const { Strategy: AuthTokenStrategy } = require('passport-auth-token');
 const db = require('./db');
 const validate = require('./validate');
 const TokenStrategy = require('./token-strategy');
+const clientAuth = require('./utils/clientAuth');
 
 const tokenUrl = require('./services/tokenUrl');
 
@@ -244,7 +245,12 @@ passport.use(
         return done(null, token, { scope: '*' });
       })
       .catch((err) => {
-        console.log('Errr in authjs token', err);
+        if (err?.message === 'Access token not found') {
+          return done(null, false);
+        }
+        console.log(
+          `[${new Date().toISOString()}][auth] bearer validation failed: ${err?.message}`
+        );
         done(null, false);
       });
   })

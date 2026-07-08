@@ -4,6 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -21,6 +22,11 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { WhitelistedEmailSelect } from '@/components/ui/whitelisted-email-select';
+import {
+  WithWhitelistedEmailsProps,
+  withWhitelistedEmails,
+} from '@/lib/server-side-props-definition';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import { useRouter } from 'next/router';
@@ -32,6 +38,8 @@ import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
+
+export const getServerSideProps = withWhitelistedEmails;
 
 const authTypes = [
   {
@@ -64,6 +72,7 @@ const formSchema = z.object({
   favicon: z.string().optional(),
   cssUrl: z.string().optional(),
   clientDisclaimerUrl: z.string().optional(),
+  clientDisclaimerText: z.string().optional(),
   clientStylesheets: z
     .array(
       z.object({
@@ -73,7 +82,9 @@ const formSchema = z.object({
     .optional(),
 });
 
-export default function ProjectAuthentication() {
+export default function ProjectAuthentication({
+  whitelistedEmails,
+}: WithWhitelistedEmailsProps) {
   const router = useRouter();
   const { project } = router.query;
   const { data, updateProject } = useProject(['includeAuthConfig']);
@@ -91,6 +102,9 @@ export default function ProjectAuthentication() {
       favicon: data?.config?.auth?.provider?.openstad?.config?.styling?.favicon,
       clientDisclaimerUrl:
         data?.config?.auth?.provider?.openstad?.config?.clientDisclaimerUrl,
+      clientDisclaimerText:
+        data?.config?.auth?.provider?.openstad?.config?.clientDisclaimerText ||
+        'Privacyverklaring',
       cssUrl:
         Array.isArray(
           data?.config?.auth?.provider?.openstad?.config?.clientStylesheets
@@ -126,6 +140,7 @@ export default function ProjectAuthentication() {
                 contactEmail?: string;
                 defaultRoleId?: string;
                 clientDisclaimerUrl?: string;
+                clientDisclaimerText?: string;
                 styling: {
                   logo?: string;
                   favicon?: string;
@@ -146,6 +161,7 @@ export default function ProjectAuthentication() {
                 contactEmail: values.contactEmail,
                 defaultRoleId: values.defaultRoleId,
                 clientDisclaimerUrl: values.clientDisclaimerUrl,
+                clientDisclaimerText: values.clientDisclaimerText,
                 styling: {
                   logo: values.logo,
                   favicon: values.favicon,
@@ -353,6 +369,25 @@ export default function ProjectAuthentication() {
                   )}
                 />
 
+                <FormField
+                  control={form.control}
+                  name="clientDisclaimerText"
+                  render={({ field }) => (
+                    <FormItem className="col-span-full">
+                      <FormLabel>Linktekst voor de privacyverklaring</FormLabel>
+                      <FormControl>
+                        <Input placeholder="privacyverklaring" {...field} />
+                      </FormControl>
+                      <FormDescription>
+                        Deze tekst wordt gebruikt als de klikbare link bij het
+                        privacy toestemmingsveld. Standaard:
+                        &quot;privacyverklaring&quot;.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <div className="col-span-full grid-cols-2 grid gap-4">
                   <div className="col-span-full md:col-span-1 flex flex-col">
                     <ImageUploader
@@ -467,7 +502,14 @@ export default function ProjectAuthentication() {
                             Afzender adres van login e-mails
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            {whitelistedEmails.length > 0 ? (
+                              <WhitelistedEmailSelect
+                                field={field}
+                                whitelistedEmails={whitelistedEmails}
+                              />
+                            ) : (
+                              <Input placeholder="" {...field} />
+                            )}
                           </FormControl>
                           <FormMessage />
                         </FormItem>

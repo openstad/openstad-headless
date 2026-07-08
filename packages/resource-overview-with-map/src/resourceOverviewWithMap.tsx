@@ -4,7 +4,7 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { PostcodeAutoFillLocation } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 import {
   ResourceOverview,
@@ -18,6 +18,15 @@ export type ResourceOverviewWithMapWidgetProps = ResourceOverviewWidgetProps &
 const ResourceOverviewWithMap = (props: ResourceOverviewWithMapWidgetProps) => {
   const [filteredResources, setFilteredResources] = useState<any[]>([]);
   const [location, setLocation] = useState<PostcodeAutoFillLocation>(undefined);
+  const resourceClickHandlerRef = useRef<
+    ((resource: any, index?: number) => void) | null
+  >(null);
+
+  const opensInDialog = props.displayType === 'cardgrid';
+
+  const handleMarkerClick = useCallback((resource: any, index: number) => {
+    resourceClickHandlerRef.current?.(resource, index);
+  }, []);
 
   return (
     <div className="map-wrapper">
@@ -27,6 +36,13 @@ const ResourceOverviewWithMap = (props: ResourceOverviewWithMapWidgetProps) => {
             {...props}
             onFilteredResourcesChange={setFilteredResources}
             onLocationChange={setLocation}
+            onResourceClickHandlerRegister={
+              opensInDialog
+                ? (handler) => {
+                    resourceClickHandlerRef.current = handler;
+                  }
+                : undefined
+            }
             displayMap={false}
           />
         </div>
@@ -36,7 +52,9 @@ const ResourceOverviewWithMap = (props: ResourceOverviewWithMapWidgetProps) => {
           givenResources={
             filteredResources.length > 0 ? filteredResources : undefined
           }
+          noFetch={true}
           locationProx={location}
+          onMarkerClick={opensInDialog ? handleMarkerClick : undefined}
         />
       </div>
     </div>

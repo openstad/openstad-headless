@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const { Op } = require('sequelize');
+const crypto = require('crypto');
 
 const co = require('co'),
   config = require('config'),
@@ -123,7 +124,7 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: false,
         validate: {
           textLength(value) {
-            let len = sanitize.title(value.trim()).length;
+            let len = value.trim().length;
             let titleMinLength =
               (this.config &&
                 this.config.resources &&
@@ -181,7 +182,7 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: !this.publishDate,
         validate: {
           textLength(value) {
-            let len = sanitize.summary(value.trim()).length;
+            let len = value.trim().length;
             let descriptionMinLength =
               (this.config &&
                 this.config.resources &&
@@ -233,6 +234,16 @@ module.exports = function (db, sequelize, DataTypes) {
 
       extraData: getExtraDataConfig(DataTypes.JSON, 'resources'),
 
+      timeline: {
+        type: DataTypes.JSON,
+        auth: {
+          createableBy: 'editor',
+          updateableBy: 'editor',
+        },
+        allowNull: true,
+        defaultValue: null,
+      },
+
       location: {
         type: DataTypes.JSON,
         allowNull: !(
@@ -242,44 +253,69 @@ module.exports = function (db, sequelize, DataTypes) {
         ),
       },
 
+      modBreaks: {
+        type: DataTypes.JSON,
+        auth: {
+          createableBy: 'editor',
+          updateableBy: 'editor',
+        },
+        allowNull: true,
+        defaultValue: null,
+        set: function (value) {
+          if (!Array.isArray(value) || value.length === 0) {
+            this.setDataValue('modBreaks', null);
+            return;
+          }
+          var sanitized = value.map(function (entry) {
+            return {
+              id: entry.id || crypto.randomUUID(),
+              description: entry.description
+                ? sanitize.content(entry.description.trim())
+                : '',
+              authorName: entry.authorName
+                ? sanitize.noTags(entry.authorName.trim())
+                : null,
+              modBreakDate: entry.modBreakDate || new Date().toISOString(),
+              createdAt: entry.createdAt || new Date().toISOString(),
+            };
+          });
+          this.setDataValue('modBreaks', sanitized);
+        },
+      },
+
+      modBreaksHumanized: {
+        type: DataTypes.VIRTUAL,
+        get: function () {
+          var breaks = this.getDataValue('modBreaks');
+          if (!breaks || !Array.isArray(breaks)) return [];
+          return breaks.map(function (entry) {
+            return Object.assign({}, entry, {
+              modBreakDateHumanized: entry.modBreakDate
+                ? moment(entry.modBreakDate).format('LLL')
+                : undefined,
+            });
+          });
+        },
+      },
+
       modBreak: {
-        type: DataTypes.TEXT,
-        auth: {
-          createableBy: 'editor',
-          updateableBy: 'editor',
+        type: DataTypes.VIRTUAL,
+        get: function () {
+          var breaks = this.getDataValue('modBreaks');
+          if (!breaks || !Array.isArray(breaks) || breaks.length === 0)
+            return undefined;
+          return breaks[0].description;
         },
-        allowNull: true,
-        set: function (text) {
-          text = text ? sanitize.content(text.trim()) : null;
-          this.setDataValue('modBreak', text);
-        },
-      },
-
-      modBreakUserId: {
-        type: DataTypes.INTEGER,
-        auth: {
-          createableBy: 'editor',
-          updateableBy: 'editor',
-        },
-        allowNull: true,
-      },
-
-      modBreakDate: {
-        type: DataTypes.DATE,
-        auth: {
-          createableBy: 'editor',
-          updateableBy: 'editor',
-        },
-        allowNull: true,
       },
 
       modBreakDateHumanized: {
         type: DataTypes.VIRTUAL,
         get: function () {
-          var date = this.getDataValue('modBreakDate');
+          var breaks = this.getDataValue('modBreaks');
+          if (!breaks || !Array.isArray(breaks) || breaks.length === 0)
+            return undefined;
           try {
-            if (!date) return undefined;
-            return moment(date).format('LLL');
+            return moment(breaks[0].modBreakDate).format('LLL');
           } catch (error) {
             return (error.message || 'dateFilter error').toString();
           }
@@ -362,15 +398,6 @@ module.exports = function (db, sequelize, DataTypes) {
       individualHooks: true,
 
       validate: {
-        validModBreak: function () {
-          return true;
-          /*
-        skip validation for now, should be moved to own rest object.
-
-        if (this.modBreak && (!this.modBreakUserId || !this.modBreakDate)) {
-          throw Error('Incomplete mod break');
-        }*/
-        },
         validExtraData: function (next) {
           let self = this;
           let errors = [];
@@ -601,6 +628,22 @@ module.exports = function (db, sequelize, DataTypes) {
 
       api: {},
 
+      markerFields: {
+        attributes: ['id', 'projectId', 'location', 'title'],
+      },
+
+      markerFieldsWithSearch: {
+        attributes: [
+          'id',
+          'projectId',
+          'location',
+          'title',
+          'summary',
+          'description',
+          'createdAt',
+        ],
+      },
+
       includeComments: function (userId) {
         return {
           include: [
@@ -610,7 +653,13 @@ module.exports = function (db, sequelize, DataTypes) {
                 { method: ['includeVoteCount', 'commentsAgainst'] },
                 { method: ['filterByTags', ''] },
                 { method: ['includeUserVote', 'commentsAgainst', userId] },
-                'includeRepliesOnComments'
+                {
+                  method: [
+                    'includeRepliesOnComments',
+                    userId,
+                    'commentsAgainst',
+                  ],
+                }
               ),
               as: 'commentsAgainst',
               required: false,
@@ -625,7 +674,7 @@ module.exports = function (db, sequelize, DataTypes) {
                 { method: ['includeVoteCount', 'commentsFor'] },
                 { method: ['filterByTags', ''] },
                 { method: ['includeUserVote', 'commentsFor', userId] },
-                'includeRepliesOnComments'
+                { method: ['includeRepliesOnComments', userId, 'commentsFor'] }
               ),
               as: 'commentsFor',
               required: false,
@@ -640,7 +689,13 @@ module.exports = function (db, sequelize, DataTypes) {
                 { method: ['includeVoteCount', 'commentsNoSentiment'] },
                 { method: ['filterByTags', ''] },
                 { method: ['includeUserVote', 'commentsNoSentiment', userId] },
-                'includeRepliesOnComments'
+                {
+                  method: [
+                    'includeRepliesOnComments',
+                    userId,
+                    'commentsNoSentiment',
+                  ],
+                }
               ),
               as: 'commentsNoSentiment',
               required: false,
@@ -713,12 +768,33 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       selectTags: function (tags) {
+        const safeIds = tags
+          .map((t) => parseInt(t, 10))
+          .filter(Number.isFinite);
+        if (safeIds.length === 0) return {};
         return {
           where: {
             id: {
               [db.Sequelize.Op.in]: db.Sequelize.literal(`
                 (SELECT resourceId FROM resource_tags
-                WHERE tagId IN (${tags.map((tag) => `'${tag}'`).join(', ')}))
+                WHERE tagId IN (${safeIds.join(', ')}))
+              `),
+            },
+          },
+        };
+      },
+
+      excludeTags: function (tags) {
+        const safeIds = tags
+          .map((t) => parseInt(t, 10))
+          .filter(Number.isFinite);
+        if (safeIds.length === 0) return {};
+        return {
+          where: {
+            id: {
+              [db.Sequelize.Op.notIn]: db.Sequelize.literal(`
+                (SELECT resourceId FROM resource_tags
+                WHERE tagId IN (${safeIds.join(', ')}))
               `),
             },
           },
@@ -726,14 +802,125 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       selectStatuses: function (statuses) {
+        const safeIds = statuses
+          .map((s) => parseInt(s, 10))
+          .filter(Number.isFinite);
+        if (safeIds.length === 0) return {};
         return {
           where: {
             id: {
               [db.Sequelize.Op.in]: db.Sequelize.literal(`
                 (SELECT resourceId FROM resource_statuses
-                WHERE statusId IN (${statuses.map((status) => `'${status}'`).join(', ')}))
+                WHERE statusId IN (${safeIds.join(', ')}))
               `),
             },
+          },
+        };
+      },
+
+      excludeStatuses: function (statuses) {
+        const safeIds = statuses
+          .map((s) => parseInt(s, 10))
+          .filter(Number.isFinite);
+        if (safeIds.length === 0) return {};
+        return {
+          where: {
+            id: {
+              [db.Sequelize.Op.notIn]: db.Sequelize.literal(`
+                (SELECT resourceId FROM resource_statuses
+                WHERE statusId IN (${safeIds.join(', ')}))
+              `),
+            },
+          },
+        };
+      },
+
+      selectTagGroups: function (tagGroups) {
+        if (!Array.isArray(tagGroups) || tagGroups.length === 0) return {};
+        const conditions = {};
+        tagGroups.forEach((group, index) => {
+          if (!Array.isArray(group)) return;
+          const safeIds = group
+            .map((t) => parseInt(t, 10))
+            .filter(Number.isFinite);
+          if (safeIds.length === 0) return;
+          conditions[`tagGroup${index}`] = {
+            [db.Sequelize.Op.in]: db.Sequelize.literal(`
+              (SELECT resourceId FROM resource_tags
+              WHERE tagId IN (${safeIds.join(', ')}))
+            `),
+          };
+        });
+        if (Object.keys(conditions).length === 0) return {};
+        return {
+          where: {
+            [db.Sequelize.Op.and]: Object.values(conditions).map(
+              (condition) => ({
+                id: condition,
+              })
+            ),
+          },
+        };
+      },
+
+      withinDistance: function (lat, lng, maxDistance) {
+        const safeLat = parseFloat(lat);
+        const safeLng = parseFloat(lng);
+        const safeDistance = parseFloat(maxDistance);
+        if (
+          !Number.isFinite(safeLat) ||
+          !Number.isFinite(safeLng) ||
+          !Number.isFinite(safeDistance)
+        )
+          return {};
+        return {
+          where: {
+            // A resource matches the postcode filter when it is within the
+            // requested distance OR when it is flagged as location-independent.
+            // Location-independent resources have no pin near the postcode, so
+            // they would otherwise drop out of the results; the flag keeps them
+            // visible.
+            [db.Sequelize.Op.or]: [
+              {
+                [db.Sequelize.Op.and]: [
+                  db.Sequelize.literal(
+                    `location IS NOT NULL AND JSON_EXTRACT(location, '$.lat') IS NOT NULL AND JSON_EXTRACT(location, '$.lng') IS NOT NULL`
+                  ),
+                  db.Sequelize.where(
+                    db.Sequelize.fn(
+                      'ST_Distance_Sphere',
+                      db.Sequelize.fn(
+                        'POINT',
+                        db.Sequelize.cast(
+                          db.Sequelize.fn(
+                            'JSON_EXTRACT',
+                            db.Sequelize.col('location'),
+                            db.Sequelize.literal("'$.lng'")
+                          ),
+                          'DECIMAL(10,7)'
+                        ),
+                        db.Sequelize.cast(
+                          db.Sequelize.fn(
+                            'JSON_EXTRACT',
+                            db.Sequelize.col('location'),
+                            db.Sequelize.literal("'$.lat'")
+                          ),
+                          'DECIMAL(10,7)'
+                        )
+                      ),
+                      db.Sequelize.fn('POINT', safeLng, safeLat)
+                    ),
+                    { [db.Sequelize.Op.lte]: safeDistance }
+                  ),
+                ],
+              },
+              db.Sequelize.literal(
+                // Qualify with the model alias: several joined models (user,
+                // comment, tag, status) also have an `extraData` column, so an
+                // unqualified reference is ambiguous in the count/list query.
+                "JSON_EXTRACT(`resource`.`extraData`, '$.locationIndependent') = true"
+              ),
+            ],
           },
         };
       },
@@ -793,7 +980,7 @@ module.exports = function (db, sequelize, DataTypes) {
               'name',
               'email',
               'extraData',
-              'phonenumber',
+              'phoneNumber',
               'address',
               'city',
               'postcode',
@@ -858,7 +1045,7 @@ module.exports = function (db, sequelize, DataTypes) {
             voteCount('no'),
             commentCount('commentCount'),
           ],
-          exclude: ['modBreak'],
+          exclude: ['modBreaks'],
         },
       },
 
@@ -875,6 +1062,20 @@ module.exports = function (db, sequelize, DataTypes) {
                 };
               }),
             ],
+          },
+        };
+      },
+      selectIds: function (ids) {
+        if (!ids || ids.length === 0) {
+          return {};
+        }
+        const safeIds = ids
+          .map((id) => parseInt(id, 10))
+          .filter(Number.isFinite);
+        if (safeIds.length === 0) return {};
+        return {
+          where: {
+            id: { [db.Sequelize.Op.in]: safeIds },
           },
         };
       },
@@ -916,14 +1117,6 @@ module.exports = function (db, sequelize, DataTypes) {
     });
   };
 
-  Resource.prototype.setModBreak = function (user, modBreak) {
-    return this.update({
-      modBreak: modBreak,
-      modBreakUserId: user.id,
-      modBreakDate: new Date(),
-    });
-  };
-
   let canMutate = function (user, self) {
     if (
       userHasRole(user, 'editor', self.userId) ||
@@ -945,6 +1138,12 @@ module.exports = function (db, sequelize, DataTypes) {
     }
 
     // canEditAfterFirstLikeOrComment is handled in the validate hook
+  };
+
+  const alwaysPublicExtraDataKeys = ['originalId', 'ranking'];
+
+  let canViewModeratorOnlyExtraData = function (user, self) {
+    return userHasRole(user, 'moderator', self.userId);
   };
 
   Resource.auth = Resource.prototype.auth = {
@@ -990,8 +1189,7 @@ module.exports = function (db, sequelize, DataTypes) {
     },
     canMutateStatus: function canMutateStatus(user, self) {
       if (!user || !self) return false;
-      if (!self.auth.canUpdate(user, self)) return false;
-      return userHasRole(user, 'editor');
+      return self.auth.canUpdate(user, self);
     },
     toAuthorizedJSON: function (user, data, self) {
       if (!self.auth.canView(user, self)) {
@@ -1007,6 +1205,9 @@ module.exports = function (db, sequelize, DataTypes) {
 
       delete data.project;
       delete data.config;
+      delete data.hasResourceFormConfig;
+      delete data.resourceFormFieldKeys;
+      delete data.moderatorOnlyExtraDataKeys;
       // dit zou nu dus gedefinieerd moeten worden op project.config, maar wegens backward compatible voor nu nog even hier:
       //
 
@@ -1022,6 +1223,48 @@ module.exports = function (db, sequelize, DataTypes) {
       // needs to move to definition per key
       if (!canMutate(user, self) && data.extraData && data.extraData.phone) {
         delete data.extraData.phone;
+      }
+
+      const moderatorOnlyExtraDataKeys = Array.isArray(
+        self.moderatorOnlyExtraDataKeys
+      )
+        ? self.moderatorOnlyExtraDataKeys
+        : [];
+      const resourceFormFieldKeys = Array.isArray(self.resourceFormFieldKeys)
+        ? self.resourceFormFieldKeys
+        : [];
+      const hasResourceFormConfig = !!self.hasResourceFormConfig;
+      if (
+        user &&
+        user.role &&
+        user.role !== 'all' &&
+        !canViewModeratorOnlyExtraData(user, self) &&
+        data.extraData &&
+        typeof data.extraData === 'object'
+      ) {
+        if (hasResourceFormConfig) {
+          Object.keys(data.extraData).forEach((key) => {
+            if (
+              !resourceFormFieldKeys.includes(key) &&
+              !alwaysPublicExtraDataKeys.includes(key)
+            ) {
+              delete data.extraData[key];
+            }
+          });
+        } else {
+          const preserved = {};
+          alwaysPublicExtraDataKeys.forEach((key) => {
+            if (data.extraData[key] !== undefined)
+              preserved[key] = data.extraData[key];
+          });
+          data.extraData = preserved;
+        }
+
+        moderatorOnlyExtraDataKeys.forEach((key) => {
+          if (!alwaysPublicExtraDataKeys.includes(key)) {
+            delete data.extraData[key];
+          }
+        });
       }
 
       if (data.commentsAgainst) {

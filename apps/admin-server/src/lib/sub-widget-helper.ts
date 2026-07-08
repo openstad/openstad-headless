@@ -1,5 +1,3 @@
-import { EditFieldProps } from './form-widget-helpers/EditFieldProps';
-
 type ConfigWithFunctions<ChildWidgetProps> = ChildWidgetProps & {
   updateConfig: (config: ChildWidgetProps) => void;
   onFieldChanged: (key: string, value: any) => void;

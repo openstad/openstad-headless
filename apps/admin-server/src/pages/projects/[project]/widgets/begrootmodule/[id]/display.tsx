@@ -12,7 +12,6 @@ import {
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
-import { ObjectListSelect } from '@/components/ui/object-select';
 import {
   Select,
   SelectContent,
@@ -27,10 +26,8 @@ import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
-import * as Switch from '@radix-ui/react-switch';
 import _ from 'lodash';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -46,6 +43,7 @@ const formSchema = z.object({
   notEnoughBudgetText: z.string(),
   showOriginalResource: z.boolean(),
   originalResourceUrl: z.string().optional(),
+  originalResourceText: z.string().optional(),
   resourceListColumns: z.coerce.number({
     invalid_type_error: 'Alleen volledige nummers kunnen worden ingevoerd',
   }),
@@ -56,6 +54,7 @@ const formSchema = z.object({
   tagTypeTag: z.string().optional(),
   voteAfterLoggingIn: z.boolean().optional(),
   displayModBreak: z.boolean().optional(),
+  showConfetti: z.boolean().optional(),
 });
 
 type Formdata = z.infer<typeof formSchema>;
@@ -86,6 +85,8 @@ export default function BegrootmoduleDisplay(
       hideReadMore: props.hideReadMore || false,
       scrollWhenMaxReached: props.scrollWhenMaxReached || false,
       originalResourceUrl: props.originalResourceUrl || '',
+      originalResourceText:
+        props.originalResourceText || 'Bekijk het originele ingediende plan',
       resourceListColumns: props.resourceListColumns || 3,
       showInfoMenu:
         props.showInfoMenu === undefined ? true : props.showInfoMenu,
@@ -95,6 +96,7 @@ export default function BegrootmoduleDisplay(
       hideTagsForResources: props.hideTagsForResources || false,
       voteAfterLoggingIn: props.voteAfterLoggingIn || false,
       displayModBreak: props.displayModBreak || false,
+      showConfetti: props.showConfetti || false,
     },
   });
 
@@ -273,29 +275,70 @@ export default function BegrootmoduleDisplay(
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="showConfetti"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Toon confetti na het stemmen</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           {form.watch('showOriginalResource') && (
-            <FormField
-              control={form.control}
-              name="originalResourceUrl"
-              render={({ field }) => (
-                <FormItem className="col-span-1">
-                  <FormLabel>
-                    URL van de oorspronkelijke inzending
-                    <InfoDialog content={'TODO'} />
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      onChange={(e) => {
-                        onFieldChange(field.name, e.target.value);
-                        field.onChange(e);
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <>
+              <FormField
+                control={form.control}
+                name="originalResourceUrl"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      URL van de oorspronkelijke inzending
+                      <InfoDialog content={'TODO'} />
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="originalResourceText"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      Tekst voor de link (optioneel)
+                      <InfoDialog
+                        content={
+                          'Standaard: "Bekijk het originele ingediende plan"'
+                        }
+                      />
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
           )}
 
           <FormObjectSelectField

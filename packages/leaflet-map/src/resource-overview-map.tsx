@@ -41,6 +41,7 @@ const ResourceOverviewMap = ({
   ctaButton = undefined,
   locationProx = undefined,
   givenResources,
+  noFetch = false,
   selectedProjects = [],
   onMarkerClick,
   ...props
@@ -57,10 +58,10 @@ const ResourceOverviewMap = ({
 
   const { data: resources } = datastore.useResources(
     {
-      projectId: props.projectId,
+      projectId: noFetch ? undefined : props.projectId,
       pageSize: 99999,
     },
-    { suspense: !!givenResources }
+    { suspense: false }
   );
 
   const allResources = givenResources || resources?.records || [];
@@ -92,6 +93,7 @@ const ResourceOverviewMap = ({
     allResources.map((resource: any, index: number) => {
       // TODO: types/resource does not exist yet
       let marker: MarkerProps = {
+        markerId: `resource-${resource.id || resource.uniqueId || index}`,
         location: resource?.location ? { ...resource.location } : undefined,
       };
       const markerLatLng: any = parseLocation(marker); // unify location format
@@ -203,17 +205,15 @@ const ResourceOverviewMap = ({
 
   currentMarkers = currentMarkers.concat(projectMarkers);
 
-  if (givenResources) {
-    resources.metadata.totalCount = givenResources.length;
-  }
+  const totalCount = givenResources
+    ? givenResources.length
+    : (resources?.metadata?.totalCount ?? 0);
 
   let countButtonElement: React.JSX.Element = <></>;
   if (countButton?.show) {
     countButtonElement = (
       <div className="utrecht-button utrecht-button--secondary-action osc-resource-overview-map-button osc-first-button">
-        <section className="resource-counter">
-          {resources?.metadata?.totalCount}
-        </section>
+        <section className="resource-counter">{totalCount}</section>
         <section className="resource-label">
           {countButton.label || 'plannen'}
         </section>
@@ -235,15 +235,9 @@ const ResourceOverviewMap = ({
     );
   }
 
-  const { data: areas } = datastore.useArea({
-    projectId: props.projectId,
-  });
-
   let areaId = props?.map?.areaId || false;
-  const polygon =
-    areaId && Array.isArray(areas) && areas.length > 0
-      ? (areas.find((area) => area.id.toString() === areaId) || {}).polygon
-      : [];
+  const { data: areaData } = datastore.useArea({ areaId });
+  const polygon = areaData?.polygon || [];
 
   function calculateCenter(polygon: Point[] | Point[][] | Point[][][]) {
     if (!polygon || polygon.length === 0) {
@@ -276,7 +270,7 @@ const ResourceOverviewMap = ({
     if (!!polygon) {
       setCenter(calculateCenter(polygon));
     }
-  }, [polygon, areas]);
+  }, [areaData]);
 
   const zoom = {
     minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
@@ -308,7 +302,7 @@ const ResourceOverviewMap = ({
       }
     : props?.resourceOverviewMapWidget || {};
 
-  return (polygon && center) || !Number(areaId) ? (
+  return (polygon.length > 0 && center) || !Number(areaId) ? (
     <div className="map-container--buttons">
       <Button
         appearance="primary-action-button"
@@ -320,7 +314,10 @@ const ResourceOverviewMap = ({
         {...props}
         {...zoom}
         area={polygon}
-        autoZoomAndCenter={props?.map?.autoZoomAndCenter || 'area'}
+        areaId={areaId}
+        autoZoomAndCenter={
+          props?.mapCenterMode || props?.map?.autoZoomAndCenter || 'area'
+        }
         categorize={{ categories, categorizeByField }}
         center={center}
         markers={currentMarkers}

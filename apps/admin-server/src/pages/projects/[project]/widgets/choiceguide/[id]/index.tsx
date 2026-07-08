@@ -1,3 +1,4 @@
+import AuditLogTable from '@/components/audit-log-table';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
@@ -13,7 +14,7 @@ import WidgetChoiceGuidePolygons from '@/pages/projects/[project]/widgets/choice
 import WidgetChoiceGuideGeneralSettings from '@/pages/projects/[project]/widgets/choiceguide/[id]/settings';
 import WidgetResourcesMapDatalayers from '@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers';
 import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
+import React from 'react';
 
 import { ChoiceGuideProps } from '../../../../../../../../../packages/choiceguide/src/props';
 import { PageLayout } from '../../../../../../components/ui/page-layout';
@@ -65,6 +66,7 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="datalayers">Kaart opties</TabsTrigger>
               <TabsTrigger value="polygons">Polygonen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             <TabsContent value="form" className="p-0">
               {previewConfig && (
@@ -173,6 +175,13 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
+            </TabsContent>
+            <TabsContent value="auditlog" className="p-0">
+              <AuditLogTable
+                modelName="widgets"
+                modelId={id as string}
+                projectId={projectId as string}
+              />
             </TabsContent>
           </Tabs>
 

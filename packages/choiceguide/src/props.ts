@@ -89,6 +89,7 @@ export type ChoiceOptions = {
 };
 
 export type Item = {
+  id?: string;
   trigger: string;
   title?: string;
   description?: string;
@@ -102,6 +103,7 @@ export type Item = {
   maxCharacters?: string;
   variant?: string;
   multiple?: boolean;
+  maxUploadSizeMB?: number;
   options?: Array<Option>;
   sliderTitleUnderA?: string;
   sliderTitleUnderB?: string;
@@ -118,6 +120,8 @@ export type Item = {
   defaultValue?: string;
   maxChoices?: string;
   maxChoicesMessage?: string;
+  prevPageText?: string;
+  nextPageText?: string;
   skipQuestion?: boolean;
   skipQuestionAllowExplanation?: boolean;
   skipQuestionExplanation?: string;
@@ -126,7 +130,7 @@ export type Item = {
   matrixMultiple?: boolean;
   routingInitiallyHide?: boolean;
   routingSelectedQuestion?: string;
-  routingSelectedAnswer?: string;
+  routingSelectedAnswer?: string | string[];
   imageOptionUpload?: string;
   placeholder?: string;
   images?: Array<{
@@ -143,6 +147,7 @@ export type Item = {
 };
 
 export type Option = {
+  id?: string;
   trigger: string;
   titles: Array<Title>;
 };

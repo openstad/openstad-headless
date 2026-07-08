@@ -73,33 +73,16 @@ function Counter({
 
   const { data: resources } = datastore.useResources({
     projectId: props.projectId,
-    pageSize: 999999,
-    includeTags: '',
+    pageSize: 1,
+    tags:
+      includeOrExclude === 'include' && tagIdsArray.length > 0
+        ? tagIdsArray
+        : [],
+    excludeTags:
+      includeOrExclude === 'exclude' && tagIdsArray.length > 0
+        ? tagIdsArray
+        : [],
   });
-
-  const filteredResources =
-    resources &&
-    resources?.records &&
-    tagIdsArray &&
-    Array.isArray(tagIdsArray) &&
-    tagIdsArray.length > 0
-      ? resources?.records?.filter((resource: any) => {
-          if (includeOrExclude === 'exclude') {
-            const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
-              tagIdsArray.includes(tag.id)
-            );
-
-            return !hasExcludedTag;
-          } else {
-            return tagIdsArray.some(
-              (tag) =>
-                resource.tags &&
-                Array.isArray(resource.tags) &&
-                resource.tags.find((o: { id: number }) => o.id === tag)
-            );
-          }
-        })
-      : resources?.records;
 
   const { data: resource } = datastore.useResource({
     projectId: props.projectId,
@@ -110,10 +93,6 @@ function Counter({
     projectId: props.projectId,
     resourceId: counterType === 'argument' ? resourceId : undefined,
     sentiment: opinion,
-  });
-
-  let { data: votes } = datastore.useUserVote({
-    projectId: props.projectId,
   });
 
   const {
@@ -133,11 +112,17 @@ function Counter({
   });
 
   const { data: projectVotedUsersCount } = datastore.useProjectVotedUsersCount({
-    projectId: props.projectId,
+    projectId:
+      counterType === 'votedUsersPerProject' ||
+      (counterType === 'votedUsers' && resourceId)
+        ? props.projectId
+        : undefined,
+    resourceId:
+      counterType === 'votedUsers' && resourceId ? resourceId : undefined,
   });
 
   if (counterType === 'resource') {
-    amountDisplayed = (filteredResources || []).length;
+    amountDisplayed = resources?.metadata?.totalCount || 0;
   }
 
   if (counterType === 'vote') {
@@ -151,7 +136,7 @@ function Counter({
   }
 
   if (counterType === 'votedUsers') {
-    amountDisplayed = votes.length || 0;
+    amountDisplayed = projectVotedUsersCount || 0;
   }
 
   if (counterType === 'votedUsersPerProject') {

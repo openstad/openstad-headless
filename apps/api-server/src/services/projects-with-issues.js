@@ -92,4 +92,42 @@ projectsWithIssues.endedButNotAnonymized = function ({ offset, limit }) {
   );
 };
 
+projectsWithIssues.blockedDomains = async function () {
+  let blocks = await db.DomainBlock.findAll({
+    attributes: [
+      'projectId',
+      'widgetId',
+      'domain',
+      'referer',
+      'count',
+      'lastSeen',
+    ],
+    where: {
+      lastSeen: {
+        [Sequelize.Op.gte]: new Date(Date.now() - 24 * 60 * 60 * 1000),
+      },
+    },
+    include: [
+      {
+        model: db.Project,
+        attributes: ['id', 'name', 'url'],
+      },
+    ],
+    order: [['count', 'DESC']],
+  });
+
+  let byProject = {};
+  for (let block of blocks) {
+    if (!byProject[block.projectId]) {
+      byProject[block.projectId] = {
+        project: block.project,
+        blocks: [],
+      };
+    }
+    byProject[block.projectId].blocks.push(block);
+  }
+
+  return byProject;
+};
+
 module.exports = exports = projectsWithIssues;

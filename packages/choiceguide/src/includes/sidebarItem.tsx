@@ -82,7 +82,9 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
           <h4>{props.choiceOption?.title}</h4>
           <div className="osc-choice-bar osc-from-center">
             <div
-              className={`osc-choice-bar-progress ${getClass(percentage)}`}></div>
+              className={`osc-choice-bar-progress ${getClass(
+                percentage
+              )}`}></div>
           </div>
         </div>
       );

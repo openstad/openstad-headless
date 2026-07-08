@@ -57,15 +57,9 @@ const ResourceDetailMap = ({
     currentCenter = { ...resource.location };
   }
 
-  const { data: areas } = datastore.useArea({
-    projectId: props.projectId,
-  });
-
   let areaId = props?.map?.areaId || false;
-  const polygon =
-    areaId && Array.isArray(areas) && areas.length > 0
-      ? (areas.find((area) => area.id.toString() === areaId) || {}).polygon
-      : [];
+  const { data: areaData } = datastore.useArea({ areaId });
+  const polygon = areaData?.polygon || [];
 
   const zoom = {
     minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
@@ -78,6 +72,7 @@ const ResourceDetailMap = ({
         {...props}
         {...zoom}
         area={polygon}
+        areaId={areaId}
         autoZoomAndCenter={props?.map?.autoZoomAndCenter || 'area'}
         center={currentCenter}
         markers={[currentMarker]}

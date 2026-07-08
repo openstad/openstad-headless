@@ -4,7 +4,6 @@ import {
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from '@/components/ui/card';
 import {
   Dialog,
@@ -17,12 +16,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useWidgetDefinitions } from '@/hooks/use-widget-definitions';
 import { useWidgetsHook } from '@/hooks/use-widgets';
 import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
-import { WidgetDefinitions } from '@/lib/widget-definitions';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -33,14 +32,17 @@ export default function CreateWidget({}: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
   const projectId = router.query.project as string;
-  const widgetTypes = Object.entries(WidgetDefinitions);
+  const widgetDefinitions = useWidgetDefinitions();
+  const widgetTypes = Object.entries(widgetDefinitions);
   const { createWidget } = useWidgetsHook(projectId);
 
   const [name, setName] = useState<string>('');
   const [filterSearchType, setFilterSearchType] = useState<string>('');
 
-  const filteredWidgets = widgetTypes.filter((widget) =>
-    widget[1].name.toLowerCase().includes(filterSearchType.toLowerCase())
+  const filteredWidgets = widgetTypes.filter(
+    (widget) =>
+      !widget[1].hidden &&
+      widget[1].name.toLowerCase().includes(filterSearchType.toLowerCase())
   );
 
   async function submit(type: any, description: any) {

@@ -6,6 +6,27 @@ const db = require('../../db');
 
 let service = {};
 
+function getClientDomains(apiDomain, project) {
+  let domains = [apiDomain];
+  if (project?.config?.allowedDomains?.length > 0) {
+    domains = domains.concat(project.config.allowedDomains);
+  }
+  if (project?.url) {
+    try {
+      let url = project.url;
+      if (url.indexOf('http') !== 0) url = 'https://' + url;
+      domains.push(new URL(url).host);
+    } catch (e) {
+      console.log(
+        '[allowedDomains] Could not parse project url:',
+        project.url,
+        e.message
+      );
+    }
+  }
+  return [...new Set(domains.filter(Boolean))];
+}
+
 service.fetchUserData = async function fetchUserData({
   authConfig,
   userId,
@@ -18,14 +39,18 @@ service.fetchUserData = async function fetchUserData({
   if (userId) {
     path = `/api/admin/user/${userId}?client_id=${authConfig.clientId}`;
     headers = {
-      Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+      Authorization: `Basic ${Buffer.from(
+        `${authConfig.clientId}:${authConfig.clientSecret}`
+      ).toString('base64')}`,
     };
   }
 
   if (email) {
     path = `/api/admin/users?email=${encodeURIComponent(email)}`;
     headers = {
-      Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+      Authorization: `Basic ${Buffer.from(
+        `${authConfig.clientId}:${authConfig.clientSecret}`
+      ).toString('base64')}`,
     };
   }
 
@@ -41,7 +66,9 @@ service.fetchUserData = async function fetchUserData({
       headers,
     });
     if (!response.ok) {
-      throw new Error('Fetch failed');
+      const error = new Error('Auth server request failed');
+      error.status = response.status;
+      throw error;
     }
 
     let userData;
@@ -66,6 +93,14 @@ service.fetchUserData = async function fetchUserData({
     mappedUserData.idpUser.provider = authConfig.provider;
     return mappedUserData;
   } catch (err) {
+    if (err?.status === 401 || err?.status === 403) {
+      throw new Error('Auth server rejected access token');
+    }
+
+    if (err?.status === 404) {
+      throw new Error('Auth server user lookup returned 404');
+    }
+
     throw new Error('Cannot connect to auth server');
   }
 };
@@ -87,7 +122,9 @@ service.createUser = async function ({ authConfig, userData = {} }) {
   try {
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
         'Content-type': 'application/json',
       },
       method: 'post',
@@ -160,7 +197,9 @@ service.updateUser = async function ({ authConfig, userData = {} }) {
   try {
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
         'Content-type': 'application/json',
       },
       method: 'post',
@@ -193,7 +232,9 @@ service.deleteUser = async function ({ authConfig, userData = {} }) {
   try {
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
         'Content-type': 'application/json',
       },
       method: 'post',
@@ -219,7 +260,9 @@ service.fetchClient = async function ({ authConfig, project }) {
     let url = `${authConfig.serverUrlInternal}/api/admin/client/${clientId}`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
       },
     });
     if (!response.ok) {
@@ -263,8 +306,8 @@ service.createClient = async function ({ authConfig, project }) {
     if (!Array.isArray(authTypes)) authTypes = [authTypes];
     let twoFactorRoles =
       authConfig.twoFactorRoles ||
-      (authConfig.provider == 'openstad' && ['admin']);
-    if (!Array.isArray(twoFactorRoles)) twoFactorRoles = [authTypes];
+      (authConfig.provider == 'openstad' && ['admin', 'moderator', 'editor']);
+    if (!Array.isArray(twoFactorRoles)) twoFactorRoles = [twoFactorRoles];
     let requiredUserFields =
       authConfig.requiredUserFields ||
       (authConfig.provider == 'openstad' && 'name') ||
@@ -274,7 +317,9 @@ service.createClient = async function ({ authConfig, project }) {
     let url = `${adminAuthConfig.serverUrlInternal}/api/admin/client`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${adminAuthConfig.clientId}:${adminAuthConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${adminAuthConfig.clientId}:${adminAuthConfig.clientSecret}`
+        ).toString('base64')}`,
         'Content-type': 'application/json',
       },
       method: 'post',
@@ -284,7 +329,7 @@ service.createClient = async function ({ authConfig, project }) {
         twoFactorRoles,
         siteUrl: project.url || '',
         redirectUrl: config.url || '',
-        allowedDomains: [config.domain],
+        allowedDomains: getClientDomains(config.domain, project),
         name: authConfig.name || project.name || '',
         description: `Client for API project ${project.name} (${project.id})`,
         config: newConfig,
@@ -325,7 +370,7 @@ service.updateClient = async function ({ authConfig, project }) {
       requiredUserFields,
       twoFactorRoles,
       redirectUrl: `${config.url}`,
-      allowedDomains: [config.domain],
+      allowedDomains: getClientDomains(config.domain, project),
       name: `${project.name}`,
       description: `Client for API project ${project.name} (${project.id})`,
     };
@@ -407,6 +452,7 @@ service.updateClient = async function ({ authConfig, project }) {
       'configureTwoFactor',
       'clientStylesheets',
       'clientDisclaimerUrl',
+      'clientDisclaimerText',
     ];
     properties.forEach((property) => {
       if (authConfig?.config && authConfig.config[property]) {
@@ -419,19 +465,13 @@ service.updateClient = async function ({ authConfig, project }) {
     let clientConfig = client.config;
     data.config = merge.recursive({}, clientConfig, newClientConfig);
 
-    // Update allowedDomains if exists
-    if (
-      typeof project.config.allowedDomains !== 'undefined' &&
-      project.config.allowedDomains.length > 0
-    ) {
-      data.allowedDomains = project.config.allowedDomains;
-    }
-
     // update client
     let url = `${authConfig.serverUrlInternal}/api/admin/client/${clientId}`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
         'Content-type': 'application/json',
       },
       method: 'post',
@@ -445,7 +485,14 @@ service.updateClient = async function ({ authConfig, project }) {
   }
 };
 
-service.fetchUniqueCode = async function ({ authConfig, isExport = false }) {
+service.fetchUniqueCode = async function ({
+  authConfig,
+  isExport = false,
+  limit,
+  offset,
+  search,
+  sort,
+}) {
   let clientId = authConfig.clientId;
   if (!clientId) {
     throw new Error('OpenStad.service.fetchUniqueCodes: clientId not found');
@@ -456,11 +503,18 @@ service.fetchUniqueCode = async function ({ authConfig, isExport = false }) {
 
     if (isExport) {
       url += '&export=true';
+    } else {
+      if (limit !== undefined) url += `&limit=${encodeURIComponent(limit)}`;
+      if (offset !== undefined) url += `&offset=${encodeURIComponent(offset)}`;
     }
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+    if (sort) url += `&sort=${encodeURIComponent(sort)}`;
 
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
       },
     });
     if (!response.ok) {
@@ -483,7 +537,9 @@ service.createUniqueCode = async function ({ authConfig, amount }) {
     let url = `${authConfig.serverUrlInternal}/api/admin/unique-code?clientId=${clientId}&amount=${amount}`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
       },
       method: 'post',
       body: '{}',
@@ -516,7 +572,9 @@ service.resetUniqueCode = async function ({ authConfig, uniqueCodeId }) {
     let url = `${authConfig.serverUrlInternal}/api/admin/unique-code/${uniqueCodeId}/reset?clientId=${clientId}`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
       },
       method: 'post',
       body: '{}',
@@ -541,7 +599,9 @@ service.fetchAccessCode = async function ({ authConfig }) {
     let url = `${authConfig.serverUrlInternal}/api/admin/access-code?clientId=${clientId}`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
       },
     });
     if (!response.ok) {
@@ -564,7 +624,9 @@ service.createAccessCode = async function ({ authConfig, code }) {
     let url = `${authConfig.serverUrlInternal}/api/admin/access-code?clientId=${clientId}&code=${code}`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
       },
       method: 'post',
       body: '{}',
@@ -597,7 +659,9 @@ service.deleteAccessCode = async function ({ authConfig, accessCodeId }) {
     let url = `${authConfig.serverUrlInternal}/api/admin/access-code/${accessCodeId}/delete?clientId=${clientId}`;
     let response = await fetch(url, {
       headers: {
-        Authorization: `Basic ${Buffer.from(`${authConfig.clientId}:${authConfig.clientSecret}`).toString('base64')}`,
+        Authorization: `Basic ${Buffer.from(
+          `${authConfig.clientId}:${authConfig.clientSecret}`
+        ).toString('base64')}`,
       },
       method: 'post',
       body: '{}',

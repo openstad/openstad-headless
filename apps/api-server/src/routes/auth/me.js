@@ -51,6 +51,7 @@ router.route('(/project/:projectId)?/me').get(async function (req, res, next) {
     updatedAt: req.user.updatedAt,
     deletedAt: req.user.deletedAt,
     emailNotificationConsent: req.user.emailNotificationConsent || false,
+    privacyConsentAt: req.user.privacyConsentAt || null,
   };
   res.json(data);
 });

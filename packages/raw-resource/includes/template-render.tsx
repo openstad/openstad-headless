@@ -1,3 +1,5 @@
+import { humanizeDate } from '@openstad-headless/lib/humanize-date';
+
 import { RawResourceWidgetProps } from '../src/raw-resource';
 import stringFilters from './nunjucks-filters';
 
@@ -68,6 +70,19 @@ export const renderRawTemplate = (
           location: resource.location,
           modBreak: resource.modBreak,
           modBreakDateHumanized: resource.modBreakDateHumanized,
+          modBreaks: resource.modBreaksHumanized || [],
+          modBreaksHtml: (resource.modBreaks || [])
+            .map(
+              (mb: any) =>
+                `<div class="resource-detail-modbreak-banner">` +
+                `<section>` +
+                `<strong>${mb.authorName || updatedProps.resources?.modbreakTitle || ''}</strong>` +
+                `<span>${mb.modBreakDate ? humanizeDate(mb.modBreakDate) : ''}</span>` +
+                `</section>` +
+                `<div>${mb.description || ''}</div>` +
+                `</div>`
+            )
+            .join(''),
           progress: resource.progress,
           createDateHumanized: resource.createDateHumanized,
           publishDateHumanized: resource.publishDateHumanized,

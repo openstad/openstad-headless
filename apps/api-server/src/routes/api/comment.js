@@ -1,5 +1,6 @@
 const createError = require('http-errors');
 const db = require('../../db');
+const Sequelize = require('sequelize');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
@@ -17,7 +18,6 @@ router
     req.scope.push({ method: ['forProjectId', req.params.projectId] });
 
     if (req.query.includeRepliesOnComments) {
-      req.scope.push('includeRepliesOnComments');
       req.scope.push({ method: ['includeRepliesOnComments', req.user.id] });
     }
 
@@ -112,6 +112,22 @@ router
 
     req.scope.push({ method: ['filterByTags', onlyIncludeTagIds] });
 
+    // Preserve legacy ordering for clients that don't send explicit sort.
+    if (!dbQuery.order) {
+      dbQuery.order = [['createdAt', 'ASC']];
+    }
+
+    if (dbQuery.hasOwnProperty('order')) {
+      // Handle vote-count sorting aliases returned by includeVoteCount scope.
+      dbQuery.order = dbQuery.order.map(function (sortingQuery) {
+        if (sortingQuery[0] === 'yes' || sortingQuery[0] === 'no') {
+          return [Sequelize.literal(sortingQuery[0]), sortingQuery[1]];
+        }
+
+        return sortingQuery;
+      });
+    }
+
     return db.Comment.scope(...req.scope)
       .findAndCountAll({
         where,
@@ -127,7 +143,18 @@ router
   .get(auth.useReqUser)
   .get(
     searchInResults({
-      searchfields: ['description', 'user.name', 'replies.description'],
+      searchfields: [
+        'id',
+        'resourceId',
+        'description',
+        'createdAt',
+        'sentiment',
+        'yes',
+        'no',
+        'score',
+        'user.name',
+        'replies.description',
+      ],
     })
   )
   .get(pagination.paginateResults)

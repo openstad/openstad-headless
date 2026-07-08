@@ -688,6 +688,49 @@ const getWidgetSettings = function () {
     console.error('MISSING FIELDS IN WIDGET DEFINITIONS', badDefinitions);
   }
 
+  // Merge plugin widget definitions
+  try {
+    var PluginLoader = require('@openstad-headless/plugin-loader');
+    var pluginLoader = PluginLoader.getInstance();
+    pluginLoader.load();
+    var pluginWidgets = pluginLoader.getWidgetDefinitions();
+
+    Object.entries(pluginWidgets).forEach(function ([widgetKey, definition]) {
+      if (moduleDefinitions[widgetKey]) {
+        console.warn(
+          '[plugin-loader] Widget key "' +
+            widgetKey +
+            '" conflicts with core widget — skipping plugin widget'
+        );
+        return;
+      }
+
+      var keysInDefinition = Object.keys(definition);
+      var missingKeys = requiredKeys.filter(function (k) {
+        return !keysInDefinition.includes(k);
+      });
+      if (missingKeys.length > 0) {
+        console.warn(
+          '[plugin-loader] Plugin widget "' +
+            widgetKey +
+            '" missing required keys: ' +
+            missingKeys.join(', ') +
+            ' — skipping'
+        );
+        return;
+      }
+
+      moduleDefinitions[widgetKey] = definition;
+    });
+  } catch (err) {
+    if (err.code !== 'MODULE_NOT_FOUND') {
+      console.error(
+        '[plugin-loader] Error loading plugin widgets:',
+        err.message
+      );
+    }
+  }
+
   return moduleDefinitions;
 };
 

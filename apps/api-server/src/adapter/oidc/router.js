@@ -7,6 +7,7 @@ const db = require('../../db');
 const service = require('./service');
 const isRedirectAllowed = require('../../services/isRedirectAllowed');
 const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
+const sessionDuration = require('../../util/session-duration');
 
 let router = express.Router({ mergeParams: true });
 
@@ -59,12 +60,16 @@ router
       jwt.sign(
         { userId: openStadUser.id, authProvider: req.authConfig.provider },
         config.auth['jwtSecret'],
-        { expiresIn: 182 * 24 * 60 * 60 },
+        {
+          expiresIn: sessionDuration.getJwtExpiresInForRole(openStadUser.role),
+        },
         (err, token) => {
           if (err) return next(err);
-          return res.json({
-            jwt: token,
-          });
+          const response = { jwt: token };
+          if (sessionDuration.shouldExpireOnClose(openStadUser.role)) {
+            response.expireOnClose = true;
+          }
+          return res.json(response);
         }
       );
     } catch (err) {
@@ -126,7 +131,7 @@ router
             req.project.id +
             '/digest-login?useAuth=' +
             req.authConfig.provider +
-            '\&returnTo=' +
+            '&returnTo=' +
             req.query.redirectUri
         )
       );
@@ -159,7 +164,21 @@ router
     let contentType =
       req.authConfig.serverExchangeContentType || 'application/json';
     if (contentType == 'application/x-www-form-urlencoded')
-      data = `client_id=${encodeURIComponent(req.authConfig.clientId)}&client_secret=${encodeURIComponent(req.authConfig.clientSecret)}&code=${encodeURIComponent(code)}&grant_type=authorization_code&redirect_uri=${encodeURIComponent(config.url + '/auth/project/' + req.project.id + '/digest-login?useAuth=' + req.authConfig.provider + '\&returnTo=' + req.query.returnTo)}`;
+      data = `client_id=${encodeURIComponent(
+        req.authConfig.clientId
+      )}&client_secret=${encodeURIComponent(
+        req.authConfig.clientSecret
+      )}&code=${encodeURIComponent(
+        code
+      )}&grant_type=authorization_code&redirect_uri=${encodeURIComponent(
+        config.url +
+          '/auth/project/' +
+          req.project.id +
+          '/digest-login?useAuth=' +
+          req.authConfig.provider +
+          '&returnTo=' +
+          req.query.returnTo
+      )}`;
 
     fetch(url, {
       method: 'POST',
@@ -263,7 +282,10 @@ router
   })
   .get(function (req, res, next) {
     const isSafeRedirectUrl = (url, allowedDomains) => {
-      allowedDomains = prefillAllowedDomains(allowedDomains || []);
+      allowedDomains = prefillAllowedDomains(
+        allowedDomains || [],
+        req.project?.url
+      );
 
       let redirectUrlHost = '';
       try {
@@ -301,10 +323,16 @@ router
       jwt.sign(
         { userId: req.userData.id, authProvider: req.authConfig.provider },
         req.authConfig.jwtSecret,
-        { expiresIn: 182 * 24 * 60 * 60 },
+        {
+          expiresIn: sessionDuration.getJwtExpiresInForRole(req.userData.role),
+        },
         (err, token) => {
           if (err) return next(err);
           redirectUrl = redirectUrl.replace('[[jwt]]', token);
+          if (sessionDuration.shouldExpireOnClose(req.userData.role)) {
+            redirectUrl +=
+              (redirectUrl.includes('?') ? '&' : '?') + 'expireOnClose=1';
+          }
           // Revalidate redirectUrl after adding the token
           if (!isSafeRedirectUrl(redirectUrl, allowedDomains)) {
             return res

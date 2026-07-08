@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -13,16 +14,18 @@ import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
+  SelectContentScrollable,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Matrix,
@@ -54,6 +57,9 @@ const TrixEditor = dynamic(
   }
 );
 
+const stripHtml = (html: string): string =>
+  html?.replace(/<[^>]*>/g, '').trim() || '';
+
 const formSchema = z.object({
   trigger: z.string(),
   fieldType: z.string(),
@@ -70,6 +76,10 @@ const formSchema = z.object({
   maxChoicesMessage: z.string().optional(),
   variant: z.string().optional(),
   multiple: z.boolean().optional(),
+  maxUploadSizeMB: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number().positive().optional()
+  ),
   prevPageText: z.string().optional(),
   nextPageText: z.string().optional(),
   placeholder: z.string().optional(),
@@ -114,7 +124,7 @@ const formSchema = z.object({
   matrixMultiple: z.boolean().optional(),
   routingInitiallyHide: z.boolean().optional(),
   routingSelectedQuestion: z.string().optional(),
-  routingSelectedAnswer: z.string().optional(),
+  routingSelectedAnswer: z.union([z.string(), z.array(z.string())]).optional(),
   selectAll: z.boolean().optional(),
   selectAllLabel: z.string().optional(),
 });
@@ -149,7 +159,10 @@ export default function WidgetResourceFormItems(
   type FormData = z.infer<typeof formSchema>;
   const [items, setItems] = useState<Item[]>([]);
   const [options, setOptions] = useState<Option[]>([]);
-  const [selectedItem, setItem] = useState<Item | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const selectedItem = selectedItemId
+    ? items.find((i) => i.id === selectedItemId) || null
+    : null;
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
   const [file, setFile] = useState<File>();
@@ -162,55 +175,89 @@ export default function WidgetResourceFormItems(
   const router = useRouter();
   const { project } = router.query;
 
+  const { data: allStatuses } = useStatuses(project as string);
   const { data: allTags } = useTags(project as string);
   const firstTagType = allTags?.[0]?.type ?? '';
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
     if (selectedItem) {
+      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+
+      const oldOptions = selectedItem.options || [];
+      const newOptions = options || [];
+      const triggerMap: Record<string, string> = {};
+      for (let i = 0; i < Math.min(oldOptions.length, newOptions.length); i++) {
+        if (oldOptions[i].trigger !== newOptions[i].trigger) {
+          triggerMap[oldOptions[i].trigger] = newOptions[i].trigger;
+        }
+      }
+      const hasTriggerChanges = Object.keys(triggerMap).length > 0;
+
       setItems((currentItems) =>
-        currentItems.map((item) =>
-          item.trigger === selectedItem.trigger ? { ...item, ...values } : item
-        )
+        currentItems.map((item) => {
+          if (item.id === selectedItem.id) {
+            return { ...item, ...valuesWithoutTrigger };
+          }
+          if (
+            hasTriggerChanges &&
+            item.routingSelectedQuestion === selectedItem.trigger
+          ) {
+            const answers = Array.isArray(item.routingSelectedAnswer)
+              ? item.routingSelectedAnswer
+              : item.routingSelectedAnswer
+                ? [item.routingSelectedAnswer]
+                : [];
+            const updated = answers.map(
+              (answer) => triggerMap[answer] || answer
+            );
+            return { ...item, routingSelectedAnswer: updated };
+          }
+          return item;
+        })
       );
-      setItem(null);
+      setSelectedItemId(null);
     } else {
-      setItems((currentItems) => [
-        ...currentItems,
-        {
-          trigger: `${
-            currentItems.length > 0
-              ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
-              : 1
-          }`,
-          title: values.title,
-          description: values.description,
-          placeholder: values.placeholder,
-          defaultValue: values.defaultValue,
-          type: values.type,
-          tags: values.tags || firstTagType,
-          fieldType: values.fieldType,
-          fieldKey: values.fieldKey || '',
-          fieldRequired: values.fieldRequired || false,
-          onlyForModerator: values.onlyForModerator || false,
-          minCharacters: values.minCharacters,
-          maxCharacters: values.maxCharacters,
-          maxChoices: values.maxChoices || '',
-          maxChoicesMessage: values.maxChoicesMessage || '',
-          variant: values.variant || 'text input',
-          multiple: values.multiple || false,
-          prevPageText: values.prevPageText || '',
-          nextPageText: values.nextPageText || '',
-          options: values.options || [],
-          matrix: values.matrix || matrixDefault,
-          matrixMultiple: values.matrixMultiple || false,
-          routingInitiallyHide: values.routingInitiallyHide || false,
-          routingSelectedQuestion: values.routingSelectedQuestion || '',
-          routingSelectedAnswer: values.routingSelectedAnswer || '',
-          selectAll: values.selectAll || false,
-          selectAllLabel: values.selectAllLabel || '',
-        },
-      ]);
+      setItems((currentItems) => {
+        const maxTrigger = currentItems.reduce(
+          (max, i) => Math.max(max, parseInt(i.trigger) || 0),
+          0
+        );
+        return [
+          ...currentItems,
+          {
+            id: generateId(),
+            trigger: `${maxTrigger + 1}`,
+            title: values.title,
+            description: values.description,
+            placeholder: values.placeholder,
+            defaultValue: values.defaultValue,
+            type: values.type,
+            tags: values.tags || firstTagType,
+            fieldType: values.fieldType,
+            fieldKey: values.fieldKey || '',
+            fieldRequired: values.fieldRequired || false,
+            onlyForModerator: values.onlyForModerator || false,
+            minCharacters: values.minCharacters,
+            maxCharacters: values.maxCharacters,
+            maxChoices: values.maxChoices || '',
+            maxChoicesMessage: values.maxChoicesMessage || '',
+            variant: values.variant || 'text input',
+            multiple: values.multiple || false,
+            maxUploadSizeMB: values.maxUploadSizeMB || 25,
+            prevPageText: values.prevPageText || '',
+            nextPageText: values.nextPageText || '',
+            options: values.options || [],
+            matrix: values.matrix || matrixDefault,
+            matrixMultiple: values.matrixMultiple || false,
+            routingInitiallyHide: values.routingInitiallyHide || false,
+            routingSelectedQuestion: values.routingSelectedQuestion || '',
+            routingSelectedAnswer: values.routingSelectedAnswer || '',
+            selectAll: values.selectAll || false,
+            selectAllLabel: values.selectAllLabel || '',
+          },
+        ];
+      });
     }
     form.reset(defaults);
     setOptions([]);
@@ -222,7 +269,7 @@ export default function WidgetResourceFormItems(
     if (selectedOption) {
       setOptions((currentOptions) =>
         currentOptions.map((option) =>
-          option.trigger === selectedOption.trigger
+          option.id === selectedOption.id
             ? {
                 ...option,
                 titles:
@@ -237,12 +284,13 @@ export default function WidgetResourceFormItems(
       );
       setOption(null);
     } else {
+      const maxTrigger = options.reduce(
+        (max, o) => Math.max(max, parseInt(o.trigger) || 0),
+        -1
+      );
       const newOption = {
-        trigger: `${
-          options.length > 0
-            ? parseInt(options[options.length - 1].trigger) + 1
-            : 0
-        }`,
+        id: generateId(),
+        trigger: `${maxTrigger + 1}`,
         titles: values.options?.[values.options.length - 1].titles || [],
         images: values.options?.[values.options.length - 1].images || [],
       };
@@ -260,7 +308,7 @@ export default function WidgetResourceFormItems(
 
         if (updatedMatrixOption === 'rows') {
           updatedMatrix.rows = updatedMatrix.rows.map((row) =>
-            row.trigger === matrixOption.trigger
+            row.id === matrixOption.id
               ? {
                   ...row,
                   text:
@@ -271,7 +319,7 @@ export default function WidgetResourceFormItems(
           );
         } else {
           updatedMatrix.columns = updatedMatrix.columns.map((column) =>
-            column.trigger === matrixOption.trigger
+            column.id === matrixOption.id
               ? {
                   ...column,
                   text:
@@ -308,6 +356,7 @@ export default function WidgetResourceFormItems(
       const newText = newTextObj?.text || '';
 
       const newMatrixOption: MatrixOption = {
+        id: generateId(),
         trigger: newTrigger.toString(),
         text: newText,
       };
@@ -343,6 +392,7 @@ export default function WidgetResourceFormItems(
     maxChoicesMessage: '',
     variant: 'text input',
     multiple: false,
+    maxUploadSizeMB: 25,
     prevPageText: '',
     nextPageText: '',
     options: [],
@@ -360,15 +410,19 @@ export default function WidgetResourceFormItems(
     defaultValues: defaults(),
   });
 
+  const itemsInitialized = React.useRef(false);
   useEffect(() => {
-    if (props?.items && props?.items?.length > 0) {
-      setItems(props?.items);
+    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
+      itemsInitialized.current = true;
+      setItems(props.items.map(withId));
     }
   }, [props?.items]);
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    onFieldChanged('items', items);
+    if (onFieldChanged) {
+      onFieldChanged('items', items);
+    }
   }, [items]);
 
   // Sets form to selected item values when item is selected
@@ -393,6 +447,7 @@ export default function WidgetResourceFormItems(
         maxChoicesMessage: selectedItem.maxChoicesMessage || '',
         variant: selectedItem.variant || '',
         multiple: selectedItem.multiple || false,
+        maxUploadSizeMB: selectedItem.maxUploadSizeMB || 25,
         prevPageText: selectedItem.prevPageText || '',
         nextPageText: selectedItem.nextPageText || '',
         matrix: selectedItem.matrix || matrixDefault,
@@ -406,16 +461,21 @@ export default function WidgetResourceFormItems(
             ? 'Selecteer alles'
             : selectedItem.selectAllLabel,
       });
-      setOptions(selectedItem.options || []);
-      setMatrixOptions(selectedItem.matrix || matrixDefault);
+      setOptions((selectedItem.options || []).map(withId));
+      const matrix = selectedItem.matrix || matrixDefault;
+      setMatrixOptions({
+        ...matrix,
+        rows: (matrix.rows || []).map(withId),
+        columns: (matrix.columns || []).map(withId),
+      });
     }
-  }, [selectedItem, form]);
+  }, [selectedItemId, form]);
 
   useEffect(() => {
     if (selectedOption) {
       const updatedOptions = [...options];
       const index = options.findIndex(
-        (option) => option.trigger === selectedOption.trigger
+        (option) => option.id === selectedOption.id
       );
       updatedOptions[index] = { ...selectedOption };
 
@@ -443,11 +503,30 @@ export default function WidgetResourceFormItems(
   ) => {
     if (isItemAction) {
       setItems((currentItems) => {
-        return handleMovementOrDeletion(
+        const index = currentItems.findIndex(
+          (entry) => entry.trigger === clickedTrigger
+        );
+        const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
+        const triggerA = currentItems[index]?.trigger;
+        const triggerB = currentItems[swapIndex]?.trigger;
+
+        const newItems = handleMovementOrDeletion(
           currentItems,
           actionType,
           clickedTrigger
         ) as Item[];
+
+        if (actionType !== 'delete' && triggerA && triggerB) {
+          for (const item of newItems) {
+            if (item.routingSelectedQuestion === triggerA) {
+              item.routingSelectedQuestion = triggerB;
+            } else if (item.routingSelectedQuestion === triggerB) {
+              item.routingSelectedQuestion = triggerA;
+            }
+          }
+        }
+
+        return newItems;
       });
     } else if (isMatrixAction) {
       let newMatrixOptions: Matrix;
@@ -495,25 +574,36 @@ export default function WidgetResourceFormItems(
     actionType: 'moveUp' | 'moveDown' | 'delete',
     trigger: string
   ) {
-    const index = list.findIndex((entry) => entry.trigger === trigger);
-
     if (actionType === 'delete') {
-      return list.filter((entry) => entry.trigger !== trigger);
+      return list
+        .filter((entry) => entry.trigger !== trigger)
+        .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger));
     }
+
+    const sorted = [...list].sort(
+      (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
+    );
+    const index = sorted.findIndex((entry) => entry.trigger === trigger);
 
     if (
       (actionType === 'moveUp' && index > 0) ||
-      (actionType === 'moveDown' && index < list.length - 1)
+      (actionType === 'moveDown' && index < sorted.length - 1)
     ) {
-      const newItemList = [...list];
       const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
-      let tempTrigger = newItemList[swapIndex].trigger;
-      newItemList[swapIndex].trigger = newItemList[index].trigger;
-      newItemList[index].trigger = tempTrigger;
-      return newItemList;
+      const triggerA = sorted[index].trigger;
+      const triggerB = sorted[swapIndex].trigger;
+      return sorted
+        .map((entry) => {
+          if (entry.trigger === triggerA)
+            return { ...entry, trigger: triggerB };
+          if (entry.trigger === triggerB)
+            return { ...entry, trigger: triggerA };
+          return entry;
+        })
+        .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger));
     }
 
-    return list; // If no action is performed, return the original list
+    return sorted;
   }
 
   function handleSaveItems() {
@@ -557,7 +647,7 @@ export default function WidgetResourceFormItems(
     form.reset(defaults());
     setOptions([]);
     setMatrixOptions(matrixDefault);
-    setItem(null);
+    setSelectedItemId(null);
   }
 
   function handleSaveOptions() {
@@ -590,7 +680,7 @@ export default function WidgetResourceFormItems(
         form.setValue('fieldType', defaultFormItem.fieldType || '');
       }
 
-      if (defaultFormItem.fieldType === 'text') {
+      if (defaultFormItem.fieldType === 'text' && !form.watch('variant')) {
         const variant =
           defaultFormItem.type === 'summary' ||
           defaultFormItem.type === 'description'
@@ -631,8 +721,7 @@ export default function WidgetResourceFormItems(
     if (key) {
       const isUnique = items.every(
         (item) =>
-          (selectedItem && item.trigger === selectedItem.trigger) ||
-          item.fieldKey !== key
+          (selectedItem && item.id === selectedItem.id) || item.fieldKey !== key
       );
 
       setIsFieldKeyUnique(isUnique);
@@ -662,8 +751,7 @@ export default function WidgetResourceFormItems(
                           <div
                             key={index}
                             className={`flex cursor-pointer justify-between border border-secondary ${
-                              item.trigger == selectedItem?.trigger &&
-                              'bg-secondary'
+                              item.id === selectedItem?.id && 'bg-secondary'
                             }`}>
                             <span className="flex gap-2 py-3 px-2">
                               <ArrowUp
@@ -682,7 +770,7 @@ export default function WidgetResourceFormItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
-                                setItem(item);
+                                setSelectedItemId(item.id ?? null);
                                 setOptions([]);
                                 setMatrixOptions(matrixDefault);
                                 setSettingOptions(false);
@@ -743,8 +831,7 @@ export default function WidgetResourceFormItems(
                                     <div
                                       key={index}
                                       className={`flex cursor-pointer justify-between border border-secondary ${
-                                        option.trigger ==
-                                          selectedOption?.trigger &&
+                                        option.id === selectedOption?.id &&
                                         'bg-secondary'
                                       }`}>
                                       <span className="flex gap-2 py-3 px-2">
@@ -806,8 +893,7 @@ export default function WidgetResourceFormItems(
                             const currentOption = matrixOptions?.[
                               matrixItem.type
                             ].findIndex(
-                              (option) =>
-                                option.trigger === matrixOption?.trigger
+                              (option) => option.id === matrixOption?.id
                             );
                             const activeOption =
                               currentOption !== -1
@@ -874,8 +960,7 @@ export default function WidgetResourceFormItems(
                       {hasList() &&
                         (() => {
                           const currentOption = options.findIndex(
-                            (option) =>
-                              option.trigger === selectedOption?.trigger
+                            (option) => option.id === selectedOption?.id
                           );
                           const activeOption =
                             currentOption !== -1
@@ -1024,7 +1109,7 @@ export default function WidgetResourceFormItems(
                               <div
                                 key={index}
                                 className={`flex cursor-pointer justify-between border border-secondary ${
-                                  option.trigger == selectedOption?.trigger &&
+                                  option.id === selectedOption?.id &&
                                   'bg-secondary'
                                 }`}>
                                 <span className="flex gap-2 py-3 px-2">
@@ -1098,11 +1183,11 @@ export default function WidgetResourceFormItems(
                                 Informatie blok
                               </SelectItem>
                               <SelectItem value="radiobox">
-                                Radio buttons
+                                Enkele keuze
                               </SelectItem>
                               <SelectItem value="text">Tekstveld</SelectItem>
                               <SelectItem value="checkbox">
-                                Checkboxes
+                                Meerkeuze
                               </SelectItem>
                               <SelectItem value="map">Locatie</SelectItem>
                               <SelectItem value="imageUpload">
@@ -1133,6 +1218,9 @@ export default function WidgetResourceFormItems(
                               </SelectItem>
                               <SelectItem value="tags">
                                 Inzending: Tags
+                              </SelectItem>
+                              <SelectItem value="status">
+                                Inzending: Status
                               </SelectItem>
                               <SelectItem value="location">
                                 Inzending: Locatie
@@ -1444,6 +1532,20 @@ export default function WidgetResourceFormItems(
                         )}
                       </>
                     )}
+                    {form.watch('type') === 'status' &&
+                      (!allStatuses || allStatuses.length === 0) && (
+                        <p
+                          style={{
+                            fontSize: '14px',
+                            margin: '20px 0',
+                            color: 'red',
+                          }}>
+                          <strong>
+                            Geen statussen gevonden om te selecteren. Maak dit
+                            aan onder het kopje &apos;Statussen&apos;
+                          </strong>
+                        </p>
+                      )}
                     {![
                       'none',
                       'pagination',
@@ -1705,6 +1807,30 @@ export default function WidgetResourceFormItems(
                       />
                     )}
 
+                    {(form.watch('type') === 'imageUpload' ||
+                      form.watch('type') === 'documentUpload') && (
+                      <FormField
+                        control={form.control}
+                        name="maxUploadSizeMB"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Maximale uploadgrootte (MB)</FormLabel>
+                            <FormDescription>
+                              <em className="text-xs">
+                                De maximale bestandsgrootte die een gebruiker
+                                mag uploaden. Standaard 25 MB. Let op: de server
+                                hanteert een absolute bovengrens (standaard 25
+                                MB); hogere waarden kunnen alsnog door de server
+                                geweigerd worden.
+                              </em>
+                            </FormDescription>
+                            <Input type="number" min="1" {...field} />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
                     {form.watch('type') !== 'pagination' && (
                       <FormField
                         control={form.control}
@@ -1715,8 +1841,7 @@ export default function WidgetResourceFormItems(
                           return (
                             <FormItem>
                               <FormLabel>
-                                Is dit veld zichtbaar voor iedereen of alleen
-                                admin gebruikers?
+                                Wie mag de ingevulde waarde van dit veld zien?
                               </FormLabel>
                               <Select
                                 onValueChange={(e: string) =>
@@ -1838,31 +1963,37 @@ export default function WidgetResourceFormItems(
                                       borderBottomRightRadius: '5px',
                                       marginTop: '12px',
                                     }}>
-                                    Je hebt nog geen meerkeuze, multiplechoice
-                                    of afbeelding keuze vragen toegevoegd. Voeg
+                                    Je hebt nog geen meerkeuze, enkele keuze of
+                                    afbeelding keuze vragen toegevoegd. Voeg
                                     deze eerst toe om deze vraag te kunnen tonen
                                     op basis van een ander antwoord.
                                   </p>
                                 ) : (
                                   <Select
                                     value={field.value}
-                                    onValueChange={field.onChange}>
+                                    onValueChange={(value) => {
+                                      field.onChange(value);
+                                      form.setValue(
+                                        'routingSelectedAnswer',
+                                        []
+                                      );
+                                    }}>
                                     <FormControl>
                                       <SelectTrigger>
                                         <SelectValue placeholder="Kies een vraag" />
                                       </SelectTrigger>
                                     </FormControl>
-                                    <SelectContent>
+                                    <SelectContentScrollable>
                                       {formMultipleChoiceFields.map(
                                         (f: any) => (
                                           <SelectItem
                                             key={f.trigger}
                                             value={f.trigger}>
-                                            {f.title || f.fieldKey}
+                                            {stripHtml(f.title) || f.fieldKey}
                                           </SelectItem>
                                         )
                                       )}
-                                    </SelectContent>
+                                    </SelectContentScrollable>
                                   </Select>
                                 )}
 
@@ -1896,6 +2027,31 @@ export default function WidgetResourceFormItems(
                                   }));
                               }
 
+                              const optionTriggers = options.map(
+                                (o: any) => o.trigger
+                              );
+                              const rawValues = Array.isArray(field.value)
+                                ? field.value
+                                : field.value
+                                  ? [field.value]
+                                  : [];
+                              const selectedValues = rawValues.filter(
+                                (v: string) => optionTriggers.includes(v)
+                              );
+
+                              if (selectedValues.length !== rawValues.length) {
+                                field.onChange(selectedValues);
+                              }
+
+                              const toggleValue = (trigger: string) => {
+                                const next = selectedValues.includes(trigger)
+                                  ? selectedValues.filter(
+                                      (v: string) => v !== trigger
+                                    )
+                                  : [...selectedValues, trigger];
+                                field.onChange(next);
+                              };
+
                               return (
                                 <FormItem>
                                   <FormLabel>
@@ -1920,24 +2076,25 @@ export default function WidgetResourceFormItems(
                                       een ander antwoord.
                                     </p>
                                   ) : (
-                                    <Select
-                                      value={field.value}
-                                      onValueChange={field.onChange}>
-                                      <FormControl>
-                                        <SelectTrigger>
-                                          <SelectValue placeholder="Kies een antwoord" />
-                                        </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                        {options.map((o: any) => (
-                                          <SelectItem
-                                            key={o.trigger}
-                                            value={o.trigger}>
+                                    <div className="flex flex-col gap-2 mt-2">
+                                      {options.map((o: any) => (
+                                        <label
+                                          key={o.trigger}
+                                          className="flex items-center gap-2 cursor-pointer">
+                                          <Checkbox
+                                            checked={selectedValues.includes(
+                                              o.trigger
+                                            )}
+                                            onCheckedChange={() =>
+                                              toggleValue(o.trigger)
+                                            }
+                                          />
+                                          <span className="text-sm">
                                             {o.titles?.[0]?.key || o.trigger}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
+                                          </span>
+                                        </label>
+                                      ))}
+                                    </div>
                                   )}
 
                                   <FormMessage />

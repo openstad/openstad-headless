@@ -9,29 +9,32 @@ import {
 const UserRoleDropdownList = ({
   roleId,
   addProject,
-  disabled = false,
+  cannotAddMembers = false,
 }: {
   roleId?: string;
   addProject: (roleId: string) => void;
-  disabled?: boolean;
+  cannotAddMembers?: boolean;
 }) => {
   return (
     <Select
-      defaultValue={roleId ? roleId : ''}
-      onValueChange={(value: string) => addProject(value)}
-      disabled={disabled}>
+      value={roleId ? roleId : ''}
+      onValueChange={(value: string) => addProject(value)}>
       <SelectTrigger>
         <SelectValue placeholder="" />
       </SelectTrigger>
       <SelectContent>
-        {roleId ? null : <SelectItem value={''}></SelectItem>}
+        {roleId ? null : <SelectItem value={''}>Geen rol</SelectItem>}
         <SelectItem value={'admin'}>Administrator</SelectItem>
         <SelectItem value={'editor'}>Editor</SelectItem>
         {/* currently not available
         <SelectItem value={'moderator'}>Moderator</SelectItem>
         */}
-        <SelectItem value={'member'}>Normale gebruiker</SelectItem>
-        <SelectItem value={'anonymous'}>Anonieme gebruiker</SelectItem>
+        {!cannotAddMembers && (
+          <SelectItem value={'member'}>Normale gebruiker</SelectItem>
+        )}
+        {!cannotAddMembers && (
+          <SelectItem value={'anonymous'}>Anonieme gebruiker</SelectItem>
+        )}
       </SelectContent>
     </Select>
   );

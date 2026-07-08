@@ -1,4 +1,3 @@
-import { marker } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import React, { useEffect, useState } from 'react';
 
@@ -30,6 +29,20 @@ const MapInput: React.FC<MapComponentProps> = ({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsSSR(false);
+
+      import('leaflet').then((L) => {
+        const proto = L.Map.prototype as any;
+        const orig = proto._initContainer;
+        proto._initContainer = function (id: any) {
+          const container =
+            typeof id === 'string' ? document.getElementById(id) : id;
+          if (container && container._leaflet_id) {
+            container._leaflet_id = undefined;
+          }
+          return orig.call(this, id);
+        };
+      });
+
       import('react-leaflet')
         .then((leaflet) => {
           setLeafletComponents(leaflet);
@@ -95,7 +108,10 @@ const MapInput: React.FC<MapComponentProps> = ({
         zoom={7}
         scrollWheelZoom={false}
         style={{ height: '600px', width: '100%' }}>
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          referrerPolicy="no-referrer-when-downgrade"
+        />
         {markerPosition && (
           <Marker position={markerPosition} icon={dynamicMarkerIcon} />
         )}

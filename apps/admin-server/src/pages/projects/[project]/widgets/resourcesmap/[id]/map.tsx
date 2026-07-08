@@ -37,7 +37,7 @@ type Tag = {
 
 const formSchema = z.object({
   markerHref: z.string().optional(),
-  autoZoomAndCenter: z.enum(['markers', 'area']).optional(),
+  mapCenterMode: z.enum(['', 'markers', 'area']).optional(),
   categorize: z.object({
     categorizeByField: z.string().optional(),
   }),
@@ -70,7 +70,7 @@ export default function WidgetResourcesMapMap(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       markerHref: props?.markerHref || '',
-      autoZoomAndCenter: props?.autoZoomAndCenter || 'markers',
+      mapCenterMode: props?.mapCenterMode || '',
       clustering: props?.clustering || {},
       categorize: props?.categorize || {},
       tilesVariant: props?.tilesVariant || '',
@@ -115,7 +115,7 @@ export default function WidgetResourcesMapMap(
           className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
-            name="autoZoomAndCenter"
+            name="mapCenterMode"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Automatisch inzoomen en centreren</FormLabel>
@@ -131,8 +131,8 @@ export default function WidgetResourcesMapMap(
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="" disabled>
-                      Selecteer een optie
+                    <SelectItem value="">
+                      Standaard (uit projectinstellingen)
                     </SelectItem>
                     <SelectItem value="markers">Toon de markers</SelectItem>
                     <SelectItem value="area">Toon het gebied</SelectItem>

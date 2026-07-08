@@ -9,6 +9,7 @@ export type CheckboxFieldProps = {
         label: string;
         isOtherOption?: boolean;
         defaultValue?: boolean;
+        trigger?: string;
     }[];
     fieldRequired?: boolean;
     requiredWarning?: string;

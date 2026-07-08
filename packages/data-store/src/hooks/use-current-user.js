@@ -19,8 +19,10 @@ export default function useCurrentUser(props) {
     const params = new URLSearchParams(window.location.search);
 
     if (params.has('openstadlogout')) {
+      console.log('[osc-auth] logout detected, clearing session');
       storage.remove('cmsUser');
       storage.remove('openStadUser');
+      storage.remove('expireOnClose');
 
       let url = window.location.href;
       url = url.replace(new RegExp(`[?&]openstadlogout=true`), '');
@@ -29,10 +31,15 @@ export default function useCurrentUser(props) {
       return {};
     }
 
-    // console.log('GETCURRENTUSER', self.currentUser);
-    if (self.currentUser && self.currentUser.id) {
-      // just once TODO: ik denk dat het jkan met useSWRmutaion,: als ik het goedlees update die alleen met de hand
-      return self.currentUser;
+    if (
+      storage.get('expireOnClose') &&
+      !/(^|;\s*)openstad_active=1/.test(document.cookie)
+    ) {
+      storage.remove('cmsUser');
+      storage.remove('openStadUser');
+      storage.remove('expireOnClose');
+      self.currentUser = null;
+      return {};
     }
 
     // get user from props
@@ -41,12 +48,20 @@ export default function useCurrentUser(props) {
       initialUser = globalOpenStadUser || props.openStadUser || {};
     } catch (err) {}
 
-    if (initialUser.id && initialUser.projectId == self.projectId) {
-      return initialUser;
+    if (params.has('expireOnClose')) {
+      storage.set('expireOnClose', true);
+      document.cookie =
+        'openstad_active=1; path=/; SameSite=Lax' +
+        (location.protocol === 'https:' ? '; Secure' : '');
+      let url = window.location.href;
+      url = url.replace(/[?&]expireOnClose=1/, '');
+      history.replaceState(null, '', url);
     }
+
     let jwt;
     if (params.has('openstadlogintoken')) {
       jwt = params.get('openstadlogintoken');
+      console.log('[osc-auth] login token received from URL');
       storage.set('openStadUser', { jwt });
       let url = window.location.href;
       url = url.replace(new RegExp(`[?&]openstadlogintoken=${jwt}`), '');
@@ -74,14 +89,26 @@ export default function useCurrentUser(props) {
     let sessionUser = storage.get('openStadUser') || {};
 
     // or use existing jwt
-    jwt = jwt || initialUser.jwt || sessionUser.jwt;
+    if (!jwt && sessionUser.jwt) {
+      jwt = sessionUser.jwt;
+    }
+    if (!jwt && initialUser.jwt) {
+      jwt = initialUser.jwt;
+    }
 
     // or get jwt for cmsUser
     if (!jwt && cmsUser && cmsUser.access_token && cmsUser.iss) {
-      jwt = await self.api.user.connectUser({
+      const result = await self.api.user.connectUser({
         projectId: self.projectId,
         cmsUser,
       });
+      jwt = result.jwt;
+      if (result.expireOnClose) {
+        storage.set('expireOnClose', true);
+        document.cookie =
+          'openstad_active=1; path=/; SameSite=Lax' +
+          (location.protocol === 'https:' ? '; Secure' : '');
+      }
     }
 
     // fetch me for this jwt
@@ -96,9 +123,13 @@ export default function useCurrentUser(props) {
           projectId: self.projectId,
         });
 
+        console.log(
+          `[osc-auth] user authenticated: userId=${openStadUser?.id} role=${openStadUser?.role}`
+        );
         storage.set('openStadUser', { ...openStadUser, jwt });
         return openStadUser;
       } catch (err) {
+        console.log(`[osc-auth] user fetch failed: ${err?.message}`);
         storage.remove('openStadUser');
         return {};
       }

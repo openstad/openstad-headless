@@ -1,18 +1,25 @@
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
-import {
-  canLikeResource,
-  getScopedSessionRandomSortSeed,
-  hasRole,
-} from '@openstad-headless/lib';
+import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Paginator, Spacer, Stepper } from '@openstad-headless/ui/src';
+import {
+  Paginator,
+  Spacer,
+  Stepper,
+  fireConfetti,
+} from '@openstad-headless/ui/src';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import '@utrecht/component-library-css';
 import { Button, ButtonLink, Heading } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
 import NotificationService from '../../lib/NotificationProvider/notification-service';
@@ -56,6 +63,7 @@ export type StemBegrootWidgetProps = BaseProps &
     showVoteCount: boolean;
     showOriginalResource?: boolean;
     originalResourceUrl?: string;
+    originalResourceText?: string;
     displayTitle?: boolean;
     displaySummary?: boolean;
     displayDescription?: boolean;
@@ -105,6 +113,8 @@ export type StemBegrootWidgetProps = BaseProps &
     filterBehavior?: string;
     voteAfterLoggingIn?: boolean;
     displayModBreak?: boolean;
+    randomSortRotationMs?: number;
+    showConfetti?: boolean;
   };
 
 function StemBegroot({
@@ -151,14 +161,33 @@ function StemBegroot({
     type: '',
   });
 
+  async function fetchResourcesByIds(ids: number[]): Promise<any[]> {
+    if (!ids.length || !props.api?.url) return [];
+    const params = new URLSearchParams();
+    ids.forEach((id) => params.append('ids', String(id)));
+    params.append('noPagination', 'true');
+    params.append('includeTags', '1');
+    try {
+      const response = await fetch(
+        `${props.api.url}/api/project/${props.projectId}/resource?${params.toString()}`
+      );
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data?.records || data || [];
+    } catch {
+      return [];
+    }
+  }
+
   const [pendingVoteFetched, setPendingVoteFetched] = useState<boolean>(false);
+
+  const url = new URL(window.location.href);
+  const pendingUuidFromUrl = url.searchParams.get('pendingBudgetVote');
+  let hasToRestoreVotesFromServer = pendingUuidFromUrl !== null;
 
   // Restore pending-budget-vote from server if UUID is in URL
   useEffect(() => {
     if (pendingVoteFetched) return;
-
-    const url = new URL(window.location.href);
-    const pendingUuidFromUrl = url.searchParams.get('pendingBudgetVote');
 
     async function restoreFromServer(uuid: string) {
       try {
@@ -179,11 +208,11 @@ function StemBegroot({
         // Remove pendingBudgetVote from URL
         url.searchParams.delete('pendingBudgetVote');
         window.history.replaceState({}, document.title, url.toString());
+        hasToRestoreVotesFromServer = false;
 
         if (!pendingBudgetVote.ok || !pendingBudgetVote) {
           console.error(
-            'Failed to fetch pending budget vote from server',
-            pendingBudgetVote.statusText
+            `[stem-begroot] pending vote fetch failed: uuid=${uuid} status=${pendingBudgetVote.status}`
           );
           return;
         }
@@ -191,11 +220,17 @@ function StemBegroot({
         const pendingBudgetVoteData = await pendingBudgetVote.json();
 
         if (!pendingBudgetVoteData || !pendingBudgetVoteData.data) {
-          console.error('No pending budget vote data found on server');
+          console.error(
+            `[stem-begroot] pending vote empty response: uuid=${uuid}`
+          );
           return;
         }
 
         const { data } = pendingBudgetVoteData;
+        const pendingCount = data ? Object.keys(data).length : 0;
+        console.log(
+          `[stem-begroot] pending vote restored: uuid=${uuid} resources=${pendingCount}`
+        );
 
         if (
           props.votes.voteType === 'countPerTag' ||
@@ -205,8 +240,10 @@ function StemBegroot({
         } else {
           votePendingStorage.setVotePending(data as any);
         }
-      } catch (e) {
-        console.error('Failed to restore pending budget vote from server', e);
+      } catch (e: any) {
+        console.error(
+          `[stem-begroot] pending vote restore failed: uuid=${uuid} error=${e?.message}`
+        );
       }
     }
 
@@ -286,29 +323,51 @@ function StemBegroot({
   const [sort, setSort] = useState<string | undefined>(
     props.defaultSorting || undefined
   );
-  const randomSortSeed = React.useMemo(() => {
-    const pathname =
-      typeof window !== 'undefined' ? window.location.pathname : '';
-    const search = typeof window !== 'undefined' ? window.location.search : '';
-    const seedScope = `${props.projectId || 'project'}:${pathname}:${search}`;
-    return getScopedSessionRandomSortSeed(
-      seedScope,
-      'stemBegrootRandomSortSeed'
-    );
-  }, [props.projectId]);
   const [search, setSearch] = useState<string | undefined>();
   const [page, setPage] = useState<number>(0);
   const [itemsPerPage, setPageSize] = useState<number>(
-    props.itemsPerPage || 999
+    props.itemsPerPage || 10
   );
-  const [totalPages, setTotalPages] = useState(0);
 
-  const { data: resources, submitVotes } = datastore.useResources({
+  // Resolve activeTagTab to tag IDs for the API
+  const isPerTagVoting =
+    props?.votes?.voteType === 'countPerTag' ||
+    props?.votes?.voteType === 'budgetingPerTag';
+
+  const activeTabTagIds = useMemo(() => {
+    if (!isPerTagVoting || !activeTagTab) return [];
+    const typeSelector = props.tagTypeSelector || 'tag';
+    if (typeSelector === 'tag') {
+      return allTags
+        .filter((tag: { name: string }) => tag.name === activeTagTab)
+        .map((tag: { id: number }) => tag.id);
+    } else {
+      return allTags
+        .filter((tag: { type: string }) => tag.type === activeTagTab)
+        .map((tag: { id: number }) => tag.id);
+    }
+  }, [isPerTagVoting, activeTagTab, allTags, props.tagTypeSelector]);
+
+  const apiTags = useMemo(() => {
+    if (isPerTagVoting && activeTabTagIds.length > 0) {
+      return activeTabTagIds;
+    }
+    return tags;
+  }, [tags, activeTabTagIds, isPerTagVoting]);
+
+  const {
+    data: resources,
+    isLoading,
+    submitVotes,
+  } = datastore.useResources({
     projectId: props.projectId,
-    tags,
-    sort: sort === 'random' ? undefined : sort,
+    tags: apiTags,
+    statuses: initStatuses,
+    sort,
     search,
-    pageSize: 999,
+    page,
+    pageSize: itemsPerPage,
+    randomSortRotationMs: props.randomSortRotationMs,
   });
 
   // Replace with type when available from datastore
@@ -371,16 +430,6 @@ function StemBegroot({
     }
   }, [selectedResources, selectedResourcesStorage, props.votes.voteType]);
 
-  // Save selectedResources to storage whenever they change
-  useEffect(() => {
-    if (
-      props.votes.voteType !== 'countPerTag' &&
-      props.votes.voteType !== 'budgetingPerTag'
-    ) {
-      selectedResourcesStorage.setSelectedResources(selectedResources);
-    }
-  }, [selectedResources, selectedResourcesStorage, props.votes.voteType]);
-
   useEffect(() => {
     if (props.isSimpleView && currentStep === 1 && lastStep > currentStep) {
       setCurrentStep(0); // Skip step 2
@@ -406,40 +455,69 @@ function StemBegroot({
       const pendingPerTag = votePendingStorage.getVotePendingPerTag();
 
       if (pendingPerTag) {
-        setTagCounter((prevTagCounter) =>
-          prevTagCounter.map((tagObj) => {
-            const tagName = Object.keys(tagObj)[0];
-            if (pendingPerTag[tagName]) {
-              const selectedResourceIds = Object.keys(
-                pendingPerTag[tagName]
-              ).map(Number);
+        const allPendingIds: number[] = [];
+        Object.values(pendingPerTag).forEach((tagData: any) => {
+          if (tagData && typeof tagData === 'object') {
+            Object.keys(tagData).forEach((id) =>
+              allPendingIds.push(Number(id))
+            );
+          }
+        });
 
-              const resourcesThatArePending: Array<any> =
-                resources?.records?.filter(
-                  (r: any) =>
-                    selectedResourceIds && selectedResourceIds.includes(r.id)
-                ) || [];
-
-              const currentCount =
-                props.votes.voteType === 'budgetingPerTag'
-                  ? resourcesThatArePending.reduce(
-                      (total, r) => total + r.budget,
-                      0
-                    )
-                  : resourcesThatArePending.length;
-
-              return {
-                [tagName]: {
-                  ...tagObj[tagName],
-                  selectedResources: resourcesThatArePending,
-                  current: currentCount,
-                },
-              };
-            }
-
-            return tagObj;
-          })
+        const matchedIds = new Set(
+          (resources?.records || [])
+            .filter((r: any) => allPendingIds.includes(r.id))
+            .map((r: any) => r.id)
         );
+        const missingIds = allPendingIds.filter((id) => !matchedIds.has(id));
+
+        const applyTagCounter = (allResources: any[]) => {
+          setTagCounter((prevTagCounter) =>
+            prevTagCounter.map((tagObj) => {
+              const tagName = Object.keys(tagObj)[0];
+              if (pendingPerTag[tagName]) {
+                const selectedResourceIds = Object.keys(
+                  pendingPerTag[tagName]
+                ).map(Number);
+
+                const resourcesThatArePending: Array<any> =
+                  allResources.filter((r: any) =>
+                    selectedResourceIds.includes(r.id)
+                  ) || [];
+
+                const currentCount =
+                  props.votes.voteType === 'budgetingPerTag'
+                    ? resourcesThatArePending.reduce(
+                        (total, r) => total + r.budget,
+                        0
+                      )
+                    : resourcesThatArePending.length;
+
+                return {
+                  [tagName]: {
+                    ...tagObj[tagName],
+                    selectedResources: resourcesThatArePending,
+                    current: currentCount,
+                  },
+                };
+              }
+
+              return tagObj;
+            })
+          );
+        };
+
+        if (missingIds.length > 0) {
+          console.warn(
+            `[stem-begroot] selection mismatch: pending=${allPendingIds.length} matched=${matchedIds.size} pageSize=${resources?.records?.length}, fetching ${missingIds.length} missing`
+          );
+          fetchResourcesByIds(missingIds).then((fetched) => {
+            const allResources = [...(resources?.records || []), ...fetched];
+            applyTagCounter(allResources);
+          });
+        } else {
+          applyTagCounter(resources?.records || []);
+        }
       }
     } else {
       const pending = votePendingStorage.getVotePending();
@@ -448,9 +526,22 @@ function StemBegroot({
         resources?.records?.length > 0 &&
         selectedResources.length === 0
       ) {
-        setSelectedResources(
-          resources?.records?.filter((r: any) => pending[r.id])
-        );
+        const pendingIds = Object.keys(pending).map(Number);
+        const matched = resources?.records?.filter((r: any) => pending[r.id]);
+
+        if (pendingIds.length !== matched.length) {
+          const missingIds = pendingIds.filter(
+            (id) => !matched.find((r: any) => r.id === id)
+          );
+          console.warn(
+            `[stem-begroot] selection mismatch: pending=${pendingIds.length} matched=${matched.length} pageSize=${resources?.records?.length}, fetching ${missingIds.length} missing`
+          );
+          fetchResourcesByIds(missingIds).then((fetched) => {
+            setSelectedResources([...matched, ...fetched]);
+          });
+        } else {
+          setSelectedResources(matched);
+        }
       }
     }
   }, [resources?.records, votePendingStorage]);
@@ -482,14 +573,32 @@ function StemBegroot({
       return;
     }
 
-    if (hasPendingSelection && currentStep < 4) {
+    // wait for votes from server to be retrieved before continuing to vote
+    if (hasPendingSelection && hasToRestoreVotesFromServer) {
+      if (currentStep < 3) {
+        setCurrentStep(3);
+      }
+      return;
+    }
+
+    if (
+      !hasToRestoreVotesFromServer &&
+      hasPendingSelection &&
+      currentStep < 4
+    ) {
       // Show in-progress state while submitting and only advance on successful submit
       if (currentStep < 3) {
         setCurrentStep(3);
       }
       void (async () => {
+        console.log(
+          `[stem-begroot] auto-submit triggered: selectedResources=${selectedResources.length}`
+        );
         const submitted = await submitVoteAndCleanup();
         if (submitted) {
+          if (props.showConfetti) {
+            fireConfetti();
+          }
           setCurrentStep(4);
         }
       })();
@@ -503,6 +612,7 @@ function StemBegroot({
     voteAfterLoggingIn,
     props.votes.voteType,
     votePendingStorage,
+    hasToRestoreVotesFromServer,
   ]);
 
   async function submitVoteAndCleanup() {
@@ -521,15 +631,7 @@ function StemBegroot({
 
         for (const tagObj of tagCounter) {
           const tagName = Object.keys(tagObj)[0];
-          const resourcesToVote = tagObj[tagName].selectedResources
-            .map((resourceSelected: { id: number }) => {
-              return resources?.records?.find(
-                (resource: { id: number }) =>
-                  resource.id === resourceSelected.id
-              );
-            })
-            .filter(Boolean);
-
+          const resourcesToVote = tagObj[tagName].selectedResources || [];
           allResourcesToVote = allResourcesToVote.concat(resourcesToVote);
         }
 
@@ -542,18 +644,27 @@ function StemBegroot({
 
           await doVote(uniqueResourcesToVote);
           submitted = true;
+          console.log(
+            `[stem-begroot] vote submitted: resources=${uniqueResourcesToVote.length} type=perTag`
+          );
           votePendingStorage.clearVotePendingPerTag();
           selectedResourcesStorage.clearSelectedResources();
+          setSelectedResources([]);
         }
       } else {
         if (selectedResources.length > 0) {
           votePendingStorage.clearVotePending();
           await doVote(selectedResources);
+          console.log(
+            `[stem-begroot] vote submitted: resources=${selectedResources.length}`
+          );
           selectedResourcesStorage.clearSelectedResources();
+          setSelectedResources([]);
           submitted = true;
         }
       }
     } catch (err: any) {
+      console.error(`[stem-begroot] vote failed: error=${err?.message}`);
       notifyVoteMessage(err.message, true);
     } finally {
       submitInProgressRef.current = false;
@@ -648,6 +759,12 @@ function StemBegroot({
     statuses?: Array<{ extraFunctionality?: { canLike?: boolean } }>;
   }) => {
     return canLikeResource(resource);
+  };
+
+  const getOriginalResourceUrlText = () => {
+    if (props.originalResourceText) return props.originalResourceText;
+
+    return 'Bekijk het originele ingediende plan';
   };
 
   // For now only support budgeting and count
@@ -819,6 +936,63 @@ function StemBegroot({
     ? filteredResources
     : resources?.records || [];
 
+  const computeCanAddMore = useCallback((): boolean => {
+    let canAddMore = true;
+
+    if (
+      props?.votes?.voteType === 'countPerTag' ||
+      props?.votes?.voteType === 'budgetingPerTag'
+    ) {
+      const activeTagData = tagCounter.find((tagObj) => tagObj[activeTagTab]);
+      if (!activeTagData) return false;
+
+      const activeTag = activeTagData[activeTagTab];
+      const maxLimit = activeTag.max;
+      const currentCount = activeTag.current;
+
+      if (props.votes.voteType === 'countPerTag') {
+        canAddMore = currentCount < maxLimit;
+      }
+
+      if (props.votes.voteType === 'budgetingPerTag') {
+        const notUsedResources = filteredResources.filter(
+          (allR: { id: number }) =>
+            !selectedResources.find((selectedR) => allR.id === selectedR.id)
+        );
+
+        canAddMore = notUsedResources.some(
+          (r: { budget: number }) => r.budget <= maxLimit - currentCount
+        );
+      }
+    } else {
+      const notUsedResources = resources?.records.filter(
+        (allR: { id: number }) =>
+          !selectedResources.find((selectedR) => allR.id === selectedR.id)
+      );
+
+      canAddMore =
+        props.votes.voteType === 'budgeting'
+          ? notUsedResources.some(
+              (r: { budget: number }) =>
+                r.budget <= props.votes.maxBudget - budgetUsed
+            )
+          : Math.max(props.votes.maxResources - selectedResources.length, 0) >
+            0;
+    }
+
+    return canAddMore;
+  }, [
+    props.votes.voteType,
+    props.votes.maxBudget,
+    props.votes.maxResources,
+    tagCounter,
+    activeTagTab,
+    filteredResources,
+    selectedResources,
+    resources?.records,
+    budgetUsed,
+  ]);
+
   const step1ContainerRef = useRef<HTMLDivElement | null>(null);
   const scrollToElement = () => {
     if (step1ContainerRef.current) {
@@ -844,20 +1018,55 @@ function StemBegroot({
     }
   };
 
+  // Keep previous totalPages while loading to prevent UI flicker
+  const totalPagesRef = useRef(1);
+  if (!isLoading && resources?.metadata?.pageCount) {
+    totalPagesRef.current = resources.metadata.pageCount;
+  }
+  const totalPages = totalPagesRef.current;
+
+  // Scroll to top after page change (skip initial render)
+  const pendingScrollRef = useRef(false);
+  const pageInitialised = useRef(false);
   useEffect(() => {
-    if (filteredResources) {
-      const filtered: any = filteredResources || [];
-      const totalPagesCalc = Math.ceil(filtered?.length / itemsPerPage);
-
-      if (totalPagesCalc !== totalPages) {
-        setTotalPages(totalPagesCalc);
-      }
-
-      if (page !== 0) {
-        setPage(0);
-      }
+    if (!pageInitialised.current) {
+      pageInitialised.current = true;
+      return;
     }
-  }, [filteredResources]);
+    if (isLoading) {
+      pendingScrollRef.current = true;
+    } else {
+      scrollToTop();
+    }
+  }, [page]);
+  useEffect(() => {
+    if (!isLoading && pendingScrollRef.current) {
+      pendingScrollRef.current = false;
+      scrollToTop();
+    }
+  }, [isLoading]);
+
+  const scrollInitRef = useRef(false);
+  useEffect(() => {
+    if (isLoading) return;
+    if (!scrollInitRef.current) {
+      scrollInitRef.current = true;
+      return;
+    }
+    if (!scrollWhenMaxReached) return;
+    if (computeCanAddMore()) return;
+    scrollToElement();
+  }, [selectedResources, isLoading, scrollWhenMaxReached, computeCanAddMore]);
+
+  // Reset to first page when filters change (skip initial render)
+  const filtersInitialised = useRef(false);
+  useEffect(() => {
+    if (!filtersInitialised.current) {
+      filtersInitialised.current = true;
+      return;
+    }
+    setPage(0);
+  }, [tags, search, sort, activeTagTab]);
 
   useEffect(() => {
     setVisitedTagTabs((prev) =>
@@ -885,6 +1094,7 @@ function StemBegroot({
         resourceBtnEnabled={resourceSelectable}
         resourceBtnTextHandler={createItemBtnString}
         defineOriginalUrl={getOriginalResourceUrl}
+        defineOriginalUrlText={getOriginalResourceUrlText}
         openDetailDialog={openDetailDialog}
         setOpenDetailDialog={setOpenDetailDialog}
         isSimpleView={Boolean(props.isSimpleView)}
@@ -937,20 +1147,11 @@ function StemBegroot({
           }
         }}
         resourceDetailIndex={resourceDetailIndex}
-        statusIdsToLimitResourcesTo={initStatuses}
-        tagIdsToLimitResourcesTo={tags}
-        sort={sort}
-        allTags={allTags}
-        tags={tags}
         setFilteredResources={setFilteredResources}
         filteredResources={filteredResources}
         voteType={props?.votes?.voteType || 'likes'}
         typeSelector={typeSelector}
         activeTagTab={activeTagTab}
-        randomSortSeed={randomSortSeed}
-        currentPage={page}
-        pageSize={itemsPerPage}
-        filterBehavior={filterBehavior}
         displayModBreak={displayModBreak}
         modBreakTitle={props?.resources?.modbreakTitle || ''}
       />
@@ -1072,65 +1273,7 @@ function StemBegroot({
                     }
                   }
                 }}
-                decideCanAddMore={() => {
-                  let canAddMore = true;
-
-                  if (
-                    props?.votes?.voteType === 'countPerTag' ||
-                    props?.votes?.voteType === 'budgetingPerTag'
-                  ) {
-                    const activeTagData = tagCounter.find(
-                      (tagObj) => tagObj[activeTagTab]
-                    );
-                    if (!activeTagData) return false;
-
-                    const activeTag = activeTagData[activeTagTab];
-                    const maxLimit = activeTag.max;
-                    const currentCount = activeTag.current;
-
-                    if (props.votes.voteType === 'countPerTag') {
-                      canAddMore = currentCount < maxLimit;
-                    }
-
-                    if (props.votes.voteType === 'budgetingPerTag') {
-                      let notUsedResources = filteredResources.filter(
-                        (allR: { id: number }) =>
-                          !selectedResources.find(
-                            (selectedR) => allR.id === selectedR.id
-                          )
-                      );
-
-                      canAddMore = notUsedResources.some(
-                        (r: { budget: number }) =>
-                          r.budget <= maxLimit - currentCount
-                      );
-                    }
-                  } else {
-                    let notUsedResources = resources?.records.filter(
-                      (allR: { id: number }) =>
-                        !selectedResources.find(
-                          (selectedR) => allR.id === selectedR.id
-                        )
-                    );
-
-                    canAddMore =
-                      props.votes.voteType === 'budgeting'
-                        ? notUsedResources.some(
-                            (r: { budget: number }) =>
-                              r.budget <= props.votes.maxBudget - budgetUsed
-                          )
-                        : Math.max(
-                            props.votes.maxResources - selectedResources.length,
-                            0
-                          ) > 0;
-                  }
-
-                  if (!canAddMore && scrollWhenMaxReached) {
-                    scrollToElement();
-                  }
-
-                  return canAddMore;
-                }}
+                decideCanAddMore={computeCanAddMore}
               />
             </>
           ) : null}
@@ -1284,18 +1427,37 @@ function StemBegroot({
                     if (currentStep === 3) {
                       const submitted = await submitVoteAndCleanup();
                       if (submitted) {
+                        if (props.showConfetti) {
+                          fireConfetti();
+                        }
                         setCurrentStep(4);
                       }
                     } else if (currentStep === 4) {
-                      currentUser.logout({ url: location.href });
+                      const currentUrl = new URL(location.href);
+                      const params = currentUrl.searchParams;
+                      params.delete('openstadlogintoken');
+                      await currentUser.logout({ url: currentUrl.toString() });
                     } else {
                       setCurrentStep(currentStep + 1);
                     }
                   }}
                   disabled={(() => {
                     if (
-                      props.votes.voteType === 'countPerTag' ||
-                      props.votes.voteType === 'budgetingPerTag'
+                      props.votes.voteType === 'count' &&
+                      selectedResources.length < props.votes.minResources
+                    )
+                      return true;
+
+                    if (
+                      props.votes.voteType === 'budgeting' &&
+                      budgetUsed < props.votes.minBudget
+                    )
+                      return true;
+
+                    if (
+                      (props.votes.voteType === 'countPerTag' ||
+                        props.votes.voteType === 'budgetingPerTag') &&
+                      currentStep === 0
                     ) {
                       const unmetTags = tagCounter.filter((tagObj) => {
                         const key = Object.keys(tagObj)[0];
@@ -1317,7 +1479,8 @@ function StemBegroot({
                     return (
                       (props?.votes?.voteType === 'likes' ||
                         props?.votes?.voteType === 'budgeting') &&
-                      selectedResources.length === 0
+                      selectedResources.length === 0 &&
+                      currentStep === 0
                     );
                   })()}>
                   {(() => {
@@ -1468,22 +1631,13 @@ function StemBegroot({
                   }
                 }
               }}
-              statusIdsToLimitResourcesTo={initStatuses}
-              tagIdsToLimitResourcesTo={tags}
-              sort={sort}
-              allTags={allTags}
-              tags={tags}
               activeTagTab={activeTagTab}
               setFilteredResources={setFilteredResources}
               filteredResources={filteredResources}
               voteType={props?.votes?.voteType || 'likes'}
               typeSelector={typeSelector}
-              randomSortSeed={randomSortSeed}
               hideTagsForResources={hideTagsForResources}
               hideReadMore={hideReadMore}
-              currentPage={page}
-              pageSize={itemsPerPage}
-              filterBehavior={filterBehavior}
             />
             <Spacer size={3} />
 
@@ -1494,7 +1648,6 @@ function StemBegroot({
                   totalPages={totalPages || 1}
                   onPageChange={(newPage) => {
                     setPage(newPage);
-                    scrollToTop();
                   }}
                 />
               </div>

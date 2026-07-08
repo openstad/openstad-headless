@@ -8,9 +8,12 @@ import commentsByProject from './commentsByProject';
 import datalayer from './datalayer';
 import enqueteResultCount from './enqueteResultCount';
 import fetchx from './fetch';
+import markers from './markers';
 import projectVotedUsersCount from './projectVotedUsersCount';
 import resource from './resource';
+import resourceMarkers from './resource-markers';
 import resources from './resources';
+import statuses from './statuses';
 import submissions from './submissions';
 import tags from './tags';
 import user from './user';
@@ -91,6 +94,10 @@ function API(props = {}) {
     submitLike: resources.submitLike.bind(self),
   };
 
+  self.resourceMarkers = {
+    fetch: resourceMarkers.fetch.bind(self),
+  };
+
   self.choicesguide = {
     fetch: choicesguide.fetch.bind(self),
     create: choicesguide.create.bind(self),
@@ -99,6 +106,10 @@ function API(props = {}) {
   self.submissions = {
     fetch: submissions.fetch.bind(self),
     create: submissions.create.bind(self),
+  };
+
+  self.statuses = {
+    fetch: statuses.fetch.bind(self),
   };
 
   self.tags = {
@@ -114,6 +125,10 @@ function API(props = {}) {
 
   self.datalayer = {
     fetch: datalayer.fetch.bind(self),
+  };
+
+  self.markers = {
+    fetch: markers.fetch.bind(self),
   };
 
   self.widget = {

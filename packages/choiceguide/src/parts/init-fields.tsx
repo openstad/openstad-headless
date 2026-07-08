@@ -9,7 +9,12 @@ const getMinMaxByField = (key, data) => {
     : '';
 };
 
-export const InitializeFormFields = (items, data, showForm = true) => {
+export const InitializeFormFields = (
+  items,
+  data,
+  showForm = true,
+  questionsPerPage = 100
+) => {
   const formFields: FieldProps[] = [];
 
   if (typeof items === 'object' && items.length > 0) {
@@ -151,6 +156,10 @@ export const InitializeFormFields = (items, data, showForm = true) => {
           break;
         case 'imageUpload':
           fieldData['allowedTypes'] = item.allowedTypes || ['image/*'];
+          fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
+          break;
+        case 'documentUpload':
+          fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
           break;
         case 'text':
           if (item.defaultValue) {
@@ -190,10 +199,40 @@ export const InitializeFormFields = (items, data, showForm = true) => {
           fieldData['matrixMultiple'] = item?.matrixMultiple || false;
           fieldData['defaultValue'] = [];
           break;
+        case 'pagination':
+          fieldData['type'] = 'pagination';
+          break;
+        case 'sort':
+          fieldData['type'] = 'sort';
+          fieldData['options'] = item.options || [];
+          fieldData['numberingStyle'] = item.numberingStyle || 'none';
+          break;
       }
 
       formFields.push(fieldData);
     }
+  }
+
+  if (questionsPerPage < formFields.length) {
+    const result: FieldProps[] = [];
+    let count = 0;
+
+    for (const field of formFields) {
+      if (field.type === 'pagination') {
+        result.push(field);
+        count = 0;
+        continue;
+      }
+
+      if (count > 0 && count % questionsPerPage === 0) {
+        result.push({ type: 'pagination' } as any);
+      }
+
+      result.push(field);
+      count++;
+    }
+
+    return result;
   }
 
   return formFields;

@@ -1,7 +1,9 @@
 import {
+  CommentWidgetContext,
   Comments,
   CommentsWidgetProps,
 } from '@openstad-headless/comments/src/comments';
+import CommentComponent from '@openstad-headless/comments/src/parts/comment';
 import DataStore from '@openstad-headless/data-store/src';
 import { FormValue } from '@openstad-headless/form/src/form';
 import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
@@ -118,6 +120,10 @@ export type DocumentMapProps = BaseProps &
     defaultSorting?: string;
     sorting?: Array<{ value: string; label: string }>;
     displaySearchBar?: boolean;
+    markerClickBehavior?: 'sidebar' | 'popup';
+    hideCommentsList?: boolean;
+    hideFilters?: boolean;
+    hideToggleMarkers?: boolean;
   };
 
 function DocumentMap({
@@ -162,6 +168,10 @@ function DocumentMap({
   defaultSorting,
   sorting = [],
   displaySearchBar = false,
+  markerClickBehavior = 'sidebar',
+  hideCommentsList = false,
+  hideFilters = false,
+  hideToggleMarkers = false,
   ...props
 }: DocumentMapProps) {
   const [sort, setSort] = useState<string | undefined>(
@@ -258,6 +268,7 @@ function DocumentMap({
     urlTagIdsArray && allTags
       ? allTags.filter((tag: { id: number }) => urlTagIdsArray.includes(tag.id))
       : [];
+  const [refreshComments, setRefreshComments] = useState(0);
 
   const useCommentsData = {
     projectId: props.projectId,
@@ -265,6 +276,8 @@ function DocumentMap({
     sentiment: sentiment,
     onlyIncludeTagIds: filteredTagsIdsString || undefined,
     search: search || '',
+    refreshKey: refreshComments,
+    sort: sort || 'createdAt_asc',
   };
 
   const { data: comments } = datastore.useComments(useCommentsData);
@@ -273,7 +286,7 @@ function DocumentMap({
   const [filteredComments, setFilteredComments] =
     useState<Array<Comment>>(comments);
   const [commentValue, setCommentValue] = useState<string>('');
-  const [refreshComments, setRefreshComments] = useState(false);
+  const [isSubmittingComment, setIsSubmittingComment] = useState(false);
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setCommentValue(e.target.value);
@@ -358,15 +371,19 @@ function DocumentMap({
   const leafletMapRef = useRef<HTMLDivElement>(null);
 
   const imageUrl = resource.images ? resource.images[0].url : '';
-  const img = new Image();
-  img.src = imageUrl;
-  img.onload = () => {
-    const containerWidth = leafletMapRef.current?.offsetWidth || 1920;
-    const imageWidth = containerWidth * 0.8;
-    const imageHeight = (img.height / img.width) * imageWidth;
-    setDocumentWidth(imageWidth);
-    setDocumentHeight(imageHeight);
-  };
+
+  useEffect(() => {
+    if (!imageUrl) return;
+    const img = new Image();
+    img.onload = () => {
+      const containerWidth = leafletMapRef.current?.offsetWidth || 1920;
+      const imageWidth = containerWidth * 0.8;
+      const imageHeight = (img.height / img.width) * imageWidth;
+      setDocumentWidth(imageWidth);
+      setDocumentHeight(imageHeight);
+    };
+    img.src = imageUrl;
+  }, [imageUrl]);
 
   const [bounds, setBounds] = useState<Array<Array<number>> | null>(null);
 
@@ -491,11 +508,13 @@ function DocumentMap({
   const addComment = async (e: any, position: any) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isSubmittingComment) return;
 
     if (
       commentValue.length >= props.comments?.descriptionMinLength &&
       commentValue.length <= props.comments?.descriptionMaxLength
     ) {
+      setIsSubmittingComment(true);
       try {
         const defaultTagsArray = defaultTags
           ? defaultTags
@@ -514,6 +533,15 @@ function DocumentMap({
           createdAt: new Date(),
           sentiment: 'no sentiment',
           tags: allTags,
+          confirmation: props.commentsWidget?.confirmation || false,
+          confirmationReplies:
+            props.commentsWidget?.confirmationReplies || false,
+          overwriteEmailAddress:
+            props.commentsWidget?.confirmation &&
+            props.commentsWidget?.overwriteEmailAddress
+              ? props.commentsWidget.overwriteEmailAddress
+              : '',
+          embeddedUrl: window.location.href,
         });
 
         if (goToLastPage && displayPagination) {
@@ -531,13 +559,15 @@ function DocumentMap({
         setSelectedCommentIndex(newIndex);
         setSelectedMarkerIndex(newIndex);
 
-        setRefreshComments((prev) => !prev);
+        setRefreshComments((prev) => prev + 1);
         scrollToComment(newIndex);
 
         notifySuccess();
       } catch (error) {
         notifyFailed();
         console.error('Error creating comment:', error);
+      } finally {
+        setIsSubmittingComment(false);
       }
     } else {
       return;
@@ -574,6 +604,9 @@ function DocumentMap({
     requiredUserRole: props.comments?.requiredUserRole || 'member',
   };
 
+  const isPopupMarkerBehavior = markerClickBehavior === 'popup';
+  const shouldShowCommentsList = !(isPopupMarkerBehavior && hideCommentsList);
+
   const { data: currentUser } = datastore.useCurrentUser({ ...args });
 
   const [canComment, setCanComment] = useState(args.canComment);
@@ -606,6 +639,7 @@ function DocumentMap({
   const [overridePage, setoverridePage] = useState<number | undefined>(
     undefined
   );
+  const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isScrollable = function (ele: HTMLElement) {
     const hasScrollableContent = ele.scrollHeight > ele.clientHeight;
@@ -616,28 +650,34 @@ function DocumentMap({
   };
 
   const scrollToComment = (index: number) => {
+    if (scrollIntervalRef.current) {
+      clearInterval(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
+    }
+
     let attempts = 0;
     const maxAttempts = 10;
     const interval = 100;
+
+    if (displayPagination) {
+      const currentComment = filteredComments?.findIndex(
+        (comment: any) => parseInt(comment.id) === index
+      );
+      if (typeof currentComment === 'number' && currentComment >= 0) {
+        const commentPage = Math.floor(currentComment / itemsPerPage);
+        setoverridePage(commentPage);
+      }
+    }
 
     const tryScrollToComment = () => {
       const getAllComments = Array.from(
         document.getElementsByClassName('comment-item')
       );
-      getAllComments.forEach((comment, i) => {
-        if (i !== index) {
+      getAllComments.forEach((comment) => {
+        if (comment.id !== `comment-${index}`) {
           comment.classList.remove('selected');
         }
       });
-
-      if (displayPagination) {
-        const currentComment = filteredComments?.findIndex(
-          (comment: any) => parseInt(comment.id) === index
-        );
-        const commentPage = Math.floor(currentComment / itemsPerPage);
-
-        setoverridePage(commentPage);
-      }
 
       const commentElement = document.getElementById(`comment-${index}`);
       if (commentElement) {
@@ -648,7 +688,7 @@ function DocumentMap({
         const commentEl = commentElement as HTMLElement;
         const containerEl = containerElement as HTMLElement;
 
-        if (commentElement && containerElement) {
+        if (containerElement) {
           const commentRect = commentEl.getBoundingClientRect();
           const scrollTop =
             window.pageYOffset || document.documentElement.scrollTop;
@@ -667,17 +707,23 @@ function DocumentMap({
               behavior: 'smooth',
             });
           }
-
-          commentEl.classList.add('selected');
-          clearInterval(intervalId);
-        } else if (attempts < maxAttempts) {
-          attempts++;
-        } else {
-          clearInterval(intervalId);
         }
+
+        commentEl.classList.add('selected');
+        if (scrollIntervalRef.current) {
+          clearInterval(scrollIntervalRef.current);
+          scrollIntervalRef.current = null;
+        }
+        return;
+      }
+
+      attempts++;
+      if (attempts >= maxAttempts && scrollIntervalRef.current) {
+        clearInterval(scrollIntervalRef.current);
+        scrollIntervalRef.current = null;
       }
     };
-    const intervalId = setInterval(tryScrollToComment, interval);
+    scrollIntervalRef.current = setInterval(tryScrollToComment, interval);
   };
 
   const MarkerWithId: React.FC<ExtendedMarkerProps> = ({
@@ -695,7 +741,11 @@ function DocumentMap({
         ref={markerRef}
         icon={MarkerIcon({
           icon: {
-            className: `${index === selectedMarkerIndex ? '--highlightedIcon' : '--defaultIcon'} ${isDefaultColor ? 'basic-icon' : ''} id-${index}`,
+            className: `${
+              index === selectedMarkerIndex
+                ? '--highlightedIcon'
+                : '--defaultIcon'
+            } ${isDefaultColor ? 'basic-icon' : ''} id-${index}`,
             color: !isDefaultColor ? color : undefined,
           },
         })}
@@ -705,9 +755,15 @@ function DocumentMap({
               setSelectedMarkerIndex(-1);
               setSelectedCommentIndex(-1);
             } else {
+              setPopupPosition(null);
+              if (isPopupMarkerBehavior) {
+                updateMapBounds(true);
+              }
               setSelectedMarkerIndex(index);
               setSelectedCommentIndex(index);
-              scrollToComment(index);
+              if (!isPopupMarkerBehavior) {
+                scrollToComment(index);
+              }
             }
           },
           keydown: (e: L.LeafletKeyboardEvent) => {
@@ -716,15 +772,55 @@ function DocumentMap({
                 setSelectedMarkerIndex(-1);
                 setSelectedCommentIndex(-1);
               } else {
+                setPopupPosition(null);
+                if (isPopupMarkerBehavior) {
+                  updateMapBounds(true);
+                }
                 setSelectedMarkerIndex(index);
                 setSelectedCommentIndex(index);
-                scrollToComment(index);
+                if (!isPopupMarkerBehavior) {
+                  scrollToComment(index);
+                }
               }
             }
           },
         }}
       />
     );
+  };
+
+  const selectedComment: any =
+    filteredComments?.find(
+      (comment: any) => parseInt(comment.id, 10) === selectedCommentIndex
+    ) || null;
+  const popupComment =
+    selectedComment && isPopupMarkerBehavior
+      ? {
+          ...selectedComment,
+          replies: [],
+        }
+      : selectedComment;
+  const hasOpenPopup =
+    !!popupPosition || (isPopupMarkerBehavior && !!popupComment);
+
+  const popupCommentWidgetContextValue: CommentsWidgetProps & {
+    setRefreshComments: React.Dispatch<React.SetStateAction<number>>;
+  } = {
+    ...props,
+    resourceId: resourceId || '',
+    canComment: args.canComment,
+    canLike:
+      typeof props.comments?.canLike != 'undefined'
+        ? props.comments.canLike
+        : true,
+    canDislike:
+      typeof props.comments?.canDislike != 'undefined'
+        ? props.comments.canDislike
+        : false,
+    canReply: false,
+    placeholder: props.commentsWidget?.placeholder || 'Typ hier uw reactie',
+    requiredUserRole: args.requiredUserRole,
+    setRefreshComments,
   };
 
   const getUrl = () => {
@@ -798,16 +894,20 @@ function DocumentMap({
 
   const mapRef = useRef<any>(null);
 
-  useEffect(() => {
+  const updateMapBounds = (disableBounds: boolean) => {
     const map = mapRef.current;
-    if (map) {
-      if (popupPosition) {
-        map.setMaxBounds([]);
-      } else {
-        map.setMaxBounds(bounds);
-      }
+    if (!map) return;
+
+    if (disableBounds) {
+      map.setMaxBounds([]);
+    } else if (bounds) {
+      map.setMaxBounds(bounds);
     }
-  }, [popupPosition]);
+  };
+
+  useEffect(() => {
+    updateMapBounds(hasOpenPopup);
+  }, [bounds, hasOpenPopup]);
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -913,9 +1013,34 @@ function DocumentMap({
   }, [mapRef.current, isTouchDevice]);
 
   return !bounds ? null : (
-    <div className={`documentMap--container ${largeDoc ? '--largeDoc' : ''}`}>
+    <div
+      className={`documentMap--container ${largeDoc ? '--largeDoc' : ''} ${displayResourceInfo === 'above' ? '--info-above' : ''} ${displayResourceInfo === 'below' ? '--info-below' : ''}`}>
+      {displayResourceInfo === 'above' && (
+        <div className="resource-info-full">
+          <section className="content-intro">
+            {displayResourceTitle === 'yes' && resource.title ? (
+              <Heading level={1}>{resource.title}</Heading>
+            ) : null}
+            {displayResourceSummary === 'yes' && resource.summary ? (
+              <Heading
+                level={2}
+                appearance="utrecht-heading-4"
+                dangerouslySetInnerHTML={{
+                  __html: resource.summary,
+                }}></Heading>
+            ) : null}
+            {displayResourceDescription === 'yes' && resource.description ? (
+              <Paragraph
+                dangerouslySetInnerHTML={{ __html: resource.description }}
+              />
+            ) : null}
+          </section>
+        </div>
+      )}
       <div
-        className={`map-container ${!toggleMarker ? '--hideMarkers' : ''} ${displayMapSide}`}>
+        className={`map-container ${
+          !toggleMarker ? '--hideMarkers' : ''
+        } ${displayMapSide}`}>
         {(displayResourceInfo === 'left' ||
           accessibilityUrlVisible ||
           backUrl ||
@@ -1003,7 +1128,9 @@ function DocumentMap({
             zoom={zoom}
             zoomSnap={0}
             maxBounds={
-              popupPosition ? undefined : (bounds as LatLngBoundsLiteral)
+              popupPosition || (isPopupMarkerBehavior && selectedComment)
+                ? undefined
+                : (bounds as LatLngBoundsLiteral)
             }>
             <MapEvents />
             {filteredComments &&
@@ -1064,7 +1191,10 @@ function DocumentMap({
                     </Button>
                   </>
                 ) : (
-                  <form>
+                  <form
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                    }}>
                     <div>
                       <FormLabel htmlFor="commentBox">
                         {addCommentText}
@@ -1158,7 +1288,7 @@ function DocumentMap({
                       )}
                     <Button
                       appearance="primary-action-button"
-                      type="submit"
+                      type="button"
                       onClick={(e) => addComment(e, popupPosition)}>
                       {submitCommentText}
                     </Button>
@@ -1166,12 +1296,46 @@ function DocumentMap({
                 )}
               </Popup>
             )}
+            {isPopupMarkerBehavior &&
+              popupComment?.location &&
+              !popupPosition && (
+                <Popup
+                  className="document-map-comment-popup"
+                  position={popupComment.location}
+                  eventHandlers={{
+                    popupclose: () => {
+                      setSelectedMarkerIndex(-1);
+                      setSelectedCommentIndex(-1);
+                    },
+                  }}>
+                  <CommentWidgetContext.Provider
+                    value={popupCommentWidgetContextValue}>
+                    <CommentComponent
+                      comment={popupComment}
+                      disableReplyFeatures
+                      disableLocationLink
+                      keepMenuIconStatic
+                      adminLabel={props.comments?.adminLabel || 'admin'}
+                      editorLabel={props.comments?.editorLabel}
+                      setRefreshComments={() =>
+                        setRefreshComments((prev) => prev + 1)
+                      }
+                      submitComment={() =>
+                        setRefreshComments((prev) => prev + 1)
+                      }
+                      variant={props.commentsWidget?.variant || 'medium'}
+                    />
+                  </CommentWidgetContext.Provider>
+                </Popup>
+              )}
           </MapContainer>
 
           {!!args.canComment && (
             <>
               <Button
-                className={`info-trigger ${infoPopupButtonText ? 'button-has-text' : ''}`}
+                className={`info-trigger ${
+                  infoPopupButtonText ? 'button-has-text' : ''
+                }`}
                 appearance="primary-action-button"
                 onClick={() => setModalOpen(true)}>
                 <i className="ri-information-line"></i>
@@ -1212,17 +1376,19 @@ function DocumentMap({
       <div className="content document-map-info-container" ref={contentRef}>
         {!isDefinitive && (
           <>
-            <div className="toggleMarkers">
-              <Checkbox
-                id="toggleMarkers"
-                defaultChecked
-                onChange={() => setToggleMarker(!toggleMarker)}
-              />
-              <FormLabel htmlFor="toggleMarkers">
-                {' '}
-                <Paragraph>{addMarkerText}</Paragraph>{' '}
-              </FormLabel>
-            </div>
+            {!hideToggleMarkers && (
+              <div className="toggleMarkers">
+                <Checkbox
+                  id="toggleMarkers"
+                  defaultChecked
+                  onChange={() => setToggleMarker(!toggleMarker)}
+                />
+                <FormLabel htmlFor="toggleMarkers">
+                  {' '}
+                  <Paragraph>{addMarkerText}</Paragraph>{' '}
+                </FormLabel>
+              </div>
+            )}
             {displayLikes && (
               <>
                 <Likes
@@ -1290,7 +1456,8 @@ function DocumentMap({
           </section>
         )}
 
-        {tagGroups &&
+        {!hideFilters &&
+        tagGroups &&
         Array.isArray(tagGroups) &&
         tagGroups.length > 0 &&
         datastore ? (
@@ -1332,11 +1499,18 @@ function DocumentMap({
           />
         ) : null}
 
-        {!isDefinitive && (
+        {!isDefinitive && shouldShowCommentsList && (
           <div ref={containerRef}>
             <Comments
               {...props}
-              key={refreshComments ? 'refresh' : 'no-refresh'}
+              key={`refresh-${refreshComments}`}
+              confirmation={props.commentsWidget?.confirmation || false}
+              confirmationReplies={
+                props.commentsWidget?.confirmationReplies || false
+              }
+              overwriteEmailAddress={
+                props.commentsWidget?.overwriteEmailAddress || ''
+              }
               onlyIncludeTags={
                 selectedTagsString || filteredTagsIdsString || ''
               }
@@ -1351,12 +1525,36 @@ function DocumentMap({
               displayPagination={displayPagination}
               onGoToLastPage={setGoToLastPage}
               overridePage={overridePage}
+              onOverridePageConsumed={() => setoverridePage(undefined)}
               overrideSort={sort}
               searchTerm={search}
             />
           </div>
         )}
       </div>
+
+      {displayResourceInfo === 'below' && (
+        <div className="resource-info-full">
+          <section className="content-intro">
+            {displayResourceTitle === 'yes' && resource.title ? (
+              <Heading level={1}>{resource.title}</Heading>
+            ) : null}
+            {displayResourceSummary === 'yes' && resource.summary ? (
+              <Heading
+                level={2}
+                appearance="utrecht-heading-4"
+                dangerouslySetInnerHTML={{
+                  __html: resource.summary,
+                }}></Heading>
+            ) : null}
+            {displayResourceDescription === 'yes' && resource.description ? (
+              <Paragraph
+                dangerouslySetInnerHTML={{ __html: resource.description }}
+              />
+            ) : null}
+          </section>
+        </div>
+      )}
 
       <button
         className={`back-to-top ${showButton ? 'show' : ''}`}

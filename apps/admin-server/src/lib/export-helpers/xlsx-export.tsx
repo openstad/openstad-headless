@@ -21,7 +21,11 @@ export const exportToXLSX = (
           }
         });
       } else if (flat.hasOwnProperty(key)) {
-        cleaned[label] = flat[key];
+        if (key === 'isSpam') {
+          cleaned[label] = flat[key] ? 'Ja' : 'Nee';
+        } else {
+          cleaned[label] = flat[key];
+        }
       }
     });
     return cleaned;

@@ -18,7 +18,7 @@ let createProjectConfig = function ({
   if (useOnlyDefinedOnProject) {
     // use only providers that are configured on the project, but fallback on defaults if nothing is defined on the project
     let projectProviders = Object.keys(projectSpecificConfig.provider || {});
-    if (projectProviders) {
+    if (projectProviders.length > 0) {
       let mergedProviders = Object.keys(mergedConfig.provider || {});
       mergedProviders.map((target) => {
         if (!projectProviders.find((p) => p == target)) {
@@ -48,11 +48,12 @@ let getConfig = async function ({ project, useAuth = 'default' }) {
   authConfig = merge.recursive(authConfig, providerConfig);
 
   if (!authConfig.jwtSecret || authConfig.jwtSecret == 'REPLACE THIS VALUE!!') {
-    // todo: move this to a place where is called once, not every request
-    console.log('===========================');
-    console.log('jwtSecret is not configured');
-    console.log('¡¡ this should be fixed !!!');
-    console.log('===========================');
+    if (!getConfig._jwtWarningShown) {
+      console.warn(
+        `[${new Date().toISOString()}][auth-settings] jwtSecret is not configured - this must be fixed`
+      );
+      getConfig._jwtWarningShown = true;
+    }
   }
 
   return authConfig;

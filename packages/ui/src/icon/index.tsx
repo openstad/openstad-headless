@@ -21,7 +21,9 @@ export function Icon({
 }) {
   return (
     <div
-      className={`icon ${text === undefined || iconOnly === true ? 'no-label' : ''} ${className}`}
+      className={`icon ${
+        text === undefined || iconOnly === true ? 'no-label' : ''
+      } ${className}`}
       aria-hidden={iconOnly ? 'true' : 'false'}
       onClick={onClick}
       data-description={description ? description : undefined}>

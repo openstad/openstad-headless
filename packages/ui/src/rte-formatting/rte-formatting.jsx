@@ -20,7 +20,7 @@ import {
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 
-function unwrapSingleRootDiv(content) {
+export function unwrapSingleRootDiv(content) {
   if (typeof content !== 'string') return content;
   const trimmed = content.trim();
   if (!trimmed) return trimmed;
@@ -193,7 +193,8 @@ export default function RenderContent(content, options = {}) {
           <Link
             key={index}
             href={node.attribs.href}
-            target={node.attribs.target}>
+            target={node.attribs.target}
+            rel={node.attribs.rel}>
             {children}
           </Link>
         );

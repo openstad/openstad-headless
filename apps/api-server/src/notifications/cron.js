@@ -28,7 +28,7 @@ module.exports = async function processQueuedNotifications() {
       for (let type of types) {
         let froms = Object.keys(targets[projectId][type]);
         for (let from of froms) {
-          let tos = Object.keys(targets[projectId][type][froms]);
+          let tos = Object.keys(targets[projectId][type][from]);
           for (let to of tos) {
             // target is now an array of notifications
             let target = targets[projectId][type][from][to];

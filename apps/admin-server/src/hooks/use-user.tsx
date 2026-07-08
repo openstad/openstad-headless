@@ -1,4 +1,3 @@
-import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 
@@ -20,7 +19,7 @@ export default function useUser() {
   if (userDecode) {
     const match = userDecode.match(/^(.+)-\*-(.+)$/);
     if (match) {
-      url = `/api/openstad/api/user?byIdpUser[identifier]=${encodeURIComponent(match[2])}&byIdpUser[provider]=${encodeURIComponent(match[1])}`;
+      url = `/api/openstad/api/user?byIdpUser[identifier]=${encodeURIComponent(match[2])}&byIdpUser[provider]=${encodeURIComponent(match[1])}&uniqueByIdpUser=0`;
     } else {
       url = `/api/openstad/api/user/${encodeURIComponent(userDecode)}`;
     }
@@ -48,5 +47,25 @@ export default function useUser() {
     return await res.json();
   }
 
-  return { ...userSwr, updateUser };
+  async function anonymizeUser(body: {
+    id: number;
+    projectId: number;
+    anonymizeUserName?: string;
+  }) {
+    const url = `/api/openstad/api/project/${body.projectId}/user/${body.id}/do-anonymizeall`;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        anonymizeUserName: body.anonymizeUserName,
+      }),
+    });
+    if (!res.ok) throw new Error('User anonymization failed');
+
+    return await res.json();
+  }
+
+  return { ...userSwr, updateUser, anonymizeUser };
 }

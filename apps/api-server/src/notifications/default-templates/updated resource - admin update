@@ -1,33 +1,24 @@
 <!-- template: updated resource - admin update -->
-<subject>updated resource - admin update</subject>
+<subject>Resource bijgewerkt op {{ project.title }}</subject>
 <body>
   <mjml>
     <mj-body>
-      <mj-raw>
-        <!-- Company Header -->
-      </mj-raw>
-      <mj-section>
-        <mj-column width="200px">
-          <mj-image src="{{ imagePath }}/logo-openstad.png"> </mj-image>
-        </mj-column>
-      </mj-section>
-      <mj-raw>
-        <!-- Image Header -->
-      </mj-raw>
-      <mj-section>
-        <mj-column width="600px">
-          <mj-image src="{{ imagePath }}/mail-header.jpg"></mj-image>
-        </mj-column>
-      </mj-section>
       <mj-raw>
         <!-- Mail context -->
       </mj-raw>
       <mj-section>
         <mj-column width="500px">
-          <mj-text font-size="20px" font-family="Helvetica Neue">Een bestaande resource is aangepast.</mj-text>
+          <mj-text font-size="20px" font-family="Helvetica Neue">
+            Er is een resource bijgewerkt.
+          </mj-text>
           <mj-text>Beste administrator,</mj-text>
-          <mj-text color="#525252">Er is recentelijk een resource aangepast. Hieronder kunt u direct de nieuwe resource bekijken in het admin-paneel.</mj-text>
-          <mj-button background-color="#12B886" href="{{redirectUrl}}">Weergeven</mj-button>
+          <mj-text color="#525252">
+            Er is recentelijk een bestaande resource aangepast. Hieronder kunt
+            u direct de resource bekijken in het admin-paneel.
+          </mj-text>
+          <mj-button background-color="#12B886" href="{{ adminResourceUrl or redirectUrl }}">
+            Weergeven
+          </mj-button>
         </mj-column>
       </mj-section>
       <mj-raw>
@@ -38,7 +29,7 @@
           <mj-text>Of gebruik deze link in je browser:</mj-text>
         </mj-column>
         <mj-column>
-          <mj-text>{{redirectUrl}}</mj-text>
+          <mj-text>{{ adminResourceUrl or redirectUrl }}</mj-text>
         </mj-column>
       </mj-section>
     </mj-body>

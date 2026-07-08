@@ -37,7 +37,9 @@ module.exports = {
           if (!notificationsToBeSent[project.id])
             notificationsToBeSent[project.id] = { project, messages: [] };
           notificationsToBeSent[project.id].messages.push(
-            `Project ${project.title} ${project.url ? ' (' + project.url + ')' : ''} has an endDate in the past but projectHasEnded is not set.`
+            `Project ${project.title} ${
+              project.url ? ' (' + project.url + ')' : ''
+            } has an endDate in the past but projectHasEnded is not set.`
           );
         }
 
@@ -53,6 +55,18 @@ module.exports = {
           notificationsToBeSent[project.id].messages.push(
             `Project ${project.title} (${project.domain}) has ended but is not yet anonymized.`
           );
+        }
+
+        let blockedByProject = await projectsWithIssues.blockedDomains();
+        for (let projectId of Object.keys(blockedByProject)) {
+          let { project, blocks } = blockedByProject[projectId];
+          if (!notificationsToBeSent[projectId])
+            notificationsToBeSent[projectId] = { project, messages: [] };
+          for (let block of blocks) {
+            notificationsToBeSent[projectId].messages.push(
+              `Widget ${block.widgetId} was blocked ${block.count}x on domain "${block.domain}" (last seen: ${block.referer})`
+            );
+          }
         }
 
         // send notifications

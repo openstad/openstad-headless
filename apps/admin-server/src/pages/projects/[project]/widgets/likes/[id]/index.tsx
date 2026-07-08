@@ -1,3 +1,4 @@
+import AuditLogTable from '@/components/audit-log-table';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import WidgetPreview from '@/components/widget-preview';
@@ -11,7 +12,7 @@ import {
 import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 
 import LikesDisplay from './weergave';
 
@@ -57,6 +58,7 @@ export default function WidgetLikes({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="display">Instellingen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             <TabsContent value="display" className="p-0">
               {previewConfig ? (
@@ -78,6 +80,13 @@ export default function WidgetLikes({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
+            </TabsContent>
+            <TabsContent value="auditlog" className="p-0">
+              <AuditLogTable
+                modelName="widgets"
+                modelId={id as string}
+                projectId={projectId as string}
+              />
             </TabsContent>
           </Tabs>
 

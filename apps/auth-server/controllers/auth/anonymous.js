@@ -8,6 +8,8 @@ const login = require('connect-ensure-login');
 const tokenUrl = require('../../services/tokenUrl');
 const authAnonymousConfig = require('../../config/auth').get(authType);
 const url = require('url');
+const clientAuth = require('../../utils/clientAuth');
+const { logAuthEvent } = require('../../middleware/auditLog');
 
 exports.login = (req, res, next) => {
   /**
@@ -30,14 +32,14 @@ exports.register = (req, res, next) => {
   ) {
     req.flash('error', { msg: 'Cannot create new users' });
     return res.redirect(
-      `/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`
+      `/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : ''}`
     );
   }
 
   if (!req.session.createAnonymousUser) {
     req.flash('error', { msg: 'Cookies zijn onmisbaar op deze site' });
     return res.redirect(
-      `/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`
+      `/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : ''}`
     );
   } else {
     req.session.createAnonymousUser = false;
@@ -47,7 +49,7 @@ exports.register = (req, res, next) => {
         if (!user) {
           req.flash('error', { msg: authAnonymousConfig.errorMessage });
           return res.redirect(
-            `/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri}`
+            `/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : ''}`
           );
         }
 
@@ -70,21 +72,45 @@ exports.register = (req, res, next) => {
             ip: ip,
           };
 
-          const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(req.query.redirect_uri)}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+          if (!req.query.redirect_uri)
+            return next(
+              new Error(
+                'No redirect_uri provided and no default redirectUrl configured for this client'
+              )
+            );
+          const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(
+            req.query.redirect_uri
+          )}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
+
+          logAuthEvent(req, 'register', {
+            userId: user.id,
+            data: { method: 'anonymous', email: req.body.email },
+          });
 
           try {
-            db.ActionLog.create(values)
+            const defaultRoleId = req.client.config.defaultRoleId
+              ? req.client.config.defaultRoleId
+              : authAnonymousConfig.defaultRoleId;
+            db.UserRole.create({
+              clientId: req.client.id,
+              roleId: defaultRoleId,
+              userId: user.id,
+            })
+              .then(() =>
+                clientAuth.initializeClientAuth(req.session, req.client, user, {
+                  authType,
+                  twoFactorValid: false,
+                })
+              )
+              .then(() => clientAuth.saveSession(req.session))
+              .then(() => db.ActionLog.create(values))
               .then(() => {
                 return res.redirect(authorizeUrl);
               })
               .catch((err) => {
-                // Redirect if it succeeds to authorize screen
                 return res.redirect(authorizeUrl);
-                //		next(err);
               });
           } catch (e) {
-            // Redirect if it succeeds to authorize screen
-
             return res.redirect(authorizeUrl);
           }
         });

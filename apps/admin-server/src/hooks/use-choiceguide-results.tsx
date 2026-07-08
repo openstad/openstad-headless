@@ -1,5 +1,4 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
-import useSWR from 'swr';
 
 export default function useChoiceGuideResults(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);

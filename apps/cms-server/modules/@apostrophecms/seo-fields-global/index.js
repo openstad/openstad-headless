@@ -1,3 +1,31 @@
+function normalizeCanonicalUrl(value) {
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  const trimmedValue = value.trim();
+  if (!trimmedValue) {
+    return '';
+  }
+
+  const candidate = /^https?:\/\//i.test(trimmedValue)
+    ? trimmedValue
+    : `https://${trimmedValue}`;
+
+  try {
+    const parsed = new URL(candidate);
+    parsed.hash = '';
+
+    if (parsed.pathname === '/') {
+      parsed.pathname = '';
+    }
+
+    return parsed.toString().replace(/\/$/, '');
+  } catch (err) {
+    return '';
+  }
+}
+
 function getDefaults(self, req) {
   const project =
     (req && req.project) ||
@@ -5,8 +33,10 @@ function getDefaults(self, req) {
     {};
   const global = (req && req.data && req.data.global) || {};
 
+  const canonicalSource = project.fullUrl || project.url;
+
   return {
-    canonicalDefault: project.url || '',
+    canonicalDefault: normalizeCanonicalUrl(canonicalSource),
     organizationDefault:
       project.title ||
       global.projectTitle ||
@@ -98,6 +128,9 @@ module.exports = {
           }
 
           const defaults = getDefaults(self);
+          const project =
+            (self.apos && self.apos.options && self.apos.options.project) || {};
+          const hostnameOnlyCanonical = normalizeCanonicalUrl(project.url);
           const globalTypes = {
             $in: ['@apostrophecms/global', 'apostrophe-global'],
           };
@@ -117,6 +150,28 @@ module.exports = {
               );
             } catch (err) {
               logSafeWarning(self, 'Canonical URL backfill failed', err);
+            }
+
+            // Fix previously saved wrong canonicals (hostname-only instead of full URL)
+            if (
+              hostnameOnlyCanonical &&
+              defaults.canonicalDefault !== hostnameOnlyCanonical
+            ) {
+              try {
+                await self.apos.doc.db.updateMany(
+                  {
+                    type: globalTypes,
+                    seoSiteCanonicalUrl: hostnameOnlyCanonical,
+                  },
+                  { $set: { seoSiteCanonicalUrl: defaults.canonicalDefault } }
+                );
+              } catch (err) {
+                logSafeWarning(
+                  self,
+                  'Canonical URL correction backfill failed',
+                  err
+                );
+              }
             }
           }
 

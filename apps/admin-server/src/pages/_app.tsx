@@ -8,7 +8,7 @@ import {
   SessionContext,
   type SessionUserType,
   fetchSessionUser,
-} from '../auth';
+} from '../auth-context';
 
 export default function App({ Component, pageProps }: AppProps) {
   let [session, setSession] = useState({});

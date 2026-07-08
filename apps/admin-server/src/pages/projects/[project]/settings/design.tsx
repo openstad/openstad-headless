@@ -15,7 +15,7 @@ import { Heading } from '@/components/ui/typography';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import Prism from 'prismjs';
-import React, { useState } from 'react';
+import React from 'react';
 import { useCallback, useEffect } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
@@ -203,11 +203,10 @@ export default function ProjectSettingsDesign() {
                           id="editing"
                           placeholder="Schrijf hier je custom css..."
                           spellCheck="false"
-                          onInput={(
-                            e: React.ChangeEvent<HTMLTextAreaElement>
-                          ) => {
-                            update(e.target.value);
-                            sync_scroll(e.target);
+                          onInput={(e) => {
+                            const target = e.target as HTMLTextAreaElement;
+                            update(target.value);
+                            sync_scroll(target);
                           }}
                           onScroll={(e) => sync_scroll(e.target as HTMLElement)}
                           onKeyDown={(event) =>

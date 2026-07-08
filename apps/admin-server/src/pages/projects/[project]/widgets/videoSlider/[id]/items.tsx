@@ -23,13 +23,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import {
   Item,
   Option,
 } from '@openstad-headless/enquete/src/types/enquete-props';
-import { ProjectSettingProps } from '@openstad-headless/types';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -96,7 +96,10 @@ export default function WidgetEnqueteItems(
   type FormData = z.infer<typeof formSchema>;
   const [items, setItems] = useState<Item[]>([]);
   const [options, setOptions] = useState<Option[]>([]);
-  const [selectedItem, setItem] = useState<Item | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const selectedItem = selectedItemId
+    ? items.find((i) => i.id === selectedItemId) || null
+    : null;
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
   const [file, setFile] = useState<File>();
@@ -112,53 +115,60 @@ export default function WidgetEnqueteItems(
     }
 
     if (selectedItem) {
+      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+
       setItems((currentItems) =>
         currentItems.map((item) =>
-          item.trigger === selectedItem.trigger ? { ...item, ...values } : item
+          item.id === selectedItem.id
+            ? { ...item, ...valuesWithoutTrigger }
+            : item
         )
       );
-      setItem(null);
+      setSelectedItemId(null);
     } else {
-      setItems((currentItems) => [
-        ...currentItems,
-        {
-          trigger: `${
-            currentItems.length > 0
-              ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
-              : 1
-          }`,
-          title: values.title,
-          key: values.key,
-          description: values.description,
-          questionType: values.questionType,
-          videoUrl: values.videoUrl,
-          fieldKey: values.fieldKey,
-          minCharacters: values.minCharacters,
-          maxCharacters: values.maxCharacters,
-          variant: values.variant || 'text input',
-          options: values.options || [],
-          multiple: values.multiple || false,
-          group: values.group || '',
-          view: values.view || 'default',
-          image: values.image || '',
-          imageAlt: values.imageAlt || '',
-          imageDescription: values.imageDescription || '',
-          fieldRequired: values.fieldRequired || false,
-          maxChoices: values.maxChoices || '',
-          maxChoicesMessage: values.maxChoicesMessage || '',
-          showSmileys: values.showSmileys || false,
-          defaultValue: values.defaultValue || '',
-          placeholder: values.placeholder || '',
+      setItems((currentItems) => {
+        const maxTrigger = currentItems.reduce(
+          (max, i) => Math.max(max, parseInt(i.trigger) || 0),
+          0
+        );
+        return [
+          ...currentItems,
+          {
+            id: generateId(),
+            trigger: `${maxTrigger + 1}`,
+            title: values.title,
+            key: values.key,
+            description: values.description,
+            questionType: values.questionType,
+            videoUrl: values.videoUrl,
+            fieldKey: values.fieldKey,
+            minCharacters: values.minCharacters,
+            maxCharacters: values.maxCharacters,
+            variant: values.variant || 'text input',
+            options: values.options || [],
+            multiple: values.multiple || false,
+            group: values.group || '',
+            view: values.view || 'default',
+            image: values.image || '',
+            imageAlt: values.imageAlt || '',
+            imageDescription: values.imageDescription || '',
+            fieldRequired: values.fieldRequired || false,
+            maxChoices: values.maxChoices || '',
+            maxChoicesMessage: values.maxChoicesMessage || '',
+            showSmileys: values.showSmileys || false,
+            defaultValue: values.defaultValue || '',
+            placeholder: values.placeholder || '',
 
-          // Keeping these for backwards compatibility
-          image1: values.image1 || '',
-          text1: values.text1 || '',
-          key1: values.key1 || '',
-          image2: values.image2 || '',
-          text2: values.text2 || '',
-          key2: values.key2 || '',
-        },
-      ]);
+            // Keeping these for backwards compatibility
+            image1: values.image1 || '',
+            text1: values.text1 || '',
+            key1: values.key1 || '',
+            image2: values.image2 || '',
+            text2: values.text2 || '',
+            key2: values.key2 || '',
+          },
+        ];
+      });
     }
 
     form.reset(defaults);
@@ -171,7 +181,7 @@ export default function WidgetEnqueteItems(
       setOptions((currentOptions) => {
         const updatedOptions = currentOptions
           .map((option) => {
-            if (option.trigger === selectedOption.trigger) {
+            if (option.id === selectedOption.id) {
               const newTitles =
                 values.options?.find((o) => o.trigger === option.trigger)
                   ?.titles || [];
@@ -191,12 +201,13 @@ export default function WidgetEnqueteItems(
 
       setOption(null);
     } else {
+      const maxTrigger = options.reduce(
+        (max, o) => Math.max(max, parseInt(o.trigger) || 0),
+        -1
+      );
       const newOption = {
-        trigger: `${
-          options.length > 0
-            ? parseInt(options[options.length - 1].trigger) + 1
-            : 0
-        }`,
+        id: generateId(),
+        trigger: `${maxTrigger + 1}`,
         titles: values.options?.[values.options.length - 1].titles || [],
       };
       setOptions((currentOptions) => [...currentOptions, newOption]);
@@ -244,15 +255,19 @@ export default function WidgetEnqueteItems(
     defaultValues: defaults(),
   });
 
+  const itemsInitialized = React.useRef(false);
   useEffect(() => {
-    if (props?.items && props?.items?.length > 0) {
-      setItems(props?.items);
+    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
+      itemsInitialized.current = true;
+      setItems(props.items.map(withId));
     }
   }, [props?.items]);
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    onFieldChanged('items', items);
+    if (onFieldChanged) {
+      onFieldChanged('items', items);
+    }
   }, [items]);
 
   // Sets form to selected item values when item is selected
@@ -293,15 +308,15 @@ export default function WidgetEnqueteItems(
         text2: selectedItem.text2 || '',
         key2: selectedItem.key2 || '',
       });
-      setOptions(selectedItem.options || []);
+      setOptions((selectedItem.options || []).map(withId));
     }
-  }, [selectedItem, form]);
+  }, [selectedItemId, form]);
 
   useEffect(() => {
     if (selectedOption) {
       const updatedOptions = [...options];
       const index = options.findIndex(
-        (option) => option.trigger === selectedOption.trigger
+        (option) => option.id === selectedOption.id
       );
       updatedOptions[index] = { ...selectedOption };
 
@@ -343,25 +358,36 @@ export default function WidgetEnqueteItems(
     actionType: 'moveUp' | 'moveDown' | 'delete',
     trigger: string
   ) {
-    const index = list.findIndex((entry) => entry.trigger === trigger);
-
     if (actionType === 'delete') {
-      return list.filter((entry) => entry.trigger !== trigger);
+      return list
+        .filter((entry) => entry.trigger !== trigger)
+        .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger));
     }
+
+    const sorted = [...list].sort(
+      (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
+    );
+    const index = sorted.findIndex((entry) => entry.trigger === trigger);
 
     if (
       (actionType === 'moveUp' && index > 0) ||
-      (actionType === 'moveDown' && index < list.length - 1)
+      (actionType === 'moveDown' && index < sorted.length - 1)
     ) {
-      const newItemList = [...list];
       const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
-      let tempTrigger = newItemList[swapIndex].trigger;
-      newItemList[swapIndex].trigger = newItemList[index].trigger;
-      newItemList[index].trigger = tempTrigger;
-      return newItemList;
+      const triggerA = sorted[index].trigger;
+      const triggerB = sorted[swapIndex].trigger;
+      return sorted
+        .map((entry) => {
+          if (entry.trigger === triggerA)
+            return { ...entry, trigger: triggerB };
+          if (entry.trigger === triggerB)
+            return { ...entry, trigger: triggerA };
+          return entry;
+        })
+        .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger));
     }
 
-    return list; // If no action is performed, return the original list
+    return sorted;
   }
 
   function handleSaveItems() {
@@ -405,7 +431,7 @@ export default function WidgetEnqueteItems(
   function resetForm() {
     form.reset(defaults());
     setOptions([]);
-    setItem(null);
+    setSelectedItemId(null);
   }
 
   function handleSaveOptions() {
@@ -419,8 +445,7 @@ export default function WidgetEnqueteItems(
     if (key) {
       const isUnique = items.every(
         (item) =>
-          (selectedItem && item.trigger === selectedItem.trigger) ||
-          item.fieldKey !== key
+          (selectedItem && item.id === selectedItem.id) || item.fieldKey !== key
       );
 
       setIsFieldKeyUnique(isUnique);
@@ -448,8 +473,7 @@ export default function WidgetEnqueteItems(
                           <div
                             key={index}
                             className={`flex cursor-pointer justify-between border border-secondary ${
-                              item.trigger == selectedItem?.trigger &&
-                              'bg-secondary'
+                              item.id === selectedItem?.id && 'bg-secondary'
                             }`}>
                             <span className="flex gap-2 py-3 px-2">
                               <ArrowUp
@@ -468,7 +492,7 @@ export default function WidgetEnqueteItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
-                                setItem(item);
+                                setSelectedItemId(item.id ?? null);
                                 setOptions([]);
                                 setSettingOptions(false);
                               }}>
@@ -506,7 +530,7 @@ export default function WidgetEnqueteItems(
                     {hasList() &&
                       (() => {
                         const currentOption = options.findIndex(
-                          (option) => option.trigger === selectedOption?.trigger
+                          (option) => option.id === selectedOption?.id
                         );
                         const activeOption =
                           currentOption !== -1 ? currentOption : options.length;
@@ -727,7 +751,7 @@ export default function WidgetEnqueteItems(
                               <div
                                 key={index}
                                 className={`flex cursor-pointer justify-between border border-secondary ${
-                                  option.trigger == selectedOption?.trigger &&
+                                  option.id === selectedOption?.id &&
                                   'bg-secondary'
                                 }`}>
                                 <span className="flex gap-2 py-3 px-2">
@@ -890,7 +914,7 @@ export default function WidgetEnqueteItems(
                                 Antwoordopties met afbeeldingen
                               </SelectItem>
                               <SelectItem value="multiplechoice">
-                                Multiplechoice
+                                Enkele keuze
                               </SelectItem>
                               <SelectItem value="open">Open vraag</SelectItem>
                               <SelectItem value="multiple">

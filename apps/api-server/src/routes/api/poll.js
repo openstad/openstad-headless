@@ -142,7 +142,9 @@ router
         next();
       })
       .catch((err) => {
-        console.log('err', err);
+        console.log(
+          `[${new Date().toISOString()}][poll] error: ${err?.message}`
+        );
         next(err);
       });
   })
@@ -204,7 +206,9 @@ router
         next();
       })
       .catch((err) => {
-        console.log('err', err);
+        console.log(
+          `[${new Date().toISOString()}][poll] error: ${err?.message}`
+        );
         next(err);
       });
   })
@@ -249,7 +253,9 @@ router
         }
       })
       .catch((err) => {
-        console.log('err', err);
+        console.log(
+          `[${new Date().toISOString()}][poll] error: ${err?.message}`
+        );
         next(err);
       });
   })

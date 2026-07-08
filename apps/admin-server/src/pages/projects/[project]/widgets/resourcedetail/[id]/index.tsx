@@ -1,3 +1,4 @@
+import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useProject } from '@/hooks/use-project';
@@ -16,10 +17,11 @@ import WidgetResourceDetailDocumentMap from '@/pages/projects/[project]/widgets/
 import { ResourceOverviewMapWidgetTabProps } from '@/pages/projects/[project]/widgets/resourcesmap/[id]';
 import WidgetResourcesMapButtons from '@/pages/projects/[project]/widgets/resourcesmap/[id]/buttons';
 import WidgetResourcesMapDatalayers from '@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers';
+import WidgetResourcesMapLegend from '@/pages/projects/[project]/widgets/resourcesmap/[id]/legend';
 import WidgetResourcesMapMap from '@/pages/projects/[project]/widgets/resourcesmap/[id]/map';
+import WidgetResourcesMapMarkers from '@/pages/projects/[project]/widgets/resourcesmap/[id]/markers';
 import WidgetResourcesMapPolygons from '@/pages/projects/[project]/widgets/resourcesmap/[id]/polygons';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
-import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
 import { useRouter } from 'next/router';
 import React from 'react';
 
@@ -59,6 +61,24 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
       'emailNotificationConsent'
     );
 
+  const totalPropPackage = {
+    ...widget?.config,
+    ...previewConfig,
+    updateConfig: (config: ResourceDetailWidgetProps) => {
+      const merged = { ...widget.config, ...config };
+      updateConfig(merged);
+      updatePreview(merged as ResourceDetailWidgetProps);
+    },
+    onFieldChanged: (key: string, value: any) => {
+      if (previewConfig) {
+        updatePreview({
+          ...previewConfig,
+          [key]: value,
+        });
+      }
+    },
+  };
+
   return (
     <div>
       <PageLayout
@@ -88,41 +108,16 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                 Interactieve afbeelding
               </TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig && (
-                <WidgetResourceDetailGeneral
-                  {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
-                />
+                <WidgetResourceDetailGeneral {...totalPropPackage} />
               )}
             </TabsContent>
             <TabsContent value="display" className="p-0">
               {previewConfig && (
-                <WidgetResourceDetailDisplay
-                  {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
-                />
+                <WidgetResourceDetailDisplay {...totalPropPackage} />
               )}
             </TabsContent>
 
@@ -133,6 +128,8 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                     <TabsTrigger value="map">Kaart</TabsTrigger>
                     <TabsTrigger value="polygons">Polygonen</TabsTrigger>
                     <TabsTrigger value="datalayers">Kaartlagen</TabsTrigger>
+                    <TabsTrigger value="markerSets">Markers</TabsTrigger>
+                    <TabsTrigger value="legend">Legenda</TabsTrigger>
                     <TabsTrigger value="button">Knoppen</TabsTrigger>
                   </TabsList>
 
@@ -178,6 +175,32 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   </TabsContent>
                   <TabsContent value="datalayers" className="p-0">
                     <WidgetResourcesMapDatalayers
+                      {...extractConfig<
+                        ResourceDetailWidgetProps,
+                        ResourceOverviewMapWidgetTabProps
+                      >({
+                        previewConfig,
+                        subWidgetKey: 'resourceOverviewMapWidget',
+                        updateConfig,
+                        updatePreview,
+                      })}
+                    />
+                  </TabsContent>
+                  <TabsContent value="markerSets" className="p-0">
+                    <WidgetResourcesMapMarkers
+                      {...extractConfig<
+                        ResourceDetailWidgetProps,
+                        ResourceOverviewMapWidgetTabProps
+                      >({
+                        previewConfig,
+                        subWidgetKey: 'resourceOverviewMapWidget',
+                        updateConfig,
+                        updatePreview,
+                      })}
+                    />
+                  </TabsContent>
+                  <TabsContent value="legend" className="p-0">
+                    <WidgetResourcesMapLegend
                       {...extractConfig<
                         ResourceDetailWidgetProps,
                         ResourceOverviewMapWidgetTabProps
@@ -370,25 +393,19 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
 
             <TabsContent value="document-map" className="p-0">
               {previewConfig && (
-                <WidgetResourceDetailDocumentMap
-                  {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
-                />
+                <WidgetResourceDetailDocumentMap {...totalPropPackage} />
               )}
             </TabsContent>
 
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
+            </TabsContent>
+            <TabsContent value="auditlog" className="p-0">
+              <AuditLogTable
+                modelName="widgets"
+                modelId={id as string}
+                projectId={projectId as string}
+              />
             </TabsContent>
           </Tabs>
 

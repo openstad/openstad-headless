@@ -1,10 +1,12 @@
-import { useState } from 'react';
-
 export default function useUserVote(props) {
   let self = this;
 
   const projectId = props.projectId;
   const type = props.type;
+
+  if (!projectId) {
+    return { data: {}, error: 'No projectId given', isLoading: false };
+  }
 
   const { data, error, isLoading } = self.useSWR(
     { type, projectId: self.projectId },

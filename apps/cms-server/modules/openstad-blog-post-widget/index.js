@@ -64,6 +64,27 @@ module.exports = {
           enableCarousel: true,
         },
       },
+      autoplay: {
+        type: 'boolean',
+        label: 'Autoplay inschakelen',
+        def: false,
+        help: 'Schakel dit in om de carrousel automatisch door de berichten te bladeren.',
+        if: {
+          enableCarousel: true,
+        },
+      },
+      autoplayInterval: {
+        type: 'integer',
+        label: 'Autoplay interval (seconden)',
+        def: 5,
+        min: 1,
+        max: 60,
+        help: 'Het aantal seconden tussen elke automatische overgang (1-60).',
+        if: {
+          enableCarousel: true,
+          autoplay: true,
+        },
+      },
     },
   },
   methods: function (self) {

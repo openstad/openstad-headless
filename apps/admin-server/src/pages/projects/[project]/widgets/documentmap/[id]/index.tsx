@@ -1,3 +1,4 @@
+import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useProject } from '@/hooks/use-project';
@@ -39,14 +40,21 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
   const projectId = router.query.project;
 
   const { data: widget, updateConfig } = useWidgetConfig<DocumentMapProps>();
-  const { previewConfig, updatePreview } = useWidgetPreview<DocumentMapProps>(
-    {}
-  );
+  const { previewConfig, updatePreview } = useWidgetPreview<DocumentMapProps>({
+    projectId: projectId as string,
+  });
 
   const totalPropPackage = {
     ...widget?.config,
-    updateConfig: (config: DocumentMapProps) =>
-      updateConfig({ ...widget.config, ...config }),
+    updateConfig: (config: DocumentMapProps) => {
+      const newConfig = {
+        ...widget.config,
+        ...config,
+        projectId: projectId as string,
+      };
+      updateConfig(newConfig);
+      updatePreview(newConfig);
+    },
 
     onFieldChanged: (key: string, value: any) => {
       if (previewConfig) {
@@ -95,13 +103,13 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="text">Content</TabsTrigger>
               <TabsTrigger value="confirmation">Bevestiging</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
+              <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig ? (
                 <DocumentGeneral
                   {...totalPropPackage}
                   projectId={projectId as string}
-                  {...previewConfig}
                 />
               ) : null}
             </TabsContent>
@@ -110,7 +118,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
                 <DocumentLinks
                   {...totalPropPackage}
                   projectId={projectId as string}
-                  {...previewConfig}
                 />
               ) : null}
             </TabsContent>
@@ -119,7 +126,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
                 <DocumentInclude
                   {...totalPropPackage}
                   projectId={projectId as string}
-                  {...previewConfig}
                 />
               ) : null}
             </TabsContent>
@@ -128,7 +134,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
                 <DocumentFilters
                   {...totalPropPackage}
                   projectId={projectId as string}
-                  {...previewConfig}
                 />
               ) : null}
             </TabsContent>
@@ -137,7 +142,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
                 <DocumentSorting
                   {...totalPropPackage}
                   projectId={projectId as string}
-                  {...previewConfig}
                 />
               ) : null}
             </TabsContent>
@@ -146,7 +150,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
                 <DocumentExtraFields
                   {...totalPropPackage}
                   projectId={projectId as string}
-                  {...previewConfig}
                 />
               ) : null}
             </TabsContent>
@@ -155,7 +158,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
                 <DocumentContent
                   {...totalPropPackage}
                   projectId={projectId as string}
-                  {...previewConfig}
                 />
               ) : null}
             </TabsContent>
@@ -189,6 +191,13 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
+            </TabsContent>
+            <TabsContent value="auditlog" className="p-0">
+              <AuditLogTable
+                modelName="widgets"
+                modelId={id as string}
+                projectId={projectId as string}
+              />
             </TabsContent>
           </Tabs>
 

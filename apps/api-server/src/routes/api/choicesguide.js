@@ -1,5 +1,6 @@
 const express = require('express');
 const createError = require('http-errors');
+const { Op, Sequelize } = require('sequelize');
 const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
@@ -9,6 +10,7 @@ const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const crypto = require('crypto');
 const {
   analyzeSpamPayload,
+  isSpamFilterEnabled,
   logSpamAnalysis,
   removeSpamMetaFields,
 } = require('../../services/spam-detector');
@@ -138,6 +140,57 @@ router
       where.widgetId = widgetId;
     }
 
+    let search = req.query.search;
+    if (search) {
+      if (!Array.isArray(search)) search = [search];
+      const criteria = search[0] || {};
+      const field = Object.keys(criteria)[0];
+      const value =
+        field && typeof criteria[field] === 'string'
+          ? criteria[field].trim()
+          : '';
+
+      if (field && value) {
+        if (field === 'widgetId' || field === 'userId' || field === 'id') {
+          const exactNumber = parseInt(value, 10);
+          if (!Number.isNaN(exactNumber)) {
+            where[field] = exactNumber;
+          }
+        } else if (field === 'createdAt') {
+          where[Op.and] = [
+            ...(Array.isArray(where[Op.and]) ? where[Op.and] : []),
+            Sequelize.where(
+              Sequelize.cast(Sequelize.col('createdAt'), 'CHAR'),
+              { [Op.like]: `%${value}%` }
+            ),
+          ];
+        } else if (field === 'result') {
+          where[Op.and] = [
+            ...(Array.isArray(where[Op.and]) ? where[Op.and] : []),
+            Sequelize.where(Sequelize.cast(Sequelize.col('result'), 'CHAR'), {
+              [Op.like]: `%${value}%`,
+            }),
+          ];
+        } else if (field === 'text') {
+          where[Op.or] = [
+            Sequelize.where(Sequelize.cast(Sequelize.col('widgetId'), 'CHAR'), {
+              [Op.like]: `%${value}%`,
+            }),
+            Sequelize.where(Sequelize.cast(Sequelize.col('userId'), 'CHAR'), {
+              [Op.like]: `%${value}%`,
+            }),
+            Sequelize.where(
+              Sequelize.cast(Sequelize.col('createdAt'), 'CHAR'),
+              { [Op.like]: `%${value}%` }
+            ),
+            Sequelize.where(Sequelize.cast(Sequelize.col('result'), 'CHAR'), {
+              [Op.like]: `%${value}%`,
+            }),
+          ];
+        }
+      }
+    }
+
     try {
       const result = await db.ChoicesGuideResult.scope(
         ...req.scope
@@ -189,11 +242,14 @@ router
     const sanitizedSubmittedData = removeSpamMetaFields(
       req.body.submittedData || {}
     );
-    const analysis = analyzeSpamPayload(req.body.submittedData || {}, {
-      withDetails: true,
-    });
-    logSpamAnalysis({ routeName: 'choicesguide', req, analysis });
-    const isSpamSubmission = analysis.isProbablySpam;
+    let isSpamSubmission = false;
+    if (isSpamFilterEnabled()) {
+      const analysis = analyzeSpamPayload(req.body.submittedData || {}, {
+        withDetails: true,
+      });
+      logSpamAnalysis({ routeName: 'choicesguide', req, analysis });
+      isSpamSubmission = analysis.isProbablySpam;
+    }
 
     let data = {
       userId: req.user && req.user.id,

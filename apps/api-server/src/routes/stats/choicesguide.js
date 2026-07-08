@@ -10,19 +10,18 @@ router.all('*', function (req, res, next) {
 });
 
 router.route('/total').get(rateLimiter(), function (req, res, next) {
+  const widgetId = req.query.widgetId || req.query.choicesGuideId;
   let query = `
-        SELECT count(choicesGuideResults.id) AS counted 
-        FROM choicesGuideResults
-        INNER JOIN choicesGuides ON choicesGuides.id = choicesGuideResults.choicesGuideId
-        WHERE choicesGuideResults.deletedAt IS NULL 
-        AND choicesGuides.projectId=?    
-        AND choicesGuides.deletedAt IS NULL
+        SELECT count(choices_guide_results.id) AS counted 
+        FROM choices_guide_results
+        WHERE choices_guide_results.deletedAt IS NULL 
+        AND choices_guide_results.projectId=?
     `;
   const bindvars = [req.params.projectId];
 
-  if (req.query.choicesGuideId) {
-    query += `AND choicesGuideResults.choicesGuideId=?`;
-    bindvars.push(req.query.choicesGuideId);
+  if (widgetId) {
+    query += `AND choices_guide_results.widgetId=?`;
+    bindvars.push(widgetId);
   }
 
   sequelize

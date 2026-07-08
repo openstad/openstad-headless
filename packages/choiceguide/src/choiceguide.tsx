@@ -62,7 +62,13 @@ function ChoiceGuide(props: ChoiceGuideProps) {
     typeof loginRequired !== 'undefined' && loginRequired;
   const showForm = onlyShowForUsers ? !!hasRole(currentUser, 'member') : true;
 
-  const formFields = InitializeFormFields(items, props, showForm);
+  const questionsPerPage = Number(noOfQuestionsToShow) || 100;
+  const formFields = InitializeFormFields(
+    items,
+    props,
+    showForm,
+    questionsPerPage
+  );
 
   const defaultAnswers = formFields.reduce((acc, item) => {
     acc[item.fieldKey] = item?.defaultValue;
@@ -150,29 +156,30 @@ function ChoiceGuide(props: ChoiceGuideProps) {
         props.widgetId
       );
       if (result) {
+        console.log(`[choiceguide] submitted: widgetId=${widgetId}`);
         notifySuccess();
 
         if (afterUrl) {
           location.href = afterUrl || '/';
         }
       }
-    } catch (e) {
-      console.log('Error', e);
+    } catch (e: any) {
+      console.error(
+        `[choiceguide] submit failed: widgetId=${widgetId} error=${e?.message}`
+      );
       notifyFailed();
     }
   };
 
-  const questionsPerPage = Number(noOfQuestionsToShow) || 100;
-  const totalPages = Math.ceil(formFields.length / questionsPerPage);
+  const paginationFieldPositions = formFields
+    .map((field, idx) => (field.type === 'pagination' ? idx : -1))
+    .filter((idx) => idx !== -1);
 
-  const paginationFieldPositions: number[] = [];
-  for (let i = 0; i < totalPages - 1; i++) {
-    const endIndex = (i + 1) * questionsPerPage;
-    paginationFieldPositions.push(endIndex);
-  }
-
-  // Add start and end indices for slicing
-  const pageFieldStartPositions = [0, ...paginationFieldPositions];
+  const totalPages = paginationFieldPositions.length + 1;
+  const pageFieldStartPositions = [
+    0,
+    ...paginationFieldPositions.map((idx) => idx + 1),
+  ];
   const pageFieldEndPositions = [
     ...paginationFieldPositions,
     formFields.length,
@@ -181,7 +188,9 @@ function ChoiceGuide(props: ChoiceGuideProps) {
   return (
     <div className="osc">
       <div
-        className={`osc-choiceguide-container ${stickyBarAtTop ? 'sticky-top-bar' : ''}`}
+        className={`osc-choiceguide-container ${
+          stickyBarAtTop ? 'sticky-top-bar' : ''
+        }`}
         ref={containerRef}>
         <div className="osc-choiceguide-form">
           {!showForm && (
@@ -222,11 +231,8 @@ function ChoiceGuide(props: ChoiceGuideProps) {
           <Form
             fields={formFields}
             title=""
-            submitText={
-              currentPage < totalPages - 1
-                ? nextButtonText || 'Volgende'
-                : submitButtonText || 'Versturen'
-            }
+            submitText={submitButtonText || 'Versturen'}
+            nextPageText={nextButtonText}
             submitHandler={onSubmit}
             secondaryLabel={''}
             getValuesOnChange={(

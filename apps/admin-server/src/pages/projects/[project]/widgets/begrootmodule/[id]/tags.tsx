@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -22,7 +21,10 @@ import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { handleTagCheckboxGroupChange } from '@/lib/form-widget-helpers/TagGroupHelper';
+import {
+  filterStaleTagGroups,
+  handleTagCheckboxGroupChange,
+} from '@/lib/form-widget-helpers/TagGroupHelper';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
 import * as Switch from '@radix-ui/react-switch';
@@ -66,6 +68,12 @@ export default function WidgetStemBegrootOverviewTags(
       const fetchedTags = tags as Array<Tag>;
       const groupNames = _.chain(fetchedTags).map('type').uniq().value();
       setGroupedNames(groupNames);
+
+      const currentGroups = form.getValues('tagGroups');
+      const cleaned = filterStaleTagGroups(currentGroups, groupNames);
+      if (cleaned.length !== currentGroups.length) {
+        form.setValue('tagGroups', cleaned);
+      }
     }
   }, [tags]);
 

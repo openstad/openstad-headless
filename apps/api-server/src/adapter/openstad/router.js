@@ -8,6 +8,7 @@ const service = require('./service');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const isRedirectAllowed = require('../../services/isRedirectAllowed');
 const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
+const sessionDuration = require('../../util/session-duration');
 let router = express.Router({ mergeParams: true });
 
 // Todo: dit is 'openstad', dus veel configuratie mag hier hardcoded en uit de config gehaald
@@ -61,12 +62,16 @@ router
       jwt.sign(
         { userId: openStadUser.id, authProvider: req.authConfig.provider },
         config.auth['jwtSecret'],
-        { expiresIn: 182 * 24 * 60 * 60 },
+        {
+          expiresIn: sessionDuration.getJwtExpiresInForRole(openStadUser.role),
+        },
         (err, token) => {
           if (err) return next(err);
-          return res.json({
-            jwt: token,
-          });
+          const response = { jwt: token };
+          if (sessionDuration.shouldExpireOnClose(openStadUser.role)) {
+            response.expireOnClose = true;
+          }
+          return res.json(response);
         }
       );
     } catch (err) {
@@ -126,7 +131,7 @@ router
           req.project.id +
           '/digest-login?useAuth=' +
           req.authConfig.provider +
-          '\&returnTo=' +
+          '&returnTo=' +
           req.query.redirectUri
       );
       let url = `${req.authConfig.serverUrl}/dialog/authorize`;
@@ -151,6 +156,11 @@ router
     returnTo = decodeURIComponent(returnTo);
     returnTo = returnTo || '/?openstadlogintoken=[[jwt]]';
     returnTo = String(returnTo);
+
+    const hashIndex = returnTo.indexOf('#');
+    if (hashIndex !== -1) {
+      returnTo = returnTo.substring(0, hashIndex);
+    }
     if (!returnTo.match(/\[\[jwt\]\]/))
       returnTo =
         returnTo +
@@ -168,15 +178,10 @@ router
 
     const isAllowedRedirectDomain = (url, project) => {
       let allowedDomains = prefillAllowedDomains(
-        project?.config?.allowedDomains || []
+        project?.config?.allowedDomains || [],
+        project?.url
       );
 
-      if (project.url) {
-        try {
-          let projectDomain = new URL(project.url).host;
-          allowedDomains.push(projectDomain);
-        } catch (err) {}
-      }
       if (config.admin.domain) {
         const domain = config.admin.domain.replace(/:\d+$/, '');
         allowedDomains.push(domain);
@@ -194,15 +199,22 @@ router
       req.redirectUrl = redirectUrl;
       return next();
     } else {
+      console.log(
+        `[${new Date().toISOString()}][digest-login] redirect domain not allowed: ${redirectUrl?.substring(0, 100)} projectId=${req.project?.id}`
+      );
       res.status(500).json({
         status: 'Redirect domain not allowed',
       });
     }
   })
   .get(async function (req, res, next) {
-    // get accesstoken for code
     let code = req.query.code;
-    if (!code) throw createError(403, 'Je bent niet ingelogd');
+    if (!code) {
+      console.log(
+        `[${new Date().toISOString()}][digest-login] no auth code in request: projectId=${req.project?.id}`
+      );
+      throw createError(403, 'Je bent niet ingelogd');
+    }
 
     let url = `${req.authConfig.serverUrlInternal}/oauth/token`;
     let data = {
@@ -220,31 +232,41 @@ router
       });
 
       if (!response.ok) {
-        console.log(response);
+        console.log(
+          `[${new Date().toISOString()}][digest-login] token exchange failed: projectId=${req.project?.id} status=${response.status}`
+        );
         throw new Error('Fetch failed');
       }
 
       let json = await response.json();
 
       let accessToken = json.access_token;
-      if (!accessToken)
+      if (!accessToken) {
+        console.log(
+          `[${new Date().toISOString()}][digest-login] no access_token in response: projectId=${req.project?.id}`
+        );
         return next(createError(403, 'Inloggen niet gelukt: geen accessToken'));
+      }
 
       req.userAccessToken = accessToken;
       return next();
     } catch (err) {
-      console.log(err);
+      console.log(
+        `[${new Date().toISOString()}][digest-login] token exchange error: projectId=${req.project?.id} error=${err?.message}`
+      );
       return next(createError(401, 'Login niet gelukt'));
     }
   })
   .get(async function (req, res, next) {
     try {
-      // get userdata from auth server
       req.userData = await service.fetchUserData({
         authConfig: req.authConfig,
         accessToken: req.userAccessToken,
       });
     } catch (err) {
+      console.log(
+        `[${new Date().toISOString()}][digest-login] user data fetch failed: projectId=${req.project?.id} error=${err?.message}`
+      );
       return next(createError(err));
     }
     return next();
@@ -269,6 +291,19 @@ router
       }
     }
 
+    if (!!data && !!data.privacyConsentAt && !!data.clientId) {
+      const clientId = String(data?.clientId);
+      const currentValue =
+        typeof data.privacyConsentAt === 'object' ? data.privacyConsentAt : {};
+      const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
+
+      if (clientConsentIsSet) {
+        data.privacyConsentAt = currentValue[clientId];
+      } else {
+        delete data.privacyConsentAt;
+      }
+    }
+
     // if user has same projectId and userId
     // rows are duplicate for a user
     let where = {
@@ -283,27 +318,30 @@ router
       ),
     };
 
-    // find or create the user
     db.User.findAll(where)
       .then((result) => {
         if (result && result.length > 1)
           return next(createError(403, 'Meerdere users gevonden'));
         if (result && result.length == 1) {
-          // user found; update and use
           let user = result[0];
 
           user
             .update(data)
             .then(() => {
               req.userData.id = user.id;
+              console.log(
+                `[${new Date().toISOString()}][digest-login] user found and updated: userId=${user.id} projectId=${req.project?.id}`
+              );
               return next();
             })
             .catch((e) => {
+              console.log(
+                `[${new Date().toISOString()}][digest-login] user update failed: userId=${user.id} projectId=${req.project?.id} error=${e?.message}`
+              );
               req.userData.id = user.id;
               return next();
             });
         } else {
-          // user not found; create
           if (!req.project.config.users.canCreateNewUsers)
             return next(
               createError(
@@ -317,10 +355,15 @@ router
           db.User.create(data)
             .then((result) => {
               req.userData.id = result.id;
+              console.log(
+                `[${new Date().toISOString()}][digest-login] user created: userId=${result.id} projectId=${req.project?.id} role=${result.role}`
+              );
               return next();
             })
             .catch((err) => {
-              //console.log('OAUTH DIGEST - CREATE USER ERROR');
+              console.log(
+                `[${new Date().toISOString()}][digest-login] user create failed: projectId=${req.project?.id} error=${err?.message}`
+              );
               next(err);
             });
         }
@@ -362,10 +405,24 @@ router
     jwt.sign(
       { userId: req.userData.id, authProvider: req.authConfig.provider },
       req.authConfig.jwtSecret,
-      { expiresIn: 182 * 24 * 60 * 60 },
+      {
+        expiresIn: sessionDuration.getJwtExpiresInForRole(req.userData.role),
+      },
       (err, token) => {
-        if (err) return next(err);
+        if (err) {
+          console.log(
+            `[${new Date().toISOString()}][digest-login] JWT sign error: userId=${req.userData?.id} projectId=${req.project?.id} error=${err?.message}`
+          );
+          return next(err);
+        }
         req.redirectUrl = req.redirectUrl.replace('[[jwt]]', token);
+        if (sessionDuration.shouldExpireOnClose(req.userData.role)) {
+          req.redirectUrl +=
+            (req.redirectUrl.includes('?') ? '&' : '?') + 'expireOnClose=1';
+        }
+        console.log(
+          `[${new Date().toISOString()}][digest-login] complete: userId=${req.userData?.id} projectId=${req.project?.id} role=${req.userData?.role} redirect=${req.redirectUrl?.substring(0, 80)}`
+        );
         return next();
       }
     );
@@ -391,39 +448,40 @@ router
     }
     return next();
   })
-  .get(function (req, res, next) {
+  .get(async function (req, res, next) {
     if (!req.query.ipdlogout) {
-      // redirect to idp server
-      let redirectUri = encodeURIComponent(
-        config.url +
-          '/auth/project/' +
-          req.project.id +
-          '/logout?ipdlogout=done&useAuth=' +
-          req.query.useAuth +
-          '&redirectUri=' +
-          encodeURIComponent(req.query.redirectUri)
-      );
-      let url = `${req.authConfig.serverUrl}/logout?redirectUrl=${redirectUri}&client_id=${req.authConfig.clientId}`;
+      const rawRedirectUri = Array.isArray(req.query.redirectUri)
+        ? req.query.redirectUri[0]
+        : req.query.redirectUri || '';
+      let url = `${req.authConfig.serverUrl}/logout?client_id=${req.authConfig.clientId}`;
+      if (rawRedirectUri) {
+        let safeRedirect;
+        try {
+          const parsedRedirect = new URL(rawRedirectUri);
+          if (parsedRedirect.origin === new URL(config.url).origin) {
+            // internal redirect (e.g. forceNewLogin loop): use the full URL as-is
+            safeRedirect = rawRedirectUri;
+          } else {
+            // external caller (CMS, admin): validate against project allowlist
+            const projectId = req.params.projectId;
+            const allowed =
+              projectId && (await isRedirectAllowed(projectId, rawRedirectUri));
+            if (allowed) {
+              safeRedirect = parsedRedirect.origin + '?openstadlogout=true';
+            }
+          }
+        } catch (e) {
+          safeRedirect = '';
+        }
+        if (safeRedirect) {
+          url += `&redirectUrl=${encodeURIComponent(safeRedirect)}`;
+        }
+      }
       return res.redirect(url);
     }
     return next();
   })
-  .get(async function (req, res, next) {
-    const projectId = req.params.projectId;
-    if (
-      req.query.redirectUri &&
-      projectId &&
-      (await isRedirectAllowed(projectId, req.query.redirectUri))
-    ) {
-      const redirectUri =
-        req.query.redirectUri +
-        (req.query.redirectUri.includes('?') ? '&' : '?') +
-        'openstadlogout=true';
-      return res.redirect(redirectUri);
-    } else if (req.query.redirectUri) {
-      return next(createError(403, 'redirectUri not found in allowlist.'));
-    }
-
+  .get(function (req, res) {
     return res.json({ logout: 'success' });
   });
 
@@ -445,6 +503,10 @@ router
       codes = await service.fetchUniqueCode({
         authConfig: req.authConfig,
         isExport: req.query.export === 'true',
+        limit: req.query.limit,
+        offset: req.query.offset,
+        search: req.query.search,
+        sort: req.query.sort,
       });
     } catch (err) {
       console.log(err);

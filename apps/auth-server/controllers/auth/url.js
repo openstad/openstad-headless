@@ -10,6 +10,10 @@ const tokenUrl = require('../../services/tokenUrl');
 const authService = require('../../services/authService');
 const verificationService = require('../../services/verificationService');
 const authUrlConfig = require('../../config/auth').get('Url');
+const clientAuth = require('../../utils/clientAuth');
+const interpolate = require('../../utils/interpolate');
+const { logAuthEvent } = require('../../middleware/auditLog');
+const anonymousRoleId = parseInt(process.env.ANONYMOUS_ROLE_ID, 10) || 3;
 
 const setNoCachHeadersMw = (req, res, next) => {
   res.setHeader('Surrogate-Control', 'no-store');
@@ -37,10 +41,14 @@ exports.login = [
         req.query.priviligedRoute === 'admin') ||
       false;
 
+    const loginVars = { clientEmail: config.contactEmail || '' };
+
     res.render('auth/url/login', {
       clientId: req.query.clientId,
       client: req.client,
-      redirectUrl: encodeURIComponent(req.query.redirect_uri),
+      redirectUrl: req.query.redirect_uri
+        ? encodeURIComponent(req.query.redirect_uri)
+        : '',
       title:
         configAuthType && configAuthType.title ? configAuthType.title : false,
       description:
@@ -49,10 +57,7 @@ exports.login = [
           : false,
       label:
         configAuthType && configAuthType.label ? configAuthType.label : false,
-      helpText:
-        configAuthType && configAuthType.helpText
-          ? configAuthType.helpText
-          : false,
+      helpText: interpolate(configAuthType.helpText, loginVars) || false,
       buttonText:
         configAuthType && configAuthType.buttonText
           ? configAuthType.buttonText
@@ -69,19 +74,27 @@ exports.confirmation = (req, res) => {
       ? config.authTypes[authType]
       : {};
 
-  res.render('auth/url/confirmation', {
-    clientId: req.query.clientId,
-    client: req.client,
+  const clientId = req.query.clientId;
+  const redirectUrl = req.query.redirect_uri
+    ? encodeURIComponent(req.query.redirect_uri)
+    : '';
+
+  const vars = {
     loginUrl: '/login',
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
-    title:
-      configAuthType && configAuthType.confirmedTitle
-        ? configAuthType.confirmedTitle
-        : false,
+    clientId,
+    redirectUrl,
+    retryUrl: `/login?clientId=${clientId}&redirect_uri=${redirectUrl}`,
+    clientEmail: config.contactEmail || '',
+  };
+
+  res.render('auth/url/confirmation', {
+    client: req.client,
+    retryUrl: vars.retryUrl,
+    clientEmail: vars.clientEmail,
+    title: interpolate(configAuthType.confirmedTitle, vars) || false,
     description:
-      configAuthType && configAuthType.confirmedDescription
-        ? configAuthType.confirmedDescription
-        : false,
+      interpolate(configAuthType.confirmedDescription, vars) || false,
+    helpText: interpolate(configAuthType.confirmedHelpText, vars) || false,
   });
 };
 
@@ -95,7 +108,9 @@ exports.authenticate = (req, res) => {
   res.render('auth/url/authenticate', {
     clientId: req.query.clientId,
     client: req.client,
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    redirectUrl: req.query.redirect_uri
+      ? encodeURIComponent(req.query.redirect_uri)
+      : '',
     loaderTitle: configAuthType.loaderTitle,
     loaderDescription: configAuthType.loaderDescription,
     loaderImage: configAuthType.loaderImage,
@@ -142,14 +157,12 @@ const handleSending = async (req, res, next) => {
     });
 
     res.redirect(
-      '/auth/url/confirmation?clientId=' +
-        req.client.clientId +
-        '&redirect_uri=' +
-        req.redirectUrl ||
-        '/login?clientId=' +
-          req.client.clientId +
-          '&redirect_uri=' +
-          req.redirectUrl
+      req.redirectUrl
+        ? '/auth/url/confirmation?clientId=' +
+            req.client.clientId +
+            '&redirect_uri=' +
+            req.redirectUrl
+        : '/login?clientId=' + req.client.clientId
     );
   } catch (err) {
     console.log('e-mail error', err);
@@ -258,8 +271,19 @@ exports.postAuthenticate = (req, res, next) => {
       ? encodeURIComponent(req.query.redirect_uri)
       : req.client.redirectUrl;
 
+    if (!redirectUrl) {
+      return next(
+        new Error(
+          'No redirect_uri provided and no default redirectUrl configured for this client'
+        )
+      );
+    }
+
     // Redirect if it fails to the original e-mail screen
     if (!user) {
+      logAuthEvent(req, 'login_failed', {
+        data: { method: 'url' },
+      });
       req.flash('error', {
         msg: 'De url is geen geldige login url, wellicht is deze verlopen',
       });
@@ -283,8 +307,38 @@ exports.postAuthenticate = (req, res, next) => {
       req.brute.resetKey(req.bruteKey);
 
       //log the succesfull login
-      authService
-        .logSuccessFullLogin(req)
+      logAuthEvent(req, 'login', {
+        data: { method: 'url' },
+      });
+      const upgradeAnonymousRole = () => {
+        const defaultRoleId = parseInt(
+          req.client.config?.defaultRoleId || authUrlConfig.defaultRoleId,
+          10
+        );
+        if (isNaN(defaultRoleId)) return Promise.resolve();
+        return db.UserRole.findOne({
+          where: { clientId: req.client.id, userId: user.id },
+        }).then((userRole) => {
+          if (userRole && parseInt(userRole.roleId, 10) === anonymousRoleId) {
+            return userRole.update({ roleId: defaultRoleId });
+          }
+        });
+      };
+
+      upgradeAnonymousRole()
+        .catch((err) => {
+          console.log(
+            `[url-auth] role upgrade failed for userId=${user.id} clientId=${req.client.id}: ${err?.message}`
+          );
+        })
+        .then(() =>
+          clientAuth.initializeClientAuth(req.session, req.client, user, {
+            authType,
+            twoFactorValid: false,
+          })
+        )
+        .then(() => clientAuth.saveSession(req.session))
+        .then(() => authService.logSuccessFullLogin(req))
         .then(() => {
           redirectToAuthorisation();
         })

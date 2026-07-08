@@ -163,8 +163,9 @@ export default function WidgetRawGeneral(
                     <li className="ml-4">{`{{budget}}`}</li>
                     <li className="ml-4">{`{{extraData}}`}</li>
                     <li className="ml-4">{`{{location}}`}</li>
-                    <li className="ml-4">{`{{modBreak}}`}</li>
-                    <li className="ml-4">{`{{modBreakDateHumanized}}`}</li>
+                    <li className="ml-4">{`{{modBreaksHtml}} -> Gerenderde HTML van alle modbreaks`}</li>
+                    <li className="ml-4">{`{{modBreaks}}`}</li>
+                    <li className="ml-4">{`{{modBreaks[0].description}}, {{modBreaks[0].authorName}}, {{modBreaks[0].modBreakDateHumanized}}`}</li>
                     <li className="ml-4">{`{{progress}}`}</li>
                     <li className="ml-4">{`{{createDateHumanized}}`}</li>
                     <li className="ml-4">{`{{publishDateHumanized}}`}</li>

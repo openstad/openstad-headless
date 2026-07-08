@@ -39,6 +39,11 @@ const getExistingValue = (fieldKey, resource, multiple) => {
           ? filteredTags[0]
           : undefined;
     }
+
+    if (fieldKey === 'status' && resource.statuses) {
+      const firstStatus = resource.statuses[0];
+      return firstStatus ? String(firstStatus.id) : undefined;
+    }
   }
   return undefined;
 };
@@ -204,6 +209,15 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     return formData;
   };
 
+  const addStatusToFormData = (formData) => {
+    const value = formData['status'];
+    if (value !== undefined && value !== null && value !== '') {
+      formData.statuses = [Number(value)];
+    }
+    delete formData['status'];
+    return formData;
+  };
+
   const configureFormData = (formData, publish = false) => {
     const dbFixedColumns = [
       'title',
@@ -213,12 +227,14 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
       'images',
       'location',
       'tags',
+      'statuses',
       'documents',
     ];
     const extraData = {};
     let configuredFormData = { ...formData };
 
     configuredFormData = addTagsToFormData(configuredFormData);
+    configuredFormData = addStatusToFormData(configuredFormData);
 
     for (const key in configuredFormData) {
       if (configuredFormData.hasOwnProperty(key)) {
@@ -269,20 +285,26 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
   async function onSubmit(formData: any) {
     setDisableSubmit(true);
-    formData.__timeToSubmitMs = Math.max(
+    formData.embeddedUrl = window.location.href;
+    const finalFormData = configureFormData(formData, true);
+    finalFormData.__timeToSubmitMs = Math.max(
       Date.now() - formStartTimeRef.current,
       0
     );
-
-    const finalFormData = configureFormData(formData, true);
 
     try {
       if (editMode) {
         try {
           await existingResource.update(finalFormData);
+          console.log(
+            `[resource-form] updated: resourceId=${existingResource.id}`
+          );
           notifySuccessEdit();
           redirectAfterSaveOrCreate(existingResource, true);
         } catch (e) {
+          console.error(
+            `[resource-form] update failed: resourceId=${existingResource.id} error=${e?.message}`
+          );
           notifyFailedEdit(e.message || 'Inzending bewerken mislukt');
         } finally {
           setDisableSubmit(false);
@@ -293,11 +315,17 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
 
       const result = await createResource(finalFormData, props.widgetId);
       if (result) {
+        console.log(
+          `[resource-form] created: resourceId=${result.id} widgetId=${props.widgetId}`
+        );
         notifySuccess();
         redirectAfterSaveOrCreate(result);
       }
       setDisableSubmit(false);
-    } catch (e) {
+    } catch (e: any) {
+      console.error(
+        `[resource-form] create failed: widgetId=${props.widgetId} error=${e?.message}`
+      );
       notifyFailed();
       setDisableSubmit(false);
     }
@@ -336,8 +364,6 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     formFields.length,
   ];
   const prevPageText = paginationFields[currentPage]?.prevPageText || 'Vorige';
-  const nextPageText =
-    paginationFields[currentPage]?.nextPageText || 'Volgende';
   const totalFieldCount =
     formFields.filter((field) => field.type !== 'pagination').length || 0;
 
@@ -391,9 +417,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
             fields={formFields}
             secondaryLabel={saveConceptButton || ''}
             submitHandler={onSubmit}
-            submitText={
-              currentPage < totalPages - 1 ? nextPageText : submitButtonText
-            }
+            submitText={submitButtonText}
             title=""
             submitDisabled={disableSubmit}
             allowResetAfterSubmit={editMode}

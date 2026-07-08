@@ -1,7 +1,19 @@
 require('dotenv').config();
+
+const {
+  createTelemetry,
+  setupGracefulShutdown,
+} = require('@openstad-headless/lib/telemetry');
+const telemetryManager = createTelemetry({
+  serviceName: process.env.OTEL_SERVICE_NAME || 'openstad-image-server',
+});
+telemetryManager.initialize();
+setupGracefulShutdown(telemetryManager);
+
 const express = require('express');
 const crypto = require('crypto');
 const app = express();
+app.disable('x-powered-by');
 const imgSteam = require('image-steam');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
@@ -9,11 +21,56 @@ const s3 = require('./s3');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const mime = require('mime-types');
 
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff'];
+
+/**
+ * Detect image MIME type from a fetch Response.
+ * Uses extension-based lookup first, falls back to magic-byte detection via file-type.
+ * Only returns image types that match the allowed extensions list.
+ */
+async function detectImageMimeType(response, extension) {
+  if (extension) {
+    const fromExt = mime.lookup(extension);
+    if (fromExt) return fromExt;
+  }
+
+  const reader = response.clone().body.getReader();
+  const { value } = await reader.read();
+  reader.cancel();
+
+  if (!value) {
+    const ct = response.headers.get('content-type');
+    return ct && ct.startsWith('image/') ? ct : 'application/octet-stream';
+  }
+
+  // 4100 bytes is the minimum needed by file-type to detect all supported formats
+  // See https://github.com/sindresorhus/file-type?tab=readme-ov-file#samplesize
+  const buf = Buffer.from(
+    value.buffer,
+    value.byteOffset,
+    Math.min(value.byteLength, 4100)
+  );
+  const mod = await import('file-type');
+  const detect = mod.fileTypeFromBuffer || mod.default?.fromBuffer;
+  const detected = detect ? await detect(buf) : null;
+
+  if (detected && ALLOWED_EXTENSIONS.includes(detected.ext))
+    return detected.mime;
+  const ct = response.headers.get('content-type');
+  return ct && ct.startsWith('image/') ? ct : 'application/octet-stream';
+}
 const { createFilename, sanitizeFileName, getFileUrl } = require('./utils');
 const fs = require('node:fs');
 const path = require('path');
 
 console.log('S3 enabled:', s3.isEnabled());
+
+// Absolute server-side upload cap (safety net). Defaults to 25 MB and can be
+// overridden via the MAX_FILE_UPLOAD_SIZE_MB env var. This is independent of any
+// per-widget client-side limit and protects the server from oversized uploads
+// that would otherwise stream until a socket timeout and hang without feedback.
+const maxFileUploadBytes =
+  (Number(process.env.MAX_FILE_UPLOAD_SIZE_MB) || 25) * 1024 * 1024;
 
 const swapLastDotUnderscore = (name) => {
   if (!name) return null;
@@ -24,6 +81,7 @@ const swapLastDotUnderscore = (name) => {
 };
 
 const imageMulterConfig = {
+  limits: { fileSize: maxFileUploadBytes },
   onError: function (err, next) {
     console.error(err);
     next(err);
@@ -166,6 +224,7 @@ app.use(function (req, res, next) {
     'Access-Control-Allow-Headers',
     'Content-Type, Authorization, Content-Length, X-Requested-With, x-http-method-override'
   );
+  res.removeHeader('Date');
   next();
 });
 
@@ -183,31 +242,22 @@ app.get('/image/*', rateLimiter(), async function (req, res, next) {
     req.url = req.url.replace(/^\/image\//, '');
 
     // SSRF mitigation: Validate and sanitize image path
-    // Only allow filenames with safe characters and common image extensions
-    const ALLOWED_EXTENSIONS = [
-      'jpg',
-      'jpeg',
-      'png',
-      'gif',
-      'bmp',
-      'webp',
-      'tiff',
-    ];
     const safeImageNamePattern = /^[a-zA-Z0-9_\-\.]+$/;
     const unsafePath = req.url;
 
     // Prevent directory traversal or illegal characters
     const baseName = path.basename(unsafePath); // strips directory components
-    const extension = baseName.split('.').pop().toLowerCase();
+    const hasExtension = baseName.includes('.');
+    const extension = hasExtension
+      ? baseName.split('.').pop().toLowerCase()
+      : null;
     if (
       baseName !== unsafePath || // directory component detected
       !safeImageNamePattern.test(baseName) || // unsafe chars present
-      !ALLOWED_EXTENSIONS.includes(extension) // extension not allowed
+      (hasExtension && !ALLOWED_EXTENSIONS.includes(extension)) // extension present but not allowed
     ) {
       return res.status(400).send('Invalid image filename or path');
     }
-
-    const mimeType = mime.lookup(extension);
 
     const endpoint = process.env.S3_ENDPOINT.replace(
       'https://',
@@ -242,7 +292,8 @@ app.get('/image/*', rateLimiter(), async function (req, res, next) {
           .send('File not found');
       }
 
-      res.setHeader('Content-Type', mimeType);
+      const contentType = await detectImageMimeType(response, extension);
+      res.setHeader('Content-Type', contentType);
       const contentLength = response.headers.get('content-length');
       if (contentLength) res.setHeader('Content-Length', contentLength);
 
@@ -307,6 +358,7 @@ app.get('/image/*', rateLimiter(), async function (req, res, next) {
 });
 
 const documentMulterConfig = {
+  limits: { fileSize: maxFileUploadBytes },
   onError: function (err, next) {
     console.error(err);
     next(err);
@@ -623,6 +675,18 @@ app.post(
 );
 
 app.use(function (err, req, res, next) {
+  // Multer rejects oversized uploads with a LIMIT_FILE_SIZE error. Map it to a
+  // clear HTTP 413 instead of a generic 500 so the upload fails fast with a
+  // readable message rather than hanging.
+  if (err && err.code === 'LIMIT_FILE_SIZE') {
+    const maxMB = Math.round(maxFileUploadBytes / (1024 * 1024));
+    return res.status(413).send(
+      JSON.stringify({
+        error: `File too large. The maximum upload size is ${maxMB} MB.`,
+      })
+    );
+  }
+
   const status = err.status ? err.status : 500;
   console.error(err);
   // if (!res.headerSent) {

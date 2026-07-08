@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { type SessionUserType, getSession } from '../../auth';
+import { getSession } from '../../auth';
+import { type SessionUserType } from '../../auth-context';
 
 export default async function handler(
   req: NextApiRequest,
@@ -13,6 +14,9 @@ export default async function handler(
     name: session.user?.name,
     role: session.user?.role,
     jwt: session.user?.jwt,
+    adminId: session.adminUser?.id,
+    adminName: session.adminUser?.name,
+    adminRole: session.adminUser?.role,
   };
 
   res.status(200).json(data);

@@ -124,7 +124,11 @@ function DistributionModule(props: DistributionModuleProps) {
   return (
     <div className="osc">
       <div
-        className={`osc-distribution-modules-item-content ${formOnlyVisibleForUsers && !hasRole(currentUser, 'member') ? 'visible-disabled' : ''}`}>
+        className={`osc-distribution-modules-item-content ${
+          formOnlyVisibleForUsers && !hasRole(currentUser, 'member')
+            ? 'visible-disabled'
+            : ''
+        }`}>
         {props.title && <Heading2>{props.title}</Heading2>}
         <div className="osc-distribution-modules-item-description">
           {props.description && <Paragraph>{props.description}</Paragraph>}

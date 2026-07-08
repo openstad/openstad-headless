@@ -5,6 +5,7 @@ const privilegedRoles = require('../config/roles').privilegedRoles;
 const defaultRole = require('../config/roles').defaultRole;
 const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
 const configAuthTypes = require('../config/auth.js').types;
+const clientAuth = require('../utils/clientAuth');
 
 exports.withAll = (req, res, next) => {
   db.Client.findAll()
@@ -53,6 +54,7 @@ exports.withOne = async (req, res, next) => {
       res.locals.clientProjectUrl = clientConfig.projectUrl;
       res.locals.clientEmail = clientConfig.contactEmail;
       res.locals.clientDisclaimerUrl = clientConfig.clientDisclaimerUrl;
+      res.locals.clientDisclaimerText = clientConfig.clientDisclaimerText;
       res.locals.clientStylesheets = clientConfig.clientStylesheets;
 
       //if logo isset in config overwrite the .env logo
@@ -150,10 +152,11 @@ exports.checkIfAccessTokenBelongToCurrentClient = async (req, res, next) => {
 exports.checkUniqueCodeAuth = (errorCallback) => {
   //validate code auth type
   return (req, res, next) => {
-    const authTypes = req.client.authTypes;
+    const authTypes = req.client.authTypes || [];
 
-    // if UniqueCode authentication is used, other methods are blocked to enforce users can never authorize with email
-    if (authTypes.indexOf('UniqueCode') !== -1) {
+    // if UniqueCode is the only authentication method, enforce that the user has a valid unique code.
+    // when other auth types are also active, users may log in via those providers instead.
+    if (authTypes.length === 1 && authTypes.indexOf('UniqueCode') !== -1) {
       db.UniqueCode.findOne({
         where: { clientId: req.client.id, userId: req.user.id },
       })
@@ -169,7 +172,9 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
           }
         })
         .catch((error) => {
-          console.log('error', error);
+          console.log(
+            `[${new Date().toISOString()}][auth] unique code validation failed: clientId=${req.client?.id || 'unknown'} error=${error?.message}`
+          );
 
           if (errorCallback) {
             try {
@@ -190,9 +195,9 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
 exports.checkPhonenumberAuth = (errorCallback) => {
   //validate code auth type
   return (req, res, next) => {
-    const authTypes = req.client.authTypes;
+    const authTypes = req.client.authTypes || [];
 
-    // if UniqueCode authentication is used, other methods are blocked to enforce users can never authorize with email
+    // if Phonenumber is the configured authentication method, enforce that the user has a confirmed phone number.
     if (authTypes.indexOf('Phonenumber') !== -1) {
       const userHasPrivilegedRole = privilegedRoles.indexOf(req.user.role) > -1;
 
@@ -220,9 +225,11 @@ exports.checkPhonenumberAuth = (errorCallback) => {
  */
 exports.check2FA = (req, res, next) => {
   const twoFactorRoles = req.client.twoFactorRoles;
+  const twoFactorValid =
+    req.currentClientAuth?.twoFactorValid || req.session?.twoFactorValid;
 
   // if no role is present, assume default role
-  const userRole = req.user.role ? req.user.role : defaultRole;
+  const userRole = req.currentClientRole || req.user.role || defaultRole;
 
   /**
    * In case no 2factor roles are defined all is good and check is passed
@@ -241,19 +248,17 @@ exports.check2FA = (req, res, next) => {
   }
 
   // check two factor is validated otherwise send to 2factor screen
-  if (
-    twoFactorRoles &&
-    twoFactorRoles.includes(userRole) &&
-    req.session.twoFactorValid
-  ) {
+  if (twoFactorRoles && twoFactorRoles.includes(userRole) && twoFactorValid) {
     return next();
   } else if (
     twoFactorRoles &&
     twoFactorRoles.includes(userRole) &&
-    !req.session.twoFactorValid
+    !twoFactorValid
   ) {
     return res.redirect(
-      `/auth/two-factor?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+      `/auth/two-factor?clientId=${
+        req.client.clientId
+      }&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
     );
   }
 
@@ -288,6 +293,18 @@ exports.checkRequiredUserFields = (req, res, next) => {
         }
       }
 
+      // Privacy consent is stored per client ID as a timestamp
+      if (field === 'privacyConsent') {
+        const clientId = String(req?.client?.id);
+        const currentValue = req?.user?.privacyConsentAt || {};
+        const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
+
+        if (!clientConsentIsSet) {
+          error = true;
+        }
+        return;
+      }
+
       // if at least one required field is empty, set to error
       error = error || !req.user[field];
     });
@@ -296,7 +313,9 @@ exports.checkRequiredUserFields = (req, res, next) => {
   // if error redirect to register
   if (error) {
     res.redirect(
-      `/auth/required-fields?clientId=${req.client.clientId}&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+      `/auth/required-fields?clientId=${
+        req.client.clientId
+      }&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
     );
   } else {
     next();

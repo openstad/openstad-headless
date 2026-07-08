@@ -161,6 +161,53 @@
   font-size: 14px;
 }
 
+.leaflet-popup.document-map-comment-popup .comment-item {
+  background: rgb(255, 255, 255);
+  margin: 0;
+  padding: 0;
+}
+
+.leaflet-popup.document-map-comment-popup .comment-item .comment-reaction-text {
+  margin: 0;
+}
+
+.leaflet-popup.document-map-comment-popup .comment-item-header {
+  align-items: flex-start;
+}
+
+.leaflet-popup.document-map-comment-popup
+  .comment-item-header
+  .edit-delete-button-group {
+  top: -12px;
+  margin-left: 10px;
+}
+
+.leaflet-popup.document-map-comment-popup .comment-item-header .reaction-name {
+  margin: 0;
+}
+
+.leaflet-popup.document-map-comment-popup
+  .comment-item-header
+  .edit-delete-button-group
+  > button {
+  min-width: 24px;
+  min-height: 24px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.leaflet-popup.document-map-comment-popup
+  .comment-item-header
+  .edit-delete-button-group
+  > button
+  i {
+  line-height: 1;
+}
+
 .leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
   bottom: 10px !important;
 }
@@ -215,7 +262,8 @@ a + .url-list:before {
   position: absolute;
   z-index: 1;
   top: 10px;
-  left: 55px;
+  left: unset;
+  right: 10px;
   width: max-content;
   font-size: 20px;
   padding: 0;
@@ -230,6 +278,39 @@ a + .url-list:before {
   font-size: 15px;
   margin-left: 8px;
   font-weight: normal;
+}
+
+.documentMap--container .map-container button.info-trigger .sr-only {
+  position: absolute;
+}
+
+.documentMap--container .map-container .leaflet-control-zoom {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.documentMap--container .map-container .leaflet-control-zoom a {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  text-align: center;
+  text-decoration: none;
+  color: black;
+  background-color: white;
+  display: block;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.documentMap--container .map-container .leaflet-control-zoom a:hover {
+  background-color: #f4f4f4;
+}
+
+.documentMap--container .map-container .leaflet-control-zoom-in {
+  border-bottom: 1px solid #ccc;
 }
 
 .modal-overlay[aria-hidden='true'] {
@@ -264,6 +345,62 @@ a + .url-list:before {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 1;
+}
+
+.documentMap--container.--info-above {
+  grid-template-rows: auto 1fr;
+}
+
+.documentMap--container.--info-above .resource-info-full {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.documentMap--container.--info-above .map-container,
+.documentMap--container.--info-above .content {
+  grid-row: 2;
+}
+
+.documentMap--container.--info-below {
+  grid-template-rows: 1fr auto;
+}
+
+.documentMap--container.--info-below .map-container,
+.documentMap--container.--info-below .content {
+  grid-row: 1;
+}
+
+.documentMap--container.--info-below .resource-info-full {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.documentMap--container .resource-info-full {
+  padding: 30px;
+  background: #fff;
+  border-bottom: 1px solid #ddd;
+}
+
+.documentMap--container.--info-below .resource-info-full {
+  border-bottom: 0;
+  border-top: 1px solid #ddd;
+}
+
+.documentMap--container.--info-above,
+.documentMap--container.--info-below {
+  height: auto;
+}
+
+.documentMap--container.--info-above .content,
+.documentMap--container.--info-below .content {
+  max-height: calc(100vh - 193px);
+  overflow-y: auto;
+}
+
+.documentMap--container.--info-above .map-container,
+.documentMap--container.--info-below .map-container {
+  height: calc(100vh - 193px);
+  min-height: 400px;
 }
 
 .documentMap--container:has(.content:empty) {

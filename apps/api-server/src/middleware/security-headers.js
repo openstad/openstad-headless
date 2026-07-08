@@ -13,9 +13,18 @@ module.exports = function (req, res, next) {
   let allowedDomains =
     (req.project && req.project.config && req.project.config.allowedDomains) ||
     config.allowedDomains;
-  allowedDomains = prefillAllowedDomains(allowedDomains || []);
+  allowedDomains = prefillAllowedDomains(
+    allowedDomains || [],
+    req.project?.url
+  );
 
-  if (!allowedDomains || allowedDomains.indexOf(domain) === -1) {
+  const stripWww = (d) => (d && d.startsWith('www.') ? d.slice(4) : d);
+  const normalizedDomain = stripWww(domain);
+  const isDomainAllowed =
+    allowedDomains &&
+    allowedDomains.some((d) => stripWww(d) === normalizedDomain);
+
+  if (!isDomainAllowed) {
     url = config.url || req.protocol + '://' + req.host;
 
     // Exception for URLs without project - we allow all origins
@@ -31,7 +40,6 @@ module.exports = function (req, res, next) {
         (req.path.match('^(/api/project)$') && req.method == 'GET'))
     ) {
       url = req.headers.origin;
-      console.log('no project, allowing origin', url, req.path);
     }
   }
 
@@ -70,6 +78,8 @@ module.exports = function (req, res, next) {
     res.header('Expect-CT', 'max-age=86400, enforce');
     res.header('Feature-Policy', "vibrate 'none'; geolocation 'none'");
   }
+
+  res.removeHeader('Date');
 
   if (req.method === 'OPTIONS') {
     return res.end();
