@@ -48,11 +48,12 @@ let getConfig = async function ({ project, useAuth = 'default' }) {
   authConfig = merge.recursive(authConfig, providerConfig);
 
   if (!authConfig.jwtSecret || authConfig.jwtSecret == 'REPLACE THIS VALUE!!') {
-    // todo: move this to a place where is called once, not every request
-    console.log('===========================');
-    console.log('jwtSecret is not configured');
-    console.log('¡¡ this should be fixed !!!');
-    console.log('===========================');
+    if (!getConfig._jwtWarningShown) {
+      console.warn(
+        `[${new Date().toISOString()}][auth-settings] jwtSecret is not configured - this must be fixed`
+      );
+      getConfig._jwtWarningShown = true;
+    }
   }
 
   return authConfig;

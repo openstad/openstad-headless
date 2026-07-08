@@ -6,6 +6,7 @@ export type AuditLogOptions = {
   userId?: string | number;
   projectId?: string | number;
   action?: string;
+  excludeAction?: string;
   source?: string;
   fromDate?: string;
   toDate?: string;
@@ -20,6 +21,7 @@ export default function useAuditLog(options: AuditLogOptions) {
   if (options.modelId) params.set('modelId', String(options.modelId));
   if (options.userId) params.set('userId', String(options.userId));
   if (options.action) params.set('action', options.action);
+  if (options.excludeAction) params.set('excludeAction', options.excludeAction);
   if (options.source) params.set('source', options.source);
   if (options.fromDate) params.set('fromDate', options.fromDate);
   if (options.toDate) params.set('toDate', options.toDate);

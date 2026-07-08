@@ -6,6 +6,27 @@ const db = require('../../db');
 
 let service = {};
 
+function getClientDomains(apiDomain, project) {
+  let domains = [apiDomain];
+  if (project?.config?.allowedDomains?.length > 0) {
+    domains = domains.concat(project.config.allowedDomains);
+  }
+  if (project?.url) {
+    try {
+      let url = project.url;
+      if (url.indexOf('http') !== 0) url = 'https://' + url;
+      domains.push(new URL(url).host);
+    } catch (e) {
+      console.log(
+        '[allowedDomains] Could not parse project url:',
+        project.url,
+        e.message
+      );
+    }
+  }
+  return [...new Set(domains.filter(Boolean))];
+}
+
 service.fetchUserData = async function fetchUserData({
   authConfig,
   userId,
@@ -45,7 +66,9 @@ service.fetchUserData = async function fetchUserData({
       headers,
     });
     if (!response.ok) {
-      throw new Error('Fetch failed');
+      const error = new Error('Auth server request failed');
+      error.status = response.status;
+      throw error;
     }
 
     let userData;
@@ -70,6 +93,14 @@ service.fetchUserData = async function fetchUserData({
     mappedUserData.idpUser.provider = authConfig.provider;
     return mappedUserData;
   } catch (err) {
+    if (err?.status === 401 || err?.status === 403) {
+      throw new Error('Auth server rejected access token');
+    }
+
+    if (err?.status === 404) {
+      throw new Error('Auth server user lookup returned 404');
+    }
+
     throw new Error('Cannot connect to auth server');
   }
 };
@@ -275,8 +306,8 @@ service.createClient = async function ({ authConfig, project }) {
     if (!Array.isArray(authTypes)) authTypes = [authTypes];
     let twoFactorRoles =
       authConfig.twoFactorRoles ||
-      (authConfig.provider == 'openstad' && ['admin']);
-    if (!Array.isArray(twoFactorRoles)) twoFactorRoles = [authTypes];
+      (authConfig.provider == 'openstad' && ['admin', 'moderator', 'editor']);
+    if (!Array.isArray(twoFactorRoles)) twoFactorRoles = [twoFactorRoles];
     let requiredUserFields =
       authConfig.requiredUserFields ||
       (authConfig.provider == 'openstad' && 'name') ||
@@ -298,7 +329,7 @@ service.createClient = async function ({ authConfig, project }) {
         twoFactorRoles,
         siteUrl: project.url || '',
         redirectUrl: config.url || '',
-        allowedDomains: [config.domain],
+        allowedDomains: getClientDomains(config.domain, project),
         name: authConfig.name || project.name || '',
         description: `Client for API project ${project.name} (${project.id})`,
         config: newConfig,
@@ -339,7 +370,7 @@ service.updateClient = async function ({ authConfig, project }) {
       requiredUserFields,
       twoFactorRoles,
       redirectUrl: `${config.url}`,
-      allowedDomains: [config.domain],
+      allowedDomains: getClientDomains(config.domain, project),
       name: `${project.name}`,
       description: `Client for API project ${project.name} (${project.id})`,
     };
@@ -421,6 +452,7 @@ service.updateClient = async function ({ authConfig, project }) {
       'configureTwoFactor',
       'clientStylesheets',
       'clientDisclaimerUrl',
+      'clientDisclaimerText',
     ];
     properties.forEach((property) => {
       if (authConfig?.config && authConfig.config[property]) {
@@ -432,14 +464,6 @@ service.updateClient = async function ({ authConfig, project }) {
 
     let clientConfig = client.config;
     data.config = merge.recursive({}, clientConfig, newClientConfig);
-
-    // Update allowedDomains if exists
-    if (
-      typeof project.config.allowedDomains !== 'undefined' &&
-      project.config.allowedDomains.length > 0
-    ) {
-      data.allowedDomains = project.config.allowedDomains;
-    }
 
     // update client
     let url = `${authConfig.serverUrlInternal}/api/admin/client/${clientId}`;

@@ -268,7 +268,7 @@ function DocumentMap({
     urlTagIdsArray && allTags
       ? allTags.filter((tag: { id: number }) => urlTagIdsArray.includes(tag.id))
       : [];
-  const [refreshComments, setRefreshComments] = useState(false);
+  const [refreshComments, setRefreshComments] = useState(0);
 
   const useCommentsData = {
     projectId: props.projectId,
@@ -277,6 +277,7 @@ function DocumentMap({
     onlyIncludeTagIds: filteredTagsIdsString || undefined,
     search: search || '',
     refreshKey: refreshComments,
+    sort: sort || 'createdAt_asc',
   };
 
   const { data: comments } = datastore.useComments(useCommentsData);
@@ -370,15 +371,19 @@ function DocumentMap({
   const leafletMapRef = useRef<HTMLDivElement>(null);
 
   const imageUrl = resource.images ? resource.images[0].url : '';
-  const img = new Image();
-  img.src = imageUrl;
-  img.onload = () => {
-    const containerWidth = leafletMapRef.current?.offsetWidth || 1920;
-    const imageWidth = containerWidth * 0.8;
-    const imageHeight = (img.height / img.width) * imageWidth;
-    setDocumentWidth(imageWidth);
-    setDocumentHeight(imageHeight);
-  };
+
+  useEffect(() => {
+    if (!imageUrl) return;
+    const img = new Image();
+    img.onload = () => {
+      const containerWidth = leafletMapRef.current?.offsetWidth || 1920;
+      const imageWidth = containerWidth * 0.8;
+      const imageHeight = (img.height / img.width) * imageWidth;
+      setDocumentWidth(imageWidth);
+      setDocumentHeight(imageHeight);
+    };
+    img.src = imageUrl;
+  }, [imageUrl]);
 
   const [bounds, setBounds] = useState<Array<Array<number>> | null>(null);
 
@@ -528,6 +533,15 @@ function DocumentMap({
           createdAt: new Date(),
           sentiment: 'no sentiment',
           tags: allTags,
+          confirmation: props.commentsWidget?.confirmation || false,
+          confirmationReplies:
+            props.commentsWidget?.confirmationReplies || false,
+          overwriteEmailAddress:
+            props.commentsWidget?.confirmation &&
+            props.commentsWidget?.overwriteEmailAddress
+              ? props.commentsWidget.overwriteEmailAddress
+              : '',
+          embeddedUrl: window.location.href,
         });
 
         if (goToLastPage && displayPagination) {
@@ -545,7 +559,7 @@ function DocumentMap({
         setSelectedCommentIndex(newIndex);
         setSelectedMarkerIndex(newIndex);
 
-        setRefreshComments((prev) => !prev);
+        setRefreshComments((prev) => prev + 1);
         scrollToComment(newIndex);
 
         notifySuccess();
@@ -625,6 +639,7 @@ function DocumentMap({
   const [overridePage, setoverridePage] = useState<number | undefined>(
     undefined
   );
+  const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isScrollable = function (ele: HTMLElement) {
     const hasScrollableContent = ele.scrollHeight > ele.clientHeight;
@@ -635,29 +650,34 @@ function DocumentMap({
   };
 
   const scrollToComment = (index: number) => {
+    if (scrollIntervalRef.current) {
+      clearInterval(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
+    }
+
     let attempts = 0;
     const maxAttempts = 10;
     const interval = 100;
+
+    if (displayPagination) {
+      const currentComment = filteredComments?.findIndex(
+        (comment: any) => parseInt(comment.id) === index
+      );
+      if (typeof currentComment === 'number' && currentComment >= 0) {
+        const commentPage = Math.floor(currentComment / itemsPerPage);
+        setoverridePage(commentPage);
+      }
+    }
 
     const tryScrollToComment = () => {
       const getAllComments = Array.from(
         document.getElementsByClassName('comment-item')
       );
-      getAllComments.forEach((comment, i) => {
-        if (i !== index) {
+      getAllComments.forEach((comment) => {
+        if (comment.id !== `comment-${index}`) {
           comment.classList.remove('selected');
         }
       });
-
-      if (displayPagination) {
-        const currentComment = filteredComments?.findIndex(
-          (comment: any) => parseInt(comment.id) === index
-        );
-        if (typeof currentComment === 'number' && currentComment >= 0) {
-          const commentPage = Math.floor(currentComment / itemsPerPage);
-          setoverridePage(commentPage);
-        }
-      }
 
       const commentElement = document.getElementById(`comment-${index}`);
       if (commentElement) {
@@ -668,7 +688,7 @@ function DocumentMap({
         const commentEl = commentElement as HTMLElement;
         const containerEl = containerElement as HTMLElement;
 
-        if (commentElement && containerElement) {
+        if (containerElement) {
           const commentRect = commentEl.getBoundingClientRect();
           const scrollTop =
             window.pageYOffset || document.documentElement.scrollTop;
@@ -687,17 +707,23 @@ function DocumentMap({
               behavior: 'smooth',
             });
           }
-
-          commentEl.classList.add('selected');
-          clearInterval(intervalId);
-        } else if (attempts < maxAttempts) {
-          attempts++;
-        } else {
-          clearInterval(intervalId);
         }
+
+        commentEl.classList.add('selected');
+        if (scrollIntervalRef.current) {
+          clearInterval(scrollIntervalRef.current);
+          scrollIntervalRef.current = null;
+        }
+        return;
+      }
+
+      attempts++;
+      if (attempts >= maxAttempts && scrollIntervalRef.current) {
+        clearInterval(scrollIntervalRef.current);
+        scrollIntervalRef.current = null;
       }
     };
-    const intervalId = setInterval(tryScrollToComment, interval);
+    scrollIntervalRef.current = setInterval(tryScrollToComment, interval);
   };
 
   const MarkerWithId: React.FC<ExtendedMarkerProps> = ({
@@ -778,7 +804,7 @@ function DocumentMap({
     !!popupPosition || (isPopupMarkerBehavior && !!popupComment);
 
   const popupCommentWidgetContextValue: CommentsWidgetProps & {
-    setRefreshComments: React.Dispatch<React.SetStateAction<boolean>>;
+    setRefreshComments: React.Dispatch<React.SetStateAction<number>>;
   } = {
     ...props,
     resourceId: resourceId || '',
@@ -1292,9 +1318,11 @@ function DocumentMap({
                       adminLabel={props.comments?.adminLabel || 'admin'}
                       editorLabel={props.comments?.editorLabel}
                       setRefreshComments={() =>
-                        setRefreshComments((prev) => !prev)
+                        setRefreshComments((prev) => prev + 1)
                       }
-                      submitComment={() => setRefreshComments((prev) => !prev)}
+                      submitComment={() =>
+                        setRefreshComments((prev) => prev + 1)
+                      }
                       variant={props.commentsWidget?.variant || 'medium'}
                     />
                   </CommentWidgetContext.Provider>
@@ -1475,7 +1503,14 @@ function DocumentMap({
           <div ref={containerRef}>
             <Comments
               {...props}
-              key={refreshComments ? 'refresh' : 'no-refresh'}
+              key={`refresh-${refreshComments}`}
+              confirmation={props.commentsWidget?.confirmation || false}
+              confirmationReplies={
+                props.commentsWidget?.confirmationReplies || false
+              }
+              overwriteEmailAddress={
+                props.commentsWidget?.overwriteEmailAddress || ''
+              }
               onlyIncludeTags={
                 selectedTagsString || filteredTagsIdsString || ''
               }
@@ -1490,6 +1525,7 @@ function DocumentMap({
               displayPagination={displayPagination}
               onGoToLastPage={setGoToLastPage}
               overridePage={overridePage}
+              onOverridePageConsumed={() => setoverridePage(undefined)}
               overrideSort={sort}
               searchTerm={search}
             />

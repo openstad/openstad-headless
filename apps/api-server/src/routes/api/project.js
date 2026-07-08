@@ -108,6 +108,52 @@ async function canUserUseSourceProjectForDuplication({ req, sourceProjectId }) {
   return !!sourceProjectUser;
 }
 
+// Middleware: reject duplicate project URLs (case-insensitive, ignoring www and trailing slashes).
+// `removeProtocolFromUrl` already strips the protocol from req.body.url before this runs.
+// The DB index (`projects_url_unique`) enforces exact uniqueness; this middleware enforces
+// normalized uniqueness (e.g. www.example.com/ == example.com).
+function checkUniqueUrl(req, res, next) {
+  if (!req.body.url) return next();
+
+  let normalizedUrl = req.body.url
+    .trim()
+    .toLowerCase()
+    .replace(/^www\./, '');
+  while (normalizedUrl.endsWith('/')) {
+    normalizedUrl = normalizedUrl.slice(0, -1);
+  }
+
+  if (!normalizedUrl) return next();
+
+  const excludeId = req.params.projectId
+    ? parseInt(req.params.projectId)
+    : null;
+
+  const normalizedColumn = Sequelize.literal(
+    "LOWER(TRIM(TRAILING '/' FROM REPLACE(REPLACE(REPLACE(`url`, 'https://', ''), 'http://', ''), 'www.', '')))"
+  );
+
+  const whereClause = excludeId
+    ? {
+        [Op.and]: [
+          Sequelize.where(normalizedColumn, normalizedUrl),
+          { id: { [Op.ne]: excludeId } },
+        ],
+      }
+    : Sequelize.where(normalizedColumn, normalizedUrl);
+
+  db.Project.findOne({ where: whereClause })
+    .then((existing) => {
+      if (existing) {
+        return next(
+          createError(409, 'Deze URL is al in gebruik door een ander project.')
+        );
+      }
+      return next();
+    })
+    .catch(next);
+}
+
 async function getProject(req, res, next, include = []) {
   const projectId = req.params.projectId;
   let query = { where: { id: parseInt(projectId) }, include: include };
@@ -326,25 +372,6 @@ async function createResources(
       ) {
         updatedResource.userId = await getOrCreateUser(
           sourceResourceUserId,
-          userMap,
-          req.projectId,
-          req.createdUserIds
-        );
-      }
-
-      // Remap known top-level secondary user reference.
-      const sourceModBreakUserId = updatedResource.modBreakUserId;
-      if (
-        typeof sourceModBreakUserId === 'number' ||
-        (typeof sourceModBreakUserId === 'string' &&
-          /^\d+$/.test(sourceModBreakUserId))
-      ) {
-        const normalizedSourceModBreakUserId =
-          typeof sourceModBreakUserId === 'number'
-            ? sourceModBreakUserId
-            : parseInt(sourceModBreakUserId, 10);
-        updatedResource.modBreakUserId = await getOrCreateUser(
-          normalizedSourceModBreakUserId,
           userMap,
           req.projectId,
           req.createdUserIds
@@ -791,6 +818,7 @@ router
   // -----------
   .post(auth.can('Project', 'create'))
   .post(removeProtocolFromUrl)
+  .post(checkUniqueUrl)
   .post(rateLimiter(), async function (req, res, next) {
     const isDuplicationPayload = req.body.isDuplicateRequest === true;
     req.isDuplicationPayload = isDuplicationPayload;
@@ -1214,13 +1242,37 @@ router
       })
       .catch(next);
   })
+  .get(async function (req, res, next) {
+    // blocked domains (last 24h)
+    try {
+      let blockedByProject = await projectsWithIssues.blockedDomains();
+      for (let projectId of Object.keys(blockedByProject)) {
+        let { project, blocks } = blockedByProject[projectId];
+        let entry = project.toJSON();
+        entry.issue = 'blocked-domains';
+        entry.domainBlocks = blocks.map((b) => ({
+          widgetId: b.widgetId,
+          domain: b.domain,
+          referer: b.referer,
+          count: b.count,
+          lastSeen: b.lastSeen,
+        }));
+        req.results.push(entry);
+        req.dbQuery.count += 1;
+      }
+    } catch (e) {
+      console.log('[issues] Could not fetch blocked domains:', e.message);
+    }
+    return next();
+  })
   .get(searchInResults({ searchfields: ['name', 'title'] }))
   .get(auth.useReqUser)
   .get(pagination.paginateResults)
   .get(function (req, res, next) {
     let records = req.results.records || req.results;
     records.forEach((record, i) => {
-      let project = record.toJSON();
+      let project =
+        typeof record.toJSON === 'function' ? record.toJSON() : record;
       if (!(req.user && hasRole(req.user, 'admin'))) {
         project.config = undefined;
       }
@@ -1250,6 +1302,7 @@ router
   // -----------
   .put(auth.useReqUser)
   .put(removeProtocolFromUrl)
+  .put(checkUniqueUrl)
   .put(rateLimiter(), async function (req, res, next) {
     // update certain parts of config to the oauth client
     const project = await db.Project.findOne({ where: { id: req.results.id } });
@@ -1322,47 +1375,46 @@ router
     req.pendingMessages = [
       { key: `project-${project.id}-update`, value: 'event' },
     ];
-    if (req.body.url && req.body.url != project.url)
+    if ('url' in req.body && req.body.url != project.url)
       req.pendingMessages.push({ key: `project-urls-update`, value: 'event' });
 
-    // Update allowedDomains if creating a new site
     let updateBody = req.body;
-    const hasInitDomain =
-      project?.config?.allowedDomains !== undefined &&
-      project.config.allowedDomains.length === 1 &&
-      project.config.allowedDomains[0] == 'api.openstad.org';
-    if (
-      ((project?.config?.allowedDomains || []).length === 0 || hasInitDomain) &&
-      req?.body?.url
-    ) {
-      // Check if url has protocol
-      let reqUrl = req.body.url;
-      if (!reqUrl.includes('http://') && !reqUrl.includes('https://')) {
-        reqUrl = 'http://' + reqUrl;
+
+    if (req.body.url && req.body.url !== project.url) {
+      try {
+        let providers = await authSettings.providers({ project });
+        for (let provider of providers) {
+          let authConfig = await authSettings.config({
+            project,
+            useAuth: provider,
+          });
+          let adapter = await authSettings.adapter({ authConfig });
+          if (adapter.service.updateClient) {
+            let projectWithNewUrl = { ...project.toJSON(), url: req.body.url };
+            await adapter.service.updateClient({
+              authConfig,
+              project: projectWithNewUrl,
+            });
+          }
+        }
+      } catch (err) {
+        console.log(
+          '[allowedDomains] Could not sync auth client after url change:',
+          err.message
+        );
       }
-      let url = new URL(reqUrl);
-      let host = url.host;
-
-      updateBody.config = updateBody.config || {};
-      updateBody.config.allowedDomains = [host];
-
-      // Update client (auth-db)
-      let adminAuthConfig = await authSettings.config({ project: project });
-      service.updateClient({
-        authConfig: adminAuthConfig,
-        project: updateBody,
-      });
     }
 
     project
       .authorizeData(req.body, 'update')
       .update(updateBody)
-      .then((result) => {
+      .then(async (result) => {
         req.results = result;
-        return checkHostStatus({ id: result.id });
-      })
-      .then(async () => {
-        // Re-read so response includes hostStatus written by checkHostStatus
+        try {
+          await checkHostStatus({ id: result.id });
+        } catch (err) {
+          console.log('Ignore checkHostStatus error', err);
+        }
         const fresh = await db.Project.scope('includeConfig').findByPk(
           req.results.id
         );
@@ -1374,8 +1426,7 @@ router
         return null;
       })
       .catch((err) => {
-        console.log('Ignore checkHostStatus error', err);
-        next();
+        next(err);
         return null;
       });
   })
@@ -1702,5 +1753,46 @@ router
       return res.status(500).json({ error: 'Certificate retry failed' });
     }
   });
+
+// PDF availability check
+// ----------------------
+router
+  .route('/:projectId(\\d+)/pdf/status')
+  .get(auth.can('Project', 'update'))
+  .get(function (req, res) {
+    const available =
+      !!process.env.PDF_API_ENDPOINT && !!process.env.PDF_API_KEY;
+    res.json({ available });
+  });
+
+router.route('/:projectId(\\d+)/branding').get(async function (req, res) {
+  try {
+    let project = req.project;
+    if (!project) return res.json({});
+
+    let providers = await authSettings.providers({ project });
+    for (let provider of providers) {
+      if (provider === 'default') continue;
+      let authConfig = await authSettings.config({
+        project,
+        useAuth: provider,
+      });
+      let adapter = await authSettings.adapter({ authConfig });
+      if (adapter.service.fetchClient && authConfig.clientId) {
+        let client = await adapter.service.fetchClient({
+          authConfig,
+          project,
+        });
+        return res.json({
+          logo: client?.config?.styling?.logo || null,
+        });
+      }
+    }
+
+    return res.json({});
+  } catch (err) {
+    return res.json({});
+  }
+});
 
 module.exports = router;

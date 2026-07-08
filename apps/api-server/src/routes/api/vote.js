@@ -240,7 +240,11 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
           order: [['id', 'ASC']],
         });
 
+        const existingVotes = existing.map((entry) => entry.toJSON());
+        const replaceAll = req.query.replaceAll === 'true';
+
         if (
+          replaceAll &&
           req.project.config.votes.voteType !== 'likes' &&
           req.project.config.votes.withExisting == 'error' &&
           existing &&
@@ -248,8 +252,6 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
         ) {
           throw createError(403, 'Je hebt al gestemd');
         }
-
-        const existingVotes = existing.map((entry) => entry.toJSON());
         let votes = req.body || [];
         if (!Array.isArray(votes)) votes = [votes];
 
@@ -263,7 +265,7 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
           checked: null,
         }));
 
-        if (req.project.config.votes.withExisting == 'merge') {
+        if (req.project.config.votes.withExisting == 'merge' && replaceAll) {
           if (
             existingVotes.find((newVote) =>
               votes.find((oldVote) => oldVote.resourceId == newVote.resourceId)
@@ -343,11 +345,14 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
           }
         }
 
-        if (req.project.config.votes.voteType == 'count') {
+        if (req.project.config.votes.voteType == 'count' && replaceAll) {
           if (
             votes.length < req.project.config.votes.minResources ||
             votes.length > req.project.config.votes.maxResources
           ) {
+            console.log(
+              `[${new Date().toISOString()}][vote] rejected: reason="Aantal resources klopt niet" submitted=${votes.length} min=${req.project.config.votes.minResources} max=${req.project.config.votes.maxResources} userId=${req.user?.id} projectId=${req.project?.id}`
+            );
             throw createError(400, 'Aantal resources klopt niet');
           }
         }
@@ -375,11 +380,13 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
         switch (req.project.config.votes.voteType) {
           case 'likes':
             votes.forEach((vote) => {
-              let existingVote = existingVotes
-                ? existingVotes.find(
-                    (entry) => entry.resourceId == vote.resourceId
-                  )
-                : false;
+              const existingVote = existingVotes.find(
+                (entry) => entry.resourceId == vote.resourceId
+              );
+              const otherExisting = existingVotes.filter(
+                (entry) => entry.resourceId != vote.resourceId
+              );
+
               if (existingVote) {
                 if (existingVote.opinion == vote.opinion) {
                   actions.push({ action: 'delete', vote: existingVote });
@@ -387,7 +394,23 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
                   existingVote.opinion = vote.opinion;
                   actions.push({ action: 'update', vote: existingVote });
                 }
+                if (
+                  otherExisting.length > 0 &&
+                  req.project.config.votes.withExisting === 'replace'
+                ) {
+                  otherExisting.forEach((v) =>
+                    actions.push({ action: 'delete', vote: v })
+                  );
+                }
               } else {
+                if (otherExisting.length > 0) {
+                  if (req.project.config.votes.withExisting === 'error') {
+                    throw createError(403, 'Je hebt al gestemd');
+                  }
+                  otherExisting.forEach((v) =>
+                    actions.push({ action: 'delete', vote: v })
+                  );
+                }
                 actions.push({ action: 'create', vote: vote });
               }
             });
@@ -395,6 +418,66 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
 
           case 'count':
           case 'countPerTag':
+            if (replaceAll) {
+              votes.map((vote) =>
+                actions.push({ action: 'create', vote: vote })
+              );
+              existingVotes.map((vote) =>
+                actions.push({ action: 'delete', vote: vote })
+              );
+            } else {
+              votes.forEach((vote) => {
+                let existingVote = existingVotes.find(
+                  (entry) => entry.resourceId == vote.resourceId
+                );
+                if (existingVote) {
+                  if (existingVote.opinion == vote.opinion) {
+                    actions.push({ action: 'delete', vote: existingVote });
+                  } else {
+                    existingVote.opinion = vote.opinion;
+                    actions.push({ action: 'update', vote: existingVote });
+                  }
+                } else {
+                  actions.push({ action: 'create', vote: vote });
+                }
+              });
+
+              const maxResources = req.project.config.votes.maxResources;
+              const withExisting = req.project.config.votes.withExisting;
+              if (maxResources) {
+                const createCount = actions.filter(
+                  (a) => a.action === 'create'
+                ).length;
+                const deleteCount = actions.filter(
+                  (a) => a.action === 'delete'
+                ).length;
+                const newTotal =
+                  existingVotes.length + createCount - deleteCount;
+
+                if (newTotal > maxResources) {
+                  if (withExisting === 'error') {
+                    throw createError(
+                      403,
+                      'Je hebt het maximum aantal stemmen bereikt'
+                    );
+                  }
+
+                  const excess = newTotal - maxResources;
+                  const alreadyHandled = new Set(
+                    actions.map((a) => a.vote.id).filter(Boolean)
+                  );
+                  const candidates = existingVotes
+                    .filter((v) => !alreadyHandled.has(v.id))
+                    .sort((a, b) => a.id - b.id);
+
+                  for (let i = 0; i < excess && i < candidates.length; i++) {
+                    actions.push({ action: 'delete', vote: candidates[i] });
+                  }
+                }
+              }
+            }
+            break;
+
           case 'budgeting':
           case 'budgetingPerTag':
             votes.map((vote) => actions.push({ action: 'create', vote: vote }));
@@ -425,6 +508,14 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
         });
 
         await Promise.all(promises);
+
+        const created = actions.filter((a) => a.action === 'create').length;
+        const deleted = actions.filter((a) => a.action === 'delete').length;
+        if (created > 0 || deleted > 0) {
+          console.log(
+            `[${new Date().toISOString()}][vote] ${req.project.config.votes.voteType}: created=${created} deleted=${deleted} userId=${req.user?.id} projectId=${req.project?.id}`
+          );
+        }
 
         const resourceIds = votes.map((entry) => entry.resourceId);
         const found = await db.Vote.findAll({

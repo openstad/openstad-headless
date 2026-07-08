@@ -18,7 +18,6 @@ router
     req.scope.push({ method: ['forProjectId', req.params.projectId] });
 
     if (req.query.includeRepliesOnComments) {
-      req.scope.push('includeRepliesOnComments');
       req.scope.push({ method: ['includeRepliesOnComments', req.user.id] });
     }
 
@@ -114,7 +113,7 @@ router
     req.scope.push({ method: ['filterByTags', onlyIncludeTagIds] });
 
     // Preserve legacy ordering for clients that don't send explicit sort.
-    if (!dbQuery.order && req.query.includeAllComments) {
+    if (!dbQuery.order) {
       dbQuery.order = [['createdAt', 'ASC']];
     }
 

@@ -19,6 +19,12 @@ export function useProject(scopes?: Array<string>) {
       : null
   );
 
+  const pdfStatusSwr = useSWR(
+    projectNumber
+      ? `/api/openstad/api/project/${projectNumber}/pdf/status`
+      : null
+  );
+
   async function createProject(name: string) {
     const res = await fetch('/api/openstad/api/project', {
       method: 'POST',
@@ -71,33 +77,31 @@ export function useProject(scopes?: Array<string>) {
   }
 
   async function updateProject(config: any, name?: any, url?: any) {
+    const body: { config: any; name?: string; url?: string } = { config };
     if (name) {
-      const res = await fetch(`/api/openstad/api/project/${projectNumber}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ config, name, url }),
-      });
-      const data = await res.json();
-
-      projectSwr.mutate(data);
-
-      return await data;
-    } else {
-      const res = await fetch(`/api/openstad/api/project/${projectNumber}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ config }),
-      });
-      const data = await res.json();
-
-      projectSwr.mutate(data);
-
-      return await data;
+      body.name = name;
     }
+    if (url !== undefined) {
+      body.url = url;
+    }
+
+    const res = await fetch(`/api/openstad/api/project/${projectNumber}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      return { error: data.message || 'Er is helaas iets mis gegaan.' };
+    }
+
+    projectSwr.mutate(data);
+
+    return data;
   }
 
   async function updateProjectEmails(emailConfig: any) {
@@ -133,6 +137,7 @@ export function useProject(scopes?: Array<string>) {
 
   return {
     ...projectSwr,
+    pdfAvailable: pdfStatusSwr.data?.available ?? null,
     createProject,
     importProject,
     updateProject,

@@ -127,12 +127,6 @@ exports.sendSMS = async (user, client, redirectUrl) => {
     sender: sender,
   };
 
-  console.log('https://api-prd.kpn.com/messaging/sms-kpn/v1/send', {
-    method: 'POST',
-    headers: headers,
-    body: JSON.stringify(body),
-  });
-
   response = await fetch('https://api-prd.kpn.com/messaging/sms-kpn/v1/send', {
     method: 'POST',
     headers: headers,

@@ -9,6 +9,7 @@ const db = require('../../db');
 const tokenUrl = require('../../services/tokenUrl');
 const emailService = require('../../services/email');
 const authCodeConfig = require('../../config/auth').get(authType);
+const clientAuth = require('../../utils/clientAuth');
 const interpolate = require('../../utils/interpolate');
 const { logAuthEvent } = require('../../middleware/auditLog');
 
@@ -47,6 +48,12 @@ exports.login = (req, res, next) => {
 };
 
 exports.postLogin = (req, res, next) => {
+  const config = req.client.config ? req.client.config : {};
+  const configAuthType =
+    config.authTypes && config.authTypes[authType]
+      ? config.authTypes[authType]
+      : {};
+
   passport.authenticate(
     'uniqueCode',
     { session: false },
@@ -56,7 +63,9 @@ exports.postLogin = (req, res, next) => {
         logAuthEvent(req, 'login_failed', {
           data: { method: 'uniqueCode' },
         });
-        req.flash('error', { msg: authCodeConfig.errorMessage });
+        req.flash('error', {
+          msg: configAuthType.errorMessage || authCodeConfig.errorMessage,
+        });
         const redirectUrl = req.query.redirect_uri
           ? req.query.redirect_uri
           : req.client.redirectUrl;
@@ -105,8 +114,18 @@ exports.postLogin = (req, res, next) => {
             userId: user.id,
           },
         }).then((userRole) => {
+          const initializeClientContext = () =>
+            clientAuth
+              .initializeClientAuth(req.session, req.client, user, {
+                authType,
+                twoFactorValid: false,
+              })
+              .then(() => clientAuth.saveSession(req.session));
+
           if (userRole) {
-            redirectToAuthorize();
+            initializeClientContext()
+              .then(() => redirectToAuthorize())
+              .catch(next);
           } else {
             const defaultRoleId = req.client.config.defaultRoleId
               ? req.client.config.defaultRoleId
@@ -116,6 +135,9 @@ exports.postLogin = (req, res, next) => {
               roleId: defaultRoleId,
               userId: user.id,
             })
+              .then(() => {
+                return initializeClientContext();
+              })
               .then(() => {
                 redirectToAuthorize();
               })

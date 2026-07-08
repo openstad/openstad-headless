@@ -2,7 +2,6 @@ const express = require('express');
 const merge = require('merge');
 const bruteForce = require('../../middleware/brute-force');
 const db = require('../../db');
-const fs = require('fs');
 const config = require('config');
 const path = require('path');
 const createError = require('http-errors');
@@ -10,7 +9,13 @@ const createError = require('http-errors');
 const getWidgetSettings = require('./widget-settings');
 const widgetDefinitions = getWidgetSettings();
 
-const reactCheck = require('../../util/react-check');
+const { getWidgetJavascriptOutput } = require('./widget-output');
+const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
+const {
+  normalizeWidgetUrl,
+  hashWidgetUrl,
+  recordWidgetLoad,
+} = require('../../services/normalize-widget-url');
 
 let router = express.Router({ mergeParams: true });
 
@@ -88,7 +93,9 @@ router
         defaultConfig,
         projectConfig,
         req.widgetConfig,
-        widgetId
+        widgetId,
+        null,
+        true // isPreview: never report widget loads from the admin preview
       );
 
       res.header('Content-Type', 'application/javascript');
@@ -139,6 +146,13 @@ router
       );
     }
 
+    const projectDomains = widget.project.config.allowedDomains || [];
+    const hasProjectDomains = projectDomains.length > 0 || !!widget.project.url;
+
+    const allowedDomains = hasProjectDomains
+      ? prefillAllowedDomains(projectDomains, widget.project.url)
+      : null;
+
     const defaultConfig = getDefaultConfig(widget.project, widget.type);
 
     try {
@@ -149,7 +163,8 @@ router
         defaultConfig,
         widget.project.safeConfig,
         widget.config,
-        widgetId
+        widgetId,
+        allowedDomains
       );
 
       res.header('Content-Type', 'application/javascript');
@@ -222,6 +237,7 @@ function getDefaultConfig(project, widgetType) {
     zipCodeAutofillApiUrl: zipCodeAutofillApiUrl || '',
     serverTime: new Date().toISOString(),
     gtmEnvironment: process.env.GTM_ENVIRONMENT || 'prod',
+    randomSortRotationMs: Number(process.env.RANDOM_SORT_ROTATION_MS) || 0,
   };
 
   if (
@@ -243,7 +259,9 @@ function setConfigsToOutput(
   defaultConfig,
   projectConfig,
   widgetConfig,
-  widgetId
+  widgetId,
+  allowedDomains,
+  isPreview = false
 ) {
   // Move general settings to the root to ensure we have the correct config
   if (widgetConfig.hasOwnProperty('general')) {
@@ -251,6 +269,7 @@ function setConfigsToOutput(
   }
 
   let config = merge.recursive(
+    true,
     {},
     widgetSettings.defaultConfig || {},
     defaultConfig,
@@ -265,243 +284,123 @@ function setConfigsToOutput(
     widgetSettings,
     widgetType,
     componentId,
-    config
+    config,
+    allowedDomains,
+    isPreview
   );
 }
 
-function getWidgetJavascriptOutput(
-  widgetSettings,
-  widgetType,
-  componentId,
-  widgetConfig
-) {
-  // If we include remix icon in the components, we are sending a lot of data to the client
-  // By using a CDN and loading it through a <link> tag, we reduce the size of the response and leverage browser cache
+const reportBlockCooldowns = new Map();
+const REPORT_BLOCK_COOLDOWN_MS = 5 * 60 * 1000;
 
-  let output = '';
-  let widgetOutput = '';
-  let css = '';
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamp] of reportBlockCooldowns) {
+    if (now - timestamp > REPORT_BLOCK_COOLDOWN_MS) {
+      reportBlockCooldowns.delete(key);
+    }
+  }
+}, 60 * 1000);
 
-  const data = JSON.parse(widgetConfig);
+router.post('/:widgetId([a-zA-Z0-9]+)/report-block', async (req, res) => {
+  const { widgetId } = req.params;
+  const { domain, referer } = req.body || {};
 
-  const apiUrl = process.env.URL ?? '';
-
-  // TODO: Fix this, it's a hack to get the ChoiceGuide to work
-  if (widgetSettings.componentName === 'ChoiceGuide') {
-    widgetSettings.js.forEach((file) => {
-      const filePath = path.resolve(
-        __dirname,
-        '../../../../../packages/choiceguide',
-        file
-      );
-      if (!fs.existsSync(filePath)) {
-        console.error(`JS file not found: ${filePath}`);
-      } else {
-        widgetOutput += fs.readFileSync(filePath, 'utf8');
-      }
-    });
-
-    widgetSettings.css.forEach((file) => {
-      const filePath = path.resolve(
-        __dirname,
-        '../../../../../packages/choiceguide',
-        file
-      );
-      if (!fs.existsSync(filePath)) {
-        console.error(`CSS file not found: ${filePath}`);
-      } else {
-        css += fs.readFileSync(filePath, 'utf8');
-      }
-    });
-  } else if (widgetSettings.componentName === 'DistributionModule') {
-    widgetSettings.js.forEach((file) => {
-      const filePath = path.resolve(
-        __dirname,
-        '../../../../../packages/distribution-module',
-        file
-      );
-      if (!fs.existsSync(filePath)) {
-        console.error(`JS file not found: ${filePath}`);
-      } else {
-        widgetOutput += fs.readFileSync(filePath, 'utf8');
-      }
-    });
-
-    widgetSettings.css.forEach((file) => {
-      const filePath = path.resolve(
-        __dirname,
-        '../../../../../packages/distribution-module',
-        file
-      );
-      if (!fs.existsSync(filePath)) {
-        console.error(`CSS file not found: ${filePath}`);
-      } else {
-        css += fs.readFileSync(filePath, 'utf8');
-      }
-    });
-  } else if (widgetSettings.componentName === 'MultiProjectResourceOverview') {
-    widgetSettings.js.forEach((file) => {
-      const filePath = path.resolve(
-        __dirname,
-        '../../../../../packages/multi-project-resource-overview',
-        file
-      );
-      if (!fs.existsSync(filePath)) {
-        console.error(`JS file not found: ${filePath}`);
-      } else {
-        widgetOutput += fs.readFileSync(filePath, 'utf8');
-      }
-    });
-
-    widgetSettings.css.forEach((file) => {
-      const filePath = path.resolve(
-        __dirname,
-        '../../../../../packages/multi-project-resource-overview',
-        file
-      );
-      if (!fs.existsSync(filePath)) {
-        console.error(`CSS file not found: ${filePath}`);
-      } else {
-        css += fs.readFileSync(filePath, 'utf8');
-      }
-    });
-  } else {
-    widgetSettings.js.forEach((file) => {
-      widgetOutput += fs.readFileSync(
-        require.resolve(`${widgetSettings.packageName}/${file}`),
-        'utf8'
-      );
-    });
-
-    widgetSettings.css.forEach((file) => {
-      css += fs.readFileSync(
-        require.resolve(`${widgetSettings.packageName}/${file}`),
-        'utf8'
-      );
-    });
+  if (!domain || typeof domain !== 'string') {
+    return res.status(400).json({ error: 'Missing domain' });
   }
 
-  // End of to do
+  const cooldownKey = `${widgetId}:${domain}`;
+  const lastReport = reportBlockCooldowns.get(cooldownKey);
+  if (lastReport && Date.now() - lastReport < REPORT_BLOCK_COOLDOWN_MS) {
+    return res.status(200).json({ ok: true });
+  }
+  reportBlockCooldowns.set(cooldownKey, Date.now());
 
-  // Rewrite the url to the images that we serve statically
-  css = css.replaceAll(
-    'url(../images/',
-    `url(${config.url}/widget/${widgetType}-images/`
-  );
+  try {
+    const widget = await db.Widget.findOne({
+      where: { id: widgetId },
+      include: [db.Project],
+    });
 
-  const widgetConfigWithCorrectEscapes = widgetConfig
-    .replaceAll('\\', '\\\\')
-    .replaceAll('`', '\\`');
+    if (!widget || !widget.project) {
+      return res.status(404).json({ error: 'Widget not found' });
+    }
 
-  // Create function to render component
-  // The process.env.NODE_ENV is set to production, otherwise some React dependencies will not work correctly
-  // @todo: find a way around this so we don't have to provide the `process` variable
-  output += `
-    (function () {
-      try {
-        let process = { env: { NODE_ENV: 'production' } };
-        
-        const randomComponentId = '${componentId}-' + Math.floor(Math.random() * 1000000);
-        const renderedWidgets = {};
-        
-        const currentScript = document.currentScript;
-          currentScript.insertAdjacentHTML('afterend', \`<div class="openstad" id="\${randomComponentId}"></div>\`);
+    const record = await db.DomainBlock.findOne({
+      where: {
+        projectId: widget.project.id,
+        widgetId: parseInt(widgetId),
+        domain: domain.substring(0, 255),
+      },
+    });
 
-          const redirectUri = new URL(encodeURI(window.location.href));
-          redirectUri.searchParams.delete('openstadlogout');
-          redirectUri.searchParams.delete('openstadlogintoken');
-          redirectUri.hash = '';
-          
-          const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", encodeURIComponent(redirectUri.toString())));
-          
-          function insertCssLinks(urls) {
-            const head = document.querySelector('head');
-            const body = document.querySelector('body');
-            const firstScript = body ? body.querySelector('script') : null;
-  
-            urls.forEach(urlObj => {
-              const url = urlObj?.url;
-              const loadFirst = urlObj?.loadFirst;
-              
-              const existingLinks = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).map(link => link.href);
-              if (!existingLinks.includes(url)) {
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = url;
-                
-                if (loadFirst === true && head) {
-                  head.insertBefore(link, head.firstChild);
-                } else if (head) {
-                  head.appendChild(link);
-                } else if (firstScript) {
-                  firstScript.parentNode.insertBefore(link, firstScript);
-                } else if (body) {
-                  body.appendChild(link);
-                }
-              }
-            });
-          }
-  
-          function normalizeCssUrls(cssUrls) {
-            if (!cssUrls) return [];
-          
-            if (typeof cssUrls === 'string') {
-              return [{ 'url': cssUrls, 'loadFirst': false }];
-            }
-          
-            if (Array.isArray(cssUrls)) {
-              return cssUrls.map(url => ({
-                'url': url,
-                'loadFirst': false
-              }));
-            }
-          
-            if (typeof cssUrls === 'object') {
-              return Object.values(cssUrls).map(url => ({
-                'url': url,
-                'loadFirst': false
-              }));
-            }
-          
-            return [];
-          }
-          
-          let customCssUrls = normalizeCssUrls(config.project?.cssUrl);
-  
-          let customCss = '';
-          if (config.project?.cssCustom) {
-            const customCssUrl = '${apiUrl}/api/project/' + config.projectId + '/css/' + randomComponentId;
-            customCssUrls.push({url: customCssUrl, loadFirst: false});
-          }
-  
-          customCssUrls.push({url: "${apiUrl}/api/project/" + config.projectId + "/widget-css/${widgetType}", loadFirst: true});
-  
-          insertCssLinks(customCssUrls);
-          
-          function renderWidget () {
+    if (record) {
+      await record.update({
+        count: record.count + 1,
+        lastSeen: new Date(),
+        referer: referer ? String(referer).substring(0, 2048) : record.referer,
+      });
+    } else {
+      await db.DomainBlock.create({
+        projectId: widget.project.id,
+        widgetId: parseInt(widgetId),
+        domain: domain.substring(0, 255),
+        referer: referer ? String(referer).substring(0, 2048) : '',
+      });
+    }
 
-            // Check if widget has already been rendered
-            if (renderedWidgets[randomComponentId]) {
-              return;
-            }
+    res.status(200).json({ ok: true });
+  } catch (e) {
+    console.log('[widget] Could not save domain block:', e.message);
+    res.status(500).json({ error: 'Could not save domain block' });
+  }
+});
 
-            renderedWidgets[randomComponentId] = true;
+const reportLoadCooldowns = new Map();
+const REPORT_LOAD_COOLDOWN_MS = 5 * 60 * 1000;
 
-            const React = window.React = window.OpenStadReact;
-            const ReactDOM = window.ReactDOM = window.OpenStadReactDOM;
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, timestamp] of reportLoadCooldowns) {
+    if (now - timestamp > REPORT_LOAD_COOLDOWN_MS) {
+      reportLoadCooldowns.delete(key);
+    }
+  }
+}, 60 * 1000);
 
-            ${widgetOutput}
-            ${widgetSettings.functionName}.${widgetSettings.componentName}.loadWidget(randomComponentId, config);
-          }
+router.post('/:widgetId([a-zA-Z0-9]+)/report-load', async (req, res) => {
+  const { widgetId } = req.params;
+  const { url } = req.body || {};
 
-          ${reactCheck(apiUrl)}
-          currentScript.remove();
-      } catch(e) {
-        console.error("Could not place widget", e);
-      }
-    })();
-    `;
-  return output;
-}
+  if (!url || typeof url !== 'string') {
+    return res.status(400).json({ error: 'Missing url' });
+  }
+
+  const normalizedUrl = normalizeWidgetUrl(url);
+  if (!normalizedUrl) {
+    return res.status(400).json({ error: 'Invalid url' });
+  }
+
+  const cooldownKey = `${widgetId}:${hashWidgetUrl(normalizedUrl)}`;
+  const lastReport = reportLoadCooldowns.get(cooldownKey);
+  if (lastReport && Date.now() - lastReport < REPORT_LOAD_COOLDOWN_MS) {
+    return res.status(200).json({ ok: true });
+  }
+  reportLoadCooldowns.set(cooldownKey, Date.now());
+
+  try {
+    const result = await recordWidgetLoad(db, { widgetId, rawUrl: url });
+
+    if (result.status === 'not-found') {
+      return res.status(404).json({ error: 'Widget not found' });
+    }
+
+    res.status(200).json({ ok: true });
+  } catch (e) {
+    console.log('[widget] Could not save widget load:', e.message);
+    res.status(500).json({ error: 'Could not save widget load' });
+  }
+});
 
 module.exports = router;

@@ -29,6 +29,20 @@ const MapInput: React.FC<MapComponentProps> = ({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsSSR(false);
+
+      import('leaflet').then((L) => {
+        const proto = L.Map.prototype as any;
+        const orig = proto._initContainer;
+        proto._initContainer = function (id: any) {
+          const container =
+            typeof id === 'string' ? document.getElementById(id) : id;
+          if (container && container._leaflet_id) {
+            container._leaflet_id = undefined;
+          }
+          return orig.call(this, id);
+        };
+      });
+
       import('react-leaflet')
         .then((leaflet) => {
           setLeafletComponents(leaflet);

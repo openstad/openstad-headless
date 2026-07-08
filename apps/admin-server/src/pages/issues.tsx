@@ -41,14 +41,46 @@ export default function Projects() {
             </div>
             <ul>
               {data.map((project: any) => {
+                if (
+                  project.issue === 'blocked-domains' &&
+                  project.domainBlocks
+                ) {
+                  return project.domainBlocks.map((block: any) => (
+                    <li
+                      className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
+                      key={`${project.id}-block-${block.widgetId}-${block.domain}`}
+                      onClick={() => {
+                        router.push(
+                          `/projects/${project.id}/settings/alloweddomains`
+                        );
+                      }}>
+                      <Paragraph className="truncate">{project.name}</Paragraph>
+                      <Paragraph className="hidden lg:flex truncate">
+                        Widget {block.widgetId} ({block.count}x)
+                      </Paragraph>
+                      <Paragraph
+                        className="hidden lg:flex -mr-16 break-all"
+                        title={block.referer}>
+                        Geblokkeerd op {block.domain} ({block.referer})
+                      </Paragraph>
+                      <Paragraph className="flex">
+                        <ChevronRight
+                          strokeWidth={1.5}
+                          className="w-5 h-5 my-auto ml-auto"
+                        />
+                      </Paragraph>
+                    </li>
+                  ));
+                }
+
                 const currentDate = Date.now();
                 const anonymizationDate = addDays(
-                  project.config.project.endDate,
-                  project.config.anonymize.anonymizeUsersXDaysAfterEndDate
+                  project.config?.project?.endDate,
+                  project.config?.anonymize?.anonymizeUsersXDaysAfterEndDate
                 );
                 if (
-                  currentDate > project.config.project.endDate &&
-                  project.config.project.endDate != null
+                  currentDate > project.config?.project?.endDate &&
+                  project.config?.project?.endDate != null
                 ) {
                   return (
                     <li

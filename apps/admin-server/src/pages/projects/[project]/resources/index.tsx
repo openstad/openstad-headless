@@ -129,7 +129,7 @@ export default function ProjectResources() {
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
 
-    const allData = await fetchAll(totalCount, pageLimit);
+    const allData = await fetchAll();
     const preparedData = prepareDataForExport(allData);
     const includeSpamColumn = await getRuntimeSpamFilterEnabled();
     const exportKeyMap = includeSpamColumn

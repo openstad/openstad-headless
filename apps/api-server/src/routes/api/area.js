@@ -92,7 +92,9 @@ router
         res.json({ success: true, id: result.id });
       })
       .catch((err) => {
-        console.log('errr', err);
+        console.log(
+          `[${new Date().toISOString()}][area] error: ${err?.message}`
+        );
         next(err);
       });
   });
@@ -117,7 +119,9 @@ router
         next();
       })
       .catch((err) => {
-        console.log('errr', err);
+        console.log(
+          `[${new Date().toISOString()}][area] error: ${err?.message}`
+        );
         next(err);
       });
   })

@@ -16,10 +16,14 @@ const checkHostStatus = require('../services/checkHostStatus');
 // -------
 // Check periodically if the IP address is set to
 module.exports = {
-  cronTime: '0 2 */6 * * *',
+  cronTime: '0 0 3 * * *',
   runOnInit: false,
   onTick: async () => {
     console.log('crons --- checking projects host status');
-    checkHostStatus();
+    try {
+      await checkHostStatus();
+    } catch (err) {
+      console.error('[checkHostStatus] cron failed:', err.message);
+    }
   },
 };

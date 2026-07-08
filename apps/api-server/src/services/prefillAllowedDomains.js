@@ -1,35 +1,33 @@
-const prefillAllowedDomains = function (allowedDomains) {
+const {
+  parseHost,
+  addWithParents,
+} = require('@openstad-headless/lib/allowed-domains');
+
+const prefillAllowedDomains = function (inputDomains, projectUrl) {
+  const allowedDomains = [...(inputDomains || [])];
   try {
-    if (process.env.BASE_DOMAIN) {
-      let baseDomain = process.env.BASE_DOMAIN;
-      if (baseDomain.indexOf('http') !== 0) {
-        baseDomain = 'https://' + baseDomain;
-      }
-      const baseUrl = new URL(baseDomain);
-      allowedDomains.push(baseUrl.host);
+    const configuredHosts = allowedDomains
+      .map((d) => parseHost(d))
+      .filter(Boolean);
+    for (const host of configuredHosts) {
+      addWithParents(allowedDomains, host);
     }
 
-    if (process.env.URL) {
-      let hostname = process.env.URL;
-      if (hostname.indexOf('http') !== 0) {
-        hostname = 'https://' + hostname;
-      }
-      const url = new URL(hostname);
-      allowedDomains.push(url.host);
+    if (projectUrl) {
+      addWithParents(allowedDomains, parseHost(projectUrl));
     }
 
-    if (process.env.CMS_URL) {
-      const cmsUrl = new URL(process.env.CMS_URL);
-      allowedDomains.push(cmsUrl.host);
-    }
+    const envVars = [
+      process.env.BASE_DOMAIN,
+      process.env.URL,
+      process.env.CMS_URL,
+      process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL,
+      process.env.ADMIN_DOMAIN,
+    ];
 
-    if (process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL) {
-      const authUrl = new URL(process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL);
-      allowedDomains.push(authUrl.host);
-    }
-
-    if (process.env.ADMIN_DOMAIN) {
-      allowedDomains.push(process.env.ADMIN_DOMAIN);
+    for (const envVar of envVars) {
+      if (!envVar) continue;
+      addWithParents(allowedDomains, parseHost(envVar));
     }
   } catch (err) {
     console.error('Error processing allowed domains:', err);

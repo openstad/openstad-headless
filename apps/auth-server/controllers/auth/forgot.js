@@ -146,7 +146,9 @@ exports.postForgot = (req, res, next) => {
       );
     })
     .catch((err) => {
-      console.log('ererer', err);
+      console.log(
+        `[${new Date().toISOString()}][auth] password reset error: ${err?.message}`
+      );
       req.flash('error', { msg: 'E-mail adres is niet bekend bij ons.' });
       res.redirect(
         '/auth/local/forgot?clientId=' +

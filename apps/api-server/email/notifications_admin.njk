@@ -108,13 +108,15 @@
 											<strong>{{resource.summary | nl2br | safe}}</strong><br/>
 											<br/>
 
-											{% if resource.modBreak %}
-												<div id="modBreak">
-													<b>{{PROJECTNAME}}</b> &nbsp;&nbsp;|&nbsp;&nbsp; {{resource.modBreakDateHumanized}}<br>
-													<p>
-														{{resource.modBreak | safe | nl2br}}
-													</p>
-												</div>
+											{% if resource.modBreaksHumanized and resource.modBreaksHumanized.length %}
+												{% for mb in resource.modBreaksHumanized %}
+													<div id="modBreak">
+														<b>{{ mb.authorName or PROJECTNAME }}</b> &nbsp;&nbsp;|&nbsp;&nbsp; {{ mb.modBreakDateHumanized }}<br>
+														<p>
+															{{ mb.description | safe | nl2br }}
+														</p>
+													</div>
+												{% endfor %}
 											{% endif %}
 
 											{{resource.description | nl2br | safe}}<br/>

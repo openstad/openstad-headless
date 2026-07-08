@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
+  SelectContentScrollable,
   SelectGroup,
   SelectItem,
   SelectLabel,
@@ -27,6 +28,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import {
@@ -112,6 +114,10 @@ const formSchema = z.object({
     })
     .optional(),
   multiple: z.boolean().optional(),
+  maxUploadSizeMB: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number().positive().optional()
+  ),
   randomizeItems: z.boolean().optional(),
   image: z.string().optional(),
   imageUpload: z.string().optional(),
@@ -200,7 +206,10 @@ export default function WidgetEnqueteItems(
   type FormData = z.infer<typeof formSchema>;
   const [items, setItems] = useState<Item[]>([]);
   const [options, setOptions] = useState<Option[]>([]);
-  const [selectedItem, setItem] = useState<Item | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const selectedItem = selectedItemId
+    ? items.find((i) => i.id === selectedItemId) || null
+    : null;
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
   const [file, setFile] = useState<File>();
@@ -232,10 +241,12 @@ export default function WidgetEnqueteItems(
       }
       const hasTriggerChanges = Object.keys(triggerMap).length > 0;
 
+      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+
       setItems((currentItems) =>
         currentItems.map((item) => {
-          if (item.trigger === selectedItem.trigger) {
-            return { ...item, ...values };
+          if (item.id === selectedItem.id) {
+            return { ...item, ...valuesWithoutTrigger };
           }
           if (
             hasTriggerChanges &&
@@ -254,62 +265,66 @@ export default function WidgetEnqueteItems(
           return item;
         })
       );
-      setItem(null);
+      setSelectedItemId(null);
     } else {
-      setItems((currentItems) => [
-        ...currentItems,
-        {
-          trigger: `${
-            currentItems.length > 0
-              ? parseInt(currentItems[currentItems.length - 1].trigger) + 1
-              : 1
-          }`,
-          title: values.title,
-          key: values.key,
-          description: values.description,
-          questionType: values.questionType,
-          fieldKey: values.fieldKey,
-          minCharacters: values.minCharacters,
-          maxCharacters: values.maxCharacters,
-          nextPageText: values.nextPageText || '',
-          prevPageText: values.prevPageText || '',
-          stepName: values.stepName || '',
-          variant: values.variant || 'text input',
-          options: values.options || [],
-          multiple: values.multiple || false,
-          randomizeItems: values.randomizeItems || false,
-          image_b: values.image_b || '',
-          description_b: values.description_b || '',
-          key_b: values.key_b || '',
-          fieldRequired: values.fieldRequired || false,
-          createImageSlider: values.createImageSlider || false,
-          imageClickable: values.imageClickable || false,
-          maxChoices: values.maxChoices || '',
-          maxChoicesMessage: values.maxChoicesMessage || '',
-          showSmileys: values.showSmileys || false,
-          defaultValue: values.defaultValue || '',
-          placeholder: values.placeholder || '',
-          matrix: values.matrix || matrixDefault,
-          matrixMultiple: values.matrixMultiple || false,
-          routingInitiallyHide: values.routingInitiallyHide || false,
-          routingSelectedQuestion: values.routingSelectedQuestion || '',
-          routingSelectedAnswer: values.routingSelectedAnswer || '',
-          infoField: values.infoField || '',
-          infofieldExplanation: values.infofieldExplanation || false,
-          numberingStyle: values.numberingStyle || 'none',
-          images: values?.images || [],
-          // Keeping these for backwards compatibility
-          image1: values.image1 || '',
-          text1: values.text1 || '',
-          key1: values.key1 || '',
-          image2: values.image2 || '',
-          text2: values.text2 || '',
-          key2: values.key2 || '',
-          imageDescription: values.imageDescription || '',
-          imageAlt: values.imageAlt || '',
-          image: values.image || '',
-        },
-      ]);
+      setItems((currentItems) => {
+        const maxTrigger = currentItems.reduce(
+          (max, i) => Math.max(max, parseInt(i.trigger) || 0),
+          0
+        );
+        return [
+          ...currentItems,
+          {
+            id: generateId(),
+            trigger: `${maxTrigger + 1}`,
+            title: values.title,
+            key: values.key,
+            description: values.description,
+            questionType: values.questionType,
+            fieldKey: values.fieldKey,
+            minCharacters: values.minCharacters,
+            maxCharacters: values.maxCharacters,
+            nextPageText: values.nextPageText || '',
+            prevPageText: values.prevPageText || '',
+            stepName: values.stepName || '',
+            variant: values.variant || 'text input',
+            options: values.options || [],
+            multiple: values.multiple || false,
+            maxUploadSizeMB: values.maxUploadSizeMB || 25,
+            randomizeItems: values.randomizeItems || false,
+            image_b: values.image_b || '',
+            description_b: values.description_b || '',
+            key_b: values.key_b || '',
+            fieldRequired: values.fieldRequired || false,
+            createImageSlider: values.createImageSlider || false,
+            imageClickable: values.imageClickable || false,
+            maxChoices: values.maxChoices || '',
+            maxChoicesMessage: values.maxChoicesMessage || '',
+            showSmileys: values.showSmileys || false,
+            defaultValue: values.defaultValue || '',
+            placeholder: values.placeholder || '',
+            matrix: values.matrix || matrixDefault,
+            matrixMultiple: values.matrixMultiple || false,
+            routingInitiallyHide: values.routingInitiallyHide || false,
+            routingSelectedQuestion: values.routingSelectedQuestion || '',
+            routingSelectedAnswer: values.routingSelectedAnswer || '',
+            infoField: values.infoField || '',
+            infofieldExplanation: values.infofieldExplanation || false,
+            numberingStyle: values.numberingStyle || 'none',
+            images: values?.images || [],
+            // Keeping these for backwards compatibility
+            image1: values.image1 || '',
+            text1: values.text1 || '',
+            key1: values.key1 || '',
+            image2: values.image2 || '',
+            text2: values.text2 || '',
+            key2: values.key2 || '',
+            imageDescription: values.imageDescription || '',
+            imageAlt: values.imageAlt || '',
+            image: values.image || '',
+          },
+        ];
+      });
     }
 
     form.reset(defaults);
@@ -323,7 +338,7 @@ export default function WidgetEnqueteItems(
       setOptions((currentOptions) => {
         const updatedOptions = currentOptions
           .map((option) => {
-            if (option.trigger === selectedOption.trigger) {
+            if (option.id === selectedOption.id) {
               const newTitles =
                 values.options?.find((o) => o.trigger === option.trigger)
                   ?.titles || [];
@@ -343,12 +358,13 @@ export default function WidgetEnqueteItems(
 
       setOption(null);
     } else {
+      const maxTrigger = options.reduce(
+        (max, o) => Math.max(max, parseInt(o.trigger) || 0),
+        -1
+      );
       const newOption = {
-        trigger: `${
-          options.length > 0
-            ? parseInt(options[options.length - 1].trigger) + 1
-            : 0
-        }`,
+        id: generateId(),
+        trigger: `${maxTrigger + 1}`,
         titles: values.options?.[values.options.length - 1].titles || [],
       };
       setOptions((currentOptions) => [...currentOptions, newOption]);
@@ -365,7 +381,7 @@ export default function WidgetEnqueteItems(
 
         if (updatedMatrixOption === 'rows') {
           updatedMatrix.rows = updatedMatrix.rows.map((row) =>
-            row.trigger === matrixOption.trigger
+            row.id === matrixOption.id
               ? {
                   ...row,
                   text:
@@ -376,7 +392,7 @@ export default function WidgetEnqueteItems(
           );
         } else {
           updatedMatrix.columns = updatedMatrix.columns.map((column) =>
-            column.trigger === matrixOption.trigger
+            column.id === matrixOption.id
               ? {
                   ...column,
                   text:
@@ -413,6 +429,7 @@ export default function WidgetEnqueteItems(
       const newText = newTextObj?.text || '';
 
       const newMatrixOption: MatrixOption = {
+        id: generateId(),
         trigger: newTrigger.toString(),
         text: newText,
       };
@@ -447,6 +464,7 @@ export default function WidgetEnqueteItems(
     variant: 'text input',
     options: [],
     multiple: false,
+    maxUploadSizeMB: 25,
     randomizeItems: false,
     infoBlockStyle: 'default',
     infoBlockShareButton: false,
@@ -489,15 +507,19 @@ export default function WidgetEnqueteItems(
     defaultValues: defaults(),
   });
 
+  const itemsInitialized = React.useRef(false);
   useEffect(() => {
-    if (props?.items && props?.items?.length > 0) {
-      setItems(props?.items);
+    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
+      itemsInitialized.current = true;
+      setItems(props.items.map(withId));
     }
   }, [props?.items]);
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    onFieldChanged('items', items);
+    if (onFieldChanged) {
+      onFieldChanged('items', items);
+    }
   }, [items]);
 
   function buildFormValues(item: Item) {
@@ -526,6 +548,7 @@ export default function WidgetEnqueteItems(
       variant: item.variant || '',
       options: item.options || [],
       multiple: item.multiple || false,
+      maxUploadSizeMB: item.maxUploadSizeMB || 25,
       randomizeItems: item.randomizeItems || false,
       infoBlockStyle: item.infoBlockStyle || 'default',
       infoBlockShareButton: item.infoBlockShareButton || false,
@@ -572,7 +595,7 @@ export default function WidgetEnqueteItems(
     if (selectedOption) {
       const updatedOptions = [...options];
       const index = options.findIndex(
-        (option) => option.trigger === selectedOption.trigger
+        (option) => option.id === selectedOption.id
       );
       updatedOptions[index] = { ...selectedOption };
 
@@ -671,28 +694,57 @@ export default function WidgetEnqueteItems(
     actionType: 'moveUp' | 'moveDown' | 'delete',
     trigger: string
   ) {
-    const index = list.findIndex((entry) => entry.trigger === trigger);
-
     if (actionType === 'delete') {
-      return list.filter((entry) => entry.trigger !== trigger);
+      return list
+        .filter((entry) => entry.trigger !== trigger)
+        .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger));
     }
+
+    const sorted = [...list].sort(
+      (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
+    );
+    const index = sorted.findIndex((entry) => entry.trigger === trigger);
 
     if (
       (actionType === 'moveUp' && index > 0) ||
-      (actionType === 'moveDown' && index < list.length - 1)
+      (actionType === 'moveDown' && index < sorted.length - 1)
     ) {
-      const newItemList = [...list];
       const swapIndex = actionType === 'moveUp' ? index - 1 : index + 1;
-      let tempTrigger = newItemList[swapIndex].trigger;
-      newItemList[swapIndex].trigger = newItemList[index].trigger;
-      newItemList[index].trigger = tempTrigger;
-      return newItemList;
+      const triggerA = sorted[index].trigger;
+      const triggerB = sorted[swapIndex].trigger;
+      return sorted
+        .map((entry) => {
+          if (entry.trigger === triggerA)
+            return { ...entry, trigger: triggerB };
+          if (entry.trigger === triggerB)
+            return { ...entry, trigger: triggerA };
+          return entry;
+        })
+        .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger));
     }
 
-    return list; // If no action is performed, return the original list
+    return sorted;
   }
 
   function handleSaveItems() {
+    let itemsToSave = [...items];
+
+    if (selectedItem) {
+      const values = form.getValues();
+      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+      if (valuesWithoutTrigger?.options) {
+        valuesWithoutTrigger.options = options;
+      }
+      if (valuesWithoutTrigger?.matrix) {
+        valuesWithoutTrigger.matrix = matrixOptions;
+      }
+      itemsToSave = itemsToSave.map((item) =>
+        item.id === selectedItem.id
+          ? { ...item, ...valuesWithoutTrigger }
+          : item
+      );
+    }
+
     const updatedProps = { ...props };
 
     Object.keys(updatedProps).forEach((key: string) => {
@@ -702,7 +754,10 @@ export default function WidgetEnqueteItems(
       }
     });
 
-    props.updateConfig({ ...updatedProps, items });
+    setItems(itemsToSave);
+    props.updateConfig({ ...updatedProps, items: itemsToSave });
+    setSelectedItemId(null);
+    form.reset(defaults());
     setOptions([]);
     setMatrixOptions(matrixDefault);
   }
@@ -740,7 +795,7 @@ export default function WidgetEnqueteItems(
     form.reset(defaults());
     setOptions([]);
     setMatrixOptions(matrixDefault);
-    setItem(null);
+    setSelectedItemId(null);
   }
 
   function handleSaveOptions() {
@@ -761,8 +816,7 @@ export default function WidgetEnqueteItems(
     if (key) {
       const isUnique = items.every(
         (item) =>
-          (selectedItem && item.trigger === selectedItem.trigger) ||
-          item.fieldKey !== key
+          (selectedItem && item.id === selectedItem.id) || item.fieldKey !== key
       );
 
       setIsFieldKeyUnique(isUnique);
@@ -810,7 +864,7 @@ export default function WidgetEnqueteItems(
                 <Separator className="my-4" />
                 <div className="flex flex-col gap-1">
                   {items.length > 0
-                    ? items
+                    ? [...items]
                         .sort(
                           (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
                         )
@@ -820,14 +874,11 @@ export default function WidgetEnqueteItems(
                             className={`flex cursor-pointer justify-between border border-secondary 
                             ${
                               item.questionType === 'pagination' &&
-                              item.trigger !== selectedItem?.trigger
+                              item.id !== selectedItem?.id
                                 ? 'bg-[#f8f8f8]'
                                 : ''
                             }
-                            ${
-                              item.trigger == selectedItem?.trigger &&
-                              'bg-secondary'
-                            }`}>
+                            ${item.id === selectedItem?.id && 'bg-secondary'}`}>
                             <span className="flex gap-2 py-3 px-2">
                               <ArrowUp
                                 className="cursor-pointer"
@@ -845,10 +896,19 @@ export default function WidgetEnqueteItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
+                                if (selectedItem?.id === item.id) return;
                                 form.reset(buildFormValues(item));
-                                setItem(item);
-                                setOptions(item.options || []);
-                                setMatrixOptions(item.matrix || matrixDefault);
+                                setSelectedItemId(item.id ?? null);
+                                setOptions((item.options || []).map(withId));
+                                setMatrixOptions({
+                                  ...(item.matrix || matrixDefault),
+                                  rows: (
+                                    (item.matrix || matrixDefault).rows || []
+                                  ).map(withId),
+                                  columns: (
+                                    (item.matrix || matrixDefault).columns || []
+                                  ).map(withId),
+                                });
                                 setSettingOptions(false);
                                 setOption(null);
                               }}
@@ -900,7 +960,7 @@ export default function WidgetEnqueteItems(
 
                           <div className="flex flex-col gap-1">
                             {matrixOptions?.[matrixItem.type]?.length > 0
-                              ? matrixOptions?.[matrixItem.type]
+                              ? [...matrixOptions?.[matrixItem.type]]
                                   .sort(
                                     (a, b) =>
                                       parseInt(a.trigger) - parseInt(b.trigger)
@@ -909,8 +969,7 @@ export default function WidgetEnqueteItems(
                                     <div
                                       key={index}
                                       className={`flex cursor-pointer justify-between border border-secondary ${
-                                        option.trigger ==
-                                          selectedOption?.trigger &&
+                                        option.id === selectedOption?.id &&
                                         'bg-secondary'
                                       }`}>
                                       <span className="flex gap-2 py-3 px-2">
@@ -972,8 +1031,7 @@ export default function WidgetEnqueteItems(
                             const currentOption = matrixOptions?.[
                               matrixItem.type
                             ].findIndex(
-                              (option) =>
-                                option.trigger === matrixOption?.trigger
+                              (option) => option.id === matrixOption?.id
                             );
                             const activeOption =
                               currentOption !== -1
@@ -1040,8 +1098,7 @@ export default function WidgetEnqueteItems(
                       {hasList() &&
                         (() => {
                           const currentOption = options.findIndex(
-                            (option) =>
-                              option.trigger === selectedOption?.trigger
+                            (option) => option.id === selectedOption?.id
                           );
                           const activeOption =
                             currentOption !== -1
@@ -1462,7 +1519,7 @@ export default function WidgetEnqueteItems(
                     <Separator className="my-4" />
                     <div className="flex flex-col gap-1">
                       {options.length > 0
-                        ? options
+                        ? [...options]
                             .sort(
                               (a, b) =>
                                 parseInt(a.trigger) - parseInt(b.trigger)
@@ -1471,7 +1528,7 @@ export default function WidgetEnqueteItems(
                               <div
                                 key={index}
                                 className={`flex cursor-pointer justify-between border border-secondary ${
-                                  option.trigger == selectedOption?.trigger &&
+                                  option.id === selectedOption?.id &&
                                   'bg-secondary'
                                 }`}>
                                 <span className="flex gap-2 py-3 px-2">
@@ -2178,6 +2235,30 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
+                    {(form.watch('questionType') === 'imageUpload' ||
+                      form.watch('questionType') === 'documentUpload') && (
+                      <FormField
+                        control={form.control}
+                        name="maxUploadSizeMB"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Maximale uploadgrootte (MB)</FormLabel>
+                            <FormDescription>
+                              <em className="text-xs">
+                                De maximale bestandsgrootte die een gebruiker
+                                mag uploaden. Standaard 25 MB. Let op: de server
+                                hanteert een absolute bovengrens (standaard 25
+                                MB); hogere waarden kunnen alsnog door de server
+                                geweigerd worden.
+                              </em>
+                            </FormDescription>
+                            <Input type="number" min="1" {...field} />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
                     {![
                       'pagination',
                       'sort',
@@ -2348,36 +2429,32 @@ export default function WidgetEnqueteItems(
                       </>
                     )}
 
-                    {form.watch('questionType') !== 'pagination' && (
-                      <FormField
-                        control={form.control}
-                        name="routingInitiallyHide"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Is deze vraag altijd zichtbaar?
-                            </FormLabel>
-                            <Select
-                              onValueChange={(e: string) =>
-                                field.onChange(e === 'true')
-                              }
-                              value={field.value ? 'true' : 'false'}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Kies een optie" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {/* True and false are deliberately switched */}
-                                <SelectItem value="true">Nee</SelectItem>
-                                <SelectItem value="false">Ja</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
+                    <FormField
+                      control={form.control}
+                      name="routingInitiallyHide"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Is deze vraag altijd zichtbaar?</FormLabel>
+                          <Select
+                            onValueChange={(e: string) =>
+                              field.onChange(e === 'true')
+                            }
+                            value={field.value ? 'true' : 'false'}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Kies een optie" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {/* True and false are deliberately switched */}
+                              <SelectItem value="true">Nee</SelectItem>
+                              <SelectItem value="false">Ja</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
                     {form.watch('questionType') === 'sort' && (
                       <FormField
@@ -2502,7 +2579,7 @@ export default function WidgetEnqueteItems(
                                         <SelectValue placeholder="Kies een vraag" />
                                       </SelectTrigger>
                                     </FormControl>
-                                    <SelectContent>
+                                    <SelectContentScrollable>
                                       {formMultipleChoiceFields.map(
                                         (f: any) => (
                                           <SelectItem
@@ -2512,7 +2589,7 @@ export default function WidgetEnqueteItems(
                                           </SelectItem>
                                         )
                                       )}
-                                    </SelectContent>
+                                    </SelectContentScrollable>
                                   </Select>
                                 )}
 

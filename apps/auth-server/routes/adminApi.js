@@ -162,14 +162,19 @@ module.exports = (app) => {
 
   // only use this error handler middleware in "/api" based routes in order to output the errors as JSON instead of HTML
   app.use('/api/admin/', function (err, req, res, next) {
-    console.log('===> err', err);
+    var status = err.status || 500;
+    var userIsAdmin = req.user && req.user.role && req.user.role === 'admin';
+    var isDev = process.env.NODE_ENV === 'development';
+    var showDebug = isDev || userIsAdmin;
 
-    // use the error's status or default to 500
-    res.status(err.status || 500);
+    if (status >= 500) {
+      console.error(err.stack || err);
+    }
 
-    // send back json data
+    res.status(status);
     res.send({
-      message: err.message,
+      message:
+        status >= 500 && !showDebug ? 'Er is iets misgegaan' : err.message,
     });
   });
 };

@@ -31,6 +31,7 @@ type userType = {
 interface SessionData {
   [key: string]: string | number | userType | undefined;
   user?: userType;
+  adminUser?: userType;
 }
 
 const sessionOptions = {
@@ -56,6 +57,19 @@ async function getSession(
 }
 
 async function authMiddleware(req: NextRequest, res: NextResponse) {
+  const loadSessionUser = async (projectId: number, jwt: string) => {
+    const url = `${process.env.API_URL_INTERNAL || process.env.API_URL}/auth/project/${projectId}/me`;
+    const response = await fetch(url, {
+      headers: { Authorization: `Bearer ${jwt}` },
+    });
+    if (!response.ok) throw new Error('TokenValidationFailed');
+
+    const result: OpenstadProfile = await response.json();
+    if (!result.id) throw new Error('NoUser');
+
+    return result;
+  };
+
   // projectId
   let targetProjectId = 1;
   let match = req.nextUrl.pathname.match(/^\/projects\/(\d+)/);
@@ -67,7 +81,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
 
   // session
   const session = await getSession(req, res);
-  let jwt = session[`project-${targetProjectId}`] || session[`project-1`];
+  let jwt = session['project-1'];
 
   // store login token
   const searchParams = req.nextUrl?.searchParams;
@@ -75,6 +89,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
   if (openstadlogintoken) {
     jwt = openstadlogintoken;
     session[`project-${targetProjectId}`] = jwt;
+    session['project-1'] = jwt;
     await session.save();
     let path = req.nextUrl.pathname;
     if (path == '' || path == '/') path = '/projects';
@@ -82,6 +97,9 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     query = query.replace(/openstadlogintoken=(?:.(?!&|$))+./, '');
     if (query == '?') query = '';
     let newUrl = `${process.env.URL}${path}${query}`;
+    console.log(
+      `[${new Date().toISOString()}][admin-auth] login token received: projectId=${targetProjectId} redirect=${path}`
+    );
     return NextResponse.redirect(newUrl, { headers: res.headers });
   }
 
@@ -90,18 +108,11 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
 
     let forceNewLogin = false;
 
-    // check login token
+    // check login token — validate against project 1 (admin project)
+    // because admin rights are granted via project 1, not per target project
     if (jwt) {
       try {
-        let url = `${
-          process.env.API_URL_INTERNAL || process.env.API_URL
-        }/auth/project/${targetProjectId}/me`;
-        let response = await fetch(url, {
-          headers: { Authorization: `Bearer ${jwt}` },
-        });
-        if (!response.ok) throw new Error('TokenValidationFailed');
-        let result: OpenstadProfile = await response.json();
-        if (!result.id) throw 'no user';
+        const result = await loadSessionUser(1, jwt as string);
         if (
           !(
             req.nextUrl.pathname.match(/^\/(?:projects)?\/?$/) &&
@@ -120,18 +131,61 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
           role: result.role,
           jwt: jwt as string,
         };
+        console.log(
+          `[${new Date().toISOString()}][admin-auth] user authenticated: userId=${result.id} role=${result.role}`
+        );
       } catch (err) {
+        if (!forceNewLogin && typeof jwt === 'string' && jwt.includes('.')) {
+          try {
+            const payload = JSON.parse(
+              Buffer.from(jwt.split('.')[1], 'base64').toString()
+            );
+            if (
+              typeof payload.exp === 'number' &&
+              payload.exp * 1000 < Date.now()
+            ) {
+              forceNewLogin = true;
+            }
+          } catch (e) {}
+        }
+        console.log(
+          `[${new Date().toISOString()}][admin-auth] user validation failed: projectId=${targetProjectId} forceNewLogin=${forceNewLogin}`
+        );
         jwt = '';
         session.user = undefined;
-      } finally {
-        await session.save();
       }
+
+      const adminJwt = session['project-1'];
+      if (adminJwt) {
+        try {
+          const adminResult = session.user
+            ? {
+                id: session.user.id,
+                name: session.user.name,
+                role: session.user.role,
+              }
+            : await loadSessionUser(1, adminJwt as string);
+
+          session.adminUser = {
+            id: adminResult.id,
+            name: adminResult.name,
+            role: adminResult.role,
+            jwt: adminJwt as string,
+          };
+        } catch (err) {
+          session.adminUser = undefined;
+        }
+      } else {
+        session.adminUser = undefined;
+      }
+
+      await session.save();
     }
 
-    // login if token not found
+    // login if token not found — always login via project 1 (admin project)
     if (!jwt && !req.nextUrl.pathname.startsWith('/api/openstad')) {
       // api routes require user but will nog login
-      return signIn(req, res, targetProjectId, forceNewLogin);
+      return signIn(req, res, 1, forceNewLogin);
     }
   }
 
@@ -174,7 +228,15 @@ async function signIn(
 ) {
   if (forceNewLogin) {
     const session = await getSession(req, res);
-    session.destroy();
+    delete session[`project-${projectId}`];
+    session.user = undefined;
+
+    if (projectId === 1) {
+      delete session['project-1'];
+      session.adminUser = undefined;
+    }
+
+    await session.save();
   }
   let path = req.nextUrl.pathname.replace('/api/openstad', '');
   if (path == '/') path = '/projects';
@@ -187,4 +249,51 @@ async function signIn(
   return NextResponse.redirect(loginUrl, { headers: res.headers });
 }
 
-export { authMiddleware, getSession, sessionOptions, signIn };
+function clientSignIn() {
+  let loginUrl = `/signin`;
+  document.location.href = loginUrl;
+}
+
+type SessionUserType = {
+  id?: number;
+  name?: string;
+  role?: string;
+  jwt?: string;
+  adminId?: number;
+  adminName?: string;
+  adminRole?: string;
+};
+
+async function fetchSessionUser() {
+  try {
+    let response = await fetch('/api/current-user', {
+      headers: { 'Content-type': 'application/json' },
+    });
+    if (!response.ok) {
+      throw new Error('Fetch failed');
+    }
+    let result = await response.json();
+    return {
+      id: result.id,
+      name: result.name,
+      role: result.role,
+      jwt: result.jwt,
+      adminId: result.adminId,
+      adminName: result.adminName,
+      adminRole: result.adminRole,
+    };
+  } catch (err) {
+    console.log(err);
+    return {};
+  }
+}
+
+export {
+  authMiddleware,
+  getSession,
+  sessionOptions,
+  signIn,
+  clientSignIn,
+  fetchSessionUser,
+  type SessionUserType,
+};

@@ -6,9 +6,15 @@ import { useRouter } from 'next/router';
 import React from 'react';
 import { toast } from 'react-hot-toast';
 
-export default function WidgetPublish({ apiUrl }: { apiUrl: string }) {
+export default function WidgetPublish({
+  apiUrl,
+  idOverride,
+}: {
+  apiUrl: string;
+  idOverride?: string;
+}) {
   const router = useRouter();
-  const id = router.query.id;
+  const id = idOverride ?? router.query.id;
   const widgetScriptTag = `<script src="${apiUrl}/widget/${id}" type="text/javascript"></script>`;
   const widgetUrl = `${apiUrl}/widget/${id}`;
 

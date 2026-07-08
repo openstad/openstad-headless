@@ -56,6 +56,7 @@ export type Info = {
 };
 
 export type Item = {
+  id?: string;
   trigger: string;
   title?: string;
   description?: string;
@@ -71,6 +72,7 @@ export type Item = {
   maxCharacters?: string;
   variant?: string;
   multiple?: boolean;
+  maxUploadSizeMB?: number;
   images?: Array<{
     image?: never;
     src: string;
@@ -90,6 +92,7 @@ export type Item = {
 };
 
 export type Option = {
+  id?: string;
   trigger: string;
   titles: Array<Title>;
   images?: Array<{

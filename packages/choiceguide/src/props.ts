@@ -89,6 +89,7 @@ export type ChoiceOptions = {
 };
 
 export type Item = {
+  id?: string;
   trigger: string;
   title?: string;
   description?: string;
@@ -102,6 +103,7 @@ export type Item = {
   maxCharacters?: string;
   variant?: string;
   multiple?: boolean;
+  maxUploadSizeMB?: number;
   options?: Array<Option>;
   sliderTitleUnderA?: string;
   sliderTitleUnderB?: string;
@@ -145,6 +147,7 @@ export type Item = {
 };
 
 export type Option = {
+  id?: string;
   trigger: string;
   titles: Array<Title>;
 };

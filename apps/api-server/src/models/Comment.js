@@ -246,15 +246,26 @@ module.exports = function (db, sequelize, DataTypes) {
         };
       },
 
-      includeRepliesOnComments: function (userId) {
+      includeRepliesOnComments: function (userId, parentAlias) {
         let commentVoteThreshold = 5; // todo: configureerbaar
+        const allowedAliases = [
+          'commentsAgainst',
+          'commentsFor',
+          'commentsNoSentiment',
+        ];
+        if (parentAlias && !allowedAliases.includes(parentAlias)) {
+          throw new Error(`Invalid parentAlias: ${parentAlias}`);
+        }
+        const replyTableName = parentAlias
+          ? `\`${parentAlias}->replies\``
+          : 'replies';
         return {
           include: [
             {
               model: db.Comment.scope(
                 'defaultScope',
-                { method: ['includeVoteCount', 'replies'] },
-                { method: ['includeUserVote', 'replies', userId] }
+                { method: ['includeVoteCount', replyTableName] },
+                { method: ['includeUserVote', replyTableName, userId] }
               ),
               as: 'replies',
               required: false,
@@ -280,12 +291,6 @@ module.exports = function (db, sequelize, DataTypes) {
           where: {
             parentId: null,
           },
-          // HACK: Inelegant?
-          order: [
-            //						sequelize.literal(`GREATEST(0, \`yes\` - ${commentVoteThreshold}) DESC`),
-            sequelize.literal('parentId'),
-            sequelize.literal('createdAt'),
-          ],
         };
       },
 
@@ -410,18 +415,17 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       filterByTags: function (onlyIncludeTagIds) {
-        let where = {};
-        if (onlyIncludeTagIds) {
-          where.id = { [Op.in]: onlyIncludeTagIds.split(',') };
-        }
+        const safeIds = (onlyIncludeTagIds || '')
+          .split(',')
+          .map((id) => parseInt(id, 10))
+          .filter(Number.isFinite);
         return {
           include: [
             {
               model: db.Tag,
-              as: 'tags',
               through: { attributes: [] },
-              required: !!onlyIncludeTagIds,
-              where: where,
+              required: safeIds.length > 0,
+              where: safeIds.length > 0 ? { id: { [Op.in]: safeIds } } : {},
             },
           ],
         };
@@ -446,7 +450,6 @@ module.exports = function (db, sequelize, DataTypes) {
     });
     this.belongsToMany(models.Tag, {
       through: 'comment_tags',
-      as: 'tags',
       foreignKey: 'commentId',
       otherKey: 'tagId',
       constraints: false,

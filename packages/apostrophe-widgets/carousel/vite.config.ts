@@ -4,4 +4,5 @@ export default createWidgetConfig({
   name: 'ApostropheWidgetsCarousel',
   entry: 'src/carousel.tsx',
   usePrefix: false,
+  bundleReact: true,
 });

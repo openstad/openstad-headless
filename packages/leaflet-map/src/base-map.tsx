@@ -220,6 +220,7 @@ const BaseMap = ({
   defaultIcon = undefined,
 
   area = undefined,
+  areaId = undefined,
   renderArea = undefined,
   areaPolygonStyle = undefined,
 
@@ -574,6 +575,7 @@ const BaseMap = ({
       newMarkers.length !== currentMarkers.length ||
       newMarkers.some(
         (marker, index) =>
+          marker.markerId !== currentMarkers[index]?.markerId ||
           marker.lat !== currentMarkers[index]?.lat ||
           marker.lng !== currentMarkers[index]?.lng
       );
@@ -619,25 +621,6 @@ const BaseMap = ({
     maxZoom,
   };
 
-  useEffect(() => {
-    document.documentElement.style.setProperty('--basemap-map-width', width);
-
-    const heightValue = height
-      ? height.match(/\d+(px|%|vh|vw|em|rem|ex|ch|vmin|vmax|cm|mm|in|pt|pc)$/)
-        ? height
-        : `${height}px`
-      : 'auto';
-
-    document.documentElement.style.setProperty(
-      '--basemap-map-height',
-      heightValue
-    );
-    document.documentElement.style.setProperty(
-      '--basemap-map-aspect-ratio',
-      height ? 'unset' : '16 / 9'
-    );
-  }, [width, height]);
-
   const [isTouchDevice, setIsTouchDevice] = useState(false);
   const [containerReady, setContainerReady] = useState(false);
   const containerWrapperRef = useRef<HTMLDivElement>(null);
@@ -647,6 +630,30 @@ const BaseMap = ({
       setIsTouchDevice(true);
     }
   }, []);
+
+  useEffect(() => {
+    const el = containerWrapperRef.current;
+    if (!el) return;
+
+    const unitPattern =
+      /\d+(px|%|vh|vw|em|rem|ex|ch|vmin|vmax|cm|mm|in|pt|pc)$/;
+
+    if (width) {
+      const widthValue = width.match(unitPattern) ? width : `${width}px`;
+      el.style.setProperty('--basemap-map-width', widthValue);
+    } else {
+      el.style.removeProperty('--basemap-map-width');
+    }
+
+    if (height) {
+      const heightValue = height.match(unitPattern) ? height : `${height}px`;
+      el.style.setProperty('--basemap-map-height', heightValue);
+      el.style.setProperty('--basemap-map-aspect-ratio', 'unset');
+    } else {
+      el.style.removeProperty('--basemap-map-height');
+      el.style.removeProperty('--basemap-map-aspect-ratio');
+    }
+  }, [width, height]);
 
   useEffect(() => {
     const el = containerWrapperRef.current;
@@ -745,9 +752,11 @@ const BaseMap = ({
             <AutoZoom
               autoZoomAndCenter={autoZoomAndCenter}
               area={area}
+              areaId={areaId}
               markers={currentMarkers}
               center={center}
               zoomAfterInit={zoomAfterInit}
+              customPolygonIds={customPolygon?.map((p: { id: number }) => p.id)}
             />
 
             <TileLayer {...tileLayerProps} />

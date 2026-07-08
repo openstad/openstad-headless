@@ -78,7 +78,9 @@ exports.save = (token, expirationDate, userID, clientID, scope) => {
       scope,
     })
       .then((token) => {
-        console.log('Savedddd access token');
+        console.log(
+          `[${new Date().toISOString()}][auth] access token saved: userId=${userID} clientId=${clientID}`
+        );
         if (!token) {
           resolve(undefined);
         }
@@ -151,13 +153,17 @@ exports.removeExpired = () => {
         });
 
         Promise.all(deleteActions)
-          .then((success) => {
-            console.log('success', success);
+          .then(() => {
+            console.log(
+              `[${new Date().toISOString()}][auth] cleaned up ${deleteActions.length} expired tokens`
+            );
             resolve();
           })
           .catch((e) => {
+            console.warn(
+              `[${new Date().toISOString()}][auth] token cleanup error: ${e?.message}`
+            );
             resolve();
-            console.log('e', e);
           });
       })
       .catch((e) => {

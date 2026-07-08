@@ -84,7 +84,7 @@ export default function ProjectSettings() {
       basicAuthActive: data?.config?.basicAuth?.active || false,
       username: data?.config?.basicAuth?.username || '',
       password: data?.config?.basicAuth?.password || '',
-      projectToggle: data?.config?.project?.projectToggle || false,
+      projectToggle: data?.config?.project?.projectToggle ?? !!data?.url,
     };
   }, [data]);
 
@@ -100,17 +100,12 @@ export default function ProjectSettings() {
   }, [form, defaults]);
 
   useEffect(() => {
-    if (checkboxInitial) {
-      if (data?.config?.project?.projectToggle) {
-        setShowUrl(true);
-        setCheckboxInitial(false);
-      }
+    if (!data) return;
 
-      if (data?.url) {
-        form.setValue('projectToggle', true);
-        setShowUrl(true);
-        setCheckboxInitial(false);
-      }
+    if (checkboxInitial) {
+      const toggle = data?.config?.project?.projectToggle ?? !!data?.url;
+      setShowUrl(toggle);
+      setCheckboxInitial(false);
       setProjectHasEnded(data?.config?.project?.projectHasEnded);
     }
 
@@ -127,6 +122,7 @@ export default function ProjectSettings() {
           project: {
             endDate: values.endDate,
             projectToggle: values.projectToggle,
+            lastUrl: values.url || data?.config?.project?.lastUrl || '',
           },
           basicAuth: {
             active: values.basicAuthActive,
@@ -135,15 +131,18 @@ export default function ProjectSettings() {
           },
         },
         values.name,
-        values.url
+        values.projectToggle ? values.url : ''
       );
-      if (project) {
+      if (project?.error) {
+        toast.error(project.error);
+      } else if (project) {
         toast.success('Project aangepast!');
       } else {
         toast.error('Er is helaas iets mis gegaan.');
       }
     } catch (error) {
       console.error('could not update', error);
+      toast.error('Er is helaas iets mis gegaan.');
     }
   }
 
@@ -293,7 +292,7 @@ export default function ProjectSettings() {
                             className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                             onCheckedChange={(e: boolean) => {
                               field.onChange(e);
-                              setShowUrl(!showUrl);
+                              setShowUrl(e);
                             }}
                             checked={field.value}>
                             <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
@@ -318,6 +317,12 @@ export default function ProjectSettings() {
                               <Input placeholder="Url" {...field} />
                             </FormControl>
                             <FormMessage />
+                            {!field.value && data?.config?.project?.lastUrl && (
+                              <p className="text-xs text-muted-foreground">
+                                Laatst ingestelde URL:{' '}
+                                {data.config.project.lastUrl}
+                              </p>
+                            )}
                           </FormItem>
                         )}
                       />

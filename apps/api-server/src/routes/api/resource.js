@@ -196,11 +196,45 @@ router.all('*', function (req, res, next) {
     req.scope.push('includeTags');
   }
 
+  if (req.query.excludeTags) {
+    let excludeTags = req.query.excludeTags;
+    if (!Array.isArray(excludeTags)) excludeTags = [excludeTags];
+    req.scope.push({ method: ['excludeTags', excludeTags] });
+  }
+
   if (req.query.statuses) {
     let statuses = req.query.statuses;
     // if statuses is not an array, make it an array
     if (!Array.isArray(statuses)) statuses = [statuses];
     req.scope.push({ method: ['selectStatuses', statuses] });
+  }
+
+  if (req.query.excludeStatuses) {
+    let excludeStatuses = req.query.excludeStatuses;
+    if (!Array.isArray(excludeStatuses)) excludeStatuses = [excludeStatuses];
+    req.scope.push({ method: ['excludeStatuses', excludeStatuses] });
+  }
+
+  if (req.query.tagGroups) {
+    try {
+      const tagGroups = JSON.parse(req.query.tagGroups);
+      if (Array.isArray(tagGroups) && tagGroups.length > 0) {
+        req.scope.push({ method: ['selectTagGroups', tagGroups] });
+      }
+    } catch (e) {
+      // invalid JSON, ignore
+    }
+  }
+
+  if (req.query.lat && req.query.lng && req.query.maxDistance) {
+    req.scope.push({
+      method: [
+        'withinDistance',
+        req.query.lat,
+        req.query.lng,
+        req.query.maxDistance,
+      ],
+    });
   }
 
   if (req.query.includeUser) {
@@ -219,14 +253,66 @@ router.all('*', function (req, res, next) {
     req.query.projectIds = projectIds;
   }
 
+  if (
+    req?.query?.ids &&
+    (typeof req?.query?.ids === 'object' || typeof req?.query?.ids === 'string')
+  ) {
+    let ids = req.query.ids;
+    if (!Array.isArray(ids)) ids = [ids];
+    req.scope.push({ method: ['selectIds', ids] });
+    req.query.ids = ids;
+  }
+
   if (req.canIncludeVoteCount) req.scope.push('includeVoteCount');
-  // todo? volgens mij wordt dit niet meer gebruikt
-  // if (req.query.highlighted) {
-  //  	query = db.Resource.getHighlighted({ projectId: req.params.projectId })
-  // }
 
   return next();
 });
+
+router
+  .route('/markers')
+  .get(auth.can('Resource', 'list'))
+  .get(function (req, res, next) {
+    if (req.query.search) {
+      req.scope.push('markerFieldsWithSearch');
+    } else {
+      req.scope.push('markerFields');
+    }
+    req.scope.push('includeTags');
+
+    let { dbQuery } = req;
+
+    dbQuery.where = {
+      ...req.queryConditions,
+      ...dbQuery.where,
+      deletedAt: null,
+    };
+
+    let projectIds = req?.query?.projectIds || [];
+
+    if (
+      !Array.isArray(projectIds) ||
+      (Array.isArray(projectIds) && projectIds.length === 0)
+    ) {
+      dbQuery.where.projectId = req.params.projectId;
+    }
+
+    db.Resource.scope(...req.scope)
+      .findAll(dbQuery)
+      .then(function (resources) {
+        req.results = resources;
+        return next();
+      })
+      .catch(next);
+  })
+  .get(auth.useReqUser)
+  .get(
+    searchInResults({
+      searchfields: ['id', 'title', 'summary', 'description', 'createdAt'],
+    })
+  )
+  .get(function (req, res, next) {
+    res.json(req.results);
+  });
 
 router
   .route('/')
@@ -415,25 +501,32 @@ router
           .catch(next);
       })
       .catch(function (error) {
-        // todo: dit komt uit de oude routes; maak het generieker
         if (
           typeof error == 'object' &&
           error instanceof Sequelize.ValidationError
         ) {
           let errors = [];
           error.errors.forEach(function (error) {
-            // notNull kent geen custom messages in deze versie van sequelize; zie https://github.com/sequelize/sequelize/issues/1500
-            // TODO: we zitten op een nieuwe versie van seq; vermoedelijk kan dit nu wel
             errors.push(
               error.type === 'notNull Violation' && error.path === 'location'
                 ? 'Kies een locatie op de kaart'
                 : error.message
             );
           });
-          //	res.status(422).json(errors);
+
+          console.error('[resource-create] Validation error:', {
+            projectId: req.params.projectId,
+            widgetId: req.body?.widgetId || null,
+            errors: errors,
+          });
 
           next(createError(422, errors.join(', ')));
         } else {
+          console.error('[resource-create] Failed:', {
+            projectId: req.params.projectId,
+            widgetId: req.body?.widgetId || null,
+            error: error.message || error,
+          });
           next(error);
         }
       });
@@ -511,9 +604,10 @@ router
 
     if (!req.query.nomail && req.body['publishDate']) {
       const tags = await req.results.getTags();
+      let emailReceivers = [];
+
       if (tags && tags.length > 0) {
-        // Convert to csv string
-        const emailReceivers = (
+        emailReceivers = (
           await Promise.all(
             tags.flatMap(async (tag) => {
               const { useDifferentSubmitAddress, newSubmitAddress } =
@@ -529,18 +623,18 @@ router
         )
           .filter((data) => data !== null && data.length > 0)
           .flat();
+      }
 
-        if (emailReceivers.length > 0) {
-          db.Notification.create({
-            type: 'new published resource - admin update',
-            projectId: req.project.id,
-            data: {
-              userId: req.user.id,
-              resourceId: req.results.id,
-              emailReceivers: emailReceivers,
-            },
-          });
-        }
+      if (emailReceivers.length > 0) {
+        db.Notification.create({
+          type: 'new published resource - admin update',
+          projectId: req.project.id,
+          data: {
+            userId: req.user.id,
+            resourceId: req.results.id,
+            emailReceivers: emailReceivers,
+          },
+        });
       }
 
       if (sendConfirmationToAdmin) {
@@ -681,11 +775,8 @@ router
       ...req.body,
     };
 
-    if (userhasModeratorRights(req.user)) {
-      if (data.modBreak) {
-        data.modBreakUserId = req.body.modBreakUserId = req.user.id;
-        data.modBreakDate = req.body.modBreakDate = new Date().toString();
-      }
+    if (!userhasModeratorRights(req.user)) {
+      delete data.modBreaks;
     }
 
     resource
@@ -808,6 +899,7 @@ router
         },
       });
     }
+
     next();
   })
   .put(auth.useReqUser)

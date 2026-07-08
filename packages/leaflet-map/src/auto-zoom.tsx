@@ -1,3 +1,4 @@
+import DataStore from '@openstad-headless/data-store/src';
 import type { Map as LeafletMap } from 'leaflet';
 import { LatLng, latLngBounds } from 'leaflet';
 import React from 'react';
@@ -13,9 +14,11 @@ import type { MarkerProps } from './types/marker-props';
 type AutoZoomProps = {
   autoZoomAndCenter?: 'area' | 'markers';
   area?: AreaShape;
+  areaId?: number | string | false;
   markers?: Array<MarkerProps>;
   center?: LocationType;
   zoomAfterInit?: boolean;
+  customPolygonIds?: number[];
 };
 
 type LatLngLike = { lat: number; lng: number };
@@ -59,13 +62,27 @@ function buildMarkerFingerprint(markers?: Array<MarkerProps>): string {
 export function AutoZoom({
   autoZoomAndCenter,
   area,
+  areaId,
   markers,
   center,
   zoomAfterInit = true,
+  customPolygonIds,
 }: AutoZoomProps) {
   const map: LeafletMap = useMap();
   const hasInitialZoomed = useRef(false);
   const prevMarkerFingerprint = useRef('');
+
+  const hasCustomPolygons =
+    Array.isArray(customPolygonIds) && customPolygonIds.length > 0;
+
+  const datastore = new DataStore({});
+  const { data: customPolygonAreas } = datastore.useAreas(
+    hasCustomPolygons ? { ids: customPolygonIds } : undefined
+  );
+
+  const waitingForCustomPolygons =
+    hasCustomPolygons &&
+    (!Array.isArray(customPolygonAreas) || customPolygonAreas.length === 0);
 
   const definedCenter: LatLngLike =
     center?.lat && center?.lng
@@ -79,6 +96,8 @@ export function AutoZoom({
     if (!container.clientHeight || !container.clientWidth) {
       return;
     }
+
+    if (waitingForCustomPolygons && autoZoomAndCenter === 'area') return;
 
     const isInitial = !hasInitialZoomed.current;
 
@@ -99,21 +118,51 @@ export function AutoZoom({
 
     prevMarkerFingerprint.current = fingerprint;
     zoomTo('markers', 0);
-  }, [autoZoomAndCenter, area, markers]);
+  }, [autoZoomAndCenter, area, areaId, markers, customPolygonAreas]);
 
   function zoomTo(mode: 'area' | 'markers', depth: number): boolean {
     if (mode === 'area') {
-      return zoomToArea();
+      return zoomToArea(depth);
     } else if (mode === 'markers') {
       return zoomToMarkers(depth);
     }
     return false;
   }
 
-  function zoomToArea(): boolean {
+  function zoomToArea(depth: number = 0): boolean {
+    if (
+      hasCustomPolygons &&
+      Array.isArray(customPolygonAreas) &&
+      customPolygonAreas.length > 0
+    ) {
+      const allRings = customPolygonAreas.flatMap((a: any) =>
+        collectAreaRings(a.polygon)
+      );
+      if (allRings.length > 0) {
+        let bounds = latLngBounds([]);
+        allRings.forEach((ring) => {
+          bounds.extend(latLngBounds(ring));
+        });
+        if (bounds.isValid()) {
+          map.fitBounds(bounds);
+          return true;
+        }
+      }
+    }
+
     if (area && Array.isArray(area) && area.length > 0) {
       const normalizedArea = Array.isArray(area[0]) ? area : [area];
       return fitArea(normalizedArea);
+    }
+    const hasAreaConfigured =
+      areaId !== undefined &&
+      areaId !== null &&
+      areaId !== false &&
+      areaId !== '' &&
+      areaId !== 0 &&
+      areaId !== '0';
+    if (!hasAreaConfigured && !hasCustomPolygons && depth < 2) {
+      return zoomToMarkers(depth + 1);
     }
     return false;
   }
@@ -126,7 +175,7 @@ export function AutoZoom({
 
     if (validMarkers.length === 0) {
       if (depth < 2) {
-        return zoomToArea();
+        return zoomToArea(depth + 1);
       }
       return false;
     }
@@ -149,8 +198,7 @@ export function AutoZoom({
     const allRings = collectAreaRings(polygons);
 
     if (allRings.length === 0) {
-      map.panTo(new LatLng(definedCenter.lat, definedCenter.lng));
-      return true;
+      return false;
     }
 
     if (

@@ -91,6 +91,19 @@ trix-editor a {
   text-decoration: underline;
 }
 
+.trix-target-blank-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  margin: 0.25rem 0;
+}
+
+.trix-target-blank-checkbox {
+  margin: 0;
+}
+
 trix-editor ul {
   list-style-type: disc;
   padding-left: 1.5rem;

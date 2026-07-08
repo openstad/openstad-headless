@@ -1,3 +1,4 @@
+import ChangesDisplay from '@/components/audit-log-diff';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useAuditLog from '@/hooks/use-audit-log';
 import React, { useState } from 'react';
@@ -10,7 +11,6 @@ type AuditLogTableProps = {
 };
 
 const ACTION_LABELS: Record<string, { label: string; className: string }> = {
-  GET: { label: 'Bekeken', className: 'bg-gray-100 text-gray-800' },
   POST: { label: 'Aangemaakt', className: 'bg-green-100 text-green-800' },
   PUT: { label: 'Bewerkt', className: 'bg-blue-100 text-blue-800' },
   DELETE: { label: 'Verwijderd', className: 'bg-red-100 text-red-800' },
@@ -36,10 +36,7 @@ const ACTION_LABELS: Record<string, { label: string; className: string }> = {
     label: '2FA mislukt',
     className: 'bg-orange-100 text-orange-800',
   },
-  cleanup: {
-    label: 'Opgeschoond',
-    className: 'bg-yellow-100 text-yellow-800',
-  },
+  cleanup: { label: 'Opgeschoond', className: 'bg-yellow-100 text-yellow-800' },
 };
 
 function ActionBadge({ action }: { action: string }) {
@@ -55,91 +52,54 @@ function ActionBadge({ action }: { action: string }) {
   );
 }
 
-function ChangesDisplay({
-  previousData,
-  newData,
-  action,
-}: {
-  previousData: Record<string, any> | null;
-  newData: Record<string, any> | null;
-  action: string;
-}) {
-  if (action === 'GET' || action === 'login' || action === 'logout') {
-    if (newData && Object.keys(newData).length > 0) {
-      return (
-        <div className="text-xs text-muted-foreground">
-          {Object.entries(newData).map(([key, value]) => (
-            <div key={key}>
-              <span className="font-medium">{key}:</span> {String(value)}
-            </div>
-          ))}
-        </div>
-      );
-    }
-    return <span className="text-xs text-muted-foreground">-</span>;
-  }
+const AUTH_METHOD_LABELS: Record<string, string> = {
+  url: 'E-maillink',
+  local: 'Wachtwoord',
+  uniqueCode: 'Stemcode',
+  anonymous: 'Anoniem',
+  phonenumber: 'SMS',
+};
 
-  if (action === 'DELETE' && previousData) {
-    return (
-      <div className="text-xs text-muted-foreground">
-        {Object.entries(previousData)
-          .slice(0, 5)
-          .map(([key, value]) => (
-            <div key={key}>
-              <span className="font-medium">{key}:</span>{' '}
-              <span className="text-red-600 line-through">
-                {String(value)?.substring(0, 100)}
-              </span>
-            </div>
-          ))}
-        {Object.keys(previousData).length > 5 && (
-          <div className="text-muted-foreground">
-            +{Object.keys(previousData).length - 5} meer...
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  if (!previousData && !newData) {
-    return <span className="text-xs text-muted-foreground">-</span>;
-  }
-
-  const data = newData || {};
-  const prev = previousData || {};
-
+function AuthEventDetails({ data }: { data: any }) {
+  if (!data) return null;
+  const method = data?.method;
+  if (!method) return null;
   return (
-    <div className="text-xs text-muted-foreground">
-      {Object.entries(data)
-        .slice(0, 5)
-        .map(([key, value]) => (
-          <div key={key}>
-            <span className="font-medium">{key}:</span>{' '}
-            {prev[key] !== undefined && (
-              <>
-                <span className="text-red-600 line-through">
-                  {String(prev[key])?.substring(0, 50)}
-                </span>
-                {' → '}
-              </>
-            )}
-            <span className="text-green-700">
-              {String(value)?.substring(0, 100)}
-            </span>
-          </div>
-        ))}
-      {Object.keys(data).length > 5 && (
-        <div className="text-muted-foreground">
-          +{Object.keys(data).length - 5} meer...
-        </div>
-      )}
-    </div>
+    <Paragraph className="text-xs text-muted-foreground">
+      Methode: {AUTH_METHOD_LABELS[method] || method}
+    </Paragraph>
   );
 }
 
+const MODEL_LABELS: Record<string, string> = {
+  widgets: 'Widget',
+  resource: 'Inzending',
+  tag: 'Tag',
+  status: 'Status',
+  area: 'Polygoon',
+  user: 'Gebruiker',
+  project: 'Project',
+  submission: 'Formulier inzending',
+  choicesguide: 'Keuzewijzer',
+  datalayer: 'Kaartlaag',
+  markers: 'Marker',
+  pdf: 'PDF',
+  AuthSession: 'Sessie',
+  'audit-log': 'Logboek',
+};
+
+function formatModelName(
+  modelName: string,
+  modelId?: number | null,
+  source?: string
+) {
+  const label = MODEL_LABELS[modelName] || modelName;
+  if (!modelId || source === 'auth') return label;
+  return `${label} ID ${modelId}`;
+}
+
 function formatDate(dateString: string) {
-  const date = new Date(dateString);
-  return date.toLocaleString('nl-NL', {
+  return new Date(dateString).toLocaleString('nl-NL', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -156,35 +116,31 @@ export default function AuditLogTable({
   projectId,
 }: AuditLogTableProps) {
   const [page, setPage] = useState(1);
-  const pageSize = 20;
 
   const { data, isLoading, error } = useAuditLog({
     modelName,
     modelId,
     userId,
     projectId,
+    excludeAction: 'GET',
     page,
-    pageSize,
+    pageSize: 20,
   });
 
-  if (isLoading) {
+  if (isLoading)
     return (
       <div className="p-6 bg-white rounded-md">
         <Paragraph>Audit logs laden...</Paragraph>
       </div>
     );
-  }
-
-  if (error) {
+  if (error)
     return (
       <div className="p-6 bg-white rounded-md">
         <Paragraph>Fout bij het laden van audit logs.</Paragraph>
       </div>
     );
-  }
 
   const records = data?.records || [];
-  const total = data?.total || 0;
   const totalPages = data?.totalPages || 1;
 
   if (records.length === 0) {
@@ -198,69 +154,74 @@ export default function AuditLogTable({
   return (
     <div className="container px-0">
       <div className="p-6 bg-white rounded-md">
-        <div className="grid grid-cols-1 lg:grid-cols-12 items-center py-2 px-2 border-b border-border">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-4 items-center py-2 px-2 border-b border-border">
           <ListHeading className="hidden lg:flex lg:col-span-2">
             Datum/Tijd
           </ListHeading>
           <ListHeading className="hidden lg:flex lg:col-span-2">
             Gebruiker
           </ListHeading>
-          <ListHeading className="hidden lg:flex lg:col-span-1">
+          <ListHeading className="hidden lg:flex lg:col-span-2">
             Actie
           </ListHeading>
           {!modelName && (
-            <ListHeading className="hidden lg:flex lg:col-span-1">
+            <ListHeading className="hidden lg:flex lg:col-span-2">
               Object
             </ListHeading>
           )}
           <ListHeading
-            className={`hidden lg:flex ${modelName ? 'lg:col-span-5' : 'lg:col-span-4'}`}>
+            className={`hidden lg:flex ${modelName ? 'lg:col-span-6' : 'lg:col-span-4'}`}>
             Wijzigingen
-          </ListHeading>
-          <ListHeading className="hidden lg:flex lg:col-span-2">
-            IP-adres
           </ListHeading>
         </div>
         <ul>
           {records.map((entry: any) => (
             <li
               key={entry.id}
-              className="grid grid-cols-1 lg:grid-cols-12 items-start py-3 px-2 border-b border-border hover:bg-muted/50">
+              className="grid grid-cols-1 lg:grid-cols-12 gap-x-4 items-start py-3 px-2 border-b border-border hover:bg-muted/50">
               <Paragraph className="lg:col-span-2 text-xs">
                 {formatDate(entry.createdAt)}
               </Paragraph>
               <div className="lg:col-span-2">
                 <Paragraph className="text-xs font-medium">
-                  {entry.userName || `User #${entry.userId || '-'}`}
+                  {entry.userName || `User #${entry.userId || ''}`}
                 </Paragraph>
                 <Paragraph className="text-xs text-muted-foreground">
-                  {entry.userRole || '-'}
+                  {entry.userRole || ''}
                 </Paragraph>
               </div>
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-2">
                 <ActionBadge action={entry.action} />
-                {entry.source === 'auth' && (
-                  <span className="ml-1 text-xs text-muted-foreground">
-                    (auth)
-                  </span>
-                )}
               </div>
               {!modelName && (
-                <Paragraph className="lg:col-span-1 text-xs">
-                  {entry.modelName}
-                  {entry.modelId ? ` #${entry.modelId}` : ''}
-                </Paragraph>
+                <div className="lg:col-span-2">
+                  <Paragraph className="text-xs">
+                    {formatModelName(
+                      entry.modelName,
+                      entry.modelId,
+                      entry.source
+                    )}
+                  </Paragraph>
+                  {!projectId && entry.projectId && (
+                    <Paragraph className="text-xs text-muted-foreground">
+                      {entry.projectName
+                        ? `${entry.projectName} ID ${entry.projectId}`
+                        : `Project ID ${entry.projectId}`}
+                    </Paragraph>
+                  )}
+                </div>
               )}
-              <div className={modelName ? 'lg:col-span-5' : 'lg:col-span-4'}>
-                <ChangesDisplay
-                  previousData={entry.previousData}
-                  newData={entry.newData}
-                  action={entry.action}
-                />
+              <div className={modelName ? 'lg:col-span-6' : 'lg:col-span-4'}>
+                {entry.source === 'auth' ? (
+                  <AuthEventDetails data={entry.newData} />
+                ) : (
+                  <ChangesDisplay
+                    previousData={entry.previousData}
+                    newData={entry.newData}
+                    action={entry.action}
+                  />
+                )}
               </div>
-              <Paragraph className="lg:col-span-2 text-xs text-muted-foreground">
-                {entry.ipAddress || '-'}
-              </Paragraph>
             </li>
           ))}
         </ul>
@@ -268,7 +229,7 @@ export default function AuditLogTable({
         {totalPages > 1 && (
           <div className="flex items-center justify-between mt-4 pt-4 border-t border-border">
             <Paragraph className="text-xs text-muted-foreground">
-              {total} resultaten, pagina {page} van {totalPages}
+              {data?.total || 0} resultaten, pagina {page} van {totalPages}
             </Paragraph>
             <div className="flex gap-2">
               <button

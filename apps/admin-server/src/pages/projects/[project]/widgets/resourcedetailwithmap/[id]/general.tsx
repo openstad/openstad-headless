@@ -17,7 +17,7 @@ import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail-with-map/src/resourceDetailWithMap';
 import { useRouter } from 'next/router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -48,13 +48,11 @@ export default function WidgetResourceDetailGeneral(
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
-  const [toggle, setToggle] = useState('resourceId_');
-
   const defaults = useCallback(
     () => ({
-      resourceId: props?.resourceId || undefined,
-      resourceIdRelativePath: props?.resourceIdRelativePath || undefined,
-      backUrl: props?.backUrl || undefined,
+      resourceId: props?.resourceId ?? '',
+      resourceIdRelativePath: props?.resourceIdRelativePath ?? '',
+      backUrl: props?.backUrl ?? '',
     }),
     [props?.resourceId, props?.resourceIdRelativePath, props?.backUrl]
   );
@@ -67,6 +65,8 @@ export default function WidgetResourceDetailGeneral(
   useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
+
+  const resourceIdValue = form.watch('resourceId');
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -83,13 +83,10 @@ export default function WidgetResourceDetailGeneral(
             items={resources}
             keyForValue="id"
             label={(resource) => `${resource.id} ${resource.title}`}
-            onFieldChanged={(e, key) => {
-              props.onFieldChanged;
-              setToggle(e + '_' + key);
-            }}
+            onFieldChanged={props.onFieldChanged}
             noSelection="Niet koppelen - beschrijf het path of gebruik queryparam openstadResourceId"
           />
-          {toggle === 'resourceId_' ? (
+          {!resourceIdValue ? (
             <FormField
               control={form.control}
               name="resourceIdRelativePath"

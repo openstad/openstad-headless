@@ -5,6 +5,7 @@ const privilegedRoles = require('../config/roles').privilegedRoles;
 const defaultRole = require('../config/roles').defaultRole;
 const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
 const configAuthTypes = require('../config/auth.js').types;
+const clientAuth = require('../utils/clientAuth');
 
 exports.withAll = (req, res, next) => {
   db.Client.findAll()
@@ -53,6 +54,7 @@ exports.withOne = async (req, res, next) => {
       res.locals.clientProjectUrl = clientConfig.projectUrl;
       res.locals.clientEmail = clientConfig.contactEmail;
       res.locals.clientDisclaimerUrl = clientConfig.clientDisclaimerUrl;
+      res.locals.clientDisclaimerText = clientConfig.clientDisclaimerText;
       res.locals.clientStylesheets = clientConfig.clientStylesheets;
 
       //if logo isset in config overwrite the .env logo
@@ -170,7 +172,9 @@ exports.checkUniqueCodeAuth = (errorCallback) => {
           }
         })
         .catch((error) => {
-          console.log('error', error);
+          console.log(
+            `[${new Date().toISOString()}][auth] unique code validation failed: clientId=${req.client?.id || 'unknown'} error=${error?.message}`
+          );
 
           if (errorCallback) {
             try {
@@ -221,9 +225,11 @@ exports.checkPhonenumberAuth = (errorCallback) => {
  */
 exports.check2FA = (req, res, next) => {
   const twoFactorRoles = req.client.twoFactorRoles;
+  const twoFactorValid =
+    req.currentClientAuth?.twoFactorValid || req.session?.twoFactorValid;
 
   // if no role is present, assume default role
-  const userRole = req.user.role ? req.user.role : defaultRole;
+  const userRole = req.currentClientRole || req.user.role || defaultRole;
 
   /**
    * In case no 2factor roles are defined all is good and check is passed
@@ -242,16 +248,12 @@ exports.check2FA = (req, res, next) => {
   }
 
   // check two factor is validated otherwise send to 2factor screen
-  if (
-    twoFactorRoles &&
-    twoFactorRoles.includes(userRole) &&
-    req.session.twoFactorValid
-  ) {
+  if (twoFactorRoles && twoFactorRoles.includes(userRole) && twoFactorValid) {
     return next();
   } else if (
     twoFactorRoles &&
     twoFactorRoles.includes(userRole) &&
-    !req.session.twoFactorValid
+    !twoFactorValid
   ) {
     return res.redirect(
       `/auth/two-factor?clientId=${
@@ -289,6 +291,18 @@ exports.checkRequiredUserFields = (req, res, next) => {
           error = true;
           return;
         }
+      }
+
+      // Privacy consent is stored per client ID as a timestamp
+      if (field === 'privacyConsent') {
+        const clientId = String(req?.client?.id);
+        const currentValue = req?.user?.privacyConsentAt || {};
+        const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
+
+        if (!clientConsentIsSet) {
+          error = true;
+        }
+        return;
       }
 
       // if at least one required field is empty, set to error

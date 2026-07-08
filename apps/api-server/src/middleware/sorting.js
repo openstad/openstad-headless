@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const db = require('../db');
 
 function getSortableModel(req) {
@@ -46,25 +47,34 @@ module.exports = function (req, res, next) {
         case 'votes_desc':
         case 'ranking':
           return ['yes', 'DESC'];
-          break;
         case 'votes_asc':
           return ['yes', 'ASC'];
-          break;
         case 'random':
-          return db.sequelize.random();
-          break;
+          const clientSeed = parseInt(req.query.pseudoRandomSortSeed, 10);
+          const seed = Number.isInteger(clientSeed)
+            ? clientSeed
+            : crypto.randomInt(4294967295);
+          return db.sequelize.literal(`RAND(${seed})`);
+        case 'score':
+          if (!allowedSortColumns.includes('score')) {
+            return [fallbackSortColumn, 'DESC'];
+          }
+          return ['score', 'DESC'];
+        case 'title':
+          if (!allowedSortColumns.includes('title')) {
+            return [fallbackSortColumn, 'DESC'];
+          }
+          return ['title', 'ASC'];
         default:
           column = column.replace(/[^a-z0-9_]+/gi, '');
 
           let match = column.match(/^([a-z0-9_]+)_(asc|desc)$/i);
           if (!match) {
             return [fallbackSortColumn, 'DESC'];
-            break;
           }
 
           if (!allowedSortColumns.includes(match[1])) {
             return [fallbackSortColumn, 'DESC'];
-            break;
           }
 
           const sortOrder = column.endsWith('_asc') ? 'ASC' : 'DESC';

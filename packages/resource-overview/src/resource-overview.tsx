@@ -6,17 +6,14 @@ import {
 } from '@openstad-headless/admin-server/src/components/ui/tabs';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
+//@ts-ignore
+import { resolveRandomSortSeed } from '@openstad-headless/data-store/src/api/resources';
 import { ResourceOverviewMap } from '@openstad-headless/leaflet-map/src/resource-overview-map';
 import {
   ResourceOverviewMapWidgetProps,
   dataLayerArray,
 } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
-import {
-  canLikeResource,
-  deterministicRandomSort,
-  getScopedSessionRandomSortSeed,
-  hasRole,
-} from '@openstad-headless/lib';
+import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
@@ -47,55 +44,8 @@ import React, {
 
 import { elipsizeHTML } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
+import { findResourceIndex } from './lib/find-resource-index';
 import './resource-overview.css';
-
-// This function takes in latitude and longitude of two locations
-// and returns the distance between them as the crow flies (in kilometers)
-function calcCrow(
-  coords1: PostcodeAutoFillLocation,
-  coords2: PostcodeAutoFillLocation
-) {
-  if (!coords1 || !coords2) {
-    return 0;
-  }
-
-  const coords1Lat = parseFloat(coords1.lat),
-    coords1Lng = parseFloat(coords1.lng),
-    coords2Lat = parseFloat(coords2.lat),
-    coords2Lng = parseFloat(coords2.lng);
-  const toRad = (Value: number) => {
-    return (Value * Math.PI) / 180;
-  };
-
-  var R = 6371;
-  var dLat = toRad(coords2Lat - coords1Lat);
-  var dLon = toRad(coords2Lng - coords1Lng);
-  var lat1 = toRad(coords1Lat);
-  var lat2 = toRad(coords2Lat);
-
-  var a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  var d = R * c;
-  return d;
-}
-
-const getResourceStableKey = (resource: any) => {
-  // Keep keys typed to avoid collisions between synthetic project cards and resources.
-  if (resource?.uniqueId) {
-    return `unique:${String(resource.uniqueId)}`;
-  }
-  if (resource?.id !== undefined && resource?.id !== null) {
-    return `resource:${String(resource.id)}`;
-  }
-
-  return String(
-    `fallback:${resource?.projectId || ''}:${resource?.createdAt || ''}:${
-      resource?.title || ''
-    }`
-  );
-};
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -182,6 +132,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
     onLocationChange?: (location: PostcodeAutoFillLocation) => void;
     onMarkerResourceClick?: (resource: any, index: number) => void;
+    onResourceClickHandlerRegister?: (
+      handler: (resource: any, index?: number) => void
+    ) => void;
     displayLikeButton?: boolean;
     displayDislike?: boolean;
     clickableImage?: boolean;
@@ -204,6 +157,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
       overviewImage?: string;
       overviewUrl?: string;
       overviewMarkerIcon?: string;
+      overviewSortDate?: string;
       projectLat?: string;
       projectLng?: string;
       includeProjectsInOverview?: boolean;
@@ -227,6 +181,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
+    datastore?: any;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -424,7 +379,16 @@ const defaultItemRenderer = (
   const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
   const selectedOpinion = resource?.userVote?.opinion;
 
-  const TileFooter = ({ doVote }: { doVote?: (value: string) => any }) => {
+  const TileFooter = ({
+    doVote,
+    resource: likeResource,
+  }: {
+    doVote?: (value: string) => any;
+    resource?: any;
+  }) => {
+    const displayResource = likeResource || resource;
+    const opinion = displayResource?.userVote?.opinion;
+
     const vote = async (sentiment: string) => {
       if (doVote) {
         await doVote(sentiment);
@@ -442,20 +406,20 @@ const defaultItemRenderer = (
             <Icon
               icon="ri-thumb-up-line"
               variant="big"
-              text={resource.yes}
+              text={displayResource.yes}
               description="Stemmen voor"
               onClick={() => vote('yes')}
-              className={selectedOpinion === 'yes' ? 'selected' : ''}
+              className={opinion === 'yes' ? 'selected' : ''}
             />
 
             {props.likeWidget?.displayDislike && (
               <Icon
                 icon="ri-thumb-down-line"
                 variant="big"
-                text={resource.no}
+                text={displayResource.no}
                 description="Stemmen tegen"
                 onClick={() => vote('no')}
-                className={selectedOpinion === 'no' ? 'selected' : ''}
+                className={opinion === 'no' ? 'selected' : ''}
               />
             )}
           </>
@@ -465,30 +429,28 @@ const defaultItemRenderer = (
           <div className="micro-score-container">
             <Icon
               icon={`${
-                selectedOpinion === 'yes'
-                  ? 'ri-triangle-fill'
-                  : 'ri-triangle-line'
+                opinion === 'yes' ? 'ri-triangle-fill' : 'ri-triangle-line'
               } micro-score-triangle`}
               variant="big"
               description="Stemmen voor"
               onClick={() => vote('yes')}
               className={`micro-score-vote micro-score-vote--yes ${
-                selectedOpinion === 'yes' ? 'selected' : ''
+                opinion === 'yes' ? 'selected' : ''
               }`}
             />
-            <Paragraph className="votes-score">{resource.netVotes}</Paragraph>
+            <Paragraph className="votes-score">
+              {displayResource.netVotes}
+            </Paragraph>
             {props.likeWidget?.displayDislike && (
               <Icon
                 icon={`${
-                  selectedOpinion === 'no'
-                    ? 'ri-triangle-fill'
-                    : 'ri-triangle-line'
+                  opinion === 'no' ? 'ri-triangle-fill' : 'ri-triangle-line'
                 } micro-score-triangle micro-score-triangle-down`}
                 variant="big"
                 description="Stemmen tegen"
                 onClick={() => vote('no')}
                 className={`micro-score-vote micro-score-vote--no ${
-                  selectedOpinion === 'no' ? 'selected' : ''
+                  opinion === 'no' ? 'selected' : ''
                 }`}
               />
             )}
@@ -499,7 +461,7 @@ const defaultItemRenderer = (
           <Icon
             icon="ri-message-line"
             variant="big"
-            text={resource.commentCount}
+            text={displayResource.commentCount}
             description="Aantal reacties"
           />
         ) : null}
@@ -604,9 +566,13 @@ const defaultItemRenderer = (
               resourceId={resource.id}
               projectId={props.projectId}
               {...props}
+              datastore={(props as any).datastore}
+              initialResource={resource}
               disabled={!canLike}
               refreshResourceLikes={refreshLikes}>
-              {(doVote) => <TileFooter doVote={doVote} />}
+              {(doVote, likeResource) => (
+                <TileFooter doVote={doVote} resource={likeResource} />
+              )}
             </Likes>
           ) : (
             <TileFooter />
@@ -834,6 +800,53 @@ const defaultItemRenderer = (
   );
 };
 
+type DialogResourceItemProps = {
+  item: any;
+  datastore: any;
+  projectId?: string;
+  currentUser?: any;
+  displayDocuments?: boolean;
+  documentsTitle?: string;
+  documentsDesc?: string;
+  displayTags?: boolean;
+  dialogTagGroups?: string[];
+  displayBudget?: boolean;
+  displayLikeButton?: boolean;
+  displayDislike?: boolean;
+  clickableImage?: boolean;
+  onRemoveClick: (resource: any) => void;
+  forwardProps: ResourceOverviewWidgetProps;
+};
+
+function DialogResourceItem({
+  item,
+  datastore,
+  projectId,
+  onRemoveClick,
+  forwardProps,
+  ...gridderProps
+}: DialogResourceItemProps) {
+  const itemIsFull =
+    !!item && ('summary' in item || 'description' in item || 'images' in item);
+
+  const { data } = datastore.useResource({
+    projectId,
+    resourceId: item?.id,
+    initialData: itemIsFull ? item : undefined,
+  });
+
+  const resource = itemIsFull ? item : data && data.id ? data : item;
+
+  return (
+    <GridderResourceDetail
+      resource={resource}
+      onRemoveClick={onRemoveClick}
+      {...gridderProps}
+      {...forwardProps}
+    />
+  );
+}
+
 function ResourceOverviewInner({
   renderItem = defaultItemRenderer,
   allowFiltering = true,
@@ -958,27 +971,39 @@ function ResourceOverviewInner({
   const [sort, setSort] = useState<string | undefined>(
     props.defaultSorting || undefined
   );
+  const [randomSortKey, setRandomSortKey] = useState<number>(0);
   const [location, setLocation] = useState<PostcodeAutoFillLocation>(undefined);
 
   const [resources, setResources] = useState<Array<any>>([]);
   const [filteredResources, setFilteredResources] = useState<Array<any>>([]);
-  const randomSortSeed = useMemo(() => {
-    const pathname =
-      typeof window !== 'undefined' ? window.location.pathname : '';
-    const search = typeof window !== 'undefined' ? window.location.search : '';
-    const seedScope = `${props.projectId || 'project'}:${pathname}:${search}`;
-    return getScopedSessionRandomSortSeed(
-      seedScope,
-      'resourceOverviewRandomSortSeed'
-    );
-  }, [props.projectId]);
 
   const projectIds =
     selectedProjects
       ?.filter((project) => !project?.excludeResourcesInOverview)
       .map((project) => project.id) || [];
 
-  // Order tags by their type so it can be directly used in the resource filter
+  // Only multi-project needs client-side list processing (synthetic project cards).
+  // Everything else is handled server-side.
+  const listUsesAllResources = selectedProjects.length > 0;
+  const needsAllResourcesFetch =
+    listUsesAllResources || !!displayMap || !!onFilteredResourcesChange;
+
+  // Build API filter params — always send filters to the API
+  const apiTags = useMemo(
+    () => [...(includeTags.length > 0 ? includeTags : []), ...tags],
+    [includeTags, tags]
+  );
+  const apiExcludeTags = useMemo(() => excludeTags, [excludeTags]);
+  const apiStatuses = useMemo(
+    () => (includeOrExcludeStatusIds === 'include' ? statuses : []),
+    [includeOrExcludeStatusIds, statuses]
+  );
+  const apiExcludeStatuses = useMemo(
+    () => (includeOrExcludeStatusIds === 'exclude' ? statuses : []),
+    [includeOrExcludeStatusIds, statuses]
+  );
+
+  // Group tags by type for AND logic between tag types
   const groupedTags: { [key: string]: number[] } = useMemo(() => {
     const tagsMap: { [key: string]: number[] } = {};
     allTags.forEach((tag: { type: string; id: string | number }) => {
@@ -986,270 +1011,281 @@ function ResourceOverviewInner({
       if (!tagsMap[tagType]) {
         tagsMap[tagType] = [];
       }
-
       const tagId = typeof tag.id === 'string' ? parseInt(tag.id, 10) : tag.id;
       tagsMap[tagType].push(tagId);
     });
     return tagsMap;
   }, [allTags]);
 
-  const { data: resourcesWithPagination, isLoading } = datastore.useResources({
-    pageSize: 999999,
+  // When AND behavior is needed, group selected tags by their type for the API.
+  // Handle includeTags and user tags separately — they can have different behavior settings.
+  const apiTagGroups = useMemo(() => {
+    const groups: number[][] = [];
+
+    // includeTags: group by type when filterBehaviorInclude is 'and'
+    if (filterBehaviorInclude === 'and' && includeTags.length > 0) {
+      Object.keys(groupedTags).forEach((tagType) => {
+        const tagsOfType = groupedTags[tagType];
+        const selectedOfType = includeTags.filter((tagId) =>
+          tagsOfType.includes(tagId)
+        );
+        if (selectedOfType.length > 0) {
+          groups.push(selectedOfType);
+        }
+      });
+    }
+
+    // user-selected tags: group by type when filterBehavior is 'and'
+    if (filterBehavior === 'and' && tags.length > 0) {
+      Object.keys(groupedTags).forEach((tagType) => {
+        const tagsOfType = groupedTags[tagType];
+        const selectedOfType = tags.filter((tagId) =>
+          tagsOfType.includes(tagId)
+        );
+        if (selectedOfType.length > 0) {
+          groups.push(selectedOfType);
+        }
+      });
+    }
+
+    return groups;
+  }, [filterBehavior, filterBehaviorInclude, tags, includeTags, groupedTags]);
+
+  // When tag groups handle the AND logic, send only the remaining OR tags as flat params
+  const flatApiTags = useMemo(() => {
+    if (filterBehaviorInclude === 'and' && filterBehavior === 'and') return [];
+    if (filterBehaviorInclude === 'and') return tags;
+    if (filterBehavior === 'and') return includeTags;
+    return apiTags;
+  }, [filterBehavior, filterBehaviorInclude, tags, includeTags, apiTags]);
+
+  const {
+    data: resourcesWithPagination,
+    allData: allResourcesData,
+    isLoading,
+    revalidate: revalidateResources,
+  } = datastore.useResources({
+    pageSize,
     ...props,
+    page,
     search,
-    tags: [],
-    sort: undefined,
+    tags: flatApiTags,
+    excludeTags: apiExcludeTags,
+    statuses: apiStatuses,
+    excludeStatuses: apiExcludeStatuses,
+    tagGroups: apiTagGroups,
+    lat: location?.lat,
+    lng: location?.lng,
+    maxDistance: location ? (location.proximity || 999) * 1000 : undefined,
+    sort,
+    randomSortKey: sort === 'random' ? randomSortKey : undefined,
     projectIds: projectIds || [],
     allowMultipleProjects: selectedProjects && selectedProjects.length > 1,
+    fetchAll: needsAllResourcesFetch
+      ? listUsesAllResources
+        ? true
+        : displayType === 'cardgrid' && displayMap
+          ? true
+          : 'markers'
+      : false,
   });
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
+  const [dialogSource, setDialogSource] = useState<'list' | 'marker'>('list');
 
   useEffect(() => {
     if (
+      !isLoading &&
       resourcesWithPagination &&
       !(selectedProjects.length > 0 && projectIds.length === 0)
     ) {
       setResources(resourcesWithPagination.records || []);
     }
-  }, [resourcesWithPagination, pageSize]);
+  }, [resourcesWithPagination, isLoading]);
 
   useEffect(() => {
-    const allResources: any = [];
+    if (listUsesAllResources) {
+      // Multi-project: inject synthetic project cards into the all-resources data
+      const allRecords = allResourcesData?.records || [];
+      const allResources: any = [];
 
-    if (selectedProjects && selectedProjects.length > 0) {
-      selectedProjects.forEach((project) => {
-        if (project.includeProjectsInOverview === false) return;
+      if (selectedProjects && selectedProjects.length > 0) {
+        selectedProjects.forEach((project) => {
+          if (project.includeProjectsInOverview === false) return;
 
-        const tagsArray = project?.tags
-          ? project.tags.split(',').map((tag) => tag.trim())
-          : [];
-        const tags = tagsArray
-          .map((tag) => {
-            const foundTag = allTags.find(
-              (t: { id: number }) => t.id === parseInt(tag)
-            );
-            return foundTag ? foundTag : null;
-          })
-          .filter((tag) => tag !== null);
+          const tagsArray = project?.tags
+            ? project.tags.split(',').map((tag: string) => tag.trim())
+            : [];
+          const projectTags = tagsArray
+            .map((tag: string) => {
+              const foundTag = allTags.find(
+                (t: { id: number }) => t.id === parseInt(tag)
+              );
+              return foundTag ? foundTag : null;
+            })
+            .filter((tag: any) => tag !== null);
 
-        const projectObject = {
-          title: project?.overviewTitle || '',
-          summary: project?.overviewSummary || '',
-          description: project?.overviewDescription || '',
-          images: [
-            {
-              url: project?.overviewImage || '',
-            },
-          ],
-          overviewUrl: project?.overviewUrl || '',
-          projectId: project.id,
-          createdAt: project?.createdAt || '',
-          tags: tags,
-          uniqueId: `project-${project.id}`,
-        };
+          const projectObject = {
+            title: project?.overviewTitle || '',
+            summary: project?.overviewSummary || '',
+            description: project?.overviewDescription || '',
+            images: [{ url: project?.overviewImage || '' }],
+            overviewUrl: project?.overviewUrl || '',
+            projectId: project.id,
+            createdAt: project?.overviewSortDate || project?.createdAt || '',
+            tags: projectTags,
+            uniqueId: `project-${project.id}`,
+          };
 
-        if (search) {
-          const searchLower = search.toLowerCase();
-          if (
-            !projectObject.title.toLowerCase().includes(searchLower) &&
-            !projectObject.summary.toLowerCase().includes(searchLower) &&
-            !projectObject.description.toLowerCase().includes(searchLower)
-          ) {
-            return;
+          if (search) {
+            const searchLower = search.toLowerCase();
+            if (
+              !projectObject.title.toLowerCase().includes(searchLower) &&
+              !projectObject.summary.toLowerCase().includes(searchLower) &&
+              !projectObject.description.toLowerCase().includes(searchLower)
+            ) {
+              return;
+            }
           }
-        }
 
-        allResources.push(projectObject);
-      });
-    }
-
-    const uniqueResources = allResources?.filter(
-      (resource: any, index: number, self: any) => {
-        if (resource.uniqueId) {
-          return (
-            index ===
-            self.findIndex((t: any) => t.uniqueId === resource.uniqueId)
-          );
-        }
-        return true;
+          allResources.push(projectObject);
+        });
       }
-    );
 
-    const combinedResources = [...uniqueResources, ...resources];
-
-    // Filtering is always 'or' inside their own types and depending on filterBehavior it's 'and' or 'or' between types
-    // This logic is for both includeTags (that sets the base resources based on widget settings) and tags (the user selected tags for filtering)
-    // excludeTags are always excluded first and have no further logic
-    const tagIntegers = tags?.map((tag: any) => parseInt(tag, 10));
-    const filtered = combinedResources
-      ?.filter((resource: any) => {
-        const hasExcludedTag = resource.tags?.some((tag: { id: number }) =>
-          excludeTags.includes(tag.id)
-        );
-        if (hasExcludedTag) return false;
-
-        if (includeTags.length > 0) {
-          if (filterBehaviorInclude === 'and') {
-            const relevantTagTypes = Object.keys(groupedTags).filter(
-              (tagType) =>
-                includeTags.some((tagId) =>
-                  groupedTags[tagType].includes(tagId)
-                )
-            );
-
-            return relevantTagTypes.every((tagType) => {
-              const tagsOfType = groupedTags[tagType];
-              const includeTagsOfType = includeTags.filter((tagId) =>
-                tagsOfType.includes(tagId)
-              );
-              return resource.tags?.some((tag: { id: number }) =>
-                includeTagsOfType.includes(tag.id)
-              );
-            });
-          } else {
-            return resource.tags?.some((tag: { id: number }) =>
-              includeTags.includes(tag.id)
+      const uniqueResources = allResources.filter(
+        (resource: any, index: number, self: any) => {
+          if (resource.uniqueId) {
+            return (
+              index ===
+              self.findIndex((t: any) => t.uniqueId === resource.uniqueId)
             );
           }
+          return true;
         }
+      );
 
-        return true;
-      })
-      ?.filter((resource: any) => {
-        if (tagIntegers.length > 0) {
-          if (filterBehavior === 'and') {
-            const relevantTagTypes = Object.keys(groupedTags).filter(
-              (tagType) =>
-                tagIntegers.some((tagId) =>
-                  groupedTags[tagType].includes(tagId)
-                )
+      const combined = [...uniqueResources, ...allRecords].sort(
+        (a: any, b: any) => {
+          if (sort === 'createdAt_desc')
+            return (
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
             );
-
-            return relevantTagTypes.every((tagType) => {
-              const tagsOfType = groupedTags[tagType];
-              const includeTagsOfType = tagIntegers.filter((tagId) =>
-                tagsOfType.includes(tagId)
-              );
-              return resource.tags?.some((tag: { id: number }) =>
-                includeTagsOfType.includes(tag.id)
-              );
-            });
-          } else {
-            return resource.tags?.some((tag: { id: number }) =>
-              tagIntegers.includes(tag.id)
+          if (sort === 'createdAt_asc')
+            return (
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
             );
-          }
+          if (sort === 'title')
+            return (a.title || '').localeCompare(b.title || '');
+          if (sort === 'votes_desc') return (b.yes || 0) - (a.yes || 0);
+          if (sort === 'votes_asc' || sort === 'ranking')
+            return (a.yes || 0) - (b.yes || 0);
+          if (sort === 'score') return (b.score || 0) - (a.score || 0);
+          return 0;
         }
+      );
 
-        return true;
-      })
-      ?.filter((resource: any) => {
-        if (!location) return true;
-        if (!resource?.location?.lat || !resource?.location?.lng) return false;
-
-        const resourceLocation: PostcodeAutoFillLocation = {
-          lat: resource.location.lat.toString(),
-          lng: resource.location.lng.toString(),
-        };
-        const distance = calcCrow(location, resourceLocation);
-        return distance <= (location?.proximity || 999);
-      })
-      ?.filter((resource: any) => {
-        if (!statusIdsToLimitResourcesTo?.length) return true;
-
-        const hasMatchingStatus = resource.statuses?.some((o: { id: number }) =>
-          statusIdsToLimitResourcesTo.includes(o.id)
-        );
-
-        return (includeOrExcludeStatusIds === 'include') === hasMatchingStatus;
-      })
-      ?.sort((a: any, b: any) => {
-        if (sort === 'createdAt_desc') {
-          return (
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-          );
-        }
-        if (sort === 'createdAt_asc') {
-          return (
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-          );
-        }
-        if (sort === 'title') {
-          return a.title.localeCompare(b.title);
-        }
-        if (sort === 'votes_desc') {
-          return b.yes - a.yes;
-        }
-        if (sort === 'votes_asc' || sort === 'ranking') {
-          return a.yes - b.yes;
-        }
-        if (sort === 'random') {
-          return deterministicRandomSort(
-            a,
-            b,
-            randomSortSeed,
-            getResourceStableKey
-          );
-        }
-        if (sort === 'score') {
-          return (b.score || 0) - (a.score || 0);
-        }
-
-        return 0;
-      });
-
-    setFilteredResources(filtered);
+      setFilteredResources(combined);
+    } else {
+      // Server-side path: API already filtered, sorted, and paginated
+      if (!isLoading) {
+        setFilteredResources(resourcesWithPagination?.records || []);
+      }
+    }
   }, [
-    resources,
-    tags,
-    statuses,
+    resourcesWithPagination,
+    allResourcesData,
+    isLoading,
+    listUsesAllResources,
+    selectedProjects,
+    allTags,
     search,
     sort,
-    allTags,
-    excludeTags,
-    includeTags,
-    location,
-    groupedTags,
-    randomSortSeed,
   ]);
 
   useEffect(() => {
-    const filtered: any = filteredResources || [];
-    const totalPagesCalc = Math.max(1, Math.ceil(filtered.length / pageSize));
+    // Skip recalculation while loading — SWR returns undefined for new keys
+    // which would cause totalPages=1 and clamp the page back to 0
+    if (isLoading) return;
+
+    const totalCount = listUsesAllResources
+      ? (filteredResources || []).length
+      : resourcesWithPagination?.metadata?.totalCount || 0;
+    const totalPagesCalc = Math.max(1, Math.ceil(totalCount / pageSize));
 
     if (totalPagesCalc !== totalPages) {
       setTotalPages(totalPagesCalc);
     }
 
-    // Keep current page when data refreshes, but clamp when page count shrinks.
-    setPage((currentPage) => Math.min(currentPage, totalPagesCalc - 1));
+    // Only clamp page if it's actually out of bounds
+    setPage((currentPage) =>
+      currentPage >= totalPagesCalc ? totalPagesCalc - 1 : currentPage
+    );
 
     if (onFilteredResourcesChange) {
-      onFilteredResourcesChange(filtered);
+      onFilteredResourcesChange(
+        allResourcesData?.records || filteredResources || []
+      );
     }
 
     if (onLocationChange) {
       onLocationChange(location);
     }
   }, [
+    isLoading,
     filteredResources,
+    resourcesWithPagination,
+    allResourcesData,
+    listUsesAllResources,
     location,
     onFilteredResourcesChange,
     onLocationChange,
     pageSize,
-    totalPages,
   ]);
 
   useEffect(() => {
-    // Reset to first page when filter controls change.
     setPage(0);
   }, [tags, statuses, search, sort, location, includeTags, excludeTags]);
 
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
 
+  const markerDialogList = useMemo(
+    () =>
+      listUsesAllResources
+        ? (filteredResources ?? [])
+        : (allResourcesData?.records ?? filteredResources ?? []),
+    [listUsesAllResources, filteredResources, allResourcesData]
+  );
+
+  const dialogList = useMemo(
+    () =>
+      dialogSource === 'marker' ? markerDialogList : (filteredResources ?? []),
+    [dialogSource, markerDialogList, filteredResources]
+  );
+
+  const openDialogForResource = useCallback(
+    (resource: any, source: 'list' | 'marker') => {
+      const listForSource =
+        source === 'marker' ? markerDialogList : (filteredResources ?? []);
+      const idx = findResourceIndex(
+        resource.id ?? resource.uniqueId,
+        listForSource
+      );
+      if (idx === -1) {
+        console.warn(
+          '[resource-overview] dialog open: resource not found in list',
+          { source, resource }
+        );
+        return;
+      }
+      setDialogSource(source);
+      setResourceDetailIndex(idx);
+      setOpen(true);
+    },
+    [filteredResources, markerDialogList]
+  );
+
   const onResourceClick = useCallback(
-    (resource: any, index: number) => {
+    (resource: any, _index?: number) => {
       if (displayType === 'cardrow') {
         let urlToUse = props.itemLink;
 
@@ -1283,12 +1319,23 @@ function ResourceOverviewInner({
       }
 
       if (displayType === 'cardgrid') {
-        setResourceDetailIndex(index);
-        setOpen(true);
+        openDialogForResource(resource, 'list');
       }
     },
-    [displayType, props.itemLink]
+    [displayType, props.itemLink, selectedProjects, openDialogForResource]
   );
+
+  const onMarkerClickInternal = useCallback(
+    (resource: any) => {
+      if (displayType !== 'cardgrid') return;
+      openDialogForResource(resource, 'marker');
+    },
+    [displayType, openDialogForResource]
+  );
+
+  useEffect(() => {
+    props.onResourceClickHandlerRegister?.(onMarkerClickInternal);
+  }, [onMarkerClickInternal, props.onResourceClickHandlerRegister]);
 
   const filterNeccesary =
     allowFiltering &&
@@ -1320,7 +1367,7 @@ function ResourceOverviewInner({
   };
 
   const refreshLikes = () => {
-    datastore.refresh();
+    revalidateResources();
   };
 
   const overviewSection = (
@@ -1338,36 +1385,37 @@ function ResourceOverviewInner({
           </Paragraph>
         )
       ) : (
-        filteredResources
-          ?.slice(page * pageSize, (page + 1) * pageSize)
-          ?.map((resource: any, index: number) => {
-            return (
-              <React.Fragment
-                key={`resource-item-${resource?.id || resource?.uniqueId}`}>
-                {renderItem(
-                  resource,
-                  {
-                    ...props,
-                    displayType,
-                    selectedProjects,
-                    displayOverviewTagGroups,
-                    overviewTagGroups,
-                  },
-                  () => {
-                    onResourceClick(resource, index);
-                  },
-                  refreshLikes
-                )}
-              </React.Fragment>
-            );
-          })
+        (listUsesAllResources
+          ? filteredResources?.slice(page * pageSize, (page + 1) * pageSize)
+          : filteredResources
+        )?.map((resource: any) => {
+          return (
+            <React.Fragment
+              key={`resource-item-${resource?.id || resource?.uniqueId}`}>
+              {renderItem(
+                resource,
+                {
+                  ...props,
+                  displayType,
+                  selectedProjects,
+                  displayOverviewTagGroups,
+                  overviewTagGroups,
+                  datastore,
+                },
+                () => {
+                  onResourceClick(resource);
+                },
+                refreshLikes
+              )}
+            </React.Fragment>
+          );
+        })
       )}
     </section>
   );
-  const validFilteredResources =
-    filteredResources?.filter(
-      (r) => r && (r.id || r.uniqueId) // only real resources or projects
-    ) || [];
+  const validDialogList = dialogList.filter(
+    (r: any) => r && (r.id || r.uniqueId) // only real resources or projects
+  );
   return tagsLoading ? (
     <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
   ) : (
@@ -1378,14 +1426,16 @@ function ResourceOverviewInner({
         children={
           <Carousel
             startIndex={resourceDetailIndex}
-            items={validFilteredResources}
+            items={validDialogList}
             buttonText={{
               next: 'Volgende afbeelding',
               previous: 'Vorige afbeelding',
             }}
             itemRenderer={(item) => (
-              <GridderResourceDetail
-                resource={item}
+              <DialogResourceItem
+                item={item}
+                datastore={datastore}
+                projectId={props.projectId}
                 currentUser={currentUser}
                 displayDocuments={displayDocuments}
                 documentsTitle={documentsTitle}
@@ -1396,7 +1446,7 @@ function ResourceOverviewInner({
                 displayLikeButton={displayLikeButton}
                 displayDislike={displayDislike}
                 clickableImage={clickableImage}
-                onRemoveClick={(resource) => {
+                onRemoveClick={(resource: any) => {
                   try {
                     resource
                       .delete(resource.id)
@@ -1408,7 +1458,7 @@ function ResourceOverviewInner({
                     console.error(e);
                   }
                 }}
-                {...props}
+                forwardProps={props}
               />
             )}></Carousel>
         }
@@ -1420,9 +1470,9 @@ function ResourceOverviewInner({
               {
                 ...props,
                 displayType,
-                onMarkerResourceClick: onResourceClick,
+                onMarkerResourceClick: onMarkerClickInternal,
               },
-              filteredResources || [],
+              allResourcesData?.records || filteredResources || [],
               bannerText,
               displayBanner,
               displayMap && !displayAsTabs,
@@ -1481,6 +1531,10 @@ function ResourceOverviewInner({
                     'score',
                   ].includes(f.sort)
                 ) {
+                  if (f.sort === 'random') {
+                    resolveRandomSortSeed(0, true);
+                    setRandomSortKey((k) => k + 1);
+                  }
                   setSort(f.sort);
                 }
                 setSearch(f.search.text);
@@ -1509,7 +1563,7 @@ function ResourceOverviewInner({
               <TabsContent value="map">
                 {renderHeader(
                   props,
-                  filteredResources || [],
+                  allResourcesData?.records || filteredResources || [],
                   bannerText,
                   false,
                   true,
