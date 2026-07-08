@@ -175,14 +175,9 @@ describe('POST / — create resource guards', () => {
       findAndCountAll: vi.fn(),
       findOne: vi.fn(),
     });
-    // The source returns the 400 from inside an images.forEach() callback, which
-    // does not halt createResource — it still issues the create afterwards. Stub
-    // the create so this does not hit a real DB (the 400 response is already
-    // sent). NOTE: latent source bug — a rejected image should not still create
-    // the resource; worth a separate fix.
-    db.Resource.authorizeData = vi.fn().mockReturnValue({
-      create: vi.fn(() => new Promise(() => {})),
-    });
+    // A rejected image must abort the handler: no create may be issued.
+    const create = vi.fn(() => new Promise(() => {}));
+    db.Resource.authorizeData = vi.fn().mockReturnValue({ create });
 
     const app = createApp({ project: makeProject(), user: makeUser() });
     const res = await request(app)
@@ -194,6 +189,7 @@ describe('POST / — create resource guards', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/invalid image/i);
+    expect(create).not.toHaveBeenCalled();
   });
 
   it('returns 401 when canAddNewResources is false', async () => {
