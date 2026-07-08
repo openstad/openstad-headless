@@ -718,7 +718,7 @@ async function updateResourceTags(req, res, next) {
   const resourceInstance = req.results;
   resourceInstance
     .setTags(tagEntities)
-    .then((result) => {
+    .then(() => {
       // refetch. now with tags
       let scope = [...req.scope, 'includeTags'];
       if (req.canIncludeVoteCount) scope.push('includeVoteCount');
@@ -760,7 +760,7 @@ async function updateResourceStatuses(req, res, next) {
   const resourceInstance = req.results;
   resourceInstance
     .setStatuses(statusEntities)
-    .then((result) => {
+    .then(() => {
       // refetch. now with statuses
       let scope = [...req.scope, 'includeStatuses'];
       if (req.canIncludeVoteCount) scope.push('includeVoteCount');
@@ -918,15 +918,11 @@ async function duplicateResources(req, res, next) {
 
         let finalTags = [];
         if (Array.isArray(tags) && tags.length > 0) {
-          const projectId = req.params.projectId;
-
           finalTags = await getValidTags(projectId, tags, true);
         }
 
         let finalStatuses = [];
         if (Array.isArray(statuses) && statuses.length > 0) {
-          const projectId = req.params.projectId;
-
           finalStatuses = await getValidStatuses(projectId, statuses);
         }
 
