@@ -8,64 +8,7 @@ const config = require('../../config');
 const memoryStorage = require('../../memoryStorage');
 const utils = require('../../utils');
 const validate = require('../../validate');
-
-function parseHost(value) {
-  if (!value) return null;
-  try {
-    if (value.indexOf('http') !== 0) value = 'https://' + value;
-    return new URL(value).host;
-  } catch {
-    return null;
-  }
-}
-
-function getParentDomains(hostname) {
-  const host = hostname.split(':')[0];
-  const parts = host.split('.');
-  const parents = [];
-  for (let i = 1; i < parts.length - 1; i++) {
-    parents.push(parts.slice(i).join('.'));
-  }
-  return parents;
-}
-
-function addWithParents(list, host) {
-  if (!host) return;
-  list.push(host);
-  for (const parent of getParentDomains(host)) {
-    list.push(parent);
-  }
-}
-
-const prefillAllowedDomains = function (inputDomains) {
-  const allowedDomains = [...(inputDomains || [])];
-  try {
-    const configuredHosts = allowedDomains
-      .map((d) => parseHost(d))
-      .filter(Boolean);
-    for (const host of configuredHosts) {
-      addWithParents(allowedDomains, host);
-    }
-
-    const envVars = [
-      process.env.BASE_DOMAIN,
-      process.env.APP_URL,
-      process.env.CMS_URL,
-      process.env.API_URL,
-      process.env.ADMIN_URL,
-    ];
-
-    for (const envVar of envVars) {
-      if (!envVar) continue;
-      addWithParents(allowedDomains, parseHost(envVar));
-    }
-  } catch (err) {
-    console.error('Error processing allowed domains:', err);
-    return [...new Set(allowedDomains)];
-  }
-
-  return [...new Set(allowedDomains)];
-};
+const { prefillAllowedDomains } = require('./allowed-domains');
 
 exports.prefillAllowedDomains = prefillAllowedDomains;
 
@@ -91,18 +34,18 @@ const expiresIn = { expires_in: config.token.expiresIn };
  * duration, etc. as parsed by the application.  The application issues a code,
  * which is bound to these values, and will be exchanged for an access token.
  */
-server.grant(
-  oauth2orize.grant.code((client, redirectURI, user, ares, done) => {
-    const code = utils.createToken({
-      sub: user.id,
-      exp: config.codeToken.expiresIn,
-    });
-    memoryStorage.authorizationCodes
-      .save(code, client.id, redirectURI, user.id, client.scope)
-      .then(() => done(null, code))
-      .catch((err) => done(err));
-  })
-);
+exports.issueAuthorizationCode = (client, redirectURI, user, ares, done) => {
+  const code = utils.createToken({
+    sub: user.id,
+    exp: config.codeToken.expiresIn,
+  });
+  memoryStorage.authorizationCodes
+    .save(code, client.id, redirectURI, user.id, client.scope)
+    .then(() => done(null, code))
+    .catch((err) => done(err));
+};
+
+server.grant(oauth2orize.grant.code(exports.issueAuthorizationCode));
 
 /**
  * Grant implicit authorization.
@@ -112,20 +55,20 @@ server.grant(
  * duration, etc. as parsed by the application.  The application issues a token,
  * which is bound to these values.
  */
-server.grant(
-  oauth2orize.grant.token((client, user, ares, done) => {
-    const token = utils.createToken({
-      sub: user.id,
-      exp: config.token.expiresIn,
-    });
-    const expiration = config.token.calculateExpirationDate();
+exports.issueImplicitToken = (client, user, ares, done) => {
+  const token = utils.createToken({
+    sub: user.id,
+    exp: config.token.expiresIn,
+  });
+  const expiration = config.token.calculateExpirationDate();
 
-    memoryStorage.accessTokens
-      .save(token, expiration, user.id, client.id, client.scope)
-      .then(() => done(null, token, expiresIn))
-      .catch((err) => done(err));
-  })
-);
+  memoryStorage.accessTokens
+    .save(token, expiration, user.id, client.id, client.scope)
+    .then(() => done(null, token, expiresIn))
+    .catch((err) => done(err));
+};
+
+server.grant(oauth2orize.grant.token(exports.issueImplicitToken));
 
 /**
  * Exchange authorization codes for access tokens.
@@ -135,31 +78,29 @@ server.grant(
  * are validated, the application issues an access token on behalf of the user who
  * authorized the code.
  */
-server.exchange(
-  oauth2orize.exchange.code((client, code, redirectURI, done) => {
-    memoryStorage.authorizationCodes
-      .delete(code)
-      .then((authCode) =>
-        validate.authCode(code, authCode, client, redirectURI)
-      )
-      .then((authCode) => validate.generateTokens(authCode))
-      .then((tokens) => {
-        if (tokens.length === 1) {
-          return done(null, tokens[0], null, expiresIn);
-        }
-        if (tokens.length === 2) {
-          return done(null, tokens[0], tokens[1], expiresIn);
-        }
-        throw new Error('Error exchanging auth code for tokens');
-      })
-      .catch((err) => {
-        console.log(
-          `[${new Date().toISOString()}][oauth] auth code exchange failed: ${err?.message}`
-        );
-        done(null, false);
-      });
-  })
-);
+exports.exchangeAuthorizationCode = (client, code, redirectURI, done) => {
+  memoryStorage.authorizationCodes
+    .delete(code)
+    .then((authCode) => validate.authCode(code, authCode, client, redirectURI))
+    .then((authCode) => validate.generateTokens(authCode))
+    .then((tokens) => {
+      if (tokens.length === 1) {
+        return done(null, tokens[0], null, expiresIn);
+      }
+      if (tokens.length === 2) {
+        return done(null, tokens[0], tokens[1], expiresIn);
+      }
+      throw new Error('Error exchanging auth code for tokens');
+    })
+    .catch((err) => {
+      console.log(
+        `[${new Date().toISOString()}][oauth] auth code exchange failed: ${err?.message}`
+      );
+      done(null, false);
+    });
+};
+
+server.exchange(oauth2orize.exchange.code(exports.exchangeAuthorizationCode));
 
 /**
  * Exchange user id and password for access tokens.
@@ -168,28 +109,28 @@ server.exchange(
  * from the token request for verification. If these values are validated, the
  * application issues an access token on behalf of the user who authorized the code.
  */
-server.exchange(
-  oauth2orize.exchange.password((client, username, password, scope, done) => {
-    db.User.findOne({ where: { email: username } })
-      .then((user) => validate.user(user, password))
-      .then((user) =>
-        validate.generateTokens({ scope, userID: user.id, clientID: client.id })
-      )
-      .then((tokens) => {
-        if (tokens === false) {
-          return done(null, false);
-        }
-        if (tokens.length === 1) {
-          return done(null, tokens[0], null, expiresIn);
-        }
-        if (tokens.length === 2) {
-          return done(null, tokens[0], tokens[1], expiresIn);
-        }
-        throw new Error('Error exchanging password for tokens');
-      })
-      .catch(() => done(null, false));
-  })
-);
+exports.exchangePassword = (client, username, password, scope, done) => {
+  db.User.findOne({ where: { email: username } })
+    .then((user) => validate.user(user, password))
+    .then((user) =>
+      validate.generateTokens({ scope, userID: user.id, clientID: client.id })
+    )
+    .then((tokens) => {
+      if (tokens === false) {
+        return done(null, false);
+      }
+      if (tokens.length === 1) {
+        return done(null, tokens[0], null, expiresIn);
+      }
+      if (tokens.length === 2) {
+        return done(null, tokens[0], tokens[1], expiresIn);
+      }
+      throw new Error('Error exchanging password for tokens');
+    })
+    .catch(() => done(null, false));
+};
+
+server.exchange(oauth2orize.exchange.password(exports.exchangePassword));
 
 /**
  * Exchange the client id and password/secret for an access token.
@@ -198,20 +139,22 @@ server.exchange(
  * password/secret from the token request for verification. If these values are validated, the
  * application issues an access token on behalf of the client who authorized the code.
  */
-server.exchange(
-  oauth2orize.exchange.clientCredentials((client, scope, done) => {
-    const token = utils.createToken({
-      sub: client.id,
-      exp: config.token.expiresIn,
-    });
-    const expiration = config.token.calculateExpirationDate();
-    // Pass in a null for user id since there is no user when using this grant type
+exports.exchangeClientCredentials = (client, scope, done) => {
+  const token = utils.createToken({
+    sub: client.id,
+    exp: config.token.expiresIn,
+  });
+  const expiration = config.token.calculateExpirationDate();
+  // Pass in a null for user id since there is no user when using this grant type
 
-    memoryStorage.accessTokens
-      .save(token, expiration, null, client.id, scope)
-      .then(() => done(null, token, null, expiresIn))
-      .catch((err) => done(err));
-  })
+  memoryStorage.accessTokens
+    .save(token, expiration, null, client.id, scope)
+    .then(() => done(null, token, null, expiresIn))
+    .catch((err) => done(err));
+};
+
+server.exchange(
+  oauth2orize.exchange.clientCredentials(exports.exchangeClientCredentials)
 );
 
 /**
@@ -221,17 +164,19 @@ server.exchange(
  * request for verification.  If this value is validated, the application issues an access
  * token on behalf of the client who authorized the code
  */
+exports.exchangeRefreshToken = (client, refreshToken, scope, done) => {
+  memoryStorage.refreshTokens
+    .find(refreshToken)
+    .then((foundRefreshToken) =>
+      validate.refreshToken(foundRefreshToken, refreshToken, client)
+    )
+    .then((foundRefreshToken) => validate.generateToken(foundRefreshToken))
+    .then((token) => done(null, token, null, expiresIn))
+    .catch(() => done(null, false));
+};
+
 server.exchange(
-  oauth2orize.exchange.refreshToken((client, refreshToken, scope, done) => {
-    memoryStorage.refreshTokens
-      .find(refreshToken)
-      .then((foundRefreshToken) =>
-        validate.refreshToken(foundRefreshToken, refreshToken, client)
-      )
-      .then((foundRefreshToken) => validate.generateToken(foundRefreshToken))
-      .then((token) => done(null, token, null, expiresIn))
-      .catch(() => done(null, false));
-  })
+  oauth2orize.exchange.refreshToken(exports.exchangeRefreshToken)
 );
 
 /*
@@ -251,46 +196,48 @@ server.exchange(
  * authorization).  We accomplish that here by routing through `ensureLoggedIn()`
  * first, and rendering the `dialog` view.
  */
+exports.validateAuthorizationClient = (clientId, redirectURI, scope, done) => {
+  db.Client.findOne({ where: { clientId: clientId } })
+    .then((client) => {
+      if (client) {
+        client.scope = scope; // eslint-disable-line no-param-reassign
+      }
+
+      /**
+       * Check if redirectURI same host as registered
+       */
+      const allowedDomains = prefillAllowedDomains(
+        client.allowedDomains ? client.allowedDomains : []
+      );
+      const redirectUrlHost = new URL(redirectURI).host;
+
+      //console.log('===> allowedDomains', allowedDomains, redirectUrlHost);
+
+      // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
+      if (allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1) {
+        // Find and encode returnTo param if present, this allows us to support returnTo urls with special characters (e.g. `?` and `&`)
+        const returnTo = redirectURI.substr(
+          redirectURI.lastIndexOf('returnTo=') + 9
+        );
+        if (returnTo) {
+          // encode returnTo param
+          const encodedReturnTo = encodeURIComponent(returnTo);
+          redirectURI = redirectURI.replace(returnTo, encodedReturnTo);
+        }
+        return done(null, client, redirectURI);
+      } else {
+        console.log(
+          `[${new Date().toISOString()}][oauth] redirect host not allowed: clientId=${client?.id} redirectHost=${redirectUrlHost}`
+        );
+        throw new Error("Redirect host doesn't match the client host");
+      }
+    })
+    .catch((err) => done(err));
+};
+
 exports.authorization = [
   login.ensureLoggedIn(),
-  server.authorization((clientId, redirectURI, scope, done) => {
-    db.Client.findOne({ where: { clientId: clientId } })
-      .then((client) => {
-        if (client) {
-          client.scope = scope; // eslint-disable-line no-param-reassign
-        }
-
-        /**
-         * Check if redirectURI same host as registered
-         */
-        const allowedDomains = prefillAllowedDomains(
-          client.allowedDomains ? client.allowedDomains : []
-        );
-        const redirectUrlHost = new URL(redirectURI).host;
-
-        //console.log('===> allowedDomains', allowedDomains, redirectUrlHost);
-
-        // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
-        if (allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1) {
-          // Find and encode returnTo param if present, this allows us to support returnTo urls with special characters (e.g. `?` and `&`)
-          const returnTo = redirectURI.substr(
-            redirectURI.lastIndexOf('returnTo=') + 9
-          );
-          if (returnTo) {
-            // encode returnTo param
-            const encodedReturnTo = encodeURIComponent(returnTo);
-            redirectURI = redirectURI.replace(returnTo, encodedReturnTo);
-          }
-          return done(null, client, redirectURI);
-        } else {
-          console.log(
-            `[${new Date().toISOString()}][oauth] redirect host not allowed: clientId=${client?.id} redirectHost=${redirectUrlHost}`
-          );
-          throw new Error("Redirect host doesn't match the client host");
-        }
-      })
-      .catch((err) => done(err));
-  }),
+  server.authorization(exports.validateAuthorizationClient),
   (req, res, next) => {
     // Render the decision dialog if the client isn't a trusted client
     // TODO:  Make a mechanism so that if this isn't a trusted client, the user can record that

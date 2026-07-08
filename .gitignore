@@ -19,3 +19,6 @@ docker-compose.override.yml
 apps/*/package-lock.json
 /packages/ui/dist
 .worktrees
+
+# Test coverage reports
+coverage/

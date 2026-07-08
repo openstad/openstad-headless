@@ -103,8 +103,19 @@ jobs:
       - name: Install dependencies
         run: npm ci --safe-chain-skip-minimum-package-age
 
-      - name: Run Vitest tests
-        run: npm run test:unit
+      # Runs the full unit-test suite AND enforces the coverage thresholds from
+      # the root vitest.config.ts; a failing threshold exits non-zero and blocks
+      # the build. No separate `test:unit` step — coverage runs the tests too.
+      - name: Run Vitest tests with coverage
+        run: npm run test:unit:coverage
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports
+          path: coverage/
+          retention-days: 7
 
   component-test:
     name: Run Component tests
