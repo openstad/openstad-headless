@@ -142,12 +142,18 @@ async function unsubscribe(req, res, next) {
           id: user.idpUser.identifier,
         };
 
-        const updatedUserInAuth = await req.adapter.service.updateUser({
+        await req.adapter.service.updateUser({
           authConfig: req.authConfig,
           userData: updatedUserData,
         });
       }
-    } catch (e) {}
+    } catch (err) {
+      // Unsubscribe should still succeed if the idp update fails, but do log
+      console.error(
+        'Could not update emailNotificationConsent on idp user:',
+        err.message
+      );
+    }
 
     if (!process.env.AUTH_ADAPTER_OPENSTAD_SERVERURL) {
       res.json({
@@ -534,9 +540,6 @@ async function parseOnlyProjectIds(req, res, next) {
     ids = ids.map((id) => parseInt(id)).filter((id) => typeof id == 'number');
     if (ids.length) {
       let users = [req.targetUser, ...req.linkedUsers];
-      let xx = ids.map((projectId) =>
-        users.find((user) => projectId == user.projectId)
-      );
       let userIds = ids
         .map((projectId) => users.find((user) => projectId == user.projectId))
         .filter((user) => !!user)
@@ -667,7 +670,7 @@ async function deleteOAuthUserIfNoneRemain(req, res, next) {
     });
     let adapter = await authSettings.adapter({ authConfig: req.authConfig });
     if (adapter.service.deleteUser) {
-      adapter.service.deleteUser({
+      await adapter.service.deleteUser({
         authConfig,
         userData: { id: req.externalUserId },
       });
@@ -760,35 +763,38 @@ async function updateUser(req, res, next) {
         },
       });
 
-      apiUsers.forEach((apiUser, i) => {
-        return new Promise((resolve, reject) => {
+      // One failing linked-user update should not fail the request, but the
+      // updates must complete before the updated user is fetched and returned.
+      await Promise.all(
+        apiUsers.map((apiUser) => {
           let data =
             apiUser.projectId == req.params.projectId
               ? updatedUserDataForProject
               : synchronizedUpdatedUserData;
 
-          if (req.user.can('update', apiUser)) {
-            if (
-              data?.idpUser &&
-              !data.idpUser.accesstoken &&
-              apiUser?.idpUser?.accesstoken
-            ) {
-              data.idpUser.accesstoken = apiUser.idpUser.accesstoken;
-            }
-            apiUser
-              .authorizeData(data, 'update', req.user)
-              .update(data)
-              .then((result) => {
-                resolve();
-              })
-              .catch((err) => {
-                resolve(err);
-              });
-          } else {
-            resolve(new Error('User not authorized to update nickName'));
+          if (!req.user.can('update', apiUser)) {
+            console.error(`Not authorized to update linked user ${apiUser.id}`);
+            return Promise.resolve();
           }
-        });
-      });
+
+          if (
+            data?.idpUser &&
+            !data.idpUser.accesstoken &&
+            apiUser?.idpUser?.accesstoken
+          ) {
+            data.idpUser.accesstoken = apiUser.idpUser.accesstoken;
+          }
+          return apiUser
+            .authorizeData(data, 'update', req.user)
+            .update(data)
+            .catch((err) => {
+              console.error(
+                `Could not update linked user ${apiUser.id}:`,
+                err.message
+              );
+            });
+        })
+      );
     } else {
       let apiUser = await db.User.scope(['includeProject']).findOne({
         where: {
@@ -796,7 +802,9 @@ async function updateUser(req, res, next) {
           projectId: req.params.projectId,
         },
       });
-      apiUser.authorizeData(userData, 'update', req.user).update(userData);
+      await apiUser
+        .authorizeData(userData, 'update', req.user)
+        .update(userData);
     }
 
     return next();
