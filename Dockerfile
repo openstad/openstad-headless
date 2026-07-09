@@ -36,6 +36,12 @@ RUN npm config set fetch-retry-maxtimeout 300000
 RUN npm config set fetch-retry-mintimeout 60000
 RUN npm config set fetch-timeout 300000
 RUN npm config set legacy-peer-deps true
+# npm 12 defaults allow-git to "none", blocking git dependencies (e.g. image-steam).
+# "root" allows only git deps declared in our own workspace package.json files.
+RUN npm config set allow-git root
+# npm 12 blocks dependency install scripts by default; native builds (sharp, sqlite3,
+# bcrypt, ...) need them. Run all scripts like npm 11 did; safe-chain still scans for malware.
+RUN npm config set dangerously-allow-all-scripts true
 
 ARG BUILD_ENV=production
 ENV BUILD_ENV=${BUILD_ENV}
@@ -56,6 +62,10 @@ RUN npm update -g npm
 RUN npm i -g @aikidosec/safe-chain && safe-chain setup-ci
 # See builder stage: setup-ci does not modify PATH inside a docker build, so wire it manually.
 ENV PATH="/root/.safe-chain/shims:/root/.safe-chain/bin:${PATH}"
+# npm 12 blocks git deps by default; allow those declared in our workspace package.json files.
+RUN npm config set allow-git root
+# npm 12 blocks install scripts by default; run them so native modules build.
+RUN npm config set dangerously-allow-all-scripts true
 CMD ["sh", "-lc", "rm -rf node_modules && npm run update-lock"]
 
 FROM builder AS base
@@ -69,7 +79,7 @@ RUN npm cache clean --force
 
 # Remove all folders from ./apps except the one specified by APP
 RUN find ./apps -mindepth 1 -maxdepth 1 -type d ! -name "${APP}" -exec rm -rf {} +
-RUN npm prune -ws
+RUN npm prune --ws
 RUN if [ "${APP}" = "image-server" ]; then \
       SHARP_VERSION="$(node -p "require('./package-lock.json').packages['node_modules/sharp'].version")"; \
       BUILD_ARCH="$(uname -m)"; \
@@ -113,7 +123,7 @@ ARG OPENSTAD_VERSION
 ENV OPENSTAD_VERSION=$OPENSTAD_VERSION
 ENV NEXT_PUBLIC_OPENSTAD_VERSION=$OPENSTAD_VERSION
 RUN npm run build --if-present -w $WORKSPACE
-RUN npm prune -ws --production
+RUN npm prune --ws --production
 RUN if [ "${APP}" = "image-server" ]; then \
       SHARP_VERSION="$(node -p "require('./package-lock.json').packages['node_modules/sharp'].version")"; \
       BUILD_ARCH="$(uname -m)"; \
