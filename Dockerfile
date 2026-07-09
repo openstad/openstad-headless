@@ -1,5 +1,5 @@
 # Image used for building dependencies
-FROM node:24-slim AS builder
+FROM node:24-trixie-slim AS builder
 ENV GITHUB_REPOSITORY=openstad/openstad-headless
 
 LABEL org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}
@@ -41,16 +41,16 @@ ENV CYPRESS_CACHE_FOLDER=/tmp/CypressCache
 
 RUN npm ci --include=optional --safe-chain-skip-minimum-package-age
 
+# Build plugin-loader (TypeScript → dist/) before app builds need it
+RUN npm run build --if-present -w packages/plugin-loader
+
 # Minimal target for update-lock. It only serves to update the lock file.
-FROM node:24-slim AS update-lock
+FROM node:24-trixie-slim AS update-lock
 WORKDIR /opt/openstad-headless
 RUN npm update -g npm
 # Install safe-chain so --safe-chain-skip-minimum-package-age is recognized when updating the lock file
 RUN npm i -g @aikidosec/safe-chain && safe-chain setup-ci
 CMD ["sh", "-lc", "rm -rf node_modules && npm run update-lock"]
-
-# Build plugin-loader (TypeScript → dist/) before app builds need it
-RUN npm run build --if-present -w packages/plugin-loader
 
 FROM builder AS base
 
@@ -122,7 +122,7 @@ RUN if [ "${APP}" = "image-server" ]; then \
     fi
 
 # Release image
-FROM node:24-slim AS release
+FROM node:24-trixie-slim AS release
 ARG APP
 ARG PORT
 ARG NODE_ENV
