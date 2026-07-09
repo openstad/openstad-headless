@@ -1,7 +1,14 @@
 import { FormValue } from '@openstad-headless/form/src/form';
 import type { BaseProps } from '@openstad-headless/types';
 import { Button, Heading, Paragraph } from '@utrecht/component-library-react';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import './dilemma.scss';
 
@@ -37,7 +44,12 @@ export type DilemmaProps = {
   required?: boolean;
   overrideDefaultValue?: FormValue;
   onChange?: (
-    e: { name: string; value: FormValue },
+    e: {
+      name: string;
+      value: FormValue;
+      isInitial?: boolean;
+      interactionKey?: string;
+    },
     triggerSetLastKey?: boolean
   ) => void;
 };
@@ -92,6 +104,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   const [infoDialog, setInfoDialog] = useState<boolean>(false);
   const [showExplanationDialog, setShowExplanationDialog] =
     useState<boolean>(false);
+  // Mount detection + marking whether the next emit is an explanation.
+  const didInitRef = useRef(false);
+  const pendingExplanationRef = useRef(false);
+
   const [explanations, setExplanations] = useState<Record<string, string>>(
     initialAnswersExplanation
   );
@@ -245,6 +261,8 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   };
 
   const handleExplanationChange = (dilemmaId: string, explanation: string) => {
+    // Mark that the next emit concerns an explanation interaction.
+    pendingExplanationRef.current = true;
     setExplanations((prev) => ({
       ...prev,
       [dilemmaId]: explanation,
@@ -304,8 +322,20 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         })
         .filter((item) => item.answer !== undefined);
 
-      onChange({ name: fieldKey, value: combinedAnswers });
+      const isInitial = !didInitRef.current;
+      const isExplanation = pendingExplanationRef.current;
+      pendingExplanationRef.current = false;
+
+      onChange({
+        name: fieldKey,
+        value: combinedAnswers,
+        ...(isInitial ? { isInitial: true } : {}),
+        ...(isExplanation
+          ? { interactionKey: `${fieldKey}::explanation` }
+          : {}),
+      });
     }
+    didInitRef.current = true;
   }, [dilemmaAnswers, explanations]);
 
   useEffect(() => {

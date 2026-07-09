@@ -8,7 +8,7 @@ import {
   Paragraph,
   Strong,
 } from '@utrecht/component-library-react';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
@@ -36,7 +36,12 @@ export type RangeSliderProps = {
   disabled?: boolean;
   type?: string;
   onChange?: (
-    e: { name: string; value: FormValue | valueObject },
+    e: {
+      name: string;
+      value: FormValue | valueObject;
+      isInitial?: boolean;
+      interactionKey?: string;
+    },
     triggerSetLastKey?: boolean
   ) => void;
   showMoreInfo?: boolean;
@@ -150,7 +155,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
 
   const changeValue = (
     key: 'value' | 'skipQuestion' | 'skipQuestionExplanation',
-    newValue: any
+    newValue: any,
+    options?: { isInitial?: boolean; interactionKey?: string }
   ) => {
     const currValue: valueObject = { ...value };
 
@@ -166,20 +172,32 @@ const RangeSlider: FC<RangeSliderProps> = ({
       onChange({
         name: fieldKey,
         value: currValue,
+        ...(options?.isInitial ? { isInitial: true } : {}),
+        ...(options?.interactionKey
+          ? { interactionKey: options.interactionKey }
+          : {}),
       });
     }
 
     setValue(currValue);
   };
 
+  const didInitRef = useRef(false);
   useEffect(() => {
     setFieldDisabled(skipSelected);
-    changeValue('skipQuestion', skipSelected);
+    // The first emit is the mount initialisation, not a user interaction.
+    changeValue('skipQuestion', skipSelected, {
+      isInitial: !didInitRef.current,
+    });
+    didInitRef.current = true;
   }, [skipSelected]);
 
   const handleInputChange = (event: { name: string; value: FormValue }) => {
     const { value } = event;
-    changeValue('skipQuestionExplanation', value || '');
+    // Track explanation separately as question_interact with an 'explanation' suffix.
+    changeValue('skipQuestionExplanation', value || '', {
+      interactionKey: `${fieldKey}::explanation`,
+    });
   };
 
   return (

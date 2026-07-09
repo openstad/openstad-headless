@@ -4,6 +4,11 @@ import { FormValue } from '../form';
 import type { CombinedFieldPropsWithType } from '../props';
 import { getSchemaForField } from './validation.js';
 
+export type SubmitResult = {
+  firstErrorKey: string | null;
+  errors: { [key: string]: string | null };
+};
+
 export const handleSubmit = (
   fields: Array<CombinedFieldPropsWithType>,
   formValues: { [p: string]: FormValue },
@@ -14,7 +19,7 @@ export const handleSubmit = (
   submitHandler: (values: { [p: string]: FormValue }) => void,
   pageHandler: (() => void) | null = null,
   submitBeforeLastPage?: boolean
-): string | null => {
+): SubmitResult => {
   const errors: { [key: string]: string | null } = {};
   let firstErrorKey: string | null = null;
 
@@ -70,8 +75,8 @@ export const handleSubmit = (
       }
       submitHandler(valuesToSubmit);
     }
-    return null;
+    return { firstErrorKey: null, errors };
   }
 
-  return firstErrorKey;
+  return { firstErrorKey, errors };
 };
