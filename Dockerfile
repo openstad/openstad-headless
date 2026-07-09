@@ -39,6 +39,9 @@ RUN npm config set legacy-peer-deps true
 # npm 12 defaults allow-git to "none", blocking git dependencies (e.g. image-steam).
 # "root" allows only git deps declared in our own workspace package.json files.
 RUN npm config set allow-git root
+# npm 12 blocks dependency install scripts by default; native builds (sharp, sqlite3,
+# bcrypt, ...) need them. Run all scripts like npm 11 did; safe-chain still scans for malware.
+RUN npm config set dangerously-allow-all-scripts true
 
 ARG BUILD_ENV=production
 ENV BUILD_ENV=${BUILD_ENV}
@@ -61,6 +64,8 @@ RUN npm i -g @aikidosec/safe-chain && safe-chain setup-ci
 ENV PATH="/root/.safe-chain/shims:/root/.safe-chain/bin:${PATH}"
 # npm 12 blocks git deps by default; allow those declared in our workspace package.json files.
 RUN npm config set allow-git root
+# npm 12 blocks install scripts by default; run them so native modules build.
+RUN npm config set dangerously-allow-all-scripts true
 CMD ["sh", "-lc", "rm -rf node_modules && npm run update-lock"]
 
 FROM builder AS base
