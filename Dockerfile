@@ -36,6 +36,9 @@ RUN npm config set fetch-retry-maxtimeout 300000
 RUN npm config set fetch-retry-mintimeout 60000
 RUN npm config set fetch-timeout 300000
 RUN npm config set legacy-peer-deps true
+# npm 12 defaults allow-git to "none", blocking git dependencies (e.g. image-steam).
+# "root" allows only git deps declared in our own workspace package.json files.
+RUN npm config set allow-git root
 
 ARG BUILD_ENV=production
 ENV BUILD_ENV=${BUILD_ENV}
@@ -56,6 +59,8 @@ RUN npm update -g npm
 RUN npm i -g @aikidosec/safe-chain && safe-chain setup-ci
 # See builder stage: setup-ci does not modify PATH inside a docker build, so wire it manually.
 ENV PATH="/root/.safe-chain/shims:/root/.safe-chain/bin:${PATH}"
+# npm 12 blocks git deps by default; allow those declared in our workspace package.json files.
+RUN npm config set allow-git root
 CMD ["sh", "-lc", "rm -rf node_modules && npm run update-lock"]
 
 FROM builder AS base
