@@ -20,6 +20,10 @@ RUN npm update -g npm
 
 # Install safe-chain to prevent installing malware through npm
 RUN npm i -g @aikidosec/safe-chain && safe-chain setup-ci
+# setup-ci only wires PATH via GITHUB_PATH/TF_BUILD/BASH_ENV, which don't exist inside
+# a docker build. Add the shims dir manually so npm routes through safe-chain and its
+# --safe-chain-* flags are consumed (otherwise npm 12 fails them with EUNKNOWNCONFIG).
+ENV PATH="/root/.safe-chain/shims:/root/.safe-chain/bin:${PATH}"
 
 # Install app dependencies
 COPY --chown=node:node package*.json .
@@ -50,6 +54,8 @@ WORKDIR /opt/openstad-headless
 RUN npm update -g npm
 # Install safe-chain so --safe-chain-skip-minimum-package-age is recognized when updating the lock file
 RUN npm i -g @aikidosec/safe-chain && safe-chain setup-ci
+# See builder stage: setup-ci does not modify PATH inside a docker build, so wire it manually.
+ENV PATH="/root/.safe-chain/shims:/root/.safe-chain/bin:${PATH}"
 CMD ["sh", "-lc", "rm -rf node_modules && npm run update-lock"]
 
 FROM builder AS base
