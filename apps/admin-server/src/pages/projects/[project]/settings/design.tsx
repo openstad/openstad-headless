@@ -93,7 +93,7 @@ export default function ProjectSettingsDesign() {
   const fieldValue = watch('cssCustom');
 
   useEffect(() => {
-    update(fieldValue as any);
+    update(fieldValue as string);
   }, [fieldValue]);
 
   const update = (text: string) => {

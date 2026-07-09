@@ -105,8 +105,11 @@ export default function CreateUserGeneral() {
     try {
       await updateUser({ ...values, id: user.id, projectId: user.projectId });
       toast.success('User is bijgewerkt');
-    } catch (err: any) {
-      toast.error(err.message || 'User kon niet worden bijgewerkt');
+    } catch (err: unknown) {
+      toast.error(
+        (err instanceof Error && err.message) ||
+          'User kon niet worden bijgewerkt'
+      );
     }
   }
 
@@ -141,8 +144,11 @@ export default function CreateUserGeneral() {
       toast.success('Gebruiker is geanonimiseerd');
       setIsAnonymizeDialogOpen(false);
       setIsAnonymizeConfirmed(false);
-    } catch (error: any) {
-      toast.error(error?.message || 'Gebruiker kon niet worden geanonimiseerd');
+    } catch (error: unknown) {
+      toast.error(
+        (error instanceof Error && error.message) ||
+          'Gebruiker kon niet worden geanonimiseerd'
+      );
     } finally {
       setIsAnonymizing(false);
     }

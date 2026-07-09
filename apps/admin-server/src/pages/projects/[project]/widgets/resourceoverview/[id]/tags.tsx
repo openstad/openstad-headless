@@ -231,7 +231,7 @@ export default function WidgetResourceOverviewTags(
                                       (el) => el.type === groupName
                                     ) > -1
                                   }
-                                  onCheckedChange={(checked: any) => {
+                                  onCheckedChange={(checked) => {
                                     const projectId = tags.find(
                                       (tag: { type: string }) =>
                                         tag.type === groupName
@@ -240,7 +240,7 @@ export default function WidgetResourceOverviewTags(
                                     const updatedFields =
                                       handleTagCheckboxGroupChange(
                                         groupName,
-                                        checked,
+                                        checked === true,
                                         field.value,
                                         'type',
                                         projectId
@@ -323,10 +323,10 @@ export default function WidgetResourceOverviewTags(
                                         el.type === groupName && el.multiple
                                     ) > -1
                                   }
-                                  onCheckedChange={(checked: any) => {
+                                  onCheckedChange={(checked) => {
                                     const groups = handleTagCheckboxGroupChange(
                                       groupName,
-                                      checked,
+                                      checked === true,
                                       field.value,
                                       'multiple'
                                     );
@@ -366,10 +366,10 @@ export default function WidgetResourceOverviewTags(
                                         el.inlineOptions
                                     ) > -1
                                   }
-                                  onCheckedChange={(checked: any) => {
+                                  onCheckedChange={(checked) => {
                                     const groups = handleTagCheckboxGroupChange(
                                       groupName,
-                                      checked,
+                                      checked === true,
                                       field.value,
                                       'inlineOptions'
                                     );
