@@ -18,19 +18,21 @@ Once you have pushed a branch to the remote, do not rebase it. Rebasing rewrites
 
 ### Branch Naming
 
-Branch names should start with the issue type and issue ID, followed by a slash and a brief description of the work. Use issue types that are used in GitHub (feature, bug, task).
+We follow the GitHub automated braching strategy when creating one from an issue. Branch names should start with the issue ID, followed by a brief description of the work.
 
 ```text
-feature-6803/add-tests-to-map-widget
+6803-add-tests-to-map-widget
 ```
 
-The ID lets you quickly find the branch belonging to a given Issue. The short description makes it clear at a glance what the branch is about, without having to open it.
+The ID lets you quickly find the branch belonging to a given issue. The short description makes it clear at a glance what the branch is about, without having to open it.
 
 ## Pull Requests
 
-### PR Title & Commit Messages
+### PR Title
 
-We use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) for the PR titel and commit messages. For exampe: `feat(resource-detail): add file size and mime type to document links`
+We squash-merge all PRs, which means the PR title becomes the commit message in `branch-sprint-1`’s history. When you trace a specific line of code years from now, a well-written title makes it immediately clear what exactly was changed.
+
+We use [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) for the PR titel. This For exampe: `feat(resource-detail): add file size and mime type to document links`
 
 ### PR Template
 
