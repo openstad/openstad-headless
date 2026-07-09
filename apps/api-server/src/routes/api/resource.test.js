@@ -14,6 +14,7 @@ const origResourceDestroy = db.Resource.destroy;
 const origWidgetFindAll = db.Widget.findAll;
 const origStatusFindAll = db.Status.findAll;
 const origTagFindAll = db.Tag.findAll;
+const origProjectScope = db.Project.scope;
 
 afterEach(() => {
   db.Resource.can = origResourceCan;
@@ -24,6 +25,7 @@ afterEach(() => {
   db.Widget.findAll = origWidgetFindAll;
   db.Status.findAll = origStatusFindAll;
   db.Tag.findAll = origTagFindAll;
+  db.Project.scope = origProjectScope;
   delete process.env.IMAGE_APP_URL;
 });
 
@@ -173,6 +175,9 @@ describe('POST / — create resource guards', () => {
       findAndCountAll: vi.fn(),
       findOne: vi.fn(),
     });
+    // A rejected image must abort the handler: no create may be issued.
+    const create = vi.fn(() => new Promise(() => {}));
+    db.Resource.authorizeData = vi.fn().mockReturnValue({ create });
 
     const app = createApp({ project: makeProject(), user: makeUser() });
     const res = await request(app)
@@ -184,6 +189,7 @@ describe('POST / — create resource guards', () => {
 
     expect(res.status).toBe(400);
     expect(res.body.error).toMatch(/invalid image/i);
+    expect(create).not.toHaveBeenCalled();
   });
 
   it('returns 401 when canAddNewResources is false', async () => {
@@ -364,6 +370,11 @@ describe('PUT /:id — update resource guards', () => {
     db.Resource.can = vi.fn().mockReturnValue(true);
     db.Resource.scope = vi.fn().mockReturnValue({
       findOne: vi.fn().mockResolvedValue(resource),
+    });
+    // The update notification step reads the project's emailConfig; stub the
+    // lookup so it does not hit a real DB (which would log a connection error).
+    db.Project.scope = vi.fn().mockReturnValue({
+      findByPk: vi.fn().mockResolvedValue(null),
     });
 
     const app = createApp({ project: makeProject(), user: makeUser() });
