@@ -59,10 +59,12 @@ export default function ProjectSettingsAllowedDomains() {
   const configuredDomains: string[] = data?.config?.allowedDomains ?? [];
 
   const autoDomains = useMemo(() => {
+    const stripWww = (host: string) =>
+      host.startsWith('www.') ? host.slice(4) : host;
     const seen = new Set<string>();
 
     if (projectHost) {
-      seen.add(projectHost);
+      seen.add(stripWww(projectHost));
       for (const parent of getParentDomains(projectHost)) {
         seen.add(parent);
       }
