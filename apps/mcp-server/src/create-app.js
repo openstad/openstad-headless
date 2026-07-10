@@ -12,26 +12,16 @@ const { createServer } = require('./create-server');
  * Builds the Express app for the reporting MCP server. Separated from
  * server.js's process bootstrap (dotenv, app.listen) so it can be exercised
  * with supertest without opening a real network listener.
- * @param {{host: string, port: number, authToken?: string, [key: string]: any}} config
+ *
+ * This server is shared and multi-tenant: it holds no reporting credentials
+ * of its own. Every /mcp request carries its own reporting bearer token
+ * (Authorization header) and project id (X-Reporting-Project-Id header),
+ * which are extracted per request and used to build a request-scoped config
+ * — so concurrent requests for different municipalities never share state.
+ * @param {{apiBaseUrl: string, host: string, port: number}} config
  */
 function createApp(config) {
   const app = createMcpExpressApp({ host: config.host });
-
-  // Shared-secret auth on /mcp: required by loadConfig() whenever
-  // config.host isn't localhost, optional (but still enforced if set) on
-  // localhost. Without this, anyone who can reach the port could invoke
-  // every reporting tool using this process's held bearer token with no
-  // credential of their own.
-  app.use('/mcp', (req, res, next) => {
-    if (!config.authToken) return next();
-    const header = req.get('Authorization') || '';
-    if (header === `Bearer ${config.authToken}`) return next();
-    return res.status(401).json({
-      jsonrpc: '2.0',
-      error: { code: -32000, message: 'Unauthorized' },
-      id: null,
-    });
-  });
 
   // Stateless mode: a fresh McpServer + transport per request, so one process
   // can serve concurrent tool calls without shared session state — this
@@ -41,7 +31,23 @@ function createApp(config) {
     let transport;
     let server;
     try {
-      server = createServer(config);
+      const authHeader = req.get('Authorization') || '';
+      const reportingToken = authHeader.startsWith('Bearer ')
+        ? authHeader.slice('Bearer '.length)
+        : undefined;
+      // Only accept a plain numeric project id — this value is interpolated
+      // into the outbound reporting API URL path (reporting-client.js's
+      // buildUrl), so anything else (e.g. `../..`) is treated as absent
+      // rather than passed through and risking a path-prefix rewrite.
+      const rawProjectId = req.get('X-Reporting-Project-Id') || '';
+      const projectId = /^\d+$/.test(rawProjectId) ? rawProjectId : undefined;
+
+      // Missing/invalid credentials are not rejected here — the tool layer
+      // (make-report-tool.js) returns an MCP tool error per call instead, so
+      // the failure surfaces in the LLM UI rather than as a bare HTTP error.
+      const requestConfig = { ...config, reportingToken, projectId };
+
+      server = createServer(requestConfig);
       transport = new StreamableHTTPServerTransport({
         sessionIdGenerator: undefined,
       });

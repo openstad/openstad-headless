@@ -5,9 +5,9 @@ const { TOOLS } = require('./tools/definitions');
 
 /**
  * Builds an McpServer with every reporting tool registered, bound to the
- * given (server-held) config. The LLM client only ever sees tool names,
+ * given request-scoped config. The LLM client only ever sees tool names,
  * descriptions and parameters — never `config.reportingToken`.
- * @param {{apiBaseUrl: string, projectId: string, reportingToken: string}} config
+ * @param {{apiBaseUrl: string, projectId?: string, reportingToken?: string}} config
  */
 function createServer(config) {
   const server = new McpServer({

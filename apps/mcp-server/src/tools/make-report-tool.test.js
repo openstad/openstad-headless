@@ -98,6 +98,42 @@ describe('makeReportTool', () => {
     });
   });
 
+  it('returns a tool error, without calling fetch, when reportingToken is missing', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const tool = makeReportTool({
+      name: 'reporting_resources',
+      description: 'x',
+      path: '/resources',
+    });
+    const result = await tool.handler(
+      { ...config, reportingToken: undefined },
+      {}
+    );
+
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain(
+      'no reporting token / project id provided'
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('returns a tool error, without calling fetch, when projectId is missing', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+
+    const tool = makeReportTool({
+      name: 'reporting_resources',
+      description: 'x',
+      path: '/resources',
+    });
+    const result = await tool.handler({ ...config, projectId: undefined }, {});
+
+    expect(result.isError).toBe(true);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it('propagates the reporting API problem+json error so the SDK can surface it as a tool error', async () => {
     stubFetch(async () => ({
       ok: false,
