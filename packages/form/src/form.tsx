@@ -249,9 +249,12 @@ function Form({
     }
 
     if (firstErrorKey && formRef.current) {
-      const errorElement = formRef.current.querySelector(
+      const namedElement = formRef.current.querySelector(
         `[name="${firstErrorKey}"]`
       );
+      // ponytail: named element can be a type="hidden" input (e.g. map) with no
+      // layout box; scroll to its visible .question wrapper instead.
+      const errorElement = namedElement?.closest('.question') ?? namedElement;
       if (errorElement) {
         const elementPosition =
           errorElement.getBoundingClientRect().top + window.scrollY;
