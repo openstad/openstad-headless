@@ -73,7 +73,7 @@ response. Consequences:
 
 The shared React runtime (`window.OpenStadReact`) is a separate esbuild bundle
 (`apps/api-server/scripts/build-react-runtime.js` → `dist/openstad-react-runtime.js`) served at
-`GET /widget/react-runtime.js` and loaded once per page (`src/util/react-check.js`).
+`GET /widget/react-runtime.js` and loaded once per page (`apps/api-server/src/util/react-check.js`).
 
 ## Flow 1: configuration → storage
 
