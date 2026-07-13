@@ -13,8 +13,11 @@ function buildUser(values) {
 }
 
 assert.strictEqual(
-  buildUser({ name: 'Freek', nickName: 'Freeky', projectDisplayName: 'Administrator' })
-    .displayName,
+  buildUser({
+    name: 'Freek',
+    nickName: 'Freeky',
+    projectDisplayName: 'Administrator',
+  }).displayName,
   'Administrator',
   'projectDisplayName moet voorrang hebben'
 );
@@ -29,4 +32,6 @@ assert.strictEqual(
   'valt terug op name'
 );
 
-console.log('OK: User.displayName fallback (projectDisplayName || nickName || name)');
+console.log(
+  'OK: User.displayName fallback (projectDisplayName || nickName || name)'
+);
