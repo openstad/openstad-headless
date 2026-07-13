@@ -1,6 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import { Form } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Heading, ListHeading, Paragraph } from '@/components/ui/typography';
@@ -26,10 +27,16 @@ type EmailNotificationConsent = {
   consent: boolean;
 };
 
+type ProjectDisplayName = {
+  projectId: string;
+  displayName: string;
+};
+
 type CombinedProjectRoleAndConsent = {
   projectId: string;
   roleId?: string;
   consent?: boolean;
+  displayName?: string;
 };
 
 export default function CreateUserProjects() {
@@ -39,6 +46,9 @@ export default function CreateUserProjects() {
   const [projectRoles, setProjectRoles] = useState<Array<ProjectRole>>([]);
   const [emailNotificationConsents, setEmailNotificationConsents] = useState<
     Array<EmailNotificationConsent>
+  >([]);
+  const [projectDisplayNames, setProjectDisplayNames] = useState<
+    Array<ProjectDisplayName>
   >([]);
 
   useEffect(() => {}, [projects, users]);
@@ -80,12 +90,27 @@ export default function CreateUserProjects() {
     });
   };
 
+  const addProjectDisplayName = (projectId: string, displayName: string) => {
+    setProjectDisplayNames((prev) => {
+      let updated = [...prev];
+      const index = updated.findIndex((e) => e.projectId === projectId);
+
+      if (index !== -1) {
+        updated[index].displayName = displayName;
+      } else {
+        updated.push({ projectId, displayName });
+      }
+      return updated;
+    });
+  };
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     let error: any;
 
     const mergedProjects: CombinedProjectRoleAndConsent[] = [
       ...projectRoles,
       ...emailNotificationConsents,
+      ...projectDisplayNames,
     ];
 
     for (let updateValue of mergedProjects) {
@@ -100,6 +125,12 @@ export default function CreateUserProjects() {
           const updatedUser = user;
           if (user.emailNotificationConsent !== updateValue.consent) {
             updatedUser.emailNotificationConsent = updateValue.consent;
+          }
+          if (
+            typeof updateValue.displayName !== 'undefined' &&
+            user.projectDisplayName !== updateValue.displayName
+          ) {
+            updatedUser.projectDisplayName = updateValue.displayName;
           }
           if (
             typeof updateValue.roleId !== 'undefined' &&
@@ -122,6 +153,9 @@ export default function CreateUserProjects() {
             };
             if (typeof updateValue.consent !== 'undefined') {
               newUser.emailNotificationConsent = updateValue.consent;
+            }
+            if (typeof updateValue.displayName !== 'undefined') {
+              newUser.projectDisplayName = updateValue.displayName;
             }
             if (updateValue.roleId) {
               newUser.role = updateValue.roleId;
@@ -175,9 +209,10 @@ export default function CreateUserProjects() {
 
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="ml-1">
-            <div className="mt-4 grid grid-cols-1 lg:grid-cols-5 items-center lg:py-3 lg:border-b border-border gap-4">
+            <div className="mt-4 grid grid-cols-1 lg:grid-cols-6 items-center lg:py-3 lg:border-b border-border gap-4">
               <ListHeading className="hidden lg:flex">Projectnaam</ListHeading>
               <ListHeading className="hidden lg:flex">Gebruiker ID</ListHeading>
+              <ListHeading className="hidden lg:flex">Weergavenaam</ListHeading>
               <ListHeading className="hidden lg:flex">Rol</ListHeading>
               <ListHeading className="hidden lg:flex">
                 E-mail notificaties toestemming
@@ -210,10 +245,22 @@ export default function CreateUserProjects() {
                 return (
                   <li
                     key={project.id}
-                    className="grid grid-cols-1 lg:grid-cols-5 items-center py-3 h-fit hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-4">
+                    className="grid grid-cols-1 lg:grid-cols-6 items-center py-3 h-fit hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-4">
                     <Paragraph className="truncate">{project.name}</Paragraph>
                     <Paragraph className="truncate text-muted-foreground">
                       {user?.id ?? '—'}
+                    </Paragraph>
+                    <Paragraph className="truncate mr-4">
+                      {!!effectiveRole && (
+                        <Input
+                          type="text"
+                          defaultValue={user?.projectDisplayName || ''}
+                          placeholder="Weergavenaam"
+                          onChange={(e) => {
+                            addProjectDisplayName(project.id, e.target.value);
+                          }}
+                        />
+                      )}
                     </Paragraph>
                     <Paragraph className="truncate mr-4">
                       <UserRoleDropdownList
