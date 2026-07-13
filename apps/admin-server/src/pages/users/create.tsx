@@ -42,8 +42,11 @@ export default function CreateUser() {
       toast.success('User is toegevoegd');
       user.key = `${user.idpUser.provider}-*-${user.idpUser.identifier}`;
       document.location.href = `/users/${btoa(user.key)}`;
-    } catch (err: any) {
-      toast.error(err.message || 'User kon niet worden toegevoegd');
+    } catch (err: unknown) {
+      toast.error(
+        (err instanceof Error && err.message) ||
+          'User kon niet worden toegevoegd'
+      );
     }
   }
   if (!projects) return null;

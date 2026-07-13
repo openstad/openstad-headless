@@ -168,11 +168,11 @@ export default function DocumentFilters(
                                       (el) => el.type === groupName
                                     ) > -1
                                   }
-                                  onCheckedChange={(checked: any) => {
+                                  onCheckedChange={(checked) => {
                                     const updatedFields =
                                       handleTagCheckboxGroupChange(
                                         groupName,
-                                        checked,
+                                        checked === true,
                                         field.value,
                                         'type'
                                       );
@@ -258,10 +258,10 @@ export default function DocumentFilters(
                                         el.type === groupName && el.multiple
                                     ) > -1
                                   }
-                                  onCheckedChange={(checked: any) => {
+                                  onCheckedChange={(checked) => {
                                     const groups = handleTagCheckboxGroupChange(
                                       groupName,
-                                      checked,
+                                      checked === true,
                                       field.value,
                                       'multiple'
                                     );

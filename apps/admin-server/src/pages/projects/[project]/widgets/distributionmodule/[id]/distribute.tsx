@@ -24,7 +24,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  total: z.any(),
+  total: z.coerce.number(),
   choice: z.string(),
   budgetTotalText: z.string().optional(),
   budgetLeftoverText: z.string().optional(),

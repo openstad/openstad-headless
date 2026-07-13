@@ -162,7 +162,7 @@ export default function WidgetStemBegrootSorting(
                                     (el) => el.value === item.value
                                   ) > -1
                                 }
-                                onCheckedChange={(checked: any) => {
+                                onCheckedChange={(checked) => {
                                   return checked
                                     ? field.onChange([
                                         ...field.value,
