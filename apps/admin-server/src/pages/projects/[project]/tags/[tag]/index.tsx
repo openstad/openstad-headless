@@ -37,7 +37,7 @@ const formSchema = z.object({
   mapIcon: z.string().optional(),
   mapIconUploader: z.string().optional(),
   listIcon: z.string().optional(),
-  useDifferentSubmitAddress: z.any(),
+  useDifferentSubmitAddress: z.boolean().optional(),
   image: z.string().optional(),
   defaultResourceImage: z.string().optional(),
   documentMapIconColor: z.string().optional(),

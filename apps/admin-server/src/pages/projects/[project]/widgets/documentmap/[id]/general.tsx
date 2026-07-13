@@ -46,6 +46,8 @@ const formSchema = z.object({
   hideCommentsList: z.boolean().optional(),
   hideFilters: z.boolean().optional(),
   hideToggleMarkers: z.boolean().optional(),
+  displayLikes: z.boolean().optional(),
+  largeDoc: z.boolean().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -85,6 +87,8 @@ export default function DocumentGeneral(
       hideCommentsList: props?.hideCommentsList || false,
       hideFilters: props?.hideFilters || false,
       hideToggleMarkers: props?.hideToggleMarkers || false,
+      displayLikes: props?.displayLikes || false,
+      largeDoc: props?.largeDoc || false,
     },
   });
 

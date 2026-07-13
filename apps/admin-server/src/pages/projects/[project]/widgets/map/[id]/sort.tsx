@@ -145,7 +145,7 @@ export default function WidgetMapSort() {
                             <FormControl>
                               <Checkbox
                                 checked={field.value?.includes(item.id)}
-                                onCheckedChange={(checked: any) => {
+                                onCheckedChange={(checked) => {
                                   return checked
                                     ? field.onChange([...field.value, item.id])
                                     : field.onChange(

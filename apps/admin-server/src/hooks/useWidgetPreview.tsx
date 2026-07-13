@@ -23,7 +23,9 @@ export function useWidgetPreview<T extends { [key: string]: any }>(
     if (!previewConfig) {
       const config = widget?.config;
       if (typeof config === 'object')
-        (config as any).showAdminHiddenPolygonStyling = true;
+        (
+          config as { showAdminHiddenPolygonStyling?: boolean }
+        ).showAdminHiddenPolygonStyling = true;
 
       if (config) {
         setPreviewConfig({

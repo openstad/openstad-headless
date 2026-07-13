@@ -20,12 +20,16 @@ export default async function handler(
 
       for (const [key, component] of Object.entries(widgetAdminComponents)) {
         if (!merged[key]) {
+          const meta = component as {
+            name?: string;
+            description?: string;
+            image?: string;
+          };
           merged[key] = {
-            name: (component as any).name || key,
-            description: (component as any).description || '',
+            name: meta.name || key,
+            description: meta.description || '',
             image:
-              (component as any).image ||
-              '/widget_preview/resource_overview_preview.png',
+              meta.image || '/widget_preview/resource_overview_preview.png',
           };
         }
       }
