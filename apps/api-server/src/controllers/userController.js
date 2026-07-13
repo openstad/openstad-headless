@@ -698,7 +698,8 @@ function attachUserToAnonymizeResults(req, res, next) {
 // ----------------------------------------------------------------------------
 
 function loadUser(req, res, next) {
-  const userId = parseInt(req.params.userId) || 1;
+  const userId = parseInt(req.params.userId, 10);
+  if (!userId) return next(createError(400, 'Invalid user id'));
   db.User.scope(...req.scope)
     .findOne({
       //where: {id: userId, projectId: req.params.projectId},
@@ -763,8 +764,8 @@ async function updateUser(req, res, next) {
         },
       });
 
-      // One failing linked-user update should not fail the request, but the
-      // updates must complete before the updated user is fetched and returned.
+      // A failing linked-user update fails the request, so the client knows
+      // the update did not fully succeed.
       await Promise.all(
         apiUsers.map((apiUser) => {
           let data =
@@ -784,15 +785,7 @@ async function updateUser(req, res, next) {
           ) {
             data.idpUser.accesstoken = apiUser.idpUser.accesstoken;
           }
-          return apiUser
-            .authorizeData(data, 'update', req.user)
-            .update(data)
-            .catch((err) => {
-              console.error(
-                `Could not update linked user ${apiUser.id}:`,
-                err.message
-              );
-            });
+          return apiUser.authorizeData(data, 'update', req.user).update(data);
         })
       );
     } else {
@@ -815,10 +808,15 @@ async function updateUser(req, res, next) {
 }
 
 async function respondUpdatedUser(req, res, next) {
-  let result = await db.User.findOne({
-    where: { id: req.params.userId, projectId: req.params.projectId },
-  });
-  res.json(result);
+  try {
+    const result = await db.User.findOne({
+      where: { id: req.params.userId, projectId: req.params.projectId },
+    });
+    if (!result) return next(createError(404, 'User not found'));
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
 }
 
 async function deleteUser(req, res, next) {
