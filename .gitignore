@@ -22,3 +22,7 @@ apps/*/package-lock.json
 
 # Test coverage reports
 coverage/
+
+# AI agent docs are tracked (override developers' global gitignores)
+!AGENTS.md
+!.ai
