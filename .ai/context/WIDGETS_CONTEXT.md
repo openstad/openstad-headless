@@ -69,7 +69,7 @@ response. Consequences:
 - A package must be built before its changes appear anywhere (including the admin preview).
 - During development, `apps/api-server/nodemon-watch-server.js` watches the whole repo, maps
   changed files to their package, and rebuilds that package **plus its dependents** (via
-  `scripts/get-headless-dependency-tree`).
+  `apps/api-server/scripts/get-headless-dependency-tree.js`).
 
 The shared React runtime (`window.OpenStadReact`) is a separate esbuild bundle
 (`apps/api-server/scripts/build-react-runtime.js` → `dist/openstad-react-runtime.js`) served at

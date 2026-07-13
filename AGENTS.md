@@ -22,7 +22,7 @@ Runtime: Node 24. Databases: MySQL (api + auth), MongoDB (cms), Redis (pub/sub +
 ## Quick commands
 
 ```bash
-# Development (full stack; add -f docker-compose.override.yml if you have a local override)
+# Development (full stack; `docker compose` automatically applies docker-compose.override.yml if present)
 docker compose up
 
 cd packages/<widget> && npm run dev      # Dev server for a single widget package
