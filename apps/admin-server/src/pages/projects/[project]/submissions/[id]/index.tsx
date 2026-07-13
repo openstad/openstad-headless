@@ -46,7 +46,7 @@ export default function ProjectStatusEdit() {
             <td className="align-top p-2.5 w-40">
               <strong>User</strong>
             </td>
-            <td>{sub.userId}</td>
+            <td>{sub.user?.displayName ?? sub.userId}</td>
           </tr>
           <tr className="even:bg-gray-50">
             <td className="align-top p-2.5 w-40">
