@@ -24,7 +24,7 @@ export function extractConfig<
   const {
     subWidgetKey,
     previewConfig,
-    updateConfig,
+    updateConfig: persistParentConfig,
     updatePreview,
     extraChildConfig,
   } = params;
@@ -42,7 +42,7 @@ export function extractConfig<
           ...config,
         },
       };
-      updateConfig(mergedConfig);
+      persistParentConfig(mergedConfig);
       // Keep the preview state in sync with what was just saved, so a
       // subsequent sibling save merges against fresh config instead of a
       // stale snapshot (prevents one column overwriting another).
