@@ -62,6 +62,7 @@ const filterBody = (req, res, next) => {
     'password',
     'name',
     'nickName',
+    'projectDisplayName',
     'email',
     'phoneNumber',
     'address',
@@ -799,6 +800,7 @@ router
         let synchronizedUpdatedUserData = merge.recursive({}, updatedUserData);
         let userProjectSpecificFields = [
           'nickName',
+          'projectDisplayName',
           'role',
           'emailNotificationConsent',
           'privacyConsentAt',
