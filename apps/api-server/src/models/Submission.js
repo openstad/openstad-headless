@@ -45,6 +45,7 @@ module.exports = function (db, sequelize, DataTypes) {
             attributes: [
               'role',
               'displayName',
+              'projectDisplayName',
               'nickName',
               'name',
               'displayName',

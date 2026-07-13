@@ -976,6 +976,7 @@ module.exports = function (db, sequelize, DataTypes) {
               'id',
               'role',
               'displayName',
+              'projectDisplayName',
               'nickName',
               'name',
               'email',
