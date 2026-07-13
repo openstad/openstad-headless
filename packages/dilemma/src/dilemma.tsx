@@ -171,10 +171,6 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
     const unanswered = dilemmaCards.filter((d) => !newAnswers[d.id]);
     if (unanswered.length > 0) {
-      // currentDilemma wordt geïndexeerd op de unanswered-lijst, niet op
-      // dilemmaCards. Na skippen staat de volgende altijd vooraan (index 0);
-      // een dilemmaCards-index zou hier buiten de lijst kunnen vallen en een
-      // lege tussenrender (zichtbare sprong) veroorzaken.
       setCurrentDilemmaIndex(0);
     } else {
       setIsFinished(true);

@@ -836,6 +836,8 @@ label.utrecht-form-label {
   input[type='range'] {
   margin-bottom: 0;
   margin-top: 30px;
+  touch-action: none;
+  overscroll-behavior: contain;
 }
 .osc-enquete-item-content.--youth
   .question-type-tickmark-slider
@@ -845,6 +847,7 @@ label.utrecht-form-label {
   inset: 0 0 -20px 0;
   position: absolute;
   z-index: 1;
+  pointer-events: none;
 }
 .osc-enquete-item-content.--youth
   .question-type-tickmark-slider
@@ -1016,6 +1019,12 @@ label.utrecht-form-label {
   .osc-enquete-item-content.--youth .question-type-dilemma {
     justify-content: start !important;
   }
+}
+.osc-enquete-item-content.--youth
+  .question-type-dilemma:not(:has(.dilemma-finished))
+  + .button-group
+  .utrecht-button--submit.utrecht-button--primary-action {
+  display: none;
 }
 .osc-enquete-item-content.--youth
   .question-type-dilemma
