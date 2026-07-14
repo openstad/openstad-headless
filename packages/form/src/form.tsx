@@ -15,6 +15,7 @@ import SelectField from '@openstad-headless/ui/src/form-elements/select';
 import SortField from '@openstad-headless/ui/src/form-elements/sort';
 import TextInput from '@openstad-headless/ui/src/form-elements/text';
 import TickmarkSlider from '@openstad-headless/ui/src/form-elements/tickmark-slider';
+import TimelineField from '@openstad-headless/ui/src/form-elements/timeline';
 import VideoField from '@openstad-headless/video/src/video';
 import '@utrecht/component-library-css';
 import {
@@ -30,7 +31,6 @@ import type {
   ComponentFieldProps,
   FormProps,
 } from './props';
-import { resolveFieldInteraction } from './utils/interaction';
 import { computeEffectivePagination } from './utils/pagination';
 import { updateRouting } from './utils/routing';
 import { handleSubmit } from './utils/submit';
@@ -67,8 +67,6 @@ function Form({
   totalFieldCount = 0,
   formStyle = 'default',
   initialValues,
-  onFieldInteraction,
-  onValidationErrors,
   ...props
 }: FormProps) {
   const initialFormValues: { [key: string]: FormValue } = {};
@@ -231,7 +229,7 @@ function Form({
     }
 
     event.preventDefault();
-    const { firstErrorKey, errors: validationErrors } = handleSubmit(
+    const firstErrorKey = handleSubmit(
       fieldsToRender as unknown as Array<CombinedFieldPropsWithType>,
       formValues,
       setFormErrors,
@@ -240,13 +238,6 @@ function Form({
       pageHandler,
       submitBeforeLastPage
     );
-
-    if (firstErrorKey && onValidationErrors) {
-      const errorEntries = Object.entries(validationErrors)
-        .filter(([, msg]) => msg !== null)
-        .map(([key, msg]) => ({ fieldKey: key, errorMessage: msg }));
-      onValidationErrors(errorEntries);
-    }
 
     if (firstErrorKey && formRef.current) {
       const errorElement = formRef.current.querySelector(
@@ -297,12 +288,7 @@ function Form({
   };
 
   const handleInputChange = (
-    event: {
-      name: string;
-      value: any;
-      isInitial?: boolean;
-      interactionKey?: string;
-    },
+    event: { name: string; value: any },
     triggerSetLastKey?: boolean
   ) => {
     const { name, value } = event;
@@ -310,13 +296,6 @@ function Form({
 
     if (triggerSetLastKey !== false) {
       setLastUpdatedKey(name);
-    }
-
-    // Programmatic initialisation (the onChange that fields fire on mount
-    // to register their default value) does not count as user interaction.
-    const interaction = resolveFieldInteraction(event);
-    if (onFieldInteraction && interaction.track && interaction.key) {
-      onFieldInteraction(interaction.key);
     }
   };
 
@@ -389,6 +368,7 @@ function Form({
     sort: SortField as React.ComponentType<ComponentFieldProps>,
     dilemma: DilemmaField as React.ComponentType<ComponentFieldProps>,
     video: VideoField as React.ComponentType<ComponentFieldProps>,
+    timeline: TimelineField as React.ComponentType<ComponentFieldProps>,
   };
 
   const renderField = (

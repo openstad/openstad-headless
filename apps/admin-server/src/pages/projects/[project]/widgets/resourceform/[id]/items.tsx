@@ -705,6 +705,11 @@ export default function WidgetResourceFormItems(
             : '';
 
       form.setValue('fieldKey', recommendedFieldKey);
+    } else if (form.watch('type') === 'timeline') {
+      if (form.watch('fieldKey') === '') {
+        form.setValue('fieldKey', 'timeline');
+      }
+      form.setValue('fieldType', 'timeline');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.watch('type')]);
@@ -1240,6 +1245,9 @@ export default function WidgetResourceFormItems(
                               <SelectItem value="budget">
                                 Inzending: Budget
                               </SelectItem>
+                              <SelectItem value="timeline">
+                                Inzending: Tijdlijn
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -1341,6 +1349,7 @@ export default function WidgetResourceFormItems(
                               'documentUpload',
                               'select',
                               'matrix',
+                              'timeline',
                             ];
                             const type = form.watch('type');
                             const fieldKey = !nonStaticType.includes(type || '')
@@ -2104,6 +2113,25 @@ export default function WidgetResourceFormItems(
                           />
                         )}
                       </>
+                    )}
+
+                    {form.watch('type') === 'timeline' && (
+                      <div
+                        style={{
+                          padding: '11px',
+                          borderLeft: '4px solid #3b82f6',
+                          backgroundColor: '#eff6ff',
+                          borderTopRightRadius: '5px',
+                          borderBottomRightRadius: '5px',
+                          fontSize: '14px',
+                        }}>
+                        <strong>
+                          Tijdlijn-items worden beheerd door de indiener.
+                        </strong>
+                        <br />
+                        De indiener kan bij het invullen van het formulier zelf
+                        tijdlijn-items toevoegen, bewerken en verwijderen.
+                      </div>
                     )}
 
                     {hasOptions() && (

@@ -196,6 +196,13 @@ export const InitializeFormFields = (items, data) => {
           fieldData['matrixMultiple'] = item?.matrixMultiple || false;
           fieldData['defaultValue'] = [];
           break;
+        case 'timeline':
+          fieldData['type'] = 'timeline';
+          fieldData['allowedTypes'] = item.allowedTypes;
+          if (!fieldData['defaultValue']) {
+            fieldData['defaultValue'] = [];
+          }
+          break;
       }
 
       formFields.push(fieldData);

@@ -89,6 +89,7 @@ export type Item = {
   routingSelectedAnswer?: string | string[];
   selectAll?: boolean;
   selectAllLabel?: string;
+  allowedTypes?: string[];
 };
 
 export type Option = {
