@@ -147,11 +147,10 @@ router
     }
 
     const projectDomains = widget.project.config.allowedDomains || [];
-    const hasProjectDomains = projectDomains.length > 0 || !!widget.project.url;
-
-    const allowedDomains = hasProjectDomains
-      ? prefillAllowedDomains(projectDomains, widget.project.url)
-      : null;
+    const allowedDomains = prefillAllowedDomains(
+      projectDomains,
+      widget.project.url
+    );
 
     const defaultConfig = getDefaultConfig(widget.project, widget.type);
 

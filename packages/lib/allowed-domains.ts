@@ -18,11 +18,15 @@ export function parseHost(value: string): string | null {
   }
 }
 
+export function toggleWww(host: string): string {
+  return host.startsWith('www.') ? host.slice(4) : 'www.' + host;
+}
+
 export function addWithParents(list: string[], host: string | null): void {
   if (!host) return;
-  list.push(host);
-  for (const parent of getParentDomains(host)) {
-    list.push(parent);
+  for (const domain of [host, ...getParentDomains(host)]) {
+    list.push(domain);
+    list.push(toggleWww(domain));
   }
 }
 

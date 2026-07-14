@@ -39,3 +39,46 @@ describe('getWidgetJavascriptOutput report-load', () => {
     expect(output).toContain('/report-load');
   });
 });
+
+describe('getWidgetJavascriptOutput allowed-domains gate', () => {
+  const GATE_MARKER = 'staat niet in de lijst met toegestane websites';
+
+  it('includes the not-allowed gate when allowedDomains has entries', () => {
+    const output = getWidgetJavascriptOutput(
+      widgetSettings,
+      'plainwidget',
+      'osc-component-1-2',
+      '{}',
+      ['example.nl'],
+      false
+    );
+
+    expect(output).toContain(GATE_MARKER);
+  });
+
+  it('omits the gate when allowedDomains is empty', () => {
+    const output = getWidgetJavascriptOutput(
+      widgetSettings,
+      'plainwidget',
+      'osc-component-1-2',
+      '{}',
+      [],
+      false
+    );
+
+    expect(output).not.toContain(GATE_MARKER);
+  });
+
+  it('omits the gate when allowedDomains is null', () => {
+    const output = getWidgetJavascriptOutput(
+      widgetSettings,
+      'plainwidget',
+      'osc-component-1-2',
+      '{}',
+      null,
+      false
+    );
+
+    expect(output).not.toContain(GATE_MARKER);
+  });
+});
