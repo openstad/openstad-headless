@@ -103,8 +103,7 @@ export const exportSubmissionsToCSV = async (
 
       if (
         settings?.splitMultipleChoice &&
-        (item.questionType === 'multiplechoice' ||
-          item.questionType === 'multiple') &&
+        item.questionType === 'multiple' &&
         item.options &&
         Array.isArray(item.options)
       ) {
