@@ -347,8 +347,21 @@ function Enquete(props: EnqueteWidgetProps) {
                 isOtherOption: option.titles[0].isOtherOption,
                 defaultValue: option.titles[0].defaultValue,
                 trigger: option.trigger || '',
+                ...(props.isQuiz
+                  ? {
+                      isCorrect: option.titles[0].isCorrect,
+                      feedbackText: option.titles[0].feedbackText,
+                    }
+                  : {}),
               };
             });
+          }
+
+          if (props.isQuiz) {
+            fieldData['feedbackMode'] = item.feedbackMode;
+            fieldData['feedbackText'] = item.feedbackText;
+            fieldData['feedbackCorrect'] = item.feedbackCorrect;
+            fieldData['feedbackIncorrect'] = item.feedbackIncorrect;
           }
 
           if (draftValue !== undefined) {
@@ -366,6 +379,12 @@ function Enquete(props: EnqueteWidgetProps) {
           }
           if (item.maxChoicesMessage) {
             fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
+          }
+          if (item.minChoices) {
+            fieldData['minChoices'] = item.minChoices;
+          }
+          if (item.minChoicesMessage) {
+            fieldData['minChoicesMessage'] = item.minChoicesMessage;
           }
 
           break;
@@ -466,6 +485,12 @@ function Enquete(props: EnqueteWidgetProps) {
             draftValue !== ''
           ) {
             fieldData['overrideDefaultValue'] = String(draftValue);
+          }
+
+          if (props.isQuiz) {
+            fieldData['feedbackMode'] = item.feedbackMode;
+            fieldData['feedbackText'] = item.feedbackText;
+            fieldData['scaleFeedback'] = item.scaleFeedback;
           }
           break;
         }

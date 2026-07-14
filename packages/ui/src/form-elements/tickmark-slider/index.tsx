@@ -47,6 +47,8 @@ export type TickmarkSliderProps = {
   defaultValue?: string;
   prevPageText?: string;
   nextPageText?: string;
+  confirmed?: boolean;
+  optionFeedback?: Record<string, 'correct' | 'incorrect' | 'missed'>;
 };
 
 const TickmarkSlider: FC<TickmarkSliderProps> = ({
@@ -72,6 +74,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
   images = [],
   createImageSlider = false,
   imageClickable = false,
+  confirmed = false,
 }) => {
   const defaultValue = Math.ceil(fieldOptions.length / 2).toString();
   const initialValue = overrideDefaultValue
@@ -173,7 +176,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
             });
           }
         }}
-        disabled={disabled}
+        disabled={disabled || confirmed}
         aria-invalid={checkInvalid}
         aria-describedby={`${randomId}_error`}
       />
