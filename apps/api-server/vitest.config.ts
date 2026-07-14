@@ -5,6 +5,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.{js,ts}'],
+    setupFiles: [path.resolve(__dirname, '../../vitest.setup.js')],
     env: {
       NODE_CONFIG_DIR: path.resolve(__dirname, 'config'),
     },

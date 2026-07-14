@@ -327,9 +327,10 @@ export default function ProjectAuthenticationRequiredFields() {
                                     <FormControl>
                                       <Checkbox
                                         checked={field.value?.includes(item.id)}
-                                        onCheckedChange={(checked: any) => {
+                                        onCheckedChange={(checked) => {
                                           setShowUserPageFields(
-                                            field.value.length > 1 || checked
+                                            field.value.length > 1 ||
+                                              checked === true
                                           );
                                           return checked
                                             ? field.onChange([
@@ -533,9 +534,10 @@ export default function ProjectAuthenticationRequiredFields() {
                                     <FormControl>
                                       <Checkbox
                                         checked={field.value?.includes(item.id)}
-                                        onCheckedChange={(checked: any) => {
+                                        onCheckedChange={(checked) => {
                                           setShowAnonymousPageFields(
-                                            field.value.length > 1 || checked
+                                            field.value.length > 1 ||
+                                              checked === true
                                           );
                                           return checked
                                             ? field.onChange([

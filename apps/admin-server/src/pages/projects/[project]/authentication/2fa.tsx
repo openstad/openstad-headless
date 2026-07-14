@@ -186,9 +186,10 @@ export default function ProjectAuthentication2FA() {
                                 <FormControl>
                                   <Checkbox
                                     checked={field.value?.includes(item.id)}
-                                    onCheckedChange={(checked: any) => {
+                                    onCheckedChange={(checked) => {
                                       setShowPageFields(
-                                        field.value.length > 1 || checked
+                                        field.value.length > 1 ||
+                                          checked === true
                                       );
                                       return checked
                                         ? field.onChange([
