@@ -10,6 +10,7 @@ const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 const defaultCan = require('../lib/sequelize-authorization/mixins/can');
 const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
 const roles = require('../lib/sequelize-authorization/lib/roles');
+const userRoles = require('../services/userRoles');
 
 // For detecting throwaway accounts in the email address validation.
 var emailBlackList = require('../../config/mail_blacklist');
@@ -529,19 +530,19 @@ module.exports = function (db, sequelize, DataTypes) {
   };
 
   User.prototype.isUnknown = function () {
-    return this.role === 'unknown';
+    return userRoles.isUnknown(this.role);
   };
 
   User.prototype.isAnonymous = function () {
-    return this.role === 'anonymous';
+    return userRoles.isAnonymous(this.role);
   };
 
   User.prototype.isMember = function () {
-    return this.role !== 'unknown' && this.role !== 'anonymous';
+    return userRoles.isMember(this.role);
   };
 
   User.prototype.isAdmin = function () {
-    return this.role === 'admin' || this.role === 'su';
+    return userRoles.isAdmin(this.role);
   };
 
   User.prototype.isLoggedIn = function () {
