@@ -117,6 +117,8 @@ export type ResourceDetailWidgetProps = {
 type DocumentType = {
   name?: string;
   url?: string;
+  size?: number;
+  mimeType?: string;
 };
 
 // A collapsed tag group: shows a single interactive label pill (with a count
@@ -887,7 +889,11 @@ function ResourceDetail({
                             href={document.url}
                             key={index}>
                             <Icon icon="ri-download-2-fill" iconOnly />
-                            {formatDocumentLabel(document.name, document.url)}
+                            {formatDocumentLabel(
+                              document.name,
+                              document.url,
+                              document.size
+                            )}
                           </ButtonLink>
                         )
                       )}
