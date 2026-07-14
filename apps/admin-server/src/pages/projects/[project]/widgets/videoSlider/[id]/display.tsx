@@ -43,6 +43,7 @@ export default function WidgetEnqueteDisplay(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displayTitle: props?.displayTitle || false,
+      displayDescription: props?.displayDescription || false,
       formVisibility: props?.formVisibility || 'always',
     },
   });
