@@ -718,13 +718,11 @@ router
   // -----------
   .put(auth.useReqUser)
   .put(function (req, res, next) {
-    if (
-      !(
-        req.project.config &&
-        req.project.config.resources &&
-        req.project.config.resources.canAddNewResources
-      )
-    ) {
+    if (!(
+      req.project.config &&
+      req.project.config.resources &&
+      req.project.config.resources.canAddNewResources
+    )) {
       if (!req.results.dataValues.publishDate) {
         return next(
           createError(
