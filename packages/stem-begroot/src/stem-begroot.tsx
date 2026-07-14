@@ -1238,8 +1238,9 @@ function StemBegroot({
         </div>
         <Spacer size={1} />
 
-        {props.votes.voteType === 'budgeting' ||
-        props?.votes?.voteType === 'budgetingPerTag' ? (
+        {(props.votes.voteType === 'budgeting' ||
+          props?.votes?.voteType === 'budgetingPerTag') &&
+        currentStep !== 4 ? (
           <>
             {usedBudgetList}
             <Spacer size={1.5} />
