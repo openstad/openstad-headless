@@ -43,30 +43,32 @@ import './resource-detail.css';
 import { formatDocumentLabel } from './utils';
 
 type booleanProps = {
-  [K in
-    | 'displayImage'
-    | 'displayImageDescription'
-    | 'displayTitle'
-    | 'displayModBreak'
-    | 'displaySummary'
-    | 'displayDescription'
-    | 'displayDescriptionExpandable'
-    | 'displayUser'
-    | 'displayDate'
-    | 'displayBudget'
-    | 'displayLocation'
-    | 'displayBudgetDocuments'
-    | 'displayLikes'
-    | 'displayTags'
-    | 'displayStatus'
-    | 'displayDocuments'
-    | 'clickableImage'
-    | 'displayStatusBar'
-    | 'displayEditResourceButton'
-    | 'displayDeleteButton'
-    | 'displayDeleteEditButtonOnTop'
-    | 'displaySocials'
-    | 'displayTimeline']: boolean | undefined;
+  [
+    K in
+      | 'displayImage'
+      | 'displayImageDescription'
+      | 'displayTitle'
+      | 'displayModBreak'
+      | 'displaySummary'
+      | 'displayDescription'
+      | 'displayDescriptionExpandable'
+      | 'displayUser'
+      | 'displayDate'
+      | 'displayBudget'
+      | 'displayLocation'
+      | 'displayBudgetDocuments'
+      | 'displayLikes'
+      | 'displayTags'
+      | 'displayStatus'
+      | 'displayDocuments'
+      | 'clickableImage'
+      | 'displayStatusBar'
+      | 'displayEditResourceButton'
+      | 'displayDeleteButton'
+      | 'displayDeleteEditButtonOnTop'
+      | 'displaySocials'
+      | 'displayTimeline'
+  ]: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = {
