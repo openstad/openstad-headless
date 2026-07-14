@@ -40,7 +40,7 @@ export const BudgetStatusPanel = ({
                     <span>{budgetChosenTitle || 'Budget gekozen:'}</span>
                     <span>
                       <Strong>
-                        &euro;{budgetUsed.toLocaleString('nl-NL')}
+                        {`€${budgetUsed.toLocaleString('nl-NL')}`}
                       </Strong>
                     </span>
                   </Paragraph>
@@ -50,10 +50,9 @@ export const BudgetStatusPanel = ({
                     <span>{budgetRemainingTitle || 'Budget over:'}</span>
                     <span className="strong">
                       <Strong>
-                        &euro;
-                        {Math.max(maxBudget - budgetUsed, 0).toLocaleString(
+                        {`€${Math.max(maxBudget - budgetUsed, 0).toLocaleString(
                           'nl-NL'
-                        )}{' '}
+                        )} `}
                       </Strong>
                     </span>
                   </Paragraph>

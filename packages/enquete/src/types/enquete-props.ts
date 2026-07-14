@@ -25,6 +25,7 @@ export type EnqueteProps = {
   allowedPolygons?: Array<{ id: number; name: string }>;
   enableDraftPersistence?: boolean;
   draftRetentionHours?: number;
+  gtmEnvironment?: string;
 };
 
 export type Item = {
@@ -39,10 +40,12 @@ export type Item = {
   maxCharacters?: string;
   nextPageText?: string;
   prevPageText?: string;
+  stepName?: string;
   variant?: string;
   options?: Array<Option>;
   imageUpload?: string;
   multiple?: boolean;
+  maxUploadSizeMB?: number;
   randomizeItems?: boolean;
   image?: string;
   imageAlt?: string;

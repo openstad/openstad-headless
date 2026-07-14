@@ -30,6 +30,7 @@ import type {
   ComponentFieldProps,
   FormProps,
 } from './props';
+import { resolveFieldInteraction } from './utils/interaction';
 import { computeEffectivePagination } from './utils/pagination';
 import { updateRouting } from './utils/routing';
 import { handleSubmit } from './utils/submit';
@@ -66,6 +67,8 @@ function Form({
   totalFieldCount = 0,
   formStyle = 'default',
   initialValues,
+  onFieldInteraction,
+  onValidationErrors,
   ...props
 }: FormProps) {
   const initialFormValues: { [key: string]: FormValue } = {};
@@ -89,25 +92,25 @@ function Form({
           (field?.fieldOptions?.length || 2) / 2
         ).toString();
       }
+    }
 
-      if (
-        field?.routingInitiallyHide &&
-        field?.routingSelectedQuestion &&
-        field?.routingSelectedAnswer &&
-        !(
-          Array.isArray(field.routingSelectedAnswer) &&
-          field.routingSelectedAnswer.length === 0
-        )
-      ) {
-        const getRoutingSelectedQuestionField = fields.find(
-          (f) => f.trigger === field.routingSelectedQuestion
-        );
-        const routingSelectedQuestionFieldKey =
-          getRoutingSelectedQuestionField?.fieldKey || '';
+    if (
+      field?.routingInitiallyHide &&
+      field?.routingSelectedQuestion &&
+      field?.routingSelectedAnswer &&
+      !(
+        Array.isArray(field.routingSelectedAnswer) &&
+        field.routingSelectedAnswer.length === 0
+      )
+    ) {
+      const getRoutingSelectedQuestionField = fields.find(
+        (f) => f.trigger === field.routingSelectedQuestion
+      );
+      const routingSelectedQuestionFieldKey =
+        getRoutingSelectedQuestionField?.fieldKey || '';
 
-        fieldsWithImpactOnRouting.push(routingSelectedQuestionFieldKey);
-        initialHiddenFields.push(fieldKey);
-      }
+      fieldsWithImpactOnRouting.push(routingSelectedQuestionFieldKey);
+      initialHiddenFields.push(routingKeys[index]);
     }
   });
 
@@ -228,7 +231,7 @@ function Form({
     }
 
     event.preventDefault();
-    const firstErrorKey = handleSubmit(
+    const { firstErrorKey, errors: validationErrors } = handleSubmit(
       fieldsToRender as unknown as Array<CombinedFieldPropsWithType>,
       formValues,
       setFormErrors,
@@ -237,6 +240,13 @@ function Form({
       pageHandler,
       submitBeforeLastPage
     );
+
+    if (firstErrorKey && onValidationErrors) {
+      const errorEntries = Object.entries(validationErrors)
+        .filter(([, msg]) => msg !== null)
+        .map(([key, msg]) => ({ fieldKey: key, errorMessage: msg }));
+      onValidationErrors(errorEntries);
+    }
 
     if (firstErrorKey && formRef.current) {
       const errorElement = formRef.current.querySelector(
@@ -287,7 +297,12 @@ function Form({
   };
 
   const handleInputChange = (
-    event: { name: string; value: any },
+    event: {
+      name: string;
+      value: any;
+      isInitial?: boolean;
+      interactionKey?: string;
+    },
     triggerSetLastKey?: boolean
   ) => {
     const { name, value } = event;
@@ -295,6 +310,13 @@ function Form({
 
     if (triggerSetLastKey !== false) {
       setLastUpdatedKey(name);
+    }
+
+    // Programmatic initialisation (the onChange that fields fire on mount
+    // to register their default value) does not count as user interaction.
+    const interaction = resolveFieldInteraction(event);
+    if (onFieldInteraction && interaction.track && interaction.key) {
+      onFieldInteraction(interaction.key);
     }
   };
 

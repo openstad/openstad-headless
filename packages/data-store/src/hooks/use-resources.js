@@ -62,7 +62,12 @@ export default function useResources(
   };
 
   // Primary paginated call
-  const { data, error, isLoading } = self.useSWR(
+  const {
+    data,
+    error,
+    isLoading,
+    mutate: revalidateList,
+  } = self.useSWR(
     { ...filterParams, page, pageSize },
     'resources.fetch',
     options
@@ -144,5 +149,6 @@ export default function useResources(
     isLoading: isLoading || (fetchAll && allIsLoading),
     submitVotes,
     create,
+    revalidate: () => revalidateList(),
   };
 }

@@ -42,6 +42,10 @@ export type FormProps = {
   totalFieldCount?: number;
   formStyle?: string;
   initialValues?: { [p: string]: FormValue };
+  onFieldInteraction?: (fieldKey: string) => void;
+  onValidationErrors?: (
+    errors: Array<{ fieldKey: string; errorMessage: string | null }>
+  ) => void;
 };
 
 type PaginationFieldProps = {

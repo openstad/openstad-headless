@@ -19,9 +19,24 @@ if (
 (async () => {
   const resetDatabase = async () => {
     try {
+      let migrationGlobs = ['./migrations/*.js'];
+      try {
+        const {
+          getPluginMigrationGlobs,
+        } = require('@openstad-headless/plugin-loader');
+        migrationGlobs = getPluginMigrationGlobs();
+      } catch (err) {
+        if (err.code !== 'MODULE_NOT_FOUND') {
+          console.error(
+            '[plugin-loader] Error loading plugin migrations:',
+            err.message
+          );
+        }
+      }
+
       const umzug = new Umzug({
         migrations: {
-          glob: './migrations/*.js',
+          glob: migrationGlobs,
           params: [
             db.sequelize.getQueryInterface(),
             db.Sequelize, // Sequelize constructor - the required module

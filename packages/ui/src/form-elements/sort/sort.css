@@ -128,3 +128,51 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+.sort-field-container.--untouched ol li::marker {
+  transition: color 0.6s ease;
+}
+.sort-field-container:not(.--untouched) ol li::marker {
+  transition: color 0.6s ease;
+}
+
+@keyframes sort-pulse {
+  0%,
+  100% {
+    background: color-mix(
+      in srgb,
+      var(--sort-drag-active-background-color) 20%,
+      transparent
+    );
+  }
+  50% {
+    background: color-mix(
+      in srgb,
+      var(--sort-drag-active-background-color) 70%,
+      transparent
+    );
+  }
+}
+.sort-field-container.--untouched
+  .sortable-context
+  li
+  > div
+  span:has(.ri-draggable) {
+  animation: sort-pulse 3s ease-in-out infinite;
+}
+.sort-field-container.--untouched
+  .sortable-context
+  li
+  > div
+  span:has(.ri-draggable)
+  .ri-draggable {
+  color: var(--sort-drag-active-color);
+}
+@media (prefers-reduced-motion: reduce) {
+  .sort-field-container.--untouched
+    .sortable-context
+    li
+    > div
+    span:has(.ri-draggable) {
+    animation: none;
+  }
+}

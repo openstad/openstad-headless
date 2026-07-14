@@ -10,13 +10,22 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
+import { useRouter } from 'next/router';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -82,6 +91,8 @@ const formSchema = z.object({
   displayDeleteButton: z.boolean().optional(),
   displayDeleteEditButtonOnTop: z.boolean().optional(),
   displayTimeline: z.boolean().optional(),
+  collapseTagType: z.string().optional(),
+  collapseTagLabel: z.string().optional(),
   selectedSocialShareOptions: z.array(z.enum(shareOptions)).optional(),
 });
 
@@ -95,6 +106,16 @@ export default function WidgetResourceDetailDisplay(
   async function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
   }
+
+  const router = useRouter();
+  const { project } = router.query;
+  const { data: allTags } = useTags(project as string);
+  const tagTypes: string[] = Array.isArray(allTags)
+    ? allTags.reduce((types: string[], tag: any) => {
+        if (tag?.type && !types.includes(tag.type)) types.push(tag.type);
+        return types;
+      }, [])
+    : [];
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
@@ -138,6 +159,8 @@ export default function WidgetResourceDetailDisplay(
       displayDeleteEditButtonOnTop:
         props?.displayDeleteEditButtonOnTop || false,
       displayTimeline: props?.displayTimeline || false,
+      collapseTagType: props?.collapseTagType ?? '',
+      collapseTagLabel: props?.collapseTagLabel ?? '',
       selectedSocialShareOptions:
         typeof props?.selectedSocialShareOptions === 'undefined'
           ? defaultShareValues
@@ -349,6 +372,76 @@ export default function WidgetResourceDetailDisplay(
               </FormItem>
             )}
           />
+
+          {form.watch('displayTags') && (
+            <div className="bg-stone-100 p-4 rounded-md border border-stone-200 col-span-full lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="collapseTagType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Tag type samenvouwen bij volledige selectie
+                    </FormLabel>
+                    <FormDescription>
+                      Wanneer een inzending álle tags van dit type heeft, wordt
+                      in plaats van alle losse tags één label getoond.
+                    </FormDescription>
+                    <Select
+                      value={field.value || ''}
+                      onValueChange={(value) => {
+                        const next = value === 'none' ? '' : value;
+                        field.onChange(next);
+                        props.onFieldChanged?.('collapseTagType', next);
+                      }}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Geen" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Geen</SelectItem>
+                        {tagTypes.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {!!form.watch('collapseTagType') && (
+                <FormField
+                  control={form.control}
+                  name="collapseTagLabel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Label bij volledige selectie (terugval)
+                      </FormLabel>
+                      <FormDescription>
+                        Standaard wordt het &apos;Selecteer alles&apos;-label
+                        uit het formulier gebruikt. Dit veld wordt alleen
+                        gebruikt als dat formulier-label niet is ingesteld.
+                      </FormDescription>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          {...field}
+                          onChange={(e) => {
+                            onFieldChange(field.name, e.target.value);
+                            field.onChange(e);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+          )}
 
           <FormField
             control={form.control}

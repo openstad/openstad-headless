@@ -16,6 +16,7 @@ import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
+  SelectContentScrollable,
   SelectGroup,
   SelectItem,
   SelectLabel,
@@ -67,6 +68,7 @@ const formSchema = z.object({
   maxCharacters: z.string().optional(),
   nextPageText: z.string().optional(),
   prevPageText: z.string().optional(),
+  stepName: z.string().optional(),
   variant: z.string().optional(),
   key_b: z.string().optional(),
   description_b: z.string().optional(),
@@ -112,6 +114,10 @@ const formSchema = z.object({
     })
     .optional(),
   multiple: z.boolean().optional(),
+  maxUploadSizeMB: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number().positive().optional()
+  ),
   randomizeItems: z.boolean().optional(),
   image: z.string().optional(),
   imageUpload: z.string().optional(),
@@ -280,9 +286,11 @@ export default function WidgetEnqueteItems(
             maxCharacters: values.maxCharacters,
             nextPageText: values.nextPageText || '',
             prevPageText: values.prevPageText || '',
+            stepName: values.stepName || '',
             variant: values.variant || 'text input',
             options: values.options || [],
             multiple: values.multiple || false,
+            maxUploadSizeMB: values.maxUploadSizeMB || 25,
             randomizeItems: values.randomizeItems || false,
             image_b: values.image_b || '',
             description_b: values.description_b || '',
@@ -452,9 +460,11 @@ export default function WidgetEnqueteItems(
     maxCharacters: '',
     nextPageText: 'Volgende',
     prevPageText: 'Vorige',
+    stepName: '',
     variant: 'text input',
     options: [],
     multiple: false,
+    maxUploadSizeMB: 25,
     randomizeItems: false,
     infoBlockStyle: 'default',
     infoBlockShareButton: false,
@@ -507,7 +517,9 @@ export default function WidgetEnqueteItems(
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    onFieldChanged('items', items);
+    if (onFieldChanged) {
+      onFieldChanged('items', items);
+    }
   }, [items]);
 
   function buildFormValues(item: Item) {
@@ -532,9 +544,11 @@ export default function WidgetEnqueteItems(
       maxCharacters: item.maxCharacters || '',
       nextPageText: item.nextPageText || '',
       prevPageText: item.prevPageText || '',
+      stepName: item.stepName || '',
       variant: item.variant || '',
       options: item.options || [],
       multiple: item.multiple || false,
+      maxUploadSizeMB: item.maxUploadSizeMB || 25,
       randomizeItems: item.randomizeItems || false,
       infoBlockStyle: item.infoBlockStyle || 'default',
       infoBlockShareButton: item.infoBlockShareButton || false,
@@ -1803,6 +1817,22 @@ export default function WidgetEnqueteItems(
                             </FormItem>
                           )}
                         />
+                        <FormField
+                          control={form.control}
+                          name="stepName"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Stapnaam (analytics)</FormLabel>
+                              <FormDescription>
+                                Stabiele naam van de pagina die hierna volgt,
+                                gebruikt als form_step_name in de dataLayer.
+                                Laat leeg voor de standaard &quot;Stap N&quot;.
+                              </FormDescription>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </>
                     )}
 
@@ -2205,6 +2235,30 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
+                    {(form.watch('questionType') === 'imageUpload' ||
+                      form.watch('questionType') === 'documentUpload') && (
+                      <FormField
+                        control={form.control}
+                        name="maxUploadSizeMB"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Maximale uploadgrootte (MB)</FormLabel>
+                            <FormDescription>
+                              <em className="text-xs">
+                                De maximale bestandsgrootte die een gebruiker
+                                mag uploaden. Standaard 25 MB. Let op: de server
+                                hanteert een absolute bovengrens (standaard 25
+                                MB); hogere waarden kunnen alsnog door de server
+                                geweigerd worden.
+                              </em>
+                            </FormDescription>
+                            <Input type="number" min="1" {...field} />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
                     {![
                       'pagination',
                       'sort',
@@ -2525,7 +2579,7 @@ export default function WidgetEnqueteItems(
                                         <SelectValue placeholder="Kies een vraag" />
                                       </SelectTrigger>
                                     </FormControl>
-                                    <SelectContent>
+                                    <SelectContentScrollable>
                                       {formMultipleChoiceFields.map(
                                         (f: any) => (
                                           <SelectItem
@@ -2535,7 +2589,7 @@ export default function WidgetEnqueteItems(
                                           </SelectItem>
                                         )
                                       )}
-                                    </SelectContent>
+                                    </SelectContentScrollable>
                                   </Select>
                                 )}
 

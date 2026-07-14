@@ -19,7 +19,7 @@ import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orien
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 import 'filepond/dist/filepond.min.css';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { FilePond, registerPlugin } from 'react-filepond';
 
 import { InfoImage } from '../../infoImage';
@@ -62,8 +62,6 @@ const filePondSettings = {
   labelButtonRetryItemProcessing: 'Retry',
   labelButtonProcessItem: 'Upload',
   labelFileTypeNotAllowed: 'Bestandstype is niet toegestaan',
-  allowFileSizeValidation: true,
-  maxFileSize: '8mb',
   name: 'document',
   maxParallelUploads: 1,
 };
@@ -78,9 +76,14 @@ export type DocumentUploadProps = {
   allowedTypes?: string[];
   disabled?: boolean;
   multiple?: boolean;
+  maxUploadSizeMB?: number;
   type?: string;
   onChange?: (
-    e: { name: string; value: { name: string; url: string }[] },
+    e: {
+      name: string;
+      value: { name: string; url: string }[];
+      isInitial?: boolean;
+    },
     triggerSetLastKey?: boolean
   ) => void;
   imageUrl?: string;
@@ -147,6 +150,11 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
 }) => {
   const datastore = new DataStore(props);
 
+  // Client-side upload limit (in MB). Falls back to 25 MB so existing widgets
+  // without a stored value immediately get the new limit.
+  const maxMB = props.maxUploadSizeMB ?? 25;
+  const maxBytes = maxMB * 1024 * 1024;
+
   const initialValue: MockDocFile[] =
     overrideDefaultValue && Array.isArray(overrideDefaultValue)
       ? (overrideDefaultValue as { url: string; name: string }[]).map(
@@ -182,6 +190,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
     }
   }
 
+  const didInitRef = useRef(false);
   useEffect(() => {
     const allDocuments = [];
 
@@ -220,8 +229,11 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
       onChange({
         name: fieldKey,
         value: allDocuments,
+        // The first emit is the mount initialisation, not a user interaction.
+        isInitial: !didInitRef.current,
       });
     }
+    didInitRef.current = true;
   }, [
     uploadedDocuments.length,
     mockDocuments.length,
@@ -288,6 +300,11 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
           <RteContent content={description} unwrapSingleRootDiv={true} />
         </FormFieldDescription>
       )}
+
+      <FormFieldDescription className="openstad-max-upload-size">
+        Maximale bestandsgrootte: {maxMB} MB
+      </FormFieldDescription>
+
       {showMoreInfo && (
         <AccordionProvider
           sections={[
@@ -360,7 +377,11 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
               const fileName = fileItem.file.name;
               const forbiddenChar = fileName.match(forbiddenCharsRegex);
 
-              if (forbiddenChar) {
+              if (fileItem.file.size > maxBytes) {
+                reject(
+                  `Het bestand is te groot. De maximale bestandsgrootte is ${maxMB} MB.`
+                );
+              } else if (forbiddenChar) {
                 const forbiddenCharName = forbiddenChar[0];
                 const forbiddenCharIndex =
                   fileName.indexOf(forbiddenCharName) + 1;

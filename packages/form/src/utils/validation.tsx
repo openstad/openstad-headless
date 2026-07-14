@@ -184,6 +184,18 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
         return undefined;
       }
 
+    case 'sort':
+      if (typeof field.fieldRequired !== 'undefined' && field.fieldRequired) {
+        return z
+          .string()
+          .min(
+            1,
+            field.requiredWarning || 'Het veld' + fieldTitle + 'is verplicht'
+          );
+      } else {
+        return undefined;
+      }
+
     // Default value for range is "50", so it's never empty.
     // If skipQuestion is true, the value is ignored anyway.
     // Therefore, we don't need validation here.

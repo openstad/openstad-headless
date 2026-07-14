@@ -314,6 +314,8 @@ api:
     secretStoreName: "gcp-secret-store"
     # Cooldown in seconds between manual retry triggers per project
     retryCooldownSeconds: 60
+  # GTM dataLayer environment tag (prod, acc, test)
+  gtmEnvironment: prod
   # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
   otelServiceName: openstad-api-server
   otelExporterOtlpEndpoint: http://openstad-otel-collector:4317
@@ -609,3 +611,25 @@ secrets:
   ipAddress:
     hashIpAddresses: "false"
     hashIpSalt:
+
+# Plugin configuration
+# Plugins are installed at runtime via an init container.
+plugins:
+  enabled: false
+  # Node.js image used by the init container to run npm install
+  nodeImage: node:24-slim
+  # Install path inside the shared volume
+  installPath: /opt/openstad-plugins
+  # Optional: name of an existing Secret containing .npmrc for private registries
+  # The secret should have a key named ".npmrc"
+  npmrcSecret: ""
+  # Plugin list (same format as plugins.json)
+  items: []
+  # Example:
+  # items:
+  #   - name: my-plugin
+  #     packageName: "@myorg/my-plugin"
+  #     version: "1.2.3"
+  #     enabled: true
+  #     config:
+  #       someKey: someValue

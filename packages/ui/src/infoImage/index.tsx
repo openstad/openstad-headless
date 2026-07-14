@@ -3,10 +3,12 @@ import {
   Paragraph,
   Strong,
 } from '@utrecht/component-library-react';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { Carousel } from '../carousel';
+import { Lightbox } from '../lightbox';
 import { Spacer } from '../spacer';
+import './index.css';
 
 type ImageType = {
   url: string;
@@ -33,6 +35,9 @@ const InfoImage = ({
   addSpacer = false,
   imageClickable = false,
 }: InfoImageProps) => {
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightboxAlt, setLightboxAlt] = useState<string | undefined>(undefined);
+
   let imageArray: ImageType[] = images && images.length > 0 ? images : [];
   if (!imageArray.length && imageFallback) {
     imageArray = [
@@ -50,36 +55,58 @@ const InfoImage = ({
     imageDescription?: string
   ) => (
     <figure className="info-image-container">
-      <img
-        src={image}
-        alt={imageAlt}
-        onClick={
-          imageClickable ? () => window.open(image, '_blank') : undefined
-        }
-        className={imageClickable ? 'clickable-image' : undefined}
-      />
+      {imageClickable ? (
+        <div
+          style={{ cursor: 'zoom-in' }}
+          onClick={() => {
+            setLightboxSrc(image);
+            setLightboxAlt(imageAlt);
+          }}
+          role="button"
+          tabIndex={0}
+          aria-label="Afbeelding uitvergroot bekijken"
+          onKeyDown={(e) =>
+            (e.key === 'Enter' || e.key === ' ') &&
+            (setLightboxSrc(image), setLightboxAlt(imageAlt))
+          }>
+          <img src={image} alt={imageAlt} className="clickable-image" />
+        </div>
+      ) : (
+        <img src={image} alt={imageAlt} />
+      )}
       {imageDescription && <figcaption>{imageDescription}</figcaption>}
       {addSpacer && <Spacer size={0.5} />}
     </figure>
   );
 
-  return createImageSlider && imageArray.length > 0 ? (
-    <Carousel
-      items={images}
-      buttonText={{
-        next: 'Volgende afbeelding',
-        previous: 'Vorige afbeelding',
-      }}
-      pager={true}
-      itemRenderer={(img) =>
-        renderImage(img.url, img.imageAlt, img.imageDescription)
-      }
-    />
-  ) : imageArray.length > 0 ? (
-    imageArray.map((img) =>
-      renderImage(img.url, img.imageAlt, img.imageDescription)
-    )
-  ) : null;
+  return (
+    <>
+      {lightboxSrc && (
+        <Lightbox
+          src={lightboxSrc}
+          alt={lightboxAlt}
+          onClose={() => setLightboxSrc(null)}
+        />
+      )}
+      {createImageSlider && imageArray.length > 0 ? (
+        <Carousel
+          items={images}
+          buttonText={{
+            next: 'Volgende afbeelding',
+            previous: 'Vorige afbeelding',
+          }}
+          pager={true}
+          itemRenderer={(img) =>
+            renderImage(img.url, img.imageAlt, img.imageDescription)
+          }
+        />
+      ) : imageArray.length > 0 ? (
+        imageArray.map((img) =>
+          renderImage(img.url, img.imageAlt, img.imageDescription)
+        )
+      ) : null}
+    </>
+  );
 };
 
 export { InfoImage };

@@ -16,11 +16,13 @@ import useMarkers from './hooks/use-markers.js';
 import useProjectVotedUsersCount from './hooks/use-project-voted-users-count';
 import useResource from './hooks/use-resource.js';
 import useResources from './hooks/use-resources.js';
+import useStatuses from './hooks/use-statuses.js';
 import useSubmissions from './hooks/use-submissions.js';
 import useTags from './hooks/use-tags.js';
 import useUserActivity from './hooks/use-user-activity';
 import useUserVote from './hooks/use-user-vote.js';
 import useWidget from './hooks/use-widget';
+import useWidgets from './hooks/use-widgets';
 import mergeData from './merge-data';
 
 const windowGlobal = typeof window !== 'undefined' ? window : {};
@@ -41,6 +43,7 @@ function DataStore(props = {}) {
   self.useDatalayer = useDatalayer.bind(self);
   self.useMarkers = useMarkers.bind(self);
   self.useAreas = useAreas.bind(self);
+  self.useStatuses = useStatuses.bind(self);
   self.useTags = useTags.bind(self);
   self.useCurrentUser = useCurrentUser.bind(self);
   self.useUserVote = useUserVote.bind(self);
@@ -52,6 +55,7 @@ function DataStore(props = {}) {
   self.useProjectVotedUsersCount = useProjectVotedUsersCount.bind(self);
   self.useUserActivity = useUserActivity.bind(self);
   self.useWidget = useWidget.bind(self);
+  self.useWidgets = useWidgets.bind(self);
 
   // current user
   const {
@@ -143,7 +147,7 @@ function DataStore(props = {}) {
         Object.keys(windowGlobal.OpenStadSWR).indexOf(
           JSON.stringify(cacheKey, null, 2)
         ) != -1,
-      async (currentData) => currentData, // optimistic ui as fetcher
+      async (currentData) => currentData,
       {
         revalidate: true,
         rollbackOnError: true,

@@ -14,26 +14,29 @@ const FakeCoreV1Api = class {};
 
 // Mock @kubernetes/client-node (hoisted)
 vi.mock('@kubernetes/client-node', () => {
-  const mockKC = vi.fn(() => ({
-    loadFromCluster: vi.fn(),
-    makeApiClient: vi.fn((ApiClass) => {
-      if (ApiClass === FakeCustomObjectsApi) {
-        return {
-          createNamespacedCustomObject: mockCreateNamespacedCustomObject,
-          getNamespacedCustomObject: mockGetNamespacedCustomObject,
-          patchNamespacedCustomObject: mockPatchNamespacedCustomObject,
-          listNamespacedCustomObject: mockListNamespacedCustomObject,
-          deleteNamespacedCustomObject: mockDeleteNamespacedCustomObject,
-        };
-      }
-      if (ApiClass === FakeCoreV1Api) {
-        return {
-          readNamespacedSecret: mockReadNamespacedSecret,
-        };
-      }
-      return {};
-    }),
-  }));
+  // Regular function (not arrow) so it is usable with `new KubeConfig()`.
+  const mockKC = vi.fn(function () {
+    return {
+      loadFromCluster: vi.fn(),
+      makeApiClient: vi.fn((ApiClass) => {
+        if (ApiClass === FakeCustomObjectsApi) {
+          return {
+            createNamespacedCustomObject: mockCreateNamespacedCustomObject,
+            getNamespacedCustomObject: mockGetNamespacedCustomObject,
+            patchNamespacedCustomObject: mockPatchNamespacedCustomObject,
+            listNamespacedCustomObject: mockListNamespacedCustomObject,
+            deleteNamespacedCustomObject: mockDeleteNamespacedCustomObject,
+          };
+        }
+        if (ApiClass === FakeCoreV1Api) {
+          return {
+            readNamespacedSecret: mockReadNamespacedSecret,
+          };
+        }
+        return {};
+      }),
+    };
+  });
   return {
     KubeConfig: mockKC,
     CustomObjectsApi: FakeCustomObjectsApi,

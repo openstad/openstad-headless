@@ -3,12 +3,23 @@ import DataStore from '@openstad-headless/data-store/src';
 import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Paginator, Spacer, Stepper } from '@openstad-headless/ui/src';
+import {
+  Paginator,
+  Spacer,
+  Stepper,
+  fireConfetti,
+} from '@openstad-headless/ui/src';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import '@utrecht/component-library-css';
 import { Button, ButtonLink, Heading } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
 import NotificationService from '../../lib/NotificationProvider/notification-service';
@@ -22,6 +33,7 @@ import { Step3 } from './step-3';
 import { Step3Success } from './step-3-success';
 import { Step4 } from './step-4';
 import { createSelectedResourcesStorage } from './utils/selected-resources-storage';
+import { createVoteCompletedStorage } from './utils/vote-completed-storage';
 import { createVotePendingStorage } from './utils/vote-pending-storage';
 
 type TagTypeSingle = {
@@ -103,6 +115,7 @@ export type StemBegrootWidgetProps = BaseProps &
     voteAfterLoggingIn?: boolean;
     displayModBreak?: boolean;
     randomSortRotationMs?: number;
+    showConfetti?: boolean;
   };
 
 function StemBegroot({
@@ -136,6 +149,11 @@ function StemBegroot({
 
   const selectedResourcesStorage = React.useMemo(
     () => createSelectedResourcesStorage(props.projectId),
+    [props.projectId]
+  );
+
+  const voteCompletedStorage = React.useMemo(
+    () => createVoteCompletedStorage(props.projectId),
     [props.projectId]
   );
 
@@ -584,7 +602,7 @@ function StemBegroot({
         );
         const submitted = await submitVoteAndCleanup();
         if (submitted) {
-          setCurrentStep(4);
+          await moveToStep4AndLogout();
         }
       })();
     }
@@ -921,6 +939,111 @@ function StemBegroot({
     ? filteredResources
     : resources?.records || [];
 
+  useEffect(() => {
+    const shouldShowStep4 = voteCompletedStorage.consumeShowStep4AfterLogout();
+    if (shouldShowStep4) {
+      setCurrentStep(4);
+      if (props.showConfetti) {
+        fireConfetti();
+      }
+    }
+  }, [voteCompletedStorage, props.showConfetti]);
+
+  function clearPlanSelection() {
+    votePendingStorage.clearAllVotePending();
+    selectedResourcesStorage.clearSelectedResources();
+    setSelectedResources([]);
+    setTagCounter((prevTagCounter) =>
+      prevTagCounter.map((tagObj) => {
+        const tagName = Object.keys(tagObj)[0];
+        return {
+          [tagName]: {
+            ...tagObj[tagName],
+            current: 0,
+            selectedResources: [],
+          },
+        };
+      })
+    );
+  }
+
+  async function moveToStep4AndLogout() {
+    clearPlanSelection();
+
+    if (!currentUser?.logout) {
+      setCurrentStep(4);
+      if (props.showConfetti) {
+        fireConfetti();
+      }
+      return;
+    }
+
+    voteCompletedStorage.setState({ showStep4AfterLogout: true });
+
+    const currentUrl = new URL(location.href);
+    const params = currentUrl.searchParams;
+    params.delete('openstadlogintoken');
+
+    await currentUser.logout({ url: currentUrl.toString() });
+  }
+
+  const computeCanAddMore = useCallback((): boolean => {
+    let canAddMore = true;
+
+    if (
+      props?.votes?.voteType === 'countPerTag' ||
+      props?.votes?.voteType === 'budgetingPerTag'
+    ) {
+      const activeTagData = tagCounter.find((tagObj) => tagObj[activeTagTab]);
+      if (!activeTagData) return false;
+
+      const activeTag = activeTagData[activeTagTab];
+      const maxLimit = activeTag.max;
+      const currentCount = activeTag.current;
+
+      if (props.votes.voteType === 'countPerTag') {
+        canAddMore = currentCount < maxLimit;
+      }
+
+      if (props.votes.voteType === 'budgetingPerTag') {
+        const notUsedResources = filteredResources.filter(
+          (allR: { id: number }) =>
+            !selectedResources.find((selectedR) => allR.id === selectedR.id)
+        );
+
+        canAddMore = notUsedResources.some(
+          (r: { budget: number }) => r.budget <= maxLimit - currentCount
+        );
+      }
+    } else {
+      const notUsedResources = resources?.records.filter(
+        (allR: { id: number }) =>
+          !selectedResources.find((selectedR) => allR.id === selectedR.id)
+      );
+
+      canAddMore =
+        props.votes.voteType === 'budgeting'
+          ? notUsedResources.some(
+              (r: { budget: number }) =>
+                r.budget <= props.votes.maxBudget - budgetUsed
+            )
+          : Math.max(props.votes.maxResources - selectedResources.length, 0) >
+            0;
+    }
+
+    return canAddMore;
+  }, [
+    props.votes.voteType,
+    props.votes.maxBudget,
+    props.votes.maxResources,
+    tagCounter,
+    activeTagTab,
+    filteredResources,
+    selectedResources,
+    resources?.records,
+    budgetUsed,
+  ]);
+
   const step1ContainerRef = useRef<HTMLDivElement | null>(null);
   const scrollToElement = () => {
     if (step1ContainerRef.current) {
@@ -973,6 +1096,18 @@ function StemBegroot({
       scrollToTop();
     }
   }, [isLoading]);
+
+  const scrollInitRef = useRef(false);
+  useEffect(() => {
+    if (isLoading) return;
+    if (!scrollInitRef.current) {
+      scrollInitRef.current = true;
+      return;
+    }
+    if (!scrollWhenMaxReached) return;
+    if (computeCanAddMore()) return;
+    scrollToElement();
+  }, [selectedResources, isLoading, scrollWhenMaxReached, computeCanAddMore]);
 
   // Reset to first page when filters change (skip initial render)
   const filtersInitialised = useRef(false);
@@ -1189,65 +1324,7 @@ function StemBegroot({
                     }
                   }
                 }}
-                decideCanAddMore={() => {
-                  let canAddMore = true;
-
-                  if (
-                    props?.votes?.voteType === 'countPerTag' ||
-                    props?.votes?.voteType === 'budgetingPerTag'
-                  ) {
-                    const activeTagData = tagCounter.find(
-                      (tagObj) => tagObj[activeTagTab]
-                    );
-                    if (!activeTagData) return false;
-
-                    const activeTag = activeTagData[activeTagTab];
-                    const maxLimit = activeTag.max;
-                    const currentCount = activeTag.current;
-
-                    if (props.votes.voteType === 'countPerTag') {
-                      canAddMore = currentCount < maxLimit;
-                    }
-
-                    if (props.votes.voteType === 'budgetingPerTag') {
-                      let notUsedResources = filteredResources.filter(
-                        (allR: { id: number }) =>
-                          !selectedResources.find(
-                            (selectedR) => allR.id === selectedR.id
-                          )
-                      );
-
-                      canAddMore = notUsedResources.some(
-                        (r: { budget: number }) =>
-                          r.budget <= maxLimit - currentCount
-                      );
-                    }
-                  } else {
-                    let notUsedResources = resources?.records.filter(
-                      (allR: { id: number }) =>
-                        !selectedResources.find(
-                          (selectedR) => allR.id === selectedR.id
-                        )
-                    );
-
-                    canAddMore =
-                      props.votes.voteType === 'budgeting'
-                        ? notUsedResources.some(
-                            (r: { budget: number }) =>
-                              r.budget <= props.votes.maxBudget - budgetUsed
-                          )
-                        : Math.max(
-                            props.votes.maxResources - selectedResources.length,
-                            0
-                          ) > 0;
-                  }
-
-                  if (!canAddMore && scrollWhenMaxReached) {
-                    scrollToElement();
-                  }
-
-                  return canAddMore;
-                }}
+                decideCanAddMore={computeCanAddMore}
               />
             </>
           ) : null}
@@ -1346,6 +1423,13 @@ function StemBegroot({
                 <Button
                   appearance="primary-action-button"
                   onClick={async () => {
+                    if (currentStep === 4) {
+                      clearPlanSelection();
+                      voteCompletedStorage.clearState();
+                      setCurrentStep(startingStep);
+                      return;
+                    }
+
                     if (currentStep === 0) {
                       if (
                         props.votes.voteType === 'countPerTag' ||
@@ -1401,18 +1485,17 @@ function StemBegroot({
                     if (currentStep === 3) {
                       const submitted = await submitVoteAndCleanup();
                       if (submitted) {
-                        setCurrentStep(4);
+                        await moveToStep4AndLogout();
                       }
-                    } else if (currentStep === 4) {
-                      const currentUrl = new URL(location.href);
-                      const params = currentUrl.searchParams;
-                      params.delete('openstadlogintoken');
-                      await currentUser.logout({ url: currentUrl.toString() });
                     } else {
                       setCurrentStep(currentStep + 1);
                     }
                   }}
                   disabled={(() => {
+                    if (currentStep === 4) {
+                      return false;
+                    }
+
                     if (
                       props.votes.voteType === 'count' &&
                       selectedResources.length < props.votes.minResources

@@ -141,7 +141,7 @@ export default {
     if (resources.some((r) => !('resourceId' in r) || !('opinion' in r)))
       throw new Error('Ontbrekende velden resourceId of opinion');
 
-    let url = `/api/project/${projectId}/vote`;
+    let url = `/api/project/${projectId}/vote?replaceAll=true`;
     let headers = {
       'Content-Type': 'application/json',
     };

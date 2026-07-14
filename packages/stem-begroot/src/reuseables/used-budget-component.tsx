@@ -36,21 +36,21 @@ export const BudgetUsedList = ({
           <div
             key={`budget-item-${budget}-${index}`}
             className={`budget-badge budget-badge-primary osc-budget-${index}`}>
-            <Paragraph>&euro;{budget.toLocaleString('nl-NL') || 0}</Paragraph>
+            <Paragraph>{`€${budget.toLocaleString('nl-NL') || 0}`}</Paragraph>
           </div>
         ))}
         <div className="osc-stem-begroot-budget-list-budget-left-indication budget-badge budget-badge-plain">
           <Paragraph>
-            &euro;{Math.max(maxBudget - budgetUsed, 0).toLocaleString('nl-NL')}
+            {`€${Math.max(maxBudget - budgetUsed, 0).toLocaleString('nl-NL')}`}
           </Paragraph>
         </div>
       </div>
       <div className="total-budget" role="status">
         <Paragraph>
-          Totaal: &euro;{maxBudget.toLocaleString('nl-NL')},
+          {`Totaal: €${maxBudget.toLocaleString('nl-NL')},`}
         </Paragraph>
         <Paragraph>
-          Gebruikt: &euro;{budgetUsed.toLocaleString('nl-NL')}
+          {`Gebruikt: €${budgetUsed.toLocaleString('nl-NL')}`}
         </Paragraph>
       </div>
     </>

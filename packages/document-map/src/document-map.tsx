@@ -533,6 +533,15 @@ function DocumentMap({
           createdAt: new Date(),
           sentiment: 'no sentiment',
           tags: allTags,
+          confirmation: props.commentsWidget?.confirmation || false,
+          confirmationReplies:
+            props.commentsWidget?.confirmationReplies || false,
+          overwriteEmailAddress:
+            props.commentsWidget?.confirmation &&
+            props.commentsWidget?.overwriteEmailAddress
+              ? props.commentsWidget.overwriteEmailAddress
+              : '',
+          embeddedUrl: window.location.href,
         });
 
         if (goToLastPage && displayPagination) {
@@ -1495,6 +1504,13 @@ function DocumentMap({
             <Comments
               {...props}
               key={`refresh-${refreshComments}`}
+              confirmation={props.commentsWidget?.confirmation || false}
+              confirmationReplies={
+                props.commentsWidget?.confirmationReplies || false
+              }
+              overwriteEmailAddress={
+                props.commentsWidget?.overwriteEmailAddress || ''
+              }
               onlyIncludeTags={
                 selectedTagsString || filteredTagsIdsString || ''
               }

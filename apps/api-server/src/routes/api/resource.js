@@ -604,9 +604,10 @@ router
 
     if (!req.query.nomail && req.body['publishDate']) {
       const tags = await req.results.getTags();
+      let emailReceivers = [];
+
       if (tags && tags.length > 0) {
-        // Convert to csv string
-        const emailReceivers = (
+        emailReceivers = (
           await Promise.all(
             tags.flatMap(async (tag) => {
               const { useDifferentSubmitAddress, newSubmitAddress } =
@@ -622,18 +623,18 @@ router
         )
           .filter((data) => data !== null && data.length > 0)
           .flat();
+      }
 
-        if (emailReceivers.length > 0) {
-          db.Notification.create({
-            type: 'new published resource - admin update',
-            projectId: req.project.id,
-            data: {
-              userId: req.user.id,
-              resourceId: req.results.id,
-              emailReceivers: emailReceivers,
-            },
-          });
-        }
+      if (emailReceivers.length > 0) {
+        db.Notification.create({
+          type: 'new published resource - admin update',
+          projectId: req.project.id,
+          data: {
+            userId: req.user.id,
+            resourceId: req.results.id,
+            emailReceivers: emailReceivers,
+          },
+        });
       }
 
       if (sendConfirmationToAdmin) {
@@ -898,6 +899,7 @@ router
         },
       });
     }
+
     next();
   })
   .put(auth.useReqUser)

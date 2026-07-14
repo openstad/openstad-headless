@@ -1,5 +1,7 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { FormValue } from '@openstad-headless/form/src/form';
+import NotificationProvider from '@openstad-headless/lib/NotificationProvider/notification-provider';
+import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
 import {
   AccordionProvider,
   FormField,
@@ -17,7 +19,7 @@ import FilePondPluginImageExifOrientation from 'filepond-plugin-image-exif-orien
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 import 'filepond/dist/filepond.min.css';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { FilePond, registerPlugin } from 'react-filepond';
 
 import { InfoImage } from '../../infoImage';
@@ -59,8 +61,6 @@ const filePondSettings = {
   labelButtonRetryItemProcessing: 'Retry',
   labelButtonProcessItem: 'Upload',
   labelFileTypeNotAllowed: 'Bestandstype is niet toegestaan',
-  allowFileSizeValidation: true,
-  maxFileSize: '8mb',
   name: 'image',
   maxParallelUploads: 1,
 };
@@ -87,9 +87,14 @@ export type ImageUploadProps = {
   allowedTypes?: string[];
   disabled?: boolean;
   multiple?: boolean;
+  maxUploadSizeMB?: number;
   type?: string;
   onChange?: (
-    e: { name: string; value: { name: string; url: string }[] },
+    e: {
+      name: string;
+      value: { name: string; url: string }[];
+      isInitial?: boolean;
+    },
     triggerSetLastKey?: boolean
   ) => void;
   imageUrl?: string;
@@ -136,6 +141,13 @@ const ImageUploadField: FC<ImageUploadProps> = ({
 }) => {
   const datastore = new DataStore(props);
 
+  // Client-side upload limit (in MB). Falls back to 25 MB so existing widgets
+  // without a stored value immediately get the new limit.
+  const maxMB = props.maxUploadSizeMB ?? 25;
+  const maxBytes = maxMB * 1024 * 1024;
+  const notifyFailed = (message: string) =>
+    NotificationService.addNotification(message, 'error');
+
   const initialValue: MockImageFile[] =
     overrideDefaultValue && Array.isArray(overrideDefaultValue)
       ? (overrideDefaultValue as { url: string; name: string }[]).map(
@@ -168,6 +180,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     }
   }
 
+  const didInitRef = useRef(false);
   useEffect(() => {
     const images = [...uploadedImages];
     for (let i = 0; i < mockImages.length; i++) {
@@ -179,8 +192,11 @@ const ImageUploadField: FC<ImageUploadProps> = ({
       onChange({
         name: fieldKey,
         value: images,
+        // The first emit is the mount initialisation, not a user interaction.
+        isInitial: !didInitRef.current,
       });
     }
+    didInitRef.current = true;
   }, [uploadedImages.length, mockImages.length, setImages, setUploadedImages]);
 
   const acceptAttribute = allowedTypes ? allowedTypes : '';
@@ -235,6 +251,10 @@ const ImageUploadField: FC<ImageUploadProps> = ({
           <RteContent content={description} unwrapSingleRootDiv={true} />
         </FormFieldDescription>
       )}
+
+      <FormFieldDescription className="openstad-max-upload-size">
+        Maximale bestandsgrootte: {maxMB} MB
+      </FormFieldDescription>
 
       {showMoreInfo && (
         <>
@@ -343,10 +363,25 @@ const ImageUploadField: FC<ImageUploadProps> = ({
               ? [acceptAttribute]
               : acceptAttribute
           }
+          beforeAddFile={(fileItem) => {
+            return new Promise<boolean>((resolve, reject) => {
+              if (fileItem.file.size > maxBytes) {
+                reject(
+                  `Het bestand is te groot. De maximale bestandsgrootte is ${maxMB} MB.`
+                );
+              } else {
+                resolve(true);
+              }
+            }).catch((error) => {
+              notifyFailed(error);
+              return false;
+            });
+          }}
           aria-invalid={fieldInvalid}
           aria-describedby={`${randomId}_error`}
           {...filePondSettings}
         />
+        <NotificationProvider />
       </div>
     </FormField>
   );
