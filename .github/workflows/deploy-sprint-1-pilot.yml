@@ -1,0 +1,235 @@
+name: Deploy sprint-1 to subsidy-internal-pilot
+
+on:
+  push:
+    branches:
+      - branch-sprint-1
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-sprint-1-pilot
+  cancel-in-progress: true
+
+jobs:
+  version:
+    name: Construct alpha version
+    runs-on: ubuntu-latest
+    outputs:
+      release_version: ${{ steps.construct.outputs.release_version }}
+      git_tag: ${{ steps.construct.outputs.git_tag }}
+    steps:
+      # 0.0.x versions sort below all real releases (2.x) and increase monotonically,
+      # so ArgoCD with targetRevision "0.0.*" always picks the newest sprint build.
+      - name: Construct version from run number
+        id: construct
+        env:
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          RELEASE_VERSION="0.0.${RUN_NUMBER}"
+          echo "release_version=$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "git_tag=v$RELEASE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "::notice::Release version: $RELEASE_VERSION"
+
+  run-tests:
+    name: Run tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Setup safe-chain
+        run: |
+          npm i -g @aikidosec/safe-chain
+          safe-chain setup-ci
+
+      - name: Install dependencies
+        run: npm ci --safe-chain-skip-minimum-package-age
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+  build-builder-stage:
+    name: Build `builder` stage
+    needs: [run-tests, version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Restore cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: docker-base-${{ github.sha }}
+          restore-keys: |
+            docker-base-
+
+      - name: Build base stage
+        env:
+          OPENSTAD_VERSION: ${{ needs.version.outputs.release_version }}
+        run: |
+          docker buildx build \
+            --target=builder \
+            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --cache-from=type=local,src=/tmp/.buildx-cache \
+            --load \
+            --build-arg OPENSTAD_VERSION="$OPENSTAD_VERSION" \
+            -t builder-stage:latest \
+            .
+
+  build-and-push-docker-image:
+    needs: [build-builder-stage, version]
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        app: [admin-server, api-server, auth-server, image-server, cms-server]
+        include:
+          - app: api-server
+            build-target: release-with-packages
+    name: '[${{ matrix.app }}] Build & push image'
+    runs-on: ubuntu-latest
+    env:
+      IMAGE: 'ghcr.io/${{ github.repository_owner }}/${{ matrix.app }}'
+      APP: ${{ matrix.app }}
+      BUILD_TARGET: release
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Restore base build cache
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: docker-base-${{ github.sha }}
+          restore-keys: |
+            docker-base-
+
+      - if: ${{ matrix.build-target }}
+        name: Set correct build target
+        run: echo "BUILD_TARGET=${{ matrix.build-target }}" >> $GITHUB_ENV
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build image and push to GitHub Container Registry
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: '${{ env.IMAGE }}:${{ needs.version.outputs.git_tag }}'
+          build-args: |
+            APP=${{ matrix.app }}
+            OPENSTAD_VERSION=${{ needs.version.outputs.release_version }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+
+  release-chart:
+    name: Publish pilot Helm chart & prerelease
+    needs: [build-and-push-docker-image, version]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set chart version and bake image references
+        env:
+          RELEASE_VERSION: ${{ needs.version.outputs.release_version }}
+          IMAGE_TAG: ${{ needs.version.outputs.git_tag }}
+          REPO_OWNER: ${{ github.repository_owner }}
+        run: |
+          yq -i ".version = \"$RELEASE_VERSION\"" charts/openstad-headless/Chart.yaml
+          for pair in admin:admin-server api:api-server auth:auth-server image:image-server cms:cms-server; do
+            KEY="${pair%%:*}"
+            APP="${pair#*:}"
+            yq -i ".${KEY}.deploymentContainer.image = \"ghcr.io/${REPO_OWNER}/${APP}:${IMAGE_TAG}\"" charts/openstad-headless/values.yaml
+          done
+
+      # Wrapper chart with the app chart as a dependency named `openstad-headless`,
+      # so the existing umbrella values (nested under `openstad-headless:`) work as-is.
+      - name: Create pilot wrapper chart
+        env:
+          RELEASE_VERSION: ${{ needs.version.outputs.release_version }}
+        run: |
+          mkdir sprint-chart
+          cat > sprint-chart/Chart.yaml <<EOF
+          apiVersion: v2
+          name: openstad-headless-pilot
+          description: Auto-deploy wrapper around openstad-headless for the sprint pilot
+          version: ${RELEASE_VERSION}
+          dependencies:
+            - name: openstad-headless
+              version: ${RELEASE_VERSION}
+              repository: file://../charts/openstad-headless
+          EOF
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.19.2
+
+      - name: Package and push Helm chart
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          GH_REPOSITORY: ${{ github.repository }}
+          RELEASE_VERSION: ${{ needs.version.outputs.release_version }}
+        run: |
+          helm dependency update sprint-chart
+          helm lint sprint-chart
+          helm package sprint-chart
+          echo "$GH_TOKEN" | helm registry login ghcr.io \
+            --username "$REPO_OWNER" \
+            --password-stdin
+          helm push "openstad-headless-pilot-${RELEASE_VERSION}.tgz" "oci://ghcr.io/$GH_REPOSITORY"
+
+      - name: Create GitHub prerelease
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_TAG: ${{ needs.version.outputs.git_tag }}
+          RELEASE_VERSION: ${{ needs.version.outputs.release_version }}
+          GH_REPOSITORY: ${{ github.repository }}
+        run: |
+          if gh release view "$GIT_TAG" --repo "$GH_REPOSITORY" > /dev/null 2>&1; then
+            echo "::notice::Release $GIT_TAG already exists, skipping"
+            exit 0
+          fi
+          gh release create "$GIT_TAG" \
+            "openstad-headless-pilot-${RELEASE_VERSION}.tgz" \
+            --repo "$GH_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "$GIT_TAG" \
+            --generate-notes \
+            --prerelease --latest=false
