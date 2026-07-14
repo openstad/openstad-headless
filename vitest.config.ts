@@ -43,6 +43,9 @@ export default defineConfig({
         // #1640 PR4: user route split into services (each unit-tested).
         'apps/api-server/src/services/userDeduplication.js',
         'apps/api-server/src/services/userUnsubscribe.js',
+        // #1640 PR5: business logic extracted from the Resource/User models.
+        'apps/api-server/src/services/resourceSerialization.js',
+        'apps/api-server/src/services/userRoles.js',
         'apps/auth-server/controllers/oauth/oauth2.js',
         'apps/auth-server/controllers/oauth/allowed-domains.js',
         'apps/auth-server/controllers/auth/local.js',
