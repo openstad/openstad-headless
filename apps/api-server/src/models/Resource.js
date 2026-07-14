@@ -223,7 +223,7 @@ module.exports = function (db, sequelize, DataTypes) {
       budget: {
         type: DataTypes.INTEGER,
         auth: {
-          updateableBy: 'editor',
+          updateableBy: ['admin', 'editor', 'owner', 'moderator'],
         },
         allowNull: true,
         set: function (budget) {
