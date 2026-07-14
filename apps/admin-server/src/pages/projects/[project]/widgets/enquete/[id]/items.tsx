@@ -63,6 +63,11 @@ const formSchema = z.object({
   key: z.string(),
   description: z.string().optional(),
   questionType: z.string().optional(),
+  feedbackMode: z.string().optional(),
+  feedbackText: z.string().optional(),
+  feedbackCorrect: z.string().optional(),
+  feedbackIncorrect: z.string().optional(),
+  scaleFeedback: z.array(z.string()).optional(),
   fieldKey: z.string(),
   minCharacters: z.string().optional(),
   maxCharacters: z.string().optional(),
@@ -89,6 +94,8 @@ const formSchema = z.object({
             isOtherOption: z.boolean().optional(),
             defaultValue: z.boolean().optional(),
             hideLabel: z.boolean().optional(),
+            isCorrect: z.boolean().optional(),
+            feedbackText: z.string().optional(),
             key_b: z.string().optional(),
             description_b: z.string().optional(),
             image_b: z.string().optional(),
@@ -126,6 +133,8 @@ const formSchema = z.object({
   imageClickable: z.boolean().optional(),
   maxChoices: z.string().optional(),
   maxChoicesMessage: z.string().optional(),
+  minChoices: z.string().optional(),
+  minChoicesMessage: z.string().optional(),
   showSmileys: z.boolean().optional(),
   placeholder: z.string().optional(),
   defaultValue: z.string().optional(),
@@ -282,6 +291,11 @@ export default function WidgetEnqueteItems(
             description: values.description,
             questionType: values.questionType,
             fieldKey: values.fieldKey,
+            feedbackMode: values.feedbackMode || 'none',
+            feedbackText: values.feedbackText || '',
+            feedbackCorrect: values.feedbackCorrect || '',
+            feedbackIncorrect: values.feedbackIncorrect || '',
+            scaleFeedback: values.scaleFeedback || [],
             minCharacters: values.minCharacters,
             maxCharacters: values.maxCharacters,
             nextPageText: values.nextPageText || '',
@@ -300,6 +314,8 @@ export default function WidgetEnqueteItems(
             imageClickable: values.imageClickable || false,
             maxChoices: values.maxChoices || '',
             maxChoicesMessage: values.maxChoicesMessage || '',
+            minChoices: values.minChoices || '',
+            minChoicesMessage: values.minChoicesMessage || '',
             showSmileys: values.showSmileys || false,
             defaultValue: values.defaultValue || '',
             placeholder: values.placeholder || '',
@@ -455,6 +471,11 @@ export default function WidgetEnqueteItems(
     question: '',
     questionSubtitle: '',
     questionType: '',
+    feedbackMode: 'none',
+    feedbackText: '',
+    feedbackCorrect: '',
+    feedbackIncorrect: '',
+    scaleFeedback: [],
     fieldKey: '',
     minCharacters: '',
     maxCharacters: '',
@@ -475,6 +496,8 @@ export default function WidgetEnqueteItems(
     imageClickable: false,
     maxChoices: '',
     maxChoicesMessage: '',
+    minChoices: '',
+    minChoicesMessage: '',
     showSmileys: false,
     defaultValue: '',
     placeholder: '',
@@ -540,6 +563,11 @@ export default function WidgetEnqueteItems(
       fieldKey: item.fieldKey || '',
       description: item.description || '',
       questionType: item.questionType || '',
+      feedbackMode: item.feedbackMode || 'none',
+      feedbackText: item.feedbackText || '',
+      feedbackCorrect: item.feedbackCorrect || '',
+      feedbackIncorrect: item.feedbackIncorrect || '',
+      scaleFeedback: item.scaleFeedback || [],
       minCharacters: item.minCharacters || '',
       maxCharacters: item.maxCharacters || '',
       nextPageText: item.nextPageText || '',
@@ -559,6 +587,8 @@ export default function WidgetEnqueteItems(
       imageClickable: item.imageClickable || false,
       maxChoices: item.maxChoices || '',
       maxChoicesMessage: item.maxChoicesMessage || '',
+      minChoices: item.minChoices || '',
+      minChoicesMessage: item.minChoicesMessage || '',
       showSmileys: item.showSmileys || false,
       defaultValue: item.defaultValue || '',
       placeholder: item.placeholder || '',
@@ -1190,6 +1220,56 @@ export default function WidgetEnqueteItems(
                                   )}
                                 />
                               )}
+
+                              {props.isQuiz &&
+                                form.watch('feedbackMode') === 'perAnswer' && (
+                                  <FormField
+                                    control={form.control}
+                                    name={`options.${activeOption}.titles.0.feedbackText`}
+                                    render={({ field }) => (
+                                      <FormItem>
+                                        <FormLabel>
+                                          Feedback bij dit antwoord
+                                        </FormLabel>
+                                        <Input {...field} />
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                )}
+
+                              {form.watch('feedbackMode') ===
+                                'correctIncorrect' &&
+                                ['multiplechoice', 'multiple'].includes(
+                                  form.watch('questionType') || ''
+                                ) && (
+                                  <FormField
+                                    control={form.control}
+                                    name={
+                                      `options.${activeOption}.titles.0.isCorrect` as any
+                                    }
+                                    render={({ field }) => (
+                                      <FormItem
+                                        style={{
+                                          display: 'flex',
+                                          alignItems: 'center',
+                                          justifyContent: 'flex-start',
+                                          flexDirection: 'row',
+                                          marginTop: '10px',
+                                        }}>
+                                        {YesNoSelect(field, props)}
+                                        <FormLabel
+                                          style={{
+                                            marginTop: 0,
+                                            marginLeft: '6px',
+                                          }}>
+                                          Is dit een goed antwoord?
+                                        </FormLabel>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                )}
                             </>
                           ) : (
                             <>
@@ -1685,7 +1765,10 @@ export default function WidgetEnqueteItems(
                           <FormLabel>Type antwoorden</FormLabel>
                           <Select
                             value={field.value}
-                            onValueChange={field.onChange}>
+                            onValueChange={(value) => {
+                              field.onChange(value);
+                              form.setValue('feedbackMode', 'none');
+                            }}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Kies type" />
@@ -2368,6 +2451,141 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
+                    {props.isQuiz &&
+                      ['multiplechoice', 'multiple', 'scale'].includes(
+                        form.watch('questionType') || ''
+                      ) && (
+                        <FormField
+                          control={form.control}
+                          name="feedbackMode"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Feedbackmodus</FormLabel>
+                              <FormDescription>
+                                Bepaal welke feedback de bezoeker ziet nadat een
+                                antwoord is bevestigd.
+                              </FormDescription>
+                              <Select
+                                value={field.value || 'none'}
+                                onValueChange={field.onChange}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een feedbackmodus" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="none">Geen</SelectItem>
+                                  <SelectItem value="static">
+                                    Vaste tekst
+                                  </SelectItem>
+                                  <SelectItem value="perAnswer">
+                                    Per antwoord
+                                  </SelectItem>
+                                  {['multiplechoice', 'multiple'].includes(
+                                    form.watch('questionType') || ''
+                                  ) && (
+                                    <SelectItem value="correctIncorrect">
+                                      Goed / fout
+                                    </SelectItem>
+                                  )}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+
+                    {props.isQuiz &&
+                      form.watch('feedbackMode') === 'static' && (
+                        <FormField
+                          control={form.control}
+                          name="feedbackText"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Feedbacktekst</FormLabel>
+                              <FormControl>
+                                <TrixEditor
+                                  value={field.value || ''}
+                                  onChange={(val) => field.onChange(val)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+
+                    {props.isQuiz &&
+                      form.watch('feedbackMode') === 'correctIncorrect' &&
+                      ['multiplechoice', 'multiple'].includes(
+                        form.watch('questionType') || ''
+                      ) && (
+                        <>
+                          <FormField
+                            control={form.control}
+                            name="feedbackCorrect"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Feedback als alles goed is
+                                </FormLabel>
+                                <FormControl>
+                                  <TrixEditor
+                                    value={field.value || ''}
+                                    onChange={(val) => field.onChange(val)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                          <FormField
+                            control={form.control}
+                            name="feedbackIncorrect"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Feedback als er minstens 1 fout is
+                                </FormLabel>
+                                <FormControl>
+                                  <TrixEditor
+                                    value={field.value || ''}
+                                    onChange={(val) => field.onChange(val)}
+                                  />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </>
+                      )}
+
+                    {props.isQuiz &&
+                      form.watch('feedbackMode') === 'perAnswer' &&
+                      form.watch('questionType') === 'scale' &&
+                      [0, 1, 2, 3, 4].map((n) => (
+                        <FormField
+                          key={n}
+                          control={form.control}
+                          name={`scaleFeedback.${n}`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{`Feedback bij waarde ${
+                                n + 1
+                              }`}</FormLabel>
+                              <FormControl>
+                                <TrixEditor
+                                  value={field.value || ''}
+                                  onChange={(val) => field.onChange(val)}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ))}
+
                     {form.watch('questionType') === 'open' && (
                       <FormField
                         control={form.control}
@@ -2419,6 +2637,51 @@ export default function WidgetEnqueteItems(
                                   Als het maximaal aantal opties is
                                   geselecteerd, geef dan een melding aan de
                                   gebruiker. Dit is optioneel.
+                                </em>
+                              </FormDescription>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    )}
+
+                    {form.watch('questionType') === 'multiple' && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="minChoices"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Minimaal te selecteren opties
+                              </FormLabel>
+                              <FormDescription>
+                                <em className="text-xs">
+                                  Als de bezoeker minimaal een aantal opties
+                                  moet selecteren, vul dan hier het aantal in.
+                                  Dit wordt gecontroleerd bij het verdergaan.
+                                </em>
+                              </FormDescription>
+                              <Input {...field} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={form.control}
+                          name="minChoicesMessage"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Minimaal aantal niet bereikt melding
+                              </FormLabel>
+                              <FormDescription>
+                                <em className="text-xs">
+                                  Melding als er te weinig opties zijn gekozen.
+                                  Gebruik {'{minChoices}'} voor het aantal. Dit
+                                  is optioneel.
                                 </em>
                               </FormDescription>
                               <Input {...field} />
