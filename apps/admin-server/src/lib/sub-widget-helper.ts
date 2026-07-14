@@ -24,7 +24,7 @@ export function extractConfig<
   const {
     subWidgetKey,
     previewConfig,
-    updateConfig,
+    updateConfig: persistParentConfig,
     updatePreview,
     extraChildConfig,
   } = params;
@@ -34,14 +34,20 @@ export function extractConfig<
   const extractedConfig: ConfigWithFunctions<ChildWidgetProps> = {
     ...extraChildConfig,
     ...(previewConfig[subWidgetKey] as ChildWidgetProps),
-    updateConfig: (config: ChildWidgetProps) =>
-      updateConfig({
+    updateConfig: (config: ChildWidgetProps) => {
+      const mergedConfig = {
         ...previewConfig,
         [subWidgetKey]: {
           ...previewConfig[subWidgetKey],
           ...config,
         },
-      }),
+      };
+      persistParentConfig(mergedConfig);
+      // Keep the preview state in sync with what was just saved, so a
+      // subsequent sibling save merges against fresh config instead of a
+      // stale snapshot (prevents one column overwriting another).
+      updatePreview(mergedConfig);
+    },
     onFieldChanged: (key: string, value: any) => {
       if (previewConfig) {
         updatePreview({
