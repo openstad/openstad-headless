@@ -2,6 +2,19 @@
 import DataStore from '@openstad-headless/data-store/src';
 import Form, { FormValue } from '@openstad-headless/form/src/form';
 import { FieldProps } from '@openstad-headless/form/src/props';
+import {
+  detectEnvironment,
+  mapQuestionType,
+  pushFormError,
+  pushFormStart,
+  pushFormStep,
+  pushFormSubmit,
+  pushQuestionInteract,
+} from '@openstad-headless/lib/gtm-datalayer';
+import type {
+  DisplayType,
+  FormStatus,
+} from '@openstad-headless/lib/gtm-datalayer';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import {
@@ -20,6 +33,7 @@ import NotificationService from '../../lib/NotificationProvider/notification-ser
 import hasRole from '../../lib/has-role';
 import RteContent from '../../ui/src/rte-formatting/rte-content';
 import './enquete.scss';
+import { buildQuestionIdMap, resolveQuestionId } from './gtm-helpers';
 import { EnquetePropsType } from './types/';
 
 // Helper types and functions for draft persistence
@@ -130,6 +144,11 @@ function Enquete(props: EnqueteWidgetProps) {
   const latestValuesRef = useRef<Record<string, unknown> | null>(null);
   const saveTimeoutRef = useRef<number | null>(null);
   const formStartTimeRef = useRef<number>(Date.now());
+  const formStartFiredRef = useRef(false);
+  const interactedFieldsRef = useRef<Set<string>>(new Set());
+  // Skip the form_step when loading the first page; it only fires on
+  // the first interaction (together with form_start).
+  const stepMountSkippedRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -224,6 +243,8 @@ function Enquete(props: EnqueteWidgetProps) {
     const result = await createSubmission(formData, props.widgetId);
 
     if (result) {
+      pushFormSubmit(getTrackingContext());
+
       console.log(
         `[enquete] submitted: widgetId=${props.widgetId} submissionId=${result.id}`
       );
@@ -466,6 +487,7 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['type'] = 'pagination';
           fieldData['prevPageText'] = item?.prevPageText || '1';
           fieldData['nextPageText'] = item?.nextPageText || '2';
+          fieldData['stepName'] = item?.stepName || '';
           break;
         case 'sort':
           fieldData['options'] = item?.options || [];
@@ -586,8 +608,141 @@ function Enquete(props: EnqueteWidgetProps) {
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Positional question_id map (qid1..qidN) based on the question order.
+  const questionIdMap = buildQuestionIdMap(props.items);
+
+  const getTrackingContext = () => ({
+    environment: detectEnvironment(props.gtmEnvironment),
+    formId: `fid${props.widgetId || '0'}`,
+    formName: props.title || '',
+    displayType: (isFullscreen ? 'fullscreen' : 'standard') as DisplayType,
+    memberId: (currentUser as any)?.id
+      ? String((currentUser as any).id)
+      : undefined,
+  });
+
+  const getStepInfo = (pageIndex: number) => {
+    const status: FormStatus =
+      pageIndex === 0
+        ? 'started'
+        : pageIndex >= totalPages - 1
+          ? 'final_step'
+          : 'in_progress';
+
+    // Dedicated, stable step name: the pagination item that introduces a
+    // page carries the name of that next page (page 1 = the
+    // pagination before page 1, etc.). Falls back to "Stap N" when no
+    // name is set, so the name does not move along with the first question.
+    const paginationFields = formFields.filter((f) => f.type === 'pagination');
+    const configuredName =
+      pageIndex > 0
+        ? (paginationFields[pageIndex - 1] as any)?.stepName
+        : undefined;
+    const formStepName =
+      (typeof configuredName === 'string' && configuredName.trim()) ||
+      `Stap ${pageIndex + 1}`;
+
+    return {
+      formStep: pageIndex + 1,
+      formStepName,
+      formStepTotal: totalPages,
+      formStatus: status,
+    };
+  };
+
+  // Fires form_start once and then the form_step of the current page,
+  // so form_step comes together with form_start (not on load).
+  const ensureFormStarted = () => {
+    if (formStartFiredRef.current) return;
+    formStartFiredRef.current = true;
+    pushFormStart(getTrackingContext());
+    pushFormStep({ ...getTrackingContext(), ...getStepInfo(currentPage) });
+  };
+
+  useEffect(() => {
+    if (!draftChecked) return;
+
+    // The first run is loading page 1; we skip that form_step.
+    if (!stepMountSkippedRef.current) {
+      stepMountSkippedRef.current = true;
+      return;
+    }
+
+    // Navigation to a next step. Should the user navigate without
+    // interaction, we still start the form here (form_start first).
+    if (!formStartFiredRef.current) {
+      ensureFormStarted();
+      return;
+    }
+    pushFormStep({ ...getTrackingContext(), ...getStepInfo(currentPage) });
+  }, [currentPage, draftChecked]);
+
+  const handleFieldInteraction = (interactionKey: string) => {
+    // form_start (+ form_step of the current page) fires on the first real
+    // user interaction, before the first question_interact event.
+    ensureFormStarted();
+
+    if (interactedFieldsRef.current.has(interactionKey)) return;
+    interactedFieldsRef.current.add(interactionKey);
+
+    const { baseKey, questionId, isExplanation } = resolveQuestionId(
+      questionIdMap,
+      interactionKey
+    );
+
+    const item = props.items?.find((i) => i.fieldKey === baseKey);
+    if (
+      !item ||
+      !questionId ||
+      item.questionType === 'pagination' ||
+      item.questionType === 'none'
+    )
+      return;
+
+    pushQuestionInteract({
+      ...getTrackingContext(),
+      ...getStepInfo(currentPage),
+      questionId,
+      questionName: isExplanation
+        ? `${item.title || ''} (explanation)`
+        : item.title || '',
+      questionType: mapQuestionType(item.questionType || '', item.showSmileys),
+    });
+  };
+
+  const handleValidationErrors = (
+    errors: Array<{ fieldKey: string; errorMessage: string | null }>
+  ) => {
+    const context = getTrackingContext();
+    const stepInfo = getStepInfo(currentPage);
+
+    errors.forEach(({ fieldKey, errorMessage }) => {
+      const item = props.items?.find((i) => i.fieldKey === fieldKey);
+
+      pushFormError({
+        ...context,
+        ...stepInfo,
+        questionId: item
+          ? questionIdMap[fieldKey] || context.formId
+          : context.formId,
+        questionName: item?.title || context.formName,
+        questionType: item
+          ? mapQuestionType(item.questionType || '', item.showSmileys)
+          : 'form_error',
+        formErrorText: errorMessage || 'Validation error',
+        formErrorType: errorMessage?.toLowerCase().includes('verplicht')
+          ? 'required_field'
+          : 'invalid_input',
+      });
+    });
+  };
+
   const handleValuesChange = (values: Record<string, unknown>) => {
     if (typeof window === 'undefined') return;
+
+    // form_start has been moved to handleFieldInteraction so it only fires on
+    // a real user interaction, not on the mount initialisation.
+
     if (props.enableDraftPersistence !== true) return;
 
     latestValuesRef.current = values;
@@ -616,7 +771,9 @@ function Enquete(props: EnqueteWidgetProps) {
   }, []);
 
   return (
-    <div className={`osc${isFullscreen ? ' --fullscreen' : ''}`}>
+    <div
+      className={`osc${isFullscreen ? ' --fullscreen' : ''}`}
+      data-form-name={props.title || ''}>
       <div className="container">
         {formOnlyVisibleForUsers && !hasRole(currentUser, 'member') && (
           <>
@@ -710,6 +867,8 @@ function Enquete(props: EnqueteWidgetProps) {
               totalFieldCount={totalFieldCount}
               totalPages={totalPages}
               initialValues={initialValues}
+              onFieldInteraction={handleFieldInteraction}
+              onValidationErrors={handleValidationErrors}
             />
           )}
         </div>

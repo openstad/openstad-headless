@@ -66,6 +66,7 @@ export const GridderResourceDetail = ({
   ...props
 }: GridderResourceDetailProps) => {
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightboxAlt, setLightboxAlt] = useState<string | undefined>(undefined);
 
   // When resource is correctly typed the we will not need :any
 
@@ -127,17 +128,27 @@ export const GridderResourceDetail = ({
   const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
   const canLike = canLikeResource(resource);
 
-  const renderImage = (image: string, clickableImage: boolean) => {
+  const renderImage = (
+    image: string,
+    clickableImage: boolean,
+    alt?: string
+  ) => {
     const imageComponent = <Image src={image} className="--aspectRatio-16-9" />;
 
     return clickableImage ? (
       <div
         style={{ cursor: 'zoom-in' }}
-        onClick={() => setLightboxSrc(image)}
+        onClick={() => {
+          setLightboxSrc(image);
+          setLightboxAlt(alt);
+        }}
         role="button"
         tabIndex={0}
         aria-label="Afbeelding uitvergroot bekijken"
-        onKeyDown={(e) => e.key === 'Enter' && setLightboxSrc(image)}>
+        onKeyDown={(e) =>
+          (e.key === 'Enter' || e.key === ' ') &&
+          (setLightboxSrc(image), setLightboxAlt(alt))
+        }>
         {imageComponent}
       </div>
     ) : (
@@ -148,13 +159,18 @@ export const GridderResourceDetail = ({
   return (
     <>
       {lightboxSrc && (
-        <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+        <Lightbox
+          src={lightboxSrc}
+          alt={lightboxAlt}
+          onClose={() => setLightboxSrc(null)}
+        />
       )}
       <div className="osc-gridder-resource-detail">
         <section className={`osc-gridder-resource-detail-photo ${hasImages}`}>
           {renderImage(
             resource.images?.at(0)?.url || defaultImage,
-            clickableImage
+            clickableImage,
+            resource.images?.at(0)?.alt
           )}
 
           <div className="osc-gridder-resource-detail-budget-theme-bar">

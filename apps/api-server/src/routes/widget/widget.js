@@ -236,6 +236,7 @@ function getDefaultConfig(project, widgetType) {
     zipCodeApiUrl: zipCodeApiUrl || '',
     zipCodeAutofillApiUrl: zipCodeAutofillApiUrl || '',
     serverTime: new Date().toISOString(),
+    gtmEnvironment: process.env.GTM_ENVIRONMENT || 'prod',
     randomSortRotationMs: Number(process.env.RANDOM_SORT_ROTATION_MS) || 0,
   };
 

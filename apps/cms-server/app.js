@@ -16,6 +16,7 @@ const app = express();
 const _ = require('lodash');
 const projectService = require('./services/projects');
 const aposConfig = require('./lib/apos-config');
+const { resolveSitePrefix } = require('./lib/resolve-site-prefix');
 const { refresh } = require('less');
 const REFRESH_PROJECTS_INTERVAL = 60000 * 5;
 const Url = require('node:url');
@@ -421,9 +422,12 @@ app.use(function (req, res, next) {
  * if openstad.org exists of course.
  */
 app.use('/:sitePrefix', function (req, res, next) {
-  const domainAndPath = req.openstadDomain + '/' + req.params.sitePrefix;
-
-  const site = projects[domainAndPath] ? projects[domainAndPath] : false;
+  const site = resolveSitePrefix({
+    projects,
+    openstadDomain: req.openstadDomain,
+    sitePrefix: req.params.sitePrefix,
+    alreadyResolved: Boolean(req.sitePrefix),
+  });
 
   if (site) {
     site.sitePrefix = req.params.sitePrefix;

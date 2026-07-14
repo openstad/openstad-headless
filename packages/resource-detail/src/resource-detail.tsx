@@ -43,32 +43,30 @@ import './resource-detail.css';
 import { formatDocumentLabel } from './utils';
 
 type booleanProps = {
-  [
-    K in
-      | 'displayImage'
-      | 'displayImageDescription'
-      | 'displayTitle'
-      | 'displayModBreak'
-      | 'displaySummary'
-      | 'displayDescription'
-      | 'displayDescriptionExpandable'
-      | 'displayUser'
-      | 'displayDate'
-      | 'displayBudget'
-      | 'displayLocation'
-      | 'displayBudgetDocuments'
-      | 'displayLikes'
-      | 'displayTags'
-      | 'displayStatus'
-      | 'displayDocuments'
-      | 'clickableImage'
-      | 'displayStatusBar'
-      | 'displayEditResourceButton'
-      | 'displayDeleteButton'
-      | 'displayDeleteEditButtonOnTop'
-      | 'displaySocials'
-      | 'displayTimeline'
-  ]: boolean | undefined;
+  [K in
+    | 'displayImage'
+    | 'displayImageDescription'
+    | 'displayTitle'
+    | 'displayModBreak'
+    | 'displaySummary'
+    | 'displayDescription'
+    | 'displayDescriptionExpandable'
+    | 'displayUser'
+    | 'displayDate'
+    | 'displayBudget'
+    | 'displayLocation'
+    | 'displayBudgetDocuments'
+    | 'displayLikes'
+    | 'displayTags'
+    | 'displayStatus'
+    | 'displayDocuments'
+    | 'clickableImage'
+    | 'displayStatusBar'
+    | 'displayEditResourceButton'
+    | 'displayDeleteButton'
+    | 'displayDeleteEditButtonOnTop'
+    | 'displaySocials'
+    | 'displayTimeline']: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = {
@@ -90,6 +88,8 @@ export type ResourceDetailWidgetProps = {
     backUrlText?: string;
     urlWithResourceFormForEditing?: string;
     displayDeleteButton?: boolean;
+    collapseTagType?: string;
+    collapseTagLabel?: string;
   } & MapPropsType &
   booleanProps & {
     likeWidget?: Omit<
@@ -118,6 +118,50 @@ type DocumentType = {
   name?: string;
   url?: string;
 };
+
+// A collapsed tag group: shows a single interactive label pill (with a count
+// and a chevron) that expands to reveal the individual tags it stands for.
+function CollapsibleTagGroup({
+  label,
+  tags,
+}: {
+  label: string;
+  tags: Array<{ name: string }>;
+}) {
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+
+  return (
+    <div className="osc-collapsible-tags">
+      <button
+        type="button"
+        className={`osc-pill osc-tag-toggle ${open ? 'is-open' : ''}`}
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((prev) => !prev)}>
+        <span className="osc-tag-toggle-label">{label}</span>
+        <span className="osc-tag-toggle-count">{tags.length}</span>
+        <Icon
+          icon="ri-arrow-down-s-line"
+          iconOnly
+          className="osc-tag-toggle-chevron"
+        />
+      </button>
+
+      {open ? (
+        <div
+          id={panelId}
+          role="group"
+          aria-label={label}
+          className="osc-collapsible-tags-panel">
+          {tags.map((t, index) => (
+            <Pill key={`${t.name}-${index}`} text={t.name} />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 function ResourceDetail({
   displayImage = true,
@@ -152,6 +196,8 @@ function ResourceDetail({
   displayDeleteButton = true,
   displayDeleteEditButtonOnTop = false,
   displayTimeline = false,
+  collapseTagType = '',
+  collapseTagLabel = '',
   selectedSocialShareOptions = [
     'facebook',
     'x',
@@ -166,6 +212,7 @@ function ResourceDetail({
   const [expanded, setExpanded] = useState(false);
   const [showAccordion, setShowAccordion] = useState(false);
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightboxAlt, setLightboxAlt] = useState<string | undefined>(undefined);
   const descriptionRef = React.useRef<HTMLDivElement>(null);
   const id = useId();
 
@@ -190,6 +237,46 @@ function ResourceDetail({
     projectId: props.projectId,
     resourceId: resourceId,
   });
+
+  // Tags of the type configured for "collapse": when a resource holds the full
+  // set, the Tags section renders a single label pill instead of every tag.
+  // This uses the same shared useTags as the resource-form tag field (see
+  // resource-form/src/parts/init-fields.tsx), so the set compared here matches
+  // exactly what the form's "Selecteer alles" selects — keep them in sync.
+  // Only fetched when the collapse feature is configured.
+  const { data: collapseTags } = datastore.useTags({
+    projectId: props.projectId,
+    type: collapseTagType,
+    enabled: !!collapseTagType,
+  });
+
+  // The collapse label follows the project form's "Selecteer alles" label for
+  // this tag type, so it is edited in one place (the form). Falls back to the
+  // widget's own label when no matching form field is found. Only fetched when
+  // the collapse feature is configured.
+  const { data: projectWidgets } = datastore.useWidgets({
+    projectId: collapseTagType ? props.projectId : undefined,
+  });
+
+  const formSelectAllLabel = React.useMemo(() => {
+    if (!collapseTagType || !Array.isArray(projectWidgets)) return '';
+    for (const widget of projectWidgets) {
+      if (widget?.type !== 'resourceform') continue;
+      const items = widget?.config?.items;
+      if (!Array.isArray(items)) continue;
+      const match = items.find(
+        (item: any) =>
+          item?.type === 'tags' &&
+          item?.tags === collapseTagType &&
+          item?.selectAll &&
+          item?.selectAllLabel
+      );
+      if (match) return match.selectAllLabel as string;
+    }
+    return '';
+  }, [projectWidgets, collapseTagType]);
+
+  const resolvedCollapseLabel = formSelectAllLabel || collapseTagLabel;
 
   const showDate = (date: string) => {
     return date.split(' ').slice(0, -1).join(' ');
@@ -324,7 +411,8 @@ function ResourceDetail({
   const renderImage = (
     src: string,
     clickableImage: boolean,
-    imageDescription?: string
+    imageDescription?: string,
+    imageAlt?: string
   ) => {
     const imageElement = (
       <>
@@ -360,11 +448,17 @@ function ResourceDetail({
     return clickableImage ? (
       <div
         style={{ cursor: 'zoom-in' }}
-        onClick={() => setLightboxSrc(src)}
+        onClick={() => {
+          setLightboxSrc(src);
+          setLightboxAlt(imageAlt);
+        }}
         role="button"
         tabIndex={0}
         aria-label="Afbeelding uitvergroot bekijken"
-        onKeyDown={(e) => e.key === 'Enter' && setLightboxSrc(src)}>
+        onKeyDown={(e) =>
+          (e.key === 'Enter' || e.key === ' ') &&
+          (setLightboxSrc(src), setLightboxAlt(imageAlt))
+        }>
         {imageElement}
       </div>
     ) : (
@@ -466,7 +560,11 @@ function ResourceDetail({
   return (
     <section className="osc-resource-detail-widget-container">
       {lightboxSrc && (
-        <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+        <Lightbox
+          src={lightboxSrc}
+          alt={lightboxAlt}
+          onClose={() => setLightboxSrc(null)}
+        />
       )}
       {displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit />}
       <div
@@ -488,7 +586,7 @@ function ResourceDetail({
                     previous: 'Vorige afbeelding',
                   }}
                   itemRenderer={(i) =>
-                    renderImage(i.url, clickableImage, i.description)
+                    renderImage(i.url, clickableImage, i.description, i.alt)
                   }
                 />
               )}
@@ -696,23 +794,62 @@ function ResourceDetail({
 
                   <Spacer size={0.5} />
                   <div className="resource-detail-pil-list-content">
-                    {(
-                      resource.tags as Array<{
+                    {(() => {
+                      type TagItem = {
                         type: string;
                         name: string;
                         seqnr?: number;
-                      }>
-                    )
-                      ?.filter((t) => t.type !== 'status')
-                      ?.sort((a: { seqnr?: number }, b: { seqnr?: number }) => {
+                      };
+                      const sortBySeqnr = (
+                        a: { seqnr?: number },
+                        b: { seqnr?: number }
+                      ) => {
                         if (a.seqnr === undefined || a.seqnr === null) return 1;
                         if (b.seqnr === undefined || b.seqnr === null)
                           return -1;
                         return a.seqnr - b.seqnr;
-                      })
-                      ?.map((t) => (
-                        <Pill text={t.name} />
-                      ))}
+                      };
+
+                      const visibleTags = (
+                        (resource.tags as Array<TagItem>) || []
+                      ).filter((t) => t.type !== 'status');
+
+                      // Collapse: when the resource holds every tag of the
+                      // configured type, show a single label pill instead.
+                      const tagsOfCollapseType = visibleTags.filter(
+                        (t) => t.type === collapseTagType
+                      );
+                      const shouldCollapse =
+                        !!collapseTagType &&
+                        !!resolvedCollapseLabel &&
+                        Array.isArray(collapseTags) &&
+                        collapseTags.length > 0 &&
+                        tagsOfCollapseType.length === collapseTags.length;
+
+                      if (shouldCollapse) {
+                        const collapsed = tagsOfCollapseType.sort(sortBySeqnr);
+                        const remaining = visibleTags
+                          .filter((t) => t.type !== collapseTagType)
+                          .sort(sortBySeqnr);
+                        return (
+                          <>
+                            <CollapsibleTagGroup
+                              label={resolvedCollapseLabel}
+                              tags={collapsed}
+                            />
+                            {remaining.map((t, index) => (
+                              <Pill key={`${t.name}-${index}`} text={t.name} />
+                            ))}
+                          </>
+                        );
+                      }
+
+                      return visibleTags
+                        .sort(sortBySeqnr)
+                        .map((t, index) => (
+                          <Pill key={`${t.name}-${index}`} text={t.name} />
+                        ));
+                    })()}
                   </div>
                   <Spacer size={2} />
                 </div>
