@@ -48,7 +48,6 @@ module.exports = function (db, sequelize, DataTypes) {
               'projectDisplayName',
               'nickName',
               'name',
-              'displayName',
               'email',
               'phoneNumber',
               'address',
