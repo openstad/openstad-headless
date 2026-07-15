@@ -6,6 +6,7 @@ import {
   fillTimelineEndDates,
   formatDutchDate,
 } from '@openstad-headless/lib/timeline-dates';
+import * as RadixDialog from '@radix-ui/react-dialog';
 import {
   FormField,
   FormFieldDescription,
@@ -408,6 +409,11 @@ const TimelineField: FC<TimelineFieldProps> = ({
         onOpenChange={(open) => !open && closeDialog()}
         className="timeline-dialog">
         <div className="timeline-dialog-content">
+          <RadixDialog.Title className="timeline-dialog-title">
+            {editingTrigger !== null
+              ? 'Tijdlijn-item bewerken'
+              : 'Tijdlijn-item toevoegen'}
+          </RadixDialog.Title>
           <FormField type="text">
             <Paragraph className="utrecht-form-field__label">
               <FormLabel htmlFor={dateId}>Datum</FormLabel>

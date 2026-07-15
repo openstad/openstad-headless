@@ -14,11 +14,16 @@ import { UploadDocument } from '@/hooks/upload-document';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { formatDutchDate } from '@openstad-headless/lib/timeline-dates';
+import {
+  formatFileSize,
+  getFileFormat,
+} from '@openstad-headless/ui/src/lib/format-file-size';
 import * as Switch from '@radix-ui/react-switch';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 export interface AgendaItem {
@@ -42,6 +47,8 @@ export interface AgendaLink {
   kind?: 'link' | 'document';
   soort?: 'link' | 'document';
   documentName?: string;
+  fileFormat?: string;
+  fileSize?: string;
 }
 
 interface AgendaItemsEditorProps {
@@ -68,6 +75,8 @@ const formSchema = z.object({
         openInNewWindow: z.boolean(),
         kind: z.enum(['link', 'document']).optional(),
         documentName: z.string().optional(),
+        fileFormat: z.string().optional(),
+        fileSize: z.string().optional(),
       })
     )
     .optional(),
@@ -240,6 +249,8 @@ export function AgendaItemsEditor({
             openInNewWindow: v?.openInNewWindow || false,
             kind: v?.kind || link.kind || link.soort || 'link',
             documentName: v?.documentName ?? link.documentName,
+            fileFormat: v?.fileFormat ?? link.fileFormat,
+            fileSize: v?.fileSize ?? link.fileSize,
           };
         })
       );
@@ -258,6 +269,8 @@ export function AgendaItemsEditor({
         openInNewWindow: last?.openInNewWindow || false,
         kind: last?.kind || 'link',
         documentName: last?.documentName,
+        fileFormat: last?.fileFormat,
+        fileSize: last?.fileSize,
       };
       setLinks((currentLinks) => [...currentLinks, newLink]);
     }
@@ -415,18 +428,34 @@ export function AgendaItemsEditor({
                         onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (!file) return;
-                          const uploaded = await UploadDocument(
-                            file,
-                            project as string
-                          );
-                          if (uploaded?.url) {
-                            form.setValue(
-                              `links.${activeLinkIndex}.url`,
-                              uploaded.url
+                          try {
+                            const uploaded = await UploadDocument(
+                              file,
+                              project as string
                             );
-                            form.setValue(
-                              `links.${activeLinkIndex}.documentName`,
-                              uploaded.name || file.name
+                            if (uploaded?.url) {
+                              form.setValue(
+                                `links.${activeLinkIndex}.url`,
+                                uploaded.url
+                              );
+                              form.setValue(
+                                `links.${activeLinkIndex}.documentName`,
+                                uploaded.name || file.name
+                              );
+                              form.setValue(
+                                `links.${activeLinkIndex}.fileFormat`,
+                                getFileFormat(file.name)
+                              );
+                              form.setValue(
+                                `links.${activeLinkIndex}.fileSize`,
+                                file.size > 0
+                                  ? formatFileSize(file.size)
+                                  : undefined
+                              );
+                            }
+                          } catch {
+                            toast.error(
+                              'Document uploaden mislukt. Probeer het opnieuw.'
                             );
                           }
                         }}

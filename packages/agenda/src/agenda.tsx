@@ -170,7 +170,7 @@ function Agenda({
                       rel={
                         link.openInNewWindow ? 'noopener noreferrer' : undefined
                       }>
-                      {link.title}
+                      {link.title || link.url}
                       {meta}
                     </LinkListLink>
                   );

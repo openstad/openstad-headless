@@ -248,6 +248,10 @@ module.exports = function (db, sequelize, DataTypes) {
 
       timeline: {
         type: DataTypes.JSON,
+        auth: {
+          createableBy: 'all',
+          updateableBy: ['admin', 'editor', 'owner', 'moderator'],
+        },
         allowNull: true,
         defaultValue: null,
         set: function (value) {
