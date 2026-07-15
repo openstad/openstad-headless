@@ -18,7 +18,7 @@ function removeURLParameter(url, parameter) {
     const pars = urlparts[1].split(/[&;]/g);
 
     // reverse iteration as may be destructive
-    for (let i = pars.length; i-- > 0; ) {
+    for (let i = pars.length; i-- > 0;) {
       // idiom for string.startsWith
       if (pars[i].lastIndexOf(prefix, 0) !== -1) {
         pars.splice(i, 1);
