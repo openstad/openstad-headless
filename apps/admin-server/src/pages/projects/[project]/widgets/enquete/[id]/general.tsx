@@ -54,6 +54,11 @@ const formSchema = z.object({
     .string()
     .optional()
     .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
+  isQuiz: z.boolean().optional(),
+  confirmAnswerMessage: z
+    .string()
+    .optional()
+    .default('Bevestig eerst je antwoord voordat je verdergaat.'),
   enableDraftPersistence: z.boolean().optional(),
   draftRetentionHours: z.coerce.number().optional(),
   showMinMaxAfterBlur: z.boolean().optional().default(false),
@@ -87,6 +92,10 @@ export default function WidgetEnqueteGeneral(
       maxCharactersError:
         props.maxCharactersError ||
         'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      isQuiz: props?.isQuiz ?? false,
+      confirmAnswerMessage:
+        props.confirmAnswerMessage ||
+        'Bevestig eerst je antwoord voordat je verdergaat.',
       enableDraftPersistence: props.enableDraftPersistence ?? false,
       draftRetentionHours: props.draftRetentionHours ?? 24,
       maxCharactersOverWarning:
@@ -168,6 +177,49 @@ export default function WidgetEnqueteGeneral(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="isQuiz"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Is dit een quiz?</FormLabel>
+                <FormDescription>
+                  Zet quiz- en feedbackopties aan. Per vraag kun je daarna
+                  instellen welke feedback bezoekers zien nadat ze een antwoord
+                  bevestigen.
+                </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.watch('isQuiz') && (
+            <FormField
+              control={form.control}
+              name="confirmAnswerMessage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Melding bij niet-bevestigd antwoord</FormLabel>
+                  <FormDescription>
+                    Tekst die verschijnt wanneer een bezoeker verder wil zonder
+                    een goed/fout-antwoord te bevestigen.
+                  </FormDescription>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        onFieldChange(field.name, e.target.value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}

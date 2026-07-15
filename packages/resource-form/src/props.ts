@@ -25,11 +25,7 @@ export type ResourceFormWidget = {
 
 export type General = {
   resource?:
-    | 'resource'
-    | 'article'
-    | 'activeUser'
-    | 'resourceUser'
-    | 'submission';
+    'resource' | 'article' | 'activeUser' | 'resourceUser' | 'submission';
   formName?: string;
   redirectUrl?: string;
   hideAdmin?: boolean;

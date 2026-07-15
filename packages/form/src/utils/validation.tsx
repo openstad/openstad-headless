@@ -109,17 +109,45 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
         return schema.optional();
       }
 
-    case 'checkbox':
-      if (typeof field.fieldRequired !== 'undefined' && field.fieldRequired) {
+    case 'checkbox': {
+      const minChoicesNum = toMinInt(field.minChoices);
+      const isRequired =
+        typeof field.fieldRequired !== 'undefined' && field.fieldRequired;
+
+      if (minChoicesNum > 0) {
+        const minMessage = field.minChoicesMessage
+          ? field.minChoicesMessage.replace(
+              '{minChoices}',
+              String(minChoicesNum)
+            )
+          : `Selecteer minimaal ${minChoicesNum} opties.`;
+        return z.preprocess(
+          (value) => (value === undefined || value === null ? '' : value),
+          z.string().refine(
+            (value) => {
+              try {
+                const parsed = JSON.parse(value || '[]');
+                return Array.isArray(parsed) && parsed.length >= minChoicesNum;
+              } catch {
+                return false;
+              }
+            },
+            { message: minMessage }
+          )
+        );
+      }
+
+      if (isRequired) {
         return z
           .string()
           .min(
             3,
             field.requiredWarning || 'Het veld' + fieldTitle + 'is verplicht'
           );
-      } else {
-        return undefined;
       }
+
+      return undefined;
+    }
     case 'documentUpload':
     case 'imageUpload':
       if (typeof field.fieldRequired !== 'undefined' && field.fieldRequired) {

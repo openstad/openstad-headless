@@ -366,12 +366,10 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
             budget += resource.budget;
           });
 
-          if (
-            !(
-              budget >= req.project.config.votes.minBudget &&
-              budget <= req.project.config.votes.maxBudget
-            )
-          ) {
+          if (!(
+            budget >= req.project.config.votes.minBudget &&
+            budget <= req.project.config.votes.maxBudget
+          )) {
             throw createError(400, 'Budget klopt niet');
           }
         }

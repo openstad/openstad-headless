@@ -42,6 +42,11 @@ export type FormProps = {
   totalFieldCount?: number;
   formStyle?: string;
   initialValues?: { [p: string]: FormValue };
+  confirmAnswerMessage?: string;
+  onFieldInteraction?: (fieldKey: string) => void;
+  onValidationErrors?: (
+    errors: Array<{ fieldKey: string; errorMessage: string | null }>
+  ) => void;
 };
 
 type PaginationFieldProps = {
@@ -106,6 +111,13 @@ type FieldWithOptionalFields = CombinedFieldProps & {
   routingSelectedQuestion?: string;
   routingSelectedAnswer?: string | string[];
   infoBlockStyle?: string;
+  feedbackMode?: 'none' | 'static' | 'perAnswer' | 'correctIncorrect';
+  feedbackText?: string;
+  feedbackCorrect?: string;
+  feedbackIncorrect?: string;
+  scaleFeedback?: string[];
+  minChoices?: string;
+  minChoicesMessage?: string;
 };
 
 export type {

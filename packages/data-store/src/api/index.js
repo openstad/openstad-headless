@@ -20,6 +20,7 @@ import user from './user';
 import userActivity from './user-activity';
 import userVote from './user-vote';
 import widget from './widget';
+import widgets from './widgets';
 
 const windowGlobal = typeof window !== 'undefined' ? window : {};
 
@@ -133,6 +134,10 @@ function API(props = {}) {
 
   self.widget = {
     fetch: widget.fetch.bind(self),
+  };
+
+  self.widgets = {
+    fetch: widgets.fetch.bind(self),
   };
 
   self.areas = {
