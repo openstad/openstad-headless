@@ -1,4 +1,5 @@
 import { FormValue } from '@openstad-headless/form/src/form';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import type { BaseProps } from '@openstad-headless/types';
 import { Button, Heading, Paragraph } from '@utrecht/component-library-react';
 import React, {
@@ -458,7 +459,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       }
       data-required={required}>
       <div className="dilemma-intro">
-        <Heading level={2} dangerouslySetInnerHTML={{ __html: title || '' }} />
+        <Heading
+          level={2}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(title || '') }}
+        />
         <div className="dilemma-progress">
           <span>
             {currentIndex + 1} van {dilemmas.length}
@@ -497,11 +501,13 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
               <Heading
                 level={3}
                 appearance="utrecht-heading-4"
-                dangerouslySetInnerHTML={{ __html: currentDilemma.a.title }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(currentDilemma.a.title),
+                }}
               />
               <Paragraph
                 dangerouslySetInnerHTML={{
-                  __html: currentDilemma.a.description,
+                  __html: sanitizeHtml(currentDilemma.a.description),
                 }}
               />
             </div>
@@ -534,11 +540,13 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
               <Heading
                 level={3}
                 appearance="utrecht-heading-4"
-                dangerouslySetInnerHTML={{ __html: currentDilemma.b.title }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(currentDilemma.b.title),
+                }}
               />
               <Paragraph
                 dangerouslySetInnerHTML={{
-                  __html: currentDilemma.b.description,
+                  __html: sanitizeHtml(currentDilemma.b.description),
                 }}
               />
             </div>
@@ -623,7 +631,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         <div className="info-card-container">
           <Paragraph
             dangerouslySetInnerHTML={{
-              __html: currentDilemma?.infoField || '',
+              __html: sanitizeHtml(currentDilemma?.infoField || ''),
             }}
           />
           <button

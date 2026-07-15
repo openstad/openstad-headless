@@ -23,6 +23,7 @@ import '@utrecht/design-tokens/dist/root.css';
 import React, { useState } from 'react';
 
 import { canLikeResource, hasRole } from '../../lib';
+import { sanitizeHtml } from '../../lib/sanitize';
 import { Icon } from '../../ui/src/icon';
 import './gridder-resource-detail.css';
 
@@ -213,15 +214,17 @@ export const GridderResourceDetail = ({
           <div>
             <div>
               <Heading1
-                dangerouslySetInnerHTML={{ __html: resource.title }}></Heading1>
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(resource.title),
+                }}></Heading1>
               <Paragraph
                 className="strong"
                 dangerouslySetInnerHTML={{
-                  __html: resource.summary,
+                  __html: sanitizeHtml(resource.summary),
                 }}></Paragraph>
               <Paragraph
                 dangerouslySetInnerHTML={{
-                  __html: resource.description,
+                  __html: sanitizeHtml(resource.description),
                 }}></Paragraph>
             </div>
           </div>

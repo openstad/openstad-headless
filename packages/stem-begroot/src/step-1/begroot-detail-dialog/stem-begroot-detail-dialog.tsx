@@ -1,5 +1,6 @@
 import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-detail-map';
 import { humanizeDate } from '@openstad-headless/lib/humanize-date';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import {
   Icon,
   IconButton,
@@ -276,7 +277,7 @@ export const StemBegrootResourceDetailDialog = ({
                           {displayTitle ? (
                             <Heading1
                               dangerouslySetInnerHTML={{
-                                __html: resource?.title,
+                                __html: sanitizeHtml(resource?.title),
                               }}
                             />
                           ) : null}
@@ -284,14 +285,14 @@ export const StemBegrootResourceDetailDialog = ({
                             <Paragraph
                               className="strong"
                               dangerouslySetInnerHTML={{
-                                __html: resource?.summary,
+                                __html: sanitizeHtml(resource?.summary),
                               }}
                             />
                           ) : null}
                           {displayDescription ? (
                             <Paragraph
                               dangerouslySetInnerHTML={{
-                                __html: resource?.description,
+                                __html: sanitizeHtml(resource?.description),
                               }}
                             />
                           ) : null}
@@ -317,7 +318,7 @@ export const StemBegrootResourceDetailDialog = ({
                                 <Spacer size={1} />
                                 <div
                                   dangerouslySetInnerHTML={{
-                                    __html: mb.description,
+                                    __html: sanitizeHtml(mb.description),
                                   }}
                                 />
                               </div>

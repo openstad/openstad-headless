@@ -15,6 +15,7 @@ import {
 } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
@@ -249,7 +250,7 @@ const defaultItemRenderer = (
       return (
         <div
           dangerouslySetInnerHTML={{
-            __html: render,
+            __html: sanitizeHtml(render),
           }}></div>
       );
     } catch (e) {

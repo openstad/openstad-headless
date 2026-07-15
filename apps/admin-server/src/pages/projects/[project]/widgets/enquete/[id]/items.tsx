@@ -37,6 +37,7 @@ import {
   MatrixOption,
   Option,
 } from '@openstad-headless/enquete/src/types/enquete-props';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
@@ -943,14 +944,16 @@ export default function WidgetEnqueteItems(
                                 setOption(null);
                               }}
                               dangerouslySetInnerHTML={{
-                                __html: `${
-                                  item.title ||
-                                  (item?.questionType === 'pagination'
-                                    ? '--- Nieuwe pagina ---'
-                                    : item?.questionType === 'swipe'
-                                      ? 'Swipe'
-                                      : 'Geen titel')
-                                }`,
+                                __html: sanitizeHtml(
+                                  `${
+                                    item.title ||
+                                    (item?.questionType === 'pagination'
+                                      ? '--- Nieuwe pagina ---'
+                                      : item?.questionType === 'swipe'
+                                        ? 'Swipe'
+                                        : 'Geen titel')
+                                  }`
+                                ),
                               }}></span>
                             <span className="gap-2 py-3 px-2">
                               <X

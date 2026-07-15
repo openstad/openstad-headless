@@ -39,6 +39,7 @@ import {
   Matrix,
   MatrixOption,
 } from '@openstad-headless/enquete/src/types/enquete-props';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
@@ -1132,10 +1133,11 @@ export default function WidgetChoiceGuideItems(
                               }}>
                               <span
                                 dangerouslySetInnerHTML={{
-                                  __html:
+                                  __html: sanitizeHtml(
                                     item.type === 'pagination'
                                       ? '--- Nieuwe pagina ---'
-                                      : item.title || 'Geen titel',
+                                      : item.title || 'Geen titel'
+                                  ),
                                 }}
                               />
                             </span>
