@@ -29,8 +29,8 @@ exports.index = (req, res, next) => {
     let availableAuthType = availableAuthTypes.shift();
     let url = availableAuthType.loginUrl + '?clientId=' + req.client.clientId;
 
-    if (req.query.redirect_uri) {
-      url = url + '&redirect_uri=' + encodeURIComponent(req.query.redirect_uri);
+    if (req.redirectUri) {
+      url = url + '&redirect_uri=' + encodeURIComponent(req.redirectUri);
     }
 
     res.redirect(url);
@@ -40,9 +40,7 @@ exports.index = (req, res, next) => {
       isPriviligedRoute: isPriviligedRoute,
       clientId: req.client.clientId,
       client: req.client,
-      redirect_uri: req.query.redirect_uri
-        ? encodeURIComponent(req.query.redirect_uri)
-        : '',
+      redirect_uri: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
     });
   }
 };

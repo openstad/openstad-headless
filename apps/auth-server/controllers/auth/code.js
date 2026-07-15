@@ -41,9 +41,7 @@ exports.login = (req, res, next) => {
       ? configAuthType.displaySidebar
       : authCodeConfig.displaySidebar,
     backUrl: authCodeConfig.displayBackbutton ? backUrl : false,
-    redirect_uri: req.query.redirect_uri
-      ? encodeURIComponent(req.query.redirect_uri)
-      : '',
+    redirect_uri: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
   });
 };
 
@@ -66,8 +64,8 @@ exports.postLogin = (req, res, next) => {
         req.flash('error', {
           msg: configAuthType.errorMessage || authCodeConfig.errorMessage,
         });
-        const redirectUrl = req.query.redirect_uri
-          ? req.query.redirect_uri
+        const redirectUrl = req.redirectUri
+          ? req.redirectUri
           : req.client.redirectUrl;
         if (!redirectUrl)
           return next(
@@ -92,8 +90,8 @@ exports.postLogin = (req, res, next) => {
           logAuthEvent(req, 'login', {
             data: { method: 'uniqueCode' },
           });
-          const redirectUrl = req.query.redirect_uri
-            ? req.query.redirect_uri
+          const redirectUrl = req.redirectUri
+            ? req.redirectUri
             : req.client.redirectUrl;
           if (!redirectUrl)
             return next(

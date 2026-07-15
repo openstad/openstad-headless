@@ -6,8 +6,8 @@ const failCallback = function (req, res, next, options) {
   const redirectUrl =
     clientConfig && clientConfig.emailRedirectUrl
       ? clientConfig.emailRedirectUrl
-      : req.query.redirect_uri
-        ? encodeURIComponent(req.query.redirect_uri)
+      : req.redirectUri
+        ? encodeURIComponent(req.redirectUri)
         : '';
   res.redirect(
     '/login?clientId=' + req.client.clientId + '&redirect_uri=' + redirectUrl

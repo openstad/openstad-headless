@@ -46,9 +46,7 @@ exports.login = [
     res.render('auth/url/login', {
       clientId: req.query.clientId,
       client: req.client,
-      redirectUrl: req.query.redirect_uri
-        ? encodeURIComponent(req.query.redirect_uri)
-        : '',
+      redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
       title:
         configAuthType && configAuthType.title ? configAuthType.title : false,
       description:
@@ -75,8 +73,8 @@ exports.confirmation = (req, res) => {
       : {};
 
   const clientId = req.query.clientId;
-  const redirectUrl = req.query.redirect_uri
-    ? encodeURIComponent(req.query.redirect_uri)
+  const redirectUrl = req.redirectUri
+    ? encodeURIComponent(req.redirectUri)
     : '';
 
   const vars = {
@@ -108,9 +106,7 @@ exports.authenticate = (req, res) => {
   res.render('auth/url/authenticate', {
     clientId: req.query.clientId,
     client: req.client,
-    redirectUrl: req.query.redirect_uri
-      ? encodeURIComponent(req.query.redirect_uri)
-      : '',
+    redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
     loaderTitle: configAuthType.loaderTitle,
     loaderDescription: configAuthType.loaderDescription,
     loaderImage: configAuthType.loaderImage,
@@ -203,8 +199,8 @@ exports.postLogin = async (req, res, next) => {
     req.redirectUrl =
       clientConfig && clientConfig.emailRedirectUrl
         ? clientConfig.emailRedirectUrl
-        : req.query.redirect_uri
-          ? encodeURIComponent(req.query.redirect_uri)
+        : req.redirectUri
+          ? encodeURIComponent(req.redirectUri)
           : '';
 
     let user = await getUser(req.body.email);
@@ -269,8 +265,8 @@ exports.postAuthenticate = (req, res, next) => {
     if (err) {
       return next(err);
     }
-    const redirectUrl = req.query.redirect_uri
-      ? encodeURIComponent(req.query.redirect_uri)
+    const redirectUrl = req.redirectUri
+      ? encodeURIComponent(req.redirectUri)
       : req.client.redirectUrl;
 
     if (!redirectUrl) {

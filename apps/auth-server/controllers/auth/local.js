@@ -47,12 +47,10 @@ exports.login = (req, res) => {
   res.render('auth/local/login', {
     loginUrl:
       authLocalConfig.loginUrl +
-      `?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : ''}`,
+      `?clientId=${req.client.clientId}&redirect_uri=${req.redirectUri ? encodeURIComponent(req.redirectUri) : ''}`,
     clientId: req.client.clientId,
     client: req.client,
-    redirectUrl: req.query.redirect_uri
-      ? encodeURIComponent(req.query.redirect_uri)
-      : '',
+    redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
     title: configAuthType.title ? configAuthType.title : authLocalConfig.title,
     description: configAuthType.description
       ? configAuthType.description
@@ -131,8 +129,8 @@ exports.postLogin = (req, res, next) => {
         data: { method: 'local', email: req.body.email },
       });
       req.flash('error', { msg: 'Incorrect combination email/password' });
-      const redirectUrl = req.query.redirect_uri
-        ? encodeURIComponent(req.query.redirect_uri)
+      const redirectUrl = req.redirectUri
+        ? encodeURIComponent(req.redirectUri)
         : req.client.redirectUrl;
       let loginUrl = authLocalConfig.loginUrl;
       if (req.params.priviligedRoute && req.params.priviligedRoute == 'admin') {
@@ -154,8 +152,8 @@ exports.postLogin = (req, res, next) => {
         })
         .then(() => clientAuth.saveSession(req.session))
         .then(() => {
-          const redirectUrl = req.query.redirect_uri
-            ? encodeURIComponent(req.query.redirect_uri)
+          const redirectUrl = req.redirectUri
+            ? encodeURIComponent(req.redirectUri)
             : req.client.redirectUrl;
           if (!redirectUrl)
             return next(

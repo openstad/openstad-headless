@@ -48,7 +48,8 @@ exports.withOne = async (req, res, next) => {
       req.client = client;
 
       try {
-        validateRedirectUri(req.query.redirect_uri, client);
+        req.redirectUri =
+          validateRedirectUri(req.query.redirect_uri, client) || '';
       } catch (err) {
         return next(err);
       }
@@ -265,7 +266,7 @@ exports.check2FA = (req, res, next) => {
     return res.redirect(
       `/auth/two-factor?clientId=${
         req.client.clientId
-      }&redirect_uri=${req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : ''}`
+      }&redirect_uri=${req.redirectUri ? encodeURIComponent(req.redirectUri) : ''}`
     );
   }
 
@@ -322,7 +323,7 @@ exports.checkRequiredUserFields = (req, res, next) => {
     res.redirect(
       `/auth/required-fields?clientId=${
         req.client.clientId
-      }&redirect_uri=${req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : ''}`
+      }&redirect_uri=${req.redirectUri ? encodeURIComponent(req.redirectUri) : ''}`
     );
   } else {
     next();

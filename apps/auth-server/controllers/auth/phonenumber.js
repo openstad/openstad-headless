@@ -49,9 +49,7 @@ exports.login = (req, res) => {
   res.render('auth/phonenumber/login', {
     loginUrl: authPhonenumberConfig.loginUrl,
     clientId: req.client.clientId,
-    redirectUrl: req.query.redirect_uri
-      ? encodeURIComponent(req.query.redirect_uri)
-      : '',
+    redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
     client: req.client,
     title:
       configAuthType.loginTitle ||
@@ -121,11 +119,11 @@ exports.postLogin = async (req, res, next) => {
   req.redirectUrl =
     clientConfig && clientConfig.emailRedirectUrl
       ? clientConfig.emailRedirectUrl
-      : req.query.redirect_uri
-        ? encodeURIComponent(req.query.redirect_uri)
+      : req.redirectUri
+        ? encodeURIComponent(req.redirectUri)
         : '';
-  const redirectUrl = req.query.redirect_uri
-    ? req.query.redirect_uri
+  const redirectUrl = req.redirectUri
+    ? req.redirectUri
     : req.client.redirectUrl;
   if (!redirectUrl)
     return next(
@@ -199,9 +197,7 @@ exports.smsCode = (req, res) => {
   res.render('auth/phonenumber/sms-code', {
     loginUrl: authPhonenumberConfig.smsCodeUrl,
     clientId: req.client.clientId,
-    redirectUrl: req.query.redirect_uri
-      ? encodeURIComponent(req.query.redirect_uri)
-      : '',
+    redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
     client: req.client,
     title:
       configAuthType.smsCodeTitle ||
@@ -240,8 +236,8 @@ exports.postSmsCode = (req, res, next) => {
     'phonenumber',
     { session: false },
     function (err, user, info) {
-      const redirectUrl = req.query.redirect_uri
-        ? req.query.redirect_uri
+      const redirectUrl = req.redirectUri
+        ? req.redirectUri
         : req.client.redirectUrl;
       if (!redirectUrl)
         return next(

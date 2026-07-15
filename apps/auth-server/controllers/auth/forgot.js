@@ -17,7 +17,7 @@ const authResetConfig = require('../../config/auth').get('Reset');
 const { logAuthEvent } = require('../../middleware/auditLog');
 
 const encodedRedirect = (req) =>
-  req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : '';
+  req.redirectUri ? encodeURIComponent(req.redirectUri) : '';
 
 exports.forgot = (req, res) => {
   const config = req.client.config ? req.client.config : {};

@@ -30,49 +30,46 @@ function renderWith(clientOverrides = {}) {
   return rendered;
 }
 
-function consentLabel(rendered) {
-  const field = rendered.locals.requiredFields.find(
-    (f) => f.key === 'privacyConsent'
-  );
-  return field ? field.label : undefined;
+function consentField(rendered) {
+  return rendered.locals.requiredFields.find((f) => f.key === 'privacyConsent');
 }
 
 describe('required-fields privacy consent label', () => {
-  test('builds an anchor for a valid https policy URL', () => {
-    const label = consentLabel(
+  test('exposes a valid https policy URL plus prefix/text for the template', () => {
+    const field = consentField(
       renderWith({ clientDisclaimerUrl: 'https://example.nl/privacy' })
     );
-    expect(label).toContain('<a href="https://example.nl/privacy"');
-    expect(label).toContain('target="_blank"');
-    expect(label).toContain('rel="noreferrer noopener"');
-    expect(label).toContain('aria-label=');
+    expect(field.privacyUrl).toBe('https://example.nl/privacy');
+    expect(field.labelPrefix).toBe('Ik ga akkoord met de ');
+    expect(field.labelSuffix).toBe('');
+    expect(field.privacyText).toBeTruthy();
   });
 
-  test('drops javascript: policy URLs and falls back to plain text', () => {
-    const label = consentLabel(
+  test('drops javascript: policy URLs and leaves only plain text', () => {
+    const field = consentField(
       renderWith({ clientDisclaimerUrl: 'javascript:alert(1)' })
     );
-    expect(label).not.toContain('<a ');
-    expect(label).not.toContain('javascript:');
+    expect(field.privacyUrl).toBe('');
+    expect(field.privacyText).toBeTruthy();
   });
 
-  test('quote injection in the policy URL cannot escape the href attribute', () => {
-    const label = consentLabel(
+  test('quote injection in the policy URL is percent-encoded by new URL()', () => {
+    const field = consentField(
       renderWith({
         clientDisclaimerUrl: 'https://example.nl/x?"onmouseover="alert(1)',
       })
     );
-    expect(label).not.toContain('"onmouseover="');
-    expect(label).toContain('<a href="https://example.nl/');
+    expect(field.privacyUrl).not.toContain('"onmouseover="');
+    expect(field.privacyUrl.startsWith('https://example.nl/')).toBe(true);
   });
 
   test('script tags in the disclaimer text are stripped', () => {
-    const label = consentLabel(
+    const field = consentField(
       renderWith({
         clientDisclaimerUrl: 'https://example.nl/privacy',
         clientDisclaimerText: '<script>alert(1)</script>privacyverklaring',
       })
     );
-    expect(label).not.toContain('<script>');
+    expect(field.privacyText).not.toContain('<script>');
   });
 });

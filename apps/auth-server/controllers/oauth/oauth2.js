@@ -248,8 +248,11 @@ exports.authorization = [
         } else {
           res.render('dialog', {
             transactionID: req.oauth2.transactionID,
-            user: req.user,
-            client: req.oauth2.client,
+            user: { name: req.user?.name },
+            client: {
+              name: req.oauth2.client?.name,
+              clientId: req.oauth2.client?.clientId,
+            },
           });
         }
       })
@@ -260,8 +263,11 @@ exports.authorization = [
 
         res.render('dialog', {
           transactionID: req.oauth2.transactionID,
-          user: req.user,
-          client: req.oauth2.client,
+          user: { name: req.user?.name },
+          client: {
+            name: req.oauth2.client?.name,
+            clientId: req.oauth2.client?.clientId,
+          },
         });
       });
   },

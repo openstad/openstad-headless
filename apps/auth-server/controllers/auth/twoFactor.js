@@ -12,9 +12,7 @@ function isEncoded(uri) {
 }
 
 const formatRedirectUrl = (url, req) => {
-  let redirectUrl = req.query.redirect_uri
-    ? req.query.redirect_uri
-    : req.client.redirectUrl;
+  let redirectUrl = req.redirectUri ? req.redirectUri : req.client.redirectUrl;
 
   if (!redirectUrl) return `${url}?clientId=${req.client.clientId}`;
 
@@ -45,9 +43,7 @@ exports.index = (req, res, next) => {
     description: configTwoFactor.description,
     title: configTwoFactor.title,
     buttonText: configTwoFactor.buttonText,
-    redirectUrl: req.query.redirect_uri
-      ? encodeURIComponent(req.query.redirect_uri)
-      : '',
+    redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
   });
 };
 
@@ -75,8 +71,8 @@ exports.post = async (req, res, next) => {
       return next(e);
     }
 
-    const redirectUrl = req.query.redirect_uri
-      ? encodeURIComponent(req.query.redirect_uri)
+    const redirectUrl = req.redirectUri
+      ? encodeURIComponent(req.redirectUri)
       : req.client.redirectUrl;
     if (!redirectUrl)
       return next(
@@ -157,9 +153,7 @@ exports.configure = async (req, res, next) => {
       description: configTwoFactor.description,
       title: configTwoFactor.title,
       buttonText: configTwoFactor.buttonText,
-      redirectUrl: req.query.redirect_uri
-        ? encodeURIComponent(req.query.redirect_uri)
-        : '',
+      redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
     });
   }
 };
