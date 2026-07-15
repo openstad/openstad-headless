@@ -25,6 +25,8 @@ spec:
         - name: certs
           secret:
             secretName: openstad-auth-certificates
+        - name: init-tmp
+          emptyDir: {}
       containers:
       - name: {{ template "openstad.auth.fullname" . }}
         image: {{ .Values.auth.deploymentContainer.image }}
@@ -257,9 +259,8 @@ spec:
       initContainers:
       - name: init-db-ready
         image: {{ .Values.auth.deploymentContainer.image }}
-        # readOnlyRootFilesystem staat hier bewust uit: npm schrijft naar
-        # $HOME/.npm en /tmp tijdens init/migrate. Zie finding-matrix.
         securityContext:
+          readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
           capabilities:
             drop:
@@ -269,7 +270,16 @@ spec:
         command: ["/bin/bash", "-c"]
         args:
           - nc $DB_HOST $DB_PORT -z -w1 && npm run init-database -w apps/auth-server -- --only-if-empty && npm run migrate-database -w apps/auth-server
+        volumeMounts:
+          - mountPath: /tmp
+            name: init-tmp
         env:
+          # npm schrijft cache/logs naar $HOME/.npm; wijs die naar de /tmp emptyDir
+          # zodat readOnlyRootFilesystem: true kan.
+          - name: HOME
+            value: /tmp
+          - name: npm_config_cache
+            value: /tmp/.npm
           - name: APP_URL
             value: https://{{ template "openstad.auth.url" . }}
 
