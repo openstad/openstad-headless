@@ -190,7 +190,9 @@ function cleanUpProjects() {
 async function doStartServer(domain, req, res) {
   if (!apostropheServer[domain]) {
     console.log('Starting up project: ', domain);
-    apostropheServer[domain] = await run(domain, projects[domain], {});
+    apostropheServer[domain] = await run(domain, projects[domain], {
+      sitePrefix: req && req.sitePrefix,
+    });
     apostropheServer[domain].app.set('trust proxy', true);
     apostropheServer[domain].app(req, res);
     return Promise.resolve();
@@ -228,7 +230,7 @@ async function run(id, projectData, options, callback) {
     _id: id,
     shortName: 'openstad-' + projectData.id,
     mongo: {},
-    prefix: projectData.sitePrefix ? '/' + projectData.sitePrefix : false,
+    prefix: options && options.sitePrefix ? '/' + options.sitePrefix : false,
     modules: {
       ...aposConfig.modules,
       '@apostrophecms/express': {
@@ -430,7 +432,6 @@ app.use('/:sitePrefix', function (req, res, next) {
   });
 
   if (site) {
-    site.sitePrefix = req.params.sitePrefix;
     req.sitePrefix = req.params.sitePrefix;
     req.site = site;
 

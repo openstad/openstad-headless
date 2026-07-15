@@ -478,8 +478,7 @@ function Form({
     fieldInvalid: boolean,
     confirmed: boolean,
     optionFeedback:
-      | Record<string, 'correct' | 'incorrect' | 'missed'>
-      | undefined
+      Record<string, 'correct' | 'incorrect' | 'missed'> | undefined
   ) => {
     if (!field.type) {
       return null;
