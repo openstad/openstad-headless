@@ -27,6 +27,11 @@ spec:
         - securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           env:
           - name: URL
             value: https://{{ template "openstad.api.url" . }}
@@ -384,6 +389,15 @@ spec:
         {{- if .Values.plugins.enabled }}
         - name: install-plugins
           image: {{ .Values.plugins.nodeImage }}
+          # readOnlyRootFilesystem staat hier bewust uit: npm install schrijft
+          # naar $HOME/.npm naast het gemounte plugin-volume. Zie finding-matrix.
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -404,6 +418,15 @@ spec:
             {{- end }}
         {{- end }}
         - command: ["/bin/bash", "-c"]
+          # readOnlyRootFilesystem staat hier bewust uit: npm schrijft naar
+          # $HOME/.npm en /tmp tijdens init/migrate. Zie finding-matrix.
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           args:
             - nc $DB_HOST $DB_PORT -z -w1 && npm run init-database -w apps/api-server -- --only-if-empty && npm run migrate-database -w apps/api-server
           env:
