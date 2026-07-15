@@ -1,6 +1,7 @@
 const login = require('connect-ensure-login');
 const db = require('../../db');
 const clientAuth = require('../../utils/clientAuth');
+const sanitize = require('../../utils/sanitize');
 
 /**
  * Simple informational end point, if you want to get information
@@ -56,8 +57,12 @@ exports.info = (req, res) => {
 exports.account = [
   (req, res) => {
     res.render('account/profile', {
-      user: req.user,
-      client: req.client,
+      user: {
+        name: sanitize.plainText(req.user?.name || ''),
+        email: sanitize.plainText(req.user?.email || ''),
+        password: !!req.user?.password,
+      },
+      client: sanitize.client(req.client),
       displayLogout: true,
     });
   },

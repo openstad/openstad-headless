@@ -95,13 +95,13 @@ exports.index = (req, res, next) => {
   });
 
   res.render('auth/required-fields', {
-    client: req.client,
-    clientId: req.client.clientId,
+    client: sanitize.client(req.client),
+    clientId: sanitize.plainText(req.client.clientId),
     requiredFields: requiredUserFields,
-    info: configRequiredFields.info,
-    description: configRequiredFields.description,
-    title: configRequiredFields.title,
-    buttonText: configRequiredFields.buttonText,
+    info: sanitize.safeTags(configRequiredFields.info),
+    description: sanitize.safeTags(configRequiredFields.description),
+    title: sanitize.safeTags(configRequiredFields.title),
+    buttonText: sanitize.safeTags(configRequiredFields.buttonText),
     redirect_uri: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
   });
 };

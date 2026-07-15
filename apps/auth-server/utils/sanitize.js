@@ -98,6 +98,18 @@ var allSafeTags = {
   },
 };
 
+// sanitize-html laat entities achter (& -> &amp;); waarden die daarna nog door
+// nunjucks autoescape gaan zouden dubbel escapen. Decoden naar plain text,
+// autoescape doet daarna de (enige) escaping.
+var decodeEntities = function (text) {
+  return text
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&');
+};
+
 module.exports = {
   title: function (text) {
     // TODO: de replace is natuurlijk belachelijk, maar ik heb nergens een combi kunnen vinden waarin sanatize en nunjucks dit fatsoenlijk oplossen. Ik denk dat de weergaven van title naar |safe moeten, want ze zijn toch gesanatized, maar daar heb ik nu geen tijd voor
@@ -116,10 +128,30 @@ module.exports = {
 
   // TODO: Transform all call to these two options, instead
   //       of the content-type-named versions above.
+  // Non-strings (false/undefined als "niet gezet" in render locals) gaan
+  // ongewijzigd door.
   safeTags: function (text) {
-    return sanitize(text, allSafeTags);
+    return typeof text === 'string' ? sanitize(text, allSafeTags) : text;
   },
   noTags: function (text) {
-    return sanitize(text, noTags);
+    return typeof text === 'string' ? sanitize(text, noTags) : text;
+  },
+
+  // Voor render locals die de template onder autoescape toont: tags strippen,
+  // entities terugdecoden zodat autoescape niet dubbel escapet.
+  plainText: function (text) {
+    return typeof text === 'string'
+      ? decodeEntities(sanitize(text, noTags))
+      : text;
+  },
+
+  // Views gebruiken alleen client.name en client.clientId; geef nooit het
+  // hele (Sequelize-)clientobject aan res.render.
+  client: function (client) {
+    if (!client) return {};
+    return {
+      name: module.exports.plainText(client.name),
+      clientId: module.exports.plainText(client.clientId),
+    };
   },
 };

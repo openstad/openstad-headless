@@ -1,6 +1,7 @@
 const twofactor = require('node-2fa');
 const QRCode = require('qrcode');
 const clientAuth = require('../../utils/clientAuth');
+const sanitize = require('../../utils/sanitize');
 const { logAuthEvent } = require('../../middleware/auditLog');
 
 const twoFactorBaseUrl = '/auth/two-factor';
@@ -36,13 +37,13 @@ exports.index = (req, res, next) => {
   }
 
   res.render('auth/two-factor/authenticate', {
-    client: req.client,
-    clientId: req.client.clientId,
+    client: sanitize.client(req.client),
+    clientId: sanitize.plainText(req.client.clientId),
     postUrl: twoFactorBaseUrl,
-    info: configTwoFactor.info,
-    description: configTwoFactor.description,
-    title: configTwoFactor.title,
-    buttonText: configTwoFactor.buttonText,
+    info: sanitize.safeTags(configTwoFactor.info),
+    description: sanitize.safeTags(configTwoFactor.description),
+    title: sanitize.safeTags(configTwoFactor.title),
+    buttonText: sanitize.plainText(configTwoFactor.buttonText),
     redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
   });
 };
@@ -147,12 +148,12 @@ exports.configure = async (req, res, next) => {
     res.render('auth/two-factor/configure', {
       postUrl: twoFactorBaseUrl + '/configure',
       twoFactorQrSrc: qrCode,
-      twoFactorSecret: twoFactorSecret,
-      clientId: req.client.clientId,
-      info: configTwoFactor.info,
-      description: configTwoFactor.description,
-      title: configTwoFactor.title,
-      buttonText: configTwoFactor.buttonText,
+      twoFactorSecret: sanitize.plainText(String(twoFactorSecret || '')),
+      clientId: sanitize.plainText(req.client.clientId),
+      info: sanitize.plainText(configTwoFactor.info),
+      description: sanitize.plainText(configTwoFactor.description),
+      title: sanitize.plainText(configTwoFactor.title),
+      buttonText: sanitize.plainText(configTwoFactor.buttonText),
       redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
     });
   }

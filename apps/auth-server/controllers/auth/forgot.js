@@ -15,6 +15,7 @@ const authLocalConfig = require('../../config/auth').get('Local');
 const authForgotConfig = require('../../config/auth').get('Forgot');
 const authResetConfig = require('../../config/auth').get('Reset');
 const { logAuthEvent } = require('../../middleware/auditLog');
+const sanitize = require('../../utils/sanitize');
 
 const encodedRedirect = (req) =>
   req.redirectUri ? encodeURIComponent(req.redirectUri) : '';
@@ -27,19 +28,19 @@ exports.forgot = (req, res) => {
       : {};
 
   res.render('auth/forgot/forgot', {
-    title: configAuthType.title ? configAuthType.title : authForgotConfig.title,
-    description: configAuthType.description
-      ? configAuthType.description
-      : authForgotConfig.description,
-    backToLoginText: configAuthType.backToLoginText
-      ? configAuthType.backToLoginText
-      : authForgotConfig.backToLoginText,
-    label: configAuthType.label ? configAuthType.label : authForgotConfig.label,
-    buttonText: configAuthType.buttonText
-      ? configAuthType.buttonText
-      : authForgotConfig.buttonText,
-    clientId: req.client.clientId,
-    client: req.client,
+    title: sanitize.plainText(configAuthType.title || authForgotConfig.title),
+    description: sanitize.plainText(
+      configAuthType.description || authForgotConfig.description
+    ),
+    backToLoginText: sanitize.plainText(
+      configAuthType.backToLoginText || authForgotConfig.backToLoginText
+    ),
+    label: sanitize.plainText(configAuthType.label || authForgotConfig.label),
+    buttonText: sanitize.plainText(
+      configAuthType.buttonText || authForgotConfig.buttonText
+    ),
+    clientId: sanitize.plainText(req.client.clientId),
+    client: sanitize.client(req.client),
     redirectUrl: encodedRedirect(req),
   });
 };
@@ -52,15 +53,17 @@ exports.reset = (req, res) => {
       : authResetConfig;
 
   res.render('auth/forgot/reset', {
-    title: configAuthType.title,
-    description: configAuthType.description,
-    buttonText: configAuthType.buttonText,
-    labelConfirmPassword: configAuthType.labelConfirmPassword,
-    labelNewPassword: configAuthType.labelNewPassword,
-    labelEmail: configAuthType.labelEmail,
-    token: req.query.token,
-    clientId: req.client.clientId,
-    client: req.client,
+    title: sanitize.plainText(configAuthType.title),
+    description: sanitize.plainText(configAuthType.description),
+    buttonText: sanitize.plainText(configAuthType.buttonText),
+    labelConfirmPassword: sanitize.plainText(
+      configAuthType.labelConfirmPassword
+    ),
+    labelNewPassword: sanitize.plainText(configAuthType.labelNewPassword),
+    labelEmail: sanitize.plainText(configAuthType.labelEmail),
+    token: sanitize.plainText(String(req.query.token || '')),
+    clientId: sanitize.plainText(req.client.clientId),
+    client: sanitize.client(req.client),
     redirectUrl: encodedRedirect(req),
   });
 };

@@ -11,6 +11,7 @@ const emailService = require('../../services/email');
 const authCodeConfig = require('../../config/auth').get(authType);
 const clientAuth = require('../../utils/clientAuth');
 const interpolate = require('../../utils/interpolate');
+const sanitize = require('../../utils/sanitize');
 const { logAuthEvent } = require('../../middleware/auditLog');
 
 exports.login = (req, res, next) => {
@@ -23,24 +24,25 @@ exports.login = (req, res, next) => {
   const vars = { clientEmail: config.contactEmail || '' };
 
   res.render('auth/code/login', {
-    client: req.client,
-    clientId: req.client.clientId,
-    title: configAuthType.title ? configAuthType.title : authCodeConfig.title,
-    description: configAuthType.description
-      ? configAuthType.description
-      : authCodeConfig.description,
-    label: configAuthType.label ? configAuthType.label : authCodeConfig.label,
-    helpText: interpolate(
-      configAuthType.helpText || authCodeConfig.helpText,
-      vars
+    client: sanitize.client(req.client),
+    clientId: sanitize.plainText(req.client.clientId),
+    title: sanitize.plainText(configAuthType.title || authCodeConfig.title),
+    description: sanitize.plainText(
+      configAuthType.description || authCodeConfig.description
     ),
-    buttonText: configAuthType.buttonText
-      ? configAuthType.buttonText
-      : authCodeConfig.buttonText,
-    displaySidebar: configAuthType.displaySidebar
-      ? configAuthType.displaySidebar
-      : authCodeConfig.displaySidebar,
-    backUrl: authCodeConfig.displayBackbutton ? backUrl : false,
+    label: sanitize.plainText(configAuthType.label || authCodeConfig.label),
+    helpText: sanitize.safeTags(
+      interpolate(configAuthType.helpText || authCodeConfig.helpText, vars)
+    ),
+    buttonText: sanitize.plainText(
+      configAuthType.buttonText || authCodeConfig.buttonText
+    ),
+    displaySidebar: !!(
+      configAuthType.displaySidebar || authCodeConfig.displaySidebar
+    ),
+    backUrl: authCodeConfig.displayBackbutton
+      ? sanitize.plainText(backUrl)
+      : false,
     redirect_uri: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
   });
 };

@@ -12,6 +12,7 @@ const authService = require('../../services/authService');
 const tokenSMS = require('../../services/tokenSMS');
 const authPhonenumberConfig = require('../../config/auth').get('Phonenumber');
 const interpolate = require('../../utils/interpolate');
+const sanitize = require('../../utils/sanitize');
 const verificationService = require('../../services/verificationService');
 const { logAuthEvent } = require('../../middleware/auditLog');
 const URL = require('url').URL;
@@ -48,38 +49,45 @@ exports.login = (req, res) => {
 
   res.render('auth/phonenumber/login', {
     loginUrl: authPhonenumberConfig.loginUrl,
-    clientId: req.client.clientId,
+    clientId: sanitize.plainText(req.client.clientId),
     redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
-    client: req.client,
-    title:
+    client: sanitize.client(req.client),
+    title: sanitize.plainText(
       configAuthType.loginTitle ||
-      configAuthType.title ||
-      authPhonenumberConfig.loginTitle ||
-      authPhonenumberConfig.title,
-    subtitle:
-      configAuthType.loginSubtitle || authPhonenumberConfig.loginSubtitle,
-    description:
-      configAuthType.loginDescription ||
-      configAuthType.description ||
-      authPhonenumberConfig.loginDescription ||
-      authPhonenumberConfig.description,
-    label:
-      configAuthType.loginLabel ||
-      configAuthType.label ||
-      authPhonenumberConfig.loginLabel ||
-      authPhonenumberConfig.label,
-    helpText: interpolate(
-      configAuthType.loginHelpText ||
-        configAuthType.helpText ||
-        authPhonenumberConfig.loginHelpText ||
-        authPhonenumberConfig.helpText,
-      vars
+        configAuthType.title ||
+        authPhonenumberConfig.loginTitle ||
+        authPhonenumberConfig.title
     ),
-    buttonText:
+    subtitle: sanitize.plainText(
+      configAuthType.loginSubtitle || authPhonenumberConfig.loginSubtitle
+    ),
+    description: sanitize.plainText(
+      configAuthType.loginDescription ||
+        configAuthType.description ||
+        authPhonenumberConfig.loginDescription ||
+        authPhonenumberConfig.description
+    ),
+    label: sanitize.plainText(
+      configAuthType.loginLabel ||
+        configAuthType.label ||
+        authPhonenumberConfig.loginLabel ||
+        authPhonenumberConfig.label
+    ),
+    helpText: sanitize.safeTags(
+      interpolate(
+        configAuthType.loginHelpText ||
+          configAuthType.helpText ||
+          authPhonenumberConfig.loginHelpText ||
+          authPhonenumberConfig.helpText,
+        vars
+      )
+    ),
+    buttonText: sanitize.plainText(
       configAuthType.loginButtonText ||
-      configAuthType.buttonText ||
-      authPhonenumberConfig.loginButtonText ||
-      authPhonenumberConfig.buttonText,
+        configAuthType.buttonText ||
+        authPhonenumberConfig.loginButtonText ||
+        authPhonenumberConfig.buttonText
+    ),
   });
 };
 
@@ -196,38 +204,45 @@ exports.smsCode = (req, res) => {
 
   res.render('auth/phonenumber/sms-code', {
     loginUrl: authPhonenumberConfig.smsCodeUrl,
-    clientId: req.client.clientId,
+    clientId: sanitize.plainText(req.client.clientId),
     redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
-    client: req.client,
-    title:
+    client: sanitize.client(req.client),
+    title: sanitize.plainText(
       configAuthType.smsCodeTitle ||
-      configAuthType.title ||
-      authPhonenumberConfig.smsCodeTitle ||
-      authPhonenumberConfig.title,
-    subtitle:
-      configAuthType.smsCodeSubtitle || authPhonenumberConfig.smsCodeSubtitle,
-    description:
-      configAuthType.smsCodeDescription ||
-      configAuthType.description ||
-      authPhonenumberConfig.smsCodeDescription ||
-      authPhonenumberConfig.description,
-    label:
-      configAuthType.smsCodeLabel ||
-      configAuthType.label ||
-      authPhonenumberConfig.smsCodeLabel ||
-      authPhonenumberConfig.label,
-    helpText: interpolate(
-      configAuthType.smsCodeHelpText ||
-        configAuthType.helpText ||
-        authPhonenumberConfig.smsCodeHelpText ||
-        authPhonenumberConfig.helpText,
-      smsVars
+        configAuthType.title ||
+        authPhonenumberConfig.smsCodeTitle ||
+        authPhonenumberConfig.title
     ),
-    buttonText:
+    subtitle: sanitize.plainText(
+      configAuthType.smsCodeSubtitle || authPhonenumberConfig.smsCodeSubtitle
+    ),
+    description: sanitize.plainText(
+      configAuthType.smsCodeDescription ||
+        configAuthType.description ||
+        authPhonenumberConfig.smsCodeDescription ||
+        authPhonenumberConfig.description
+    ),
+    label: sanitize.plainText(
+      configAuthType.smsCodeLabel ||
+        configAuthType.label ||
+        authPhonenumberConfig.smsCodeLabel ||
+        authPhonenumberConfig.label
+    ),
+    helpText: sanitize.safeTags(
+      interpolate(
+        configAuthType.smsCodeHelpText ||
+          configAuthType.helpText ||
+          authPhonenumberConfig.smsCodeHelpText ||
+          authPhonenumberConfig.helpText,
+        smsVars
+      )
+    ),
+    buttonText: sanitize.plainText(
       configAuthType.smsCodeButtonText ||
-      configAuthType.buttonText ||
-      authPhonenumberConfig.smsCodeButtonText ||
-      authPhonenumberConfig.buttonText,
+        configAuthType.buttonText ||
+        authPhonenumberConfig.smsCodeButtonText ||
+        authPhonenumberConfig.buttonText
+    ),
   });
 };
 

@@ -1,7 +1,9 @@
+const sanitize = require('../../utils/sanitize');
+
 exports.info = (req, res, next) => {
   res.render('auth/unsubscribe', {
-    title: req.client?.name || '',
-    clientId: req.client?.clientId,
-    client: req.client,
+    title: sanitize.plainText(req.client?.name || ''),
+    clientId: sanitize.plainText(req.client?.clientId || ''),
+    client: sanitize.client(req.client),
   });
 };

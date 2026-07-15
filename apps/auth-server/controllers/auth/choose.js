@@ -1,5 +1,6 @@
 const adminAuthTypes = require('../../config/auth').adminTypes;
 const configAuthTypes = require('../../config/auth.js').types;
+const sanitize = require('../../utils/sanitize');
 
 /**
  * Controller responsible for handling the logic for choosing which login options are availablde
@@ -38,8 +39,8 @@ exports.index = (req, res, next) => {
     res.render('auth/choose', {
       authTypes: availableAuthTypes,
       isPriviligedRoute: isPriviligedRoute,
-      clientId: req.client.clientId,
-      client: req.client,
+      clientId: sanitize.plainText(req.client.clientId),
+      client: sanitize.client(req.client),
       redirect_uri: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
     });
   }

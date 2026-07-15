@@ -14,6 +14,7 @@ const db = require('../../db');
 const authLocalConfig = require('../../config/auth').get('Local');
 const clientAuth = require('../../utils/clientAuth');
 const { safeRedirectUri } = require('../../utils/redirectUri');
+const sanitize = require('../../utils/sanitize');
 const authType = 'Local';
 const { logAuthEvent } = require('../../middleware/auditLog');
 
@@ -44,32 +45,34 @@ exports.login = (req, res) => {
       ? config.authTypes[authType]
       : {};
 
+  const clientId = sanitize.plainText(req.client.clientId);
+
   res.render('auth/local/login', {
     loginUrl:
       authLocalConfig.loginUrl +
-      `?clientId=${req.client.clientId}&redirect_uri=${req.redirectUri ? encodeURIComponent(req.redirectUri) : ''}`,
-    clientId: req.client.clientId,
-    client: req.client,
+      `?clientId=${clientId}&redirect_uri=${req.redirectUri ? encodeURIComponent(req.redirectUri) : ''}`,
+    clientId: clientId,
+    client: sanitize.client(req.client),
     redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
-    title: configAuthType.title ? configAuthType.title : authLocalConfig.title,
-    description: configAuthType.description
-      ? configAuthType.description
-      : authLocalConfig.description,
-    emailLabel: configAuthType.emailLabel
-      ? configAuthType.emailLabel
-      : authLocalConfig.emailLabel,
-    passwordLabel: configAuthType.passwordLabel
-      ? configAuthType.passwordLabel
-      : authLocalConfig.passwordLabel,
-    helpText: configAuthType.helpText
-      ? configAuthType.helpText
-      : authLocalConfig.helpText,
-    buttonText: configAuthType.buttonText
-      ? configAuthType.buttonText
-      : authLocalConfig.buttonText,
-    forgotPasswordText: configAuthType.forgotPasswordText
-      ? configAuthType.forgotPasswordText
-      : authLocalConfig.forgotPasswordText,
+    title: sanitize.plainText(configAuthType.title || authLocalConfig.title),
+    description: sanitize.plainText(
+      configAuthType.description || authLocalConfig.description
+    ),
+    emailLabel: sanitize.plainText(
+      configAuthType.emailLabel || authLocalConfig.emailLabel
+    ),
+    passwordLabel: sanitize.plainText(
+      configAuthType.passwordLabel || authLocalConfig.passwordLabel
+    ),
+    helpText: sanitize.plainText(
+      configAuthType.helpText || authLocalConfig.helpText
+    ),
+    buttonText: sanitize.plainText(
+      configAuthType.buttonText || authLocalConfig.buttonText
+    ),
+    forgotPasswordText: sanitize.plainText(
+      configAuthType.forgotPasswordText || authLocalConfig.forgotPasswordText
+    ),
   });
 };
 
@@ -81,7 +84,7 @@ exports.login = (req, res) => {
  */
 exports.register = (req, res) => {
   res.render('auth/local/register', {
-    clientId: req.client.clientId,
+    clientId: sanitize.plainText(req.client.clientId),
   });
 };
 

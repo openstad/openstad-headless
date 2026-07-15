@@ -11,6 +11,7 @@ const {
   prefillAllowedDomains,
   validateRedirectUri,
 } = require('../../utils/redirectUri');
+const sanitize = require('../../utils/sanitize');
 
 exports.prefillAllowedDomains = prefillAllowedDomains;
 
@@ -247,12 +248,11 @@ exports.authorization = [
           })(req, res, next);
         } else {
           res.render('dialog', {
-            transactionID: req.oauth2.transactionID,
-            user: { name: req.user?.name },
-            client: {
-              name: req.oauth2.client?.name,
-              clientId: req.oauth2.client?.clientId,
-            },
+            transactionID: sanitize.plainText(
+              String(req.oauth2.transactionID || '')
+            ),
+            user: { name: sanitize.plainText(req.user?.name || '') },
+            client: sanitize.client(req.oauth2.client),
           });
         }
       })
@@ -262,12 +262,11 @@ exports.authorization = [
         );
 
         res.render('dialog', {
-          transactionID: req.oauth2.transactionID,
-          user: { name: req.user?.name },
-          client: {
-            name: req.oauth2.client?.name,
-            clientId: req.oauth2.client?.clientId,
-          },
+          transactionID: sanitize.plainText(
+            String(req.oauth2.transactionID || '')
+          ),
+          user: { name: sanitize.plainText(req.user?.name || '') },
+          client: sanitize.client(req.oauth2.client),
         });
       });
   },
