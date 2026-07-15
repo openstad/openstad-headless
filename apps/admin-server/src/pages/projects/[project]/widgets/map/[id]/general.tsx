@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -17,9 +16,9 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -33,50 +32,37 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function WidgetMapGeneral() {
+export default function WidgetMapGeneral(
+  props: { [key: string]: any } & EditFieldProps<any>
+) {
   const category = 'general';
-
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
-  const defaults = useCallback(
-    () => ({
-      display: widget?.config?.[category]?.display || 'full',
-      name: widget?.config?.[category]?.name || 'Inzending',
-      submissionField: widget?.config?.[category]?.submissionField || 'theme',
-      filterLabel: widget?.config?.[category]?.filterLabel || "Alle thema's",
-    }),
-    [widget?.config]
-  );
-
-  async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
-  }
+  const settings = props?.[category] || {};
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      display: settings.display || 'full',
+      name: settings.name || 'Inzending',
+      submissionField: settings.submissionField || 'theme',
+      filterLabel: settings.filterLabel || "Alle thema's",
+      mobileCase: settings.mobileCase || false,
+    },
   });
 
+  // Push the whole general object into the draft on any change.
   useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+    const subscription = form.watch((values) => {
+      props.onFieldChanged?.(category, values);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, props]);
 
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl">Algemeen</Heading>
         <Separator className="my-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
+        <form className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="display"
@@ -170,9 +156,6 @@ export default function WidgetMapGeneral() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-fit col-span-full">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

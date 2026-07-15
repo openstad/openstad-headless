@@ -3,6 +3,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useStatus from '@/hooks/use-statuses';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import type { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
 import * as Switch from '@radix-ui/react-switch';
@@ -11,7 +12,6 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
   FormControl,
@@ -39,7 +39,6 @@ export default function DocumentGeneral(
   props: DocumentMapProps & EditFieldProps<DocumentMapProps>
 ) {
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
-  const [disabled, setDisabled] = useState(false);
   const [accessibilityUrlVisible, setAccessibilityUrlVisible] = useState(
     props.accessibilityUrlVisible || false
   );
@@ -66,6 +65,11 @@ export default function DocumentGeneral(
         props.backUrlContent || 'Je bekijkt nu de versie met reacties',
       backUrlText: props.backUrlText || 'Bekijk de verbeterde versie',
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Links',
   });
 
   return (
@@ -265,9 +269,6 @@ export default function DocumentGeneral(
             </FormItem>
           )}
         />
-        <Button type="submit" disabled={disabled}>
-          Opslaan
-        </Button>
       </form>
     </Form>
   );

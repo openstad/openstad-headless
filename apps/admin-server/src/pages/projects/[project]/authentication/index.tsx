@@ -13,6 +13,7 @@ import {
 import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterSave } from '@/components/ui/save-controller';
 import {
   Select,
   SelectContent,
@@ -34,7 +35,6 @@ import * as React from 'react';
 import { useState } from 'react';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
@@ -127,71 +127,68 @@ export default function ProjectAuthentication({
     form.reset(defaults());
   }, [form, defaults]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      let updatedConfig: {
-        auth: {
-          provider: {
-            openstad: {
-              authTypes: string[];
-              config: {
-                fromEmail?: string;
-                fromName?: string;
-                contactEmail?: string;
-                defaultRoleId?: string;
-                clientDisclaimerUrl?: string;
-                clientDisclaimerText?: string;
-                styling: {
-                  logo?: string;
-                  favicon?: string;
-                };
-                clientStylesheets?: { url: string }[];
+  const save = useCallback(async () => {
+    const values = form.getValues();
+    let updatedConfig: {
+      auth: {
+        provider: {
+          openstad: {
+            authTypes: string[];
+            config: {
+              fromEmail?: string;
+              fromName?: string;
+              contactEmail?: string;
+              defaultRoleId?: string;
+              clientDisclaimerUrl?: string;
+              clientDisclaimerText?: string;
+              styling: {
+                logo?: string;
+                favicon?: string;
               };
+              clientStylesheets?: { url: string }[];
             };
           };
         };
-      } = {
-        auth: {
-          provider: {
-            openstad: {
-              authTypes: values.authTypes,
-              config: {
-                fromEmail: values.fromEmail,
-                fromName: values.fromName,
-                contactEmail: values.contactEmail,
-                defaultRoleId: values.defaultRoleId,
-                clientDisclaimerUrl: values.clientDisclaimerUrl,
-                clientDisclaimerText: values.clientDisclaimerText,
-                styling: {
-                  logo: values.logo,
-                  favicon: values.favicon,
-                },
+      };
+    } = {
+      auth: {
+        provider: {
+          openstad: {
+            authTypes: values.authTypes,
+            config: {
+              fromEmail: values.fromEmail,
+              fromName: values.fromName,
+              contactEmail: values.contactEmail,
+              defaultRoleId: values.defaultRoleId,
+              clientDisclaimerUrl: values.clientDisclaimerUrl,
+              clientDisclaimerText: values.clientDisclaimerText,
+              styling: {
+                logo: values.logo,
+                favicon: values.favicon,
               },
             },
           },
         },
-      };
+      },
+    };
 
-      if (values.cssUrl) {
-        updatedConfig.auth.provider.openstad.config.clientStylesheets = [
-          {
-            url: values.cssUrl,
-          },
-        ];
-      }
-
-      const project = await updateProject(updatedConfig);
-      const doubleSave = await updateProject(updatedConfig);
-
-      if (doubleSave && project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('Could not update', error);
+    if (values.cssUrl) {
+      updatedConfig.auth.provider.openstad.config.clientStylesheets = [
+        {
+          url: values.cssUrl,
+        },
+      ];
     }
-  }
+
+    const project = await updateProject(updatedConfig);
+    const doubleSave = await updateProject(updatedConfig);
+
+    if (!doubleSave || !project) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+  }, [form, updateProject]);
+
+  useRegisterSave({ isDirty: form.formState.isDirty, save });
 
   const [showEmailFields, setShowEmailFields] = useState(false);
   useEffect(() => {
@@ -231,9 +228,7 @@ export default function ProjectAuthentication({
                 authentificeren voor dit project.
               </p>
               <br />
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6">
+              <div className="space-y-6">
                 <FormField
                   control={form.control}
                   name="authTypes"
@@ -401,7 +396,7 @@ export default function ProjectAuthentication({
                           typeof imageResult.url !== 'undefined'
                             ? imageResult.url
                             : '';
-                        form.setValue('logo', result);
+                        form.setValue('logo', result, { shouldDirty: true });
                         form.resetField('imageLogo');
                         form.trigger('logo');
                       }}
@@ -420,7 +415,9 @@ export default function ProjectAuthentication({
                           typeof imageResult.url !== 'undefined'
                             ? imageResult.url
                             : '';
-                        form.setValue('favicon', result);
+                        form.setValue('favicon', result, {
+                          shouldDirty: true,
+                        });
                         form.resetField('imageFavicon');
                         form.trigger('favicon');
                       }}
@@ -441,7 +438,7 @@ export default function ProjectAuthentication({
                           <Button
                             color="red"
                             onClick={() => {
-                              form.setValue('logo', '');
+                              form.setValue('logo', '', { shouldDirty: true });
                             }}
                             style={{
                               position: 'absolute',
@@ -469,7 +466,9 @@ export default function ProjectAuthentication({
                           <Button
                             color="red"
                             onClick={() => {
-                              form.setValue('favicon', '');
+                              form.setValue('favicon', '', {
+                                shouldDirty: true,
+                              });
                             }}
                             style={{
                               position: 'absolute',
@@ -533,9 +532,7 @@ export default function ProjectAuthentication({
                     />
                   </>
                 ) : null}
-
-                <Button type="submit">Opslaan</Button>
-              </form>
+              </div>
             </Form>
           </div>
         </div>

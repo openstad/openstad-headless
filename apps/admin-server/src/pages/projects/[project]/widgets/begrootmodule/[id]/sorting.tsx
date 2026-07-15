@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -17,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -89,6 +89,13 @@ export default function WidgetStemBegrootSorting(
       defaultSorting: props?.defaultSorting || 'random',
       sorting: props?.sorting || [],
     },
+  });
+
+  // Every RHF field on this tab feeds the whole-widget draft automatically,
+  // coerced + validated against the tab schema.
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Sorteer opties',
   });
 
   return (
@@ -191,9 +198,6 @@ export default function WidgetStemBegrootSorting(
               </FormItem>
             )}
           />
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

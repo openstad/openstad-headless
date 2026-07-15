@@ -1,7 +1,6 @@
 import AuditLogTable from '@/components/audit-log-table';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -26,12 +25,12 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<ChoiceGuideResultsProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<ChoiceGuideResultsProps>({
-      projectId,
-    });
+  const { widget, previewConfig, updateConfig, onFieldChanged } =
+    useWidgetDraft<ChoiceGuideResultsProps>({ projectId });
+
+  // Kept for legacy tab props; saving now flows through the header save bar.
+  const tabUpdateConfig = (config: any) =>
+    updateConfig({ ...widget.config, ...config });
 
   return (
     <div>
@@ -61,17 +60,8 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <ChoiceGuideResultSettings
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               ) : null}
             </TabsContent>

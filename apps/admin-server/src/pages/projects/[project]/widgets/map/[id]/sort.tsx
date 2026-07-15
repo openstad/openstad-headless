@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -17,9 +16,9 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -64,7 +63,7 @@ const sorting = [
 
 const formSchema = z.object({
   sorting: z.array(z.string()).refine((value) => value.some((item) => item), {
-    message: 'You have to select at least one item.',
+    message: 'Je moet minimaal één item selecteren.',
   }),
   defaultSorting: z.enum([
     'newest',
@@ -81,48 +80,34 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function WidgetMapSort() {
+export default function WidgetMapSort(
+  props: { [key: string]: any } & EditFieldProps<any>
+) {
   const category = 'sort';
-
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
-  const defaults = useCallback(
-    () => ({
-      sorting: widget?.config?.[category]?.sorting || [],
-      defaultSorting: widget?.config?.[category]?.defaultSorting || 'newest',
-    }),
-    [widget?.config]
-  );
-
-  async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
-  }
+  const settings = props?.[category] || {};
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      sorting: settings.sorting || [],
+      defaultSorting: settings.defaultSorting || 'newest',
+    },
   });
 
+  // Push the whole sort object into the draft on any change.
   useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+    const subscription = form.watch((values) => {
+      props.onFieldChanged?.(category, values);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, props]);
 
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl">Sorteren</Heading>
         <Separator className="my-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
+        <form className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="sorting"
@@ -202,9 +187,6 @@ export default function WidgetMapSort() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-fit col-span-full">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

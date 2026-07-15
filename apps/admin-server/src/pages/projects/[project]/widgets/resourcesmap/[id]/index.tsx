@@ -1,8 +1,8 @@
 import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { flushAllFields } from '@/hooks/useFieldDebounce';
+import { useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -10,7 +10,7 @@ import {
 import type { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { BaseProps } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
@@ -37,32 +37,27 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<ResourceOverviewMapWidgetProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<ResourceOverviewMapWidgetProps>({
-      projectId,
-    });
+  const { widget, previewConfig, updateConfig, onFieldChanged } =
+    useWidgetDraft<ResourceOverviewMapWidgetProps>({ projectId });
+
+  const [activeTab, setActiveTab] = useState('map');
+
+  // Flush any pending field debounce into the draft before the current tab
+  // unmounts, so a value typed just before switching tabs is never lost.
+  const onTabChange = (value: string) => {
+    flushAllFields();
+    setActiveTab(value);
+  };
+
+  // Kept for legacy tab props; saving now flows through the header save bar.
+  const tabUpdateConfig = (config: any) =>
+    updateConfig({ ...widget?.config, ...config });
 
   const totalPropPackage = {
     ...widget?.config,
     ...previewConfig,
-    updateConfig: (config: ResourceOverviewMapWidgetProps) =>
-      updateConfig({ ...widget.config, ...config }),
-
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        let updatedConfig = {
-          ...previewConfig,
-          [key]: value,
-        };
-        if (key == 'categorize.categorizeByField')
-          updatedConfig.categorize = { categorizeByField: value };
-        if (key == 'clustering.isActive')
-          updatedConfig.clustering = { isActive: value };
-        updatePreview(updatedConfig);
-      }
-    },
+    updateConfig: tabUpdateConfig,
+    onFieldChanged,
     projectId,
   };
 
@@ -84,7 +79,7 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="map">
+          <Tabs value={activeTab} onValueChange={onTabChange}>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="button">Knoppen</TabsTrigger>

@@ -1,8 +1,7 @@
 import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -27,29 +26,12 @@ export default function WidgetResourceDetailMap({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<ResourceDetailMapWidgetProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<ResourceDetailMapWidgetProps>({
-      projectId,
-    });
+  const { widget, previewConfig, updateConfig, onFieldChanged } =
+    useWidgetDraft<ResourceDetailMapWidgetProps>({ projectId });
 
-  const totalPropPackage = {
-    ...widget?.config,
-    ...previewConfig,
-    updateConfig: (config: ResourceDetailMapWidgetProps) =>
-      updateConfig({ ...widget.config, ...config }),
-
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
-    projectId,
-  };
+  // Kept for legacy tab props; saving now flows through the header save bar.
+  const tabUpdateConfig = (config: any) =>
+    updateConfig({ ...widget.config, ...config });
 
   return (
     <div>
@@ -77,7 +59,11 @@ export default function WidgetResourceDetailMap({ apiUrl }: WithApiUrlProps) {
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig && (
-                <WidgetResourceDetailMapGeneral {...totalPropPackage} />
+                <WidgetResourceDetailMapGeneral
+                  {...previewConfig}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
+                />
               )}
             </TabsContent>
             <TabsContent value="publish" className="p-0">

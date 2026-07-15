@@ -17,7 +17,18 @@ export function useWidgetConfig<R>(idOverride?: string) {
       : null
   );
 
-  async function updateConfig<R extends { [key: string]: any }>(config: R) {
+  // Returns the saved widget (the server response, truthy) on success and null
+  // on failure, so callers can show truthful feedback AND reconcile their draft
+  // from what the server actually stored. Legacy per-tab save buttons still get
+  // a toast; the whole-widget save bar passes { silent: true } and renders its
+  // own success/error state (avoiding double feedback and the "always success"
+  // toast bug).
+  async function updateConfig<R extends { [key: string]: any }>(
+    config: R,
+    options?: { silent?: boolean }
+  ): Promise<{ config: R } | null> {
+    const silent = options?.silent ?? false;
+
     // these are added by the preview but should not be saved
     if (config.login?.url) delete config.login?.url;
     if (config.logout?.url) delete config.logout?.url;
@@ -35,14 +46,17 @@ export function useWidgetConfig<R>(idOverride?: string) {
       );
 
       if (!res.ok) {
-        toast.error('De configuratie kon niet worden aangepast');
-      } else {
-        const data = await res.json();
-        swr.mutate(data);
+        if (!silent) toast.error('De configuratie kon niet worden aangepast');
+        return null;
       }
-      toast.success('Configuratie aangepast');
+
+      const data = await res.json();
+      swr.mutate(data);
+      if (!silent) toast.success('Configuratie aangepast');
+      return data;
     } catch (error) {
-      toast.error('De configuratie kon niet worden aangepast');
+      if (!silent) toast.error('De configuratie kon niet worden aangepast');
+      return null;
     }
   }
 

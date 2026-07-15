@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -19,6 +18,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import {
@@ -35,17 +35,13 @@ import * as z from 'zod';
 
 const formSchema = z.object({
   displayTagFilters: z.boolean(),
-  tagGroups: z
-    .array(
-      z.object({
-        type: z.string(),
-        label: z.string().optional(),
-        multiple: z.boolean(),
-      })
-    )
-    .refine((value) => value.some((item) => item), {
-      message: 'You have to select at least one item.',
-    }),
+  tagGroups: z.array(
+    z.object({
+      type: z.string(),
+      label: z.string().optional(),
+      multiple: z.boolean(),
+    })
+  ),
   displayTagGroupName: z.boolean(),
   filterBehavior: z.string().optional(),
 });
@@ -90,6 +86,11 @@ export default function WidgetStemBegrootOverviewTags(
       filterBehavior: props?.filterBehavior || 'or',
     },
   });
+
+  // Feed every RHF field on this tab into the whole-widget draft. No schema is
+  // passed: begrootmodule does not enforce a required tag group, so this tab
+  // never blocks the whole-widget save.
+  useSyncDraftForm(form, props.onFieldChanged);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -303,10 +304,6 @@ export default function WidgetStemBegrootOverviewTags(
               </FormItem>
             )}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -12,6 +11,7 @@ import { FormObjectSelectField } from '@/components/ui/form-object-select-field'
 import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterSave } from '@/components/ui/save-controller';
 import {
   Select,
   SelectContent,
@@ -27,7 +27,6 @@ import { useRouter } from 'next/router';
 import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
@@ -68,27 +67,27 @@ export default function ProjectSettingsMap() {
     form.reset(defaults());
   }, [form, defaults]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const project = await updateProject({
-        map: {
-          areaId: values.areaId,
-          minZoom: values.minZoom,
-          maxZoom: values.maxZoom,
-          tilesVariant: values.tilesVariant,
-          customUrl: values.customUrl,
-          autoZoomAndCenter: values.autoZoomAndCenter,
-        },
-      });
-      if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('could not update', error);
+  const save = useCallback(async () => {
+    if (disabled) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+    const values = form.getValues();
+    const result = await updateProject({
+      map: {
+        areaId: values.areaId,
+        minZoom: values.minZoom,
+        maxZoom: values.maxZoom,
+        tilesVariant: values.tilesVariant,
+        customUrl: values.customUrl,
+        autoZoomAndCenter: values.autoZoomAndCenter,
+      },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+  }, [form, updateProject, disabled]);
+
+  useRegisterSave({ isDirty: form.formState.isDirty, save });
 
   useEffect(() => {
     const minZoomValue = form.watch('minZoom');
@@ -143,9 +142,7 @@ export default function ProjectSettingsMap() {
           <Form {...form} className="p-6 bg-white rounded-md">
             <Heading size="xl">Kaart instellingen</Heading>
             <Separator className="my-4" />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-2/3 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
+            <div className="lg:w-2/3 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
               <FormField
                 control={form.control}
                 name="minZoom"
@@ -317,14 +314,7 @@ export default function ProjectSettingsMap() {
                   </FormItem>
                 )}
               />
-
-              <Button
-                type="submit"
-                className="w-fit col-span-full"
-                disabled={disabled}>
-                Opslaan
-              </Button>
-            </form>
+            </div>
           </Form>
         </div>
       </PageLayout>

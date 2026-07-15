@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -24,6 +23,7 @@ import { Heading } from '@/components/ui/typography';
 import { useProject } from '@/hooks/use-project';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -98,6 +98,13 @@ export default function BegrootmoduleDisplay(
       displayModBreak: props.displayModBreak || false,
       showConfetti: props.showConfetti || false,
     },
+  });
+
+  // Every RHF field on this tab feeds the whole-widget draft automatically,
+  // coerced + validated against the tab schema.
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Weergave opties',
   });
 
   const router = useRouter();
@@ -491,10 +498,6 @@ export default function BegrootmoduleDisplay(
               )}
             </>
           )}
-
-          <Button type="submit" className="w-fit col-span-full">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

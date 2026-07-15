@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -12,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
@@ -74,6 +74,13 @@ export default function BegrootmoduleText(
       budgetRemainingTitle: props.budgetRemainingTitle ?? '',
       overviewTitle: props.overviewTitle ?? '',
     },
+  });
+
+  // Every RHF field on this tab feeds the whole-widget draft automatically,
+  // coerced + validated against the tab schema.
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Teksten',
   });
 
   return (
@@ -491,9 +498,6 @@ export default function BegrootmoduleText(
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-fit col-span-full">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

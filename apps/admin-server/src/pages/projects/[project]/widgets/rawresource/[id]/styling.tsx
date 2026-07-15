@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -9,6 +8,7 @@ import {
 } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RawResourceWidgetProps } from '@openstad-headless/raw-resource/src/raw-resource';
@@ -101,6 +101,13 @@ export default function WidgetRawStylingClasses(
     },
   });
 
+  // Every RHF field on this tab feeds the whole-widget draft automatically,
+  // coerced + validated against the tab schema.
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Styling classes',
+  });
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
@@ -176,10 +183,6 @@ export default function WidgetRawStylingClasses(
               ))}
             </div>
           ))}
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

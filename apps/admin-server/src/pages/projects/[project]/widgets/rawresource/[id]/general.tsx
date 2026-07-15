@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -21,11 +20,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RawResourceWidgetProps } from '@openstad-headless/raw-resource/src/raw-resource';
 import { useRouter } from 'next/router';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -68,9 +68,12 @@ export default function WidgetRawGeneral(
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  // Every RHF field on this tab feeds the whole-widget draft automatically,
+  // coerced + validated against the tab schema.
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Algemeen',
+  });
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -206,9 +209,6 @@ export default function WidgetRawGeneral(
               </FormItem>
             )}
           />
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

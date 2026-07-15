@@ -1,15 +1,14 @@
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChoiceGuide } from '@openstad-headless/choiceguide/src/props';
-import React, { useCallback, useEffect } from 'react';
+import { ChoiceGuideProps } from '@openstad-headless/choiceguide/src/props';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
   FormControl,
@@ -31,41 +30,29 @@ const formSchema = z.object({
 });
 
 export default function WidgetChoiceGuideGeneralSettings(
-  props: ChoiceGuide & EditFieldProps<ChoiceGuide>
+  props: ChoiceGuideProps & EditFieldProps<ChoiceGuideProps>
 ) {
   const category = 'generalSettings';
 
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
   const defaults = useCallback(
     () => ({
-      submitButtonText:
-        widget?.config?.[category]?.submitButtonText || 'Versturen',
-      nextButtonText: widget?.config?.[category]?.nextButtonText || 'Volgende',
-      loginText:
-        widget?.config?.[category]?.loginText || 'Inloggen om deel te nemen.',
-      loginTextButton:
-        widget?.config?.[category]?.loginTextButton || 'Inloggen',
-      loginRequired: widget?.config?.[category]?.loginRequired || false,
-      stickyBarAtTop: widget?.config?.[category]?.stickyBarAtTop || false,
+      submitButtonText: props?.[category]?.submitButtonText || 'Versturen',
+      nextButtonText: props?.[category]?.nextButtonText || 'Volgende',
+      loginText: props?.[category]?.loginText || 'Inloggen om deel te nemen.',
+      loginTextButton: props?.[category]?.loginTextButton || 'Inloggen',
+      loginRequired: props?.[category]?.loginRequired || false,
+      stickyBarAtTop: props?.[category]?.stickyBarAtTop || false,
       stickyBarDefaultOpen: undefinedToTrueOrProp(
-        widget?.config?.[category]?.stickyBarDefaultOpen
+        props?.[category]?.stickyBarDefaultOpen
       ),
     }),
-    [widget?.config]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   type FormData = z.infer<typeof formSchema>;
   async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
+    props.updateConfig({ ...props, [category]: values });
   }
 
   const form = useForm<FormData>({
@@ -73,9 +60,19 @@ export default function WidgetChoiceGuideGeneralSettings(
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  // Push each field into the whole-widget draft under the `generalSettings`
+  // category, so the header save bar persists them in one save.
+  const pushToDraft = useCallback(
+    (name: string, value: any) =>
+      props.onFieldChanged?.(`${category}.${name}`, value),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.onFieldChanged]
+  );
+  useSyncDraftForm(form, pushToDraft, {
+    schema: formSchema,
+    label: 'Algemene instellingen',
+  });
+  const draftProps = { ...props, onFieldChanged: pushToDraft };
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -125,7 +122,7 @@ export default function WidgetChoiceGuideGeneralSettings(
                   vullen?
                 </FormDescription>
                 {/*@ts-ignore*/}
-                {YesNoSelect(field, props)}
+                {YesNoSelect(field, draftProps)}
               </FormItem>
             )}
           />
@@ -174,7 +171,7 @@ export default function WidgetChoiceGuideGeneralSettings(
                   Moet de balk met de voortgang van de keuzewijzer bovenaan
                   getoond worden?
                 </FormLabel>
-                {YesNoSelect(field, props)}
+                {YesNoSelect(field, draftProps)}
               </FormItem>
             )}
           />
@@ -188,14 +185,10 @@ export default function WidgetChoiceGuideGeneralSettings(
                   Moet de balk met de voortgang van de keuzewijzer standaard
                   geopend zijn?
                 </FormLabel>
-                {YesNoSelect(field, props)}
+                {YesNoSelect(field, draftProps)}
               </FormItem>
             )}
           />
-
-          <Button type="submit" className="w-fit col-span-full">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

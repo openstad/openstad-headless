@@ -1,3 +1,6 @@
+// Installs the global Dutch error map for zod (import for side effect only), so
+// zod's English default validation messages never surface in the Dutch admin UI.
+import '@/lib/zod-error-map';
 import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
 import { useEffect, useState } from 'react';
@@ -9,6 +12,7 @@ import {
   type SessionUserType,
   fetchSessionUser,
 } from '../auth-context';
+import { SaveControllerProvider } from '../components/ui/save-controller';
 
 export default function App({ Component, pageProps }: AppProps) {
   let [session, setSession] = useState({});
@@ -39,7 +43,9 @@ export default function App({ Component, pageProps }: AppProps) {
               }
             }),
         }}>
-        <Component {...pageProps} />
+        <SaveControllerProvider>
+          <Component {...pageProps} />
+        </SaveControllerProvider>
       </SWRConfig>
       <Toaster position="bottom-center" />
     </SessionContext.Provider>

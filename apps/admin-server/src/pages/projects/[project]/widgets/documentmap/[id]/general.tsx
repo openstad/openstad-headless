@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import type { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
@@ -20,7 +21,6 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
   FormControl,
@@ -87,6 +87,11 @@ export default function DocumentGeneral(
       hideToggleMarkers: props?.hideToggleMarkers || false,
     },
   });
+
+  // No zod schema here: this tab's schema declares zoom fields as
+  // `z.number()` while the inputs feed strings, so validating would
+  // wrongly block the whole-widget save. Fields still sync via watch.
+  useSyncDraftForm(form, props.onFieldChanged, { label: 'Algemeen' });
 
   useEffect(() => {
     const minZoomValue = form.watch('minZoom');
@@ -457,10 +462,6 @@ export default function DocumentGeneral(
             </FormItem>
           )}
         />
-
-        <Button type="submit" disabled={disabled}>
-          Opslaan
-        </Button>
       </form>
     </Form>
   );

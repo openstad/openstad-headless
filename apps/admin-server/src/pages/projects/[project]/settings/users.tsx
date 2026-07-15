@@ -15,6 +15,7 @@ import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Heading } from '@/components/ui/typography';
@@ -131,33 +132,42 @@ export default function ProjectSettingsUsers(
     emailForm.reset(emailDefaults());
   }, [anonymizeForm, anonymizeDefaults, emailForm, emailDefaults]);
 
-  async function onUsersSubmit(values: z.infer<typeof usersFormSchema>) {
-    try {
-      await updateProject({
-        users: {
-          canCreateNewUsers: values.canCreateNewUsers,
-        },
-      });
-      toast.success('Project aangepast!');
-    } catch (error) {
-      toast.error('Er is helaas iets mis gegaan.');
-      console.error('could not update', error);
+  const saveUsers = useCallback(async () => {
+    const values = usersForm.getValues();
+    const result = await updateProject({
+      users: {
+        canCreateNewUsers: values.canCreateNewUsers,
+      },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+  }, [usersForm, updateProject]);
 
-  async function onAnonymizeSubmit(
-    values: z.infer<typeof anonymizeFormSchema>
-  ) {
-    try {
-      await updateProject({
-        [anonymizeCategory]: values,
-      });
-      toast.success('Project aangepast!');
-    } catch (error) {
-      toast.error('Er is helaas iets mis gegaan.');
-      console.error('Could not update', error);
+  const saveAnonymize = useCallback(async () => {
+    const values = anonymizeForm.getValues();
+    const result = await updateProject({
+      [anonymizeCategory]: values,
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+  }, [anonymizeForm, updateProject]);
+
+  const usersDirty = usersForm.formState.isDirty;
+  const anonymizeDirty = anonymizeForm.formState.isDirty;
+
+  // Both forms share one header save bar. Save whichever tab(s) actually have
+  // unsaved changes — not just the currently-visible one — so switching tabs
+  // before saving never silently drops the other tab's edits.
+  const save = useCallback(async () => {
+    const saves: Promise<void>[] = [];
+    if (usersDirty) saves.push(saveUsers());
+    if (anonymizeDirty) saves.push(saveAnonymize());
+    await Promise.all(saves);
+  }, [usersDirty, anonymizeDirty, saveUsers, saveAnonymize]);
+
+  useRegisterSave({ isDirty: usersDirty || anonymizeDirty, save });
 
   async function anonymizeAllUsers() {
     try {
@@ -201,9 +211,7 @@ export default function ProjectSettingsUsers(
               <Form {...usersForm} className="p-6 bg-white rounded-md">
                 <Heading size="xl">Archivering</Heading>
                 <Separator className="my-4" />
-                <form
-                  onSubmit={usersForm.handleSubmit(onUsersSubmit)}
-                  className="w-5/6 grid grid-cols-1 lg:grid-cols-1 gap-x-4 gap-y-8">
+                <div className="w-5/6 grid grid-cols-1 lg:grid-cols-1 gap-x-4 gap-y-8">
                   <FormField
                     control={usersForm.control}
                     name="canCreateNewUsers"
@@ -226,10 +234,7 @@ export default function ProjectSettingsUsers(
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-fit col-span-full mt-4">
-                    Opslaan
-                  </Button>
-                </form>
+                </div>
               </Form>
             </TabsContent>
 
@@ -238,9 +243,7 @@ export default function ProjectSettingsUsers(
                 <Form {...anonymizeForm}>
                   <Heading size="xl">Anonimiseer gebruikers</Heading>
                   <Separator className="my-4" />
-                  <form
-                    onSubmit={anonymizeForm.handleSubmit(onAnonymizeSubmit)}
-                    className="space-y-4 lg:w-1/2">
+                  <div className="space-y-4 lg:w-1/2">
                     <FormField
                       control={anonymizeForm.control}
                       name="allowAnonymizeUsersAfterEndDate"
@@ -352,8 +355,7 @@ export default function ProjectSettingsUsers(
                         </FormItem>
                       )}
                     />
-                    <Button type="submit">Opslaan</Button>
-                  </form>
+                  </div>
                 </Form>
               </div>
 

@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
@@ -123,35 +124,29 @@ export default function ProjectSettings() {
     }
   }, [data, checkboxInitial, basicAuthInitial, form]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const project = await updateProject(
-        {
-          project: {
-            endDate: values.endDate,
-            projectToggle: values.projectToggle,
-            lastUrl: values.url || data?.config?.project?.lastUrl || '',
-          },
-          basicAuth: {
-            active: values.basicAuthActive,
-            password: values.password,
-          },
+  const save = useCallback(async () => {
+    const values = form.getValues();
+    const result = await updateProject(
+      {
+        project: {
+          endDate: values.endDate,
+          projectToggle: values.projectToggle,
+          lastUrl: values.url || data?.config?.project?.lastUrl || '',
         },
-        values.name,
-        values.projectToggle ? values.url : ''
-      );
-      if (project?.error) {
-        toast.error(project.error);
-      } else if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('could not update', error);
-      toast.error('Er is helaas iets mis gegaan.');
+        basicAuth: {
+          active: values.basicAuthActive,
+          password: values.password,
+        },
+      },
+      values.name,
+      values.projectToggle ? values.url : ''
+    );
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+  }, [form, updateProject, data]);
+
+  useRegisterSave({ isDirty: form.formState.isDirty, save });
 
   async function saveProjectHasEnded(value: boolean) {
     try {
@@ -264,9 +259,7 @@ export default function ProjectSettings() {
                 <Form {...form}>
                   <Heading size="xl">Projectinformatie</Heading>
                   <Separator className="my-4" />
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="grid grid-cols-2 gap-x-4 gap-y-8">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-8">
                     <FormField
                       control={form.control}
                       name="name"
@@ -380,10 +373,7 @@ export default function ProjectSettings() {
                         />
                       </>
                     ) : null}
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
-                  </form>
+                  </div>
                 </Form>
               </div>
             </TabsContent>

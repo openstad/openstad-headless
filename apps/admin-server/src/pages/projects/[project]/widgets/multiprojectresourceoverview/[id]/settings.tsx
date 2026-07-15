@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useProjectList from '@/hooks/use-project-list';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -81,6 +82,13 @@ export default function WidgetMultiProjectSettings(
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues,
+  });
+
+  // Every RHF field on this tab feeds the whole-widget draft automatically,
+  // coerced + validated against the tab schema.
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Instellingen multi project',
   });
 
   async function onSubmit(values: FormData) {
@@ -607,9 +615,6 @@ export default function WidgetMultiProjectSettings(
               }}
             />
           ))}
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -12,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -40,7 +40,7 @@ export default function AccountDisplay(
   const form = useForm<Formdata>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      allowNickname: props.allowNickname,
+      allowNickname: props.allowNickname || false,
       allowUserEdit: props.allowUserEdit,
       showLogoutButton: props.showLogoutButton || false,
       loginButtonText:
@@ -56,6 +56,10 @@ export default function AccountDisplay(
   });
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Instellingen',
+  });
 
   return (
     <Form {...form} className="p-6 bg-white rounded-md">
@@ -159,10 +163,6 @@ export default function AccountDisplay(
             </FormItem>
           )}
         />
-
-        <Button className="w-fit col-span-full" type="submit">
-          Opslaan
-        </Button>
       </form>
     </Form>
   );

@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,14 +13,13 @@ import {
 import { Info, X } from 'lucide-react';
 import { useRouter } from 'next/router';
 import * as React from 'react';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import {
   Controller,
   UseFormProps,
   useFieldArray,
   useForm,
 } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
@@ -79,35 +79,32 @@ export default function ProjectSettingsAllowedDomains() {
     return Array.from(seen);
   }, [projectHost, configuredDomains]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const out = values.urls
-      .map((url) => url.url.replace(/^https?:\/\//i, '').trim())
-      .filter((url) => url.length > 0);
-
-    try {
-      const newProjectConf = {
-        allowedDomains: out,
-      };
-
-      const project = await updateProject(newProjectConf);
-      const doubleSave = await updateProject(newProjectConf);
-
-      if (project && doubleSave) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('could not update', error);
-    }
-  }
-
-  const { handleSubmit, control, reset } = useZodForm({
+  const { control, reset, getValues, formState } = useZodForm({
     schema: formSchema,
     defaultValues: {
       urls: configuredDomains.map((url: string) => ({ url })),
     },
   });
+
+  const save = useCallback(async () => {
+    const values = getValues();
+    const out = values.urls
+      .map((url) => url.url.replace(/^https?:\/\//i, '').trim())
+      .filter((url) => url.length > 0);
+
+    const newProjectConf = {
+      allowedDomains: out,
+    };
+
+    const result = await updateProject(newProjectConf);
+    const doubleSave = await updateProject(newProjectConf);
+
+    if (!result || !doubleSave) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+  }, [getValues, updateProject]);
+
+  useRegisterSave({ isDirty: formState.isDirty, save });
 
   useEffect(() => {
     if (data?.config?.allowedDomains) {
@@ -209,9 +206,7 @@ export default function ProjectSettingsAllowedDomains() {
               Handmatig toegevoegde domeinen
             </Heading>
 
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="grid grid-cols-1 gap-y-2">
+            <div className="grid grid-cols-1 gap-y-2">
               {fields.map((item, index) => (
                 <div key={item.id} className="flex items-center gap-2 max-w-lg">
                   <Controller
@@ -242,9 +237,8 @@ export default function ProjectSettingsAllowedDomains() {
                   onClick={() => append({ url: '' })}>
                   URL toevoegen
                 </Button>
-                <Button type="submit">Opslaan</Button>
               </div>
-            </form>
+            </div>
           </Form>
         </div>
       </PageLayout>

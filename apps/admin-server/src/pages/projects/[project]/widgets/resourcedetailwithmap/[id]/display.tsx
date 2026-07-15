@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormField,
@@ -8,6 +7,7 @@ import {
 } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -59,6 +59,13 @@ export default function WidgetResourceDetailDisplay(
       displayStatus: undefinedToTrueOrProp(props?.displayStatus),
       displayLikes: undefinedToTrueOrProp(props?.displayLikes),
     },
+  });
+
+  // Every RHF field on this tab feeds the whole-widget draft automatically,
+  // coerced + validated against the tab schema.
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Weergave',
   });
 
   return (
@@ -217,10 +224,6 @@ export default function WidgetResourceDetailDisplay(
               </FormItem>
             )}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

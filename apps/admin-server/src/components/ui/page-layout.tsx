@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { ReactNode, useEffect, useState } from 'react';
 
 import { Breadcrumbs } from './breadcrumbs';
+import { SaveBar } from './save-bar';
 import { Sidenav } from './sidenav';
 import { SidenavProject } from './sidenav-project';
 import { Heading } from './typography';
@@ -56,7 +57,10 @@ export function PageLayout({
               </Heading>
               <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
-            {action}
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <SaveBar />
+              {action}
+            </div>
           </div>
         </header>
         {children}

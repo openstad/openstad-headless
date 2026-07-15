@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -17,9 +16,9 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -32,49 +31,35 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 // TODO see if this widget is still used or can be removed
-export default function WidgetMapImage() {
+export default function WidgetMapImage(
+  props: { [key: string]: any } & EditFieldProps<any>
+) {
   const category = 'image';
-
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
-  const defaults = useCallback(
-    () => ({
-      multipleImages: widget?.config?.[category]?.multipleImages || false,
-      aspectRatio: widget?.config?.[category]?.aspectRatio || '16:9',
-      defaultImage: widget?.config?.[category]?.defaultImage || '',
-    }),
-    [widget?.config]
-  );
-
-  async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
-  }
+  const settings = props?.[category] || {};
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      multipleImages: settings.multipleImages || false,
+      aspectRatio: settings.aspectRatio || '16:9',
+      defaultImage: settings.defaultImage || '',
+    },
   });
 
+  // Push the whole image object into the draft on any change.
   useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+    const subscription = form.watch((values) => {
+      props.onFieldChanged?.(category, values);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, props]);
 
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl">Resource afbeeldingen</Heading>
         <Separator className="my-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
+        <form className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="multipleImages"
@@ -132,9 +117,6 @@ export default function WidgetMapImage() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-fit col-span-full">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

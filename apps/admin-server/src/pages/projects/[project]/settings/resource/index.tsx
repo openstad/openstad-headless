@@ -1,5 +1,4 @@
 import { CheckboxList } from '@/components/checkbox-list';
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,6 +9,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterSave } from '@/components/ui/save-controller';
 import {
   Select,
   SelectContent,
@@ -26,7 +26,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../../hooks/use-project';
@@ -127,37 +126,34 @@ export default function ProjectSettingsResource() {
     form.reset(defaults());
   }, [form, defaults]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const project = await updateProject({
-        [category]: {
-          canAddNewResources: values.canAddNewResources,
-          minimumYesVotes: values.minimumYesVotes,
-          titleMinLength: values.titleMinLength,
-          titleMaxLength: values.titleMaxLength,
-          summaryMinLength: values.summaryMinLength,
-          summaryMaxLength: values.summaryMaxLength,
-          descriptionMinLength: values.descriptionMinLength,
-          descriptionMaxLength: values.descriptionMaxLength,
-          displayLocation: values.displayLocation,
-          displayTheme: values.displayTheme,
-          displayNeighbourhood: values.displayNeighbourhood,
-          displayModbreak: values.displayModbreak,
-          modbreakTitle: values.modbreakTitle,
-          defaultTagIds: values.tagGroups || [],
-          defaultStatusIds: values.statusGroups || [],
-          canEditAfterFirstLikeOrComment: values.canEditAfterFirstLikeOrComment,
-        },
-      });
-      if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('could not update', error);
+  const save = React.useCallback(async () => {
+    const values = form.getValues();
+    const result = await updateProject({
+      [category]: {
+        canAddNewResources: values.canAddNewResources,
+        minimumYesVotes: values.minimumYesVotes,
+        titleMinLength: values.titleMinLength,
+        titleMaxLength: values.titleMaxLength,
+        summaryMinLength: values.summaryMinLength,
+        summaryMaxLength: values.summaryMaxLength,
+        descriptionMinLength: values.descriptionMinLength,
+        descriptionMaxLength: values.descriptionMaxLength,
+        displayLocation: values.displayLocation,
+        displayTheme: values.displayTheme,
+        displayNeighbourhood: values.displayNeighbourhood,
+        displayModbreak: values.displayModbreak,
+        modbreakTitle: values.modbreakTitle,
+        defaultTagIds: values.tagGroups || [],
+        defaultStatusIds: values.statusGroups || [],
+        canEditAfterFirstLikeOrComment: values.canEditAfterFirstLikeOrComment,
+      },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+  }, [form, updateProject]);
+
+  useRegisterSave({ isDirty: form.formState.isDirty, save });
 
   return (
     <div>
@@ -186,9 +182,7 @@ export default function ProjectSettingsResource() {
               afhankelijk van wat je wilt uitvragen voor dit project.
             </p>
             <br />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="canAddNewResources"
@@ -373,7 +367,8 @@ export default function ProjectSettingsResource() {
                     'tagGroups',
                     checked
                       ? [...values, tag.id]
-                      : values.filter((id) => id !== tag.id)
+                      : values.filter((id) => id !== tag.id),
+                    { shouldDirty: true }
                   );
                 }}
               />
@@ -398,15 +393,12 @@ export default function ProjectSettingsResource() {
                     'statusGroups',
                     checked
                       ? [...values, status.id]
-                      : values.filter((id) => id !== status.id)
+                      : values.filter((id) => id !== status.id),
+                    { shouldDirty: true }
                   );
                 }}
               />
-
-              <Button type="submit" className="w-fit col-span-full">
-                Opslaan
-              </Button>
-            </form>
+            </div>
           </Form>
         </div>
       </PageLayout>

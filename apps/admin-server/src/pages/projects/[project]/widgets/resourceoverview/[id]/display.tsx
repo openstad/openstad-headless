@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -21,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -93,7 +93,7 @@ export default function WidgetResourceOverviewDisplay(
       displayMap: props?.displayMap || false,
       displayAsTabs: props?.displayAsTabs || false,
       displayTitle: props?.displayTitle || false,
-      headingLevel: props?.headingLevel,
+      headingLevel: props?.headingLevel || '2',
       bannerText: props?.bannerText,
       titleMaxLength: props?.titleMaxLength || 20,
       displayDescription: props?.displayDescription || false,
@@ -138,6 +138,13 @@ export default function WidgetResourceOverviewDisplay(
     },
   });
 
+  // Every RHF field on this tab feeds the whole-widget draft automatically,
+  // coerced + validated against the tab schema.
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Weergave',
+  });
+
   const { watch } = form;
   const displayBanner = watch('displayBanner');
   const displayMap = watch('displayMap');
@@ -163,13 +170,10 @@ export default function WidgetResourceOverviewDisplay(
     }
   }, [tags]);
 
-  useEffect(() => {
-    if (displayTags && typeof props.dialogTagGroups === 'undefined') {
-      const allTagGroups = tagGroupNames;
-      form.setValue('dialogTagGroups', allTagGroups);
-      props.onFieldChanged('dialogTagGroups', allTagGroups);
-    }
-  }, [displayTags, tagGroupNames]);
+  // When `dialogTagGroups` was never set, all groups are shown as selected by
+  // default (handled display-only in the checkbox below). We intentionally do
+  // NOT write that default into the form/draft on mount: it would falsely mark
+  // the widget dirty. The value is materialized only on the user's first toggle.
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -895,11 +899,20 @@ export default function WidgetResourceOverviewDisplay(
                                 className="flex flex-row items-start space-x-3 space-y-0">
                                 <FormControl>
                                   <Checkbox
-                                    checked={(field.value ?? []).includes(
-                                      groupName
-                                    )}
+                                    checked={
+                                      Array.isArray(field.value)
+                                        ? field.value.includes(groupName)
+                                        : true
+                                    }
                                     onCheckedChange={(checked: boolean) => {
-                                      let updatedFields = field.value ?? [];
+                                      // Materialize the "all selected" default on
+                                      // the first toggle so unchecking one starts
+                                      // from the full list, not an empty one.
+                                      let updatedFields = Array.isArray(
+                                        field.value
+                                      )
+                                        ? field.value
+                                        : tagGroupNames;
                                       if (checked) {
                                         updatedFields = [
                                           ...updatedFields,
@@ -988,10 +1001,6 @@ export default function WidgetResourceOverviewDisplay(
               )}
             />
           )}
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

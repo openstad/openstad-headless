@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -19,9 +18,9 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -53,52 +52,38 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function WidgetMapDetails() {
+export default function WidgetMapDetails(
+  props: { [key: string]: any } & EditFieldProps<any>
+) {
   const category = 'details';
-
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
-  const defaults = useCallback(
-    () => ({
-      template:
-        widget?.config?.[category]?.template ||
-        '<span class="ocs-gray-text">Door </span>{username} <span class="ocs-gray-text"> op </span>{createDate} <span class="ocs-gray-text">&nbsp;&nbsp;|&nbsp;&nbsp;</span> <span class="ocs-gray-text">Thema: </span>{theme}',
-      link: widget?.config?.[category]?.link || '',
-      displayShare: widget?.config?.[category]?.displayShare || false,
-      selectableOptions: widget?.config?.[category]?.selectableOptions || [],
-    }),
-    [widget?.config]
-  );
-
-  async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
-  }
+  const settings = props?.[category] || {};
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      template:
+        settings.template ||
+        '<span class="ocs-gray-text">Door </span>{username} <span class="ocs-gray-text"> op </span>{createDate} <span class="ocs-gray-text">&nbsp;&nbsp;|&nbsp;&nbsp;</span> <span class="ocs-gray-text">Thema: </span>{theme}',
+      link: settings.link || '',
+      displayShare: settings.displayShare || false,
+      selectableOptions: settings.selectableOptions || [],
+    },
   });
 
+  // Push the whole details object into the draft on any change.
   useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+    const subscription = form.watch((values) => {
+      props.onFieldChanged?.(category, values);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, props]);
 
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl">Resource details</Heading>
         <Separator className="my-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
+        <form className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="template"
@@ -193,9 +178,6 @@ export default function WidgetMapDetails() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-fit col-span-full">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

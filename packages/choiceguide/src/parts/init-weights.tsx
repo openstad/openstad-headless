@@ -9,19 +9,27 @@ export const InitializeWeights = (
 ) => {
   let weights: WeightOverview = {};
 
+  // Guard against missing config: a choiceguide without choiceOptions/items
+  // (e.g. a freshly created widget, or one that simply doesn't use scoring) must
+  // not crash the render. Previously `choiceOptions.length` and `items.forEach`
+  // threw "Cannot read properties of undefined" on an unconfigured widget.
+  if (!Array.isArray(items)) items = [];
+
   if (choicesType === 'plane') {
     choiceOptions = [{ id: 'plane' }];
   }
 
-  if (choiceOptions.length < 1) return {};
+  if (!Array.isArray(choiceOptions) || choiceOptions.length < 1) return {};
 
   choiceOptions.forEach((choiceOption) => {
+    if (!choiceOption) return;
     const id = choiceOption.id;
     // Prevent prototype pollution. Needed for security warning #216.
     if (id === '__proto__' || id === 'constructor' || id === 'prototype')
       return;
 
     items.forEach((item) => {
+      if (!item) return;
       const itemType = item.type || '';
       const allowedTypes = [
         'radiobox',

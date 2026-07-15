@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -17,9 +16,9 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -37,64 +36,44 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function WidgetMapContent() {
+export default function WidgetMapContent(
+  props: { [key: string]: any } & EditFieldProps<any>
+) {
   const category = 'content';
-
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
-  const defaults = useCallback(
-    () => ({
-      noSelectionLoggedInHTML:
-        widget?.config?.[category]?.noSelectionLoggedInHTML || '',
-      noSelectionNotLoggedInHTML:
-        widget?.config?.[category]?.noSelectionNotLoggedInHTML || '',
-      showNoSelectionBlock:
-        widget?.config?.[category]?.showNoSelectionBlock || false,
-      selectionActiveLoggedInHTML:
-        widget?.config?.[category]?.selectionActiveLoggedInHTML || '',
-      selectionInactiveLoggedInHTML:
-        widget?.config?.[category]?.selectionInactiveLoggedInHTML || '',
-      mobilePreviewLoggedInHTML:
-        widget?.config?.[category]?.mobilePreviewLoggedInHTML || '',
-      selectionActiveNotLoggedInHTML:
-        widget?.config?.[category]?.selectionActiveNotLoggedInHTML || '',
-      selectionInactiveNotLoggedInHTML:
-        widget?.config?.[category]?.selectionInactiveNotLoggedInHTML || '',
-      mobilePreviewNotLoggedInHTML:
-        widget?.config?.[category]?.mobilePreviewNotLoggedInHTML || '',
-    }),
-    [widget?.config]
-  );
-
-  async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
-  }
+  const settings = props?.[category] || {};
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      noSelectionLoggedInHTML: settings.noSelectionLoggedInHTML || '',
+      noSelectionNotLoggedInHTML: settings.noSelectionNotLoggedInHTML || '',
+      showNoSelectionBlock: settings.showNoSelectionBlock || false,
+      selectionActiveLoggedInHTML: settings.selectionActiveLoggedInHTML || '',
+      selectionInactiveLoggedInHTML:
+        settings.selectionInactiveLoggedInHTML || '',
+      mobilePreviewLoggedInHTML: settings.mobilePreviewLoggedInHTML || '',
+      selectionActiveNotLoggedInHTML:
+        settings.selectionActiveNotLoggedInHTML || '',
+      selectionInactiveNotLoggedInHTML:
+        settings.selectionInactiveNotLoggedInHTML || '',
+      mobilePreviewNotLoggedInHTML: settings.mobilePreviewNotLoggedInHTML || '',
+    },
   });
 
+  // Push the whole content object into the draft on any change.
   useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+    const subscription = form.watch((values) => {
+      props.onFieldChanged?.(category, values);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, props]);
 
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl">Content</Heading>
         <Separator className="my-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 lg:w-1/2">
+        <form className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
             name="noSelectionLoggedInHTML"
@@ -222,7 +201,6 @@ export default function WidgetMapContent() {
               </FormItem>
             )}
           />
-          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

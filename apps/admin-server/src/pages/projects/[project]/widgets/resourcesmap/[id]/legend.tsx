@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, X } from 'lucide-react';
@@ -66,6 +67,11 @@ export default function WidgetResourcesMapLegend(
     control: form.control,
     name: 'customLegend',
     keyName: 'reactKey',
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Legenda',
   });
 
   useEffect(() => {
@@ -205,18 +211,6 @@ export default function WidgetResourcesMapLegend(
             <Plus size={16} className="mr-1" />
             Item toevoegen
           </Button>
-
-          <div>
-            <Button
-              type={props?.buttonType || 'submit'}
-              onClick={() => {
-                if (props?.buttonType === 'button') {
-                  onSubmit(form.getValues());
-                }
-              }}>
-              Opslaan
-            </Button>
-          </div>
         </form>
       </Form>
     </div>

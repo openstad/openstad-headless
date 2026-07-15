@@ -1,11 +1,13 @@
 import AuditLogTable from '@/components/audit-log-table';
 import WidgetPublish from '@/components/widget-publish';
+import { flushAllFields } from '@/hooks/useFieldDebounce';
+import { useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
@@ -30,7 +32,30 @@ export const getServerSideProps = withApiUrl;
 export default function WidgetMap({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
-  const projectId = router.query.project;
+  const projectId = router.query.project as string;
+
+  const { widget, previewConfig, updateConfig, onFieldChanged } =
+    useWidgetDraft<any>({ projectId });
+
+  const [activeTab, setActiveTab] = useState('preview');
+
+  // Flush any pending field debounce into the draft before the current tab
+  // unmounts, so a value typed just before switching tabs is never lost.
+  const onTabChange = (value: string) => {
+    flushAllFields();
+    setActiveTab(value);
+  };
+
+  // Kept for legacy tab props; saving now flows through the header save bar.
+  const tabUpdateConfig = (config: any) =>
+    updateConfig({ ...widget?.config, ...config });
+
+  const totalPropPackage = {
+    ...widget?.config,
+    ...previewConfig,
+    updateConfig: tabUpdateConfig,
+    onFieldChanged,
+  };
 
   return (
     <div>
@@ -50,7 +75,7 @@ export default function WidgetMap({ apiUrl }: WithApiUrlProps) {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="preview">
+          <Tabs value={activeTab} onValueChange={onTabChange}>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="general">Algemeen</TabsTrigger>
@@ -70,34 +95,44 @@ export default function WidgetMap({ apiUrl }: WithApiUrlProps) {
               {/* <Preview type="map" /> */}
             </TabsContent>
             <TabsContent value="general" className="p-0">
-              <WidgetMapGeneral />
+              {previewConfig ? (
+                <WidgetMapGeneral {...totalPropPackage} />
+              ) : null}
             </TabsContent>
             <TabsContent value="map" className="p-0">
-              <WidgetMapMap />
+              {previewConfig ? <WidgetMapMap {...totalPropPackage} /> : null}
             </TabsContent>
             <TabsContent value="content" className="p-0">
-              <WidgetMapContent />
+              {previewConfig ? (
+                <WidgetMapContent {...totalPropPackage} />
+              ) : null}
             </TabsContent>
             <TabsContent value="sort" className="p-0">
-              <WidgetMapSort />
+              {previewConfig ? <WidgetMapSort {...totalPropPackage} /> : null}
             </TabsContent>
             <TabsContent value="images" className="p-0">
-              <WidgetMapImage />
+              {previewConfig ? <WidgetMapImage {...totalPropPackage} /> : null}
             </TabsContent>
             <TabsContent value="details" className="p-0">
-              <WidgetMapDetails />
+              {previewConfig ? (
+                <WidgetMapDetails {...totalPropPackage} />
+              ) : null}
             </TabsContent>
             <TabsContent value="filter" className="p-0">
-              <WidgetMapFilter />
+              {previewConfig ? <WidgetMapFilter {...totalPropPackage} /> : null}
             </TabsContent>
             <TabsContent value="reaction" className="p-0">
-              <WidgetMapReaction />
+              {previewConfig ? (
+                <WidgetMapReaction {...totalPropPackage} />
+              ) : null}
             </TabsContent>
             <TabsContent value="markerSets" className="p-0">
-              <WidgetMapMarkers />
+              {previewConfig ? (
+                <WidgetMapMarkers {...totalPropPackage} />
+              ) : null}
             </TabsContent>
             <TabsContent value="legend" className="p-0">
-              <WidgetMapLegend />
+              {previewConfig ? <WidgetMapLegend {...totalPropPackage} /> : null}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />

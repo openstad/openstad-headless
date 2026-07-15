@@ -91,18 +91,27 @@ export default function WidgetDistributionModuleItems(
   });
 
   const itemsInitialized = React.useRef(false);
+  // Snapshot of `items` that is in sync with the saved config: the initial empty
+  // state and, once loaded, the values seeded from props. A push that only
+  // reproduces this snapshot is not a user edit and must not mark the widget
+  // dirty — otherwise merely mounting/switching to this tab would show a false
+  // "unsaved changes" warning.
+  const syncedItemsRef = React.useRef<string>(JSON.stringify(items));
   useEffect(() => {
     if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
       itemsInitialized.current = true;
-      setItems(props.items.map(withId));
+      const seeded = props.items.map(withId);
+      syncedItemsRef.current = JSON.stringify(seeded);
+      setItems(seeded);
     }
   }, [props?.items]);
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    if (onFieldChanged) {
-      onFieldChanged('items', items);
-    }
+    if (!onFieldChanged) return;
+    // Only propagate genuine user edits to the draft; skip the mount/seed sync.
+    if (JSON.stringify(items) === syncedItemsRef.current) return;
+    onFieldChanged('items', items);
   }, [items]);
 
   // Sets form to selected item values when item is selected
@@ -171,10 +180,6 @@ export default function WidgetDistributionModuleItems(
     return sorted;
   }
 
-  function handleSaveItems() {
-    props.updateConfig({ ...props, items });
-  }
-
   function resetForm() {
     form.reset(defaults());
     setSelectedItemId(null);
@@ -236,14 +241,6 @@ export default function WidgetDistributionModuleItems(
                         ))
                     : 'Geen items'}
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={() => handleSaveItems()}>
-                  Configuratie opslaan
-                </Button>
               </div>
             </div>
 

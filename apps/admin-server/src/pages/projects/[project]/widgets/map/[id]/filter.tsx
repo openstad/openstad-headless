@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -16,9 +15,9 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -33,39 +32,26 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function WidgetMapFilter() {
+export default function WidgetMapFilter(
+  props: { [key: string]: any } & EditFieldProps<any>
+) {
   const category = 'filter';
-
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
-  const defaults = useCallback(
-    () => ({
-      searchLocations:
-        widget?.config?.[category]?.searchLocations || 'resourcesAndAddresses',
-    }),
-    [widget?.config]
-  );
-
-  async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
-  }
+  const settings = props?.[category] || {};
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      searchLocations: settings.searchLocations || 'resourcesAndAddresses',
+    },
   });
 
+  // Push the whole filter object into the draft on any change.
   useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+    const subscription = form.watch((values) => {
+      props.onFieldChanged?.(category, values);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, props]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -74,9 +60,7 @@ export default function WidgetMapFilter() {
           Filterbalk
         </Heading>
         <Separator className="mb-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 lg:w-1/2">
+        <form className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
             name="searchLocations"
@@ -102,7 +86,6 @@ export default function WidgetMapFilter() {
               </FormItem>
             )}
           />
-          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

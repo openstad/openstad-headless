@@ -1,6 +1,5 @@
 import { CheckboxList } from '@/components/checkbox-list';
 import AccordionUI from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -25,6 +24,7 @@ import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import {
@@ -38,11 +38,11 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-const formSchema = z.object({
-  displayTagFilters: z.boolean(),
-  showActiveTags: z.boolean().optional(),
-  tagGroups: z
-    .array(
+const formSchema = z
+  .object({
+    displayTagFilters: z.boolean(),
+    showActiveTags: z.boolean().optional(),
+    tagGroups: z.array(
       z.object({
         type: z.string(),
         label: z.string().optional(),
@@ -50,14 +50,26 @@ const formSchema = z.object({
         projectId: z.string().optional(),
         inlineOptions: z.boolean().optional(),
       })
-    )
-    .refine((value) => value.some((item) => item), {
-      message: 'You have to select at least one item.',
-    }),
-  displayTagGroupName: z.boolean(),
-  filterBehavior: z.string().optional(),
-  onlyShowTheseTagIds: z.string().optional(),
-});
+    ),
+    displayTagGroupName: z.boolean(),
+    filterBehavior: z.string().optional(),
+    onlyShowTheseTagIds: z.string().optional(),
+  })
+  // Only require at least one tag group when tag filtering is actually enabled.
+  // With the filter off the widget must stay saveable (no false blocker on a
+  // fresh widget), and turning the filter off must clear the message.
+  .superRefine((data, ctx) => {
+    if (
+      data.displayTagFilters &&
+      (!data.tagGroups || data.tagGroups.length === 0)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['tagGroups'],
+        message: 'Je moet minimaal één taggroep selecteren.',
+      });
+    }
+  });
 
 type Tag = {
   id: number;
@@ -109,6 +121,13 @@ export default function WidgetResourceOverviewTags(
       displayTagGroupName: props?.displayTagGroupName || false,
       onlyShowTheseTagIds: props?.onlyShowTheseTagIds || '',
     },
+  });
+
+  // Every RHF field on this tab feeds the whole-widget draft automatically,
+  // coerced + validated against the tab schema.
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Tags',
   });
 
   return (
@@ -424,10 +443,6 @@ export default function WidgetResourceOverviewTags(
               },
             ]}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
@@ -47,6 +47,13 @@ export default function WidgetResourceDetailMapGeneral(
     form.reset(defaults());
   }, [form, defaults]);
 
+  // Every RHF field on this tab feeds the whole-widget draft automatically,
+  // coerced + validated against the tab schema.
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Algemeen',
+  });
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
@@ -65,9 +72,6 @@ export default function WidgetResourceDetailMapGeneral(
             onFieldChanged={props.onFieldChanged}
             noSelection="Niet koppelen - beschrijf het path of gebruik queryparam openstadResourceId"
           />
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

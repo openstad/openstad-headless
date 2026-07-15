@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
@@ -18,7 +19,6 @@ import Prism from 'prismjs';
 import React from 'react';
 import { useCallback, useEffect } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
@@ -66,28 +66,24 @@ export default function ProjectSettingsDesign() {
     control: form.control,
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const cssUrlsArray =
-        values.cssUrls
-          ?.map((item) => item?.url?.trim() ?? '')
-          .filter(Boolean) || [];
+  const save = useCallback(async () => {
+    const values = form.getValues();
+    const cssUrlsArray =
+      values.cssUrls?.map((item) => item?.url?.trim() ?? '').filter(Boolean) ||
+      [];
 
-      const project = await updateProject({
-        project: {
-          cssUrl: cssUrlsArray.length > 0 ? cssUrlsArray : '',
-          cssCustom: values.cssCustom,
-        },
-      });
-      if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('could not update', error);
+    const result = await updateProject({
+      project: {
+        cssUrl: cssUrlsArray.length > 0 ? cssUrlsArray : '',
+        cssCustom: values.cssCustom,
+      },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+  }, [form, updateProject]);
+
+  useRegisterSave({ isDirty: form.formState.isDirty, save });
 
   const { watch } = form;
   const fieldValue = watch('cssCustom');
@@ -158,9 +154,7 @@ export default function ProjectSettingsDesign() {
           <Form {...form} className="p-6 bg-white rounded-md">
             <Heading size="xl">Vormgeving</Heading>
             <Separator className="my-4" />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="w-5/6 grid grid-cols-1 lg:grid-cols-1 gap-x-4 gap-y-8">
+            <div className="w-5/6 grid grid-cols-1 lg:grid-cols-1 gap-x-4 gap-y-8">
               <Heading size="lg">CSS URL&apos;s</Heading>
               {fields.map((item, index) => (
                 <div key={item.id} className="flex gap-2 items-center">
@@ -229,11 +223,7 @@ export default function ProjectSettingsDesign() {
                   </FormItem>
                 )}
               />
-
-              <Button type="submit" className="w-fit col-span-full">
-                Opslaan
-              </Button>
-            </form>
+            </div>
           </Form>
         </div>
       </PageLayout>

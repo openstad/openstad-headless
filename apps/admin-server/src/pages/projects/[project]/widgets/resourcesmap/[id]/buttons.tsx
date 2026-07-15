@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -11,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Switch from '@radix-ui/react-switch';
@@ -51,9 +51,16 @@ export default function WidgetResourcesMapButton(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      countButton: props?.countButton,
-      ctaButton: props?.ctaButton,
+      // Required objects: fall back to a valid { show: false } so a fresh widget
+      // (no config yet) validates and stays saveable instead of failing "Required".
+      countButton: props?.countButton || { show: false },
+      ctaButton: props?.ctaButton || { show: false },
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Knoppen',
   });
 
   const [showCtaFields, setShowCtaFields] = useState(
@@ -204,8 +211,6 @@ export default function WidgetResourcesMapButton(
               />
             </>
           ) : null}
-
-          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>
