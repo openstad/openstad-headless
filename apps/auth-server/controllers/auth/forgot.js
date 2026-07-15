@@ -16,6 +16,9 @@ const authForgotConfig = require('../../config/auth').get('Forgot');
 const authResetConfig = require('../../config/auth').get('Reset');
 const { logAuthEvent } = require('../../middleware/auditLog');
 
+const encodedRedirect = (req) =>
+  req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : '';
+
 exports.forgot = (req, res) => {
   const config = req.client.config ? req.client.config : {};
   const configAuthType =
@@ -37,7 +40,7 @@ exports.forgot = (req, res) => {
       : authForgotConfig.buttonText,
     clientId: req.client.clientId,
     client: req.client,
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    redirectUrl: encodedRedirect(req),
   });
 };
 
@@ -58,7 +61,7 @@ exports.reset = (req, res) => {
     token: req.query.token,
     clientId: req.client.clientId,
     client: req.client,
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    redirectUrl: encodedRedirect(req),
   });
 };
 
@@ -93,7 +96,7 @@ exports.postReset = (req, res, next) => {
             authLocalConfig.loginUrl +
               `?clientId=${
                 req.client.clientId
-              }&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+              }&redirect_uri=${encodedRedirect(req)}`
           );
         })
         .catch((err) => {
@@ -119,7 +122,7 @@ exports.postForgot = (req, res, next) => {
           '/auth/local/forgot' +
             '?clientId=' +
             req.client.clientId +
-            `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+            `&redirect_uri=${encodedRedirect(req)}`
         );
       }
 
@@ -131,7 +134,7 @@ exports.postForgot = (req, res, next) => {
       return password.formatResetLink(
         req.client,
         req.user,
-        encodeURIComponent(req.query.redirect_uri)
+        encodedRedirect(req)
       );
     })
     .then((url) => {
@@ -142,7 +145,7 @@ exports.postForgot = (req, res, next) => {
       res.redirect(
         '/auth/local/forgot?clientId=' +
           req.client.clientId +
-          `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+          `&redirect_uri=${encodedRedirect(req)}`
       );
     })
     .catch((err) => {
@@ -153,7 +156,7 @@ exports.postForgot = (req, res, next) => {
       res.redirect(
         '/auth/local/forgot?clientId=' +
           req.client.clientId +
-          `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+          `&redirect_uri=${encodedRedirect(req)}`
       );
     });
 

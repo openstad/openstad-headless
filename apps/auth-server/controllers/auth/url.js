@@ -203,7 +203,9 @@ exports.postLogin = async (req, res, next) => {
     req.redirectUrl =
       clientConfig && clientConfig.emailRedirectUrl
         ? clientConfig.emailRedirectUrl
-        : encodeURIComponent(req.query.redirect_uri);
+        : req.query.redirect_uri
+          ? encodeURIComponent(req.query.redirect_uri)
+          : '';
 
     let user = await getUser(req.body.email);
 

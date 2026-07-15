@@ -40,7 +40,9 @@ exports.index = (req, res, next) => {
       isPriviligedRoute: isPriviligedRoute,
       clientId: req.client.clientId,
       client: req.client,
-      redirect_uri: encodeURIComponent(req.query.redirect_uri),
+      redirect_uri: req.query.redirect_uri
+        ? encodeURIComponent(req.query.redirect_uri)
+        : '',
     });
   }
 };

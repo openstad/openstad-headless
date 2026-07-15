@@ -6,6 +6,7 @@ const defaultRole = require('../config/roles').defaultRole;
 const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
 const configAuthTypes = require('../config/auth.js').types;
 const clientAuth = require('../utils/clientAuth');
+const { validateRedirectUri } = require('../utils/redirectUri');
 
 exports.withAll = (req, res, next) => {
   db.Client.findAll()
@@ -45,6 +46,12 @@ exports.withOne = async (req, res, next) => {
 
     if (client) {
       req.client = client;
+
+      try {
+        validateRedirectUri(req.query.redirect_uri, client);
+      } catch (err) {
+        return next(err);
+      }
 
       const clientConfig = req.client.config;
       const clientConfigStyling = clientConfig.styling
@@ -258,7 +265,7 @@ exports.check2FA = (req, res, next) => {
     return res.redirect(
       `/auth/two-factor?clientId=${
         req.client.clientId
-      }&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+      }&redirect_uri=${req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : ''}`
     );
   }
 
@@ -315,7 +322,7 @@ exports.checkRequiredUserFields = (req, res, next) => {
     res.redirect(
       `/auth/required-fields?clientId=${
         req.client.clientId
-      }&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+      }&redirect_uri=${req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : ''}`
     );
   } else {
     next();

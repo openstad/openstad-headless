@@ -12,9 +12,8 @@ const hat = require('hat');
 const login = require('connect-ensure-login');
 const db = require('../../db');
 const authLocalConfig = require('../../config/auth').get('Local');
-const URL = require('url').URL;
 const clientAuth = require('../../utils/clientAuth');
-const { prefillAllowedDomains } = require('../oauth/oauth2');
+const { safeRedirectUri } = require('../../utils/redirectUri');
 const authType = 'Local';
 const { logAuthEvent } = require('../../middleware/auditLog');
 
@@ -200,30 +199,31 @@ exports.logout = async (req, res) => {
   await req.session.destroy();
 
   const config = req.client.config;
-  const allowedDomains = prefillAllowedDomains(req.client.allowedDomains || []);
 
-  let redirectURL = req.query.redirectUrl;
-  let redirectUrlHost = null;
-
-  try {
-    redirectUrlHost = redirectURL ? new URL(redirectURL).host : null;
-    if (!redirectUrlHost || allowedDomains.indexOf(redirectUrlHost) === -1) {
-      redirectURL = false;
-    }
-  } catch (e) {
-    redirectURL = null;
-  }
+  let redirectURL = safeRedirectUri(
+    req.query.redirectUrl,
+    req.client,
+    'redirectUrl'
+  );
 
   if (!redirectURL) {
-    console.log(
-      `[${new Date().toISOString()}][auth-logout] redirect host not allowed: clientId=${req.client?.id} redirectHost=${redirectUrlHost} requested=${req.query.redirectUrl?.substring(0, 120)}`
-    );
+    if (req.query.redirectUrl) {
+      console.log(
+        `[${new Date().toISOString()}][auth-logout] redirect not allowed: clientId=${req.client?.id} requested=${String(req.query.redirectUrl).substring(0, 120)}`
+      );
+    }
+    // opgeslagen fallbacks gaan door dezelfde policy als de query-waarde
     redirectURL =
-      config && config.logoutUrl ? config.logoutUrl : req.client.redirectUrl;
+      safeRedirectUri(config && config.logoutUrl, req.client, 'logoutUrl') ||
+      safeRedirectUri(req.client.redirectUrl, req.client, 'redirectUrl');
   }
 
   if (!redirectURL && process.env.ADMIN_URL) {
-    redirectURL = process.env.ADMIN_URL;
+    redirectURL = safeRedirectUri(
+      process.env.ADMIN_URL,
+      req.client,
+      'ADMIN_URL'
+    );
   }
 
   if (!redirectURL) {

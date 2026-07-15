@@ -6,7 +6,9 @@ const failCallback = function (req, res, next, options) {
   const redirectUrl =
     clientConfig && clientConfig.emailRedirectUrl
       ? clientConfig.emailRedirectUrl
-      : encodeURIComponent(req.query.redirect_uri);
+      : req.query.redirect_uri
+        ? encodeURIComponent(req.query.redirect_uri)
+        : '';
   res.redirect(
     '/login?clientId=' + req.client.clientId + '&redirect_uri=' + redirectUrl
   ); // brute force protection triggered, send them back to the login page
