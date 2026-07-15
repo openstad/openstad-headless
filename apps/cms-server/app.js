@@ -482,14 +482,22 @@ function parseCookies(header) {
 }
 
 function safeEqual(a, b) {
-  const bufferA = Buffer.from(String(a));
-  const bufferB = Buffer.from(String(b));
-  if (bufferA.length !== bufferB.length) return false;
-  return crypto.timingSafeEqual(bufferA, bufferB);
+  const key = crypto.randomBytes(32);
+  const hashA = crypto.createHmac('sha256', key).update(String(a)).digest();
+  const hashB = crypto.createHmac('sha256', key).update(String(b)).digest();
+  return crypto.timingSafeEqual(hashA, hashB);
 }
 
-function isSafeReturnPath(value) {
-  return typeof value === 'string' && /^\/(?![/\\])/.test(value);
+function safeReturnPath(value, fallback) {
+  if (typeof value !== 'string' || !value) return fallback;
+  try {
+    const base = 'http://site.invalid';
+    const parsed = new URL(value, base);
+    if (parsed.origin !== base) return fallback;
+    return parsed.pathname + parsed.search;
+  } catch {
+    return fallback;
+  }
 }
 
 function escapeHtml(value) {
@@ -557,9 +565,7 @@ app.use((req, res, next) => {
 
   if (req.method === 'POST' && req.path === SITE_ACCESS_PATH) {
     return parseSiteAccessBody(req, res, () => {
-      const returnTo = isSafeReturnPath(req.body?.returnTo)
-        ? req.body.returnTo
-        : prefix + '/';
+      const returnTo = safeReturnPath(req.body?.returnTo, prefix + '/');
       const validPassword = safeEqual(
         req.body?.password || '',
         basicAuth.password
@@ -582,9 +588,7 @@ app.use((req, res, next) => {
     });
   }
 
-  const returnTo = isSafeReturnPath(req.originalUrl)
-    ? req.originalUrl
-    : prefix + '/';
+  const returnTo = safeReturnPath(req.originalUrl, prefix + '/');
   return res
     .status(401)
     .send(renderSiteAccessForm(formAction, returnTo, false));
