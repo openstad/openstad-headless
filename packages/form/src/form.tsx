@@ -15,6 +15,7 @@ import SelectField from '@openstad-headless/ui/src/form-elements/select';
 import SortField from '@openstad-headless/ui/src/form-elements/sort';
 import TextInput from '@openstad-headless/ui/src/form-elements/text';
 import TickmarkSlider from '@openstad-headless/ui/src/form-elements/tickmark-slider';
+import TimelineField from '@openstad-headless/ui/src/form-elements/timeline';
 import RteContent from '@openstad-headless/ui/src/rte-formatting/rte-content';
 import VideoField from '@openstad-headless/video/src/video';
 import '@utrecht/component-library-css';
@@ -352,8 +353,6 @@ function Form({
       setLastUpdatedKey(name);
     }
 
-    // Programmatic initialisation (the onChange that fields fire on mount
-    // to register their default value) does not count as user interaction.
     const interaction = resolveFieldInteraction(event);
     if (onFieldInteraction && interaction.track && interaction.key) {
       onFieldInteraction(interaction.key);
@@ -430,6 +429,7 @@ function Form({
     sort: SortField as React.ComponentType<ComponentFieldProps>,
     dilemma: DilemmaField as React.ComponentType<ComponentFieldProps>,
     video: VideoField as React.ComponentType<ComponentFieldProps>,
+    timeline: TimelineField as React.ComponentType<ComponentFieldProps>,
   };
 
   const isFieldAnswered = (field: any): boolean => {

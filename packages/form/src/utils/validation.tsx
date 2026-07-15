@@ -230,6 +230,34 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
     case 'range':
       return undefined;
 
+    case 'timeline':
+      if (typeof field.fieldRequired !== 'undefined' && field.fieldRequired) {
+        const timelineLinkSchema = z
+          .object({
+            url: z.string(),
+            title: z.string().optional(),
+            kind: z.enum(['link', 'document']).optional(),
+          })
+          .passthrough();
+        const timelineItemSchema = z
+          .object({
+            activeFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            title: z.string().optional(),
+            description: z.string().optional(),
+            links: z.array(timelineLinkSchema).optional(),
+          })
+          .passthrough();
+        return z
+          .array(timelineItemSchema)
+          .min(
+            1,
+            'requiredWarning' in field && field.requiredWarning
+              ? field.requiredWarning
+              : 'Het veld' + fieldTitle + 'is verplicht'
+          );
+      }
+      return undefined;
+
     default:
       return undefined;
   }
