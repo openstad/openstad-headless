@@ -456,9 +456,9 @@ const SITE_ACCESS_PATH = '/openstad-site-access';
 const SITE_ACCESS_MAX_AGE = 1000 * 60 * 60 * 24;
 const parseSiteAccessBody = express.urlencoded({ extended: false });
 
-function siteAccessToken(site) {
+function siteAccessToken(site, password) {
   return crypto
-    .createHmac('sha256', String(site.config.basicAuth.password))
+    .createHmac('sha256', String(password))
     .update(`${SITE_ACCESS_COOKIE}:${site.id}`)
     .digest('hex');
 }
@@ -482,10 +482,10 @@ function parseCookies(header) {
 }
 
 function safeEqual(a, b) {
-  const key = crypto.randomBytes(32);
-  const hashA = crypto.createHmac('sha256', key).update(String(a)).digest();
-  const hashB = crypto.createHmac('sha256', key).update(String(b)).digest();
-  return crypto.timingSafeEqual(hashA, hashB);
+  const bufferA = Buffer.from(String(a));
+  const bufferB = Buffer.from(String(b));
+  if (bufferA.length !== bufferB.length) return false;
+  return crypto.timingSafeEqual(bufferA, bufferB);
 }
 
 function safeReturnPath(value, fallback) {
@@ -556,7 +556,7 @@ app.use((req, res, next) => {
   }
 
   const formAction = prefix + SITE_ACCESS_PATH;
-  const expectedToken = siteAccessToken(req.site);
+  const expectedToken = siteAccessToken(req.site, basicAuth.password);
   const presentedToken = parseCookies(req.headers.cookie)[SITE_ACCESS_COOKIE];
 
   if (presentedToken && safeEqual(presentedToken, expectedToken)) {
@@ -566,10 +566,11 @@ app.use((req, res, next) => {
   if (req.method === 'POST' && req.path === SITE_ACCESS_PATH) {
     return parseSiteAccessBody(req, res, () => {
       const returnTo = safeReturnPath(req.body?.returnTo, prefix + '/');
-      const validPassword = safeEqual(
-        req.body?.password || '',
-        basicAuth.password
+      const submittedToken = siteAccessToken(
+        req.site,
+        req.body?.password || ''
       );
+      const validPassword = safeEqual(submittedToken, expectedToken);
       if (validPassword) {
         const secure =
           (req.headers['x-forwarded-proto'] || req.protocol) === 'https';
