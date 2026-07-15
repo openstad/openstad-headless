@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { sanitizeHtml } from './sanitize';
+import { sanitizeHtml, sanitizeImageUrl } from './sanitize';
 
 // Deze suite draait in Node (vitest default environment) en bewijst daarmee
 // meteen het SSR-pad van isomorphic-dompurify.
@@ -56,5 +56,40 @@ describe('sanitizeHtml', () => {
     expect(sanitizeHtml('')).toBe('');
     expect(sanitizeHtml(null)).toBe('');
     expect(sanitizeHtml(undefined)).toBe('');
+  });
+});
+
+describe('sanitizeImageUrl', () => {
+  test.each([
+    'https://example.com/image.png',
+    'http://localhost:3000/image/test.jpg',
+    'https://example.com/image.png?width=100&height=100',
+    '/image/test.jpg',
+    'images/test.jpg',
+    '../images/test.jpg',
+    '//cdn.example.com/image.webp',
+  ])('allows safe image URL %s', (url) => {
+    expect(sanitizeImageUrl(url)).toBe(url);
+  });
+
+  test.each([
+    'javascript:alert(1)',
+    'data:image/svg+xml,<svg onload=alert(1)>',
+    'vbscript:msgbox(1)',
+    'blob:https://example.com/id',
+    'https://example.com/image.png\" onerror=\"alert(1)',
+    'https://example.com/image.png\nscript',
+    '',
+  ])('rejects unsafe image URL %s', (url) => {
+    expect(sanitizeImageUrl(url)).toBeUndefined();
+  });
+
+  test('trims a safe URL', () => {
+    expect(sanitizeImageUrl('  /image/test.jpg  ')).toBe('/image/test.jpg');
+  });
+
+  test('rejects missing image URLs', () => {
+    expect(sanitizeImageUrl(null)).toBeUndefined();
+    expect(sanitizeImageUrl(undefined)).toBeUndefined();
   });
 });
