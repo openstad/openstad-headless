@@ -1,3 +1,4 @@
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { Spacer } from '@openstad-headless/ui/src';
 import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
 import '@utrecht/component-library-css';
@@ -35,7 +36,7 @@ export const Step3 = ({
       <Heading3>{step3Title}</Heading3>
       <div
         className="rte"
-        dangerouslySetInnerHTML={{ __html: RenderContent(step3) }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(RenderContent(step3)) }}
       />
       <Spacer size={2} />
       <Button
