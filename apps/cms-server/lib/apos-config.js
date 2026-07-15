@@ -17,6 +17,7 @@ module.exports = {
     '@apostrophecms/anchors': {},
     '@apostrophecms/sitemap': {},
     'openstad-login': {},
+    'openstad-template-filters': {},
     'openstad-section-widget': {},
     'openstad-assets': {},
     'openstad-auth': {},

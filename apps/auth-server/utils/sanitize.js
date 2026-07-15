@@ -80,7 +80,7 @@ var allSafeTags = {
       'name',
       'title',
     ],
-    a: ['href', 'name', 'rel', 'target'],
+    a: ['href', 'name', 'rel', 'target', 'aria-label'],
     img: ['height', 'src', 'width'],
   },
   // allowedClasses: {

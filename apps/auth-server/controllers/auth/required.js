@@ -43,8 +43,19 @@ exports.index = (req, res, next) => {
   const requiredUserFieldsLabels =
     (config && config.requiredFields?.requiredUserFieldsLabels) || {};
 
-  const privacyPolicyUrl =
-    req.client.clientDisclaimerUrl || config?.clientDisclaimerUrl || '';
+  // Alleen absolute http(s)-URL's; new URL(...).href percent-encodeert
+  // quotes zodat de waarde veilig in het href-attribuut kan
+  let privacyPolicyUrl = '';
+  try {
+    const parsed = new URL(
+      req.client.clientDisclaimerUrl || config?.clientDisclaimerUrl || ''
+    );
+    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+      privacyPolicyUrl = parsed.href;
+    }
+  } catch {
+    privacyPolicyUrl = '';
+  }
   const privacyPolicyTextRaw = sanitize.noTags(
     req.client.clientDisclaimerText ||
       config?.clientDisclaimerText ||
@@ -73,7 +84,9 @@ exports.index = (req, res, next) => {
       const anchor = privacyPolicyUrl
         ? `<a href="${privacyPolicyUrl}" target="_blank" rel="noopener noreferrer" aria-label="${privacyPolicyText} (opent in nieuw tabblad)">${privacyPolicyText}</a>`
         : privacyPolicyText;
-      field.label = sanitize.noTags(field.label).replace('{link}', anchor);
+      field.label = sanitize.safeTags(
+        sanitize.noTags(field.label).replace('{link}', anchor)
+      );
     }
     return field;
   });
