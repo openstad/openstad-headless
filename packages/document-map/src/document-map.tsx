@@ -665,7 +665,8 @@ function DocumentMap({
       );
       if (typeof currentComment === 'number' && currentComment >= 0) {
         const commentPage = Math.floor(currentComment / itemsPerPage);
-        setoverridePage(commentPage);
+        setoverridePage(undefined);
+        requestAnimationFrame(() => setoverridePage(commentPage));
       }
     }
 

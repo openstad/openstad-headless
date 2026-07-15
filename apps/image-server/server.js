@@ -645,6 +645,8 @@ app.post('/document', documentUpload.single('document'), (req, res, next) => {
     JSON.stringify({
       name: sanitizeFileName(req.file.originalname),
       url: protocol + url,
+      size: req.file.size,
+      mimeType: req.file.mimetype,
     })
   );
 });
@@ -667,6 +669,8 @@ app.post(
           return {
             name: sanitizeFileName(file.originalname),
             url: protocol + url,
+            size: file.size,
+            mimeType: file.mimetype,
           };
         })
       )

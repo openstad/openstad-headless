@@ -26,6 +26,8 @@ export type EnqueteProps = {
   enableDraftPersistence?: boolean;
   draftRetentionHours?: number;
   gtmEnvironment?: string;
+  isQuiz?: boolean;
+  confirmAnswerMessage?: string;
 };
 
 export type Item = {
@@ -57,6 +59,8 @@ export type Item = {
   fieldRequired?: boolean;
   maxChoices?: string;
   maxChoicesMessage?: string;
+  minChoices?: string;
+  minChoicesMessage?: string;
   showSmileys?: boolean;
   placeholder?: string;
   defaultValue?: string;
@@ -83,6 +87,11 @@ export type Item = {
   }>;
   createImageSlider?: boolean;
   imageClickable?: boolean;
+  feedbackMode?: string;
+  feedbackText?: string;
+  feedbackCorrect?: string;
+  feedbackIncorrect?: string;
+  scaleFeedback?: string[];
 
   // Keeping this for backwards compatibility
   image1?: string;
@@ -113,6 +122,8 @@ export type Title = {
   key_b?: string;
   description_b?: string;
   image_b?: string;
+  isCorrect?: boolean;
+  feedbackText?: string;
 };
 
 export type Confirmation = {

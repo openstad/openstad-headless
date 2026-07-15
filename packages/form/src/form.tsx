@@ -16,10 +16,12 @@ import SortField from '@openstad-headless/ui/src/form-elements/sort';
 import TextInput from '@openstad-headless/ui/src/form-elements/text';
 import TickmarkSlider from '@openstad-headless/ui/src/form-elements/tickmark-slider';
 import TimelineField from '@openstad-headless/ui/src/form-elements/timeline';
+import RteContent from '@openstad-headless/ui/src/rte-formatting/rte-content';
 import VideoField from '@openstad-headless/video/src/video';
 import '@utrecht/component-library-css';
 import {
   Button,
+  FormFieldDescription,
   FormFieldErrorMessage,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
@@ -31,6 +33,7 @@ import type {
   ComponentFieldProps,
   FormProps,
 } from './props';
+import { evaluateFeedback } from './utils/feedback';
 import { resolveFieldInteraction } from './utils/interaction';
 import { computeEffectivePagination } from './utils/pagination';
 import { updateRouting } from './utils/routing';
@@ -68,6 +71,7 @@ function Form({
   totalFieldCount = 0,
   formStyle = 'default',
   initialValues,
+  confirmAnswerMessage = 'Bevestig eerst je antwoord voordat je verdergaat.',
   onFieldInteraction,
   onValidationErrors,
   ...props
@@ -130,6 +134,9 @@ function Form({
   const [routingHiddenFields, setRoutingHiddenFields] =
     useState<Array<string>>(initialHiddenFields);
   const [lastUpdatedKey, setLastUpdatedKey] = useState<string>('');
+  const [confirmedFields, setConfirmedFields] = useState<
+    Record<string, boolean>
+  >({});
 
   const {
     effectiveTotalPages,
@@ -232,6 +239,36 @@ function Form({
     }
 
     event.preventDefault();
+
+    const unconfirmed = (fieldsToRender as any[]).filter((f, i) => {
+      const routingKey = routingKeys[fieldsToRenderOffset + i];
+      const hidden = routingKey && routingHiddenFields.includes(routingKey);
+      return (
+        needsConfirm(f) &&
+        f.fieldKey &&
+        !hidden &&
+        isFieldAnswered(f) &&
+        meetsMinChoices(f) &&
+        !confirmedFields[f.fieldKey]
+      );
+    });
+    if (unconfirmed.length > 0) {
+      const newErrors: Record<string, string> = {};
+      unconfirmed.forEach((f) => {
+        newErrors[f.fieldKey] = confirmAnswerMessage;
+      });
+      setFormErrors((prev) => ({ ...prev, ...newErrors }));
+      const firstKey = unconfirmed[0].fieldKey;
+      if (formRef.current) {
+        const el = formRef.current.querySelector(`[name="${firstKey}"]`);
+        if (el) {
+          const top = el.getBoundingClientRect().top + window.scrollY - 100;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      }
+      return;
+    }
+
     const { firstErrorKey, errors: validationErrors } = handleSubmit(
       fieldsToRender as unknown as Array<CombinedFieldPropsWithType>,
       formValues,
@@ -250,9 +287,12 @@ function Form({
     }
 
     if (firstErrorKey && formRef.current) {
-      const errorElement = formRef.current.querySelector(
+      const namedElement = formRef.current.querySelector(
         `[name="${firstErrorKey}"]`
       );
+      // ponytail: named element can be a type="hidden" input (e.g. map) with no
+      // layout box; scroll to its visible .question wrapper instead.
+      const errorElement = namedElement?.closest('.question') ?? namedElement;
       if (errorElement) {
         const elementPosition =
           errorElement.getBoundingClientRect().top + window.scrollY;
@@ -322,6 +362,7 @@ function Form({
   const resetForm = () => {
     setFormValues(initialFormValues);
     setFormErrors({});
+    setConfirmedFields({});
     resetFunctions.current.forEach((reset) => reset());
   };
 
@@ -391,11 +432,54 @@ function Form({
     timeline: TimelineField as React.ComponentType<ComponentFieldProps>,
   };
 
+  const isFieldAnswered = (field: any): boolean => {
+    if (!field.fieldKey) return false;
+    const value = formValues[field.fieldKey];
+    if (value === undefined || value === null || value === '') return false;
+    if (field.type === 'checkbox') {
+      try {
+        const parsed = typeof value === 'string' ? JSON.parse(value) : value;
+        return Array.isArray(parsed) && parsed.length > 0;
+      } catch {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const hasFeedback = (field: any): boolean =>
+    !!field.feedbackMode && field.feedbackMode !== 'none';
+
+  const needsConfirm = (field: any): boolean =>
+    field.feedbackMode === 'correctIncorrect';
+
+  const meetsMinChoices = (field: any): boolean => {
+    const min = parseInt(String(field.minChoices ?? ''), 10);
+    if (!Number.isFinite(min) || min <= 0) return true;
+    if (field.type !== 'checkbox' || !field.fieldKey) return true;
+    const value = formValues[field.fieldKey];
+    try {
+      const parsed =
+        typeof value === 'string'
+          ? JSON.parse(value || '[]')
+          : Array.isArray(value)
+            ? value
+            : [];
+      return Array.isArray(parsed) && parsed.length >= min;
+    } catch {
+      return false;
+    }
+  };
+
   const renderField = (
     field: ComponentFieldProps,
     index: number,
     randomId: string,
-    fieldInvalid: boolean
+    fieldInvalid: boolean,
+    confirmed: boolean,
+    optionFeedback:
+      | Record<string, 'correct' | 'incorrect' | 'missed'>
+      | undefined
   ) => {
     if (!field.type) {
       return null;
@@ -413,6 +497,8 @@ function Form({
           overrideDefaultValue={field.fieldKey && formValues[field.fieldKey]}
           currentPage={currentPage}
           setCurrentPage={setCurrentPage}
+          confirmed={confirmed}
+          optionFeedback={optionFeedback}
           {...(field as any)}
         />
       );
@@ -475,14 +561,53 @@ function Form({
 
             const uniqueKey = `${field.fieldKey || currentPage}_${index}`;
 
+            const confirmed = field.fieldKey
+              ? !!confirmedFields[field.fieldKey]
+              : false;
+            const feedback = hasFeedback(field)
+              ? evaluateFeedback(
+                  field as any,
+                  field.fieldKey ? formValues[field.fieldKey] : undefined
+                )
+              : null;
+            const optionFeedback = feedback ? feedback.optionStates : undefined;
+
+            const stateClasses = [
+              hasFeedback(field) ? '--has-feedback' : '',
+              hasFeedback(field)
+                ? `--feedback-${(field as any).feedbackMode}`
+                : '',
+              confirmed ? '--confirmed' : '',
+              needsConfirm(field) && confirmed && feedback
+                ? feedback.isFullyCorrect
+                  ? '--answer-correct'
+                  : '--answer-incorrect'
+                : '',
+              needsConfirm(field) &&
+              confirmed &&
+              feedback &&
+              !feedback.isFullyCorrect
+                ? '--revealed'
+                : '',
+            ]
+              .filter(Boolean)
+              .join(' ');
+
             return field.type === 'pagination' ? null : (
               <div
                 // @ts-ignore
                 className={`question question-type-${field.type} --${
                   field.infoBlockStyle || ''
-                }`}
+                } ${stateClasses}`}
                 key={uniqueKey}>
-                {renderField(field, index, randomId, fieldInvalid)}
+                {renderField(
+                  field,
+                  index,
+                  randomId,
+                  fieldInvalid,
+                  confirmed,
+                  optionFeedback
+                )}
                 <FormFieldErrorMessage className="error-message">
                   {field.fieldKey && formErrors[field.fieldKey] && (
                     <span id={`${randomId}_error`} aria-live="assertive">
@@ -490,6 +615,48 @@ function Form({
                     </span>
                   )}
                 </FormFieldErrorMessage>
+                {needsConfirm(field) && field.fieldKey && !confirmed && (
+                  <div className="question-confirm">
+                    <Button
+                      type="button"
+                      appearance="secondary-action-button"
+                      className="osc-confirm-answer-button"
+                      disabled={
+                        !isFieldAnswered(field) || !meetsMinChoices(field)
+                      }
+                      onClick={() => {
+                        setConfirmedFields((prev) => ({
+                          ...prev,
+                          [field.fieldKey as string]: true,
+                        }));
+                        setFormErrors((prev) => {
+                          const next = { ...prev };
+                          delete next[field.fieldKey as string];
+                          return next;
+                        });
+                      }}>
+                      Bevestig antwoord
+                    </Button>
+                  </div>
+                )}
+                {hasFeedback(field) &&
+                  field.fieldKey &&
+                  (needsConfirm(field) ? confirmed : isFieldAnswered(field)) &&
+                  feedback &&
+                  feedback.textToShow.length > 0 && (
+                    <div className="question-feedback" aria-live="polite">
+                      {feedback.textToShow.map((text, i) => (
+                        <FormFieldDescription
+                          key={i}
+                          className="question-feedback-text">
+                          <RteContent
+                            content={text}
+                            unwrapSingleRootDiv={true}
+                          />
+                        </FormFieldDescription>
+                      ))}
+                    </div>
+                  )}
                 {/* @ts-ignore */}
                 {field.infoBlockStyle === 'youth-outro' && (
                   <div className="info-block-buttons">

@@ -35,6 +35,8 @@ export type CheckboxFieldProps = {
     isOtherOption?: boolean;
     defaultValue?: boolean;
     trigger?: string;
+    isCorrect?: boolean;
+    feedbackText?: string;
   }[];
   fieldRequired?: boolean;
   requiredWarning?: string;
@@ -51,6 +53,8 @@ export type CheckboxFieldProps = {
   infoImage?: string;
   maxChoices?: string;
   maxChoicesMessage?: string;
+  minChoices?: string;
+  minChoicesMessage?: string;
   randomId?: string;
   fieldInvalid?: boolean;
   defaultValue?: string | string[];
@@ -69,6 +73,8 @@ export type CheckboxFieldProps = {
   value?: FormValue;
   selectAll?: boolean;
   selectAllLabel?: string;
+  confirmed?: boolean;
+  optionFeedback?: Record<string, 'correct' | 'incorrect' | 'missed'>;
 };
 
 const CheckboxField: FC<CheckboxFieldProps> = ({
@@ -95,6 +101,8 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
   imageClickable = false,
   selectAll = false,
   selectAllLabel = '',
+  confirmed = false,
+  optionFeedback = {},
 }) => {
   let initialValue = defaultValue || [];
   try {
@@ -185,6 +193,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
     event: React.ChangeEvent<HTMLInputElement>,
     trigger: string
   ): void => {
+    if (confirmed) return;
     const choiceValue = event.target.value;
     if (event.target.checked) {
       setSelectedChoices([...selectedChoices, choiceValue]);
@@ -319,7 +328,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                       setSelectedChoices([]);
                     }
                   }}
-                  disabled={disabled}
+                  disabled={disabled || confirmed}
                 />
                 <span>{selectAllLabel}</span>
               </FormLabel>
@@ -327,60 +336,95 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
           </FormField>
         )}
 
-        {displayChoices?.map((choice, index) => (
-          <>
-            <FormField type="checkbox" key={index}>
-              <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
-                <FormLabel
-                  htmlFor={`${fieldKey}_${index}`}
-                  type="checkbox"
-                  className="--label-grid">
-                  <Checkbox
-                    className="utrecht-form-field__input"
-                    id={`${fieldKey}_${index}`}
-                    name={fieldKey}
-                    value={choice && choice.value}
-                    required={fieldRequired}
-                    checked={
-                      choice && choice.value
-                        ? selectedChoices.includes(choice.value)
-                        : false
-                    }
-                    onChange={(e) =>
-                      handleChoiceChange(e, choice.trigger || `${index}`)
-                    }
-                    disabled={
-                      disabled ||
-                      (maxReached && !selectedChoices.includes(choice.value))
-                    }
-                  />
-                  <span>{choice && choice.label}</span>
-                </FormLabel>
-              </Paragraph>
-            </FormField>
+        {displayChoices?.map((choice, index) => {
+          const optionState =
+            confirmed && choice?.value
+              ? optionFeedback?.[choice.value]
+              : undefined;
+          const feedbackClass =
+            optionState === 'correct'
+              ? ' --feedback-correct'
+              : optionState === 'incorrect'
+                ? ' --feedback-incorrect'
+                : optionState === 'missed'
+                  ? ' --feedback-missed'
+                  : '';
+          return (
+            <>
+              <FormField type="checkbox" key={index}>
+                <Paragraph
+                  className={`utrecht-form-field__label utrecht-form-field__label--checkbox${feedbackClass}`}>
+                  <FormLabel
+                    htmlFor={`${fieldKey}_${index}`}
+                    type="checkbox"
+                    className="--label-grid">
+                    <Checkbox
+                      className="utrecht-form-field__input"
+                      id={`${fieldKey}_${index}`}
+                      name={fieldKey}
+                      value={choice && choice.value}
+                      required={fieldRequired}
+                      checked={
+                        choice && choice.value
+                          ? selectedChoices.includes(choice.value)
+                          : false
+                      }
+                      onChange={(e) =>
+                        handleChoiceChange(e, choice.trigger || `${index}`)
+                      }
+                      aria-disabled={confirmed}
+                      disabled={
+                        disabled ||
+                        (maxReached && !selectedChoices.includes(choice.value))
+                      }
+                    />
+                    <span>{choice && choice.label}</span>
+                  </FormLabel>
+                  {optionState === 'correct' && (
+                    <span className="osc-feedback-badge --correct">
+                      <i className="ri-check-line" aria-hidden="true" />
+                      <span className="sr-only">Goed antwoord</span>
+                    </span>
+                  )}
+                  {optionState === 'incorrect' && (
+                    <span className="osc-feedback-badge --incorrect">
+                      <i className="ri-close-line" aria-hidden="true" />
+                      <span className="sr-only">Fout antwoord</span>
+                    </span>
+                  )}
+                  {optionState === 'missed' && (
+                    <span className="osc-feedback-badge --missed">
+                      <i className="ri-check-line" aria-hidden="true" />
+                      <span className="sr-only">Juist antwoord</span>
+                    </span>
+                  )}
+                </Paragraph>
+              </FormField>
 
-            {choice.isOtherOption && selectedChoices.includes(choice.value) && (
-              <div className="marginTop10 marginBottom15">
-                <TextInput
-                  type="text"
-                  // @ts-ignore
-                  onChange={(e: { name: string; value: string }) =>
-                    handleOtherOptionChange(e)
-                  }
-                  fieldKey={`${fieldKey}_${choice.trigger || index}_other`}
-                  title=""
-                  defaultValue={
-                    otherOptionValues[
-                      `${fieldKey}_${choice.trigger || index}_other`
-                    ]
-                  }
-                  fieldInvalid={false}
-                  randomId={`${fieldKey}_${choice.trigger || index}`}
-                />
-              </div>
-            )}
-          </>
-        ))}
+              {choice.isOtherOption &&
+                selectedChoices.includes(choice.value) && (
+                  <div className="marginTop10 marginBottom15">
+                    <TextInput
+                      type="text"
+                      // @ts-ignore
+                      onChange={(e: { name: string; value: string }) =>
+                        handleOtherOptionChange(e)
+                      }
+                      fieldKey={`${fieldKey}_${choice.trigger || index}_other`}
+                      title=""
+                      defaultValue={
+                        otherOptionValues[
+                          `${fieldKey}_${choice.trigger || index}_other`
+                        ]
+                      }
+                      fieldInvalid={false}
+                      randomId={`${fieldKey}_${choice.trigger || index}`}
+                    />
+                  </div>
+                )}
+            </>
+          );
+        })}
 
         {maxReached && maxChoicesMessage && (
           <em aria-live="polite">{maxChoicesMessage}</em>
