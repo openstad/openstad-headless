@@ -171,6 +171,29 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     fieldKey,
   ]);
 
+  const handleSkip = useCallback(() => {
+    if (!currentDilemma) return;
+
+    const newAnswers = {
+      ...dilemmaAnswers,
+      [currentDilemma.id]: 'skipped',
+    };
+    setDilemmaAnswers(newAnswers);
+    setSelectedOption(null);
+    setPreviousAnswers((prev) => {
+      const updated = { ...prev };
+      delete updated[currentDilemma.id];
+      return updated;
+    });
+
+    const unanswered = dilemmaCards.filter((d) => !newAnswers[d.id]);
+    if (unanswered.length > 0) {
+      setCurrentDilemmaIndex(0);
+    } else {
+      setIsFinished(true);
+    }
+  }, [currentDilemma, dilemmaAnswers, dilemmaCards]);
+
   const moveToPrevious = useCallback(() => {
     const answeredDilemmas = dilemmaCards.filter(
       (dilemma) => dilemmaAnswers[dilemma.id]
@@ -555,6 +578,15 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       </div>
 
       <div className="dilemma-actions">
+        <button
+          className="dilemma-skip-button"
+          onClick={(e) => (e.preventDefault(), handleSkip())}
+          disabled={required}
+          type="button"
+          aria-label="Dit dilemma overslaan">
+          <span>Overslaan</span>
+        </button>
+
         <button
           className="more-info-btn dilemma-info-button"
           onClick={(e) => (e.preventDefault(), setInfoDialog(true))}

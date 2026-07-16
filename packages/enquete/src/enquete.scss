@@ -981,6 +981,12 @@ label.utrecht-form-label {
         justify-content: start !important;
       }
 
+      &:not(:has(.dilemma-finished)) {
+        + .button-group .utrecht-button--submit.utrecht-button--primary-action {
+          display: none;
+        }
+      }
+
       .dilemma-field > .utrecht-button--primary-action {
         @include utrecht-button-appearance;
         position: fixed;
