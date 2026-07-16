@@ -3,11 +3,11 @@
  * stripped, non-alphanumeric runs collapsed to a single hyphen, and no
  * leading or trailing hyphens.
  */
-export function slugify(str: string): string {
+export function slugify(str: string | null | undefined): string {
   if (!str) return '';
   return str
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '') // drop combining accent marks (café → cafe)
+    .replace(/[\u0300-\u036f]/g, '') // drop combining accent marks (cafe -> cafe)
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, '-') // non-alphanumeric → hyphen

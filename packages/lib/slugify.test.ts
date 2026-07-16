@@ -5,7 +5,8 @@ import { slugify } from './slugify';
 describe('slugify', () => {
   it('returns an empty string for empty or nullish input', () => {
     expect(slugify('')).toBe('');
-    expect(slugify(undefined as unknown as string)).toBe('');
+    expect(slugify(undefined)).toBe('');
+    expect(slugify(null)).toBe('');
   });
 
   it('lowercases and replaces spaces with hyphens', () => {
