@@ -3,6 +3,7 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
+import WidgetVersionHistory from '@/components/widget-version-history';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetDefinitions } from '@/hooks/use-widget-definitions';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
@@ -92,6 +93,7 @@ export default function PluginWidgetPage({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="settings">Instellingen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
             <TabsContent value="settings" className="p-0">
               {widget && pluginWidgetAdmin ? (
@@ -116,6 +118,9 @@ export default function PluginWidgetPage({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} idOverride={widgetId} />
+            </TabsContent>
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory widgetId={widgetId} projectId={projectId} />
             </TabsContent>
           </Tabs>
 

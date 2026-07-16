@@ -70,6 +70,10 @@ router.use('/project/:projectId(\\d+)/choicesguide', require('./choicesguide'));
 router.use('/project/:projectId(\\d+)/action', require('./action'));
 
 //widgets
+router.use(
+  '/project/:projectId(\\d+)/widgets/:widgetId(\\d+)/versions',
+  require('./widget-version')
+);
 router.use('/project/:projectId(\\d+)/widgets', require('./widget'));
 router.use('/project/:projectId(\\d+)/widgets/:id(\\d+)', require('./widget'));
 
