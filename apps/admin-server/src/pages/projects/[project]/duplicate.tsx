@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useProject } from '@/hooks/use-project';
+import { collectDuplicationPayload } from '@/lib/collect-duplication-payload';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -59,49 +60,6 @@ export default function ProjectDuplicate() {
 
   if (!data) return null;
 
-  async function fetchData(url: string) {
-    let response = (await fetch(url)) || [];
-
-    if (!response.ok) {
-      return [];
-    }
-
-    let data = await response.json();
-
-    if (!Array.isArray(data)) {
-      return [];
-    }
-    return data
-      .map((item) => {
-        if (item.deletedAt) {
-          return null;
-        }
-        delete item.projectId;
-        item.originalId = item.id;
-        delete item.id;
-        return item;
-      })
-      .filter(Boolean);
-  }
-
-  type DuplicateData = {
-    sourceProjectId: number;
-    areaId: number;
-    config: any;
-    emailConfig: any;
-    hostStatus: any;
-    name: string;
-    title: string;
-    widgets: any[];
-    tags: any[];
-    statuses: any[];
-    resources: any[];
-    notificationTemplates: any[];
-    resourceSettings: boolean;
-    skipDefaultStatuses: boolean;
-    isDuplicateRequest: boolean;
-  };
-
   const removePreviousDuplicatedData = async () => {
     setRemovePreviousDuplicatedDataInProgress(true);
     let rollbackSucceeded = false;
@@ -144,67 +102,14 @@ export default function ProjectDuplicate() {
     setDuplicatingInProgress(true);
     setDuplicatedData({});
 
-    const duplicateData: DuplicateData = {
+    const payload = await collectDuplicationPayload(data.id, data);
+
+    const duplicateData = {
+      ...payload,
       sourceProjectId: data.id,
-      areaId: data.areaId,
-      config: data.config,
-      emailConfig: data.emailConfig,
-      hostStatus: data.hostStatus,
       name: values.name,
-      title: data.title,
-      widgets: [],
-      tags: [],
-      statuses: [],
-      resources: [],
-      notificationTemplates: [],
-      resourceSettings: false,
-      skipDefaultStatuses: true,
       isDuplicateRequest: true,
     };
-
-    if (duplicateData.config && duplicateData.config.uniqueId) {
-      delete duplicateData.config.uniqueId;
-    }
-
-    const widgets = await fetchData(
-      `/api/openstad/api/project/${data.id}/widgets`
-    );
-    duplicateData.widgets = widgets;
-
-    const tags = await fetchData(`/api/openstad/api/project/${data.id}/tag`);
-    duplicateData.tags = tags;
-
-    const statuses = await fetchData(
-      `/api/openstad/api/project/${data.id}/status`
-    );
-    duplicateData.statuses = statuses;
-
-    const resources = await fetchData(
-      `/api/openstad/api/project/${data.id}/resource?includeTags=1&includeStatus=1`
-    );
-    duplicateData.resources = resources;
-
-    const notificationTemplates = await fetchData(
-      `/api/openstad/notification/project/${data.id}/template`
-    );
-    duplicateData.notificationTemplates = notificationTemplates;
-
-    duplicateData.resourceSettings = duplicateData?.config?.resources || {};
-
-    if (Array.isArray(resources) && resources.length > 0) {
-      // Set the canAddNewResources to true to prevent the API from returning an error
-      duplicateData.config = duplicateData.config || {};
-      duplicateData.config.resources = duplicateData.config.resources || {};
-      duplicateData.config.resources.canAddNewResources = true;
-
-      // Set min and max for title, description and summary to prevent the API from returning an error
-      duplicateData.config.resources.titleMaxLength = 10000;
-      duplicateData.config.resources.titleMinLength = 1;
-      duplicateData.config.resources.summaryMaxLength = 10000;
-      duplicateData.config.resources.summaryMinLength = 1;
-      duplicateData.config.resources.descriptionMaxLength = 10000;
-      duplicateData.config.resources.descriptionMinLength = 1;
-    }
 
     const response = await fetch(`/api/openstad/api/project`, {
       method: 'POST',

@@ -130,6 +130,7 @@ async function getOrCreateUser(userId, userMap, projectId, createdUserIds) {
     const newAnonymousUser = await db.User.create({
       idpUser: anonymousIdentity,
       projectId,
+      name: 'Gebruiker',
     });
     userMap[mapKey] = newAnonymousUser.id;
     if (createdUserIds) createdUserIds.add(newAnonymousUser.id);

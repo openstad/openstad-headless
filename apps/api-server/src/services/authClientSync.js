@@ -84,8 +84,9 @@ async function canUserUseSourceProjectForDuplication({
 }
 
 // Strip project-specific credentials/provider ids so a duplicate regenerates them.
+// Returns a deep copy; the input config is not mutated.
 function sanitizeAuthConfigForDuplication(config = {}) {
-  const sanitizedConfig = merge.recursive({}, config || {});
+  const sanitizedConfig = structuredClone(config || {});
   const auth =
     sanitizedConfig && sanitizedConfig.auth ? sanitizedConfig.auth : {};
   const providers = auth && auth.provider ? auth.provider : {};
