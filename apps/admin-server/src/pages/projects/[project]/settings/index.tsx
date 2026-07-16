@@ -22,6 +22,10 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import {
+  type WithCmsUrlProps,
+  withCmsUrl,
+} from '@/lib/server-side-props-definition';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { slugify } from '@openstad-headless/lib/slugify';
@@ -56,7 +60,17 @@ const formSchema = z.object({
   projectToggle: z.boolean().optional(),
 });
 
-export default function ProjectSettings() {
+export const getServerSideProps = withCmsUrl;
+
+// Default project URL = the CMS host with the slugified name as a subdirectory,
+// e.g. "cms.openstad.nl/mijn-wijk". Falls back to a bare slug if CMS_URL is unset.
+function buildDefaultUrl(cmsUrl: string, name: string): string {
+  const slug = slugify(name);
+  const host = cmsUrl.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+  return host ? `${host}/${slug}` : slug;
+}
+
+export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
   const router = useRouter();
   let { project } = router.query;
   const { data, isLoading, updateProject } = useProject([
@@ -297,7 +311,10 @@ export default function ProjectSettings() {
                               if (e && !form.getValues('url')) {
                                 form.setValue(
                                   'url',
-                                  slugify(form.getValues('name') || ''),
+                                  buildDefaultUrl(
+                                    cmsUrl,
+                                    form.getValues('name') || ''
+                                  ),
                                   { shouldValidate: true }
                                 );
                               }
