@@ -107,11 +107,18 @@ export default function CreateUserProjects() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     let error: any;
 
-    const mergedProjects: CombinedProjectRoleAndConsent[] = [
+    const combinedByProject = new Map<string, CombinedProjectRoleAndConsent>();
+    for (const entry of [
       ...projectRoles,
       ...emailNotificationConsents,
       ...projectDisplayNames,
-    ];
+    ]) {
+      const existing = combinedByProject.get(entry.projectId) || {
+        projectId: entry.projectId,
+      };
+      combinedByProject.set(entry.projectId, { ...existing, ...entry });
+    }
+    const mergedProjects = Array.from(combinedByProject.values());
 
     for (let updateValue of mergedProjects) {
       let user = users;
@@ -123,14 +130,17 @@ export default function CreateUserProjects() {
       if (user) {
         try {
           const updatedUser = user;
-          if (user.emailNotificationConsent !== updateValue.consent) {
+          if (
+            typeof updateValue.consent !== 'undefined' &&
+            user.emailNotificationConsent !== updateValue.consent
+          ) {
             updatedUser.emailNotificationConsent = updateValue.consent;
           }
           if (
             typeof updateValue.displayName !== 'undefined' &&
-            user.projectDisplayName !== updateValue.displayName
+            user.projectDisplayName !== (updateValue.displayName || null)
           ) {
-            updatedUser.projectDisplayName = updateValue.displayName;
+            updatedUser.projectDisplayName = updateValue.displayName || null;
           }
           if (
             typeof updateValue.roleId !== 'undefined' &&
@@ -150,16 +160,17 @@ export default function CreateUserProjects() {
             const newUser = {
               ...user,
               projectId: updateValue.projectId,
+              role: updateValue.roleId || 'member',
+              nickName: null,
+              projectDisplayName: updateValue.displayName || null,
+              emailNotificationConsent:
+                typeof updateValue.consent !== 'undefined'
+                  ? updateValue.consent
+                  : null,
+              privacyConsentAt: null,
+              listableByRole: null,
+              detailsViewableByRole: null,
             };
-            if (typeof updateValue.consent !== 'undefined') {
-              newUser.emailNotificationConsent = updateValue.consent;
-            }
-            if (typeof updateValue.displayName !== 'undefined') {
-              newUser.projectDisplayName = updateValue.displayName;
-            }
-            if (updateValue.roleId) {
-              newUser.role = updateValue.roleId;
-            }
 
             await createUser(newUser);
           } catch (err) {
