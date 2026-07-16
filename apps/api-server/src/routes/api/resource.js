@@ -18,6 +18,7 @@ const {
   logSpamAnalysis,
   removeSpamMetaFields,
 } = require('../../services/spam-detector');
+const { stripVisibilityScope } = require('../../lib/resource-create-scope');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -490,9 +491,17 @@ router
     db.Resource.authorizeData(data, 'create', req.user, null, req.project)
       .create(data)
       .then((resourceInstance) => {
-        db.Resource.scope(...req.scope)
+        // Re-fetch without onlyVisible so the creator gets their own resource
+        // back, even when it is still pending (publishDate is null).
+        const createScope = stripVisibilityScope(req.scope);
+        db.Resource.scope(...createScope)
           .findByPk(resourceInstance.id)
           .then(async (result) => {
+            if (!result) {
+              return next(
+                createError(500, 'Failed to load resource after creation')
+              );
+            }
             result.project = req.project;
             await attachModeratorOnlyExtraDataKeys(result);
             req.results = result;

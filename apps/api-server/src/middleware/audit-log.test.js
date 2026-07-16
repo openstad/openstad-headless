@@ -149,19 +149,70 @@ describe('audit-log middleware', () => {
     );
   });
 
-  it('does not log when status code >= 400', () => {
+  it('logs failed writes (status >= 400) with statusCode and no newData', () => {
     const req = createMockReq({
       method: 'POST',
       path: '/project/1/resource',
     });
     const res = createMockRes();
-    res.statusCode = 400;
+    res.statusCode = 500;
     const next = vi.fn();
 
     middleware(req, res, next);
-    res.json({ error: 'Bad request' });
+    res.json({ error: 'Cannot set properties of null' });
 
-    expect(mockService.log).not.toHaveBeenCalled();
+    expect(mockService.log).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        action: 'POST',
+        modelName: 'resource',
+        statusCode: 500,
+        newData: null,
+      })
+    );
+  });
+
+  it('logs failed PUT with previous snapshot and the path modelId', () => {
+    const req = createMockReq({
+      method: 'PUT',
+      path: '/project/1/resource/42',
+      results: { dataValues: { id: 42, title: 'Old Title' } },
+    });
+    const res = createMockRes();
+    const next = vi.fn();
+
+    middleware(req, res, next);
+    // simulate the route assigning results before the handler throws
+    req.results = { dataValues: { id: 42, title: 'Old Title' } };
+    res.statusCode = 422;
+    res.json({ error: 'Validation error' });
+
+    expect(mockService.log).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        action: 'PUT',
+        modelName: 'resource',
+        modelId: 42,
+        statusCode: 422,
+        newData: null,
+        previousData: { id: 42, title: 'Old Title' },
+      })
+    );
+  });
+
+  it('still logs admin GET reads regardless of status (read behaviour unchanged)', () => {
+    const req = createMockReq({ method: 'GET' });
+    const res = createMockRes();
+    res.statusCode = 404;
+    const next = vi.fn();
+
+    middleware(req, res, next);
+    res.json({ error: 'Not found' });
+
+    expect(mockService.log).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ action: 'GET', modelName: 'resource' })
+    );
   });
 
   it('logs any path segment as modelName', () => {

@@ -94,7 +94,18 @@ module.exports = function auditLogMiddleware(serviceOverride) {
 
       const statusCode = res.statusCode;
 
+      // Log failed writes too: a row may already be committed before the
+      // error. data is the error payload here, not the model, so no newData.
       if (isWrite && statusCode >= 400) {
+        service.log(req, {
+          action: method,
+          modelName: resolved.modelName,
+          modelId: resolved.modelId ? parseInt(resolved.modelId) : null,
+          previousData: previousSnapshot,
+          newData: null,
+          source: 'api',
+          statusCode,
+        });
         return originalJson(data);
       }
 
