@@ -31,6 +31,7 @@ import {
   Matrix,
   MatrixOption,
 } from '@openstad-headless/enquete/src/types/enquete-props';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { defaultFormValues } from '@openstad-headless/resource-form/src/parts/default-values';
 import {
   Item,
@@ -782,10 +783,11 @@ export default function WidgetResourceFormItems(
                               }}>
                               <span
                                 dangerouslySetInnerHTML={{
-                                  __html:
+                                  __html: sanitizeHtml(
                                     item.type === 'pagination'
                                       ? '--- Nieuwe pagina ---'
-                                      : item.title || 'Geen titel',
+                                      : item.title || 'Geen titel'
+                                  ),
                                 }}
                               />
                             </span>

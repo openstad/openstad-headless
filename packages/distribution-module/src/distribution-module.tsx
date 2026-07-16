@@ -3,6 +3,7 @@
 import DataStore from '@openstad-headless/data-store/src';
 import Form, { FormValue } from '@openstad-headless/form/src/form';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Banner, Button, Icon, Spacer } from '@openstad-headless/ui/src';
 import {
@@ -172,7 +173,7 @@ function DistributionModule(props: DistributionModuleProps) {
                       {props.pointsErrorMessage && (
                         <Paragraph
                           dangerouslySetInnerHTML={{
-                            __html: props.pointsErrorMessage,
+                            __html: sanitizeHtml(props.pointsErrorMessage),
                           }}
                         />
                       )}
@@ -218,7 +219,7 @@ function DistributionModule(props: DistributionModuleProps) {
                       {props.budgetErrorMessage && (
                         <Paragraph
                           dangerouslySetInnerHTML={{
-                            __html: props.budgetErrorMessage,
+                            __html: sanitizeHtml(props.budgetErrorMessage),
                           }}
                         />
                       )}

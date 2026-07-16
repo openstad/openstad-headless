@@ -32,14 +32,14 @@ exports.register = (req, res, next) => {
   ) {
     req.flash('error', { msg: 'Cannot create new users' });
     return res.redirect(
-      `/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : ''}`
+      `/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.redirectUri ? encodeURIComponent(req.redirectUri) : ''}`
     );
   }
 
   if (!req.session.createAnonymousUser) {
     req.flash('error', { msg: 'Cookies zijn onmisbaar op deze site' });
     return res.redirect(
-      `/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : ''}`
+      `/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.redirectUri ? encodeURIComponent(req.redirectUri) : ''}`
     );
   } else {
     req.session.createAnonymousUser = false;
@@ -49,7 +49,7 @@ exports.register = (req, res, next) => {
         if (!user) {
           req.flash('error', { msg: authAnonymousConfig.errorMessage });
           return res.redirect(
-            `/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : ''}`
+            `/auth/anonymous/info?clientId=${req.client.clientId}&redirect_uri=${req.redirectUri ? encodeURIComponent(req.redirectUri) : ''}`
           );
         }
 
@@ -72,14 +72,14 @@ exports.register = (req, res, next) => {
             ip: ip,
           };
 
-          if (!req.query.redirect_uri)
+          if (!req.redirectUri)
             return next(
               new Error(
                 'No redirect_uri provided and no default redirectUrl configured for this client'
               )
             );
           const authorizeUrl = `/dialog/authorize?redirect_uri=${encodeURIComponent(
-            req.query.redirect_uri
+            req.redirectUri
           )}&response_type=code&client_id=${req.client.clientId}&scope=offline`;
 
           logAuthEvent(req, 'register', {

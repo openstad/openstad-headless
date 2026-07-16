@@ -27,6 +27,11 @@ spec:
         - securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           env:
           - name: URL
             value: https://{{ template "openstad.api.url" . }}
@@ -384,6 +389,22 @@ spec:
         {{- if .Values.plugins.enabled }}
         - name: install-plugins
           image: {{ .Values.plugins.nodeImage }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            # npm install schrijft package.json/.npmrc naar installPath (gemount) en
+            # cache/logs naar $HOME/.npm; wijs die naar de /tmp emptyDir zodat
+            # readOnlyRootFilesystem: true kan.
+            - name: HOME
+              value: /tmp
+            - name: npm_config_cache
+              value: /tmp/.npm
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -395,6 +416,8 @@ spec:
               {{- end }}
               npm install --no-save {{ range .Values.plugins.items }}{{ if .enabled }}{{ .packageName }}{{ if .version }}@{{ .version }}{{ end }} {{ end }}{{ end }}
           volumeMounts:
+            - mountPath: /tmp
+              name: tmp-dir
             - name: plugin-modules
               mountPath: {{ .Values.plugins.installPath }}
             {{- if .Values.plugins.npmrcSecret }}
@@ -404,9 +427,23 @@ spec:
             {{- end }}
         {{- end }}
         - command: ["/bin/bash", "-c"]
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
           args:
             - nc $DB_HOST $DB_PORT -z -w1 && npm run init-database -w apps/api-server -- --only-if-empty && npm run migrate-database -w apps/api-server
           env:
+            # npm schrijft cache/logs naar $HOME/.npm; wijs die naar de /tmp emptyDir
+            # zodat readOnlyRootFilesystem: true kan.
+            - name: HOME
+              value: /tmp
+            - name: npm_config_cache
+              value: /tmp/.npm
             - name: URL
               value: https://{{ template "openstad.api.url" . }}
 
@@ -603,11 +640,13 @@ spec:
           image: {{ .Values.api.deploymentContainer.image }}
           imagePullPolicy: IfNotPresent
           name: init-db-ready
-          {{- if .Values.plugins.enabled }}
           volumeMounts:
+            - mountPath: /tmp
+              name: tmp-dir
+            {{- if .Values.plugins.enabled }}
             - name: plugin-modules
               mountPath: {{ .Values.plugins.installPath }}
-          {{- end }}
+            {{- end }}
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
       restartPolicy: Always

@@ -1,6 +1,7 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Spacer } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
@@ -75,7 +76,7 @@ function RawResource(props: RawResourceWidgetProps) {
           <div
             className={stylingClasses}
             dangerouslySetInnerHTML={{
-              __html: render,
+              __html: sanitizeHtml(render),
             }}></div>
         )}
       </section>

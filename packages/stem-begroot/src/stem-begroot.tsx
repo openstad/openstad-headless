@@ -2,6 +2,7 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import {
   Paginator,
@@ -1252,7 +1253,9 @@ function StemBegroot({
             <div className="vote-per-theme-container">
               <div
                 className="vote-per-theme-intro"
-                dangerouslySetInnerHTML={{ __html: step0 }}></div>
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(step0),
+                }}></div>
               <div className="themes-container">
                 {tagsToDisplay.map((tag: string) => (
                   <div className="theme" key={tag}>

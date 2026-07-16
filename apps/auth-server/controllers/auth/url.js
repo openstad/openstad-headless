@@ -12,6 +12,7 @@ const verificationService = require('../../services/verificationService');
 const authUrlConfig = require('../../config/auth').get('Url');
 const clientAuth = require('../../utils/clientAuth');
 const interpolate = require('../../utils/interpolate');
+const sanitize = require('../../utils/sanitize');
 const { logAuthEvent } = require('../../middleware/auditLog');
 const anonymousRoleId = parseInt(process.env.ANONYMOUS_ROLE_ID, 10) || 3;
 
@@ -44,24 +45,16 @@ exports.login = [
     const loginVars = { clientEmail: config.contactEmail || '' };
 
     res.render('auth/url/login', {
-      clientId: req.query.clientId,
-      client: req.client,
-      redirectUrl: req.query.redirect_uri
-        ? encodeURIComponent(req.query.redirect_uri)
-        : '',
-      title:
-        configAuthType && configAuthType.title ? configAuthType.title : false,
-      description:
-        configAuthType && configAuthType.description
-          ? configAuthType.description
-          : false,
-      label:
-        configAuthType && configAuthType.label ? configAuthType.label : false,
-      helpText: interpolate(configAuthType.helpText, loginVars) || false,
-      buttonText:
-        configAuthType && configAuthType.buttonText
-          ? configAuthType.buttonText
-          : false,
+      clientId: sanitize.plainText(req.client.clientId),
+      client: sanitize.client(req.client),
+      redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
+      title: sanitize.safeTags(configAuthType.title || false),
+      description: sanitize.safeTags(configAuthType.description || false),
+      label: sanitize.plainText(configAuthType.label || false),
+      helpText: sanitize.safeTags(
+        interpolate(configAuthType.helpText, loginVars) || false
+      ),
+      buttonText: sanitize.plainText(configAuthType.buttonText || false),
       isPriviligedRoute: priviligedRoute,
     });
   },
@@ -74,9 +67,9 @@ exports.confirmation = (req, res) => {
       ? config.authTypes[authType]
       : {};
 
-  const clientId = req.query.clientId;
-  const redirectUrl = req.query.redirect_uri
-    ? encodeURIComponent(req.query.redirect_uri)
+  const clientId = sanitize.plainText(req.client.clientId);
+  const redirectUrl = req.redirectUri
+    ? encodeURIComponent(req.redirectUri)
     : '';
 
   const vars = {
@@ -88,13 +81,18 @@ exports.confirmation = (req, res) => {
   };
 
   res.render('auth/url/confirmation', {
-    client: req.client,
+    client: sanitize.client(req.client),
     retryUrl: vars.retryUrl,
-    clientEmail: vars.clientEmail,
-    title: interpolate(configAuthType.confirmedTitle, vars) || false,
-    description:
-      interpolate(configAuthType.confirmedDescription, vars) || false,
-    helpText: interpolate(configAuthType.confirmedHelpText, vars) || false,
+    clientEmail: sanitize.plainText(vars.clientEmail),
+    title: sanitize.safeTags(
+      interpolate(configAuthType.confirmedTitle, vars) || false
+    ),
+    description: sanitize.safeTags(
+      interpolate(configAuthType.confirmedDescription, vars) || false
+    ),
+    helpText: sanitize.safeTags(
+      interpolate(configAuthType.confirmedHelpText, vars) || false
+    ),
   });
 };
 
@@ -106,23 +104,20 @@ exports.authenticate = (req, res) => {
       : {};
 
   res.render('auth/url/authenticate', {
-    clientId: req.query.clientId,
-    client: req.client,
-    redirectUrl: req.query.redirect_uri
-      ? encodeURIComponent(req.query.redirect_uri)
-      : '',
-    loaderTitle: configAuthType.loaderTitle,
-    loaderDescription: configAuthType.loaderDescription,
-    loaderImage: configAuthType.loaderImage,
+    clientId: sanitize.plainText(req.client.clientId),
+    client: sanitize.client(req.client),
+    redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
+    loaderTitle: sanitize.plainText(configAuthType.loaderTitle),
+    loaderDescription: sanitize.plainText(configAuthType.loaderDescription),
+    loaderImage: sanitize.plainText(configAuthType.loaderImage),
   });
 };
 
 exports.register = (req, res, next) => {
   res.render('auth/url/register', {
-    token: req.query.token,
-    user: req.user,
-    client: req.client,
-    clientId: req.client.clientId,
+    token: sanitize.plainText(String(req.query.token || '')),
+    client: sanitize.client(req.client),
+    clientId: sanitize.plainText(req.client.clientId),
   });
 };
 
@@ -203,7 +198,9 @@ exports.postLogin = async (req, res, next) => {
     req.redirectUrl =
       clientConfig && clientConfig.emailRedirectUrl
         ? clientConfig.emailRedirectUrl
-        : encodeURIComponent(req.query.redirect_uri);
+        : req.redirectUri
+          ? encodeURIComponent(req.redirectUri)
+          : '';
 
     let user = await getUser(req.body.email);
 
@@ -267,8 +264,8 @@ exports.postAuthenticate = (req, res, next) => {
     if (err) {
       return next(err);
     }
-    const redirectUrl = req.query.redirect_uri
-      ? encodeURIComponent(req.query.redirect_uri)
+    const redirectUrl = req.redirectUri
+      ? encodeURIComponent(req.redirectUri)
       : req.client.redirectUrl;
 
     if (!redirectUrl) {

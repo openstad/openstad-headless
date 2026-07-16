@@ -12,6 +12,7 @@ import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/s
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { humanizeDate } from '@openstad-headless/lib/humanize-date';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import {
@@ -600,7 +601,7 @@ function ResourceDetail({
                   level={1}
                   appearance="utrecht-heading-2"
                   dangerouslySetInnerHTML={{
-                    __html: resource.title,
+                    __html: sanitizeHtml(resource.title),
                   }}></Heading>
               )}
 
@@ -616,7 +617,11 @@ function ResourceDetail({
                       </Heading>
                     </section>
                     <Spacer size={1} />
-                    <div dangerouslySetInnerHTML={{ __html: mb.description }} />
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: sanitizeHtml(mb.description),
+                      }}
+                    />
                   </div>
                 ))}
 
@@ -667,7 +672,7 @@ function ResourceDetail({
                     level={2}
                     appearance="utrecht-heading-4"
                     dangerouslySetInnerHTML={{
-                      __html: resource.summary,
+                      __html: sanitizeHtml(resource.summary),
                     }}></Heading>
                 )}
                 {displayDescription &&

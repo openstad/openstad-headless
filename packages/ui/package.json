@@ -12,6 +12,7 @@
   "author": "Gemeente Amsterdam",
   "license": "MIT",
   "dependencies": {
+    "@openstad-headless/lib": "*",
     "@cypress/react": "^9.0.1",
     "@cypress/vite-dev-server": "^6.0.3",
     "@dnd-kit/core": "^6.3.1",

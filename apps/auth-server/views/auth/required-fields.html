@@ -33,7 +33,7 @@
               id="input_field_{{requiredField.key}}"
               {% if requiredField.key === 'privacyConsent' %}required{% endif %}
             />
-            <label for="input_field_{{requiredField.key}}"> {{requiredField.label | safe}} </label>
+            <label for="input_field_{{requiredField.key}}"> {% if requiredField.privacyText %}{{requiredField.labelPrefix}}{% if requiredField.privacyUrl %}<a href="{{requiredField.privacyUrl}}" target="_blank" rel="noreferrer noopener" aria-label="{{requiredField.privacyText}} (opent in nieuw tabblad)">{{requiredField.privacyText}}</a>{% else %}{{requiredField.privacyText}}{% endif %}{{requiredField.labelSuffix}}{% else %}{{requiredField.label}}{% endif %} </label>
           {% else %}
             <label for="input_field_{{requiredField.key}}"> {{requiredField.label}} </label>
             <input
