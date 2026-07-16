@@ -34,26 +34,35 @@ import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
 
-const formSchema = z.object({
-  name: z.string().min(1, {
-    message: 'De naam van een project mag niet leeg zijn!',
-  }),
-  username: z.string().optional(),
-  password: z.string().optional(),
-  endDate: z.date().min(new Date(), {
-    message: 'De datum moet nog niet geweest zijn!',
-  }),
-  // We don't want to restrict this URL too much
-  url: z
-    .string()
-    .regex(/^(?:([a-z0-9.:\-_\/]+))?$/g, {
-      message:
-        'De URL mag alleen kleine letters, cijfers, punten, dubbele punten, koppeltekens, onderstrepingstekens en schuine strepen bevatten.',
-    })
-    .optional(),
-  basicAuthActive: z.coerce.boolean().optional(),
-  projectToggle: z.boolean().optional(),
-});
+const formSchema = z
+  .object({
+    name: z.string().min(1, {
+      message: 'De naam van een project mag niet leeg zijn!',
+    }),
+    password: z.string().optional(),
+    endDate: z.date().min(new Date(), {
+      message: 'De datum moet nog niet geweest zijn!',
+    }),
+    // We don't want to restrict this URL too much
+    url: z
+      .string()
+      .regex(/^(?:([a-z0-9.:\-_\/]+))?$/g, {
+        message:
+          'De URL mag alleen kleine letters, cijfers, punten, dubbele punten, koppeltekens, onderstrepingstekens en schuine strepen bevatten.',
+      })
+      .optional(),
+    basicAuthActive: z.coerce.boolean().optional(),
+    projectToggle: z.boolean().optional(),
+  })
+  .superRefine((values, ctx) => {
+    if (values.basicAuthActive && !values.password?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['password'],
+        message: 'Vul een wachtwoord in om de beveiliging te activeren.',
+      });
+    }
+  });
 
 export default function ProjectSettings() {
   const router = useRouter();
@@ -82,7 +91,6 @@ export default function ProjectSettings() {
         : new Date(currentDate.getFullYear(), currentDate.getMonth() + 3),
       url: data?.url || '',
       basicAuthActive: data?.config?.basicAuth?.active || false,
-      username: data?.config?.basicAuth?.username || '',
       password: data?.config?.basicAuth?.password || '',
       projectToggle: data?.config?.project?.projectToggle ?? !!data?.url,
     };
@@ -126,7 +134,6 @@ export default function ProjectSettings() {
           },
           basicAuth: {
             active: values.basicAuthActive,
-            username: values.username,
             password: values.password,
           },
         },
@@ -336,9 +343,12 @@ export default function ProjectSettings() {
                           return (
                             <FormItem className="col-span-full md:col-span-1 flex flex-col">
                               <FormLabel>
-                                Wil je de website beveiligen met een
-                                gebruikersnaam en wachtwoord?
+                                Wil je de website beveiligen met een wachtwoord?
                               </FormLabel>
+                              <em className="text-xs">
+                                Let op: het kan enkele minuten duren voordat een
+                                wijziging op de website zichtbaar is.
+                              </em>
                               <Switch.Root
                                 className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
                                 onCheckedChange={(e: boolean) => {
@@ -355,22 +365,6 @@ export default function ProjectSettings() {
                     </div>
                     {basicAuthActive ? (
                       <>
-                        <FormField
-                          control={form.control}
-                          name="username"
-                          render={({ field }) => (
-                            <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                              <FormLabel>Gebruikersnaam</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="Gebruikersnaam"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
                         <FormField
                           control={form.control}
                           name="password"
