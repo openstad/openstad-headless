@@ -24,6 +24,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { slugify } from '@openstad-headless/lib/slugify';
 import * as Switch from '@radix-ui/react-switch';
 import { useRouter } from 'next/router';
 import * as React from 'react';
@@ -293,6 +294,13 @@ export default function ProjectSettings() {
                             onCheckedChange={(e: boolean) => {
                               field.onChange(e);
                               setShowUrl(e);
+                              if (e && !form.getValues('url')) {
+                                form.setValue(
+                                  'url',
+                                  slugify(form.getValues('name') || ''),
+                                  { shouldValidate: true }
+                                );
+                              }
                             }}
                             checked={field.value}>
                             <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
