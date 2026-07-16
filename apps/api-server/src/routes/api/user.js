@@ -62,6 +62,7 @@ const filterBody = (req, res, next) => {
     'password',
     'name',
     'nickName',
+    'projectDisplayName',
     'email',
     'phoneNumber',
     'address',
@@ -795,9 +796,14 @@ router
         let synchronizedUpdatedUserData = merge.recursive({}, updatedUserData);
         let userProjectSpecificFields = [
           'nickName',
+          'projectDisplayName',
           'role',
           'emailNotificationConsent',
           'privacyConsentAt',
+          'listableByRole',
+          'detailsViewableByRole',
+          'lastLogin',
+          'isNotifiedAboutAnonymization',
         ]; // todo: dit moet natuurlijk niet hier, maar dat is nu minder relevant
         for (let userProjectSpecificField of userProjectSpecificFields) {
           delete synchronizedUpdatedUserData[userProjectSpecificField];
@@ -813,35 +819,63 @@ router
           },
         });
 
-        apiUsers.forEach((apiUser, i) => {
-          return new Promise((resolve, reject) => {
-            let data =
-              apiUser.projectId == req.params.projectId
-                ? updatedUserDataForProject
-                : synchronizedUpdatedUserData;
-
-            if (req.user.can('update', apiUser)) {
-              if (
-                data?.idpUser &&
-                !data.idpUser.accesstoken &&
-                apiUser?.idpUser?.accesstoken
-              ) {
-                data.idpUser.accesstoken = apiUser.idpUser.accesstoken;
-              }
-              apiUser
-                .authorizeData(data, 'update', req.user)
-                .update(data)
-                .then((result) => {
-                  resolve();
-                })
-                .catch((err) => {
-                  resolve(err);
-                });
-            } else {
-              resolve(new Error('User not authorized to update nickName'));
-            }
-          });
+        const existingProjects = await db.Project.findAll({
+          where: {
+            id: { [Op.in]: apiUsers.map((apiUser) => apiUser.projectId) },
+          },
+          attributes: ['id'],
         });
+        const existingProjectIds = new Set(
+          existingProjects.map((project) => project.id)
+        );
+
+        const syncErrors = [];
+        await Promise.all(
+          apiUsers.map(async (apiUser) => {
+            if (!existingProjectIds.has(apiUser.projectId)) {
+              return;
+            }
+            const isCurrentProject = apiUser.projectId == req.params.projectId;
+            let data = merge.recursive(
+              {},
+              isCurrentProject
+                ? updatedUserDataForProject
+                : synchronizedUpdatedUserData
+            );
+
+            if (!req.user.can('update', apiUser)) {
+              syncErrors.push(
+                new Error(
+                  `Not authorized to update user ${apiUser.id} in project ${apiUser.projectId}`
+                )
+              );
+              return;
+            }
+
+            if (
+              data?.idpUser &&
+              !data.idpUser.accesstoken &&
+              apiUser?.idpUser?.accesstoken
+            ) {
+              data.idpUser.accesstoken = apiUser.idpUser.accesstoken;
+            }
+
+            try {
+              await apiUser
+                .authorizeData(data, 'update', req.user)
+                .update(data);
+            } catch (err) {
+              syncErrors.push(err);
+            }
+          })
+        );
+
+        if (syncErrors.length) {
+          console.error(
+            `User update: one or more user records failed to update (${syncErrors.length}):`,
+            syncErrors.map((e) => e.message)
+          );
+        }
       } else {
         let apiUser = await db.User.scope(['includeProject']).findOne({
           where: {

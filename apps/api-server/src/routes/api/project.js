@@ -328,6 +328,17 @@ async function getOrCreateUser(userId, userMap, projectId, createdUserIds) {
 
   delete user.id;
   user.projectId = projectId;
+  user.nickName = null;
+  user.projectDisplayName = null;
+  user.listableByRole = null;
+  user.detailsViewableByRole = null;
+  user.emailNotificationConsent = null;
+  user.privacyConsentAt = null;
+  user.isNotifiedAboutAnonymization = null;
+  delete user.lastLogin;
+  if (user.idpUser && typeof user.idpUser === 'object') {
+    delete user.idpUser.accesstoken;
+  }
   const newUser = await db.User.create(user);
 
   userMap[mapKey] = newUser.id;
