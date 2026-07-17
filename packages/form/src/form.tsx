@@ -576,7 +576,7 @@ function Form({
               (field as any).feedbackMode !== 'none'
                 ? `--feedback-${(field as any).feedbackMode}`
                 : '',
-              isGraded(field) ? '--graded' : '',
+              isGraded(field as any) ? '--graded' : '',
               confirmed ? '--confirmed' : '',
               needsConfirm(field) && confirmed && feedback
                 ? feedback.isFullyCorrect
