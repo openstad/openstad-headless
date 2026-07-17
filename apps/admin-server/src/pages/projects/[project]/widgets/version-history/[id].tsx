@@ -42,14 +42,17 @@ function versionLabel(version: WidgetVersion) {
 }
 
 const ALWAYS_STRIP = new Set(['widgetId', 'projectId', 'uuid']);
+const STABLE_KEYS = ['fieldKey', 'trigger', 'key'];
 
 function stripSystemFields(value: any, isTop = false): any {
   if (Array.isArray(value)) return value.map((v) => stripSystemFields(v));
   if (value && typeof value === 'object') {
+    const hasStableKey = STABLE_KEYS.some((k) => k in value);
+    const canDropId = isTop || hasStableKey;
     const out: Record<string, any> = {};
     for (const [key, val] of Object.entries(value)) {
       if (ALWAYS_STRIP.has(key)) continue;
-      if (isTop && key === 'id') continue;
+      if (key === 'id' && canDropId) continue;
       out[key] = stripSystemFields(val);
     }
     return out;
