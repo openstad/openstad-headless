@@ -564,7 +564,10 @@ export default function WidgetEnqueteItems(
       fieldKey: item.fieldKey || '',
       description: item.description || '',
       questionType: item.questionType || '',
-      feedbackMode: item.feedbackMode || 'none',
+      feedbackMode:
+        item.feedbackMode === 'correctIncorrect'
+          ? 'none'
+          : item.feedbackMode || 'none',
       feedbackText: item.feedbackText || '',
       feedbackCorrect: item.feedbackCorrect || '',
       feedbackIncorrect: item.feedbackIncorrect || '',
@@ -1241,8 +1244,7 @@ export default function WidgetEnqueteItems(
                                   />
                                 )}
 
-                              {form.watch('feedbackMode') ===
-                                'correctIncorrect' &&
+                              {props.isQuiz &&
                                 ['multiplechoice', 'multiple'].includes(
                                   form.watch('questionType') || ''
                                 ) && (
@@ -2466,7 +2468,8 @@ export default function WidgetEnqueteItems(
                               <FormLabel>Feedbackmodus</FormLabel>
                               <FormDescription>
                                 Bepaal welke feedback de bezoeker ziet nadat een
-                                antwoord is bevestigd.
+                                antwoord is bevestigd. Dit zijn de quizopties
+                                voor deze vraag.
                               </FormDescription>
                               <Select
                                 value={field.value || 'none'}
@@ -2484,19 +2487,39 @@ export default function WidgetEnqueteItems(
                                   <SelectItem value="perAnswer">
                                     Per antwoord
                                   </SelectItem>
-                                  {['multiplechoice', 'multiple'].includes(
-                                    form.watch('questionType') || ''
-                                  ) && (
-                                    <SelectItem value="correctIncorrect">
-                                      Goed / fout
-                                    </SelectItem>
-                                  )}
                                 </SelectContent>
                               </Select>
+                              {field.value === 'perAnswer' &&
+                                ['multiplechoice', 'multiple'].includes(
+                                  form.watch('questionType') || ''
+                                ) && (
+                                  <FormDescription>
+                                    De feedbacktekst vul je per antwoord in bij
+                                    de betreffende antwoordoptie.
+                                  </FormDescription>
+                                )}
                               <FormMessage />
                             </FormItem>
                           )}
                         />
+                      )}
+
+                    {props.isQuiz &&
+                      ['multiplechoice', 'multiple'].includes(
+                        form.watch('questionType') || ''
+                      ) && (
+                        <FormItem>
+                          <FormLabel>Quizvraag maken</FormLabel>
+                          <FormDescription>
+                            Markeer minstens één antwoord als &apos;goed&apos;
+                            via &apos;Antwoordopties aanpassen&apos; (per
+                            optie). Dan wordt dit een quizvraag: de bezoeker
+                            krijgt een bevestigknop en ziet na bevestigen wat
+                            goed en fout was. Antwoorden staan standaard op
+                            fout. De feedbackmodus hierboven bepaalt los daarvan
+                            welke toelichtende tekst verschijnt.
+                          </FormDescription>
+                        </FormItem>
                       )}
 
                     {props.isQuiz &&
@@ -2520,9 +2543,11 @@ export default function WidgetEnqueteItems(
                       )}
 
                     {props.isQuiz &&
-                      form.watch('feedbackMode') === 'correctIncorrect' &&
                       ['multiplechoice', 'multiple'].includes(
                         form.watch('questionType') || ''
+                      ) &&
+                      (form.watch('options') || []).some(
+                        (option: any) => option?.titles?.[0]?.isCorrect === true
                       ) && (
                         <>
                           <FormField

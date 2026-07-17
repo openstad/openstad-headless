@@ -33,7 +33,7 @@ import type {
   ComponentFieldProps,
   FormProps,
 } from './props';
-import { evaluateFeedback } from './utils/feedback';
+import { evaluateFeedback, isGraded } from './utils/feedback';
 import { resolveFieldInteraction } from './utils/interaction';
 import { computeEffectivePagination } from './utils/pagination';
 import { updateRouting } from './utils/routing';
@@ -448,10 +448,9 @@ function Form({
   };
 
   const hasFeedback = (field: any): boolean =>
-    !!field.feedbackMode && field.feedbackMode !== 'none';
+    isGraded(field) || (!!field.feedbackMode && field.feedbackMode !== 'none');
 
-  const needsConfirm = (field: any): boolean =>
-    field.feedbackMode === 'correctIncorrect';
+  const needsConfirm = (field: any): boolean => isGraded(field);
 
   const meetsMinChoices = (field: any): boolean => {
     const min = parseInt(String(field.minChoices ?? ''), 10);
@@ -573,9 +572,11 @@ function Form({
 
             const stateClasses = [
               hasFeedback(field) ? '--has-feedback' : '',
-              hasFeedback(field)
+              (field as any).feedbackMode &&
+              (field as any).feedbackMode !== 'none'
                 ? `--feedback-${(field as any).feedbackMode}`
                 : '',
+              isGraded(field) ? '--graded' : '',
               confirmed ? '--confirmed' : '',
               needsConfirm(field) && confirmed && feedback
                 ? feedback.isFullyCorrect

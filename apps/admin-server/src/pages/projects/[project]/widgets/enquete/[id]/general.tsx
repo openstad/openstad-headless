@@ -183,7 +183,7 @@ export default function WidgetEnqueteGeneral(
             name="isQuiz"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Is dit een quiz?</FormLabel>
+                <FormLabel>Quizmodus inschakelen</FormLabel>
                 <FormDescription>
                   Zet quiz- en feedbackopties aan. Per vraag kun je daarna
                   instellen welke feedback bezoekers zien nadat ze een antwoord
