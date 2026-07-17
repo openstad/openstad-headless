@@ -253,6 +253,9 @@ async function run(id, projectData, options, callback) {
     const dbName = (dbPrefix + project.shortName).substring(0, 63);
 
     project.mongo.uri = process.env.MONGODB_URI.replace('{database}', dbName);
+    project.modules['@apostrophecms/db'] = {
+      options: { uri: project.mongo.uri },
+    };
   }
 
   const config = project;
