@@ -325,11 +325,46 @@ router
           projectId: req.project.id,
           to: receiver,
           data: commentData,
-        });
+        }).catch((err) =>
+          console.error('Error sending notification email for comment:', err)
+        );
         confirmationSent = true;
       } catch (e) {
-        console.log('Error sending notification email for comment:', e);
+        console.error('Error sending notification email for comment:', e);
       }
+    }
+
+    try {
+      const projectEmailConfig = await db.Project.unscoped().findByPk(
+        req.project.id,
+        { attributes: ['emailConfig'] }
+      );
+      if (
+        projectEmailConfig?.emailConfig?.notifications
+          ?.sendCommentAdminEmail === true
+      ) {
+        const adminData = {
+          resourceId: req.results.resourceId,
+          comment: {
+            description: req.results.description,
+            userName: req.results.user ? req.results.user.displayName : '',
+          },
+        };
+        if (req.results.parentId && req?.parentComment?.description) {
+          adminData.parentComment = {
+            description: req.parentComment.description,
+          };
+        }
+        db.Notification.create({
+          type: 'new comment - admin',
+          projectId: req.project.id,
+          data: adminData,
+        }).catch((err) =>
+          console.error('Error sending admin notification for comment:', err)
+        );
+      }
+    } catch (e) {
+      console.error('Error sending admin notification for comment:', e);
     }
 
     req.results.confirmationSent = confirmationSent;
