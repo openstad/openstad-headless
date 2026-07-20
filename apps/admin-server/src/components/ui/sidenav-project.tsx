@@ -360,6 +360,14 @@ export function SidenavProject({ className }: { className?: string }) {
             <span className="truncate">Notificaties en e-mails</span>
           </Button>
         </Link>
+        <Link href={`/projects/${project}/api-tokens`}>
+          <Button
+            variant={location.includes('/api-tokens') ? 'secondary' : 'ghost'}
+            size="default"
+            className="w-full flex justify-start">
+            <span className="truncate">API-tokens</span>
+          </Button>
+        </Link>
         {HasAccess(sessionData) && (
           <Link href={`/projects/${project}/duplicate`}>
             <Button
