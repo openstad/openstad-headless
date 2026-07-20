@@ -1,6 +1,6 @@
 const db = require('../db');
 const generateCode = require('../utils/generateCode');
-const Tasks = require('../memoryStorage/tasks');
+const Tasks = require('../databaseStorage/tasks');
 
 exports.withAll = (req, res, next) => {
   const isExport = req.query.export === 'true';

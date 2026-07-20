@@ -8,7 +8,7 @@ metadata:
     {{- include "openstad.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ template "openstad.admin.fullname" . }}-deployment
 spec:
-  replicas: {{ .Values.admin.replicas }}
+  {{- include "openstad.replicas" (dict "Values" .Values "serviceAutoscaling" .Values.admin.autoscaling "replicas" (.Values.admin.replicas | default 1)) | nindent 2 }}
   selector:
     matchLabels:
       app: {{ .Values.admin.label }}
@@ -22,6 +22,7 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
       serviceAccountName: openstad-headless-ingress-sa
+      {{- include "openstad.podAntiAffinity" (dict "Values" .Values "Release" .Release "appLabel" .Values.admin.label) | nindent 6 }}
       containers:
       - name: {{ template "openstad.admin.fullname" . }}
         image: {{ .Values.admin.deploymentContainer.image }}
