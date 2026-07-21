@@ -131,15 +131,20 @@ module.exports = function (app) {
   /**
    * Log urls
    */
-  app.use((req, res, next) => {
-    res.on('finish', () => {
-      const ts = new Date().toISOString();
-      const clientId = req.client?.id || '';
-      const log = `[${ts}] ${req.method}:${req.url} ${res.statusCode}${clientId ? ` clientId=${clientId}` : ''}`;
-      console.log(log);
+  if (
+    process.env.NODE_ENV !== 'production' ||
+    process.env.VERBOSE_LOGGING === 'true'
+  ) {
+    app.use((req, res, next) => {
+      res.on('finish', () => {
+        const ts = new Date().toISOString();
+        const clientId = req.client?.id || '';
+        const log = `\[${ts}] ${req.method}:${req.url} ${res.statusCode}${clientId ? ` clientId=${clientId}` : ''}`;
+        console.log(log);
+      });
+      next();
     });
-    next();
-  });
+  }
 
   app.get('/', authLocal.index);
 
