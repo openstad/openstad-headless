@@ -15,6 +15,7 @@ import {
 } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
@@ -44,6 +45,7 @@ import React, {
 
 import { elipsizeHTML } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
+import { findResourceIndex } from './lib/find-resource-index';
 import './resource-overview.css';
 
 export type ResourceOverviewWidgetProps = BaseProps &
@@ -131,6 +133,9 @@ export type ResourceOverviewWidgetProps = BaseProps &
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
     onLocationChange?: (location: PostcodeAutoFillLocation) => void;
     onMarkerResourceClick?: (resource: any, index: number) => void;
+    onResourceClickHandlerRegister?: (
+      handler: (resource: any, index?: number) => void
+    ) => void;
     displayLikeButton?: boolean;
     displayDislike?: boolean;
     clickableImage?: boolean;
@@ -153,6 +158,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
       overviewImage?: string;
       overviewUrl?: string;
       overviewMarkerIcon?: string;
+      overviewSortDate?: string;
       projectLat?: string;
       projectLng?: string;
       includeProjectsInOverview?: boolean;
@@ -176,6 +182,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
+    datastore?: any;
   };
 
 //Temp: Header can only be made when the map works so for now a banner
@@ -243,7 +250,7 @@ const defaultItemRenderer = (
       return (
         <div
           dangerouslySetInnerHTML={{
-            __html: render,
+            __html: sanitizeHtml(render),
           }}></div>
       );
     } catch (e) {
@@ -373,7 +380,16 @@ const defaultItemRenderer = (
   const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
   const selectedOpinion = resource?.userVote?.opinion;
 
-  const TileFooter = ({ doVote }: { doVote?: (value: string) => any }) => {
+  const TileFooter = ({
+    doVote,
+    resource: likeResource,
+  }: {
+    doVote?: (value: string) => any;
+    resource?: any;
+  }) => {
+    const displayResource = likeResource || resource;
+    const opinion = displayResource?.userVote?.opinion;
+
     const vote = async (sentiment: string) => {
       if (doVote) {
         await doVote(sentiment);
@@ -391,20 +407,20 @@ const defaultItemRenderer = (
             <Icon
               icon="ri-thumb-up-line"
               variant="big"
-              text={resource.yes}
+              text={displayResource.yes}
               description="Stemmen voor"
               onClick={() => vote('yes')}
-              className={selectedOpinion === 'yes' ? 'selected' : ''}
+              className={opinion === 'yes' ? 'selected' : ''}
             />
 
             {props.likeWidget?.displayDislike && (
               <Icon
                 icon="ri-thumb-down-line"
                 variant="big"
-                text={resource.no}
+                text={displayResource.no}
                 description="Stemmen tegen"
                 onClick={() => vote('no')}
-                className={selectedOpinion === 'no' ? 'selected' : ''}
+                className={opinion === 'no' ? 'selected' : ''}
               />
             )}
           </>
@@ -414,30 +430,28 @@ const defaultItemRenderer = (
           <div className="micro-score-container">
             <Icon
               icon={`${
-                selectedOpinion === 'yes'
-                  ? 'ri-triangle-fill'
-                  : 'ri-triangle-line'
+                opinion === 'yes' ? 'ri-triangle-fill' : 'ri-triangle-line'
               } micro-score-triangle`}
               variant="big"
               description="Stemmen voor"
               onClick={() => vote('yes')}
               className={`micro-score-vote micro-score-vote--yes ${
-                selectedOpinion === 'yes' ? 'selected' : ''
+                opinion === 'yes' ? 'selected' : ''
               }`}
             />
-            <Paragraph className="votes-score">{resource.netVotes}</Paragraph>
+            <Paragraph className="votes-score">
+              {displayResource.netVotes}
+            </Paragraph>
             {props.likeWidget?.displayDislike && (
               <Icon
                 icon={`${
-                  selectedOpinion === 'no'
-                    ? 'ri-triangle-fill'
-                    : 'ri-triangle-line'
+                  opinion === 'no' ? 'ri-triangle-fill' : 'ri-triangle-line'
                 } micro-score-triangle micro-score-triangle-down`}
                 variant="big"
                 description="Stemmen tegen"
                 onClick={() => vote('no')}
                 className={`micro-score-vote micro-score-vote--no ${
-                  selectedOpinion === 'no' ? 'selected' : ''
+                  opinion === 'no' ? 'selected' : ''
                 }`}
               />
             )}
@@ -448,7 +462,7 @@ const defaultItemRenderer = (
           <Icon
             icon="ri-message-line"
             variant="big"
-            text={resource.commentCount}
+            text={displayResource.commentCount}
             description="Aantal reacties"
           />
         ) : null}
@@ -553,9 +567,13 @@ const defaultItemRenderer = (
               resourceId={resource.id}
               projectId={props.projectId}
               {...props}
+              datastore={(props as any).datastore}
+              initialResource={resource}
               disabled={!canLike}
               refreshResourceLikes={refreshLikes}>
-              {(doVote) => <TileFooter doVote={doVote} />}
+              {(doVote, likeResource) => (
+                <TileFooter doVote={doVote} resource={likeResource} />
+              )}
             </Likes>
           ) : (
             <TileFooter />
@@ -783,6 +801,53 @@ const defaultItemRenderer = (
   );
 };
 
+type DialogResourceItemProps = {
+  item: any;
+  datastore: any;
+  projectId?: string;
+  currentUser?: any;
+  displayDocuments?: boolean;
+  documentsTitle?: string;
+  documentsDesc?: string;
+  displayTags?: boolean;
+  dialogTagGroups?: string[];
+  displayBudget?: boolean;
+  displayLikeButton?: boolean;
+  displayDislike?: boolean;
+  clickableImage?: boolean;
+  onRemoveClick: (resource: any) => void;
+  forwardProps: ResourceOverviewWidgetProps;
+};
+
+function DialogResourceItem({
+  item,
+  datastore,
+  projectId,
+  onRemoveClick,
+  forwardProps,
+  ...gridderProps
+}: DialogResourceItemProps) {
+  const itemIsFull =
+    !!item && ('summary' in item || 'description' in item || 'images' in item);
+
+  const { data } = datastore.useResource({
+    projectId,
+    resourceId: item?.id,
+    initialData: itemIsFull ? item : undefined,
+  });
+
+  const resource = itemIsFull ? item : data && data.id ? data : item;
+
+  return (
+    <GridderResourceDetail
+      resource={resource}
+      onRemoveClick={onRemoveClick}
+      {...gridderProps}
+      {...forwardProps}
+    />
+  );
+}
+
 function ResourceOverviewInner({
   renderItem = defaultItemRenderer,
   allowFiltering = true,
@@ -924,11 +989,6 @@ function ResourceOverviewInner({
   const needsAllResourcesFetch =
     listUsesAllResources || !!displayMap || !!onFilteredResourcesChange;
 
-  // Build API filter params — always send filters to the API
-  const apiTags = useMemo(
-    () => [...(includeTags.length > 0 ? includeTags : []), ...tags],
-    [includeTags, tags]
-  );
   const apiExcludeTags = useMemo(() => excludeTags, [excludeTags]);
   const apiStatuses = useMemo(
     () => (includeOrExcludeStatusIds === 'include' ? statuses : []),
@@ -953,25 +1013,25 @@ function ResourceOverviewInner({
     return tagsMap;
   }, [allTags]);
 
-  // When AND behavior is needed, group selected tags by their type for the API.
-  // Handle includeTags and user tags separately — they can have different behavior settings.
   const apiTagGroups = useMemo(() => {
     const groups: number[][] = [];
 
-    // includeTags: group by type when filterBehaviorInclude is 'and'
-    if (filterBehaviorInclude === 'and' && includeTags.length > 0) {
-      Object.keys(groupedTags).forEach((tagType) => {
-        const tagsOfType = groupedTags[tagType];
-        const selectedOfType = includeTags.filter((tagId) =>
-          tagsOfType.includes(tagId)
-        );
-        if (selectedOfType.length > 0) {
-          groups.push(selectedOfType);
-        }
-      });
+    if (includeTags.length > 0) {
+      if (filterBehaviorInclude === 'and') {
+        Object.keys(groupedTags).forEach((tagType) => {
+          const tagsOfType = groupedTags[tagType];
+          const selectedOfType = includeTags.filter((tagId) =>
+            tagsOfType.includes(tagId)
+          );
+          if (selectedOfType.length > 0) {
+            groups.push(selectedOfType);
+          }
+        });
+      } else {
+        groups.push(includeTags);
+      }
     }
 
-    // user-selected tags: group by type when filterBehavior is 'and'
     if (filterBehavior === 'and' && tags.length > 0) {
       Object.keys(groupedTags).forEach((tagType) => {
         const tagsOfType = groupedTags[tagType];
@@ -987,18 +1047,16 @@ function ResourceOverviewInner({
     return groups;
   }, [filterBehavior, filterBehaviorInclude, tags, includeTags, groupedTags]);
 
-  // When tag groups handle the AND logic, send only the remaining OR tags as flat params
   const flatApiTags = useMemo(() => {
-    if (filterBehaviorInclude === 'and' && filterBehavior === 'and') return [];
-    if (filterBehaviorInclude === 'and') return tags;
-    if (filterBehavior === 'and') return includeTags;
-    return apiTags;
-  }, [filterBehavior, filterBehaviorInclude, tags, includeTags, apiTags]);
+    if (filterBehavior === 'and') return [];
+    return tags;
+  }, [filterBehavior, tags]);
 
   const {
     data: resourcesWithPagination,
     allData: allResourcesData,
     isLoading,
+    revalidate: revalidateResources,
   } = datastore.useResources({
     pageSize,
     ...props,
@@ -1019,11 +1077,14 @@ function ResourceOverviewInner({
     fetchAll: needsAllResourcesFetch
       ? listUsesAllResources
         ? true
-        : 'markers'
+        : displayType === 'cardgrid' && displayMap
+          ? true
+          : 'markers'
       : false,
   });
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
+  const [dialogSource, setDialogSource] = useState<'list' | 'marker'>('list');
 
   useEffect(() => {
     if (
@@ -1064,7 +1125,7 @@ function ResourceOverviewInner({
             images: [{ url: project?.overviewImage || '' }],
             overviewUrl: project?.overviewUrl || '',
             projectId: project.id,
-            createdAt: project?.createdAt || '',
+            createdAt: project?.overviewSortDate || project?.createdAt || '',
             tags: projectTags,
             uniqueId: `project-${project.id}`,
           };
@@ -1096,7 +1157,22 @@ function ResourceOverviewInner({
         }
       );
 
-      const combined = [...uniqueResources, ...allRecords].sort(
+      const filteredProjectCards = uniqueResources.filter((card: any) => {
+        const cardTagIds: number[] =
+          card.tags?.map((tag: { id: number }) => tag.id) ?? [];
+        if (cardTagIds.some((id) => excludeTags.includes(id))) return false;
+        if (
+          flatApiTags.length > 0 &&
+          !flatApiTags.some((id: number) => cardTagIds.includes(id))
+        )
+          return false;
+        return apiTagGroups.every(
+          (group: number[]) =>
+            group.length === 0 || group.some((id) => cardTagIds.includes(id))
+        );
+      });
+
+      const combined = [...filteredProjectCards, ...allRecords].sort(
         (a: any, b: any) => {
           if (sort === 'createdAt_desc')
             return (
@@ -1132,6 +1208,9 @@ function ResourceOverviewInner({
     allTags,
     search,
     sort,
+    excludeTags,
+    flatApiTags,
+    apiTagGroups,
   ]);
 
   useEffect(() => {
@@ -1180,8 +1259,44 @@ function ResourceOverviewInner({
 
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
 
+  const markerDialogList = useMemo(
+    () =>
+      listUsesAllResources
+        ? (filteredResources ?? [])
+        : (allResourcesData?.records ?? filteredResources ?? []),
+    [listUsesAllResources, filteredResources, allResourcesData]
+  );
+
+  const dialogList = useMemo(
+    () =>
+      dialogSource === 'marker' ? markerDialogList : (filteredResources ?? []),
+    [dialogSource, markerDialogList, filteredResources]
+  );
+
+  const openDialogForResource = useCallback(
+    (resource: any, source: 'list' | 'marker') => {
+      const listForSource =
+        source === 'marker' ? markerDialogList : (filteredResources ?? []);
+      const idx = findResourceIndex(
+        resource.id ?? resource.uniqueId,
+        listForSource
+      );
+      if (idx === -1) {
+        console.warn(
+          '[resource-overview] dialog open: resource not found in list',
+          { source, resource }
+        );
+        return;
+      }
+      setDialogSource(source);
+      setResourceDetailIndex(idx);
+      setOpen(true);
+    },
+    [filteredResources, markerDialogList]
+  );
+
   const onResourceClick = useCallback(
-    (resource: any, index: number) => {
+    (resource: any, _index?: number) => {
       if (displayType === 'cardrow') {
         let urlToUse = props.itemLink;
 
@@ -1215,12 +1330,23 @@ function ResourceOverviewInner({
       }
 
       if (displayType === 'cardgrid') {
-        setResourceDetailIndex(index);
-        setOpen(true);
+        openDialogForResource(resource, 'list');
       }
     },
-    [displayType, props.itemLink]
+    [displayType, props.itemLink, selectedProjects, openDialogForResource]
   );
+
+  const onMarkerClickInternal = useCallback(
+    (resource: any) => {
+      if (displayType !== 'cardgrid') return;
+      openDialogForResource(resource, 'marker');
+    },
+    [displayType, openDialogForResource]
+  );
+
+  useEffect(() => {
+    props.onResourceClickHandlerRegister?.(onMarkerClickInternal);
+  }, [onMarkerClickInternal, props.onResourceClickHandlerRegister]);
 
   const filterNeccesary =
     allowFiltering &&
@@ -1252,7 +1378,7 @@ function ResourceOverviewInner({
   };
 
   const refreshLikes = () => {
-    datastore.refresh();
+    revalidateResources();
   };
 
   const overviewSection = (
@@ -1273,7 +1399,7 @@ function ResourceOverviewInner({
         (listUsesAllResources
           ? filteredResources?.slice(page * pageSize, (page + 1) * pageSize)
           : filteredResources
-        )?.map((resource: any, index: number) => {
+        )?.map((resource: any) => {
           return (
             <React.Fragment
               key={`resource-item-${resource?.id || resource?.uniqueId}`}>
@@ -1285,9 +1411,10 @@ function ResourceOverviewInner({
                   selectedProjects,
                   displayOverviewTagGroups,
                   overviewTagGroups,
+                  datastore,
                 },
                 () => {
-                  onResourceClick(resource, index);
+                  onResourceClick(resource);
                 },
                 refreshLikes
               )}
@@ -1297,10 +1424,9 @@ function ResourceOverviewInner({
       )}
     </section>
   );
-  const validFilteredResources =
-    filteredResources?.filter(
-      (r) => r && (r.id || r.uniqueId) // only real resources or projects
-    ) || [];
+  const validDialogList = dialogList.filter(
+    (r: any) => r && (r.id || r.uniqueId) // only real resources or projects
+  );
   return tagsLoading ? (
     <Paragraph className="osc-loading-results-text">Laden...</Paragraph>
   ) : (
@@ -1311,14 +1437,16 @@ function ResourceOverviewInner({
         children={
           <Carousel
             startIndex={resourceDetailIndex}
-            items={validFilteredResources}
+            items={validDialogList}
             buttonText={{
               next: 'Volgende afbeelding',
               previous: 'Vorige afbeelding',
             }}
             itemRenderer={(item) => (
-              <GridderResourceDetail
-                resource={item}
+              <DialogResourceItem
+                item={item}
+                datastore={datastore}
+                projectId={props.projectId}
                 currentUser={currentUser}
                 displayDocuments={displayDocuments}
                 documentsTitle={documentsTitle}
@@ -1329,7 +1457,7 @@ function ResourceOverviewInner({
                 displayLikeButton={displayLikeButton}
                 displayDislike={displayDislike}
                 clickableImage={clickableImage}
-                onRemoveClick={(resource) => {
+                onRemoveClick={(resource: any) => {
                   try {
                     resource
                       .delete(resource.id)
@@ -1341,7 +1469,7 @@ function ResourceOverviewInner({
                     console.error(e);
                   }
                 }}
-                {...props}
+                forwardProps={props}
               />
             )}></Carousel>
         }
@@ -1353,7 +1481,7 @@ function ResourceOverviewInner({
               {
                 ...props,
                 displayType,
-                onMarkerResourceClick: onResourceClick,
+                onMarkerResourceClick: onMarkerClickInternal,
               },
               allResourcesData?.records || filteredResources || [],
               bannerText,

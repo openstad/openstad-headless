@@ -2,70 +2,18 @@
 const login = require('connect-ensure-login');
 const oauth2orize = require('oauth2orize');
 const passport = require('passport');
-const URL = require('url').URL;
 const db = require('../../db');
 const config = require('../../config');
 const memoryStorage = require('../../memoryStorage');
 const utils = require('../../utils');
 const validate = require('../../validate');
+const {
+  prefillAllowedDomains,
+  validateRedirectUri,
+} = require('../../utils/redirectUri');
+const sanitize = require('../../utils/sanitize');
 
-function parseHost(value) {
-  if (!value) return null;
-  try {
-    if (value.indexOf('http') !== 0) value = 'https://' + value;
-    return new URL(value).host;
-  } catch {
-    return null;
-  }
-}
-
-function getParentDomains(hostname) {
-  const host = hostname.split(':')[0];
-  const parts = host.split('.');
-  const parents = [];
-  for (let i = 1; i < parts.length - 1; i++) {
-    parents.push(parts.slice(i).join('.'));
-  }
-  return parents;
-}
-
-function addWithParents(list, host) {
-  if (!host) return;
-  list.push(host);
-  for (const parent of getParentDomains(host)) {
-    list.push(parent);
-  }
-}
-
-const prefillAllowedDomains = function (inputDomains) {
-  const allowedDomains = [...(inputDomains || [])];
-  try {
-    const configuredHosts = allowedDomains
-      .map((d) => parseHost(d))
-      .filter(Boolean);
-    for (const host of configuredHosts) {
-      addWithParents(allowedDomains, host);
-    }
-
-    const envVars = [
-      process.env.BASE_DOMAIN,
-      process.env.APP_URL,
-      process.env.CMS_URL,
-      process.env.API_URL,
-      process.env.ADMIN_URL,
-    ];
-
-    for (const envVar of envVars) {
-      if (!envVar) continue;
-      addWithParents(allowedDomains, parseHost(envVar));
-    }
-  } catch (err) {
-    console.error('Error processing allowed domains:', err);
-    return [...new Set(allowedDomains)];
-  }
-
-  return [...new Set(allowedDomains)];
-};
+exports.prefillAllowedDomains = prefillAllowedDomains;
 
 // Register supported grant types.
 //
@@ -259,33 +207,29 @@ exports.authorization = [
         }
 
         /**
-         * Check if redirectURI same host as registered
+         * Check redirectURI against the central redirect policy
          */
-        const allowedDomains = prefillAllowedDomains(
-          client.allowedDomains ? client.allowedDomains : []
-        );
-        const redirectUrlHost = new URL(redirectURI).host;
-
-        //console.log('===> allowedDomains', allowedDomains, redirectUrlHost);
-
-        // throw error if allowedDomains is empty or the redirectURI's host is not present in the allowed domains
-        if (allowedDomains && allowedDomains.indexOf(redirectUrlHost) !== -1) {
-          // Find and encode returnTo param if present, this allows us to support returnTo urls with special characters (e.g. `?` and `&`)
-          const returnTo = redirectURI.substr(
-            redirectURI.lastIndexOf('returnTo=') + 9
-          );
-          if (returnTo) {
-            // encode returnTo param
-            const encodedReturnTo = encodeURIComponent(returnTo);
-            redirectURI = redirectURI.replace(returnTo, encodedReturnTo);
+        try {
+          if (!validateRedirectUri(redirectURI, client)) {
+            throw new Error('redirect_uri is required');
           }
-          return done(null, client, redirectURI);
-        } else {
+        } catch (err) {
           console.log(
-            `[${new Date().toISOString()}][oauth] redirect host not allowed: clientId=${client?.id} redirectHost=${redirectUrlHost}`
+            `[${new Date().toISOString()}][oauth] redirect not allowed: clientId=${client?.id} reason=${err.message}`
           );
           throw new Error("Redirect host doesn't match the client host");
         }
+
+        // Find and encode returnTo param if present, this allows us to support returnTo urls with special characters (e.g. `?` and `&`)
+        const returnTo = redirectURI.substr(
+          redirectURI.lastIndexOf('returnTo=') + 9
+        );
+        if (returnTo) {
+          // encode returnTo param
+          const encodedReturnTo = encodeURIComponent(returnTo);
+          redirectURI = redirectURI.replace(returnTo, encodedReturnTo);
+        }
+        return done(null, client, redirectURI);
       })
       .catch((err) => done(err));
   }),
@@ -304,9 +248,11 @@ exports.authorization = [
           })(req, res, next);
         } else {
           res.render('dialog', {
-            transactionID: req.oauth2.transactionID,
-            user: req.user,
-            client: req.oauth2.client,
+            transactionID: sanitize.plainText(
+              String(req.oauth2.transactionID || '')
+            ),
+            user: { name: sanitize.plainText(req.user?.name || '') },
+            client: sanitize.client(req.oauth2.client),
           });
         }
       })
@@ -316,9 +262,11 @@ exports.authorization = [
         );
 
         res.render('dialog', {
-          transactionID: req.oauth2.transactionID,
-          user: req.user,
-          client: req.oauth2.client,
+          transactionID: sanitize.plainText(
+            String(req.oauth2.transactionID || '')
+          ),
+          user: { name: sanitize.plainText(req.user?.name || '') },
+          client: sanitize.client(req.oauth2.client),
         });
       });
   },

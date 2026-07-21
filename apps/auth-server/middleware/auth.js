@@ -23,8 +23,8 @@ exports.check = (req, res, next) => {
   if (!req.isAuthenticated || !isAuthenticated) {
     let url = '/login?clientId=' + req.client.clientId;
 
-    if (req.query.redirect_uri) {
-      url = url + '&redirect_uri=' + encodeURIComponent(req.query.redirect_uri);
+    if (req.redirectUri) {
+      url = url + '&redirect_uri=' + encodeURIComponent(req.redirectUri);
     }
 
     if (req.session) {
@@ -36,6 +36,20 @@ exports.check = (req, res, next) => {
     db.User.findOne({ where: { id: req.user.id } })
       .then(async (user) => {
         req.user = user;
+
+        if (req.client?.id === 1 && !req.currentClientAuth?.authenticatedAt) {
+          let url = '/login?clientId=' + req.client.clientId;
+
+          if (req.redirectUri) {
+            url = url + '&redirect_uri=' + encodeURIComponent(req.redirectUri);
+          }
+
+          if (req.session) {
+            req.session.returnTo = req.originalUrl || req.url;
+          }
+
+          return res.redirect(url);
+        }
 
         if (req.client && req.currentClientAuth) {
           const currentRole = await clientAuth.resolveRoleForClient(
@@ -54,11 +68,9 @@ exports.check = (req, res, next) => {
 
             let url = '/login?clientId=' + req.client.clientId;
 
-            if (req.query.redirect_uri) {
+            if (req.redirectUri) {
               url =
-                url +
-                '&redirect_uri=' +
-                encodeURIComponent(req.query.redirect_uri);
+                url + '&redirect_uri=' + encodeURIComponent(req.redirectUri);
             }
 
             if (req.session) {

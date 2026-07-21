@@ -54,6 +54,7 @@ const formSchema = z.object({
   tagTypeTag: z.string().optional(),
   voteAfterLoggingIn: z.boolean().optional(),
   displayModBreak: z.boolean().optional(),
+  showConfetti: z.boolean().optional(),
 });
 
 type Formdata = z.infer<typeof formSchema>;
@@ -95,6 +96,7 @@ export default function BegrootmoduleDisplay(
       hideTagsForResources: props.hideTagsForResources || false,
       voteAfterLoggingIn: props.voteAfterLoggingIn || false,
       displayModBreak: props.displayModBreak || false,
+      showConfetti: props.showConfetti || false,
     },
   });
 
@@ -267,6 +269,18 @@ export default function BegrootmoduleDisplay(
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Toon de ModBreak</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="showConfetti"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>Toon confetti na het stemmen</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

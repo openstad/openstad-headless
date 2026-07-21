@@ -19,7 +19,7 @@ import {
   FormFieldDescription,
   Paragraph,
 } from '@utrecht/component-library-react';
-import React, { FC, ReactNode, useEffect, useState } from 'react';
+import React, { FC, ReactNode, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
@@ -42,6 +42,8 @@ export type SortFieldProps = {
   type?: string;
   defaultValue?: string;
   fieldOptions?: { value: string; label: string }[];
+  fieldRequired?: boolean;
+  requiredWarning?: string;
   images?: Array<{
     url: string;
     name?: string;
@@ -51,7 +53,7 @@ export type SortFieldProps = {
   createImageSlider?: boolean;
   imageClickable?: boolean;
   onChange?: (
-    e: { name: string; value: any },
+    e: { name: string; value: any; isInitial?: boolean },
     triggerSetLastKey?: boolean
   ) => void;
   prevPageText?: string;
@@ -89,6 +91,7 @@ const SortField: FC<SortFieldProps> = ({
   onChange,
   onSort,
   fieldKey,
+  fieldRequired = false,
   overrideDefaultValue,
   numberingStyle,
   infoImage,
@@ -109,6 +112,7 @@ const SortField: FC<SortFieldProps> = ({
   } catch (e) {}
 
   const [items, setItems] = useState(options);
+  const [touched, setTouched] = useState(!!overrideDefaultValue);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -124,7 +128,14 @@ const SortField: FC<SortFieldProps> = ({
     })
   );
 
+  const markTouched = () => {
+    if (!touched) {
+      setTouched(true);
+    }
+  };
+
   const handleDragEnd = (event: any) => {
+    markTouched();
     const { active, over } = event;
     if (active.id !== over?.id) {
       const oldIndex = items.findIndex(
@@ -139,19 +150,25 @@ const SortField: FC<SortFieldProps> = ({
     }
   };
 
+  const didInitRef = useRef(false);
   useEffect(() => {
     const value = items
       .filter((opt) => !!opt.titles)
       ?.map((opt) => opt.titles?.[0]?.key);
+    const sortValue = fieldRequired && !touched ? '' : JSON.stringify(value);
     onChange &&
       onChange({
         name: fieldKey,
-        value: JSON.stringify(value),
+        value: sortValue,
+        // The first emit is the mount initialisation, not a user interaction.
+        isInitial: !didInitRef.current,
       });
-  }, [items]);
+    didInitRef.current = true;
+  }, [items, touched]);
 
   return (
-    <div className={`sort-field-container --${numberingStyle}`}>
+    <div
+      className={`sort-field-container --${numberingStyle}${fieldRequired && !touched ? ' --untouched' : ''}`}>
       <div className="sortable-intro">
         {title && (
           <Paragraph className="utrecht-form-field__label">
@@ -185,7 +202,7 @@ const SortField: FC<SortFieldProps> = ({
           <SortableContext
             items={items.map((opt) => opt.titles?.[0]?.key || '')}
             strategy={verticalListSortingStrategy}>
-            <ol>
+            <ol aria-required={fieldRequired || undefined}>
               {items.map((option, index) => (
                 <li>
                   <SortableItem
@@ -201,6 +218,7 @@ const SortField: FC<SortFieldProps> = ({
                         disabled={index === 0}
                         onClick={(e) => {
                           if (index > 0) {
+                            markTouched();
                             const newItems = arrayMove(items, index, index - 1);
                             setItems(newItems);
                             if (onSort) onSort(newItems);
@@ -214,6 +232,7 @@ const SortField: FC<SortFieldProps> = ({
                         disabled={index === items.length - 1}
                         onClick={(e) => {
                           if (index < items.length - 1) {
+                            markTouched();
                             const newItems = arrayMove(items, index, index + 1);
                             setItems(newItems);
                             if (onSort) onSort(newItems);

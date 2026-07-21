@@ -5,7 +5,7 @@ const {
 const {
   OTLPTraceExporter,
 } = require('@opentelemetry/exporter-trace-otlp-grpc');
-const { Resource } = require('@opentelemetry/resources');
+const { resourceFromAttributes } = require('@opentelemetry/resources');
 // Use standard OTel resource attribute names (semantic-conventions exports can vary by version)
 const SERVICE_NAME = 'service.name';
 const SERVICE_VERSION = 'service.version';
@@ -38,7 +38,7 @@ function createTelemetry(config = {}) {
     }
 
     try {
-      const resource = new Resource({
+      const resource = resourceFromAttributes({
         [SERVICE_NAME]: merged.serviceName,
         [SERVICE_VERSION]: merged.serviceVersion,
         [DEPLOYMENT_ENVIRONMENT]: merged.environment,
@@ -50,7 +50,7 @@ function createTelemetry(config = {}) {
 
       sdk = new NodeSDK({
         resource,
-        spanProcessor: new SimpleSpanProcessor(traceExporter),
+        spanProcessors: [new SimpleSpanProcessor(traceExporter)],
         instrumentations: [
           getNodeAutoInstrumentations({
             '@opentelemetry/instrumentation-http': {

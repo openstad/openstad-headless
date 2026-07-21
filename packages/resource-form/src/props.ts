@@ -25,11 +25,7 @@ export type ResourceFormWidget = {
 
 export type General = {
   resource?:
-    | 'resource'
-    | 'article'
-    | 'activeUser'
-    | 'resourceUser'
-    | 'submission';
+    'resource' | 'article' | 'activeUser' | 'resourceUser' | 'submission';
   formName?: string;
   redirectUrl?: string;
   hideAdmin?: boolean;
@@ -72,6 +68,7 @@ export type Item = {
   maxCharacters?: string;
   variant?: string;
   multiple?: boolean;
+  maxUploadSizeMB?: number;
   images?: Array<{
     image?: never;
     src: string;
@@ -88,6 +85,7 @@ export type Item = {
   routingSelectedAnswer?: string | string[];
   selectAll?: boolean;
   selectAllLabel?: string;
+  allowedTypes?: string[];
 };
 
 export type Option = {

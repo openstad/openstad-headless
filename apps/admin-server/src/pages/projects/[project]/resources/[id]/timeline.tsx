@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import useResource from '@/hooks/use-resource';
 import useResources from '@/hooks/use-resources';
 import { withId } from '@/lib/widget-item-helpers';
+import { fillTimelineEndDates } from '@openstad-headless/lib/timeline-dates';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
@@ -28,15 +29,23 @@ export default function ProjectResourceTimeline() {
   useEffect(() => {
     if (!resource || itemsInitialized.current) return;
     itemsInitialized.current = true;
-    setItems((resource?.timeline ?? []).map(withId) as AgendaItem[]);
+    setItems(
+      fillTimelineEndDates(
+        (resource?.timeline ?? []).map(withId)
+      ) as AgendaItem[]
+    );
   }, [resource?.id]);
+
+  function handleItemsChange(next: AgendaItem[]) {
+    setItems(fillTimelineEndDates(next));
+  }
 
   async function handleSave() {
     if (!id) return;
 
     try {
       await update(Number.parseInt(id as string), {
-        timeline: items,
+        timeline: fillTimelineEndDates(items),
       });
       itemsInitialized.current = false;
       mutate();
@@ -52,8 +61,9 @@ export default function ProjectResourceTimeline() {
     <div>
       <AgendaItemsEditor
         items={items}
-        onItemsChange={setItems}
+        onItemsChange={handleItemsChange}
         showActiveDates={true}
+        timelineMode={true}
       />
       <div className="flex gap-2 mt-4">
         <Button type="button" onClick={handleSave}>

@@ -77,6 +77,44 @@ describe('audit-log service', () => {
       const result = sanitizeData(data);
       expect(result.tags).toEqual(['a', 'b', 'c']);
     });
+
+    it('converts Buffer values to a base64 string (no binary in JSON)', () => {
+      const data = { attachment: Buffer.from('hello') };
+      const result = sanitizeData(data);
+      expect(result.attachment).toBe(Buffer.from('hello').toString('base64'));
+      expect(() => JSON.stringify(result)).not.toThrow();
+    });
+
+    it('strips NULL bytes and C0 control characters from strings', () => {
+      const data = { name: 'a\u0000b\u0001c\u001Fd' };
+      const result = sanitizeData(data);
+      expect(result.name).toBe('abcd');
+    });
+
+    it('keeps tab, newline and carriage return', () => {
+      const data = { text: 'line1\nline2\tend\r' };
+      const result = sanitizeData(data);
+      expect(result.text).toBe('line1\nline2\tend\r');
+    });
+
+    it('replaces lone surrogates but keeps valid surrogate pairs', () => {
+      const data = { broken: 'x\uD800y', emoji: '😀' };
+      const result = sanitizeData(data);
+      expect(result.broken).toBe('x�y');
+      expect(result.emoji).toBe('😀');
+    });
+
+    it('produces JSON-serializable output for binary submittedData', () => {
+      const data = {
+        submittedData: {
+          field: 'ok\u0000bad',
+          blob: Buffer.from([0xff, 0xfe, 0x00]),
+        },
+      };
+      const result = sanitizeData(data);
+      expect(() => JSON.stringify(result)).not.toThrow();
+      expect(result.submittedData.field).toBe('okbad');
+    });
   });
 
   describe('getChangedFields', () => {

@@ -5,6 +5,7 @@ import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-d
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Carousel, Image } from '@openstad-headless/ui/src';
@@ -18,21 +19,23 @@ import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links
 import './resourceDetailWithMap.css';
 
 type booleanProps = {
-  [K in
-    | 'displayImage'
-    | 'displayTitle'
-    | 'displaySummary'
-    | 'displayDescription'
-    | 'displayUser'
-    | 'displayDate'
-    | 'displayBudget'
-    | 'displayLocation'
-    | 'displayBudgetDocuments'
-    | 'displayLikes'
-    | 'displayTags'
-    | 'displayStatus'
-    | 'displayDocuments'
-    | 'displaySocials']: boolean | undefined;
+  [
+    K in
+      | 'displayImage'
+      | 'displayTitle'
+      | 'displaySummary'
+      | 'displayDescription'
+      | 'displayUser'
+      | 'displayDate'
+      | 'displayBudget'
+      | 'displayLocation'
+      | 'displayBudgetDocuments'
+      | 'displayLikes'
+      | 'displayTags'
+      | 'displayStatus'
+      | 'displayDocuments'
+      | 'displaySocials'
+  ]: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = {
@@ -229,7 +232,9 @@ function ResourceDetailWithMap({
               <Heading
                 level={1}
                 appearance="utrecht-heading-2"
-                dangerouslySetInnerHTML={{ __html: resource.title }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(resource.title),
+                }}
               />
             )}
             <div className="osc-resource-detail-content-item-row">
@@ -278,12 +283,16 @@ function ResourceDetailWithMap({
                 <Heading
                   level={2}
                   appearance="utrecht-heading-4"
-                  dangerouslySetInnerHTML={{ __html: resource.summary }}
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeHtml(resource.summary),
+                  }}
                 />
               )}
               {displayDescription && (
                 <Paragraph
-                  dangerouslySetInnerHTML={{ __html: resource.description }}
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeHtml(resource.description),
+                  }}
                 />
               )}
             </div>
@@ -293,24 +302,26 @@ function ResourceDetailWithMap({
               </div>
             ) : null}
           </article>
-          {displayLocation && resource.location && (
-            <div className="map-container--buttons">
-              <ResourceDetailMap
-                resourceId={
-                  props.resourceId || resourceId || resource.id || '0'
-                }
-                {...props}
-                center={resource.location}
-                area={props.resourceDetailMap?.area}
-                resourceIdRelativePath={
-                  props.resourceIdRelativePath || 'openstadResourceId'
-                }></ResourceDetailMap>
-              <div className="map-buttons">
-                {ctaButtonElement}
-                {countButtonElement}
+          {displayLocation &&
+            resource.location?.lat &&
+            resource.location?.lng && (
+              <div className="map-container--buttons">
+                <ResourceDetailMap
+                  resourceId={
+                    props.resourceId || resourceId || resource.id || '0'
+                  }
+                  {...props}
+                  center={resource.location}
+                  area={props.resourceDetailMap?.area}
+                  resourceIdRelativePath={
+                    props.resourceIdRelativePath || 'openstadResourceId'
+                  }></ResourceDetailMap>
+                <div className="map-buttons">
+                  {ctaButtonElement}
+                  {countButtonElement}
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </>
       ) : (
         <span>resource niet gevonden..</span>

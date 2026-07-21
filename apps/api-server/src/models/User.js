@@ -158,6 +158,21 @@ module.exports = function (db, sequelize, DataTypes) {
         },
       },
 
+      projectDisplayName: {
+        type: DataTypes.STRING(64),
+        allowNull: true,
+        defaultValue: null,
+        auth: {
+          listableBy: ['moderator', 'owner'],
+          viewableBy: ['moderator', 'owner'],
+          createableBy: ['moderator', 'owner'],
+          updateableBy: ['moderator', 'owner'],
+        },
+        set: function (value) {
+          this.setDataValue('projectDisplayName', sanitize.noTags(value));
+        },
+      },
+
       name: {
         type: DataTypes.STRING(64),
         auth: {
@@ -303,9 +318,10 @@ module.exports = function (db, sequelize, DataTypes) {
         get: function () {
           // this should use project.config.allowUseOfNicknames but that implies loading the project for every time a user is shown which would be too slow
           // therefore createing nicknames is dependendt on project.config.allowUseOfNicknames; once you have created a nickName it will be shown here no matter what
+          let projectDisplayName = this.getDataValue('projectDisplayName');
           let nickName = this.getDataValue('nickName');
           let name = this.name;
-          return nickName || name || undefined;
+          return projectDisplayName || nickName || name || undefined;
         },
       },
 
@@ -625,6 +641,7 @@ module.exports = function (db, sequelize, DataTypes) {
         extraData: {},
         email: null,
         nickName: null,
+        projectDisplayName: null,
         name: anonymizedName,
         firstname: null,
         lastname: null,

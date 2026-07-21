@@ -12,8 +12,9 @@ const hat = require('hat');
 const login = require('connect-ensure-login');
 const db = require('../../db');
 const authLocalConfig = require('../../config/auth').get('Local');
-const URL = require('url').URL;
 const clientAuth = require('../../utils/clientAuth');
+const { safeRedirectUri } = require('../../utils/redirectUri');
+const sanitize = require('../../utils/sanitize');
 const authType = 'Local';
 const { logAuthEvent } = require('../../middleware/auditLog');
 
@@ -44,34 +45,34 @@ exports.login = (req, res) => {
       ? config.authTypes[authType]
       : {};
 
+  const clientId = sanitize.plainText(req.client.clientId);
+
   res.render('auth/local/login', {
     loginUrl:
       authLocalConfig.loginUrl +
-      `?clientId=${req.client.clientId}&redirect_uri=${req.query.redirect_uri ? encodeURIComponent(req.query.redirect_uri) : ''}`,
-    clientId: req.client.clientId,
-    client: req.client,
-    redirectUrl: req.query.redirect_uri
-      ? encodeURIComponent(req.query.redirect_uri)
-      : '',
-    title: configAuthType.title ? configAuthType.title : authLocalConfig.title,
-    description: configAuthType.description
-      ? configAuthType.description
-      : authLocalConfig.description,
-    emailLabel: configAuthType.emailLabel
-      ? configAuthType.emailLabel
-      : authLocalConfig.emailLabel,
-    passwordLabel: configAuthType.passwordLabel
-      ? configAuthType.passwordLabel
-      : authLocalConfig.passwordLabel,
-    helpText: configAuthType.helpText
-      ? configAuthType.helpText
-      : authLocalConfig.helpText,
-    buttonText: configAuthType.buttonText
-      ? configAuthType.buttonText
-      : authLocalConfig.buttonText,
-    forgotPasswordText: configAuthType.forgotPasswordText
-      ? configAuthType.forgotPasswordText
-      : authLocalConfig.forgotPasswordText,
+      `?clientId=${clientId}&redirect_uri=${req.redirectUri ? encodeURIComponent(req.redirectUri) : ''}`,
+    clientId: clientId,
+    client: sanitize.client(req.client),
+    redirectUrl: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
+    title: sanitize.plainText(configAuthType.title || authLocalConfig.title),
+    description: sanitize.plainText(
+      configAuthType.description || authLocalConfig.description
+    ),
+    emailLabel: sanitize.plainText(
+      configAuthType.emailLabel || authLocalConfig.emailLabel
+    ),
+    passwordLabel: sanitize.plainText(
+      configAuthType.passwordLabel || authLocalConfig.passwordLabel
+    ),
+    helpText: sanitize.plainText(
+      configAuthType.helpText || authLocalConfig.helpText
+    ),
+    buttonText: sanitize.plainText(
+      configAuthType.buttonText || authLocalConfig.buttonText
+    ),
+    forgotPasswordText: sanitize.plainText(
+      configAuthType.forgotPasswordText || authLocalConfig.forgotPasswordText
+    ),
   });
 };
 
@@ -83,7 +84,7 @@ exports.login = (req, res) => {
  */
 exports.register = (req, res) => {
   res.render('auth/local/register', {
-    clientId: req.client.clientId,
+    clientId: sanitize.plainText(req.client.clientId),
   });
 };
 
@@ -131,8 +132,8 @@ exports.postLogin = (req, res, next) => {
         data: { method: 'local', email: req.body.email },
       });
       req.flash('error', { msg: 'Incorrect combination email/password' });
-      const redirectUrl = req.query.redirect_uri
-        ? encodeURIComponent(req.query.redirect_uri)
+      const redirectUrl = req.redirectUri
+        ? encodeURIComponent(req.redirectUri)
         : req.client.redirectUrl;
       let loginUrl = authLocalConfig.loginUrl;
       if (req.params.priviligedRoute && req.params.priviligedRoute == 'admin') {
@@ -154,8 +155,8 @@ exports.postLogin = (req, res, next) => {
         })
         .then(() => clientAuth.saveSession(req.session))
         .then(() => {
-          const redirectUrl = req.query.redirect_uri
-            ? encodeURIComponent(req.query.redirect_uri)
+          const redirectUrl = req.redirectUri
+            ? encodeURIComponent(req.redirectUri)
             : req.client.redirectUrl;
           if (!redirectUrl)
             return next(
@@ -199,34 +200,40 @@ exports.logout = async (req, res) => {
   await req.session.destroy();
 
   const config = req.client.config;
-  const allowedDomains = req.client.allowedDomains
-    ? [...req.client.allowedDomains]
-    : [];
 
-  // Always allow the admin domain for logout redirects
-  if (process.env.ADMIN_URL) {
-    try {
-      allowedDomains.push(new URL(process.env.ADMIN_URL).hostname);
-    } catch (e) {
-      console.warn('Invalid ADMIN_URL env var:', process.env.ADMIN_URL);
+  let redirectURL = safeRedirectUri(
+    req.query.redirectUrl,
+    req.client,
+    'redirectUrl'
+  );
+
+  if (!redirectURL) {
+    if (req.query.redirectUrl) {
+      console.log(
+        `[${new Date().toISOString()}][auth-logout] redirect not allowed: clientId=${req.client?.id} requested=${String(req.query.redirectUrl).substring(0, 120)}`
+      );
     }
+    // opgeslagen fallbacks gaan door dezelfde policy als de query-waarde
+    redirectURL =
+      safeRedirectUri(config && config.logoutUrl, req.client, 'logoutUrl') ||
+      safeRedirectUri(req.client.redirectUrl, req.client, 'redirectUrl');
   }
 
-  let redirectURL = req.query.redirectUrl;
-
-  try {
-    const redirectUrlHost = redirectURL ? new URL(redirectURL).hostname : false;
-    redirectURL =
-      redirectUrlHost && allowedDomains.includes(redirectUrlHost)
-        ? redirectURL
-        : false;
-  } catch (e) {
-    redirectURL = null;
+  if (!redirectURL && process.env.ADMIN_URL) {
+    redirectURL = safeRedirectUri(
+      process.env.ADMIN_URL,
+      req.client,
+      'ADMIN_URL'
+    );
   }
 
   if (!redirectURL) {
-    redirectURL =
-      config && config.logoutUrl ? config.logoutUrl : req.client.redirectUrl;
+    console.log(
+      `[${new Date().toISOString()}][auth-logout] no valid redirect URL after fallbacks: clientId=${req.client?.id}`
+    );
+    return res
+      .status(500)
+      .send('Logout completed, but no valid redirect URL was configured.');
   }
 
   res.redirect(redirectURL);

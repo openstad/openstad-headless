@@ -43,3 +43,11 @@ export function handleTagCheckboxGroupChange(
 
   return updatedFields;
 }
+
+export function filterStaleTagGroups<T extends { type: string }>(
+  groups: Array<T>,
+  validTagTypes: string[]
+): Array<T> {
+  const validSet = new Set(validTagTypes);
+  return groups.filter((g) => validSet.has(g.type));
+}

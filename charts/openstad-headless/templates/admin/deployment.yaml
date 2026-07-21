@@ -24,12 +24,16 @@ spec:
       serviceAccountName: openstad-headless-ingress-sa
       containers:
       - name: {{ template "openstad.admin.fullname" . }}
-        securityContext:
-          allowPrivilegeEscalation: false
         image: {{ .Values.admin.deploymentContainer.image }}
         imagePullPolicy: IfNotPresent
         securityContext:
+          allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
         ports:
           - containerPort: {{ .Values.admin.service.httpPort }}
             name: http
@@ -86,6 +90,16 @@ spec:
             value: {{ .Values.admin.otelExporterOtlpEndpoint | quote }}
           - name: OTEL_ENABLED
             value: {{ (hasKey .Values.admin "otelEnabled") | ternary .Values.admin.otelEnabled (default false $.Values.global.otelEnabled) | quote }}
+          {{- if .Values.plugins.enabled }}
+          - name: NODE_PATH
+            value: "{{ .Values.plugins.installPath }}/node_modules"
+          - name: PLUGIN_JSON_OVERRIDE
+            valueFrom:
+              configMapKeyRef:
+                name: {{ include "openstad.fullname" . }}-plugins
+                key: plugins.json
+          {{- end }}
+          # Inject extra environment variables
           {{- if .Values.admin.extraEnvVars }}
           {{- include "common.tplvalues.render" (dict "value" .Values.admin.extraEnvVars "context" $) | nindent 10 }}
           {{- end }}
@@ -95,5 +109,61 @@ spec:
         {{- if .Values.admin.customWorkingDir }}
         workingDir: {{ .Values.admin.customWorkingDir }}
         {{- end }}
+        {{- if .Values.plugins.enabled }}
+        volumeMounts:
+          - name: plugin-modules
+            mountPath: {{ .Values.plugins.installPath }}
+        {{- end }}
         resources:
 {{ toYaml .Values.admin.resources | indent 12 }}
+      {{- if .Values.plugins.enabled }}
+      volumes:
+        - name: plugin-modules
+          emptyDir: {}
+        - name: install-tmp
+          emptyDir: {}
+        {{- if .Values.plugins.npmrcSecret }}
+        - name: npmrc-secret
+          secret:
+            secretName: {{ .Values.plugins.npmrcSecret }}
+        {{- end }}
+      initContainers:
+        - name: install-plugins
+          image: {{ .Values.plugins.nodeImage }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            # npm install schrijft package.json/.npmrc naar installPath (gemount) en
+            # cache/logs naar $HOME/.npm; wijs die naar de /tmp emptyDir zodat
+            # readOnlyRootFilesystem: true kan.
+            - name: HOME
+              value: /tmp
+            - name: npm_config_cache
+              value: /tmp/.npm
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              cd {{ .Values.plugins.installPath }}
+              echo '{"private":true}' > package.json
+              {{- if .Values.plugins.npmrcSecret }}
+              cp /etc/npmrc-secret/.npmrc .npmrc
+              {{- end }}
+              npm install --no-save {{ range .Values.plugins.items }}{{ if .enabled }}{{ .packageName }}{{ if .version }}@{{ .version }}{{ end }} {{ end }}{{ end }}
+          volumeMounts:
+            - mountPath: /tmp
+              name: install-tmp
+            - name: plugin-modules
+              mountPath: {{ .Values.plugins.installPath }}
+            {{- if .Values.plugins.npmrcSecret }}
+            - name: npmrc-secret
+              mountPath: /etc/npmrc-secret
+              readOnly: true
+            {{- end }}
+      {{- end }}

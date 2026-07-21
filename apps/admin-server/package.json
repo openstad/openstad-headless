@@ -9,7 +9,8 @@
     "dev": "node --require ./telemetry-preload.js ../../node_modules/.bin/next dev --webpack --hostname 0.0.0.0",
     "build": "next build --webpack",
     "start": "node --require ./telemetry-preload.js ../../node_modules/.bin/next start --hostname 0.0.0.0",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "generate:plugin-registry": "node -e \"require('./next.config.js')\""
   },
   "dependencies": {
     "@codemirror/lang-javascript": "^6.2.2",
@@ -32,6 +33,7 @@
     "@openstad-headless/leaflet-map": "*",
     "@openstad-headless/likes": "*",
     "@openstad-headless/multi-project-resource-overview": "*",
+    "@openstad-headless/plugin-loader": "*",
     "@openstad-headless/raw-resource": "*",
     "@openstad-headless/resource-detail": "*",
     "@openstad-headless/resource-detail-with-map": "*",
@@ -78,7 +80,7 @@
     "react-csv": "^2.2.2",
     "react-day-picker": "^8.8.2",
     "react-dom": "^19.2.4",
-    "react-hook-form": "7.62.0",
+    "react-hook-form": "7.81.0",
     "react-hot-toast": "^2.4.1",
     "react-leaflet": "^4.2.1",
     "react-leaflet-draw": "^0.20.4",

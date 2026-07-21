@@ -23,7 +23,7 @@ import { AutoZoom } from './auto-zoom';
 import './css/base-map.css';
 import { InvalidateSizeOnResize } from './invalidate-size-on-resize';
 import parseLocation from './lib/parse-location';
-import { isSafeUrl, sanitizeColor } from './lib/sanitize';
+import { sanitizeColor } from './lib/sanitize';
 import { MapConsumer } from './map-consumer';
 import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
@@ -220,6 +220,7 @@ const BaseMap = ({
   defaultIcon = undefined,
 
   area = undefined,
+  areaId = undefined,
   renderArea = undefined,
   areaPolygonStyle = undefined,
 
@@ -636,23 +637,22 @@ const BaseMap = ({
 
     const unitPattern =
       /\d+(px|%|vh|vw|em|rem|ex|ch|vmin|vmax|cm|mm|in|pt|pc)$/;
-    const heightValue = height
-      ? height.match(unitPattern)
-        ? height
-        : `${height}px`
-      : 'auto';
-    const widthValue = width
-      ? width.match(unitPattern)
-        ? width
-        : `${width}px`
-      : '100%';
 
-    el.style.setProperty('--basemap-map-width', widthValue);
-    el.style.setProperty('--basemap-map-height', heightValue);
-    el.style.setProperty(
-      '--basemap-map-aspect-ratio',
-      height ? 'unset' : '16 / 9'
-    );
+    if (width) {
+      const widthValue = width.match(unitPattern) ? width : `${width}px`;
+      el.style.setProperty('--basemap-map-width', widthValue);
+    } else {
+      el.style.removeProperty('--basemap-map-width');
+    }
+
+    if (height) {
+      const heightValue = height.match(unitPattern) ? height : `${height}px`;
+      el.style.setProperty('--basemap-map-height', heightValue);
+      el.style.setProperty('--basemap-map-aspect-ratio', 'unset');
+    } else {
+      el.style.removeProperty('--basemap-map-height');
+      el.style.removeProperty('--basemap-map-aspect-ratio');
+    }
   }, [width, height]);
 
   useEffect(() => {
@@ -752,6 +752,7 @@ const BaseMap = ({
             <AutoZoom
               autoZoomAndCenter={autoZoomAndCenter}
               area={area}
+              areaId={areaId}
               markers={currentMarkers}
               center={center}
               zoomAfterInit={zoomAfterInit}
@@ -840,7 +841,24 @@ const BaseMap = ({
                         : MarkerIcon({ icon: { color: m.color || '#555588' } });
                       const target = m.openInNewTab ? '_blank' : '_self';
                       const btnText = m.buttonText || 'Lees verder';
-                      const safeUrl = m.url && isSafeUrl(m.url) ? m.url : '';
+                      // Validate inline so the sanitisation is visible at the
+                      // call-site: only http/https/mailto survive, and we use
+                      // the serialised URL rather than the raw input.
+                      let safeUrl = '';
+                      if (m.url) {
+                        try {
+                          const parsed = new URL(m.url, window.location.origin);
+                          if (
+                            ['http:', 'https:', 'mailto:'].includes(
+                              parsed.protocol
+                            )
+                          ) {
+                            safeUrl = parsed.href;
+                          }
+                        } catch {
+                          safeUrl = '';
+                        }
+                      }
 
                       const isDirect = markerInteractionType === 'direct';
 

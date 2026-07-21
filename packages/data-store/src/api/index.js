@@ -13,12 +13,14 @@ import projectVotedUsersCount from './projectVotedUsersCount';
 import resource from './resource';
 import resourceMarkers from './resource-markers';
 import resources from './resources';
+import statuses from './statuses';
 import submissions from './submissions';
 import tags from './tags';
 import user from './user';
 import userActivity from './user-activity';
 import userVote from './user-vote';
 import widget from './widget';
+import widgets from './widgets';
 
 const windowGlobal = typeof window !== 'undefined' ? window : {};
 
@@ -107,6 +109,10 @@ function API(props = {}) {
     create: submissions.create.bind(self),
   };
 
+  self.statuses = {
+    fetch: statuses.fetch.bind(self),
+  };
+
   self.tags = {
     fetch: tags.fetch.bind(self),
     create: tags.create.bind(self),
@@ -128,6 +134,10 @@ function API(props = {}) {
 
   self.widget = {
     fetch: widget.fetch.bind(self),
+  };
+
+  self.widgets = {
+    fetch: widgets.fetch.bind(self),
   };
 
   self.areas = {

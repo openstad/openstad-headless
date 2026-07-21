@@ -9,6 +9,7 @@ import { FormValue } from '@openstad-headless/form/src/form';
 import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { MultiSelect } from '@openstad-headless/ui/src';
@@ -533,6 +534,15 @@ function DocumentMap({
           createdAt: new Date(),
           sentiment: 'no sentiment',
           tags: allTags,
+          confirmation: props.commentsWidget?.confirmation || false,
+          confirmationReplies:
+            props.commentsWidget?.confirmationReplies || false,
+          overwriteEmailAddress:
+            props.commentsWidget?.confirmation &&
+            props.commentsWidget?.overwriteEmailAddress
+              ? props.commentsWidget.overwriteEmailAddress
+              : '',
+          embeddedUrl: window.location.href,
         });
 
         if (goToLastPage && displayPagination) {
@@ -656,7 +666,8 @@ function DocumentMap({
       );
       if (typeof currentComment === 'number' && currentComment >= 0) {
         const commentPage = Math.floor(currentComment / itemsPerPage);
-        setoverridePage(commentPage);
+        setoverridePage(undefined);
+        requestAnimationFrame(() => setoverridePage(commentPage));
       }
     }
 
@@ -1017,12 +1028,14 @@ function DocumentMap({
                 level={2}
                 appearance="utrecht-heading-4"
                 dangerouslySetInnerHTML={{
-                  __html: resource.summary,
+                  __html: sanitizeHtml(resource.summary),
                 }}></Heading>
             ) : null}
             {displayResourceDescription === 'yes' && resource.description ? (
               <Paragraph
-                dangerouslySetInnerHTML={{ __html: resource.description }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(resource.description),
+                }}
               />
             ) : null}
           </section>
@@ -1073,13 +1086,15 @@ function DocumentMap({
                     level={2}
                     appearance="utrecht-heading-4"
                     dangerouslySetInnerHTML={{
-                      __html: resource.summary,
+                      __html: sanitizeHtml(resource.summary),
                     }}></Heading>
                 ) : null}
                 {displayResourceDescription === 'yes' &&
                 resource.description ? (
                   <Paragraph
-                    dangerouslySetInnerHTML={{ __html: resource.description }}
+                    dangerouslySetInnerHTML={{
+                      __html: sanitizeHtml(resource.description),
+                    }}
                   />
                 ) : null}
               </section>
@@ -1098,12 +1113,14 @@ function DocumentMap({
                   level={2}
                   appearance="utrecht-heading-4"
                   dangerouslySetInnerHTML={{
-                    __html: resource.summary,
+                    __html: sanitizeHtml(resource.summary),
                   }}></Heading>
               ) : null}
               {displayResourceDescription === 'yes' && resource.description ? (
                 <Paragraph
-                  dangerouslySetInnerHTML={{ __html: resource.description }}
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeHtml(resource.description),
+                  }}
                 />
               ) : null}
             </section>
@@ -1436,12 +1453,14 @@ function DocumentMap({
                 level={2}
                 appearance="utrecht-heading-4"
                 dangerouslySetInnerHTML={{
-                  __html: resource.summary,
+                  __html: sanitizeHtml(resource.summary),
                 }}></Heading>
             ) : null}
             {displayResourceDescription === 'yes' && resource.description ? (
               <Paragraph
-                dangerouslySetInnerHTML={{ __html: resource.description }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(resource.description),
+                }}
               />
             ) : null}
           </section>
@@ -1495,6 +1514,13 @@ function DocumentMap({
             <Comments
               {...props}
               key={`refresh-${refreshComments}`}
+              confirmation={props.commentsWidget?.confirmation || false}
+              confirmationReplies={
+                props.commentsWidget?.confirmationReplies || false
+              }
+              overwriteEmailAddress={
+                props.commentsWidget?.overwriteEmailAddress || ''
+              }
               onlyIncludeTags={
                 selectedTagsString || filteredTagsIdsString || ''
               }
@@ -1528,12 +1554,14 @@ function DocumentMap({
                 level={2}
                 appearance="utrecht-heading-4"
                 dangerouslySetInnerHTML={{
-                  __html: resource.summary,
+                  __html: sanitizeHtml(resource.summary),
                 }}></Heading>
             ) : null}
             {displayResourceDescription === 'yes' && resource.description ? (
               <Paragraph
-                dangerouslySetInnerHTML={{ __html: resource.description }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(resource.description),
+                }}
               />
             ) : null}
           </section>

@@ -39,6 +39,7 @@ const formSchema = z.object({
   showProgressBar: z.boolean(),
   displayDislike: z.boolean().optional(),
   progressBarDescription: z.string().optional(),
+  showConfetti: z.boolean().optional(),
   resourceId: z.string().optional(),
 });
 type FormData = z.infer<typeof formSchema>;
@@ -85,6 +86,7 @@ export default function LikesDisplay({
       hideCounters: props?.hideCounters || false,
       showProgressBar: undefinedToTrueOrProp(props?.showProgressBar),
       progressBarDescription: props?.progressBarDescription || '',
+      showConfetti: props?.showConfetti || false,
     },
   });
 
@@ -239,6 +241,29 @@ export default function LikesDisplay({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Wil je de dislike button tonen?</FormLabel>
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    field.onChange(e);
+                    props.onFieldChanged(field.name, e);
+                  }}
+                  checked={field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {conditionallyRenderField(
+          'showConfetti',
+          <FormField
+            control={form.control}
+            name="showConfetti"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Toon confetti bij liken</FormLabel>
                 <Switch.Root
                   className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                   onCheckedChange={(e: boolean) => {

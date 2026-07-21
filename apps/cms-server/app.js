@@ -16,6 +16,7 @@ const app = express();
 const _ = require('lodash');
 const projectService = require('./services/projects');
 const aposConfig = require('./lib/apos-config');
+const { resolveSitePrefix } = require('./lib/resolve-site-prefix');
 const { refresh } = require('less');
 const REFRESH_PROJECTS_INTERVAL = 60000 * 5;
 const Url = require('node:url');
@@ -135,10 +136,9 @@ async function loadProject(projectId) {
 
 async function loadProjects() {
   try {
-    projects = {};
-
     const allProjects = await projectService.fetchAll();
 
+    projects = {};
     allProjects.forEach(async (project) => {
       setupProject(project);
     });
@@ -190,7 +190,9 @@ function cleanUpProjects() {
 async function doStartServer(domain, req, res) {
   if (!apostropheServer[domain]) {
     console.log('Starting up project: ', domain);
-    apostropheServer[domain] = await run(domain, projects[domain], {});
+    apostropheServer[domain] = await run(domain, projects[domain], {
+      sitePrefix: req && req.sitePrefix,
+    });
     apostropheServer[domain].app.set('trust proxy', true);
     apostropheServer[domain].app(req, res);
     return Promise.resolve();
@@ -228,7 +230,7 @@ async function run(id, projectData, options, callback) {
     _id: id,
     shortName: 'openstad-' + projectData.id,
     mongo: {},
-    prefix: projectData.sitePrefix ? '/' + projectData.sitePrefix : false,
+    prefix: options && options.sitePrefix ? '/' + options.sitePrefix : false,
     modules: {
       ...aposConfig.modules,
       '@apostrophecms/express': {
@@ -422,12 +424,14 @@ app.use(function (req, res, next) {
  * if openstad.org exists of course.
  */
 app.use('/:sitePrefix', function (req, res, next) {
-  const domainAndPath = req.openstadDomain + '/' + req.params.sitePrefix;
-
-  const site = projects[domainAndPath] ? projects[domainAndPath] : false;
+  const site = resolveSitePrefix({
+    projects,
+    openstadDomain: req.openstadDomain,
+    sitePrefix: req.params.sitePrefix,
+    alreadyResolved: Boolean(req.sitePrefix),
+  });
 
   if (site) {
-    site.sitePrefix = req.params.sitePrefix;
     req.sitePrefix = req.params.sitePrefix;
     req.site = site;
 

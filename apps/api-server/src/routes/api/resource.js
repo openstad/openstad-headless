@@ -18,6 +18,7 @@ const {
   logSpamAnalysis,
   removeSpamMetaFields,
 } = require('../../services/spam-detector');
+const { stripVisibilityScope } = require('../../lib/resource-create-scope');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -490,9 +491,17 @@ router
     db.Resource.authorizeData(data, 'create', req.user, null, req.project)
       .create(data)
       .then((resourceInstance) => {
-        db.Resource.scope(...req.scope)
+        // Re-fetch without onlyVisible so the creator gets their own resource
+        // back, even when it is still pending (publishDate is null).
+        const createScope = stripVisibilityScope(req.scope);
+        db.Resource.scope(...createScope)
           .findByPk(resourceInstance.id)
           .then(async (result) => {
+            if (!result) {
+              return next(
+                createError(500, 'Failed to load resource after creation')
+              );
+            }
             result.project = req.project;
             await attachModeratorOnlyExtraDataKeys(result);
             req.results = result;
@@ -604,9 +613,10 @@ router
 
     if (!req.query.nomail && req.body['publishDate']) {
       const tags = await req.results.getTags();
+      let emailReceivers = [];
+
       if (tags && tags.length > 0) {
-        // Convert to csv string
-        const emailReceivers = (
+        emailReceivers = (
           await Promise.all(
             tags.flatMap(async (tag) => {
               const { useDifferentSubmitAddress, newSubmitAddress } =
@@ -622,18 +632,18 @@ router
         )
           .filter((data) => data !== null && data.length > 0)
           .flat();
+      }
 
-        if (emailReceivers.length > 0) {
-          db.Notification.create({
-            type: 'new published resource - admin update',
-            projectId: req.project.id,
-            data: {
-              userId: req.user.id,
-              resourceId: req.results.id,
-              emailReceivers: emailReceivers,
-            },
-          });
-        }
+      if (emailReceivers.length > 0) {
+        db.Notification.create({
+          type: 'new published resource - admin update',
+          projectId: req.project.id,
+          data: {
+            userId: req.user.id,
+            resourceId: req.results.id,
+            emailReceivers: emailReceivers,
+          },
+        });
       }
 
       if (sendConfirmationToAdmin) {
@@ -717,13 +727,11 @@ router
   // -----------
   .put(auth.useReqUser)
   .put(function (req, res, next) {
-    if (
-      !(
-        req.project.config &&
-        req.project.config.resources &&
-        req.project.config.resources.canAddNewResources
-      )
-    ) {
+    if (!(
+      req.project.config &&
+      req.project.config.resources &&
+      req.project.config.resources.canAddNewResources
+    )) {
       if (!req.results.dataValues.publishDate) {
         return next(
           createError(
@@ -898,6 +906,7 @@ router
         },
       });
     }
+
     next();
   })
   .put(auth.useReqUser)

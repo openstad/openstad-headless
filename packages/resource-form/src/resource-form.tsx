@@ -39,6 +39,11 @@ const getExistingValue = (fieldKey, resource, multiple) => {
           ? filteredTags[0]
           : undefined;
     }
+
+    if (fieldKey === 'status' && resource.statuses) {
+      const firstStatus = resource.statuses[0];
+      return firstStatus ? String(firstStatus.id) : undefined;
+    }
   }
   return undefined;
 };
@@ -97,11 +102,16 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         type FieldsWithMultiple = FieldProps & { multiple?: boolean };
         const fieldWithMultiple = field as FieldsWithMultiple;
 
-        const existingValue = getExistingValue(
-          field.fieldKey,
-          existingResource,
-          fieldWithMultiple?.multiple
-        );
+        // Timeline is always persisted in the resource.timeline column
+        // (regardless of the configured fieldKey), so read it directly.
+        const existingValue =
+          field.type === 'timeline'
+            ? existingResource?.timeline
+            : getExistingValue(
+                field.fieldKey,
+                existingResource,
+                fieldWithMultiple?.multiple
+              );
 
         return existingValue
           ? { ...field, defaultValue: existingValue }
@@ -204,6 +214,15 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     return formData;
   };
 
+  const addStatusToFormData = (formData) => {
+    const value = formData['status'];
+    if (value !== undefined && value !== null && value !== '') {
+      formData.statuses = [Number(value)];
+    }
+    delete formData['status'];
+    return formData;
+  };
+
   const configureFormData = (formData, publish = false) => {
     const dbFixedColumns = [
       'title',
@@ -213,12 +232,14 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
       'images',
       'location',
       'tags',
+      'statuses',
       'documents',
     ];
     const extraData = {};
     let configuredFormData = { ...formData };
 
     configuredFormData = addTagsToFormData(configuredFormData);
+    configuredFormData = addStatusToFormData(configuredFormData);
 
     for (const key in configuredFormData) {
       if (configuredFormData.hasOwnProperty(key)) {
@@ -227,6 +248,21 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
           delete configuredFormData[key];
         }
       }
+    }
+
+    // A timeline-type field is stored in the dedicated resource.timeline
+    // column (like the editorial Tijdlijn tab) instead of in extraData,
+    // regardless of the fieldKey the editor configured for it.
+    const timelineFieldKey = (props.items || [])
+      .filter((item) => item.type === 'timeline')
+      .map((item) => item.fieldKey)
+      .find((key) => !!key);
+    if (
+      timelineFieldKey &&
+      typeof extraData[timelineFieldKey] !== 'undefined'
+    ) {
+      configuredFormData.timeline = extraData[timelineFieldKey];
+      delete extraData[timelineFieldKey];
     }
 
     configuredFormData.extraData = extraData;

@@ -117,9 +117,10 @@ export const BegrotenSelectedOverview = ({
                             {typeIsBudgeting ? (
                               <Paragraph>
                                 <Strong>
-                                  &euro;
-                                  {resource.budget?.toLocaleString('nl-NL') ||
-                                    0}
+                                  {`€${
+                                    resource.budget?.toLocaleString('nl-NL') ||
+                                    0
+                                  }`}
                                 </Strong>
                               </Paragraph>
                             ) : null}
@@ -211,8 +212,7 @@ export const BegrotenSelectedOverview = ({
                         {typeIsBudgeting ? (
                           <Paragraph>
                             <Strong>
-                              &euro;
-                              {resource.budget?.toLocaleString('nl-NL') || 0}
+                              {`€${resource.budget?.toLocaleString('nl-NL') || 0}`}
                             </Strong>
                           </Paragraph>
                         ) : null}

@@ -22,10 +22,22 @@ export default function useCurrentUser(props) {
       console.log('[osc-auth] logout detected, clearing session');
       storage.remove('cmsUser');
       storage.remove('openStadUser');
+      storage.remove('expireOnClose');
 
       let url = window.location.href;
       url = url.replace(new RegExp(`[?&]openstadlogout=true`), '');
       history.replaceState(null, '', url);
+      self.currentUser = null;
+      return {};
+    }
+
+    if (
+      storage.get('expireOnClose') &&
+      !/(^|;\s*)openstad_active=1/.test(document.cookie)
+    ) {
+      storage.remove('cmsUser');
+      storage.remove('openStadUser');
+      storage.remove('expireOnClose');
       self.currentUser = null;
       return {};
     }
@@ -35,6 +47,16 @@ export default function useCurrentUser(props) {
     try {
       initialUser = globalOpenStadUser || props.openStadUser || {};
     } catch (err) {}
+
+    if (params.has('expireOnClose')) {
+      storage.set('expireOnClose', true);
+      document.cookie =
+        'openstad_active=1; path=/; SameSite=Lax' +
+        (location.protocol === 'https:' ? '; Secure' : '');
+      let url = window.location.href;
+      url = url.replace(/[?&]expireOnClose=1/, '');
+      history.replaceState(null, '', url);
+    }
 
     let jwt;
     if (params.has('openstadlogintoken')) {
@@ -76,10 +98,17 @@ export default function useCurrentUser(props) {
 
     // or get jwt for cmsUser
     if (!jwt && cmsUser && cmsUser.access_token && cmsUser.iss) {
-      jwt = await self.api.user.connectUser({
+      const result = await self.api.user.connectUser({
         projectId: self.projectId,
         cmsUser,
       });
+      jwt = result.jwt;
+      if (result.expireOnClose) {
+        storage.set('expireOnClose', true);
+        document.cookie =
+          'openstad_active=1; path=/; SameSite=Lax' +
+          (location.protocol === 'https:' ? '; Secure' : '');
+      }
     }
 
     // fetch me for this jwt

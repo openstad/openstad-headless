@@ -8,6 +8,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { extractConfig } from '@/lib/sub-widget-helper';
 import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail-with-map/src/resourceDetailWithMap';
 import { useRouter } from 'next/router';
@@ -20,6 +21,8 @@ import {
   TabsList,
   TabsTrigger,
 } from '../../../../../../components/ui/tabs';
+import { LikeWidgetTabProps } from '../../likes/[id]';
+import LikesDisplay from '../../likes/[id]/weergave';
 import WidgetResourcesMapButtons from '../../resourcesmap/[id]/buttons';
 import WidgetResourcesMapMap from '../../resourcesmap/[id]/map';
 import WidgetResourceDetailDisplay from './display';
@@ -84,6 +87,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="resources">Resources</TabsTrigger>
               <TabsTrigger value="map">Kaart</TabsTrigger>
+              <TabsTrigger value="likes">Likes widget</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
@@ -146,6 +150,22 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   <WidgetResourcesMapButtons {...totalPropPackageMap} />
                 </TabsContent>
               </Tabs>
+            </TabsContent>
+            <TabsContent value="likes" className="p-0">
+              {previewConfig && (
+                <LikesDisplay
+                  omitSchemaKeys={['resourceId']}
+                  {...extractConfig<
+                    ResourceDetailWidgetProps,
+                    LikeWidgetTabProps
+                  >({
+                    subWidgetKey: 'likeWidget',
+                    previewConfig: previewConfig,
+                    updateConfig,
+                    updatePreview,
+                  })}
+                />
+              )}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />

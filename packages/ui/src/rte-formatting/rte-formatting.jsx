@@ -1,3 +1,4 @@
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import '@utrecht/component-library-css';
 import {
   Heading1,
@@ -135,7 +136,9 @@ function convertTextDivsToParagraphs(content) {
 
 export default function RenderContent(content, options = {}) {
   const { unwrapSingleRootDiv: shouldUnwrapSingleRootDiv = false } = options;
-  const htmlInput = `<div>${content || ''}</div>`;
+  // Sanitize vóór het parsen, zodat processDefaultNode nooit onveilige
+  // nodes of attributen doorkrijgt.
+  const htmlInput = `<div>${sanitizeHtml(content)}</div>`;
 
   const isValidNode = function () {
     return true;
@@ -193,7 +196,8 @@ export default function RenderContent(content, options = {}) {
           <Link
             key={index}
             href={node.attribs.href}
-            target={node.attribs.target}>
+            target={node.attribs.target}
+            rel={node.attribs.rel}>
             {children}
           </Link>
         );

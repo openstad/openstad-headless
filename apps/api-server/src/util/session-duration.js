@@ -10,6 +10,14 @@ const getJwtExpiresInForRole = (role = '') => {
     : defaultJwtExpiresInSeconds;
 };
 
+const shouldExpireOnClose = (role = '') => {
+  return (
+    process.env.SESSION_EXPIRE_ON_CLOSE === 'true' &&
+    !privilegedRoles.includes(role)
+  );
+};
+
 module.exports = {
   getJwtExpiresInForRole,
+  shouldExpireOnClose,
 };

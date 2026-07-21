@@ -23,11 +23,17 @@ export default function WidgetAgendaItems(
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    onFieldChanged('items', items);
+    if (onFieldChanged) {
+      onFieldChanged('items', items);
+    }
   }, [items]);
 
   function handleSaveItems() {
-    props.updateConfig({ ...props, items });
+    const normalizedItems = items.map((item) => ({
+      ...item,
+      active: item.active ?? false,
+    }));
+    props.updateConfig({ ...props, items: normalizedItems });
   }
 
   return (

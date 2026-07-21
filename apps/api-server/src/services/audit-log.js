@@ -29,7 +29,7 @@ function getOtlpLogger() {
     const {
       OTLPLogExporter,
     } = require('@opentelemetry/exporter-logs-otlp-grpc');
-    const { Resource } = require('@opentelemetry/resources');
+    const { resourceFromAttributes } = require('@opentelemetry/resources');
 
     const endpoint =
       process.env.AUDIT_OTLP_ENDPOINT ||
@@ -44,13 +44,15 @@ function getOtlpLogger() {
         ? `${process.env.OTEL_SERVICE_NAME}-audit`
         : 'openstad-audit');
 
-    const resource = new Resource({
+    const resource = resourceFromAttributes({
       'service.name': serviceName,
       'service.namespace': 'audit',
     });
 
-    const provider = new LoggerProvider({ resource });
-    provider.addLogRecordProcessor(new BatchLogRecordProcessor(exporter));
+    const provider = new LoggerProvider({
+      resource,
+      processors: [new BatchLogRecordProcessor(exporter)],
+    });
 
     otlpLogger = provider.getLogger('audit');
   } catch (err) {
@@ -65,8 +67,27 @@ function getClientIp(req) {
   return req.ip || null;
 }
 
+// Keep strings valid for a MySQL JSON column. Strip NULL bytes and other C0
+// control chars (but keep tab, newline, carriage return) and replace lone
+// surrogates, otherwise the write fails on a binary character set.
+function toJsonSafeString(value) {
+  // toWellFormed handles the surrogates; the regex strips C0 control chars.
+  let safe = value
+    .toWellFormed()
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '');
+  if (safe.length > MAX_TEXT_LENGTH) {
+    safe = safe.substring(0, MAX_TEXT_LENGTH) + '...';
+  }
+  return safe;
+}
+
 function sanitizeData(data, _seen) {
-  if (!data || typeof data !== 'object') return data;
+  if (typeof Buffer !== 'undefined' && Buffer.isBuffer(data)) {
+    return toJsonSafeString(data.toString('base64'));
+  }
+  if (!data || typeof data !== 'object') {
+    return typeof data === 'string' ? toJsonSafeString(data) : data;
+  }
 
   const plain = data.dataValues || data;
   const seen = _seen || new WeakSet();
@@ -78,8 +99,10 @@ function sanitizeData(data, _seen) {
     if (SENSITIVE_FIELDS.includes(key) || IGNORED_FIELDS.includes(key))
       continue;
 
-    if (typeof value === 'string' && value.length > MAX_TEXT_LENGTH) {
-      sanitized[key] = value.substring(0, MAX_TEXT_LENGTH) + '...';
+    if (typeof value === 'string') {
+      sanitized[key] = toJsonSafeString(value);
+    } else if (typeof Buffer !== 'undefined' && Buffer.isBuffer(value)) {
+      sanitized[key] = toJsonSafeString(value.toString('base64'));
     } else if (Array.isArray(value)) {
       sanitized[key] = value.map((item) =>
         item && typeof item === 'object' ? sanitizeData(item, seen) : item

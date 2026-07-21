@@ -1,4 +1,5 @@
 import { ImageUploader } from '@/components/image-uploader';
+import { SimpleCalendar } from '@/components/simple-calender-popup';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -16,6 +17,7 @@ import useProjectList from '@/hooks/use-project-list';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { sanitizeImageUrl } from '@openstad-headless/lib/sanitize';
 import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
 import { Spacer } from '@openstad-headless/ui/src';
 import { X } from 'lucide-react';
@@ -36,6 +38,7 @@ const formSchema = z.object({
         overviewDescription: z.string().optional(),
         overviewImage: z.string().optional(),
         overviewMarkerIcon: z.string().optional(),
+        overviewSortDate: z.union([z.string(), z.date()]).optional(),
         overviewUrl: z.string().optional(),
         projectLat: z.string().optional(),
         projectLng: z.string().optional(),
@@ -58,6 +61,10 @@ export default function WidgetMultiProjectSettings(
   const defaultValues = {
     selectedProjects: (props.selectedProjects || []).map((project) => ({
       ...project,
+
+      overviewSortDate: project.overviewSortDate
+        ? new Date(project.overviewSortDate)
+        : undefined,
 
       // Get value from props for backwards compatibility
       includeProjectsInOverview:
@@ -83,6 +90,10 @@ export default function WidgetMultiProjectSettings(
         values.selectedProjects?.map((project) => ({
           ...project,
           id: project.id || 0,
+          overviewSortDate:
+            project.overviewSortDate instanceof Date
+              ? project.overviewSortDate.toISOString()
+              : project.overviewSortDate,
         })) || [],
 
       // Turn off for backwards compatibility. If the value was set, it has been set in selectedProjects
@@ -117,7 +128,26 @@ export default function WidgetMultiProjectSettings(
               control={form.control}
               name="selectedProjects"
               render={({ field }) => {
-                const isChecked = field.value?.some((p) => p.id === project.id);
+                const projectIndex = field.value?.findIndex(
+                  (p) => p.id === project.id
+                );
+                const isChecked =
+                  projectIndex !== undefined && projectIndex >= 0;
+                const markerIconUrl = isChecked
+                  ? sanitizeImageUrl(
+                      form.getValues(
+                        `selectedProjects.${projectIndex}.overviewMarkerIcon`
+                      )
+                    )
+                  : undefined;
+                const overviewImageUrl = isChecked
+                  ? sanitizeImageUrl(
+                      form.getValues(
+                        `selectedProjects.${projectIndex}.overviewImage`
+                      )
+                    )
+                  : undefined;
+
                 return (
                   <FormItem
                     className={
@@ -368,6 +398,21 @@ export default function WidgetMultiProjectSettings(
                                 )}
                               />
 
+                              <SimpleCalendar
+                                form={form}
+                                fieldName={`selectedProjects.${
+                                  field.value?.findIndex(
+                                    (p) => p.id === project.id
+                                  ) ?? 0
+                                }.overviewSortDate`}
+                                label="Sorteerdatum van de project tegel"
+                                description="Bepaalt de positie van de project tegel bij sorteren op datum. Laat leeg om de aanmaakdatum van het project te gebruiken."
+                                placeholder="Kies een datum"
+                                allowPast
+                                withReset
+                                resetValue=""
+                              />
+
                               <FormField
                                 control={form.control}
                                 name={`selectedProjects.${
@@ -482,26 +527,14 @@ export default function WidgetMultiProjectSettings(
                                 }}
                               />
 
-                              {!!form.getValues(
-                                `selectedProjects.${
-                                  field.value?.findIndex(
-                                    (p) => p.id === project.id
-                                  ) ?? 0
-                                }.overviewMarkerIcon`
-                              ) ? (
+                              {markerIconUrl ? (
                                 <div
                                   style={{
                                     position: 'relative',
                                     height: '140px',
                                   }}>
                                   <img
-                                    src={form.getValues(
-                                      `selectedProjects.${
-                                        field.value?.findIndex(
-                                          (p) => p.id === project.id
-                                        ) ?? 0
-                                      }.overviewMarkerIcon`
-                                    )}
+                                    src={markerIconUrl}
                                     style={{
                                       position: 'relative',
                                       width: 'auto',
@@ -532,26 +565,14 @@ export default function WidgetMultiProjectSettings(
                                 <div></div>
                               )}
 
-                              {!!form.getValues(
-                                `selectedProjects.${
-                                  field.value?.findIndex(
-                                    (p) => p.id === project.id
-                                  ) ?? 0
-                                }.overviewImage`
-                              ) && (
+                              {overviewImageUrl && (
                                 <div
                                   style={{
                                     position: 'relative',
                                     height: '140px',
                                   }}>
                                   <img
-                                    src={form.getValues(
-                                      `selectedProjects.${
-                                        field.value?.findIndex(
-                                          (p) => p.id === project.id
-                                        ) ?? 0
-                                      }.overviewImage`
-                                    )}
+                                    src={overviewImageUrl}
                                     style={{
                                       position: 'relative',
                                       width: 'auto',

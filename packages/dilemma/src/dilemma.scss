@@ -180,6 +180,29 @@
     min-height: 70px;
   }
 
+  .dilemma-skip-button {
+    padding: 0;
+    border: unset;
+    background: unset;
+    position: absolute;
+    bottom: 40px;
+    left: 24px;
+    z-index: 99;
+    cursor: pointer;
+    color: rgba(75, 75, 75, 1);
+    font-family: var(--setSwipeFontFamily--2, inherit);
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 130%;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+
+    &[disabled] {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+
   .dilemma-back-button {
     padding: 0;
     border: unset;

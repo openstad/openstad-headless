@@ -36,6 +36,8 @@ export type RadioboxFieldProps = {
     isOtherOption?: boolean;
     defaultValue?: boolean;
     trigger?: string;
+    isCorrect?: boolean;
+    feedbackText?: string;
   }[];
   fieldRequired?: boolean;
   requiredWarning?: string;
@@ -65,6 +67,8 @@ export type RadioboxFieldProps = {
   createImageSlider?: boolean;
   imageClickable?: boolean;
   randomizeItems?: boolean;
+  confirmed?: boolean;
+  optionFeedback?: Record<string, 'correct' | 'incorrect' | 'missed'>;
 };
 
 const RadioboxField: FC<RadioboxFieldProps> = ({
@@ -87,6 +91,8 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
   images = [],
   createImageSlider = false,
   imageClickable = false,
+  confirmed = false,
+  optionFeedback = {},
 }) => {
   let initialValue = (defaultValue as string) || '';
   initialValue = overrideDefaultValue
@@ -242,51 +248,84 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
           imageClickable: imageClickable,
         })}
 
-        {displayChoices?.map((choice, index) => (
-          <>
-            <FormField type="radio" key={index}>
-              <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">
-                <FormLabel
-                  htmlFor={`${fieldKey}_${index}`}
-                  type="radio"
-                  className="--label-grid">
-                  <RadioButton
-                    className="utrecht-form-field__input"
-                    id={`${fieldKey}_${index}`}
-                    name={fieldKey}
-                    required={fieldRequired}
-                    onChange={() => {
-                      (handleRadioChange(
-                        choice.value,
-                        choice.trigger || `${index}`
-                      ),
-                        setCheckInvalid(false));
-                    }}
-                    disabled={disabled}
-                    value={choice && choice.value}
-                    checked={selectedOption === choice.value}
+        {displayChoices?.map((choice, index) => {
+          const optionState =
+            confirmed && choice?.value
+              ? optionFeedback?.[choice.value]
+              : undefined;
+          const feedbackClass =
+            optionState === 'correct'
+              ? ' --feedback-correct'
+              : optionState === 'incorrect'
+                ? ' --feedback-incorrect'
+                : optionState === 'missed'
+                  ? ' --feedback-missed'
+                  : '';
+          return (
+            <>
+              <FormField type="radio" key={index}>
+                <Paragraph
+                  className={`utrecht-form-field__label utrecht-form-field__label--radio${feedbackClass}`}>
+                  <FormLabel
+                    htmlFor={`${fieldKey}_${index}`}
+                    type="radio"
+                    className="--label-grid">
+                    <RadioButton
+                      className="utrecht-form-field__input"
+                      id={`${fieldKey}_${index}`}
+                      name={fieldKey}
+                      required={fieldRequired}
+                      onChange={() => {
+                        (handleRadioChange(
+                          choice.value,
+                          choice.trigger || `${index}`
+                        ),
+                          setCheckInvalid(false));
+                      }}
+                      disabled={disabled || confirmed}
+                      value={choice && choice.value}
+                      checked={selectedOption === choice.value}
+                    />
+                    <span>{choice && choice.label}</span>
+                  </FormLabel>
+                  {optionState === 'correct' && (
+                    <span className="osc-feedback-badge --correct">
+                      <i className="ri-check-line" aria-hidden="true" />
+                      <span className="sr-only">Goed antwoord</span>
+                    </span>
+                  )}
+                  {optionState === 'incorrect' && (
+                    <span className="osc-feedback-badge --incorrect">
+                      <i className="ri-close-line" aria-hidden="true" />
+                      <span className="sr-only">Fout antwoord</span>
+                    </span>
+                  )}
+                  {optionState === 'missed' && (
+                    <span className="osc-feedback-badge --missed">
+                      <i className="ri-check-line" aria-hidden="true" />
+                      <span className="sr-only">Juist antwoord</span>
+                    </span>
+                  )}
+                </Paragraph>
+              </FormField>
+              {choice.isOtherOption && selectedOption === choice.value && (
+                <div className="marginTop10 marginBottom15">
+                  <TextInput
+                    type="text"
+                    // @ts-ignore
+                    onChange={(e: { name: string; value: string }) =>
+                      handleOtherOptionChange(e)
+                    }
+                    fieldKey={`${fieldKey}_${choice.trigger || index}_other`}
+                    title=""
+                    fieldInvalid={false}
+                    randomId={`${fieldKey}_${choice.trigger || index}`}
                   />
-                  <span>{choice && choice.label}</span>
-                </FormLabel>
-              </Paragraph>
-            </FormField>
-            {choice.isOtherOption && selectedOption === choice.value && (
-              <div className="marginTop10 marginBottom15">
-                <TextInput
-                  type="text"
-                  // @ts-ignore
-                  onChange={(e: { name: string; value: string }) =>
-                    handleOtherOptionChange(e)
-                  }
-                  fieldKey={`${fieldKey}_${choice.trigger || index}_other`}
-                  title=""
-                  fieldInvalid={false}
-                  randomId={`${fieldKey}_${choice.trigger || index}`}
-                />
-              </div>
-            )}
-          </>
-        ))}
+                </div>
+              )}
+            </>
+          );
+        })}
       </Fieldset>
     </div>
   );

@@ -11,6 +11,18 @@ const sanitize = require('../util/sanitize');
 
 const merge = require('merge');
 
+function sanitizeTimelineUrl(url) {
+  if (!url) return '';
+  const trimmed = String(url).trim();
+  if (!trimmed) return '';
+  if (/^\/\//.test(trimmed)) return '';
+  if (/^(\/|\.\/|\.\.\/|#|\?)/.test(trimmed)) return trimmed;
+  const stripped = trimmed.replace(/[^\x21-\x7e]/g, '');
+  if (/^(https?:|mailto:|tel:)/i.test(stripped)) return trimmed;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(stripped)) return '';
+  return trimmed;
+}
+
 const commentVoteThreshold =
   config.resources && config.resources.commentVoteThreshold;
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
@@ -223,7 +235,7 @@ module.exports = function (db, sequelize, DataTypes) {
       budget: {
         type: DataTypes.INTEGER,
         auth: {
-          updateableBy: 'editor',
+          updateableBy: ['admin', 'editor', 'owner', 'moderator'],
         },
         allowNull: true,
         set: function (budget) {
@@ -237,11 +249,81 @@ module.exports = function (db, sequelize, DataTypes) {
       timeline: {
         type: DataTypes.JSON,
         auth: {
-          createableBy: 'editor',
-          updateableBy: 'editor',
+          createableBy: 'all',
+          updateableBy: ['admin', 'editor', 'owner', 'moderator'],
         },
         allowNull: true,
         defaultValue: null,
+        set: function (value) {
+          if (!Array.isArray(value) || value.length === 0) {
+            this.setDataValue('timeline', null);
+            return;
+          }
+
+          const asString = (v) =>
+            typeof v === 'string' ? v : v == null ? '' : String(v);
+
+          const sanitized = value
+            .filter((item) => item && typeof item === 'object')
+            .map((item) => {
+              const links = Array.isArray(item.links)
+                ? item.links
+                    .filter((link) => link && typeof link === 'object')
+                    .map((link) => {
+                      const cleaned = {
+                        trigger: asString(link.trigger),
+                        title: link.title
+                          ? sanitize.noTags(asString(link.title).trim())
+                          : '',
+                        url: sanitizeTimelineUrl(link.url),
+                        openInNewWindow: !!link.openInNewWindow,
+                        kind:
+                          link.kind === 'document' || link.soort === 'document'
+                            ? 'document'
+                            : 'link',
+                      };
+                      if (link.documentName) {
+                        cleaned.documentName = sanitize.noTags(
+                          asString(link.documentName).trim()
+                        );
+                      }
+                      if (link.fileFormat) {
+                        cleaned.fileFormat = sanitize.noTags(
+                          asString(link.fileFormat).trim()
+                        );
+                      }
+                      if (link.fileSize) {
+                        cleaned.fileSize = sanitize.noTags(
+                          asString(link.fileSize).trim()
+                        );
+                      }
+                      return cleaned;
+                    })
+                : [];
+
+              const cleanedItem = {
+                trigger: asString(item.trigger),
+                activeFrom: /^\d{4}-\d{2}-\d{2}$/.test(
+                  asString(item.activeFrom)
+                )
+                  ? item.activeFrom
+                  : '',
+                title: item.title
+                  ? sanitize.noTags(asString(item.title).trim())
+                  : '',
+                description: item.description
+                  ? sanitize.content(asString(item.description).trim())
+                  : '',
+                links,
+              };
+              if (/^\d{4}-\d{2}-\d{2}$/.test(asString(item.activeTo))) {
+                cleanedItem.activeTo = item.activeTo;
+              }
+              return cleanedItem;
+            });
+
+          this.setDataValue('timeline', sanitized);
+        },
       },
 
       location: {
@@ -875,35 +957,50 @@ module.exports = function (db, sequelize, DataTypes) {
           return {};
         return {
           where: {
-            [db.Sequelize.Op.and]: [
-              db.Sequelize.literal(
-                `location IS NOT NULL AND JSON_EXTRACT(location, '$.lat') IS NOT NULL AND JSON_EXTRACT(location, '$.lng') IS NOT NULL`
-              ),
-              db.Sequelize.where(
-                db.Sequelize.fn(
-                  'ST_Distance_Sphere',
-                  db.Sequelize.fn(
-                    'POINT',
-                    db.Sequelize.cast(
-                      db.Sequelize.fn(
-                        'JSON_EXTRACT',
-                        db.Sequelize.col('location'),
-                        db.Sequelize.literal("'$.lng'")
-                      ),
-                      'DECIMAL(10,7)'
-                    ),
-                    db.Sequelize.cast(
-                      db.Sequelize.fn(
-                        'JSON_EXTRACT',
-                        db.Sequelize.col('location'),
-                        db.Sequelize.literal("'$.lat'")
-                      ),
-                      'DECIMAL(10,7)'
-                    )
+            // A resource matches the postcode filter when it is within the
+            // requested distance OR when it is flagged as location-independent.
+            // Location-independent resources have no pin near the postcode, so
+            // they would otherwise drop out of the results; the flag keeps them
+            // visible.
+            [db.Sequelize.Op.or]: [
+              {
+                [db.Sequelize.Op.and]: [
+                  db.Sequelize.literal(
+                    `location IS NOT NULL AND JSON_EXTRACT(location, '$.lat') IS NOT NULL AND JSON_EXTRACT(location, '$.lng') IS NOT NULL`
                   ),
-                  db.Sequelize.fn('POINT', safeLng, safeLat)
-                ),
-                { [db.Sequelize.Op.lte]: safeDistance }
+                  db.Sequelize.where(
+                    db.Sequelize.fn(
+                      'ST_Distance_Sphere',
+                      db.Sequelize.fn(
+                        'POINT',
+                        db.Sequelize.cast(
+                          db.Sequelize.fn(
+                            'JSON_EXTRACT',
+                            db.Sequelize.col('location'),
+                            db.Sequelize.literal("'$.lng'")
+                          ),
+                          'DECIMAL(10,7)'
+                        ),
+                        db.Sequelize.cast(
+                          db.Sequelize.fn(
+                            'JSON_EXTRACT',
+                            db.Sequelize.col('location'),
+                            db.Sequelize.literal("'$.lat'")
+                          ),
+                          'DECIMAL(10,7)'
+                        )
+                      ),
+                      db.Sequelize.fn('POINT', safeLng, safeLat)
+                    ),
+                    { [db.Sequelize.Op.lte]: safeDistance }
+                  ),
+                ],
+              },
+              db.Sequelize.literal(
+                // Qualify with the model alias: several joined models (user,
+                // comment, tag, status) also have an `extraData` column, so an
+                // unqualified reference is ambiguous in the count/list query.
+                "JSON_EXTRACT(`resource`.`extraData`, '$.locationIndependent') = true"
               ),
             ],
           },
@@ -961,6 +1058,7 @@ module.exports = function (db, sequelize, DataTypes) {
               'id',
               'role',
               'displayName',
+              'projectDisplayName',
               'nickName',
               'name',
               'email',
@@ -1040,13 +1138,7 @@ module.exports = function (db, sequelize, DataTypes) {
         }
         return {
           where: {
-            [db.Sequelize.Op.or]: [
-              ...projectIds.map((projectId) => {
-                return {
-                  projectId: projectId,
-                };
-              }),
-            ],
+            projectId: { [db.Sequelize.Op.in]: projectIds },
           },
         };
       },
@@ -1174,8 +1266,7 @@ module.exports = function (db, sequelize, DataTypes) {
     },
     canMutateStatus: function canMutateStatus(user, self) {
       if (!user || !self) return false;
-      if (!self.auth.canUpdate(user, self)) return false;
-      return userHasRole(user, 'editor');
+      return self.auth.canUpdate(user, self);
     },
     toAuthorizedJSON: function (user, data, self) {
       if (!self.auth.canView(user, self)) {

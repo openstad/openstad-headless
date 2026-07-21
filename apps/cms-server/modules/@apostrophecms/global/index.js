@@ -165,6 +165,12 @@ module.exports = {
         default: 'Afbeelding van het logo, link naar de homepage',
       },
 
+      logoLink: {
+        type: 'string',
+        label: 'Logo link (optioneel)',
+        help: 'Standaard linkt het logo naar de homepage. Vul hier een eigen URL in (bijv. https://example.com) om daarvan af te wijken.',
+      },
+
       footerLogo: {
         type: 'attachment',
         label: 'Footer logo',
@@ -455,6 +461,7 @@ module.exports = {
           'hideSiteTitle',
           'siteLogo',
           'logoAltText',
+          'logoLink',
           'bannerStatus',
           'bannerStatusText',
         ],
