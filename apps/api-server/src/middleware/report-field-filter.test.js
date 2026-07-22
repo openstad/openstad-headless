@@ -183,6 +183,23 @@ describe('reportFieldFilter', () => {
       expect(result.records[0].ip).toBeUndefined();
       expect(result.records[0].userId).toBeUndefined();
     });
+
+    it('drops an unexpected sibling key next to records (PII leak guard)', () => {
+      // A route handler that accidentally attaches extra data alongside the
+      // pagination wrapper (e.g. a raw user summary) must not leak it —
+      // only { metadata, records } may pass through.
+      const payload = {
+        metadata: { totalCount: 5, page: 0 },
+        records: [{ id: 1, opinion: 'yes' }],
+        summary: { email: 'jan@example.com', phoneNumber: '0612345678' },
+      };
+
+      const result = applyFilter(payload, { reportingScope: scope });
+
+      expect(result.metadata).toEqual({ totalCount: 5, page: 0 });
+      expect(result.records).toHaveLength(1);
+      expect(result.summary).toBeUndefined();
+    });
   });
 
   describe('stats component aggregate paths (scope.aggregate)', () => {

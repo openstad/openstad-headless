@@ -281,7 +281,7 @@ function filterPayload(payload, allowedFields) {
     Array.isArray(payload.records)
   ) {
     return {
-      ...payload,
+      metadata: payload.metadata,
       records: payload.records.map((record) =>
         filterRecord(record, allowedFields)
       ),
