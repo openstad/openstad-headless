@@ -78,7 +78,10 @@ function parseDateParam(value, param) {
  *
  * @param {import('express').Request} req
  * @param {string} componentKey
- * @param {{fieldTypes?:Record<string,string>}} [opts] - inject fieldTypes to avoid db in tests
+ * @param {{fieldTypes?:Record<string,string>, statusEnumValues?:string[]|null}} [opts]
+ *   - inject fieldTypes / statusEnumValues to avoid db in tests. statusEnumValues:
+ *   undefined looks it up via component-registry, null means "no enum constraint",
+ *   an array means "only these values are valid".
  * @returns {{where: object, include?: Array<{viaModel:string, where:object}>}}
  */
 function buildReportingWhere(req, componentKey, opts = {}) {
@@ -136,6 +139,18 @@ function buildReportingWhere(req, componentKey, opts = {}) {
 
   // Status — only where the component has a status column
   if (q.status !== undefined && q.status !== '') {
+    // A non-string means the querystring parser turned `status` into an
+    // object or array (e.g. ?status[x]=y), not a scalar filter value —
+    // reject before it ever reaches Sequelize as a where-clause operand.
+    if (typeof q.status !== 'string') {
+      throw new ReportingFilterError(
+        'invalid_status_type',
+        `'status' must be a single string value`,
+        'status',
+        'Pass status as a plain query string, e.g. ?status=approved'
+      );
+    }
+
     const fieldTypes =
       opts.fieldTypes ||
       require('./component-registry').getFieldTypes(componentKey);
@@ -147,6 +162,28 @@ function buildReportingWhere(req, componentKey, opts = {}) {
         'Remove the status parameter for this endpoint'
       );
     }
+
+    // Validate against the component's real status set (e.g. Submission's
+    // ENUM) when there is one. Components without a fixed enum (free-text,
+    // or a per-project status set that isn't a plain column — resources
+    // never reach this branch at all, see getFieldEnumValues) skip this
+    // check rather than enforce a hardcoded list.
+    const allowedStatuses =
+      opts.statusEnumValues !== undefined
+        ? opts.statusEnumValues
+        : require('./component-registry').getFieldEnumValues(
+            componentKey,
+            'status'
+          );
+    if (Array.isArray(allowedStatuses) && !allowedStatuses.includes(q.status)) {
+      throw new ReportingFilterError(
+        'unknown_status',
+        `'${q.status}' is not a valid status for the '${componentKey}' report`,
+        'status',
+        `Valid values: ${allowedStatuses.join(', ')}`
+      );
+    }
+
     where.status = q.status;
   }
 

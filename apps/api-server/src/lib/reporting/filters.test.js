@@ -97,6 +97,7 @@ describe('buildReportingWhere', () => {
   it('applies status only where the component has a status column', () => {
     const ok = buildReportingWhere(req({ status: 'approved' }), 'resources', {
       fieldTypes: TYPES_WITH_STATUS,
+      statusEnumValues: null,
     });
     expect(ok.where.status).toBe('approved');
 
@@ -111,6 +112,58 @@ describe('buildReportingWhere', () => {
     expect(err).toBeInstanceOf(ReportingFilterError);
     expect(err.code).toBe('unsupported_status_filter');
     expect(err.param).toBe('status');
+  });
+
+  it('rejects a non-string status (e.g. ?status[x]=y qs-parsed into an object) with 400', () => {
+    let err;
+    try {
+      buildReportingWhere(req({ status: { x: 'y' } }), 'submissions', {
+        fieldTypes: TYPES_WITH_STATUS,
+        statusEnumValues: ['approved', 'pending', 'unapproved'],
+      });
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(ReportingFilterError);
+    expect(err.code).toBe('invalid_status_type');
+    expect(err.param).toBe('status');
+  });
+
+  it('rejects an unknown status value against the component enum with 400', () => {
+    let err;
+    try {
+      buildReportingWhere(req({ status: 'bogus' }), 'submissions', {
+        fieldTypes: TYPES_WITH_STATUS,
+        statusEnumValues: ['approved', 'pending', 'unapproved'],
+      });
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(ReportingFilterError);
+    expect(err.code).toBe('unknown_status');
+    expect(err.param).toBe('status');
+    expect(err.hint).toContain('approved');
+  });
+
+  it('accepts a valid status value against the component enum', () => {
+    const { where } = buildReportingWhere(
+      req({ status: 'pending' }),
+      'submissions',
+      {
+        fieldTypes: TYPES_WITH_STATUS,
+        statusEnumValues: ['approved', 'pending', 'unapproved'],
+      }
+    );
+    expect(where.status).toBe('pending');
+  });
+
+  it('skips enum validation when the component has no fixed status enum', () => {
+    const { where } = buildReportingWhere(
+      req({ status: 'anything-goes' }),
+      'resources',
+      { fieldTypes: TYPES_WITH_STATUS, statusEnumValues: null }
+    );
+    expect(where.status).toBe('anything-goes');
   });
 });
 

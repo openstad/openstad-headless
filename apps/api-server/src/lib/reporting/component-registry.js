@@ -109,10 +109,38 @@ function getFieldTypes(componentKey) {
   return out;
 }
 
+/**
+ * Returns the allowed values for a component's field, if that field is a
+ * Sequelize ENUM — e.g. Submission.status is ENUM('approved','pending',
+ * 'unapproved'). Returns null when the field isn't an ENUM (free-text status,
+ * or a per-project/dynamic status set that can't be validated against a
+ * static list here — e.g. resources' statuses live in a separate per-project
+ * Status association, not a column, so they never reach this function).
+ *
+ * This is the "real status set of the component" referred to by
+ * filters.js's status validation — deriving it from the model instead of a
+ * hardcoded enum keeps it correct if a model's status values ever change.
+ *
+ * @param {string} componentKey
+ * @param {string} fieldName
+ * @returns {string[]|null}
+ */
+function getFieldEnumValues(componentKey, fieldName) {
+  const model = getModel(componentKey);
+  const attrs =
+    typeof model.getAttributes === 'function'
+      ? model.getAttributes()
+      : model.rawAttributes;
+  const def = attrs && attrs[fieldName];
+  const type = def && def.type;
+  return type && Array.isArray(type.values) ? type.values : null;
+}
+
 module.exports = {
   COMPONENT_MODEL,
   getModel,
   getFieldTypes,
+  getFieldEnumValues,
   getProjectScope,
   // test seam
   _resetCache: () => _typeCache.clear(),
