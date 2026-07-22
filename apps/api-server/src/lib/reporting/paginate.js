@@ -37,8 +37,8 @@ function parsePageParams(req) {
  * projectId lives in the PATH (routing choice A: /api/project/:projectId/reports/*),
  * so it is NOT added to the query. The relative path is taken from the request
  * (req.baseUrl + req.path), normalised to: no leading slash, with an `api/`
- * prefix. Active filters (dateFrom, dateTo, status) + pageSize are preserved and
- * `page` is set to nextPage.
+ * prefix. Active filters (dateFrom, dateTo, status, widgetId) + pageSize are
+ * preserved and `page` is set to nextPage.
  *
  * e.g. "api/project/1/reports/resources?dateFrom=2026-01-01&page=2&pageSize=100"
  *
@@ -53,7 +53,7 @@ function buildNextLink(req, nextPage) {
 
   const params = new URLSearchParams();
   const q = req.query || {};
-  for (const key of ['dateFrom', 'dateTo', 'status']) {
+  for (const key of ['dateFrom', 'dateTo', 'status', 'widgetId']) {
     if (q[key] !== undefined && q[key] !== '') params.set(key, String(q[key]));
   }
   params.set('page', String(nextPage));

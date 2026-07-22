@@ -70,6 +70,13 @@ describe('buildNextLink', () => {
       'api/project/1/reports/resources?dateFrom=2026-01-01&page=2&pageSize=100'
     );
   });
+
+  it('echoes widgetId so page 2+ keeps the widget filter', () => {
+    const req = makeReq({ widgetId: '42', pageSize: '100', page: '1' });
+    expect(buildNextLink(req, 2)).toBe(
+      'api/project/1/reports/resources?widgetId=42&page=2&pageSize=100'
+    );
+  });
 });
 
 describe('paginateReporting', () => {

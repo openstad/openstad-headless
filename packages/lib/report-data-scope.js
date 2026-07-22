@@ -19,16 +19,22 @@ const ALWAYS_BLOCKED_USER_KEYS = new Set([
 const ALWAYS_BLOCKED_TOP_LEVEL = new Set(['ip', 'userId']);
 
 // Free-form JSON blobs that are ALWAYS removed.
-// These can contain arbitrary PII typed in by end-users.
-const ALWAYS_BLOCKED_BLOBS = new Set(['submittedData', 'extraData']);
+// These can contain arbitrary PII typed in by end-users. `result` is the raw
+// choiceguide answers blob — never exposed as-is; answers are only available
+// opt-in via the flattened `answer_<key>` columns (dataScope.choiceguides.
+// answerFields), exactly like submissions' `submittedData`/formFields.
+const ALWAYS_BLOCKED_BLOBS = new Set(['submittedData', 'extraData', 'result']);
 
 /**
  * The complete catalog of reportable components.
  *
  * safeFields   — fields that are never PII; exposed without any admin opt-in.
  * personalFields — user-authored text or identifiers that require explicit
- *                  admin opt-in.  Free text (description/summary/result) and
- *                  user.* dot-paths live here.
+ *                  admin opt-in.  Free text (title/summary/description) and
+ *                  user.* dot-paths live here. The opt-in itself lives in
+ *                  project.config.dataScope — admin-configured, enforced in
+ *                  the project PUT route (routes/api/project.js): only an
+ *                  admin may change it.
  * pathPattern  — URL path segment used in /stats routing to match this component.
  */
 const COMPONENTS = {
@@ -124,8 +130,10 @@ const COMPONENTS = {
       'updatedAt',
       'isSpam',
     ],
-    // result is user-authored quiz data; kept as opt-in personal field.
-    personalFields: ['result', 'user.displayName', 'user.nickName'],
+    // result (the raw answers blob) is always blocked — see
+    // ALWAYS_BLOCKED_BLOBS. Answers are only exposed via the flattened
+    // answer_<key> columns (dataScope.choiceguides.answerFields opt-in).
+    personalFields: ['user.displayName', 'user.nickName'],
   },
 
   // ADDITIVE (reporting endpoints, issue #1651): the project's own metadata.

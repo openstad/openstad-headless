@@ -10,7 +10,11 @@ vi.mock('@openstad-headless/lib/report-data-scope', () => {
   );
 });
 
-const { matchComponent } = require('@openstad-headless/lib/report-data-scope');
+const {
+  matchComponent,
+  getExposedFields,
+  filterRecord,
+} = require('@openstad-headless/lib/report-data-scope');
 
 describe('matchComponent', () => {
   it('matches a plain component segment', () => {
@@ -35,5 +39,22 @@ describe('matchComponent', () => {
     expect(matchComponent('/project/1/user')).toBeNull();
     expect(matchComponent('/project/1/audit-log')).toBeNull();
     expect(matchComponent('/project/1/overview')).toBeNull();
+  });
+});
+
+describe('choiceguides result blob', () => {
+  it('is never exposed, even when opted in via personalFields', () => {
+    // 'result' is no longer a valid personalField for choiceguides, so an
+    // opt-in attempt has no effect on the exposed-fields list...
+    const allowedFields = getExposedFields('choiceguides', ['result']);
+    expect(allowedFields).not.toContain('result');
+
+    // ...and even if a caller passed 'result' through directly, the
+    // ALWAYS_BLOCKED_BLOBS safety pass strips it from the output record.
+    const record = filterRecord({ id: 1, result: { q1: 'secret answer' } }, [
+      'id',
+      'result',
+    ]);
+    expect(record).toEqual({ id: 1 });
   });
 });

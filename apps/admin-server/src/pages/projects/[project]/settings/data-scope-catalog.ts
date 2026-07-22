@@ -49,8 +49,10 @@ export const DATA_SCOPE_COMPONENTS = {
   },
   choiceguides: {
     label: 'Keuzewijzers',
+    // 'result' (the raw answers blob) is intentionally NOT listed here — it
+    // is always blocked (see ALWAYS_BLOCKED_BLOBS in report-data-scope.js).
+    // Answers are exposed via the separate answer_<key> opt-in instead.
     personalFields: [
-      { key: 'result', label: 'Keuzewijzer antwoorden' },
       { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
       { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
     ],
