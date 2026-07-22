@@ -17,6 +17,7 @@ const {
 const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const removeProtocolFromUrl = require('../../middleware/remove-protocol-from-url');
+const dataScopeAdminGate = require('../../middleware/data-scope-admin-gate');
 const messageStreaming = require('../../services/message-streaming');
 const service = require('../../adapter/openstad/service');
 const {
@@ -1378,6 +1379,9 @@ router
       return next(err);
     }
   })
+  // admin-only gate for the reporting data scope config — see
+  // middleware/data-scope-admin-gate.js.
+  .put(dataScopeAdminGate)
   .put(async function (req, res, next) {
     const project = await db.Project.findOne({ where: { id: req.results.id } });
     if (!(project && project.can && project.can('update')))

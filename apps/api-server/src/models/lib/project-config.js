@@ -340,6 +340,9 @@ module.exports = {
   // Each component has an 'enabled' flag and an optional list of personal fields
   // (user-authored text / identifiers) that the admin has explicitly opted in to.
   // Default: all components disabled — a token with no config reaches /stats only.
+  // Admin-configured, enforced in the project PUT route (routes/api/project.js):
+  // only an admin may change this subtree; resubmitting it unchanged is allowed
+  // for any role.
   dataScope: {
     type: 'object',
     subset: {
