@@ -25,6 +25,7 @@ function makeReq(query = {}) {
     baseUrl: '/api/project/1/reports',
     path: '/resources',
     reportingScope: { componentKey: 'resources', enabledPersonalFields: [] },
+    project: { id: 1 },
   };
 }
 

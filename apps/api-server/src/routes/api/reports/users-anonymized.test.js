@@ -57,10 +57,16 @@ describe('toParticipantRow', () => {
     }
   });
 
-  it('the same raw id always produces the same pseudonym (stable/joinable)', () => {
+  it('the same raw id in the same project always produces the same pseudonym (stable/joinable within a project)', () => {
     const a = toParticipantRow({ id: 42, role: 'member', projectId: 2 });
-    const b = toParticipantRow({ id: 42, role: 'admin', projectId: 3 });
+    const b = toParticipantRow({ id: 42, role: 'admin', projectId: 2 });
     expect(a.participantId).toBe(b.participantId);
+  });
+
+  it('the same raw id in a different project produces a different pseudonym (not joinable across projects)', () => {
+    const a = toParticipantRow({ id: 42, role: 'member', projectId: 2 });
+    const b = toParticipantRow({ id: 42, role: 'member', projectId: 3 });
+    expect(a.participantId).not.toBe(b.participantId);
   });
 
   it('a different raw id produces a different pseudonym', () => {

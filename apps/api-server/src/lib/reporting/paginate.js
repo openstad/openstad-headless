@@ -115,7 +115,10 @@ function paginateReporting({
   const data = pageRows.map((row) => {
     const plain = toPlain(row);
     if (includeUserId) {
-      req.reportUserPseudonyms[plain.id] = pseudonymizeUserId(plain.userId);
+      req.reportUserPseudonyms[plain.id] = pseudonymizeUserId(
+        plain.userId,
+        req.project.id
+      );
     }
     if (extraColumns) {
       req.reportExtraColumns[plain.id] =

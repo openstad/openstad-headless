@@ -28,7 +28,7 @@ function toIsoOrNull(value) {
  */
 function toParticipantRow(row) {
   return {
-    participantId: pseudonymizeUserId(row.id),
+    participantId: pseudonymizeUserId(row.id, row.projectId),
     role: row.role,
     projectId: row.projectId,
     createdAt: toIsoOrNull(row.createdAt),
