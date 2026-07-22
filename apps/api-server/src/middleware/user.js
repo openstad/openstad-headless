@@ -78,6 +78,30 @@ module.exports = async function getUser(req, res, next) {
     next(error);
   }
 };
+module.exports.isApiTokenAuthorizedForProject = isApiTokenAuthorizedForProject;
+
+/**
+ * Whether a resolved API-token owner may act on the given (already
+ * project-scoped) request. Enforces the token's project binding: a reporting
+ * token issued for project A must not be honoured on a request scoped to
+ * project B — cross-project reads are the failure mode this guards against.
+ * Only a superuser (admin on the admin project) may cross project boundaries,
+ * mirroring the JWT auth path. Pure/DB-free so it's unit-testable without a
+ * real Sequelize connection.
+ * @param {{owner: {projectId:number, role:string}, apiToken: {projectId:number}, reqProjectId: number|undefined}} args
+ * @returns {boolean}
+ */
+function isApiTokenAuthorizedForProject({ owner, apiToken, reqProjectId }) {
+  const isSuperUser =
+    owner.projectId == config.admin.projectId &&
+    ['admin', 'superuser'].includes(owner.role);
+  return (
+    isSuperUser ||
+    (reqProjectId !== undefined &&
+      reqProjectId !== null &&
+      reqProjectId == apiToken.projectId)
+  );
+}
 
 /**
  * Authenticate using an opaque API token (osr_…) stored hashed in api_tokens.
@@ -112,12 +136,12 @@ async function handleApiToken(req, res, next) {
     // (hasRole(req.user, 'editor')), so without this check a token from one
     // project could read another project's stats. Only superusers (admin on
     // the admin project) may cross project boundaries, mirroring the JWT path.
-    const isSuperUser =
-      owner.projectId == config.admin.projectId &&
-      ['admin', 'superuser'].includes(owner.role);
     if (
-      !isSuperUser &&
-      (!req.project || req.project.id != apiToken.projectId)
+      !isApiTokenAuthorizedForProject({
+        owner,
+        apiToken,
+        reqProjectId: req.project && req.project.id,
+      })
     ) {
       return nextWithEmptyUser(req, res, next);
     }

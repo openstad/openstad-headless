@@ -60,6 +60,61 @@ function getEnabledFormFields(req) {
   return (submissionsScope && submissionsScope.formFields) || [];
 }
 
+/**
+ * Maps a widget's form items to the field rows this endpoint exposes,
+ * applying the per-field opt-in gate. Pure/DB-free so it can be
+ * unit-tested without a real Sequelize connection (mirrors
+ * choice-guide-questions.js's buildQuestionRows test seam).
+ * @param {any[]} items - widget.config.items
+ * @param {string[]} enabledFormFields
+ * @returns {Array<{name:string, label:string, type:string}>}
+ */
+function buildFieldRows(items, enabledFormFields) {
+  const enabled = new Set(enabledFormFields || []);
+  const seen = new Set();
+  const fields = [];
+  for (const item of items || []) {
+    const key = fieldKeyOf(item);
+    if (!key || CONTROL_FIELD_KEYS.has(key) || seen.has(key)) continue;
+    seen.add(key);
+    if (!enabled.has(key)) continue; // per-field opt-in, mirrors flattenSubmission
+
+    fields.push({
+      name: `field_${key}`,
+      label: item.title || key,
+      type: inferFieldType(item),
+    });
+  }
+  return fields;
+}
+
+/**
+ * Resolves the field rows for one widget's form. `db` is passed in (rather
+ * than read from the module-level `require`) so this can be unit-tested with
+ * a stub db, without a real DB connection — mirrors make-report-endpoint.js's
+ * resolveCombinedInclude test seam.
+ * @param {{db: object, widgetId: string|number, projectId: number, enabledFormFields: string[]}} args
+ * @returns {Promise<{notFound: true}|{fields: Array<object>}>}
+ */
+async function resolveSubmissionFields({
+  db,
+  widgetId,
+  projectId,
+  enabledFormFields,
+}) {
+  const widget = await db.Widget.findOne({
+    where: { id: widgetId, projectId },
+    attributes: ['id', 'config'],
+  });
+  if (!widget) return { notFound: true };
+
+  const items =
+    widget.config && Array.isArray(widget.config.items)
+      ? widget.config.items
+      : [];
+  return { fields: buildFieldRows(items, enabledFormFields) };
+}
+
 // GET /api/project/:projectId/reports/submissions/fields?widgetId=
 //
 // Metadata endpoint (#440 AC): describes the fields /reports/submissions
@@ -85,11 +140,13 @@ module.exports = async function submissionsFields(req, res, next) {
       });
     }
 
-    const widget = await db.Widget.findOne({
-      where: { id: widgetId, projectId: req.project.id },
-      attributes: ['id', 'config'],
+    const result = await resolveSubmissionFields({
+      db,
+      widgetId,
+      projectId: req.project.id,
+      enabledFormFields: getEnabledFormFields(req),
     });
-    if (!widget) {
+    if (result.notFound) {
       return res.status(404).json({
         error: {
           code: 'widget_not_found',
@@ -98,30 +155,12 @@ module.exports = async function submissionsFields(req, res, next) {
       });
     }
 
-    const items =
-      widget.config && Array.isArray(widget.config.items)
-        ? widget.config.items
-        : [];
-    const enabled = new Set(getEnabledFormFields(req));
-
-    const seen = new Set();
-    const fields = [];
-    for (const item of items) {
-      const key = fieldKeyOf(item);
-      if (!key || CONTROL_FIELD_KEYS.has(key) || seen.has(key)) continue;
-      seen.add(key);
-      if (!enabled.has(key)) continue; // per-field opt-in, mirrors flattenSubmission
-
-      fields.push({
-        name: `field_${key}`,
-        label: item.title || key,
-        type: inferFieldType(item),
-      });
-    }
-
     req.reportSchemaResponse = true;
-    return res.json(fields);
+    return res.json(result.fields);
   } catch (err) {
     return next(err);
   }
 };
+module.exports.inferFieldType = inferFieldType;
+module.exports.buildFieldRows = buildFieldRows;
+module.exports.resolveSubmissionFields = resolveSubmissionFields;
