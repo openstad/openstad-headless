@@ -1,4 +1,5 @@
 const fs = require('fs').promises;
+const path = require('path');
 const nunjucks = require('nunjucks');
 const mjml2html = require('mjml');
 const sendMessage = require('../notifications/send-engines');
@@ -77,9 +78,20 @@ module.exports = (db, sequelize, DataTypes) => {
                 },
               });
               if (!template) {
-                let file = await fs.readFile(
-                  `src/notifications/default-templates/${instance.type}`
+                // basename keeps a db-supplied type from escaping the templates dir
+                const templatePath = path.join(
+                  __dirname,
+                  '../notifications/default-templates',
+                  path.basename(instance.type || '')
                 );
+                let file;
+                try {
+                  file = await fs.readFile(templatePath);
+                } catch (err) {
+                  throw new Error(
+                    `Notification template not found for type '${instance.type}' (no project template and no default template at ${templatePath})`
+                  );
+                }
                 file = file.toString();
                 let match = file.match(
                   /<subject>((?:.|\r|\n)*)<\/subject>(?:.|\r|\n)*<body>((?:.|\r|\n)*)<\/body>/
@@ -88,7 +100,10 @@ module.exports = (db, sequelize, DataTypes) => {
                 let body = match && match[2];
                 if (subject && body) template = { subject, body };
               }
-              if (!template) throw new Error('Notification template not found');
+              if (!template)
+                throw new Error(
+                  `Notification template not found for type '${instance.type}' (default template could not be parsed)`
+                );
 
               templateData = options.data;
               templateData.project = await db.Project.scope(
