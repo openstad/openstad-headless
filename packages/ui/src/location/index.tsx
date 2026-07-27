@@ -102,7 +102,9 @@ export default function PostcodeAutoFill({
   const handleSelect = async (s: Suggestion) => {
     setShowDropdown(false);
     try {
-      const res = await fetch(`${props?.zipCodeApiUrl || ''}${s.postcode}`);
+      const res = await fetch(
+        `${props?.zipCodeApiUrl || ''}${encodeURIComponent(s.postcode)}`
+      );
       const data = await res.json();
       const full = data.results?.[0];
       if (full) {

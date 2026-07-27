@@ -129,6 +129,11 @@ exports.info = (req, res, next) => {
   res.render('auth/anonymous/info', {
     loginUrl: authAnonymousConfig.loginUrl,
     clientId: req.client.clientId,
-    client: req.client,
+    // Geef alleen de velden door die de views gebruiken; nooit het volledige
+    // clientrecord (bevat config en secret) in de templatescope zetten.
+    client: {
+      name: req.client.name,
+      clientId: req.client.clientId,
+    },
   });
 };
