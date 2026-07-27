@@ -247,6 +247,13 @@
   color: black;
 }
 
+/* ponytail: clearfix zodat de gefloate balk + percentage de li niet laten inklappen */
+.osc-choice-default::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
 .osc .osc-choiceguide-container .question-type-range + .question-type-range {
   margin-top: 2rem;
 }
@@ -330,6 +337,10 @@ ul.osc-choices {
     right: 10px;
     top: unset;
     width: revert;
+    /* ponytail: cap op viewport + interne scroll, anders groeit het paneel bij 200% zoom
+       voorbij de schermrand en verdwijnt de collapse-knop erboven -> niet sluitbaar (1.4.4) */
+    max-height: calc(100vh - 20px);
+    overflow-y: auto;
   }
 }
 
