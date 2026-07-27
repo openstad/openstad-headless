@@ -341,7 +341,10 @@ services:
     profiles:
       - tools
     working_dir: /opt/openstad-headless
-    command: npm run update-lock
+    # Call npm directly (not via `npm run`): npm puts its own bin dir first
+    # in PATH, which bypasses the safe-chain shim and makes npm 12 fail hard
+    # on --safe-chain-skip-minimum-package-age.
+    command: npm install --package-lock-only --ignore-scripts --safe-chain-skip-minimum-package-age
     volumes:
       - .:/opt/openstad-headless
 
