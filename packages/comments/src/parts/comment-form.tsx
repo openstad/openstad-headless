@@ -43,7 +43,8 @@ function CommentForm({
 
   formFields.push({
     type: 'text',
-    title: '',
+    // ponytail: zichtbaar label i.p.v. alleen placeholder (WCAG 3.3.2); placeholder telt niet als label
+    title: 'Uw reactie',
     variant: 'textarea',
     minCharacters: descriptionMinLength,
     maxCharacters: descriptionMaxLength,

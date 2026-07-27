@@ -15,6 +15,7 @@ de volledige audit-analyse staat lokaal in `.claude/` (niet gecommit).
 
 - `docs/accessibility-enquete-status.md` — enquête (13 punten).
 - `docs/accessibility-navbar-status.md` — navBar (5 punten).
+- Reacties (5 punten) — detail staat inline in dit document (zie ✅ Afgerond).
 
 ---
 
@@ -41,13 +42,38 @@ klikbaar — `pointer-events:none` weg (2.4.4), chevron target ≥24px + negatie
 chevron blijven **gesplitst** (split-navigation), nu volledig toetsenbord/muis/touch + Escape.
 Live geverifieerd op de demo (31490).
 
+### Reacties (5 code-punten) + gedeelde filter/paginator — commit `21a4696b4`
+
+Alle 5 code-punten gefixt, gebouwd **en live geverifieerd** op de demo (`/inzendingen`,
+`/inzendingen/resource?openstadResourceId=17`). De 6e (lege kop) is content — zie content-acties.
+
+| Crit           | Fix                                                                                                           | Bestand                                                                  |
+| -------------- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| 1.3.1          | Paginering nu `<ul>/<li>` in bestaande `<nav aria-label="Paginering">`                                        | `packages/ui/src/paginator/index.tsx`                                    |
+| 1.4.4          | Paginering-reflow: `.osc-paginator-list { flex-wrap:wrap; list-style:none }` (comments-centrering geretarget) | `packages/ui/src/paginator/index.css`, `packages/comments/src/index.css` |
+| 2.4.11 / 2.4.3 | Collapsible filter-popup: Tab-focus gevangen, Escape sluit + focus terug naar toggle-knop                     | `packages/ui/src/stem-begroot-and-resource-overview/filter/index.tsx`    |
+| 3.3.2          | Reactie-textarea heeft nu zichtbaar `<label>` "Uw reactie" (placeholder telt niet)                            | `packages/comments/src/parts/comment-form.tsx`                           |
+| 1.1.1 / 2.4.6  | Zoek-submit sr-only "Filters toepassen" → "Zoeken"                                                            | `packages/ui/src/stem-begroot-and-resource-overview/filter/index.tsx`    |
+
+**Meegelift (gedeelde componenten):** de focus-trap + zoek-icoon zitten in de gedeelde `Filters`, en de
+paginator-fix in de gedeelde `Paginator` → dit fixt in één klap ook **Zoekbalk (#10)** en
+**Filter-zijbalk (#11)** op inzendingen-overzicht + projectenoverzicht.
+
+**Rebuild:** omdat deze componenten per widget mee-gebundeld worden (zie build-valkuil onder), zijn
+**alle 10 consumers** herbouwd: `comments`, `resource-detail`, `resource-detail-with-map`,
+`resource-overview`, `resource-overview-with-map`, `document-map`, `leaflet-map`, `stem-begroot`,
+`multi-project-resource-overview`, `simple-voting`. Verificatie: geen enkele `dist/*.iife.js` bevat
+nog "Filters toepassen".
+
+**Live-verificatie (ingelogd, 27-07-2026):** label "Uw reactie" gekoppeld via `element.labels` op beide
+sentiment-textarea's; paginator rendert `‹ 1 2 ›` als `<ul>`/`<li>` zonder bullets, `flex-wrap:wrap`,
+`aria-current="page"`; filter-popup Tab-trap beide richtingen (`preventDefault`) + Escape sluit
+(`aria-hidden=true`) en focus terug op toggle; zoek-submit leest `sr-only "Zoeken"`.
+
 ---
 
 ## ⏭️ Nog te doen
 
-- **Reacties** (6 punten): paginering als lijst + nav-landmark (1.3.1), lege kop, paginering-reflow
-  200% (1.4.4), filter-popup focus trap (2.4.11), 2 velden zonder label (3.3.2), zoek-icoon alt
-  'Filters toepassen' → 'Zoeken' (1.1.1/2.4.6). Deelt filter-sidebar/zoekbalk met inzendingen-overzicht.
 - **Keuzewijzer + Stemmodule** (8 samen): score/stap alleen via kleur (1.4.1), score niet voorgelezen,
   `aria-current`, reflow tijdlijn (1.4.10), text-spacing stapnummers (1.4.12), focus-not-obscured
   filter-popup (2.4.11).
@@ -68,6 +94,8 @@ Live geverifieerd op de demo (31490).
 - Enquête-slider: verwijder de handmatig getypte schaal-tekst in de demo (slider genereert 'm nu zelf).
 - InfoField: kies per infoblok het juiste `headingLevel` zodat de koppenhiërarchie klopt.
 - Footer-logo `alt` → `"OpenStad.org (logo)"` (via config).
+- Reacties "maximale versie": kop "Voorbeeld 2: Maximale versie" gevolgd door kop van gelijk niveau →
+  eerste kop zonder inhoud (1.3.1). Inhoud toevoegen óf de tweede kop een niveau lager (demo-content).
 - Header-logo (link + `title`): zit in de CMS/demo-header, niet in een widget.
 
 ---
@@ -87,6 +115,13 @@ vereisen een échte 320-viewport.
 1. **api-server-widgets** (enquête, form, swipe, resource-_, stem-begroot, …): de api-server (poort 31410) leest `packages/_/dist` **per request van disk** (`apps/api-server/.../widget.js`,
 `fs.readFileSync`). Dus `npm run build`van het package volstaat → automatisch live op de demo
 (hooguit browser hard-refresh ⌘⇧R). Mapping:`apps/api-server/src/routes/widget/widget-settings.js`.
+   - ⚠️ **VALKUIL — gedeelde componenten worden per widget mee-gebundeld.** Wijzig je iets in
+     `packages/ui/src` (bv. `Filters`, `Paginator`) of in `packages/comments`, dan moet je **élke widget
+     die het bundelt** herbouwen — niet alleen het "eigen" package. Bv. het reactieformulier op een
+     resource-detailpagina komt uit de **`resource-detail`**-bundle, niet uit `comments`. Consumers van
+     de shared filter/paginator/comments: `comments`, `resource-detail(-with-map)`, `resource-overview(-with-map)`,
+     `document-map`, `leaflet-map`, `stem-begroot`, `multi-project-resource-overview`, `simple-voting`.
+     Check achteraf: scan alle `packages/*/dist/*.iife.js` op de oude tekst — geen hit = alles herbouwd.
 2. **CMS-widgets** (navBar, Footer): de CMS serveert een **gekopieerde** bundle uit
    `apps/cms-server/modules/asset/ui/public/` — JS in `navBar.iife.js`, CSS in `style.css` (apart!).
    Flow: build package → **kopieer** `dist/navBar.iife.js` én `dist/navBar.css` (→ `style.css`) naar die

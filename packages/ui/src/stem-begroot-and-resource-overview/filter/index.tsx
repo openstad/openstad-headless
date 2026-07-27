@@ -359,6 +359,46 @@ export function Filters({
     }
   }, [tagState, autoApply, newActiveTagsDraft]);
 
+  // Sluit de filter-popup en zet focus terug op de toggle-knop (WCAG 2.4.11 / 2.4.3)
+  const closeFilters = () => {
+    setFiltersVisible(false);
+    const toggle = filtersWrapperRef.current
+      ?.closest('#stem-begroot-filter')
+      ?.querySelector<HTMLElement>('.toggle-filters-button');
+    toggle?.focus();
+  };
+
+  // Escape sluit; Tab wordt binnen de popup gevangen (focus trap)
+  const handleFiltersKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      closeFilters();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+
+    const wrapper = filtersWrapperRef.current;
+    if (!wrapper) return;
+
+    const focusables = Array.from(
+      wrapper.querySelectorAll<HTMLElement>(
+        "input, select, textarea, button, a[href], [tabindex]:not([tabindex='-1'])"
+      )
+    ).filter((el) => !el.hasAttribute('disabled') && el.offsetParent !== null);
+
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
+
   const handleSubmit = (e?: any, updatedFilter?: Filter, updatedTags?: any) => {
     setStopUsingDefaultValue(true);
     if (e && e.preventDefault) e.preventDefault();
@@ -578,7 +618,7 @@ export function Filters({
         {props.displaySearch && displayCollapsibleFilter ? (
           <button type="submit" className="apply-filters-button">
             <span className="filter-icon"></span>
-            <span className="sr-only">Filters toepassen</span>
+            <span className="sr-only">Zoeken</span>
           </button>
         ) : null}
 
@@ -609,6 +649,7 @@ export function Filters({
               <div
                 className="filters-wrapper"
                 ref={filtersWrapperRef}
+                onKeyDown={handleFiltersKeyDown}
                 onClick={(e) => {
                   e.stopPropagation();
                 }}>
@@ -616,7 +657,7 @@ export function Filters({
                   className="close-filters-button"
                   type="button"
                   onClick={(e) => {
-                    setFiltersVisible(false);
+                    closeFilters();
                   }}>
                   <span className="close-icon"></span>
                   <span className="sr-only">Sluit filters</span>
