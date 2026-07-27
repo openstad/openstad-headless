@@ -125,3 +125,11 @@
   background: var(--nlds-default-background-color, #f0f4f8);
   padding: 30px;
 }
+
+/* Ruimte tussen de optionele titel/beschrijving en de downloadknoppen.
+   Adjacent sibling: geen marge als beide teksten ontbreken. */
+.document-download-container
+  :is(h1, h2, h3, h4, h5, h6, p)
+  + .utrecht-button-group {
+  margin-block-start: var(--utrecht-space-block-md, 1rem);
+}
