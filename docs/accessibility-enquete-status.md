@@ -38,7 +38,8 @@ Getest via de dev-harness (`npm run dev`) met de widget-container vastgezet op 3
 - Intro-/info-pagina's, tekstvelden, smiley-/score-slider, keuze-opties (radio/checkbox).
 - Smiley-rij (`.range-slider-labels`) had een kleine intrinsieke overflow (±5px door 16px padding); opgelost met `box-sizing: border-box`, `padding: 0` en `gap`.
 - Basis toegevoegd op `.form-container`: woordafbreking, `max-width` op media, `min-width:0`.
-- Swipe ("sleep-opties"): gebruikt `max-width: calc(100vw - 86px)` + `@media (max-width:400px)` → past op echte 320px-viewport (de 400px in de test was een `100vw`-artefact).
+- Swipe-kaartstapel ("sleep-opties"): past via `max-width: calc(100vw - 86px)` + `@media (max-width:400px)`.
+- Swipe **toelichting-dialog** liep wél weg op echte 320px (`.explanation-dialog-content` had `width:95%` + `padding:20px` zónder `box-sizing`) → opgelost met `box-sizing: border-box` op de dialog + textarea (`swipe.css`).
 
 **Nog niet geverifieerd (ontbreken in de dev-harness mock-data):**
 
