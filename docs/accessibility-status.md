@@ -86,17 +86,25 @@ begrootmodule dezelfde `Stepper` renderen, fixt dit **beide widgets in één kla
 **Rebuild:** `simple-voting` én `stem-begroot` herbouwd (Stepper wordt per widget mee-gebundeld). Fix aanwezig
 in beide `dist/*.css`.
 
+### Keuzewijzer (4 punten) — `packages/choiceguide`
+
+Score-punten **live geverifieerd met echte data** (dummy keuze-opties + scoorbaar veld + gewichten in demo-widget 30):
+de scores renderen nu als tekst naast de balk (bv. "88%"/"89%") binnen een `role="status"` live region.
+
+| Crit          | Fix                                                                                                                                                                                                                                                                             | Bestand                                    |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| 1.3.1 + 1.4.1 | Scorewaarde als zichtbare tekst naast de balk (hergebruik bestaande, tot dan dode `.osc-with-percentage`/`.osc-percentage`-CSS) → voorleesbaar **én** niet-kleur. Plus lege-kop-guard: geen `<h4>` meer als de titel ontbreekt.                                                 | `choiceguide/src/includes/sidebarItem.tsx` |
+| 1.4.4         | Mobiel/zoom-paneel (`max-width:768px`, `position:fixed`) krijgt `max-height:calc(100vh - 20px)` + `overflow-y:auto` → paneel blijft binnen beeld en de collapse-knop bovenaan bereikbaar. ⚠️ 200%-zoom nog handmatig te checken (automation-browser forceert de viewport niet). | `choiceguide/src/style.css`                |
+| 2.4.11        | Keuzewijzer heeft **geen eigen filter** (0 hits); verschijnt er één dan is het de al-gefixte gedeelde `Filters` → niets te doen.                                                                                                                                                | —                                          |
+
+**Meegelift:** `choiceguide-results` hergebruikt dezelfde `ChoiceItem`/`Sidebar` → percentage-tekst werkt daar ook;
+clearfix voor de gefloate balk+percentage toegevoegd. **Rebuild:** `choiceguide` + `choiceguide-results`.
+Kanttekening: `choiceguide-results/src/style.css` is een **gedupliceerde kopie** van de choiceguide-CSS — losse opschoning waard.
+
 ---
 
 ## ⏭️ Nog te doen
 
-- **Keuzewijzer** (4 punten, `packages/choiceguide`): scorelijn niet voorgelezen / lege kop (1.3.1) +
-  score alleen via kleur (1.4.1) — samen op te lossen door de scorewaarde als tekst te tonen in
-  `src/includes/sidebarItem.tsx` (dode CSS `.osc-percentage` bestaat al); kader 'Details verbergen' valt
-  over scherm bij 200% zoom / niet sluitbaar (1.4.4, `src/includes/sidebar.tsx` + `style.css` fixed-positie
-  breakpoints); filter-popup focus (2.4.11) — **Keuzewijzer heeft géén eigen filter**, verschijnt er één dan
-  is dat de al-gefixte gedeelde `Filters` → alleen live verifiëren.
-  - Stemmodule (de andere helft van de oude "8 samen") is **afgerond**, zie ✅ Afgerond → Stepper.
 - **Interactieve kaart — bediening** (bewust apart): toetsenbord om reactie te plaatsen (2.1.1) +
   on-screen kompas voor single-pointer pannen (2.5.7). Raakt alle kaart-gebruikers.
   - Losse bevinding: kaart crasht onder `React.StrictMode` (dubbel-mount, "Map container is already
