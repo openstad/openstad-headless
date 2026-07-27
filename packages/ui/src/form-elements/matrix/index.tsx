@@ -58,6 +58,7 @@ export type MatrixFieldProps = {
   imageClickable?: boolean;
   nextPageText?: string;
   prevPageText?: string;
+  rowHeaderLabel?: string;
 };
 
 const MatrixField: FC<MatrixFieldProps> = ({
@@ -83,6 +84,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
   images = [],
   createImageSlider = false,
   imageClickable = false,
+  rowHeaderLabel = 'Onderwerp',
 }) => {
   const initialValue = Array.isArray(overrideDefaultValue)
     ? (overrideDefaultValue as string[])
@@ -188,12 +190,16 @@ const MatrixField: FC<MatrixFieldProps> = ({
           data-rows={matrix?.rows?.length || 0}>
           <TableHeader>
             <TableRow>
-              <TableHeaderCell key={`column--1`}></TableHeaderCell>
+              {/* ponytail: hoekcel niet leeg laten (WCAG 1.3.1) — visueel verborgen label */}
+              <TableHeaderCell key={`column--1`} scope="col">
+                <span className="sr-only">{rowHeaderLabel}</span>
+              </TableHeaderCell>
 
               {matrix?.columns?.map((column, index) => (
                 <TableHeaderCell
                   key={`column-${index}`}
-                  id={`${fieldKey}-col-${index}`}>
+                  id={`${fieldKey}-col-${index}`}
+                  scope="col">
                   <span className="column-text">{column?.text || ''}</span>
                 </TableHeaderCell>
               ))}

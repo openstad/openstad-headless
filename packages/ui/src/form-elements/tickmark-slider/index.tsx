@@ -78,6 +78,13 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
     ? (overrideDefaultValue as string)
     : defaultValue;
 
+  // ponytail: schaal-uitleg afleiden uit dezelfde labels die de schermlezer voorleest
+  // (WCAG 3.3.2), zodat zichtbare instructie en aria-valuetext nooit uiteenlopen.
+  const scaleHint = fieldOptions
+    .filter((opt) => opt.ariaValueText)
+    .map((opt) => `${opt.value} = ${opt.ariaValueText}`)
+    .join(', ');
+
   const [value, setValue] = useState<string>(initialValue);
 
   const maxCharacters =
@@ -119,6 +126,15 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
         <>
           <FormFieldDescription>
             <RteContent content={description} unwrapSingleRootDiv={true} />
+          </FormFieldDescription>
+          <Spacer size={0.5} />
+        </>
+      )}
+
+      {scaleHint && (
+        <>
+          <FormFieldDescription className="tickmark-slider-scale-hint">
+            {scaleHint}
           </FormFieldDescription>
           <Spacer size={0.5} />
         </>

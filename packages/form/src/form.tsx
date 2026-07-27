@@ -287,6 +287,32 @@ function Form({
     }
   };
 
+  // ponytail: bij paginawissel focus naar de eerste vraag van de nieuwe pagina i.p.v.
+  // op de 'volgende'-knop laten staan (WCAG 2.4.3). Eerste render overslaan.
+  const didMountRef = useRef(false);
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    if (typeof currentPage !== 'number' || !formRef.current) return;
+
+    const firstQuestion = formRef.current.querySelector(
+      '.question'
+    ) as HTMLElement | null;
+    if (!firstQuestion) return;
+
+    const focusTarget =
+      (firstQuestion.querySelector(
+        'h1, h2, h3, h4, h5, h6, legend'
+      ) as HTMLElement | null) || firstQuestion;
+
+    if (!focusTarget.hasAttribute('tabindex')) {
+      focusTarget.setAttribute('tabindex', '-1');
+    }
+    focusTarget.focus({ preventScroll: true });
+  }, [currentPage]);
+
   const componentMap: {
     [key: string]: React.ComponentType<ComponentFieldProps>;
   } = {

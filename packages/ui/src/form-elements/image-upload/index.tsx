@@ -4,7 +4,6 @@ import {
   AccordionProvider,
   FormField,
   FormFieldDescription,
-  FormLabel,
   Paragraph,
 } from '@utrecht/component-library-react';
 import {
@@ -52,11 +51,11 @@ const filePondSettings = {
   labelTapToRetry: 'tik om opnieuw te proberen',
   labelTapToUndo: 'tik om ongedaan te maken',
   labelButtonRemoveItem: 'Verwijderen',
-  labelButtonAbortItemLoad: 'Abort',
-  labelButtonRetryItemLoad: 'Retry',
+  labelButtonAbortItemLoad: 'Afbreken',
+  labelButtonRetryItemLoad: 'Opnieuw proberen',
   labelButtonAbortItemProcessing: 'Verwijder',
-  labelButtonUndoItemProcessing: 'Undo',
-  labelButtonRetryItemProcessing: 'Retry',
+  labelButtonUndoItemProcessing: 'Ongedaan maken',
+  labelButtonRetryItemProcessing: 'Opnieuw proberen',
   labelButtonProcessItem: 'Upload',
   labelFileTypeNotAllowed: 'Bestandstype is niet toegestaan',
   allowFileSizeValidation: true,
@@ -219,14 +218,16 @@ const ImageUploadField: FC<ImageUploadProps> = ({
   return (
     <FormField type="text">
       {title && (
-        <Paragraph className="utrecht-form-field__label">
-          <FormLabel htmlFor={randomId}>
-            <RteContent
-              content={title}
-              unwrapSingleRootDiv={true}
-              forceInline={true}
-            />
-          </FormLabel>
+        // ponytail: FilePond-wrapper is geen labelbaar input; <label for> wees nergens heen
+        // (WCAG 1.3.1). Titel als tekst met id; FilePond levert zelf zijn instructielabel.
+        <Paragraph
+          className="utrecht-form-field__label"
+          id={`${randomId}_label`}>
+          <RteContent
+            content={title}
+            unwrapSingleRootDiv={true}
+            forceInline={true}
+          />
         </Paragraph>
       )}
 
@@ -336,6 +337,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
             }
           }}
           id={randomId}
+          aria-labelledby={title ? `${randomId}_label` : undefined}
           required={fieldRequired}
           disabled={disabled}
           acceptedFileTypes={

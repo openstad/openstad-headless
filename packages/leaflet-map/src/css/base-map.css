@@ -31,6 +31,12 @@
   font-size: 18px;
   color: var(--utrecht-button-primary-action-background-color);
 }
+
+/* ponytail: Leaflet-default voor uitgeschakelde zoomknop is #bbb (1,8:1 op #f4f4f4).
+   Donkerder grijs voor ≥3:1 (WCAG 1.4.11). */
+.leaflet-container a.leaflet-disabled {
+  color: #6b6b6b;
+}
 .leaflet-bottom.leaflet-right {
   display: none;
 }

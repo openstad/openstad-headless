@@ -1,0 +1,57 @@
+# Toegankelijkheid (WCAG 2.2) — status enquête-widget
+
+Bron: audit `audit.draad.dev` (16-07-2026). Deze batch behandelt de **enquête**-widget en de
+form-elementen die zij gebruikt. Bredere analyse: `.claude/audit-split.md` en
+`.claude/audit-per-onderdeel.md` (lokaal).
+
+Laatst bijgewerkt: 27-07-2026 · branch `fix/accessibility-3-3`.
+
+---
+
+## ✅ Opgelost en gebuild (10/13 enquête-punten)
+
+| #   | WCAG          | Punt                                                   | Oplossing                                                                                                                      | Bestand(en)                                                            |
+| --- | ------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| 1   | 1.3.1         | `label for` verwees naar niet-bestaand/verborgen input | Titel als tekst-met-id i.p.v. `<label>`; FilePond krijgt `aria-labelledby`                                                     | `map/index.tsx`, `document-upload/index.tsx`, `image-upload/index.tsx` |
+| 2   | 1.3.1         | Lege eerste tabelheader in matrix                      | Hoekcel gevuld met sr-only label (`rowHeaderLabel`, default "Onderwerp") + `scope="col"` op kolomkoppen                        | `matrix/index.tsx`                                                     |
+| 3   | 1.3.5         | `autocomplete` ontbrak/ongeldig (`on` op tel)          | Herkenning uitgebreid (name/username/tel/postal-code/…) via substring-match                                                    | `text/index.tsx`                                                       |
+| 4   | 1.4.2 / 2.2.2 | Autoplay video + oneindig bewegend pijltje             | Video start gepauzeerd (geen autoplay/`playVideo()`); pijltje-animatie niet meer `infinite` en achter `prefers-reduced-motion` | `video/src/video.tsx`, `enquete.scss`                                  |
+| 5   | 1.4.3         | Witte tekst op FilePond-groen `#369763` = 3,6:1        | Groen → `#2b7d4f` (~5:1)                                                                                                       | `document-upload.css`, `image-upload.css`                              |
+| 7   | 1.4.11        | Contrast UI-componenten <3:1                           | Scorebalk-track → `#8c8c8c`; voortgangs-dots donkerder; leaflet zoom-disabled `#bbb` → `#6b6b6b`                               | `enquete.scss`, `form.scss`, `base-map.css`                            |
+| 8   | 2.4.3         | Focus bleef op 'volgende'-knop staan bij paginawissel  | Focus verspringt naar eerste vraag (heading/`.question`) van de nieuwe pagina                                                  | `form/src/form.tsx`                                                    |
+| 9   | 2.5.3         | Engelse FilePond-knoppen ('Abort'/'Retry'/'Undo')      | Vertaald naar Nederlands                                                                                                       | `document-upload/index.tsx`, `image-upload/index.tsx`                  |
+| 10  | 3.3.2         | Slider las andere tekst voor dan de instructie         | Zichtbare schaal-instructie wordt uit dezelfde labels gegenereerd (kan niet meer uiteenlopen)                                  | `tickmark-slider/index.tsx`                                            |
+| 11  | 1.3.1         | Kop opgemaakt als `<strong>` i.p.v. heading            | InfoField-titel is een echte `<h2/3/4>` (instelbaar `headingLevel`, default 3)                                                 | `info/index.tsx`                                                       |
+
+**Build:** 19 widget-bundles herbouwd (`tsc` schoon). `dist/` is grotendeels gitignored;
+alleen `packages/video/dist` is getrackt en meegecommit.
+
+---
+
+## 🟡 Deels / vereist browser-QA
+
+| #   | WCAG   | Punt                               | Status                                                                                                                                                                                                                                                          |
+| --- | ------ | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 6   | 1.4.10 | Reflow — geen horizontaal scrollen | Defensieve basis toegevoegd (woordafbreking, `max-width` op media, `min-width:0` op `.form-container`). **Layout-specifieke cases** (smiley-/scorerij, tijdlijn begroot/stem, sleep-opties, checkboxes) nog verifiëren en afstellen op **320px** in de browser. |
+
+---
+
+## ⏸️ Bewust buiten deze batch (aparte taak)
+
+| #   | WCAG  | Punt                                         | Reden                                                                                                  |
+| --- | ----- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| —   | 2.1.1 | Reactie op kaart niet via toetsenbord        | Kaart-_bediening_ apart opgepakt (keuze gebruiker). Kaart-contrast (#7) en label (#1) zijn wél gedaan. |
+| —   | 2.5.7 | Kaart pannen alleen via slepen (geen kompas) | idem                                                                                                   |
+
+---
+
+## ✍️ Content-acties (redacteur — code kan dit niet afdwingen)
+
+- **#10:** Verwijder in de demo de handmatig getypte schaal-tekst ("1 = zeer ontevreden … 5 = zeer tevreden") uit de vraag; de slider genereert die nu zelf en consistent.
+- **#11:** Kies per infoblok het juiste `headingLevel` zodat de koppenhiërarchie in de demo klopt (component ondersteunt dit nu).
+
+---
+
+## Losse aandachtspunten in de repo (niet van deze batch)
+
+- Merge-conflicten (`AA`) in `packages/ui/types/*.d.ts` stonden al vóór deze wijzigingen open — apart oplossen.

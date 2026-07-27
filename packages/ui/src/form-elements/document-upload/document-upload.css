@@ -16,6 +16,14 @@ html [data-filepond-item-state*='invalid'] .filepond--item-panel {
   background-color: #c44e47 !important;
 }
 
+/* ponytail: FilePond-default groen #369763 = 3,6:1 met witte tekst. Donkerder groen
+   (#2b7d4f ≈ 5:1) zodat bestandsnaam/grootte/status leesbaar zijn (WCAG 1.4.3). */
+html .filepond--file-status,
+html [data-filepond-item-state*='processing-complete'] .filepond--item-panel,
+html [data-filepond-item-state*='load-complete'] .filepond--item-panel {
+  background-color: #2b7d4f !important;
+}
+
 html .filepond--file-status * {
   white-space: normal;
 }

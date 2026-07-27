@@ -46,7 +46,8 @@ const VideoField: FC<VideoFieldProps> = ({
     return true;
   });
   const [muteToggle, setMuteToggle] = useState<boolean>(false);
-  const [playing, setPlaying] = useState<boolean>(true);
+  // ponytail: geen autoplay (WCAG 1.4.2/2.2.2). Video start gepauzeerd; gebruiker start hem zelf.
+  const [playing, setPlaying] = useState<boolean>(false);
 
   useEffect(() => {
     setVideoId(getYouTubeVideoId(videoUrl));
@@ -72,7 +73,7 @@ const VideoField: FC<VideoFieldProps> = ({
           host: 'https://www.youtube-nocookie.com',
           videoId: videoId,
           playerVars: {
-            autoplay: 1,
+            autoplay: 0,
             controls: 0,
             mute: muted ? 1 : 0,
             loop: 1,
@@ -92,7 +93,7 @@ const VideoField: FC<VideoFieldProps> = ({
               } else {
                 event.target.unMute();
               }
-              event.target.playVideo();
+              // ponytail: geen automatische playVideo() — start pas op gebruikersactie.
             },
           },
         });

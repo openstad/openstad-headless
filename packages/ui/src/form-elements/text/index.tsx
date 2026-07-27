@@ -344,29 +344,25 @@ const TextInput: FC<TextInputProps> = ({
   }, []);
 
   const getAutocomplete = (fieldKey: string) => {
-    switch (fieldKey?.toLocaleLowerCase()) {
-      case 'email':
-      case 'mail':
-        return 'email';
-      case 'tel':
-        return 'tel';
-      case 'password':
-        return 'current-password';
-      case 'voornaam':
-        return 'given-name';
-      case 'achternaam':
-        return 'family-name';
-      case 'straatnaam':
-        return 'street-address';
-      case 'postcode':
-        return 'postal-code';
-      case 'woonplaats':
-        return 'address-level2';
-      case 'land':
-        return 'country';
-      default:
-        return 'on';
-    }
+    // ponytail: geldige autocomplete-tokens per herkend veld (WCAG 1.3.5).
+    // Substring-match zodat 'telefoonnummer', 'e-mailadres' enz. ook matchen.
+    const key = (fieldKey || '').toLocaleLowerCase();
+    const has = (...needles: string[]) => needles.some((n) => key.includes(n));
+
+    if (has('email', 'e-mail', 'mail')) return 'email';
+    if (has('telefoon', 'phone', 'tel')) return 'tel';
+    if (has('password', 'wachtwoord')) return 'current-password';
+    if (has('gebruikersnaam', 'username')) return 'username';
+    if (has('voornaam', 'given-name')) return 'given-name';
+    if (has('achternaam', 'family-name')) return 'family-name';
+    if (key === 'naam' || has('volledige naam', 'fullname', 'full-name'))
+      return 'name';
+    if (has('straatnaam', 'straat', 'adres', 'address'))
+      return 'street-address';
+    if (has('postcode', 'postal')) return 'postal-code';
+    if (has('woonplaats', 'plaats', 'stad', 'city')) return 'address-level2';
+    if (has('land', 'country')) return 'country';
+    return 'on';
   };
 
   const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;

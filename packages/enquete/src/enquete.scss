@@ -10,6 +10,29 @@
     );
 }
 
+// ponytail: defensieve reflow-basis (WCAG 1.4.10) — lange woorden/teksten en media mogen
+// nooit horizontaal scrollen veroorzaken. Layout-specifieke reflow (smiley-rij, tijdlijn,
+// sleep-opties) is apart in de browser op 320px geverifieerd/afgesteld.
+.form-container,
+.form-container * {
+  min-width: 0;
+}
+.form-container p,
+.form-container li,
+.form-container label,
+.form-container .utrecht-form-field-description,
+.form-container legend {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+}
+.form-container img,
+.form-container video,
+.form-container iframe,
+.form-container table {
+  max-width: 100%;
+}
+
 .form-container > div.button-group {
   flex-direction: row;
 }
@@ -70,7 +93,9 @@
   height: 5px;
   width: 100%;
   margin-bottom: 1rem;
-  background: var(--osc-border);
+  // ponytail: scorebalk-track moet ≥3:1 met witte achtergrond (WCAG 1.4.11).
+  // var(--osc-border) is ~#A9B2BA (2,2:1); vast donkerder grijs.
+  background: #8c8c8c;
 }
 
 /* Thumb: webkit */
@@ -204,7 +229,11 @@ label.utrecht-form-label {
     border-radius: 50%;
     right: 0;
     background-position: 20px 20px;
-    animation: nextPagePulse 0.8s infinite ease-in-out;
+    // ponytail: geen oneindige animatie (WCAG 2.2.2). Alleen een korte, eenmalige
+    // pulse voor gebruikers zonder reduced-motion-voorkeur.
+    @media (prefers-reduced-motion: no-preference) {
+      animation: nextPagePulse 0.8s 2 ease-in-out;
+    }
     pointer-events: all;
   }
 
@@ -302,7 +331,10 @@ label.utrecht-form-label {
       .button-group.--flex .utrecht-button--primary-action:after {
         pointer-events: all;
         opacity: 1;
-        animation: nextPagePulse 0.8s infinite ease-in-out;
+        // ponytail: eenmalige pulse i.p.v. infinite (WCAG 2.2.2)
+        @media (prefers-reduced-motion: no-preference) {
+          animation: nextPagePulse 0.8s 2 ease-in-out;
+        }
       }
     }
 

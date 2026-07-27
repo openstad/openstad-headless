@@ -10,7 +10,6 @@ import {
   AccordionProvider,
   FormField,
   FormFieldDescription,
-  FormLabel,
   Paragraph,
 } from '@utrecht/component-library-react';
 import React, { FC, useEffect, useMemo, useState } from 'react';
@@ -205,14 +204,14 @@ const MapField: FC<MapProps> = ({
   return (
     <FormField type="text">
       {title && (
-        <Paragraph className="utrecht-form-field__label">
-          <FormLabel htmlFor={randomID}>
-            <RteContent
-              content={title}
-              unwrapSingleRootDiv={true}
-              forceInline={true}
-            />
-          </FormLabel>
+        // ponytail: geen <label for> naar een verborgen input die niet bestaat
+        // (WCAG 1.3.1). De kaart is geen labelbaar formulierveld; titel als tekst met id.
+        <Paragraph className="utrecht-form-field__label" id={randomID}>
+          <RteContent
+            content={title}
+            unwrapSingleRootDiv={true}
+            forceInline={true}
+          />
         </Paragraph>
       )}
 
