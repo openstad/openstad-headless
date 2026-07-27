@@ -37,6 +37,7 @@ import { evaluateFeedback, isGraded } from './utils/feedback';
 import { resolveFieldInteraction } from './utils/interaction';
 import { computeEffectivePagination } from './utils/pagination';
 import { updateRouting } from './utils/routing';
+import { scrollToFirstError } from './utils/scroll';
 import { handleSubmit } from './utils/submit';
 
 export type FormValue =
@@ -258,13 +259,8 @@ function Form({
         newErrors[f.fieldKey] = confirmAnswerMessage;
       });
       setFormErrors((prev) => ({ ...prev, ...newErrors }));
-      const firstKey = unconfirmed[0].fieldKey;
       if (formRef.current) {
-        const el = formRef.current.querySelector(`[name="${firstKey}"]`);
-        if (el) {
-          const top = el.getBoundingClientRect().top + window.scrollY - 100;
-          window.scrollTo({ top, behavior: 'smooth' });
-        }
+        scrollToFirstError(formRef.current, Object.keys(newErrors));
       }
       return;
     }
@@ -286,21 +282,14 @@ function Form({
       onValidationErrors(errorEntries);
     }
 
-    if (firstErrorKey && formRef.current) {
-      const namedElement = formRef.current.querySelector(
-        `[name="${firstErrorKey}"]`
-      );
-      // ponytail: named element can be a type="hidden" input (e.g. map) with no
-      // layout box; scroll to its visible .question wrapper instead.
-      const errorElement = namedElement?.closest('.question') ?? namedElement;
-      if (errorElement) {
-        const elementPosition =
-          errorElement.getBoundingClientRect().top + window.scrollY;
-        const offsetPosition = elementPosition - 100;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth',
-        });
+    if (firstErrorKey) {
+      if (formRef.current) {
+        scrollToFirstError(
+          formRef.current,
+          Object.keys(validationErrors).filter(
+            (key) => validationErrors[key] !== null
+          )
+        );
       }
     } else if (allowResetAfterSubmit) {
       resetForm();
