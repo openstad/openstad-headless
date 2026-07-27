@@ -79,7 +79,7 @@ export default function ProjectSettingsAllowedDomains() {
     return Array.from(seen);
   }, [projectHost, configuredDomains]);
 
-  const { control, reset, getValues, formState } = useZodForm({
+  const { control, reset, getValues, trigger, formState } = useZodForm({
     schema: formSchema,
     defaultValues: {
       urls: configuredDomains.map((url: string) => ({ url })),
@@ -87,7 +87,11 @@ export default function ProjectSettingsAllowedDomains() {
   });
 
   const save = useCallback(async () => {
-    const values = getValues();
+    const valid = await trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(getValues());
     const out = values.urls
       .map((url) => url.url.replace(/^https?:\/\//i, '').trim())
       .filter((url) => url.length > 0);
@@ -102,7 +106,7 @@ export default function ProjectSettingsAllowedDomains() {
     if (!result || !doubleSave) {
       throw new Error('Er is helaas iets mis gegaan.');
     }
-  }, [getValues, updateProject]);
+  }, [getValues, trigger, updateProject]);
 
   useRegisterSave({ isDirty: formState.isDirty, save });
 

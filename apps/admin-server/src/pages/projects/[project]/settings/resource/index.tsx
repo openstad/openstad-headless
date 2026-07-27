@@ -127,7 +127,11 @@ export default function ProjectSettingsResource() {
   }, [form, defaults]);
 
   const save = React.useCallback(async () => {
-    const values = form.getValues();
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
     const result = await updateProject({
       [category]: {
         canAddNewResources: values.canAddNewResources,

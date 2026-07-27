@@ -79,6 +79,11 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
   onChangedRef.current = onFieldChanged;
   const latestRef = useRef<any>(form.getValues());
   const pendingRef = useRef<Set<string>>(new Set());
+  // Whether the user actually edited a field in this tab during its current
+  // mount. Only edited tabs freeze a blocking snapshot on unmount (below): a
+  // merely-visited tab whose saved config is already invalid must not keep
+  // blocking every save for the whole widget after it unmounts.
+  const wasEditedRef = useRef(false);
 
   // Stable registry key for this tab: the label identifies the tab across
   // unmount/remount (so a remount replaces its own snapshot); labelless tabs
@@ -117,6 +122,7 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
     const subscription = form.watch((values, { name }) => {
       latestRef.current = values;
       if (name) {
+        wasEditedRef.current = true;
         pendingRef.current.add(name);
         flush();
       }
@@ -145,9 +151,12 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
       flush.flush();
       unregisterFlush();
       if (schema) {
-        if (label) {
-          // Freeze the last form state so this visited tab keeps blocking an
-          // invalid save after it unmounts; a remount replaces this snapshot.
+        if (label && wasEditedRef.current) {
+          // Freeze the last form state only for a tab the user actually edited,
+          // so it keeps blocking an invalid save after it unmounts; a remount
+          // replaces this snapshot. A merely-visited (or never-opened) tab drops
+          // its validator instead, so already-invalid saved config no longer
+          // blocks saving the rest of the widget.
           const snapshot = form.getValues();
           draftValidators.set(key, () => validateValues(snapshot));
         } else {

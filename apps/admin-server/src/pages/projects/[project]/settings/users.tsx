@@ -133,7 +133,11 @@ export default function ProjectSettingsUsers(
   }, [anonymizeForm, anonymizeDefaults, emailForm, emailDefaults]);
 
   const saveUsers = useCallback(async () => {
-    const values = usersForm.getValues();
+    const valid = await usersForm.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = usersFormSchema.parse(usersForm.getValues());
     const result = await updateProject({
       users: {
         canCreateNewUsers: values.canCreateNewUsers,
@@ -145,7 +149,11 @@ export default function ProjectSettingsUsers(
   }, [usersForm, updateProject]);
 
   const saveAnonymize = useCallback(async () => {
-    const values = anonymizeForm.getValues();
+    const valid = await anonymizeForm.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = anonymizeFormSchema.parse(anonymizeForm.getValues());
     const result = await updateProject({
       [anonymizeCategory]: values,
     });
@@ -161,10 +169,13 @@ export default function ProjectSettingsUsers(
   // unsaved changes — not just the currently-visible one — so switching tabs
   // before saving never silently drops the other tab's edits.
   const save = useCallback(async () => {
-    const saves: Promise<void>[] = [];
-    if (usersDirty) saves.push(saveUsers());
-    if (anonymizeDirty) saves.push(saveAnonymize());
-    await Promise.all(saves);
+    // Save the dirty tabs sequentially, not with Promise.all: both saves issue a
+    // PUT /project/:id that does an unlocked read-merge-write on the config, so
+    // concurrent requests read the same base config and the last write silently
+    // drops the other tab's changes. Awaiting in sequence lets the second save
+    // see the merged result of the first.
+    if (usersDirty) await saveUsers();
+    if (anonymizeDirty) await saveAnonymize();
   }, [usersDirty, anonymizeDirty, saveUsers, saveAnonymize]);
 
   useRegisterSave({ isDirty: usersDirty || anonymizeDirty, save });

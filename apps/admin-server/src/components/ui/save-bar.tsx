@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { AlertTriangle, CheckCircle2, X, XCircle } from 'lucide-react';
+import { useEffect, useRef } from 'react';
 
 import { Button } from './button';
 import { useSaveController } from './save-controller';
@@ -20,6 +21,19 @@ export function SaveBar() {
     triggerSave,
     dismissError,
   } = useSaveController();
+
+  const retryRef = useRef<HTMLButtonElement>(null);
+
+  // When a save fails, the bar swaps to the error layout and the focused
+  // "Wijzigingen opslaan" button unmounts, which drops focus to document.body
+  // (WCAG 2.4.3 Focus Order). Move focus to the retry button on the transition
+  // to the error state so keyboard and screen-reader users land on the
+  // actionable control instead of nowhere.
+  useEffect(() => {
+    if (state === 'error') {
+      retryRef.current?.focus();
+    }
+  }, [state]);
 
   if (state === 'success') {
     return (
@@ -49,6 +63,7 @@ export function SaveBar() {
             'Er is iets misgegaan bij het opslaan. Probeer het opnieuw.'}
         </span>
         <Button
+          ref={retryRef}
           size="sm"
           variant="default"
           onClick={triggerSave}

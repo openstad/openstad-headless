@@ -71,7 +71,11 @@ export default function ProjectSettingsMap() {
     if (disabled) {
       throw new Error('Er is helaas iets mis gegaan.');
     }
-    const values = form.getValues();
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
     const result = await updateProject({
       map: {
         areaId: values.areaId,

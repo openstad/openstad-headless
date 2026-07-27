@@ -67,7 +67,11 @@ export default function ProjectSettingsDesign() {
   });
 
   const save = useCallback(async () => {
-    const values = form.getValues();
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
     const cssUrlsArray =
       values.cssUrls?.map((item) => item?.url?.trim() ?? '').filter(Boolean) ||
       [];

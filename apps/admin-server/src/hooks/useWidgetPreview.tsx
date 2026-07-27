@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useWidgetConfig } from './use-widget-config';
 
@@ -17,23 +17,33 @@ export function useWidgetPreview<T extends { [key: string]: any }>(
     useWidgetConfig<T>(idOverride);
   const router = useRouter();
   const widgetId = idOverride ?? router.query.id;
+  const seededWidgetIdRef = useRef<string | undefined>(undefined);
 
-  // Set the preview the first time the widget config is loaded
+  // Seed the preview when the widget config loads, and RESEED whenever the
+  // widget id changes. Navigating between two widgets of the same type keeps
+  // this hook mounted, so a plain `if (!previewConfig)` guard would keep the
+  // previous widget's config in the draft — the dirty check would then compare
+  // against the wrong widget and a save could write widget A's config onto
+  // widget B. Keying on the widget id (not on config identity) also means a
+  // background SWR revalidation of the *same* widget never clobbers an
+  // in-progress edit.
   useEffect(() => {
-    if (!previewConfig) {
-      const config = widget?.config;
-      if (typeof config === 'object')
-        (config as any).showAdminHiddenPolygonStyling = true;
+    const currentId = Array.isArray(widgetId) ? widgetId[0] : widgetId;
+    if (previewConfig && seededWidgetIdRef.current === currentId) return;
 
-      if (config) {
-        setPreviewConfig({
-          ...config,
-          ...widgetSettings,
-          widgetId,
-        });
-      }
+    const config = widget?.config;
+    if (!config) return;
+    if (typeof config === 'object') {
+      (config as any).showAdminHiddenPolygonStyling = true;
     }
-  }, [widget?.config, previewConfig, widgetSettings]);
+
+    seededWidgetIdRef.current = currentId;
+    setPreviewConfig({
+      ...config,
+      ...widgetSettings,
+      widgetId,
+    });
+  }, [widget?.config, widgetId, previewConfig, widgetSettings]);
 
   // Accepts a value or a functional updater. The updater form lets several
   // field pushes in the same tick compose correctly instead of clobbering each

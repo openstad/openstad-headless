@@ -192,7 +192,11 @@ export default function ProjectAuthenticationRequiredFields() {
 
   // Save handler for user form - updates openstad provider
   const saveUser = useCallback(async () => {
-    const values = userForm.getValues();
+    const valid = await userForm.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(userForm.getValues());
     const updatedConfig = {
       auth: {
         provider: {
@@ -222,7 +226,11 @@ export default function ProjectAuthenticationRequiredFields() {
 
   // Save handler for anonymous form - updates anonymous provider
   const saveAnonymous = useCallback(async () => {
-    const values = anonymousForm.getValues();
+    const valid = await anonymousForm.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(anonymousForm.getValues());
     const updatedConfig = {
       auth: {
         provider: {
@@ -259,10 +267,13 @@ export default function ProjectAuthenticationRequiredFields() {
   // level regardless of which TabsContent is shown, so their state is safe;
   // only the save trigger needs to account for both).
   const save = useCallback(async () => {
-    const saves: Promise<void>[] = [];
-    if (userDirty) saves.push(saveUser());
-    if (anonymousDirty) saves.push(saveAnonymous());
-    await Promise.all(saves);
+    // Save the dirty tabs sequentially, not with Promise.all: both saves issue a
+    // PUT /project/:id that does an unlocked read-merge-write on the config, so
+    // concurrent requests read the same base config and the last write silently
+    // drops the other tab's changes. Awaiting in sequence lets the second save
+    // see the merged result of the first.
+    if (userDirty) await saveUser();
+    if (anonymousDirty) await saveAnonymous();
   }, [userDirty, anonymousDirty, saveUser, saveAnonymous]);
 
   useRegisterSave({ isDirty: userDirty || anonymousDirty, save });
