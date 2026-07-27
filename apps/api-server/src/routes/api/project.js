@@ -1538,7 +1538,8 @@ router
           { model: db.Poll, as: 'poll' },
         ],
       },
-      { model: db.Tag },
+      // Project has no Tag association (tags are linked via projectId only),
+      // so tags are exported nested under Resource above.
       { model: db.Status },
     ]);
   })
