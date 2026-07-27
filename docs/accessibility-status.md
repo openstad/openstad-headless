@@ -42,7 +42,7 @@ klikbaar — `pointer-events:none` weg (2.4.4), chevron target ≥24px + negatie
 chevron blijven **gesplitst** (split-navigation), nu volledig toetsenbord/muis/touch + Escape.
 Live geverifieerd op de demo (31490).
 
-### Reacties (5 code-punten) + gedeelde filter/paginator — commit `21a4696b4`
+### Reacties (5 code-punten) + gedeelde filter/paginator — commit `329f82fc9`
 
 Alle 5 code-punten gefixt, gebouwd **en live geverifieerd** op de demo (`/inzendingen`,
 `/inzendingen/resource?openstadResourceId=17`). De 6e (lege kop) is content — zie content-acties.
