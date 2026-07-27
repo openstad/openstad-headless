@@ -70,13 +70,33 @@ sentiment-textarea's; paginator rendert `‹ 1 2 ›` als `<ul>`/`<li>` zonder b
 `aria-current="page"`; filter-popup Tab-trap beide richtingen (`preventDefault`) + Escape sluit
 (`aria-hidden=true`) en focus terug op toggle; zoek-submit leest `sr-only "Zoeken"`.
 
+### Stemmodule + Begrootmodule (4 punten) — gedeelde `Stepper` — commit `5a3e6083e`
+
+Alle 4 code-punten gefixt in de gedeelde stappen-tijdlijn `packages/ui/src/stepper/` en **live geverifieerd**
+op de admin-preview (stemmodule, poort 31470). Omdat stemmodule (`simple-voting` → wrapt `stem-begroot`) én
+begrootmodule dezelfde `Stepper` renderen, fixt dit **beide widgets in één klap**.
+
+| Crit   | Fix                                                                                                                                                                                                                                                         | Bestand                                           |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| 1.3.1  | `aria-current="step"` op de actieve stap — was al aanwezig, live bevestigd (behouden bij refactor)                                                                                                                                                          | `packages/ui/src/stepper/index.tsx`               |
+| 1.4.1  | `done`-stap toont een `✓`-vinkje (`aria-hidden`) i.p.v. het cijfer → niet-kleur-onderscheid t.o.v. `active` (in dit thema is de done-cirkel bovendien wit-op-wit, dus het vinkje is de énige zichtbare done-indicatie)                                      | `packages/ui/src/stepper/index.tsx` + `index.css` |
+| 1.4.10 | Reflow: `flex-wrap:wrap` verplaatst naar de juiste laag (`.stepper-list`, de `<ol>`); stappen `flex-basis:100%` + decoratieve dividers verborgen onder `max-width:480px` → verticale stack, geen horizontale scroll                                         | `packages/ui/src/stepper/index.css`               |
+| 1.4.12 | Stapnummer viel buiten het rondje bij text-spacing: vaste `width/height` → `min-width/height` + `aspect-ratio:1` + `box-sizing:content-box`, cijfer `margin:0;line-height:1` → rondje groeit rond mee (geverifieerd 28×28 → 30×30 rond bij line-height 1.5) | `packages/ui/src/stepper/index.css`               |
+
+**Rebuild:** `simple-voting` én `stem-begroot` herbouwd (Stepper wordt per widget mee-gebundeld). Fix aanwezig
+in beide `dist/*.css`.
+
 ---
 
 ## ⏭️ Nog te doen
 
-- **Keuzewijzer + Stemmodule** (8 samen): score/stap alleen via kleur (1.4.1), score niet voorgelezen,
-  `aria-current`, reflow tijdlijn (1.4.10), text-spacing stapnummers (1.4.12), focus-not-obscured
-  filter-popup (2.4.11).
+- **Keuzewijzer** (4 punten, `packages/choiceguide`): scorelijn niet voorgelezen / lege kop (1.3.1) +
+  score alleen via kleur (1.4.1) — samen op te lossen door de scorewaarde als tekst te tonen in
+  `src/includes/sidebarItem.tsx` (dode CSS `.osc-percentage` bestaat al); kader 'Details verbergen' valt
+  over scherm bij 200% zoom / niet sluitbaar (1.4.4, `src/includes/sidebar.tsx` + `style.css` fixed-positie
+  breakpoints); filter-popup focus (2.4.11) — **Keuzewijzer heeft géén eigen filter**, verschijnt er één dan
+  is dat de al-gefixte gedeelde `Filters` → alleen live verifiëren.
+  - Stemmodule (de andere helft van de oude "8 samen") is **afgerond**, zie ✅ Afgerond → Stepper.
 - **Interactieve kaart — bediening** (bewust apart): toetsenbord om reactie te plaatsen (2.1.1) +
   on-screen kompas voor single-pointer pannen (2.5.7). Raakt alle kaart-gebruikers.
   - Losse bevinding: kaart crasht onder `React.StrictMode` (dubbel-mount, "Map container is already
