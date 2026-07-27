@@ -78,7 +78,11 @@
 .range-slider-labels {
   display: flex;
   justify-content: space-between;
-  padding: 0 0.5rem;
+  gap: 0.25rem;
+  padding: 0;
+  // ponytail: rij mag z'n eigen breedte niet overschrijden op smalle schermen (WCAG 1.4.10)
+  box-sizing: border-box;
+  max-width: 100%;
   color: black;
 }
 

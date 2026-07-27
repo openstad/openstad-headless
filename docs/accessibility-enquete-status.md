@@ -28,11 +28,22 @@ alleen `packages/video/dist` is getrackt en meegecommit.
 
 ---
 
-## 🟡 Deels / vereist browser-QA
+## 🟡 Reflow (1.4.10) — grotendeels geverifieerd op 320px
 
-| #   | WCAG   | Punt                               | Status                                                                                                                                                                                                                                                          |
-| --- | ------ | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 6   | 1.4.10 | Reflow — geen horizontaal scrollen | Defensieve basis toegevoegd (woordafbreking, `max-width` op media, `min-width:0` op `.form-container`). **Layout-specifieke cases** (smiley-/scorerij, tijdlijn begroot/stem, sleep-opties, checkboxes) nog verifiëren en afstellen op **320px** in de browser. |
+Getest via de dev-harness (`npm run dev`) met de widget-container vastgezet op 320px
+(de automation-browser gaf geen echte 320px-viewport).
+
+**Geverifieerd — geen horizontale overflow:**
+
+- Intro-/info-pagina's, tekstvelden, smiley-/score-slider, keuze-opties (radio/checkbox).
+- Smiley-rij (`.range-slider-labels`) had een kleine intrinsieke overflow (±5px door 16px padding); opgelost met `box-sizing: border-box`, `padding: 0` en `gap`.
+- Basis toegevoegd op `.form-container`: woordafbreking, `max-width` op media, `min-width:0`.
+- Swipe ("sleep-opties"): gebruikt `max-width: calc(100vw - 86px)` + `@media (max-width:400px)` → past op echte 320px-viewport (de 400px in de test was een `100vw`-artefact).
+
+**Nog niet geverifieerd (ontbreken in de dev-harness mock-data):**
+
+- Matrix-tabel, interactieve kaart, document-/afbeelding-upload. Deze gebruiken vw-/media-based responsive regels; te testen door die veldtypes aan de harness toe te voegen óf op een echte 320px-viewport (deploy of DevTools device mode).
+- De tijdlijn-reflow uit de audit hoort bij **begroot/stem**, niet bij enquête.
 
 ---
 
