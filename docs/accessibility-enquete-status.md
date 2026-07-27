@@ -44,10 +44,15 @@ Getest via de dev-harness (`npm run dev`) met de widget-container vastgezet op 3
 - Swipe **"Gemaakte keuzes"-samenvatting** had ook een scrollbalk: `.swipe-summary` gebruikte `grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))` → de 250px-minimum kon niet krimpen op 320px. Opgelost met `minmax(min(250px, 100%), 1fr)`. Geverifieerd op 320px: `overflow 0`.
 - Onderweg opgeruimd: swipe-toelichting-textarea's (samenvatting + modal) hadden alleen een placeholder → `aria-label` toegevoegd (samenvatting incl. de stelling), en het samenvatting-veld visueel opgeschoond (net omrand veld i.p.v. grijze band).
 
-**Nog niet geverifieerd (ontbreken in de dev-harness mock-data):**
+- **Interactieve kaart**: veroorzaakte een grote overflow (kaart forceerde ~746px). Oorzaak: `.osc-enquete-item-content.--youth` is een grid en het grid-item had standaard `min-width: auto`, dus het kon niet krimpen onder de min-content van de kaart. Opgelost met `> * { min-width: 0 }` op de youth-grid. **Geverifieerd op 320px: `overflow 0`, kaart 242px.**
+- **Document-/afbeelding-upload**: geen overflow op 320px (profiteren van dezelfde grid-fix + `.form-container`-basis). Geverifieerd.
 
-- Matrix-tabel, interactieve kaart, document-/afbeelding-upload. Deze gebruiken vw-/media-based responsive regels; te testen door die veldtypes aan de harness toe te voegen óf op een echte 320px-viewport (deploy of DevTools device mode).
+**Nog niet geverifieerd:**
+
+- Matrix-tabel (zat niet in de harness-mock; de audit prees juist de mobiele tabelweergave, dus laag risico).
 - De tijdlijn-reflow uit de audit hoort bij **begroot/stem**, niet bij enquête.
+
+**Losse bevinding (geen reflow):** de kaart crasht onder `React.StrictMode` in de dev-harness ("Map container is already initialized") door dubbel-mount. Niet in productie (geen StrictMode), maar wijst op ontbrekende Leaflet-cleanup bij re-mount — meenemen bij de aparte kaart-taak.
 
 ---
 

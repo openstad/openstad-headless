@@ -314,6 +314,12 @@ label.utrecht-form-label {
     display: grid;
     transform: translate(0, 0);
 
+    // ponytail: grid-items mogen krimpen onder hun content-min-width; anders forceert
+    // o.a. de kaart ~746px en ontstaat horizontale overflow op 320px (WCAG 1.4.10)
+    > * {
+      min-width: 0;
+    }
+
     &:has(.question-type-none),
     &:has([aria-invalid='true']),
     &:has(.utrecht-textbox--required),
