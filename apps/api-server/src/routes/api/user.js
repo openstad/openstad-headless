@@ -883,7 +883,9 @@ router
             projectId: req.params.projectId,
           },
         });
-        apiUser.authorizeData(userData, 'update', req.user).update(userData);
+        await apiUser
+          .authorizeData(userData, 'update', req.user)
+          .update(userData);
       }
 
       return next();
