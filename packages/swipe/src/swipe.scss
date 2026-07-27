@@ -560,12 +560,14 @@
   }
 
   .swipe-summary-explanation {
-    background: #f0f0f0;
-    padding: 16px;
+    // ponytail: schoon tekstveld binnen de witte kaart i.p.v. grijze band met los wit vlak
+    background: #fff;
+    padding: 0 16px 16px;
 
     textarea {
       width: 100%;
-      border: none;
+      box-sizing: border-box;
+      border: 1px solid #e0e0e0;
       background: #fff;
       font-family: inherit;
       font-size: 16px;
