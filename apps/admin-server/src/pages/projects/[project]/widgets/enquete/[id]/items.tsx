@@ -2477,11 +2477,11 @@ export default function WidgetEnqueteItems(
                           name="feedbackMode"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Feedbackmodus</FormLabel>
+                              <FormLabel>Extra toelichtende tekst</FormLabel>
                               <FormDescription>
-                                Bepaal welke feedback de bezoeker ziet nadat een
-                                antwoord is bevestigd. Dit zijn de quizopties
-                                voor deze vraag.
+                                Bepaalt of er naast goed/fout nog een
+                                toelichting verschijnt nadat een antwoord is
+                                bevestigd.
                               </FormDescription>
                               <Select
                                 value={field.value || 'none'}
@@ -2528,8 +2528,9 @@ export default function WidgetEnqueteItems(
                             optie). Dan wordt dit een quizvraag: de bezoeker
                             krijgt een bevestigknop en ziet na bevestigen wat
                             goed en fout was. Antwoorden staan standaard op
-                            fout. De feedbackmodus hierboven bepaalt los daarvan
-                            welke toelichtende tekst verschijnt.
+                            fout. De instelling &apos;Extra toelichtende
+                            tekst&apos; hierboven bepaalt los daarvan of er nog
+                            een toelichting bij komt.
                           </FormDescription>
                         </FormItem>
                       )}
@@ -2562,6 +2563,14 @@ export default function WidgetEnqueteItems(
                         (option: any) => option?.titles?.[0]?.isCorrect === true
                       ) && (
                         <>
+                          <Separator className="mt-4" />
+                          <Heading size="lg">
+                            Feedback bij een quizvraag (goed/fout)
+                          </Heading>
+                          <FormDescription>
+                            Deze teksten horen bij het markeren van goede
+                            antwoorden en staan los van de instelling hierboven.
+                          </FormDescription>
                           <FormField
                             control={form.control}
                             name="feedbackCorrect"
