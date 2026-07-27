@@ -23,6 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
+import { usePanelSwitchFocus } from '@/hooks/usePanelSwitchFocus';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { generateId, withId } from '@/lib/widget-item-helpers';
@@ -166,6 +167,7 @@ export default function WidgetResourceFormItems(
     : null;
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
+  const panelRef = usePanelSwitchFocus(settingOptions);
   const [file, setFile] = useState<File>();
   const [isFieldKeyUnique, setIsFieldKeyUnique] = useState(true);
   const [matrixOptions, setMatrixOptions] = useState<Matrix>(matrixDefault);
@@ -815,7 +817,12 @@ export default function WidgetResourceFormItems(
             </div>
 
             {settingOptions ? (
-              <div className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
+              <div
+                ref={panelRef}
+                tabIndex={-1}
+                role="group"
+                aria-label="Antwoordopties"
+                className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
                 {form.watch('type') === 'matrix' ? (
                   matrixList.map((matrixItem) => (
                     <>

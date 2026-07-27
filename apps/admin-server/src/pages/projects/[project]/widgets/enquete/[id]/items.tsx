@@ -26,6 +26,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { usePanelSwitchFocus } from '@/hooks/usePanelSwitchFocus';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { generateId, withId } from '@/lib/widget-item-helpers';
@@ -222,6 +223,7 @@ export default function WidgetEnqueteItems(
     : null;
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
+  const panelRef = usePanelSwitchFocus(settingOptions);
   const [file, setFile] = useState<File>();
   const [isFieldKeyUnique, setIsFieldKeyUnique] = useState(true);
   const [imageIndexOpen, setImageIndexOpen] = useState<number | null>(null);
@@ -982,7 +984,12 @@ export default function WidgetEnqueteItems(
             </div>
 
             {settingOptions ? (
-              <div className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
+              <div
+                ref={panelRef}
+                tabIndex={-1}
+                role="group"
+                aria-label="Antwoordopties"
+                className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
                 {form.watch('questionType') === 'matrix' ? (
                   matrixList.map((matrixItem) => (
                     <>
@@ -1663,7 +1670,12 @@ export default function WidgetEnqueteItems(
                 )}
               </div>
             ) : (
-              <div className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
+              <div
+                ref={panelRef}
+                tabIndex={-1}
+                role="group"
+                aria-label="Enquete items"
+                className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
                 <div>
                   <Heading size="xl">Enquete items</Heading>
                   <Separator className="my-4" />
