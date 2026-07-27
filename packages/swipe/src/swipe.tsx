@@ -10,6 +10,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { createPortal } from 'react-dom';
 
 import './swipe.scss';
 
@@ -1036,41 +1037,55 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           </div>
         )}
 
-        {showExplanationDialog && (
-          <div
-            className={`explanation-dialog ${
-              isDialogClosing ? 'explanation-dialog--closing' : ''
-            }`}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="explanation-dialog-title">
-            <div className="explanation-dialog-content">
-              <Heading level={3} id="explanation-dialog-title">
-                Korte uitleg
-              </Heading>
-              <Paragraph>Zodat we beter begrijpen wat belangrijk is.</Paragraph>
-              <textarea
-                autoFocus
-                placeholder="Ik maak deze keuze, omdat..."
-                rows={5}
-                value={explanations[currentCardId] || ''}
-                onChange={(e) =>
-                  handleExplanationChange(String(currentCardId), e.target.value)
-                }
-              />
-              <Button
-                appearance="primary-action-button"
-                onClick={closeExplanationDialog}>
-                Antwoord verzenden
-              </Button>
-              <Button
-                appearance="secondary-action-button"
-                onClick={closeExplanationDialog}>
-                Overslaan
-              </Button>
-            </div>
-          </div>
-        )}
+        {showExplanationDialog &&
+          // ponytail: via portal in document.body zodat de fixed-modal niet gevangen wordt
+          // door de transform op de swipe-kaarten (anders rekent 95% t.o.v. een bredere
+          // voorouder en loopt de dialog buiten beeld op 320px — WCAG 1.4.10).
+          createPortal(
+            // .openstad-wrapper zodat de geprefixte widget-CSS (`.openstad .explanation-dialog`)
+            // ook in de portal (buiten de widget-DOM) matcht.
+            <div className="openstad osc">
+              <div
+                className={`explanation-dialog ${
+                  isDialogClosing ? 'explanation-dialog--closing' : ''
+                }`}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="explanation-dialog-title">
+                <div className="explanation-dialog-content">
+                  <Heading level={3} id="explanation-dialog-title">
+                    Korte uitleg
+                  </Heading>
+                  <Paragraph>
+                    Zodat we beter begrijpen wat belangrijk is.
+                  </Paragraph>
+                  <textarea
+                    autoFocus
+                    placeholder="Ik maak deze keuze, omdat..."
+                    rows={5}
+                    value={explanations[currentCardId] || ''}
+                    onChange={(e) =>
+                      handleExplanationChange(
+                        String(currentCardId),
+                        e.target.value
+                      )
+                    }
+                  />
+                  <Button
+                    appearance="primary-action-button"
+                    onClick={closeExplanationDialog}>
+                    Antwoord verzenden
+                  </Button>
+                  <Button
+                    appearance="secondary-action-button"
+                    onClick={closeExplanationDialog}>
+                    Overslaan
+                  </Button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )}
       </div>
       <button
         className="swipe-back-button"
