@@ -1,9 +1,8 @@
 var sanitize = require('sanitize-html');
-const _ = require('lodash');
 
-// Normalize unicode text by Compatibility Decomposition
-// this will remove the unicode characters that are not in the ASCII range
-// We also use the deburr method from lodash to remove diacritics
+// Strip 4-byte characters (emoji, supplementary Unicode planes) that MySQL
+// utf8mb3 cannot store. All other characters, including diacritics
+// (e.g. é, ñ, ü, ö, ç), are left untouched.
 const normalizeUnicodeText = (text) => {
   if (!text || typeof text !== 'string') {
     return '';
@@ -14,7 +13,7 @@ const normalizeUnicodeText = (text) => {
     /[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDFFF]/g,
     ''
   );
-  return _.deburr(stripped.normalize('NFKD'));
+  return stripped;
 };
 
 // Decorator for the sanitize function
