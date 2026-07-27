@@ -139,7 +139,7 @@ module.exports = function (app) {
       res.on('finish', () => {
         const ts = new Date().toISOString();
         const clientId = req.client?.id || '';
-        const log = `\[${ts}] ${req.method}:${req.url} ${res.statusCode}${clientId ? ` clientId=${clientId}` : ''}`;
+        const log = `[${ts}] ${req.method}:${req.url} ${res.statusCode}${clientId ? ` clientId=${clientId}` : ''}`;
         console.log(log);
       });
       next();
