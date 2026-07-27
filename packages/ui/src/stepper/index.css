@@ -26,8 +26,12 @@
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  width: var(--nlds-stepper-icon-width, 0.5rem);
-  height: var(--nlds-stepper-icon-height, 0.5rem);
+  /* ponytail: min- + aspect-ratio i.p.v. vaste maat zodat het cijfer bij text-spacing
+     (WCAG 1.4.12) niet buiten het rondje valt maar het rondje rond mee-groeit */
+  min-width: var(--nlds-stepper-icon-width, 0.5rem);
+  min-height: var(--nlds-stepper-icon-height, 0.5rem);
+  aspect-ratio: 1 / 1;
+  box-sizing: content-box;
   padding: var(--nlds-stepper-icon-padding, 0.5rem);
   margin-right: var(--nlds-stepper-icon-margin-right, 0.5rem);
   border-width: var(--nlds-stepper-icon-border-width, 1px);
@@ -62,6 +66,18 @@
     --nlds-stepper-icon-color,
     var(--utrecht-button-primary-action-background-color)
   );
+  /* ponytail: geen block-margins/line-height die het cijfer uit het rondje duwen (1.4.12) */
+  margin: 0;
+  line-height: 1;
+}
+
+.step-icon > .step-check {
+  line-height: 1;
+  font-size: 0.875em;
+  color: var(
+    --nlds-stepper-icon-active-color,
+    var(--utrecht-button-secondary-action-color)
+  );
 }
 
 .step-icon.active {
@@ -93,4 +109,20 @@
     --nlds-stepper-icon-active-color,
     var(--utrecht-button-secondary-action-color)
   );
+}
+
+/* ponytail: reflow (WCAG 1.4.10). De items zitten in .stepper-list (de <ol>), niet in
+   .stepper (<nav>) — dáár moet de wrap staan. Op smalle viewport/zoom stapelen de stappen
+   verticaal en vervallen de decoratieve dividers, zodat er geen horizontale scroll ontstaat. */
+@media (max-width: 480px) {
+  .stepper-list {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+  .stepper-list > .step-container {
+    flex-basis: 100%;
+  }
+  .stepper-list > .step-divider {
+    display: none;
+  }
 }

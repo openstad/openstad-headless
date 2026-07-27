@@ -14,20 +14,30 @@ type Props = {
 const Stepper = (props: Props) => {
   const { steps, currentStep = 0, isSimpleView = false, ...rest } = props;
 
-  const renderStep = (step: string, index: number, displayNumber: number) => (
-    <li
-      key={index}
-      className="step-container"
-      aria-current={currentStep === index ? 'step' : undefined}>
-      <div
-        className={`step-icon ${currentStep === index ? 'active' : ''} ${
-          currentStep > index ? 'done' : ''
-        }`}>
-        <Paragraph>{displayNumber}</Paragraph>
-      </div>
-      <Paragraph> {step}</Paragraph>
-    </li>
-  );
+  const renderStep = (step: string, index: number, displayNumber: number) => {
+    const isDone = currentStep > index;
+    return (
+      <li
+        key={index}
+        className="step-container"
+        aria-current={currentStep === index ? 'step' : undefined}>
+        <div
+          className={`step-icon ${currentStep === index ? 'active' : ''} ${
+            isDone ? 'done' : ''
+          }`}>
+          {/* ponytail: checkmark = non-color cue so 'done' differs from 'active' (WCAG 1.4.1) */}
+          {isDone ? (
+            <span className="step-check" aria-hidden="true">
+              ✓
+            </span>
+          ) : (
+            <Paragraph>{displayNumber}</Paragraph>
+          )}
+        </div>
+        <Paragraph> {step}</Paragraph>
+      </li>
+    );
+  };
 
   return (
     <nav
