@@ -42,6 +42,7 @@ Getest via de dev-harness (`npm run dev`) met de widget-container vastgezet op 3
 - Swipe **toelichting-dialog** liep wél weg op echte 320px. Twee oorzaken: (1) de `position: fixed` modal zat gevangen in een voorouder met `transform`/`will-change: transform` (swipe-kaarten), waardoor `95%` t.o.v. die bredere voorouder rekende; (2) `padding` zat niet in de breedte. Opgelost door de modal via een **React-portal** (met `.openstad`-wrapper voor de geprefixte CSS) in `document.body` te renderen + `box-sizing: border-box` in `swipe.scss`. **Geverifieerd op echte 320px-viewport: `horizontalOverflow: 0`.**
   - Let op: bron is `swipe.scss` (de component importeert die), niet het gegenereerde `swipe.css`.
 - Swipe **"Gemaakte keuzes"-samenvatting** had ook een scrollbalk: `.swipe-summary` gebruikte `grid-template-columns: repeat(auto-fit, minmax(250px, 1fr))` → de 250px-minimum kon niet krimpen op 320px. Opgelost met `minmax(min(250px, 100%), 1fr)`. Geverifieerd op 320px: `overflow 0`.
+- Onderweg opgeruimd: swipe-toelichting-textarea's (samenvatting + modal) hadden alleen een placeholder → `aria-label` toegevoegd (samenvatting incl. de stelling), en het samenvatting-veld visueel opgeschoond (net omrand veld i.p.v. grijze band).
 
 **Nog niet geverifieerd (ontbreken in de dev-harness mock-data):**
 

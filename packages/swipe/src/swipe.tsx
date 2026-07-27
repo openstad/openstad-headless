@@ -824,6 +824,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                     <div className="swipe-summary-explanation">
                       <textarea
                         id={`explanation-${card.id}`}
+                        aria-label={`Korte uitleg (niet verplicht) bij: ${card.title}`}
                         placeholder="Voeg een korte uitleg (niet verplicht) toe..."
                         value={explanations[card.id] || ''}
                         onChange={(e) =>
@@ -1061,6 +1062,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                   </Paragraph>
                   <textarea
                     autoFocus
+                    aria-label="Korte uitleg bij je keuze"
                     placeholder="Ik maak deze keuze, omdat..."
                     rows={5}
                     value={explanations[currentCardId] || ''}
