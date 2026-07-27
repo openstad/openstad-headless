@@ -1173,7 +1173,12 @@ export default function WidgetResourceFormItems(
                 )}
               </div>
             ) : (
-              <div className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
+              <div
+                ref={panelRef}
+                tabIndex={-1}
+                role="group"
+                aria-label="Inzending Formulier items"
+                className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
                 <div>
                   <Heading size="xl">Inzending Formulier items</Heading>
                   <Separator className="my-4" />
@@ -2140,6 +2145,14 @@ export default function WidgetResourceFormItems(
                         <br />
                         De indiener kan bij het invullen van het formulier zelf
                         tijdlijn-items toevoegen, bewerken en verwijderen.
+                        <br />
+                        De ingevulde tijdlijn toon je door de schakelaar
+                        &apos;Tijdlijn weergeven&apos; aan te zetten in de
+                        widget van de inzending-detailpagina.
+                        <br />
+                        De einddatum van elk item wordt automatisch afgeleid uit
+                        de startdatum van het volgende item; het laatste item
+                        houdt zijn eigen, eventueel lege einddatum.
                       </div>
                     )}
 
