@@ -132,12 +132,11 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
       )}
 
       {scaleHint && (
-        <>
-          <FormFieldDescription className="tickmark-slider-scale-hint">
-            {scaleHint}
-          </FormFieldDescription>
-          <Spacer size={0.5} />
-        </>
+        // ponytail: schaal-uitleg alleen voor schermlezers (WCAG 3.3.2) — de smileys/cijfers
+        // zijn de zichtbare schaal, dus geen dubbele tekst in beeld.
+        <span id={`${randomId}_scalehint`} className="sr-only">
+          {scaleHint}
+        </span>
       )}
 
       {showMoreInfo && (
@@ -191,7 +190,12 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
         }}
         disabled={disabled}
         aria-invalid={checkInvalid}
-        aria-describedby={`${randomId}_error`}
+        aria-describedby={[
+          scaleHint ? `${randomId}_scalehint` : '',
+          `${randomId}_error`,
+        ]
+          .filter(Boolean)
+          .join(' ')}
         aria-valuetext={(() => {
           const opt = fieldOptions.find((opt) => opt.value === value);
           if (!opt) return value;
