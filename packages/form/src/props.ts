@@ -24,7 +24,8 @@ export type FormProps = {
   submitHandler: (values: { [p: string]: FormValue }) => void;
   getValuesOnChange?: (
     values: { [p: string]: FormValue },
-    hiddenFields?: string[]
+    hiddenFields?: string[],
+    fieldState?: { confirmed: string[]; touched: string[] }
   ) => void;
   submitDisabled?: boolean;
   allowResetAfterSubmit?: boolean;
@@ -43,6 +44,8 @@ export type FormProps = {
   totalFieldCount?: number;
   formStyle?: string;
   initialValues?: { [p: string]: FormValue };
+  initialConfirmedFields?: string[];
+  initialTouchedFields?: string[];
   confirmAnswerMessage?: string;
   onFieldInteraction?: (fieldKey: string) => void;
   onValidationErrors?: (
