@@ -15,7 +15,6 @@ import {
 } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
@@ -248,10 +247,11 @@ const defaultItemRenderer = (
       render = render.replace(/&amp;amp;/g, '&');
 
       return (
-        <div
-          dangerouslySetInnerHTML={{
-            __html: sanitizeHtml(render),
-          }}></div>
+        // Raw templates are admin-authored widget config (trusted, may contain
+        // iframes/scripts on purpose). Untrusted variable values are sanitized
+        // inside renderRawTemplate.
+        // eslint-disable-next-line react/no-danger
+        <div dangerouslySetInnerHTML={{ __html: render }}></div>
       );
     } catch (e) {
       console.error('De template kon niet worden geparsed: ', e);
