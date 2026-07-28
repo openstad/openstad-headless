@@ -142,62 +142,10 @@ export const renderRawTemplate = (
           }
         }
 
-        // Get all variables fom the string
-        const varsInString = extractVars(rendered);
-
-        if (varsInString && varsInString.length) {
-          for (const match of varsInString) {
-            let newValue = '';
-            const cleanMatches = match.trim().split('|');
-            const varName = cleanMatches[0].trim();
-            const filters = cleanMatches
-              .slice(1)
-              .map((filter) => filter.trim());
-
-            newValue = getVariableValue(varName, varMapping);
-
-            if (!!newValue && filters && filters.length) {
-              for (const filter of filters) {
-                // Filter can be in this format: tagGroup('type') or replace('type', 'type2) | cleanArray
-                // So we need to split the filter name and the arguments
-                const filterParts = filter.split('(');
-                const filterName = filterParts[0];
-                let filterArgs: string[] = [];
-                if (filterParts.length > 1) {
-                  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                  filterArgs = filterParts[1]
-                    .replace(')', '')
-                    .split(',')
-                    .map((f) =>
-                      f.trim().replaceAll("'", '').replaceAll('"', '')
-                    );
-                }
-
-                // @ts-ignore
-                if (stringFilters[filterName]) {
-                  if (filterArgs.length) {
-                    // @ts-ignore
-                    newValue = stringFilters[filterName](
-                      newValue,
-                      ...filterArgs
-                    );
-                  } else {
-                    // @ts-ignore
-                    newValue = stringFilters[filterName](newValue);
-                  }
-                }
-              }
-            }
-
-            // The template itself is admin-authored (trusted), but the values
-            // substituted into it are user-generated content, so they are
-            // sanitized here instead of on the rendered output.
-            rendered = rendered.replaceAll(
-              `{{${match}}}`,
-              sanitizeHtml(String(newValue ?? ''))
-            );
-          }
-        }
+        // Substitute all {{variables}}, escaped for the context they land in
+        rendered = substituteVars(rendered, (expression) =>
+          resolveExpression(expression, varMapping)
+        );
 
         return rendered;
       }
@@ -208,21 +156,107 @@ export const renderRawTemplate = (
   return render;
 };
 
-function extractVars(input: string) {
-  const vars = [];
-  let pos = 0;
+// Resolve a single `varName | filter | filter(arg)` expression to its value.
+function resolveExpression(
+  expression: string,
+  varMapping: { [key: string]: any }
+) {
+  const cleanMatches = expression.trim().split('|');
+  const varName = cleanMatches[0].trim();
+  const filters = cleanMatches.slice(1).map((filter) => filter.trim());
 
-  while (pos < input.length) {
-    const start = input.indexOf('{{', pos);
-    if (start === -1) break;
+  let newValue = getVariableValue(varName, varMapping);
 
-    const end = input.indexOf('}}', start);
-    if (end === -1) break;
+  if (!!newValue && filters && filters.length) {
+    for (const filter of filters) {
+      // Filter can be in this format: tagGroup('type') or replace('type', 'type2) | cleanArray
+      // So we need to split the filter name and the arguments
+      const filterParts = filter.split('(');
+      const filterName = filterParts[0];
+      let filterArgs: string[] = [];
+      if (filterParts.length > 1) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        filterArgs = filterParts[1]
+          .replace(')', '')
+          .split(',')
+          .map((f) => f.trim().replaceAll("'", '').replaceAll('"', ''));
+      }
 
-    const inside = input.slice(start + 2, end);
-    vars.push(inside);
-    pos = end + 2;
+      // @ts-ignore
+      if (stringFilters[filterName]) {
+        if (filterArgs.length) {
+          // @ts-ignore
+          newValue = stringFilters[filterName](newValue, ...filterArgs);
+        } else {
+          // @ts-ignore
+          newValue = stringFilters[filterName](newValue);
+        }
+      }
+    }
   }
 
-  return vars;
+  return String(newValue ?? '');
+}
+
+function escapeAttributeValue(value: string) {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+/**
+ * Walk the template once and substitute every {{variable}}. The template
+ * itself is admin-authored widget config (trusted, may contain iframes or
+ * inline handlers on purpose); the substituted values are user-generated
+ * content. Each value is therefore escaped for the context it lands in:
+ * HTML-sanitized in element content, attribute-escaped inside a tag.
+ *
+ * Values are not rescanned, so template syntax inside user content is inert.
+ *
+ * ponytail: unquoted attributes (`<a href={{url}}>`) stay injectable through
+ * whitespace; quote the attribute in the template, or escape whitespace here
+ * if that turns out to happen in the wild.
+ */
+function substituteVars(
+  template: string,
+  resolve: (expression: string) => string
+) {
+  let out = '';
+  let pos = 0;
+  let inTag = false;
+  let quote = '';
+
+  while (pos < template.length) {
+    if (template.startsWith('{{', pos)) {
+      const end = template.indexOf('}}', pos);
+      if (end === -1) break;
+
+      const value = resolve(template.slice(pos + 2, end));
+      out += inTag ? escapeAttributeValue(value) : sanitizeHtml(value);
+      pos = end + 2;
+      continue;
+    }
+
+    const char = template[pos];
+
+    if (inTag) {
+      if (quote) {
+        if (char === quote) quote = '';
+      } else if (char === '"' || char === "'") {
+        quote = char;
+      } else if (char === '>') {
+        inTag = false;
+      }
+    } else if (char === '<' && /[a-zA-Z/!]/.test(template[pos + 1] || '')) {
+      inTag = true;
+    }
+
+    out += char;
+    pos++;
+  }
+
+  return out + template.slice(pos);
 }
