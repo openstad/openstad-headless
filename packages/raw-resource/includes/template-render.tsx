@@ -1,4 +1,5 @@
 import { humanizeDate } from '@openstad-headless/lib/humanize-date';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 
 import { RawResourceWidgetProps } from '../src/raw-resource';
 import stringFilters from './nunjucks-filters';
@@ -76,10 +77,10 @@ export const renderRawTemplate = (
               (mb: any) =>
                 `<div class="resource-detail-modbreak-banner">` +
                 `<section>` +
-                `<strong>${mb.authorName || updatedProps.resources?.modbreakTitle || ''}</strong>` +
+                `<strong>${sanitizeHtml(mb.authorName || updatedProps.resources?.modbreakTitle || '')}</strong>` +
                 `<span>${mb.modBreakDate ? humanizeDate(mb.modBreakDate) : ''}</span>` +
                 `</section>` +
-                `<div>${mb.description || ''}</div>` +
+                `<div>${sanitizeHtml(mb.description || '')}</div>` +
                 `</div>`
             )
             .join(''),
@@ -188,7 +189,13 @@ export const renderRawTemplate = (
               }
             }
 
-            rendered = rendered.replaceAll(`{{${match}}}`, newValue);
+            // The template itself is admin-authored (trusted), but the values
+            // substituted into it are user-generated content, so they are
+            // sanitized here instead of on the rendered output.
+            rendered = rendered.replaceAll(
+              `{{${match}}}`,
+              sanitizeHtml(String(newValue ?? ''))
+            );
           }
         }
 
