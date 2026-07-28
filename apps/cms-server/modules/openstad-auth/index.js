@@ -50,8 +50,14 @@ module.exports = {
           // Redirect instead of rendering: req.user (Apostrophe admin) is
           // already deserialized for this request, and rendering with a
           // destroyed session crashes settings.getBrowserData
+          let target = removeURLParameter(req.url, 'openstadlogout');
+          // Guard against open redirect: only allow local paths,
+          // reject protocol-relative (//host) and backslash (/\host) forms
+          if (!/^\/(?![/\\])/.test(target)) {
+            target = '/';
+          }
           return req.session.destroy(() => {
-            res.redirect(removeURLParameter(req.url, 'openstadlogout'));
+            res.redirect(target);
           });
         }
 
