@@ -403,9 +403,12 @@ function Form({
   }, [formValues, confirmedFields, touchedFields]);
 
   const scrollTop = () => {
-    const formWidget = document.querySelector(
-      '.osc-enquete-item-content, .osc-resource-form-item-content'
-    );
+    // Scope to this form's own widget container: a page can hold multiple
+    // form widgets and a document-wide query would scroll to the first one.
+    const formWidget =
+      formRef.current?.closest(
+        '.osc-enquete-item-content, .osc-resource-form-item-content'
+      ) ?? formRef.current;
 
     if (formWidget) {
       const elementPosition =
