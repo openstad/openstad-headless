@@ -101,14 +101,37 @@ de scores renderen nu als tekst naast de balk (bv. "88%"/"89%") binnen een `role
 clearfix voor de gefloate balk+percentage toegevoegd. **Rebuild:** `choiceguide` + `choiceguide-results`.
 Kanttekening: `choiceguide-results/src/style.css` is een **gedupliceerde kopie** van de choiceguide-CSS — losse opschoning waard.
 
+### Interactieve kaart + Interactieve afbeelding — bediening (2.1.1, 2.5.7)
+
+Twee losse kaart-implementaties, beide voorzien van een **kompas** (↑↓←→ pan-knoppen, single-pointer, geen slepen)
+en een **"Plaats … in het midden"-knop** (keyboard) met een centraal **kruisje** dat toont waar het landt.
+Knoppen zijn focusbaar met zichtbare focus-outline en ≥40px targets.
+
+| Onderdeel                                      | Component                                           | 2.5.7 kompas                | 2.1.1 plaatsen                                                                                                                                                                           |
+| ---------------------------------------------- | --------------------------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Interactieve **kaart** (geografisch, audit §3) | `leaflet-map/src/base-map.tsx` + `css/base-map.css` | pan-knoppen → `map.panBy()` | plaats-knop → synthetisch `onClick({latlng: map.getCenter(), isInArea})`; laat `EditorMap.updateLocation` ongewijzigd de marker/locatie zetten. `role="status"` sr-melding bij plaatsen. |
+| Interactieve **afbeelding** (audit §15)        | `document-map/src/document-map.tsx` + `.css`        | idem                        | plaats-knop → `setPopupPosition(map.getCenter())` opent het bestaande reactie-popupformulier; focus springt naar de textarea.                                                            |
+
+**Kompas raakt álle kaart-gebruikers**; de plaats-knop + kruisje tonen alleen waar plaatsen mogelijk is
+(`onClick` aanwezig resp. `canComment && !isDefinitive`).
+
+**StrictMode-crash ("Map container is already initialized"):** gereproduceerd in de `leaflet-map` dev-harness.
+Oorzaak = react-leaflet v4 maakt de Leaflet-instance bij ref-attach; StrictMode's synchrone dubbel-attach
+botst op de nog-geïnitialiseerde container. **Productie is niet geraakt:** `lib/load-widget.tsx` rendert
+`<Component/>` **zonder** StrictMode (geen dubbel-invoke). Toegevoegd als hardening voor echte unmount/remount
+via de widget-loader: expliciete `map.remove()`-cleanup in `base-map.tsx` + wissen van de globale
+`window.oscMap`-cache in `map-consumer.tsx` (was een leak/stale-ref). De resterende dev-only StrictMode-ruis is
+een react-leaflet-limitatie (fix: StrictMode uit de dev-harness óf react-leaflet upgraden — losse keuze).
+
+**Rebuild:** BaseMap/EditorMap worden per widget gebundeld → herbouwd: `leaflet-map`, `resource-overview(-with-map)`,
+`resource-detail(-with-map)`, `resource-form`, `stem-begroot`, `enquete`, `choiceguide`, `document-map`.
+**Live geverifieerd** (harness zonder StrictMode): pannen verschuift de kaart, "Plaats op het midden" zet de
+marker op het kruisje/centrum.
+
 ---
 
 ## ⏭️ Nog te doen
 
-- **Interactieve kaart — bediening** (bewust apart): toetsenbord om reactie te plaatsen (2.1.1) +
-  on-screen kompas voor single-pointer pannen (2.5.7). Raakt alle kaart-gebruikers.
-  - Losse bevinding: kaart crasht onder `React.StrictMode` (dubbel-mount, "Map container is already
-    initialized") — ontbrekende Leaflet-cleanup bij re-mount; meenemen bij deze taak.
 - **Matrix-tabel reflow** — niet getest (zat niet in de dev-harness mock; audit prees juist de
   mobiele tabelweergave → laag risico).
 - **Overige audit-onderdelen** buiten deze widgets: teller, interactieve afbeelding, contentwidgets
