@@ -13,6 +13,7 @@ const contentWidgets = {
   'openstad-carousel': {},
   'openstad-blog-post': {},
   'openstad-breadcrumbs': {},
+  'openstad-iframe': {},
 };
 
 module.exports = {
