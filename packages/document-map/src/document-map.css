@@ -279,6 +279,126 @@ a + .url-list:before {
   font-weight: normal;
 }
 
+/* ponytail: kaartbediening — kompas (pannen zonder slepen, 2.5.7) + reactie-plaats-knop (keyboard, 2.1.1) */
+.documentMap--container .document-container .osc-map-controls {
+  position: absolute;
+  z-index: 2;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.documentMap--container .osc-map-compass {
+  display: grid;
+  grid-template-columns: repeat(3, 40px);
+  grid-template-rows: repeat(3, 40px);
+  gap: 2px;
+}
+
+.documentMap--container .osc-map-pan {
+  grid-column: 2;
+  grid-row: 2;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  border: 1px solid #767676;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a1a1a;
+  padding: 0;
+}
+
+.documentMap--container .osc-map-pan:hover {
+  background: #f0f0f0;
+}
+
+.documentMap--container .osc-map-pan:focus-visible {
+  outline: 2px solid #1471ef;
+  outline-offset: 2px;
+}
+
+.documentMap--container .osc-map-pan--up {
+  grid-column: 2;
+  grid-row: 1;
+}
+.documentMap--container .osc-map-pan--left {
+  grid-column: 1;
+  grid-row: 2;
+}
+.documentMap--container .osc-map-pan--right {
+  grid-column: 3;
+  grid-row: 2;
+}
+.documentMap--container .osc-map-pan--down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.documentMap--container .osc-map-place-comment {
+  cursor: pointer;
+  border: 1px solid #767676;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a1a1a;
+  padding: 8px 12px;
+  font-size: 15px;
+  min-height: 44px;
+  max-width: 160px;
+}
+
+.documentMap--container .osc-map-place-comment:hover {
+  background: #f0f0f0;
+}
+
+.documentMap--container .osc-map-place-comment:focus-visible {
+  outline: 2px solid #1471ef;
+  outline-offset: 2px;
+}
+
+/* centraal kruisje: toont waar "Plaats reactie in het midden" landt */
+.documentMap--container .osc-map-crosshair {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  width: 28px;
+  height: 28px;
+}
+
+.documentMap--container .osc-map-crosshair::before,
+.documentMap--container .osc-map-crosshair::after {
+  content: '';
+  position: absolute;
+  background: #1a1a1a;
+  box-shadow: 0 0 0 1px #fff;
+}
+
+.documentMap--container .osc-map-crosshair::before {
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  transform: translateX(-50%);
+}
+
+.documentMap--container .osc-map-crosshair::after {
+  top: 50%;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  transform: translateY(-50%);
+}
+
 .modal-overlay[aria-hidden='true'] {
   display: none;
 }

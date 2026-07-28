@@ -892,6 +892,27 @@ function DocumentMap({
     updateMapBounds(hasOpenPopup);
   }, [bounds, hasOpenPopup]);
 
+  // ponytail: toetsenbord/single-pointer alternatief voor slepen + reactie plaatsen (WCAG 2.1.1, 2.5.7)
+  const PAN_STEP_PX = 100;
+  const panMapBy = (x: number, y: number) => {
+    mapRef.current?.panBy([x, y], { animate: true });
+  };
+  const placeCommentAtCenter = () => {
+    const map = mapRef.current;
+    if (map) setPopupPosition(map.getCenter());
+  };
+
+  // ponytail: focus de reactie-textarea zodra de popup opent, zodat de keyboard-flow doorloopt (2.1.1)
+  useEffect(() => {
+    if (!popupPosition) return;
+    const t = setTimeout(() => {
+      (
+        document.getElementById('commentBox') as HTMLTextAreaElement | null
+      )?.focus();
+    }, 50);
+    return () => clearTimeout(t);
+  }, [popupPosition]);
+
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -1318,6 +1339,58 @@ function DocumentMap({
                 </Popup>
               )}
           </MapContainer>
+
+          {/* ponytail: kruisje toont waar "Plaats reactie in het midden" landt (2.1.1) */}
+          {!popupPosition && !!args.canComment && !isDefinitive && (
+            <div className="osc-map-crosshair" aria-hidden="true">
+              <span />
+            </div>
+          )}
+
+          {/* ponytail: single-pointer/keyboard pan-knoppen (2.5.7) + reactie-plaats-knop (2.1.1) */}
+          <div
+            className="osc-map-controls"
+            role="group"
+            aria-label="Kaartbediening">
+            <div className="osc-map-compass">
+              <button
+                type="button"
+                className="osc-map-pan osc-map-pan--up"
+                aria-label="Kaart naar boven verplaatsen"
+                onClick={() => panMapBy(0, -PAN_STEP_PX)}>
+                <span aria-hidden="true">↑</span>
+              </button>
+              <button
+                type="button"
+                className="osc-map-pan osc-map-pan--left"
+                aria-label="Kaart naar links verplaatsen"
+                onClick={() => panMapBy(-PAN_STEP_PX, 0)}>
+                <span aria-hidden="true">←</span>
+              </button>
+              <button
+                type="button"
+                className="osc-map-pan osc-map-pan--right"
+                aria-label="Kaart naar rechts verplaatsen"
+                onClick={() => panMapBy(PAN_STEP_PX, 0)}>
+                <span aria-hidden="true">→</span>
+              </button>
+              <button
+                type="button"
+                className="osc-map-pan osc-map-pan--down"
+                aria-label="Kaart naar onderen verplaatsen"
+                onClick={() => panMapBy(0, PAN_STEP_PX)}>
+                <span aria-hidden="true">↓</span>
+              </button>
+            </div>
+            {!popupPosition && !!args.canComment && !isDefinitive && (
+              <button
+                type="button"
+                className="osc-map-place-comment"
+                onClick={placeCommentAtCenter}>
+                Plaats reactie in het midden
+              </button>
+            )}
+          </div>
 
           {!!args.canComment && (
             <>

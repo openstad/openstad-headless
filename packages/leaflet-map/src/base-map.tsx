@@ -822,6 +822,41 @@ const BaseMap = ({
     };
   }, [mapContainerRef.current, isTouchDevice]);
 
+  // ponytail: react-leaflet ruimt de Leaflet-instance niet op bij StrictMode/remount ->
+  // "Map container is already initialized"; verwijder 'm expliciet bij unmount.
+  useEffect(() => {
+    return () => {
+      try {
+        mapContainerRef.current?.remove?.();
+      } catch (e) {
+        /* al opgeruimd */
+      }
+      mapContainerRef.current = null;
+    };
+  }, []);
+
+  // ponytail: toetsenbord/single-pointer alternatief voor slepen + plaatsen (WCAG 2.1.1, 2.5.7)
+  const PAN_STEP_PX = 100;
+  const panMapBy = (x: number, y: number) => {
+    mapContainerRef.current?.panBy([x, y], { animate: true });
+  };
+  const canPlaceViaKeyboard = typeof onClick === 'function';
+  const [placeMessage, setPlaceMessage] = useState('');
+  const placeAtCenter = () => {
+    const map = mapContainerRef.current;
+    if (!map || typeof onClick !== 'function') return;
+    const center = map.getCenter();
+    const areaLatLngs = normalizeAreaLocations(area || []);
+    const isInArea =
+      !(area && area.length) || isPointInArea(areaLatLngs, center);
+    onClick({ latlng: center, isInArea } as any, map);
+    setPlaceMessage(
+      isInArea
+        ? 'Locatie op het midden van de kaart geplaatst.'
+        : 'Het midden van de kaart valt buiten het toegestane gebied.'
+    );
+  };
+
   return (
     <>
       {mapDataLayers.length > 0 && (
@@ -946,6 +981,62 @@ const BaseMap = ({
             />
           )}
         </MapContainer>
+
+        {/* ponytail: kruisje toont waar "Plaats op het midden" landt (2.1.1) */}
+        {canPlaceViaKeyboard && (
+          <div className="osc-map-crosshair" aria-hidden="true">
+            <span />
+          </div>
+        )}
+
+        {/* ponytail: single-pointer/keyboard pan-knoppen (2.5.7) + plaats-knop (2.1.1) */}
+        <div
+          className="osc-map-controls"
+          role="group"
+          aria-label="Kaartbediening">
+          <div className="osc-map-compass">
+            <button
+              type="button"
+              className="osc-map-pan osc-map-pan--up"
+              aria-label="Kaart naar boven verplaatsen"
+              onClick={() => panMapBy(0, -PAN_STEP_PX)}>
+              <span aria-hidden="true">↑</span>
+            </button>
+            <button
+              type="button"
+              className="osc-map-pan osc-map-pan--left"
+              aria-label="Kaart naar links verplaatsen"
+              onClick={() => panMapBy(-PAN_STEP_PX, 0)}>
+              <span aria-hidden="true">←</span>
+            </button>
+            <button
+              type="button"
+              className="osc-map-pan osc-map-pan--right"
+              aria-label="Kaart naar rechts verplaatsen"
+              onClick={() => panMapBy(PAN_STEP_PX, 0)}>
+              <span aria-hidden="true">→</span>
+            </button>
+            <button
+              type="button"
+              className="osc-map-pan osc-map-pan--down"
+              aria-label="Kaart naar onderen verplaatsen"
+              onClick={() => panMapBy(0, PAN_STEP_PX)}>
+              <span aria-hidden="true">↓</span>
+            </button>
+          </div>
+          {canPlaceViaKeyboard && (
+            <button
+              type="button"
+              className="osc-map-place-comment"
+              onClick={placeAtCenter}>
+              Plaats op het midden
+            </button>
+          )}
+        </div>
+
+        <div aria-live="polite" className="osc-map-sr-status">
+          {placeMessage}
+        </div>
       </div>
     </>
   );
