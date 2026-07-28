@@ -72,6 +72,8 @@ function Form({
   totalFieldCount = 0,
   formStyle = 'default',
   initialValues,
+  initialConfirmedFields,
+  initialTouchedFields,
   confirmAnswerMessage = 'Bevestig eerst je antwoord voordat je verdergaat.',
   onFieldInteraction,
   onValidationErrors,
@@ -137,7 +139,15 @@ function Form({
   const [lastUpdatedKey, setLastUpdatedKey] = useState<string>('');
   const [confirmedFields, setConfirmedFields] = useState<
     Record<string, boolean>
-  >({});
+  >(() =>
+    Object.fromEntries((initialConfirmedFields || []).map((key) => [key, true]))
+  );
+  // Fields the user actually interacted with; seeded values (e.g. the
+  // tickmark-slider default) do not count until the user touches the field.
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>(
+    () =>
+      Object.fromEntries((initialTouchedFields || []).map((key) => [key, true]))
+  );
 
   const {
     effectiveTotalPages,
@@ -338,6 +348,12 @@ function Form({
     const { name, value } = event;
     setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
 
+    if (!event.isInitial) {
+      setTouchedFields((prev) =>
+        prev[name] ? prev : { ...prev, [name]: true }
+      );
+    }
+
     if (triggerSetLastKey !== false) {
       setLastUpdatedKey(name);
     }
@@ -352,6 +368,7 @@ function Form({
     setFormValues(initialFormValues);
     setFormErrors({});
     setConfirmedFields({});
+    setTouchedFields({});
     resetFunctions.current.forEach((reset) => reset());
   };
 
@@ -360,7 +377,12 @@ function Form({
       const externalHiddenFields = routingHiddenFields.filter(
         (key) => !key.startsWith('_routing_')
       );
-      getValuesOnChange(formValues, externalHiddenFields);
+      getValuesOnChange(formValues, externalHiddenFields, {
+        confirmed: Object.keys(confirmedFields).filter(
+          (key) => confirmedFields[key]
+        ),
+        touched: Object.keys(touchedFields).filter((key) => touchedFields[key]),
+      });
     }
 
     if (
@@ -378,7 +400,7 @@ function Form({
         formValues,
       });
     }
-  }, [formValues]);
+  }, [formValues, confirmedFields, touchedFields]);
 
   const scrollTop = () => {
     const formWidget = document.querySelector(
@@ -630,7 +652,10 @@ function Form({
                 )}
                 {hasFeedback(field) &&
                   field.fieldKey &&
-                  (needsConfirm(field) ? confirmed : isFieldAnswered(field)) &&
+                  (needsConfirm(field)
+                    ? confirmed
+                    : isFieldAnswered(field) &&
+                      !!touchedFields[field.fieldKey]) &&
                   feedback &&
                   feedback.textToShow.length > 0 && (
                     <div className="question-feedback" aria-live="polite">
