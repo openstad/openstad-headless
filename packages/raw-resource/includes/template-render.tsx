@@ -216,9 +216,8 @@ function escapeAttributeValue(value: string) {
  *
  * Values are not rescanned, so template syntax inside user content is inert.
  *
- * ponytail: unquoted attributes (`<a href={{url}}>`) stay injectable through
- * whitespace; quote the attribute in the template, or escape whitespace here
- * if that turns out to happen in the wild.
+ * Note: unquoted attributes (`<a href={{url}}>`) stay injectable through
+ * whitespace; quote the attribute in the template.
  */
 function substituteVars(
   template: string,
