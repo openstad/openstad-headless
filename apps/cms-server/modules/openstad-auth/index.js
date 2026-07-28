@@ -47,8 +47,12 @@ module.exports = {
         }
 
         if (req.query.openstadlogout) {
-          req.session.destroy(() => {});
-          return next();
+          // Redirect instead of rendering: req.user (Apostrophe admin) is
+          // already deserialized for this request, and rendering with a
+          // destroyed session crashes settings.getBrowserData
+          return req.session.destroy(() => {
+            res.redirect(removeURLParameter(req.url, 'openstadlogout'));
+          });
         }
 
         const thisHost = req.headers['x-forwarded-host'] || req.get('host');
