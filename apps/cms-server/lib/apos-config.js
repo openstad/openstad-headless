@@ -38,5 +38,6 @@ module.exports = {
     'openstad-carousel-widget': {},
     'openstad-blog-post-widget': {},
     'openstad-breadcrumbs-widget': {},
+    'openstad-iframe-widget': {},
   },
 };
