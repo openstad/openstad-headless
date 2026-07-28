@@ -43,6 +43,44 @@ describe('<Form />', () => {
     cy.get('.question-feedback').should('contain.text', 'Vier');
   });
 
+  it('scrolls to its own widget container, not another widget higher on the page', () => {
+    const fields = [
+      {
+        type: 'text',
+        fieldKey: 'q1',
+        title: 'Vraag',
+        fieldRequired: false,
+      },
+    ];
+
+    cy.mount(
+      <div>
+        <div
+          className="osc-enquete-item-content"
+          data-testid="decoy"
+          style={{ height: '300px' }}
+        />
+        <div className="osc-enquete-item-content" data-testid="own">
+          <Form {...({ fields, submitHandler: () => {} } as any)} />
+        </div>
+      </div>
+    );
+
+    cy.window().then((win) => {
+      cy.stub(win, 'scrollTo').as('scrollTo');
+    });
+
+    cy.get('[data-testid="own"]').then(($own) => {
+      const ownTop = $own[0].getBoundingClientRect().top;
+
+      cy.get('button[type="submit"]').click();
+
+      cy.get('@scrollTo').should('have.been.calledWithMatch', {
+        top: ownTop,
+      });
+    });
+  });
+
   it('keeps a confirmed graded answer locked when restored from a draft', () => {
     const fields = [
       {
