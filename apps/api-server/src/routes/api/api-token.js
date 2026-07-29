@@ -1,3 +1,4 @@
+const config = require('config');
 const express = require('express');
 const crypto = require('crypto');
 const createError = require('http-errors');
@@ -152,4 +153,91 @@ router.delete('/:tokenId(\\d+)', async function (req, res, next) {
   }
 });
 
+// Project-level overview routes: /project/:projectId/api-token
+const projectRouter = express.Router({ mergeParams: true });
+
+projectRouter.use(requireProjectAdmin);
+
+// GET /project/:projectId/api-token — all tokens for the project, including
+// revoked and expired ones, with owner name and computed status
+projectRouter.get('/', async function (req, res, next) {
+  try {
+    const projectId = req.project.id;
+    const adminProjectId = config.admin.projectId;
+
+    // Superuser tokens live on the admin project but can read every
+    // project's stats, so they belong in every project's overview
+    const projectIds =
+      projectId == adminProjectId ? [projectId] : [projectId, adminProjectId];
+
+    const tokens = await db.ApiToken.findAll({
+      where: { projectId: projectIds },
+      paranoid: false,
+      include: [
+        {
+          model: db.User,
+          as: 'owner',
+          attributes: ['id', 'nickName', 'name', 'email', 'role'],
+          paranoid: false,
+        },
+      ],
+      order: [['createdAt', 'DESC']],
+    });
+
+    // Admin-project tokens only grant cross-project access when the owner is
+    // a superuser (mirrors the auth middleware check); hide the rest
+    const visible = tokens.filter(
+      (token) =>
+        token.projectId == projectId ||
+        ['admin', 'superuser'].includes(token.owner && token.owner.role)
+    );
+
+    return res.json(
+      visible.map((token) => ({
+        ...maskToken(token),
+        isSuperUserToken: token.projectId != projectId,
+        owner: token.owner
+          ? {
+              id: token.owner.id,
+              name:
+                token.owner.nickName ||
+                token.owner.name ||
+                token.owner.email ||
+                null,
+            }
+          : null,
+      }))
+    );
+  } catch (err) {
+    return next(err);
+  }
+});
+
+// DELETE below intentionally matches on the viewed project's id only: a
+// superuser token shown in another project's overview cannot be revoked by
+// that project's admins — only from the admin project or the owner's
+// user page.
+
+// DELETE /project/:projectId/api-token/:tokenId — revoke from the overview
+projectRouter.delete('/:tokenId(\\d+)', async function (req, res, next) {
+  try {
+    const projectId = req.project.id;
+    const tokenId = parseInt(req.params.tokenId, 10);
+
+    const token = await db.ApiToken.findOne({
+      where: { id: tokenId, projectId },
+    });
+
+    if (!token) {
+      return next(createError(404, 'Token not found'));
+    }
+
+    await token.destroy(); // paranoid soft-delete
+    return res.json({ status: 'ok' });
+  } catch (err) {
+    return next(err);
+  }
+});
+
 module.exports = router;
+module.exports.projectRouter = projectRouter;
