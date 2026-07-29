@@ -10,6 +10,16 @@ vi.mock('@openstad-headless/lib/report-data-scope', () => {
   );
 });
 
+// logBlockedReportingPath lazily requires ../db for its fire-and-forget audit
+// query; mock it so tests exercising that path don't need real DB config.
+vi.mock('../db', () => ({
+  default: {
+    AuditLog: {
+      findOne: vi.fn().mockResolvedValue(null),
+    },
+  },
+}));
+
 const apiTokenScopeGuard = require('./api-token-scope-guard');
 
 function makeReq({ apiTokenScope, method, path, projectDataScope } = {}) {

@@ -19,6 +19,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useApiTokens, { ApiToken } from '@/hooks/use-api-tokens';
+import useProjectList from '@/hooks/use-project-list';
 import useUser from '@/hooks/use-user';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
@@ -50,7 +51,18 @@ function formatDate(iso: string) {
 
 export default function UserApiTokens() {
   const { data } = useUser();
-  const user = Array.isArray(data) ? data[0] : data;
+  const { data: projects } = useProjectList();
+
+  // Each row is a distinct membership: its own User record with its own id +
+  // projectId. A token is bound to one membership (project scope), so it must
+  // be created for the selected row, not just the first one.
+  const memberships = Array.isArray(data) ? data : data ? [data] : [];
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const user = memberships[selectedIndex];
+
+  const projectName = (projectId?: number) =>
+    projects?.find((project: any) => project.id === projectId)?.name ||
+    `Project ${projectId}`;
 
   const {
     data: tokens,
@@ -121,6 +133,43 @@ export default function UserApiTokens() {
         Genereer een token zodat externe tools zoals Power BI authenticatie
         kunnen uitvoeren via een Bearer-header.
       </p>
+
+      {memberships.length > 1 ? (
+        <div className="mb-6">
+          <label
+            id="api-token-project-label"
+            className="text-sm font-medium mb-1 block">
+            Project
+          </label>
+          <Select
+            value={String(selectedIndex)}
+            onValueChange={(value) => {
+              setSelectedIndex(Number(value));
+              setNewToken(null);
+              setCopied(false);
+            }}>
+            <SelectTrigger
+              aria-labelledby="api-token-project-label"
+              className="max-w-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {memberships.map((membership: any, index: number) => (
+                <SelectItem key={membership.id} value={String(index)}>
+                  {projectName(membership.projectId)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs text-muted-foreground mt-1">
+            Het token wordt gebonden aan het hierboven gekozen project.
+          </p>
+        </div>
+      ) : (
+        <p className="text-sm text-muted-foreground mb-6">
+          Gebonden aan project: <strong>{projectName(user.projectId)}</strong>
+        </p>
+      )}
 
       {newToken && (
         <div className="mb-6 p-4 border border-yellow-400 bg-yellow-50 rounded-md">

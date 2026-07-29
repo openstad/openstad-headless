@@ -94,7 +94,7 @@ export default function ProjectSettingsDataScope() {
 
     try {
       const result = await updateProject({ dataScope: normalized });
-      if (result) {
+      if (result && !result.error) {
         toast.success('Project aangepast!');
       } else {
         toast.error('Er is helaas iets mis gegaan.');

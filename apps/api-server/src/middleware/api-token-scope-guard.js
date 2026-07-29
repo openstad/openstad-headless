@@ -5,7 +5,6 @@ const {
   COMPONENTS,
 } = require('@openstad-headless/lib/report-data-scope');
 const auditLogService = require('../services/audit-log');
-const db = require('../db');
 
 // GET-routed paths that actually mutate state — must be blocked even for
 // reporting tokens that only send GET requests.
@@ -25,6 +24,9 @@ const ALLOWED_NON_COMPONENT_SEGMENTS = new Set(['overview']);
  * fire-and-forget; never affects the response.
  */
 async function logBlockedReportingPath(req) {
+  // Required lazily (like services/audit-log.js's own db access) so importing
+  // this module doesn't eagerly require a working DB config.
+  const db = require('../db');
   const tokenId = req.apiTokenId || null;
   const routePath = (req.path || '').substring(0, 500);
 
