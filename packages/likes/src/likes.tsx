@@ -154,11 +154,10 @@ function Likes({
       }
     } catch (err: any) {
       if (err?.status === 403) {
-        const message =
-          props.votes.voteType === 'likes'
-            ? 'Je hebt al gestemd'
-            : 'Je hebt het maximum aantal stemmen bereikt';
-        NotificationService.addNotification(message, 'error');
+        NotificationService.addNotification(
+          err.message || 'Stemmen is niet gelukt',
+          'error'
+        );
       }
     } finally {
       setIsBusy(false);
