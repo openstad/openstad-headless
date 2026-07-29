@@ -1,3 +1,18 @@
+const WRAPPING_QUOTES = '"\'“”‘’';
+
+// Strips quotes from both ends. Written as a loop rather than a regex on
+// purpose: an anchored /["']+$/ backtracks quadratically, and with a 10mb body
+// limit a long run of quotes would block the event loop for minutes.
+function stripWrappingQuotes(value) {
+  let start = 0;
+  let end = value.length;
+
+  while (start < end && WRAPPING_QUOTES.includes(value[start])) start++;
+  while (end > start && WRAPPING_QUOTES.includes(value[end - 1])) end--;
+
+  return value.slice(start, end);
+}
+
 // Normalizes user-contributed URLs. Programs like Word/Excel silently replace
 // straight quotes, hyphens and regular spaces with typographic variants; we map
 // those back before validating. Only http/https URLs are accepted.
@@ -5,16 +20,30 @@
 // Returns { ok: true, value } with the normalized value, or { ok: false } when
 // the input is not a valid http/https URL.
 function normalizeContributedUrl(value) {
-  if (typeof value !== 'string' || value.replace(/ /g, ' ').trim() === '') {
+  // Only an absent value is passed through. Any other non-string (array,
+  // object, number) is rejected: accepting it would let a value straight from
+  // the API skip the validation below and be stored unchecked.
+  if (value === null || typeof value === 'undefined') {
+    return { ok: true, value: value };
+  }
+  if (typeof value !== 'string') {
+    return { ok: false };
+  }
+  if (value.replace(/ /g, ' ').trim() === '') {
     return { ok: true, value: value };
   }
 
-  let normalized = value
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
-    .replace(/[–—]/g, '-')
-    .replace(/ /g, ' ')
-    .trim();
+  // Copying a link from Word wraps it in quotes. Those have to be stripped
+  // rather than kept, otherwise the scheme check below sees a leading quote,
+  // prepends "https://" and produces a URL that parses but is dead.
+  let normalized = stripWrappingQuotes(
+    value
+      .replace(/[“”]/g, '"')
+      .replace(/[‘’]/g, "'")
+      .replace(/[–—]/g, '-')
+      .replace(/ /g, ' ')
+      .trim()
+  ).trim();
 
   // Only prepend a scheme when none is present. A leading "scheme:" (e.g.
   // http, https, mailto, ftp) is detected case-insensitively per RFC 3986, so
@@ -24,16 +53,22 @@ function normalizeContributedUrl(value) {
     normalized = 'https://' + normalized;
   }
 
+  let parsed;
   try {
-    const parsed = new URL(normalized);
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
-      return { ok: false };
-    }
+    parsed = new URL(normalized);
   } catch (_) {
     return { ok: false };
   }
 
-  return { ok: true, value: normalized };
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    return { ok: false };
+  }
+
+  // Return the parsed URL rather than the input: new URL() drops tabs and
+  // newlines and percent-encodes characters such as < > " before parsing, so
+  // returning the raw input would store a value that differs from the one that
+  // was validated.
+  return { ok: true, value: parsed.href };
 }
 
 module.exports = { normalizeContributedUrl };
