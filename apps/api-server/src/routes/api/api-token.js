@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const createError = require('http-errors');
 const db = require('../../db');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const { computeStatus } = require('../../lib/api-token-status');
 
 const router = express.Router({ mergeParams: true });
 
@@ -38,6 +39,7 @@ function maskToken(apiToken) {
     expiresAt: apiToken.expiresAt,
     lastUsedAt: apiToken.lastUsedAt,
     createdAt: apiToken.createdAt,
+    status: computeStatus(apiToken),
   };
 }
 
