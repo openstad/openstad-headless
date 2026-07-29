@@ -101,7 +101,7 @@ de scores renderen nu als tekst naast de balk (bv. "88%"/"89%") binnen een `role
 clearfix voor de gefloate balk+percentage toegevoegd. **Rebuild:** `choiceguide` + `choiceguide-results`.
 Kanttekening: `choiceguide-results/src/style.css` is een **gedupliceerde kopie** van de choiceguide-CSS — losse opschoning waard.
 
-### Interactieve kaart + Interactieve afbeelding — bediening (2.1.1, 2.5.7)
+### Interactieve kaart + Interactieve afbeelding — volledig (§3 + §15)
 
 Twee losse kaart-implementaties, beide voorzien van een **kompas** (↑↓←→ pan-knoppen, single-pointer, geen slepen)
 en een **"Plaats … in het midden"-knop** (keyboard) met een centraal **kruisje** dat toont waar het landt.
@@ -127,6 +127,20 @@ een react-leaflet-limitatie (fix: StrictMode uit de dev-harness óf react-leafle
 `resource-detail(-with-map)`, `resource-form`, `stem-begroot`, `enquete`, `choiceguide`, `document-map`.
 **Live geverifieerd** (harness zonder StrictMode): pannen verschuift de kaart, "Plaats op het midden" zet de
 marker op het kruisje/centrum.
+
+**Resterende kaart-punten uit de audit (code geverifieerd in de bundles):**
+
+| Crit   | Onderdeel | Fix                                                                                                                                                                                                                                                | Bestand                                                          |
+| ------ | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| 2.4.4  | §3 kaart  | Marker-popup-link "Lees verder" → `aria-label="Lees verder over {title}"` (linkdoel duidelijk).                                                                                                                                                    | `leaflet-map/src/area.tsx`                                       |
+| 1.1.1  | §3 kaart  | Gedeelde `Image` forceerde altijd `role="presentation"` → een meegegeven `alt` werd genegeerd. Nu conditioneel: `role` alleen `presentation` zónder alt. (Popup zelf heeft geen `<img>`.)                                                          | `ui/src/image/index.tsx`                                         |
+| 1.4.10 | §3 kaart  | Reflow: overzicht klapt al naar 1 kolom via `@container` (`.map-wrapper` heeft `container-type`), detail via `@media`. Hardening: `min-width:0` op grid-kinderen + kapotte `@container(`-syntax gerepareerd. ⚠️ nog handmatig op 320px te checken. | `resource-overview-with-map` + `resource-detail-with-map` `.css` |
+| 2.4.3  | §15 afb.  | Bij openen van een marker-popup springt focus nu ín de popup (close-knop) i.p.v. op de zoom/info-knoppen die in de DOM ervóór staan.                                                                                                               | `document-map/src/document-map.tsx`                              |
+| 4.1.2  | §15 afb.  | Icon-only "Terug naar boven"-knop kreeg `aria-label` + `aria-hidden` op het icoon.                                                                                                                                                                 | `document-map/src/document-map.tsx`                              |
+
+⚠️ **Verificatie-caveat:** deze 5 zijn code + bundle geverifieerd, maar niet los live (document-map dev-harness heeft
+een pre-existing render-loop; de §3-popup/Image vergen een geconfigureerde resource-kaart-widget). 1.4.10 vraagt nog
+een handmatige 320px-check.
 
 ---
 
