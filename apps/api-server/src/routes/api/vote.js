@@ -8,6 +8,7 @@ const bruteForce = require('../../middleware/brute-force');
 const { Op, Sequelize } = require('sequelize');
 const pagination = require('../../middleware/pagination');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const { buildLikeActions } = require('../../lib/vote-actions');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
 const router = express.Router({ mergeParams: true });
@@ -377,41 +378,7 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
         let actions = [];
         switch (req.project.config.votes.voteType) {
           case 'likes':
-            votes.forEach((vote) => {
-              const existingVote = existingVotes.find(
-                (entry) => entry.resourceId == vote.resourceId
-              );
-              const otherExisting = existingVotes.filter(
-                (entry) => entry.resourceId != vote.resourceId
-              );
-
-              if (existingVote) {
-                if (existingVote.opinion == vote.opinion) {
-                  actions.push({ action: 'delete', vote: existingVote });
-                } else {
-                  existingVote.opinion = vote.opinion;
-                  actions.push({ action: 'update', vote: existingVote });
-                }
-                if (
-                  otherExisting.length > 0 &&
-                  req.project.config.votes.withExisting === 'replace'
-                ) {
-                  otherExisting.forEach((v) =>
-                    actions.push({ action: 'delete', vote: v })
-                  );
-                }
-              } else {
-                if (otherExisting.length > 0) {
-                  if (req.project.config.votes.withExisting === 'error') {
-                    throw createError(403, 'Je hebt al gestemd');
-                  }
-                  otherExisting.forEach((v) =>
-                    actions.push({ action: 'delete', vote: v })
-                  );
-                }
-                actions.push({ action: 'create', vote: vote });
-              }
-            });
+            actions.push(...buildLikeActions(votes, existingVotes));
             break;
 
           case 'count':
