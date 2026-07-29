@@ -335,4 +335,49 @@ module.exports = {
     type: 'arrayOfStrings',
     default: [],
   },
+
+  // Controls which data components are exposed via the /stats reporting API.
+  // Each component has an 'enabled' flag and an optional list of personal fields
+  // (user-authored text / identifiers) that the admin has explicitly opted in to.
+  // Default: all components disabled — a token with no config reaches /stats only.
+  dataScope: {
+    type: 'object',
+    subset: {
+      resources: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      votes: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      comments: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      submissions: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      choiceguides: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+    },
+  },
 };
