@@ -913,6 +913,20 @@ function DocumentMap({
     return () => clearTimeout(t);
   }, [popupPosition]);
 
+  // ponytail: bij een geopende marker-popup focus direct in de popup zetten i.p.v. op de
+  // zoom-/info-knoppen die in de DOM ervóór staan (WCAG 2.4.3 focusvolgorde).
+  useEffect(() => {
+    if (popupPosition || !popupComment) return;
+    const t = setTimeout(() => {
+      (
+        document.querySelector(
+          '.leaflet-popup .leaflet-popup-close-button'
+        ) as HTMLElement | null
+      )?.focus();
+    }, 50);
+    return () => clearTimeout(t);
+  }, [popupComment, popupPosition]);
+
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -1617,8 +1631,9 @@ function DocumentMap({
 
       <button
         className={`back-to-top ${showButton ? 'show' : ''}`}
-        onClick={scrollToTop}>
-        <i className="ri-arrow-up-line"></i>
+        onClick={scrollToTop}
+        aria-label="Terug naar boven">
+        <i className="ri-arrow-up-line" aria-hidden="true"></i>
       </button>
 
       <NotificationProvider />

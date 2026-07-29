@@ -18,7 +18,13 @@ export function Image({
       {imageHeader ? (
         <div className="osc-image-header">{imageHeader}</div>
       ) : null}
-      <img role="presentation" {...props} alt={props.alt ? props.alt : ''} />
+      {/* ponytail: role=presentation alleen als er geen alt is; anders werd een
+          meegegeven alt door de vaste presentation-rol genegeerd (WCAG 1.1.1) */}
+      <img
+        {...props}
+        alt={props.alt ? props.alt : ''}
+        role={props.alt ? props.role : 'presentation'}
+      />
       {imageFooter && (
         <figcaption className="osc-image-footer">{imageFooter}</figcaption>
       )}

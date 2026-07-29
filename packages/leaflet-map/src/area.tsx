@@ -261,7 +261,14 @@ export function Area({
                     <h3 className="utrecht-heading-3">{item.title}</h3>
                   )}
                   {item.url && (
-                    <a className="pop-up-link" href={item.url}>
+                    <a
+                      className="pop-up-link"
+                      href={item.url}
+                      aria-label={
+                        item.title
+                          ? `Lees verder over ${item.title}`
+                          : undefined
+                      }>
                       Lees verder
                     </a>
                   )}

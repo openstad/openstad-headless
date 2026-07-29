@@ -34,6 +34,11 @@
 
 .resourceOverviewWithMap-container .detail-container {
   overflow: scroll;
+  /* ponytail: laat grid-kind krimpen i.p.v. de kaartkolom breder te duwen op smal (1.4.10) */
+  min-width: 0;
+}
+.resourceOverviewWithMap-container .map-container {
+  min-width: 0;
 }
 .resourceOverviewWithMap-container .map-container {
   aspect-ratio: unset !important;
@@ -133,7 +138,7 @@
   }
 }
 
-@container resourceOverviewWithMapContainer(max-width: 768px) {
+@container resourceOverviewWithMapContainer (max-width: 768px) {
   .resourceOverviewWithMap-container .resource-card--link {
     display: block;
   }
