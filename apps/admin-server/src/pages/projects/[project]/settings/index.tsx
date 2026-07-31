@@ -35,6 +35,21 @@ import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
 
+// Radix unmounts inactive tab content, so a field's <FormMessage /> is
+// invisible while its tab isn't active. Every field below currently lives on
+// this one tab (see the JSX further down) — this map lets save() name the
+// failing field and switch to its tab instead of leaving the user with a
+// generic error and no visible indication of what to fix.
+const GENERAL_TAB = { tab: 'general', tabLabel: 'Projectinformatie' };
+const FIELD_LABELS: Record<string, string> = {
+  name: 'Projectnaam',
+  endDate: 'Einddatum',
+  url: 'Project URL',
+  basicAuthActive: 'Beveiliging met wachtwoord',
+  password: 'Wachtwoord',
+  projectToggle: 'Website aan/uit',
+};
+
 const formSchema = z
   .object({
     name: z.string().min(1, {
@@ -81,6 +96,7 @@ export default function ProjectSettings() {
   const [basicAuthInitial, setBasicAuthInitial] = useState(true);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('general');
 
   const defaults = useCallback(() => {
     const currentDate = new Date();
@@ -127,6 +143,14 @@ export default function ProjectSettings() {
   const save = useCallback(async () => {
     const valid = await form.trigger();
     if (!valid) {
+      const firstErrorField = Object.keys(form.formState.errors)[0];
+      const label = firstErrorField ? FIELD_LABELS[firstErrorField] : undefined;
+      if (label) {
+        setActiveTab(GENERAL_TAB.tab);
+        throw new Error(
+          `Controleer het veld "${label}" op het tabblad "${GENERAL_TAB.tabLabel}".`
+        );
+      }
       throw new Error('Controleer de gemarkeerde velden.');
     }
     const values = formSchema.parse(form.getValues());
@@ -249,7 +273,7 @@ export default function ProjectSettings() {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="general">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Projectinformatie</TabsTrigger>
               <TabsTrigger value="csp">Beveiligingsheaders</TabsTrigger>

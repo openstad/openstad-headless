@@ -1,9 +1,13 @@
-import { useRegisterSave } from '@/components/ui/save-controller';
+import {
+  useRegisterSave,
+  useSaveController,
+} from '@/components/ui/save-controller';
 import cloneDeep from 'lodash/cloneDeep';
 import debounce from 'lodash/debounce';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
 import set from 'lodash/set';
+import { useRouter } from 'next/router';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 
@@ -74,6 +78,14 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
 ) {
   const schema = options?.schema;
   const label = options?.label;
+  // Some call sites pass `formSchema.omit(...)` computed inline in the render
+  // body, so `schema` gets a new identity on every render. Read it through a
+  // ref (updated every render, like onChangedRef below) instead of depending
+  // on its identity directly, so those renders don't tear down and rebuild
+  // the subscription/debounce below on every keystroke.
+  const hasSchema = !!schema;
+  const schemaRef = useRef(schema);
+  schemaRef.current = schema;
 
   const onChangedRef = useRef(onFieldChanged);
   onChangedRef.current = onFieldChanged;
@@ -104,8 +116,9 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
           return;
         }
         let values = latestRef.current;
-        if (schema) {
-          const parsed = schema.safeParse(values);
+        const currentSchema = schemaRef.current;
+        if (currentSchema) {
+          const parsed = currentSchema.safeParse(values);
           if (parsed.success) values = { ...values, ...parsed.data };
         }
         pendingRef.current.forEach((name) => {
@@ -113,7 +126,7 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
         });
         pendingRef.current.clear();
       }, 300),
-    [schema]
+    []
   );
 
   useEffect(() => {
@@ -132,12 +145,12 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
 
     const key = validatorKeyRef.current as string;
     const validateValues = (values: any): ReturnType<DraftValidator> => {
-      const result = schema!.safeParse(values);
+      const result = schemaRef.current!.safeParse(values);
       if (result.success) return { ok: true };
       const firstMessage = result.error?.issues?.[0]?.message;
       return { ok: false, label, message: firstMessage || 'ongeldige waarde.' };
     };
-    if (schema) {
+    if (schemaRef.current) {
       // Live validator: reads the form at save time so it always reflects the
       // current input while this tab is mounted.
       draftValidators.set(key, () => validateValues(form.getValues()));
@@ -150,7 +163,7 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
       // being dropped.
       flush.flush();
       unregisterFlush();
-      if (schema) {
+      if (schemaRef.current) {
         if (label && wasEditedRef.current) {
           // Freeze the last form state only for a tab the user actually edited,
           // so it keeps blocking an invalid save after it unmounts; a remount
@@ -164,7 +177,8 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
         }
       }
     };
-  }, [form, flush, onFieldChanged, schema, label]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- schema read via schemaRef above
+  }, [form, flush, onFieldChanged, hasSchema, label]);
 }
 
 // Keys that only exist on the live preview config and must never be persisted
@@ -225,6 +239,7 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
 ) {
   const { data: widget, updateConfig } = useWidgetConfig<T>();
   const { previewConfig, updatePreview } = useWidgetPreview<T>(widgetSettings);
+  const { invalidateInFlightSave } = useSaveController();
 
   const widgetSettingsKeys = useMemo(
     () => Object.keys(widgetSettings),
@@ -234,11 +249,33 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
   const widgetSettingsRef = useRef(widgetSettings);
   widgetSettingsRef.current = widgetSettings;
 
-  // Drop every visited-tab validator when leaving this widget so a snapshot
-  // from one widget can never block saving another. Runs only on page unmount
-  // (not on tab switches, which keep the page mounted) — and after the child
-  // tab cleanups, so the registry ends up empty.
+  // `_app.tsx` renders `<Component {...pageProps} />` without a `key`, so a
+  // widget id change on the same dynamic route (e.g. a browser history jump
+  // between two widgets of the same type) does NOT remount this hook. Detect
+  // that during render (not in an effect: child tab effects run before this
+  // parent effect, so an effect-based clear would wipe the validators the new
+  // tabs just registered) and drop every visited-tab validator from the OLD
+  // widget so its frozen snapshot can never block saving the new one.
+  const routerWidgetId = useRouter().query.id;
+  const widgetId = Array.isArray(routerWidgetId)
+    ? routerWidgetId[0]
+    : routerWidgetId;
+  const lastWidgetIdRef = useRef(widgetId);
+  if (lastWidgetIdRef.current !== widgetId) {
+    clearDraftValidators();
+    lastWidgetIdRef.current = widgetId;
+  }
+
+  // Also drop everything on unmount (navigating away from the widget entirely).
   useEffect(() => clearDraftValidators, []);
+
+  // A save started for the OLD widget id must not be able to flash
+  // success/blocked on the new one once it resolves. `register(null)` only
+  // bumps the staleness token on unmount, and switching widget id here does
+  // not unmount, so invalidate explicitly on every id change.
+  useEffect(() => {
+    invalidateInFlightSave();
+  }, [widgetId, invalidateInFlightSave]);
 
   // Always hold the freshest draft so save() reads flushed values, not a stale
   // closure from when it was registered.
@@ -298,16 +335,34 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
       );
     }
 
-    // Reconcile the draft from what the server actually stored (it may merge or
-    // sanitize the config), so isDirty reliably returns to false after a save
-    // instead of leaving the bar stuck on "dirty".
-    const prev = previewRef.current as any;
-    updatePreview({
-      ...(saved.config as any),
-      ...widgetSettingsRef.current,
-      widgetId: prev?.widgetId,
-      showAdminHiddenPolygonStyling: true,
-    } as T);
+    // Reconcile from what the server actually stored, so isDirty reliably
+    // clears after a save. Functional updater: a field changed WHILE the PUT
+    // was in flight (after `draft` was captured above) must survive, or the
+    // input still shows the typed value while the bar falsely reports "saved".
+    updatePreview((prevPreview) => {
+      const base: any = {
+        ...(saved.config as any),
+        ...widgetSettingsRef.current,
+        widgetId: (prevPreview as any)?.widgetId,
+        showAdminHiddenPolygonStyling: true,
+      };
+      if (!prevPreview) return base as T;
+      // Compare like-for-like: strip prevPreview the same way `draft` already
+      // is, so preview-only bookkeeping (widgetId, showAdminHiddenPolygonStyling)
+      // and the preview-injected login/logout url never look like "in-flight
+      // edits" just because of that asymmetry — only genuinely changed keys
+      // fall through to the override below.
+      const strippedPrevPreview = stripPreviewOnly(
+        prevPreview,
+        widgetSettingsKeys
+      );
+      Object.keys(strippedPrevPreview).forEach((key) => {
+        if (!isEqual((strippedPrevPreview as any)[key], (draft as any)[key])) {
+          base[key] = (prevPreview as any)[key];
+        }
+      });
+      return base as T;
+    });
   }, [updateConfig, widgetSettingsKeys, updatePreview]);
 
   useRegisterSave({ isDirty, save });

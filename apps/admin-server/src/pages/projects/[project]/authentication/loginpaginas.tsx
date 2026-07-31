@@ -257,7 +257,12 @@ export default function ProjectAuthentication() {
   const save = useCallback(async () => {
     const valid = await form.trigger();
     if (!valid) {
-      throw new Error('Controleer de gemarkeerde velden.');
+      const firstErrorField = Object.keys(form.formState.errors)[0];
+      throw new Error(
+        firstErrorField
+          ? `Controleer het veld "${firstErrorField}".`
+          : 'Controleer de gemarkeerde velden.'
+      );
     }
     const values = formSchema.parse(form.getValues());
     const result = await updateProject({

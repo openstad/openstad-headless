@@ -194,7 +194,12 @@ export default function ProjectAuthenticationRequiredFields() {
   const saveUser = useCallback(async () => {
     const valid = await userForm.trigger();
     if (!valid) {
-      throw new Error('Controleer de gemarkeerde velden.');
+      const firstErrorField = Object.keys(userForm.formState.errors)[0];
+      throw new Error(
+        firstErrorField
+          ? `Controleer het veld "${firstErrorField}" op het tabblad "Gebruikers".`
+          : 'Controleer de gemarkeerde velden op het tabblad "Gebruikers".'
+      );
     }
     const values = formSchema.parse(userForm.getValues());
     const updatedConfig = {
@@ -228,7 +233,12 @@ export default function ProjectAuthenticationRequiredFields() {
   const saveAnonymous = useCallback(async () => {
     const valid = await anonymousForm.trigger();
     if (!valid) {
-      throw new Error('Controleer de gemarkeerde velden.');
+      const firstErrorField = Object.keys(anonymousForm.formState.errors)[0];
+      throw new Error(
+        firstErrorField
+          ? `Controleer het veld "${firstErrorField}" op het tabblad "Anonieme gebruikers".`
+          : 'Controleer de gemarkeerde velden op het tabblad "Anonieme gebruikers".'
+      );
     }
     const values = formSchema.parse(anonymousForm.getValues());
     const updatedConfig = {

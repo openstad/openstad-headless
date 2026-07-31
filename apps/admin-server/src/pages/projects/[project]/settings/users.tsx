@@ -135,7 +135,12 @@ export default function ProjectSettingsUsers(
   const saveUsers = useCallback(async () => {
     const valid = await usersForm.trigger();
     if (!valid) {
-      throw new Error('Controleer de gemarkeerde velden.');
+      const firstErrorField = Object.keys(usersForm.formState.errors)[0];
+      throw new Error(
+        firstErrorField
+          ? `Controleer het veld "${firstErrorField}" op het tabblad "Archivering".`
+          : 'Controleer de gemarkeerde velden op het tabblad "Archivering".'
+      );
     }
     const values = usersFormSchema.parse(usersForm.getValues());
     const result = await updateProject({
@@ -151,7 +156,12 @@ export default function ProjectSettingsUsers(
   const saveAnonymize = useCallback(async () => {
     const valid = await anonymizeForm.trigger();
     if (!valid) {
-      throw new Error('Controleer de gemarkeerde velden.');
+      const firstErrorField = Object.keys(anonymizeForm.formState.errors)[0];
+      throw new Error(
+        firstErrorField
+          ? `Controleer het veld "${firstErrorField}" op het tabblad "Anonimiseren".`
+          : 'Controleer de gemarkeerde velden op het tabblad "Anonimiseren".'
+      );
     }
     const values = anonymizeFormSchema.parse(anonymizeForm.getValues());
     const result = await updateProject({

@@ -35,6 +35,15 @@ type SaveControllerValue = {
   register: (registration: SaveRegistration | null) => void;
   triggerSave: () => void;
   dismissError: () => void;
+  /**
+   * Mark any save currently in flight as stale without touching the
+   * registered page's dirty/success/error state. Call this when a page
+   * switches to a different underlying record WITHOUT unmounting (e.g. a
+   * widget id changing on the same route) — `register(null)` only bumps the
+   * token on unmount, so without this a save started for the old record could
+   * still resolve and flash "saved"/blocked on the new one.
+   */
+  invalidateInFlightSave: () => void;
 };
 
 const SaveControllerContext = createContext<SaveControllerValue | null>(null);
@@ -108,6 +117,16 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
       .then(() => {
         // Ignore the result if the user navigated away mid-save.
         if (isStale()) return;
+        // An edit made while the save was in flight can leave the page dirty
+        // again after its reconcile (see useWidgetDraft's save()) — show that
+        // as still-dirty instead of falsely claiming success on it. Checking
+        // the live registration here is more robust than relying on a re-render
+        // happening to have refreshed `registration` by this point.
+        if (registrationRef.current?.isDirty) {
+          setIsDirty(true);
+          setPhase('idle');
+          return;
+        }
         setPhase('success');
         clearSuccessTimer();
         successTimer.current = setTimeout(() => {
@@ -130,6 +149,18 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
     setErrorMessage(null);
     setPhase('idle');
   }, []);
+
+  const invalidateInFlightSave = useCallback(() => {
+    registrationToken.current += 1;
+    // A page switch without unmount (see useWidgetDraft's widgetId effect)
+    // doesn't go through register(null), so it wouldn't otherwise clear a
+    // leftover success/error from the OLD record. The new record's own
+    // register() call (right after, same commit) sets the correct phase from
+    // its actual isDirty state.
+    setErrorMessage(null);
+    clearSuccessTimer();
+    setPhase('idle');
+  }, [clearSuccessTimer]);
 
   useEffect(() => clearSuccessTimer, [clearSuccessTimer]);
 
@@ -160,6 +191,7 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
       register,
       triggerSave,
       dismissError,
+      invalidateInFlightSave,
     }),
     [
       state,
@@ -169,6 +201,7 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
       register,
       triggerSave,
       dismissError,
+      invalidateInFlightSave,
     ]
   );
 
