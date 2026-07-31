@@ -2,9 +2,11 @@
 
 Exposes the Openstad reporting API (`/api/project/:projectId/reports/v1/...`) as a curated set of MCP tools, so an LLM client (e.g. Claude Desktop) can query resources, votes, comments, submissions, etc. without the model ever seeing a bearer token.
 
-## Multi-tenant design
+## Deployment model: one server per installation, multi-project within it
 
-This is a single, shared, centrally-hosted server — not one process per municipality. The server holds **no reporting credentials of its own**. Every request to `/mcp` carries its own credentials:
+`MCP_REPORTING_API_BASE_URL` binds an MCP server to exactly **one** api-server, and Openstad is deployed as one installation per municipality. So deploy **one MCP server per Openstad installation** (alongside its api-server, in the same namespace) — a token issued on another installation only yields 401s here.
+
+Within that installation the server is stateless and serves **every project**: it holds no reporting credentials of its own, and one process handles concurrent requests for different projects without shared state. Every request to `/mcp` carries its own credentials:
 
 - `Authorization: Bearer <reporting-token>` — the same reporting API token used elsewhere against the Openstad API.
 - `X-Reporting-Project-Id: <projectId>` — the id of the project that token was issued for.
@@ -17,15 +19,15 @@ If either header is missing or invalid, the affected tool call returns an MCP to
 
 Only deployment-level settings are configured via environment variables:
 
-| Variable                     | Default                  | Description                           |
-| ---------------------------- | ------------------------ | ------------------------------------- |
-| `MCP_REPORTING_API_BASE_URL` | `http://localhost:31410` | Base URL of the reporting API         |
-| `MCP_HOST`                   | `127.0.0.1`              | Host to bind the `/mcp` HTTP endpoint |
-| `MCP_PORT`                   | `3900`                   | Port to bind the `/mcp` HTTP endpoint |
+| Variable                     | Default                  | Description                                |
+| ---------------------------- | ------------------------ | ------------------------------------------ |
+| `MCP_REPORTING_API_BASE_URL` | `http://localhost:31410` | Base URL of this installation's api-server |
+| `MCP_HOST`                   | `127.0.0.1`              | Host to bind the `/mcp` HTTP endpoint      |
+| `MCP_PORT`                   | `3900`                   | Port to bind the `/mcp` HTTP endpoint      |
 
-## Client (municipality) configuration
+## Client configuration
 
-Each municipality configures their own connection with their own reporting token and project id, using [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) as the stdio↔HTTP bridge. Example Claude Desktop config:
+Each client configures its own connection with its own reporting token and project id, pointed at the MCP server of the installation that issued the token, using [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) as the stdio↔HTTP bridge. Example Claude Desktop config:
 
 ```json
 {

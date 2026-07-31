@@ -1,9 +1,10 @@
 'use strict';
 
 /**
- * Server-startup configuration for the reporting MCP server. The server
- * itself holds no reporting credentials — it is a shared, multi-tenant
- * process; each request carries its own reporting bearer token and project
+ * Server-startup configuration for the reporting MCP server. apiBaseUrl binds
+ * one instance to one Openstad installation's api-server; within it the
+ * process is shared across every project and holds no reporting credentials
+ * of its own. Each request carries its own reporting bearer token and project
  * id (extracted per-request in create-app.js), so an LLM client can only
  * ever ask for data that request's own token already scopes it to.
  */

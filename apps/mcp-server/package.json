@@ -14,8 +14,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "supertest": "^4.0.2",
-    "vitest": "^3.2.3"
+    "supertest": "^4.0.2"
   },
   "author": "Gemeente Amsterdam",
   "license": "MIT"

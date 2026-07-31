@@ -19,6 +19,7 @@
     "test:unit:auth": "vitest run apps/auth-server",
     "test:unit:cms": "vitest run apps/cms-server",
     "test:unit:image": "vitest run apps/image-server",
+    "test:unit:mcp": "vitest run apps/mcp-server",
     "test:e2e": "cypress run",
     "test:component": "cypress run --component",
     "cy:open": "cypress open",

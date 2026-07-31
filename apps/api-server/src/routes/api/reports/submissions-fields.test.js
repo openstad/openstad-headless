@@ -139,8 +139,13 @@ describe('submissionsFields handler', () => {
     const res = {
       _status: null,
       _body: null,
+      _headers: {},
       status(code) {
         this._status = code;
+        return this;
+      },
+      set(key, value) {
+        this._headers[key] = value;
         return this;
       },
       json(body) {
@@ -151,7 +156,7 @@ describe('submissionsFields handler', () => {
     return res;
   }
 
-  it('returns 400 missing_widget_id when ?widgetId= is absent, without ever touching the DB', async () => {
+  it('returns 400 missing_widget_id as problem+json when ?widgetId= is absent, without ever touching the DB', async () => {
     const req = { query: {}, project: { id: 1 } };
     const res = makeRes();
     const next = vi.fn();
@@ -159,7 +164,31 @@ describe('submissionsFields handler', () => {
     await submissionsFields(req, res, next);
 
     expect(res._status).toBe(400);
-    expect(res._body.error.code).toBe('missing_widget_id');
+    expect(res._headers['Content-Type']).toBe('application/problem+json');
+    expect(res._body.code).toBe('missing_widget_id');
+    expect(res._body.status).toBe(400);
     expect(next).not.toHaveBeenCalled();
+  });
+
+  it('returns 404 widget_not_found as problem+json for a widget outside the project', async () => {
+    // The handler passes the module-level db into resolveSubmissionFields;
+    // stub the one query so this stays DB-free like the test above.
+    const db = require('../../../db');
+    const findOne = vi.spyOn(db.Widget, 'findOne').mockResolvedValue(null);
+
+    try {
+      const req = { query: { widgetId: '99' }, project: { id: 1 } };
+      const res = makeRes();
+      const next = vi.fn();
+
+      await submissionsFields(req, res, next);
+
+      expect(res._status).toBe(404);
+      expect(res._headers['Content-Type']).toBe('application/problem+json');
+      expect(res._body.code).toBe('widget_not_found');
+      expect(next).not.toHaveBeenCalled();
+    } finally {
+      findOne.mockRestore();
+    }
   });
 });

@@ -2,6 +2,9 @@ import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { createApp } = require('./create-app');
+const {
+  StreamableHTTPServerTransport,
+} = require('@modelcontextprotocol/sdk/server/streamableHttp.js');
 
 const BASE_CONFIG = {
   apiBaseUrl: 'http://localhost:31410',
@@ -40,7 +43,7 @@ describe('createApp — per-request credential extraction', () => {
     expect(options.headers.Authorization).toBe('Bearer osr_test');
   });
 
-  it('does not leak a reporting token/project id between two concurrent tenants', async () => {
+  it('does not leak a reporting token/project id between two concurrent projects', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ data: [], nextLink: null }),
@@ -61,10 +64,10 @@ describe('createApp — per-request credential extraction', () => {
           params: { name: 'reporting_resources', arguments: {} },
         });
 
-    // Two "municipalities" hitting the same shared server instance at the
-    // same time — this is the scenario the request-scoped config exists to
-    // isolate, so the assertion below checks each request's own
-    // token/project pairing, not just that two calls happened.
+    // Two projects hitting the same shared server instance at the same time
+    // — this is the scenario the request-scoped config exists to isolate, so
+    // the assertion below checks each request's own token/project pairing,
+    // not just that two calls happened.
     await Promise.all([callTool('token-a', '2'), callTool('token-b', '9')]);
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
@@ -113,6 +116,41 @@ describe('createApp — per-request credential extraction', () => {
       .send({ jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} });
 
     expect(res.status).not.toBe(401);
+  });
+
+  it('closes the per-request transport when the client aborts mid-request', async () => {
+    // LLM clients cancel tool calls routinely. With a hanging upstream the
+    // response's 'close' fires while handleRequest is still awaiting, so a
+    // cleanup listener registered only afterwards would never run.
+    const fetchMock = vi.fn(() => new Promise(() => {}));
+    vi.stubGlobal('fetch', fetchMock);
+    const closeSpy = vi.spyOn(StreamableHTTPServerTransport.prototype, 'close');
+    const app = createApp(BASE_CONFIG);
+
+    try {
+      const pending = request(app)
+        .post('/mcp')
+        .set('Authorization', 'Bearer osr_test')
+        .set('X-Reporting-Project-Id', '2')
+        .set('Accept', 'application/json, text/event-stream')
+        .send({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'tools/call',
+          params: { name: 'reporting_resources', arguments: {} },
+        });
+      pending.end(() => {});
+
+      // Poll rather than sleep a fixed amount: fixed timeouts are flaky on a
+      // slow CI runner. The hanging fetch means the handler is still inside
+      // handleRequest once fetch has been reached — exactly the mid-request
+      // state an aborting client hits.
+      await vi.waitFor(() => expect(fetchMock).toHaveBeenCalled());
+      pending.abort();
+      await vi.waitFor(() => expect(closeSpy).toHaveBeenCalled());
+    } finally {
+      closeSpy.mockRestore();
+    }
   });
 
   it('rejects GET /mcp with 405', async () => {

@@ -75,7 +75,7 @@ describe('buildNextLink', () => {
   it('echoes widgetId so page 2+ keeps the widget filter', () => {
     const req = makeReq({ widgetId: '42', pageSize: '100', page: '1' });
     expect(buildNextLink(req, 2)).toBe(
-      'api/project/1/reports/resources?widgetId=42&page=2&pageSize=100'
+      'api/project/1/reports/v1/resources?widgetId=42&page=2&pageSize=100'
     );
   });
 });

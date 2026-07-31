@@ -13,11 +13,13 @@ const { createServer } = require('./create-server');
  * server.js's process bootstrap (dotenv, app.listen) so it can be exercised
  * with supertest without opening a real network listener.
  *
- * This server is shared and multi-tenant: it holds no reporting credentials
- * of its own. Every /mcp request carries its own reporting bearer token
- * (Authorization header) and project id (X-Reporting-Project-Id header),
- * which are extracted per request and used to build a request-scoped config
- * — so concurrent requests for different municipalities never share state.
+ * One instance belongs to one Openstad installation (config.apiBaseUrl binds
+ * it to a single api-server) and serves every project within it: it holds no
+ * reporting credentials of its own. Every /mcp request carries its own
+ * reporting bearer token (Authorization header) and project id
+ * (X-Reporting-Project-Id header), which are extracted per request and used
+ * to build a request-scoped config — so concurrent requests for different
+ * projects never share state.
  * @param {{apiBaseUrl: string, host: string, port: number}} config
  */
 function createApp(config) {
@@ -30,6 +32,21 @@ function createApp(config) {
   app.post('/mcp', async (req, res) => {
     let transport;
     let server;
+
+    // Registered before anything is created, not in a finally after
+    // handleRequest: LLM clients cancel tool calls routinely, and an aborted
+    // request fires 'close' while handleRequest is still awaiting — a
+    // listener added afterwards would never run and leak the per-request
+    // McpServer/transport pair. Both bindings are assigned synchronously
+    // below, so the closure always sees them by the time 'close' can fire.
+    // Both close() calls return promises; a rejection inside an event
+    // listener has no caller to catch it and would take the process down.
+    res.on('close', () => {
+      Promise.all([transport?.close(), server?.close()]).catch((err) => {
+        console.error('Error closing MCP request scope:', err);
+      });
+    });
+
     try {
       const authHeader = req.get('Authorization') || '';
       const reportingToken = authHeader.startsWith('Bearer ')
@@ -62,14 +79,6 @@ function createApp(config) {
           id: null,
         });
       }
-    } finally {
-      // Registered on every path (success, thrown error) so a request that
-      // throws inside handleRequest still cleans up the per-request
-      // McpServer/transport pair instead of leaking them.
-      res.on('close', () => {
-        transport?.close();
-        server?.close();
-      });
     }
   });
 

@@ -23,11 +23,11 @@ function makeReportTool({ name, description, path, paramsShape = {} }) {
     description,
     inputSchema: paramsShape,
     handler: async (config, args) => {
-      // This server is shared and multi-tenant: it holds no reporting
-      // credentials of its own, so a connection with a missing/invalid
-      // reporting token or project id (see create-app.js's per-request
-      // extraction) surfaces as a tool error here — visible in the LLM UI —
-      // rather than as a connection-wide HTTP rejection.
+      // This server is shared across every project of one installation and
+      // holds no reporting credentials of its own, so a request with a
+      // missing/invalid reporting token or project id (see create-app.js's
+      // per-request extraction) surfaces as a tool error here — visible in
+      // the LLM UI — rather than as a connection-wide HTTP rejection.
       if (!config.reportingToken || !config.projectId) {
         return {
           content: [
