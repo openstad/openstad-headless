@@ -67,12 +67,12 @@ describe('requiresAdmin', () => {
 
   it('allows a non-admin resubmitting the unchanged saved dataScope', () => {
     const dataScope = {
-      votes: { enabled: true, personalFields: ['user.displayName'] },
+      comments: { enabled: true, personalFields: ['description'] },
     };
     expect(
       requiresAdmin({
         incomingDataScope: {
-          votes: { enabled: true, personalFields: ['user.displayName'] },
+          comments: { enabled: true, personalFields: ['description'] },
         },
         savedDataScope: dataScope,
         user: { role: 'editor' },

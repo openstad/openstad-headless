@@ -21,41 +21,27 @@ export const DATA_SCOPE_COMPONENTS = {
       { key: 'summary', label: 'Samenvatting' },
       { key: 'description', label: 'Beschrijving' },
       { key: 'images', label: 'Afbeeldingen' },
-      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
-      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
     ],
   },
   votes: {
     label: 'Stemmen',
-    personalFields: [
-      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
-      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
-    ],
+    personalFields: [],
   },
   comments: {
     label: 'Reacties',
-    personalFields: [
-      { key: 'description', label: 'Reactietekst' },
-      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
-      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
-    ],
+    personalFields: [{ key: 'description', label: 'Reactietekst' }],
   },
   submissions: {
     label: 'Enquêtes',
-    personalFields: [
-      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
-      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
-    ],
+    // Answers are exposed via the separate field_<key> opt-in instead.
+    personalFields: [],
   },
   choiceguides: {
     label: 'Keuzewijzers',
     // 'result' (the raw answers blob) is intentionally NOT listed here — it
     // is always blocked (see ALWAYS_BLOCKED_BLOBS in report-data-scope.js).
     // Answers are exposed via the separate answer_<key> opt-in instead.
-    personalFields: [
-      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
-      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
-    ],
+    personalFields: [],
   },
   // ADDITIVE (reporting endpoints, issue #1651): the project's own metadata is
   // public and has no personal fields.

@@ -120,7 +120,7 @@ describe('serializeRecord', () => {
     expect(out.location).toBe('{"lat":52}');
   });
 
-  it('nested user: always present with allowed sub-keys, null when absent', () => {
+  it('never emits a user object, even when user.* fields are requested', () => {
     const scope = {
       enabledPersonalFields: ['user.displayName', 'user.nickName'],
     };
@@ -130,11 +130,11 @@ describe('serializeRecord', () => {
       scope,
       { fieldTypes }
     );
-    expect(withUser.user).toEqual({ displayName: 'Ann', nickName: null });
+    expect(withUser.user).toBeUndefined();
 
     const noUser = serializeRecord('resources', { id: 1 }, scope, {
       fieldTypes,
     });
-    expect(noUser.user).toEqual({ displayName: null, nickName: null });
+    expect(noUser.user).toBeUndefined();
   });
 });

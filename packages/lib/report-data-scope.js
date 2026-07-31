@@ -29,13 +29,14 @@ const ALWAYS_BLOCKED_BLOBS = new Set(['submittedData', 'extraData', 'result']);
  * The complete catalog of reportable components.
  *
  * safeFields   — fields that are never PII; exposed without any admin opt-in.
- * personalFields — user-authored text or identifiers that require explicit
- *                  admin opt-in.  Free text (title/summary/description) and
- *                  user.* dot-paths live here. The opt-in itself lives in
- *                  project.config.dataScope — admin-configured, enforced in
- *                  the project PUT route (routes/api/project.js): only an
- *                  admin may change it.
+ * personalFields — user-authored text that requires explicit admin opt-in.
+ *                  The opt-in itself lives in project.config.dataScope —
+ *                  admin-configured, enforced in the project PUT route
+ *                  (routes/api/project.js): only an admin may change it.
  * pathPattern  — URL path segment used in /stats routing to match this component.
+ *
+ * No user.* fields: reporting identifies a person only by the HMAC pseudonym in
+ * `userId` (lib/reporting/pseudonymize.js), never by name.
  */
 const COMPONENTS = {
   resources: {
@@ -56,14 +57,7 @@ const COMPONENTS = {
       'location',
     ],
     // title/summary/description are free text authored by the submitter.
-    personalFields: [
-      'title',
-      'summary',
-      'description',
-      'images',
-      'user.displayName',
-      'user.nickName',
-    ],
+    personalFields: ['title', 'summary', 'description', 'images'],
   },
 
   votes: {
@@ -80,7 +74,7 @@ const COMPONENTS = {
       'confirmed',
     ],
     // ip and userId are always blocked — not listed here.
-    personalFields: ['user.displayName', 'user.nickName'],
+    personalFields: [],
   },
 
   comments: {
@@ -100,7 +94,7 @@ const COMPONENTS = {
       'modBreakDatetime',
     ],
     // description is free text authored by the commenter.
-    personalFields: ['description', 'user.displayName', 'user.nickName'],
+    personalFields: ['description'],
   },
 
   submissions: {
@@ -116,7 +110,8 @@ const COMPONENTS = {
       'isSpam',
     ],
     // submittedData is always blocked — arbitrary user JSON, not listed here.
-    personalFields: ['user.displayName', 'user.nickName'],
+    // Answers are opt-in per field via dataScope.submissions.formFields.
+    personalFields: [],
   },
 
   choiceguides: {
@@ -133,7 +128,7 @@ const COMPONENTS = {
     // result (the raw answers blob) is always blocked — see
     // ALWAYS_BLOCKED_BLOBS. Answers are only exposed via the flattened
     // answer_<key> columns (dataScope.choiceguides.answerFields opt-in).
-    personalFields: ['user.displayName', 'user.nickName'],
+    personalFields: [],
   },
 
   // ADDITIVE (reporting endpoints, issue #1651): the project's own metadata.

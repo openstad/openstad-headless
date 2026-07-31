@@ -12,15 +12,23 @@ const MUTATING_GET_SEGMENTS = ['/toggle', '/confirm', '/like', '/dislike'];
 
 // Non-component path segments a reporting token may still reach. Everything
 // else is denied (fail-closed). Only aggregate/stats endpoints belong here.
+const OVERVIEW_SEGMENT = 'overview';
+
 // ADDITIVE (#442): /reports/users/anonymized + /reports/users/aggregates are
 // deliberately NOT a normal report-data-scope component — there is no raw
 // user-id/PII exposure to gate per-field (rows are hand-built with a fixed,
-// pseudonymized field set; see users-anonymized.js), so they belong here
-// alongside 'overview' rather than in the COMPONENTS catalog.
+// pseudonymized field set; see users-anonymized.js), so they don't live in the
+// COMPONENTS catalog either. They expose a project-wide participant roster
+// (role, createdAt, lastLogin) across EVERY data source, which is broader than
+// any single component — so they require their OWN dedicated opt-in
+// (dataScope.users.enabled), not "any component enabled" (that would let
+// enabling e.g. just 'votes' reporting silently unlock the full participant
+// list too).
+const USER_DATA_SEGMENTS = new Set(['anonymized', 'aggregates']);
+
 const ALLOWED_NON_COMPONENT_SEGMENTS = new Set([
-  'overview',
-  'anonymized',
-  'aggregates',
+  OVERVIEW_SEGMENT,
+  ...USER_DATA_SEGMENTS,
 ]);
 
 /**
@@ -95,7 +103,11 @@ function getEnabledComponents(req) {
  *  3. For component-specific paths the component must be enabled in the
  *     project's config.dataScope.  Disabled or unconfigured → 403.
  *  4. Non-component paths are denied by default (fail-closed); only an explicit
- *     allowlist of aggregate endpoints (/overview) is permitted. Every blocked
+ *     allowlist of aggregate endpoints (/overview, /users/anonymized,
+ *     /users/aggregates) is permitted. /overview requires any component to be
+ *     enabled; the /users/* paths require their own dedicated
+ *     dataScope.users.enabled toggle, since they expose a project-wide
+ *     participant roster broader than any single component. Every blocked
  *     non-component path is logged so it can be added to the allowlist later.
  *  5. Resolved scope info is attached to req.reportingScope so the
  *     downstream field-filter middleware can project responses correctly.
@@ -166,6 +178,33 @@ function apiTokenScopeGuard(req, res, next) {
       return res
         .status(403)
         .json({ error: 'Path not allowed for reporting tokens' });
+    }
+
+    if (USER_DATA_SEGMENTS.has(lastSegment)) {
+      // Dedicated gate: enabling any single component must NOT unlock the
+      // project-wide participant roster/aggregates — only its own toggle does.
+      const dataScope =
+        req.project && req.project.config && req.project.config.dataScope;
+      const usersEnabled = !!(
+        dataScope &&
+        dataScope.users &&
+        dataScope.users.enabled
+      );
+
+      if (!usersEnabled) {
+        logBlockedReportingPath(req).catch(() => {});
+        return res.status(403).json({
+          error:
+            "The 'users' reporting component is not enabled for this project's reporting scope",
+        });
+      }
+
+      req.reportingScope = {
+        componentKey: null,
+        enabledPersonalFields: [],
+        enabledComponents: getEnabledComponents(req),
+      };
+      return next();
     }
 
     // Aggregate endpoints (e.g. /overview) derive their numbers from the

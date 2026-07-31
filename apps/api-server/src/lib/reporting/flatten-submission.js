@@ -9,8 +9,11 @@
  * (project config `dataScope.submissions.formFields`, admin-configured) are
  * emitted. This is a separate allowlist from report-data-scope's
  * safeFields/personalFields catalog (which only knows fixed, cross-project
- * field names) — form fields are dynamic per project/widget, so they cannot
- * live in that static catalog.
+ * field names) — form fields are dynamic per widget, so they cannot live in
+ * that static catalog.
+ *
+ * `enabledFieldKeys` has no widget dimension: the opt-in is project-wide per
+ * fieldKey — see the SCOPE note in models/lib/project-config.js.
  *
  * `submittedData` itself stays hard-blocked as a blob (report-data-scope
  * ALWAYS_BLOCKED_BLOBS); these flattened columns are injected AFTER the field

@@ -89,7 +89,7 @@ describe('reportFieldFilter', () => {
       expect(result.extraData).toBeUndefined();
     });
 
-    it('keeps user.displayName only when opted in', () => {
+    it('never exposes user.* — not even when asked for explicitly', () => {
       const scopeWithPersonal = {
         componentKey: 'votes',
         enabledPersonalFields: ['user.displayName'],
@@ -109,11 +109,9 @@ describe('reportFieldFilter', () => {
         reportingScope: scopeWithPersonal,
       });
 
-      expect(result.user).toBeDefined();
-      expect(result.user.displayName).toBe('User-42');
-      // PII in user always stripped
-      expect(result.user.email).toBeUndefined();
-      expect(result.user.phoneNumber).toBeUndefined();
+      // user.* is no longer part of the reporting catalog: the joined user
+      // object is dropped wholesale rather than projected down.
+      expect(result.user).toBeUndefined();
       // userId at top level still stripped
       expect(result.userId).toBeUndefined();
     });

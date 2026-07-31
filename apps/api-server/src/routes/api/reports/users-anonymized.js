@@ -8,9 +8,12 @@ const {
 } = require('../../../lib/reporting/paginate');
 const { pseudonymizeUserId } = require('../../../lib/reporting/pseudonymize');
 
-// Real deelnemers only: excludes the system/anonymous placeholder (id 0) and
-// the anonymous/unknown roles (#442 AC: no PII by default, only participants).
-const EXCLUDED_ROLES = ['anonymous', 'unknown'];
+// Real participants only: excludes the system placeholder (id 0), the
+// anonymous/unknown roles, and staff — a staff role is often unique in a
+// project, which singles that person out via the participantId <-> userId join.
+// /reports/users/aggregates still counts all activity, so its participant count
+// can exceed this roster's row count.
+const EXCLUDED_ROLES = ['anonymous', 'unknown', 'admin', 'editor', 'moderator'];
 
 function toIsoOrNull(value) {
   if (!value) return null;
@@ -80,3 +83,4 @@ async function usersAnonymized(req, res, next) {
 module.exports = usersAnonymized;
 module.exports.toParticipantRow = toParticipantRow;
 module.exports.toIsoOrNull = toIsoOrNull;
+module.exports.EXCLUDED_ROLES = EXCLUDED_ROLES;

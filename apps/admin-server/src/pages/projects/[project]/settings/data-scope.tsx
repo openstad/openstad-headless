@@ -191,7 +191,7 @@ export default function ProjectSettingsDataScope() {
                         {enabled && def.personalFields.length > 0 && (
                           <div className="pl-2 border-l-2 border-yellow-300 space-y-2">
                             <p className="text-sm font-medium text-muted-foreground">
-                              Optionele persoonsvelden (gepseudonimiseerd)
+                              Optionele persoonsvelden
                             </p>
                             <FormField
                               control={form.control}

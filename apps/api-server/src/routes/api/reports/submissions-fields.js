@@ -50,6 +50,10 @@ function inferFieldType(item) {
 }
 
 /**
+ * The opted-in form-field keys for this project. Project-wide per fieldKey, so
+ * what this endpoint reports is that list intersected with ?widgetId='s items
+ * — see the SCOPE note in models/lib/project-config.js.
+ *
  * @param {import('express').Request} req
  * @returns {string[]}
  */

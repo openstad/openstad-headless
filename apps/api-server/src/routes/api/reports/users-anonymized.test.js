@@ -1,6 +1,10 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 
-const { toParticipantRow, toIsoOrNull } = require('./users-anonymized');
+const {
+  toParticipantRow,
+  toIsoOrNull,
+  EXCLUDED_ROLES,
+} = require('./users-anonymized');
 
 beforeAll(() => {
   process.env.OPENSTAD_REPORT_PSEUDONYM_SECRET = 'test-secret';
@@ -16,6 +20,23 @@ describe('toIsoOrNull', () => {
     expect(toIsoOrNull(null)).toBeNull();
     expect(toIsoOrNull(undefined)).toBeNull();
     expect(toIsoOrNull('not a date')).toBeNull();
+  });
+});
+
+describe('EXCLUDED_ROLES', () => {
+  it('keeps staff out of the roster — a unique role would single someone out', () => {
+    for (const role of ['admin', 'editor', 'moderator']) {
+      expect(EXCLUDED_ROLES).toContain(role);
+    }
+  });
+
+  it('still excludes the placeholder roles', () => {
+    expect(EXCLUDED_ROLES).toContain('anonymous');
+    expect(EXCLUDED_ROLES).toContain('unknown');
+  });
+
+  it('keeps real participants in', () => {
+    expect(EXCLUDED_ROLES).not.toContain('member');
   });
 });
 

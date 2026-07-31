@@ -58,8 +58,8 @@ function coerceValue(value, typeKey) {
  * - Every allowed column is ALWAYS present; missing/undefined → null
  *   (consistent schema for Power BI; also compensates for filterRecord dropping
  *   undefined keys).
- * - user.* dot-path fields become a nested `user` object whose allowed
- *   sub-keys are always present (null when absent).
+ * - Output is flat: a joined `user` object is dropped, since the catalog carries
+ *   no user.* fields.
  * - Raw `userId` is never emitted here; the pseudonymous userId is added AFTER
  *   the field-filter by the report-finalize middleware (#438).
  *
@@ -79,9 +79,6 @@ function serializeRecord(componentKey, row, scope, opts = {}) {
     require('./component-registry').getFieldTypes(componentKey);
 
   const topLevel = exposed.filter((f) => !f.includes('.'));
-  const userSub = exposed
-    .filter((f) => f.startsWith('user.'))
-    .map((f) => f.slice('user.'.length));
 
   const out = {};
   for (const key of topLevel) {
@@ -90,15 +87,6 @@ function serializeRecord(componentKey, row, scope, opts = {}) {
       raw === undefined ? null : raw,
       fieldTypes[key] || 'UNKNOWN'
     );
-  }
-
-  if (userSub.length > 0) {
-    const user = plain.user && typeof plain.user === 'object' ? plain.user : {};
-    out.user = {};
-    for (const key of userSub) {
-      const raw = user[key];
-      out.user[key] = raw === undefined ? null : raw;
-    }
   }
 
   return out;

@@ -377,7 +377,12 @@ module.exports = {
           // /reports/submissions/fields. Distinct from personalFields above
           // (which lists fixed, cross-project field names from
           // report-data-scope's static catalog) — form fields are dynamic,
-          // defined per project/widget, so they can't live in that catalog.
+          // defined per widget, so they can't live in that catalog.
+          //
+          // SCOPE: project-wide per fieldKey, not per widget — opting in
+          // 'email' also exposes form B's field_email if B uses that same key.
+          // ?widgetId= narrows rows, never the allowlist.
+          //
           // Default empty: no form answers are exposed until explicitly
           // opted in per field key.
           formFields: { type: 'arrayOfStrings', default: [] },
@@ -391,7 +396,8 @@ module.exports = {
           // Per-field opt-in allowlist (#441) for the flattened
           // answer_<key> columns exposed by /reports/choice-guide-results —
           // same rationale as submissions.formFields above (dynamic,
-          // per-widget question keys can't live in the static catalog).
+          // per-widget question keys can't live in the static catalog), and
+          // the same scope: project-wide per answer key.
           answerFields: { type: 'arrayOfStrings', default: [] },
         },
       },
@@ -410,6 +416,16 @@ module.exports = {
         subset: {
           enabled: { type: 'boolean', default: false },
           personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      // ADDITIVE (#442): dedicated toggle for the participant roster
+      // (/reports/users/anonymized + /reports/users/aggregates). It spans every
+      // data source, so enabling e.g. only 'votes' must not unlock it.
+      // Enforced in middleware/api-token-scope-guard.js.
+      users: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
         },
       },
     },

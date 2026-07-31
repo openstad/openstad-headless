@@ -10,6 +10,9 @@ const {
 } = require('../../../lib/reporting/flatten-submission');
 
 /**
+ * The opted-in answer keys for this project — project-wide per key, see the
+ * SCOPE note in models/lib/project-config.js.
+ *
  * @param {import('express').Request} req
  * @returns {string[]}
  */

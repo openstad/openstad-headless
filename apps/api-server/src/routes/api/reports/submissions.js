@@ -10,6 +10,9 @@ const {
 } = require('../../../lib/reporting/flatten-submission');
 
 /**
+ * The opted-in form-field keys for this project — project-wide per fieldKey,
+ * see the SCOPE note in models/lib/project-config.js.
+ *
  * @param {import('express').Request} req
  * @returns {string[]}
  */
@@ -42,6 +45,10 @@ function widgetItemsOf(plainRow) {
 // item whose key is absent from a given row's submittedData, so passing the
 // page-wide union of items as the "form definition" gives consistent
 // schema for free (#440 AC: consistent schema, empty fields as null).
+//
+// ?widgetId= narrows the ROWS, never the allowlist (project-wide per fieldKey).
+// The union is computed per PAGE, so the column set can differ between pages of
+// an unfiltered query — pass ?widgetId= when a stable schema matters.
 module.exports = makeReportEndpoint({
   componentKey: 'submissions',
   model: 'Submission',
