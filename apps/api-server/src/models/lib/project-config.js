@@ -401,6 +401,13 @@ module.exports = {
           answerFields: { type: 'arrayOfStrings', default: [] },
         },
       },
+      projects: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
       // ADDITIVE (#441): choice-guide definition content (safe-only, no
       // personalFields — see report-data-scope.js's choiceguideguides /
       // choiceguidequestions comments).
