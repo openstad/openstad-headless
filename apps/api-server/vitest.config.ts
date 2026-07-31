@@ -12,5 +12,9 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    // node-config resolves its config dir from process.cwd(); without this the
+    // suites that import src/db.js fail to collect when vitest runs from the
+    // repo root (as CI does).
+    env: { NODE_CONFIG_DIR: path.resolve(__dirname, 'config') },
   },
 });
