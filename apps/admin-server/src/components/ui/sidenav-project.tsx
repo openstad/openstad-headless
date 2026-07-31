@@ -31,9 +31,9 @@ export function SidenavProject({ className }: { className?: string }) {
         className
       )}>
       <div className="flex flex-col items-start justify-center h-24">
-        <button onClick={() => router.back()}>
+        <button type="button" aria-label="Terug" onClick={() => router.back()}>
           <div className="m-4 p-3 bg-secondary rounded">
-            <ArrowLeft size={20} />
+            <ArrowLeft size={20} aria-hidden="true" />
           </div>
         </button>
       </div>
