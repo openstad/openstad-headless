@@ -317,11 +317,15 @@ function Comment({
                   </Button>
                 ) : (
                   <Button disabled>
-                    <i className="ri-thumb-down-line"></i>
+                    <i className="ri-thumb-down-line" aria-hidden="true"></i>
                     {variant != 'micro-score' && (
                       <>
                         Mee oneens (<span>{noVotes}</span>)
                       </>
+                    )}
+                    {/* ponytail: ook de disabled dislike-knop een naam geven in micro-variant (1.1.1) */}
+                    {variant == 'micro-score' && (
+                      <span className="sr-only">Mee oneens</span>
                     )}
                   </Button>
                 ))}
