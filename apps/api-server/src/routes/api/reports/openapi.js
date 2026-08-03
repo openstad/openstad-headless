@@ -20,5 +20,11 @@ const spec = swaggerJsdoc({
  * unauthenticated location.
  */
 module.exports = function openapiSpec(req, res) {
+  // The spec is a schema document, not participant data — same flag
+  // submissions-fields.js uses, so report-field-filter passes it through
+  // instead of screening it as an aggregate payload (which it is not).
+  // Only relevant when the request carries a reporting token; harmless
+  // otherwise, since the filter no-ops for every other request.
+  req.reportSchemaResponse = true;
   res.json(spec);
 };

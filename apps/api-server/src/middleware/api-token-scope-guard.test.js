@@ -244,6 +244,24 @@ describe('apiTokenScopeGuard', () => {
       expect(req.reportingScope.enabledComponents).toEqual(['votes']);
     });
 
+    it('allows /openapi.json even when no component is enabled — the spec is documentation, and reports/index.js already serves it without a token', () => {
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path: '/api/project/1/reports/v1/openapi.json',
+        projectDataScope: { votes: { enabled: false, personalFields: [] } },
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
+      expect(next).toHaveBeenCalledOnce();
+      // report-field-filter blocks any reporting response reaching it with no
+      // scope attached, so the guard must still set one.
+      expect(req.reportingScope).toMatchObject({ componentKey: null });
+    });
+
     it('blocks /overview when no component is enabled (fail-closed)', () => {
       const req = makeReq({
         apiTokenScope: 'reports',

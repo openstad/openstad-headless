@@ -19,11 +19,14 @@ If either header is missing or invalid, the affected tool call returns an MCP to
 
 Only deployment-level settings are configured via environment variables:
 
-| Variable                     | Default                  | Description                                |
-| ---------------------------- | ------------------------ | ------------------------------------------ |
-| `MCP_REPORTING_API_BASE_URL` | `http://localhost:31410` | Base URL of this installation's api-server |
-| `MCP_HOST`                   | `127.0.0.1`              | Host to bind the `/mcp` HTTP endpoint      |
-| `MCP_PORT`                   | `3900`                   | Port to bind the `/mcp` HTTP endpoint      |
+| Variable                     | Default                  | Description                                                                           |
+| ---------------------------- | ------------------------ | ------------------------------------------------------------------------------------- |
+| `MCP_REPORTING_API_BASE_URL` | `http://localhost:31410` | Base URL of this installation's api-server                                            |
+| `MCP_HOST`                   | `127.0.0.1`              | Host to bind the `/mcp` HTTP endpoint                                                 |
+| `MCP_PORT`                   | `3900`                   | Port to bind the `/mcp` HTTP endpoint                                                 |
+| `MCP_ALLOWED_HOSTS`          | _(unset)_                | Comma-separated `Host` headers to accept — **set this when binding beyond localhost** |
+
+> **Deploying in a container:** `MCP_HOST` must be `0.0.0.0` for the port to be reachable from outside the pod. The MCP SDK applies DNS-rebinding protection automatically only for a localhost bind, so set `MCP_ALLOWED_HOSTS` to the hostname(s) the server is reached by — otherwise it accepts any `Host` header.
 
 ## Client configuration
 

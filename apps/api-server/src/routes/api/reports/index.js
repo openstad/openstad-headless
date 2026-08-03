@@ -29,11 +29,13 @@ router.use((req, res, next) => {
 
 // NLgov API Design Rules: publish OpenAPI 3.x at a fixed location. Mounted
 // BEFORE the auth gate below — an integrator must be able to read the API
-// shape before they can request a reporting token for it. (A request that
-// DOES carry a valid reporting token still 403s here via the globally-mounted
-// api-token-scope-guard, since /openapi.json matches no known reporting
-// component — a narrow, documented edge case, not a security gap: the spec
-// stays reachable for the unauthenticated case that matters.)
+// shape before they can request a reporting token for it. A request that DOES
+// carry a valid reporting token reaches the spec too: api-token-scope-guard
+// allows it via its SPEC_SEGMENT branch (no project data here to scope, so it
+// does not depend on dataScope), and openapi.js sets req.reportSchemaResponse
+// so report-field-filter passes the document through instead of screening it
+// as an aggregate payload. Both matter — every real client (Power BI, Swagger
+// UI, generated SDKs) sends Authorization on every request.
 //
 // Access-Control-Allow-Origin is hardcoded to '*' here specifically (not left
 // to the app-wide, allowlist-based security-headers.js middleware) because

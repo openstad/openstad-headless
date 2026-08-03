@@ -8,6 +8,7 @@ describe('loadConfig', () => {
     expect(config).toEqual({
       apiBaseUrl: 'http://localhost:31410',
       host: '127.0.0.1',
+      allowedHosts: undefined,
       port: 3900,
     });
   });
@@ -33,5 +34,23 @@ describe('loadConfig', () => {
       MCP_HOST: '0.0.0.0',
     });
     expect(config.host).toBe('0.0.0.0');
+  });
+
+  it('parses MCP_ALLOWED_HOSTS into a trimmed list', () => {
+    const config = loadConfig({
+      MCP_ALLOWED_HOSTS: 'reporting-mcp.example.org, mcp.internal ',
+    });
+    expect(config.allowedHosts).toEqual([
+      'reporting-mcp.example.org',
+      'mcp.internal',
+    ]);
+  });
+
+  it('leaves allowedHosts undefined when MCP_ALLOWED_HOSTS is empty or blank, so the SDK default applies', () => {
+    expect(loadConfig({}).allowedHosts).toBeUndefined();
+    expect(loadConfig({ MCP_ALLOWED_HOSTS: '' }).allowedHosts).toBeUndefined();
+    expect(
+      loadConfig({ MCP_ALLOWED_HOSTS: ' , ' }).allowedHosts
+    ).toBeUndefined();
   });
 });

@@ -31,6 +31,14 @@ const OVERVIEW_SEGMENT = 'overview';
 // list too).
 const USER_DATA_SEGMENTS = new Set(['anonymized', 'aggregates']);
 
+// The OpenAPI spec is documentation, not project data. reports/index.js mounts
+// it BEFORE the auth gate, so it is already served to anyone without a token —
+// blocking it for a request that DOES carry one would be a pure usability
+// defect, since every real client (Power BI, Swagger UI, generated SDKs) sends
+// Authorization on every request. Allowed independently of dataScope for the
+// same reason: there is no project data here to scope.
+const SPEC_SEGMENT = 'openapi.json';
+
 const ALLOWED_NON_COMPONENT_SEGMENTS = new Set([
   OVERVIEW_SEGMENT,
   ...USER_DATA_SEGMENTS,
@@ -191,6 +199,20 @@ function apiTokenScopeGuard(req, res, next) {
     // so an allowlisted word elsewhere in the path cannot open it up.
     const segments = pathLower.split('/').filter(Boolean);
     const lastSegment = segments[segments.length - 1];
+
+    // Checked before the dataScope-dependent branches below: the spec must
+    // stay readable even for a project that has enabled no components at all.
+    // A scope is still attached, because report-field-filter blocks any
+    // reporting response that reaches it without one.
+    if (lastSegment === SPEC_SEGMENT) {
+      req.reportingScope = {
+        componentKey: null,
+        enabledPersonalFields: [],
+        aggregate: false,
+      };
+      return next();
+    }
+
     const allowed = ALLOWED_NON_COMPONENT_SEGMENTS.has(lastSegment);
 
     if (!allowed) {

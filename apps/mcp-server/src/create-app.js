@@ -20,10 +20,16 @@ const { createServer } = require('./create-server');
  * (X-Reporting-Project-Id header), which are extracted per request and used
  * to build a request-scoped config — so concurrent requests for different
  * projects never share state.
- * @param {{apiBaseUrl: string, host: string, port: number}} config
+ * @param {{apiBaseUrl: string, host: string, allowedHosts?: string[], port: number}} config
  */
 function createApp(config) {
-  const app = createMcpExpressApp({ host: config.host });
+  // allowedHosts must be passed through: the SDK only applies DNS-rebinding
+  // protection by itself when host is localhost, and a container deployment
+  // binds 0.0.0.0. Omitted (undefined) keeps the SDK's own default.
+  const app = createMcpExpressApp({
+    host: config.host,
+    allowedHosts: config.allowedHosts,
+  });
 
   // Stateless mode: a fresh McpServer + transport per request, so one process
   // can serve concurrent tool calls without shared session state — this

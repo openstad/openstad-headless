@@ -76,6 +76,30 @@ describe('fetchReportingData', () => {
     expect(err.problem).toEqual(problem);
   });
 
+  it('reports the real status when a proxy answers with a non-JSON error body', async () => {
+    // A 502 from an ingress is an HTML page, not problem+json — parsing it
+    // first would throw a SyntaxError and hide the actual status.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 502,
+        json: async () => {
+          throw new SyntaxError('Unexpected token < in JSON at position 0');
+        },
+      })
+    );
+
+    let err;
+    try {
+      await fetchReportingData(config, '/resources', {});
+    } catch (e) {
+      err = e;
+    }
+    expect(err.status).toBe(502);
+    expect(err.message).toBe('Reporting API request failed with status 502');
+  });
+
   it('folds a problem body detail into the error message (the SDK only ever surfaces .message to the LLM)', async () => {
     vi.stubGlobal(
       'fetch',

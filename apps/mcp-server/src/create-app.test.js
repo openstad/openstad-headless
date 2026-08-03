@@ -153,6 +153,31 @@ describe('createApp — per-request credential extraction', () => {
     }
   });
 
+  it('validates the Host header against allowedHosts when bound beyond localhost', async () => {
+    // The SDK only applies DNS-rebinding protection by itself for a localhost
+    // host; on 0.0.0.0 (what any container deployment binds) it just warns, so
+    // allowedHosts has to be passed through for the protection to exist at all.
+    const app = createApp({
+      ...BASE_CONFIG,
+      host: '0.0.0.0',
+      allowedHosts: ['mcp.internal'],
+    });
+
+    const rejected = await request(app)
+      .post('/mcp')
+      .set('Host', 'evil.example.org')
+      .set('Accept', 'application/json, text/event-stream')
+      .send({ jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} });
+    expect(rejected.status).toBe(403);
+
+    const accepted = await request(app)
+      .post('/mcp')
+      .set('Host', 'mcp.internal')
+      .set('Accept', 'application/json, text/event-stream')
+      .send({ jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} });
+    expect(accepted.status).not.toBe(403);
+  });
+
   it('rejects GET /mcp with 405', async () => {
     const app = createApp(BASE_CONFIG);
     const res = await request(app).get('/mcp');

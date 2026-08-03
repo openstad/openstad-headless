@@ -69,7 +69,24 @@ async function fetchReportingData(config, path, params) {
   const res = await fetch(url, {
     headers: { Authorization: `Bearer ${config.reportingToken}` },
   });
-  const body = await res.json();
+
+  // Not every failure comes from the reporting API itself — a proxy or
+  // ingress in front of it answers with an HTML error page, and parsing that
+  // as JSON would throw a SyntaxError that hides the real status from the
+  // LLM. Parse defensively and let messageFromProblem fall back to the status.
+  let body;
+  try {
+    body = await res.json();
+  } catch {
+    if (res.ok) {
+      const err = new Error(
+        `Reporting API returned a non-JSON body with status ${res.status}`
+      );
+      err.status = res.status;
+      throw err;
+    }
+    body = null;
+  }
 
   if (!res.ok) {
     const err = new Error(messageFromProblem(body, res.status));

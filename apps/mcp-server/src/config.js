@@ -20,10 +20,27 @@ function parsePort(value, fallback) {
   return Number.isFinite(n) && n >= 0 ? n : fallback;
 }
 
+/**
+ * Host names this server accepts in the Host header, as a comma-separated
+ * list. The MCP SDK applies DNS-rebinding protection automatically only when
+ * bound to localhost; binding to 0.0.0.0 — which any container deployment
+ * needs — drops it for a bare console warning. Setting this restores host
+ * validation for that case. Empty means "keep the SDK's default behaviour".
+ */
+function parseAllowedHosts(value) {
+  if (!value) return undefined;
+  const hosts = value
+    .split(',')
+    .map((h) => h.trim())
+    .filter(Boolean);
+  return hosts.length > 0 ? hosts : undefined;
+}
+
 function loadConfig(env = process.env) {
   return {
     apiBaseUrl: env.MCP_REPORTING_API_BASE_URL || 'http://localhost:31410',
     host: env.MCP_HOST || '127.0.0.1',
+    allowedHosts: parseAllowedHosts(env.MCP_ALLOWED_HOSTS),
     port: parsePort(env.MCP_PORT, 3900),
   };
 }
