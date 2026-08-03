@@ -8,6 +8,7 @@ const require = createRequire(import.meta.url);
 const db = require('../db');
 const authSettings = require('../util/auth-settings');
 const config = require('config');
+const auditLogService = require('../services/audit-log');
 const getUserMiddleware = require('./user.js');
 
 const JWT_SECRET = config.auth.jwtSecret;
@@ -16,6 +17,8 @@ const JWT_SECRET = config.auth.jwtSecret;
 const originalUserFindOne = db.User.findOne;
 const originalProjectFindOne = db.Project.findOne;
 const originalApiTokenFindOne = db.ApiToken.findOne;
+const originalAuditLogFindOne = db.AuditLog.findOne;
+const originalLogDirect = auditLogService.logDirect;
 const originalAuthSettingsConfig = authSettings.config;
 const originalFixedAuthTokens = config.auth.fixedAuthTokens;
 
@@ -35,6 +38,8 @@ afterEach(() => {
   db.User.findOne = originalUserFindOne;
   db.Project.findOne = originalProjectFindOne;
   db.ApiToken.findOne = originalApiTokenFindOne;
+  db.AuditLog.findOne = originalAuditLogFindOne;
+  auditLogService.logDirect = originalLogDirect;
   authSettings.config = originalAuthSettingsConfig;
   // Restore fixedAuthTokens in case a test mutated the shared config singleton
   setFixedAuthTokens(originalFixedAuthTokens);
@@ -355,6 +360,69 @@ describe('user middleware', () => {
       expect(next).toHaveBeenCalledWith();
       // Rejected deliberately, not by way of a swallowed exception.
       expect(errorLog).not.toHaveBeenCalled();
+    });
+
+    // The audit entry is written fire-and-forget, so let the microtask queue
+    // drain before asserting on it.
+    describe('auditing the first use of an expired token', () => {
+      const EXPIRED = { expiresAt: new Date(Date.now() - 60 * 1000) };
+
+      async function runAndFlush() {
+        const req = apiTokenReq();
+        await getUserMiddleware(req, createMockRes(), vi.fn());
+        await new Promise((resolve) => setImmediate(resolve));
+        return req;
+      }
+
+      it('writes a single token_expired entry the first time', async () => {
+        const apiToken = mockApiToken(EXPIRED);
+        db.AuditLog.findOne = vi.fn().mockResolvedValue(null);
+        auditLogService.logDirect = vi.fn();
+
+        await runAndFlush();
+
+        expect(auditLogService.logDirect).toHaveBeenCalledTimes(1);
+        const entry = auditLogService.logDirect.mock.calls[0][0];
+        expect(entry).toMatchObject({
+          action: 'token_expired',
+          modelName: 'api-token',
+          modelId: apiToken.id,
+          projectId: apiToken.projectId,
+        });
+      });
+
+      it('does not log again once an entry exists', async () => {
+        mockApiToken(EXPIRED);
+        db.AuditLog.findOne = vi.fn().mockResolvedValue({ id: 1 });
+        auditLogService.logDirect = vi.fn();
+
+        await runAndFlush();
+
+        expect(auditLogService.logDirect).not.toHaveBeenCalled();
+      });
+
+      it('still rejects the request when the audit write fails', async () => {
+        mockApiToken(EXPIRED);
+        db.AuditLog.findOne = vi
+          .fn()
+          .mockRejectedValue(new Error('audit db down'));
+        auditLogService.logDirect = vi.fn();
+
+        const req = await runAndFlush();
+
+        expect(req.user).toEqual({ role: 'anonymous', id: null });
+      });
+
+      it('does not log for a valid token', async () => {
+        mockApiToken({ expiresAt: new Date(Date.now() + 60 * 1000) });
+        db.User.findOne = vi.fn().mockResolvedValue(OWNER);
+        db.AuditLog.findOne = vi.fn().mockResolvedValue(null);
+        auditLogService.logDirect = vi.fn();
+
+        await runAndFlush();
+
+        expect(auditLogService.logDirect).not.toHaveBeenCalled();
+      });
     });
 
     it('accepts a token whose expiry is still ahead', async () => {
