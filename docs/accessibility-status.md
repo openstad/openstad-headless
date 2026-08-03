@@ -215,16 +215,32 @@ in open-state, dus gesloten blijft de banner normaal bovenop.
 
 cms-server herstart (scss hercompileert bij restart). Live-audit-verificatie volgt bij deploy naar audit.draad.dev.
 
+### Tijdlijn: huidige fase (1.3.1)
+
+De content-tijdlijn had geen "huidige fase"-status en de items hebben géén datumveld
+(`title` is vrije tekst als "March 8th"), dus niet uit data afleidbaar. Toegevoegd: een
+boolean `current` ("Mark as current phase") per item; de render zet `aria-current="step"`
+op de item-`<div>`. De losse agenda-widget had `aria-current` al.
+
+| Crit  | Fix                                                    | Bestand                                                                         |
+| ----- | ------------------------------------------------------ | ------------------------------------------------------------------------------- |
+| 1.3.1 | boolean `current` → `aria-current="step"` in de render | `cms-server/modules/openstad-timeline-widget/index.js`, `.../views/widget.html` |
+
+cms-server herstart (apostrophe pikt schema + template op). Redacteur moet per tijdlijn
+het huidige item aanvinken. Live-audit-verificatie volgt bij deploy naar audit.draad.dev.
+
 ---
 
 ## ⏭️ Nog te doen
 
-- **Tijdlijn `aria-current` (contentwidget, 1.3.1)** — uitgesteld: de content-tijdlijn kent geen "huidige
-  fase"-status (alleen period-vs-moment als type); `aria-current` binden vergt een nieuw schema-veld
-  (`openstad-timeline-widget`). De losse agenda-widget heeft `aria-current` al.
-- **Inzending-detail afbeeldingslink (2.5.3)** — `resource-detail.tsx:353` `aria-label` matcht niet de zichtbare
-  tekst; verweven met de misleidende, configureerbare "Reageer op deze inzending"-tekst (deels content).
-- **Matrix-tabel reflow** — niet getest (laag risico).
+- **Matrix-tabel reflow (1.4.10)** — code staat al (`matrix.css`: mobiele card-stack <480px +
+  `overflow:auto` fallback); alleen nog handmatig op 320px verifiëren. Laag risico.
+- **Inzending-detail afbeeldingslink (2.5.3)** — code is in orde: de beeld-only link heeft
+  `aria-label="Bekijk afbeelding… (opent in nieuw tabblad)"` zonder zichtbare-tekst-conflict.
+  Wat rest = content: de misleidende, configureerbare "Reageer op deze inzending"-tekst.
+
+> **Code-kant van de 27 audit-punten is hiermee dicht.** Resterend zijn verify-only (matrix 320px)
+> en content-/config-acties (zie hieronder) die code niet kan afdwingen.
 
 ---
 
