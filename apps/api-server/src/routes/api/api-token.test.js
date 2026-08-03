@@ -18,6 +18,7 @@ const BASE_URL = `/project/${PROJECT_ID}/user/${USER_ID}/api-token`;
 const originalUserFindOne = db.User.findOne;
 const originalApiTokenCreate = db.ApiToken.create;
 const originalApiTokenFindAll = db.ApiToken.findAll;
+const originalApiTokenFindOne = db.ApiToken.findOne;
 
 // Builds an app that mounts the router the way the real API does
 // (mergeParams on /project/:projectId/user/:userId/api-token), with req.user and
@@ -57,6 +58,7 @@ afterEach(() => {
   db.User.findOne = originalUserFindOne;
   db.ApiToken.create = originalApiTokenCreate;
   db.ApiToken.findAll = originalApiTokenFindAll;
+  db.ApiToken.findOne = originalApiTokenFindOne;
 });
 
 describe('api-token routes', () => {
@@ -277,16 +279,15 @@ describe('api-token routes', () => {
       });
     });
 
-    // Only 'active' and 'expired' are reachable here: the model is paranoid and
-    // this query does not pass `paranoid: false`, so a soft-deleted (revoked)
-    // row can never come back. computeStatus's 'revoked' branch is covered in
-    // lib/api-token-status.test.js.
+    // Since this PR the list opts out of paranoid mode, so revoked tokens come
+    // back too and the status field is what tells them apart.
     it('computes the status of each listed token', async () => {
       const hour = 60 * 60 * 1000;
       db.ApiToken.findAll = vi.fn().mockResolvedValue([
         { id: 1, expiresAt: new Date(Date.now() + hour), deletedAt: null },
         { id: 2, expiresAt: new Date(Date.now() - hour), deletedAt: null },
         { id: 3, expiresAt: null, deletedAt: null },
+        { id: 4, expiresAt: null, deletedAt: new Date(Date.now() - hour) },
       ]);
 
       const res = await request(createApp()).get(BASE_URL);
@@ -298,7 +299,16 @@ describe('api-token routes', () => {
         'active',
         'expired',
         'expired',
+        'revoked',
       ]);
+    });
+
+    it('includes revoked tokens by opting out of paranoid mode', async () => {
+      await request(createApp()).get(BASE_URL);
+
+      expect(db.ApiToken.findAll).toHaveBeenCalledWith(
+        expect.objectContaining({ paranoid: false })
+      );
     });
 
     it('scopes the query to this user and project, newest first', async () => {
@@ -320,6 +330,70 @@ describe('api-token routes', () => {
       db.ApiToken.findAll = vi.fn().mockRejectedValue(new Error('db down'));
 
       const res = await request(createApp()).get(BASE_URL);
+
+      expect(res.status).toBe(500);
+    });
+  });
+
+  describe('DELETE /:tokenId (revoke)', () => {
+    const TOKEN_ID = 7;
+    const DELETE_URL = `${BASE_URL}/${TOKEN_ID}`;
+
+    function mockStoredToken() {
+      const token = {
+        id: TOKEN_ID,
+        destroy: vi.fn().mockResolvedValue(undefined),
+      };
+      db.ApiToken.findOne = vi.fn().mockResolvedValue(token);
+      return token;
+    }
+
+    it('soft-deletes the token so it stops authenticating immediately', async () => {
+      const token = mockStoredToken();
+
+      const res = await request(createApp()).delete(DELETE_URL);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ status: 'ok' });
+      // destroy() on a paranoid model sets deletedAt; the auth middleware looks
+      // tokens up without `paranoid: false`, so the row is invisible from the
+      // next request on.
+      expect(token.destroy).toHaveBeenCalledTimes(1);
+    });
+
+    it('only revokes a token belonging to this user and project', async () => {
+      mockStoredToken();
+
+      await request(createApp()).delete(DELETE_URL);
+
+      expect(db.ApiToken.findOne).toHaveBeenCalledWith({
+        where: { id: TOKEN_ID, userId: USER_ID, projectId: PROJECT_ID },
+      });
+    });
+
+    it('returns 404 for a token that is not there', async () => {
+      db.ApiToken.findOne = vi.fn().mockResolvedValue(null);
+
+      const res = await request(createApp()).delete(DELETE_URL);
+
+      expect(res.status).toBe(404);
+    });
+
+    it('rejects a non-admin user with 403', async () => {
+      const token = mockStoredToken();
+
+      const res = await request(
+        createApp({ user: { id: 1, role: 'editor' } })
+      ).delete(DELETE_URL);
+
+      expect(res.status).toBe(403);
+      expect(token.destroy).not.toHaveBeenCalled();
+    });
+
+    it('passes a database failure to the error handler', async () => {
+      db.ApiToken.findOne = vi.fn().mockRejectedValue(new Error('db down'));
+
+      const res = await request(createApp()).delete(DELETE_URL);
 
       expect(res.status).toBe(500);
     });

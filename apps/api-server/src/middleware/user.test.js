@@ -319,6 +319,27 @@ describe('user middleware', () => {
       expect(errorLog).not.toHaveBeenCalled();
     });
 
+    it('does not authenticate a revoked token', async () => {
+      // Revoking soft-deletes the row. The lookup below must keep the model's
+      // paranoid default — opting out with `paranoid: false` would hand a
+      // revoked token back and make revocation a no-op.
+      db.ApiToken.findOne = vi.fn().mockResolvedValue(null);
+      db.User.findOne = vi.fn();
+
+      const req = apiTokenReq();
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      expect(db.ApiToken.findOne).toHaveBeenCalledWith({
+        where: { tokenHash: TOKEN_HASH },
+      });
+      expect(req.user).toEqual({ role: 'anonymous', id: null });
+      expect(db.User.findOne).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith();
+      expect(errorLog).not.toHaveBeenCalled();
+    });
+
     it('rejects an expired token without looking up its owner', async () => {
       mockApiToken({ expiresAt: new Date(Date.now() - 60 * 1000) });
       db.User.findOne = vi.fn();
