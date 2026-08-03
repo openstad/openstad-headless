@@ -1,7 +1,7 @@
 # Toegankelijkheid (WCAG 2.2) — overzicht & handoff
 
 Centrale status voor de audit-remediatie van `audit.draad.dev` (audit 16-07-2026).
-**Branch:** `fix/accessibility-3-3`. Laatst bijgewerkt: 27-07-2026.
+**Branch:** `fix/accessibility-3-3`. Laatst bijgewerkt: 03-08-2026.
 
 Dit is het startpunt voor een nieuwe sessie. Detail per onderdeel staat in aparte docs;
 de volledige audit-analyse staat lokaal in `.claude/` (niet gecommit).
@@ -182,6 +182,17 @@ scss hercompileert bij restart). Lokaal gedeployd; live-audit-verificatie volgt 
 | 2.5.3 | `aria-label="close message"` → `"sluit melding"`   | `views/elements/flash.html`, `error-flash.html`              |
 | 3.3.1 | e-mail-foutmelding ontkennend i.p.v. instructie    | `public/javascripts/jquery.validate.nl.js`                   |
 
+**⚠️ Nagekomen (03-08-2026, na live-check):** de eerste 2.4.6-fix miste de pagina die de audit
+juist noemde. De contactlink op de **"Bevestig jouw e-mailadres"**-loginpagina zit in
+`views/auth/url/login.html` (regel 61) + de default `helpText` in `config/auth.js` — die stonden nog
+op "neem contact met ons op." Nu ook omgezet naar "stuur ons een e-mail", plus dezelfde mailto-link in
+de sms-flow (`config/auth.js` `smsCodeHelpText`) en de two-factor-pagina (`views/auth/two-factor/authenticate.html`).
+(De variant in `views/auth/required-fields.html` staat in een uitgecommentarieerd blok → niet gerenderd, gelaten.)
+
+| Crit  | Fix                                                       | Bestand                                                                                                               |
+| ----- | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| 2.4.6 | login/sms/two-factor contactlink → "stuur ons een e-mail" | `views/auth/url/login.html`, `config/auth.js` (helpText + smsCodeHelpText), `views/auth/two-factor/authenticate.html` |
+
 ### Kopniveau instelbaar (1.3.1)
 
 InfoField rendert de titel al als échte kop (niet `<strong>`) en had de prop
@@ -231,16 +242,51 @@ het huidige item aanvinken. Live-audit-verificatie volgt bij deploy naar audit.d
 
 ---
 
+## 🔎 Live-verificatie op audit.draad.dev (03-08-2026)
+
+Alle pagina's doorgeklikt in Chrome, per fix de DOM/ARIA gecontroleerd (content overgeslagen).
+
+**✅ Groen — de api-server-widgets (deployen automatisch vanaf disk):** navBar (submenu-`ul`,
+chevron 40px, Escape sluit), teller (`aria-label` + samengevoegde cijfers), agenda (losse link niet in
+`li`, `aria-current`, `<time>`), interactieve afbeelding + kaart (kompas, plaats-knop, `role=application`),
+likes (knopnamen, `aria-pressed`, duim `aria-hidden`), reacties (paginering-`ul`, filter `inert`, "Uw
+reactie", zoek="Zoeken"), enquête (0 kapotte `label[for]`, matrix-hoekcel "Onderwerp"+`scope`,
+slider `aria-valuetext`), stem/begroot (stepper `aria-current=step`), keuzewijzer (score-tekst in
+`role=status`), verdeel + emoji-slider (`role=status`/`aria-live` bij laden), inzending-detail (unieke
+id's), inzendingen-overzicht (zoek-label, postcode-autocomplete), inzending-formulier (`autocomplete=tel`),
+auth-login e-mail-foutmelding (ontkennend). Auth e-mail-error 3.3.1 is dus live.
+
+**❌ Twee gaten gevonden:**
+
+1. **CMS-contentwidgets niet uitgerold naar audit.draad.dev** — de fixes uit commit `f7001b462` +
+   tijdlijn `48e0a4161` staan wél in de repo maar niet live op de audit-server: accordeon-chevron mist
+   `aria-hidden` (1.1.1), carousel-knoppen hebben lege toegankelijke naam ("Vorige/Volgende slide" in
+   `aria-hidden`-wrapper, 4.1.2), tijdlijn mist `aria-current` (1.3.1). De tijdlijn-**linkkleur**
+   (`#0b5394`, scss) ís live, en navBar ook → alleen de apostrophe-**widget-assets** ontbreken.
+   **→ Actie (deploy, geen code):** rebuild + kopieer de apostrophe-widget-bundles naar de cms-server op
+   audit.draad.dev + `docker restart` (zie build-sectie). Daarna herverifiëren.
+2. **Auth contactlink (2.4.6) — gemiste template, nu gefixt** (zie ⚠️ Nagekomen hierboven). Code staat;
+   auth-server moet nog uitgerold/gerestart worden op audit.draad.dev.
+
+---
+
 ## ⏭️ Nog te doen
 
+- **Contentwidgets uitrollen (deploy)** — zie gat #1 hierboven. Enige echte code-blocker die nog live moet.
+- **Auth-server uitrollen (deploy)** — contactlink-fix + (te verifiëren) close-message `aria-label` 2.5.3.
 - **Matrix-tabel reflow (1.4.10)** — code staat al (`matrix.css`: mobiele card-stack <480px +
   `overflow:auto` fallback); alleen nog handmatig op 320px verifiëren. Laag risico.
+- **Verify-only op de live site** (niet in de browser-automation af te dwingen): reflow 1.4.10 (320/400px),
+  resize-text 1.4.4 (200%), contrast 1.4.3 / non-text-contrast 1.4.11 (kleurmeting), text-spacing 1.4.12,
+  focus-not-obscured 2.4.11 (200%), close-message 2.5.3 (vereist e-mail-submit), beeldkiezer "✓ Gekozen"-
+  badge (samenvattingsstap).
 - **Inzending-detail afbeeldingslink (2.5.3)** — code is in orde: de beeld-only link heeft
   `aria-label="Bekijk afbeelding… (opent in nieuw tabblad)"` zonder zichtbare-tekst-conflict.
   Wat rest = content: de misleidende, configureerbare "Reageer op deze inzending"-tekst.
 
-> **Code-kant van de 27 audit-punten is hiermee dicht.** Resterend zijn verify-only (matrix 320px)
-> en content-/config-acties (zie hieronder) die code niet kan afdwingen.
+> **Code-kant is nagenoeg dicht**, met één correctie t.o.v. de vorige versie: de contactlink zat nog
+> op de verkeerde auth-template (nu gefixt). Resterend zijn **2 deploys** (contentwidgets + auth-server),
+> verify-only checks, en content-/config-acties (zie hieronder) die code niet kan afdwingen.
 
 ---
 
