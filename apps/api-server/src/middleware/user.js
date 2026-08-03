@@ -7,6 +7,37 @@ const authSettings = require('../util/auth-settings');
 
 let adapters = {};
 
+// RFC 7235 allows any amount of whitespace between the auth scheme and its
+// credentials, so match the scheme tolerantly instead of assuming a single
+// space. Both quantifiers run over disjoint character classes, so there is no
+// backtracking blow-up on a hostile header.
+const BEARER_SCHEME = /^\s*bearer\s+/i;
+
+// lastUsedAt is informational (shown in the admin token list). A reporting
+// client may poll continuously, so writing it on every request would mean one
+// UPDATE per request per token; only refresh it once per window.
+const LAST_USED_AT_THROTTLE_MS = 5 * 60 * 1000;
+
+/**
+ * Extract the credentials from an `Authorization: Bearer <token>` header.
+ * Returns null when the header is absent or uses a different scheme.
+ */
+function parseBearerToken(header) {
+  if (typeof header !== 'string' || !BEARER_SCHEME.test(header)) return null;
+  return header.replace(BEARER_SCHEME, '').trim();
+}
+
+/**
+ * Whether lastUsedAt is stale enough to be worth an UPDATE.
+ */
+function shouldRefreshLastUsedAt(apiToken, now) {
+  const lastUsedAt = new Date(apiToken.lastUsedAt).getTime();
+  // Missing or unparseable: treat as never used, so a corrupt value cannot
+  // freeze the column forever.
+  if (!Number.isFinite(lastUsedAt)) return true;
+  return now.getTime() - lastUsedAt >= LAST_USED_AT_THROTTLE_MS;
+}
+
 /**
  * Get user from jwt or fixed token and validate with auth server
  * @param req
@@ -21,8 +52,9 @@ module.exports = async function getUser(req, res, next) {
     }
 
     // Opaque API token path (Bearer osr_…) — bypasses JWT and auth-server round-trip
-    if (/^bearer osr_/i.test(req.headers['authorization'])) {
-      return handleApiToken(req, res, next);
+    const bearerToken = parseBearerToken(req.headers['authorization']);
+    if (bearerToken && bearerToken.startsWith('osr_')) {
+      return handleApiToken(req, res, next, bearerToken);
     }
 
     const allowedUploadPaths = ['/upload/images', '/upload/documents'];
@@ -81,9 +113,8 @@ module.exports = async function getUser(req, res, next) {
  * Authenticate using an opaque API token (osr_…) stored hashed in api_tokens.
  * Skips the auth-server round-trip; loads the owner User directly from DB.
  */
-async function handleApiToken(req, res, next) {
+async function handleApiToken(req, res, next, rawToken) {
   try {
-    const rawToken = req.headers['authorization'].replace(/^bearer /i, '');
     const tokenHash = crypto
       .createHash('sha256')
       .update(rawToken)
@@ -117,8 +148,17 @@ async function handleApiToken(req, res, next) {
     req.user = owner;
     req.apiTokenScope = 'reports';
 
-    // Update lastUsedAt asynchronously — do not block the request
-    apiToken.update({ lastUsedAt: new Date() }).catch(() => {});
+    // Update lastUsedAt asynchronously — do not block the request. Failing to
+    // record usage must never fail the request, but it should not be silent
+    // either.
+    const now = new Date();
+    if (shouldRefreshLastUsedAt(apiToken, now)) {
+      apiToken.update({ lastUsedAt: now }).catch((err) => {
+        console.error(
+          `[${new Date().toISOString()}][auth-middleware] could not update lastUsedAt: ${err?.message}`
+        );
+      });
+    }
 
     return next();
   } catch (err) {
