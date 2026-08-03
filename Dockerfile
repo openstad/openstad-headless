@@ -20,6 +20,10 @@ RUN npm update -g npm
 
 # Install safe-chain to prevent installing malware through npm
 RUN npm i -g @aikidosec/safe-chain && safe-chain setup-ci
+# safe-chain setup-ci only persists PATH on GitHub Actions/Azure/CircleCI (via GITHUB_PATH etc).
+# In a plain docker build it writes shims to ~/.safe-chain but not PATH, so put them on PATH
+# ourselves — otherwise later `npm` steps hit real npm and reject safe-chain's own flags.
+ENV PATH="/root/.safe-chain/shims:/root/.safe-chain/bin:${PATH}"
 
 # Install app dependencies
 COPY --chown=node:node package*.json .
@@ -32,6 +36,10 @@ RUN npm config set fetch-retry-maxtimeout 300000
 RUN npm config set fetch-retry-mintimeout 60000
 RUN npm config set fetch-timeout 300000
 RUN npm config set legacy-peer-deps true
+# npm >=12 blocks dependency install scripts by default; native modules (bcrypt, sharp) then never
+# build their .node binary and crash at runtime. safe-chain already scans packages for malware, so
+# re-enable scripts for the trusted lockfile. Persists to /root/.npmrc → inherited by base/prepare stages.
+RUN npm config set dangerously-allow-all-scripts true
 
 ARG BUILD_ENV=production
 ENV BUILD_ENV=${BUILD_ENV}
@@ -39,7 +47,8 @@ ENV BUILD_ENV=${BUILD_ENV}
 # set Cypress cache to a writable temp path (avoids issues with /root/.cache)
 ENV CYPRESS_CACHE_FOLDER=/tmp/CypressCache
 
-RUN npm ci --include=optional --safe-chain-skip-minimum-package-age
+# --allow-git=all: npm >=12 disables git-type deps by default (EALLOWGIT); we have a pinned git dep (image-steam)
+RUN npm ci --include=optional --safe-chain-skip-minimum-package-age --allow-git=all
 
 # Minimal target for update-lock. It only serves to update the lock file.
 FROM node:24-slim AS update-lock
@@ -47,6 +56,7 @@ WORKDIR /opt/openstad-headless
 RUN npm update -g npm
 # Install safe-chain so --safe-chain-skip-minimum-package-age is recognized when updating the lock file
 RUN npm i -g @aikidosec/safe-chain && safe-chain setup-ci
+ENV PATH="/root/.safe-chain/shims:/root/.safe-chain/bin:${PATH}"
 CMD ["sh", "-lc", "rm -rf node_modules && npm run update-lock"]
 
 FROM builder AS base
@@ -60,7 +70,7 @@ RUN npm cache clean --force
 
 # Remove all folders from ./apps except the one specified by APP
 RUN find ./apps -mindepth 1 -maxdepth 1 -type d ! -name "${APP}" -exec rm -rf {} +
-RUN npm prune -ws
+RUN npm prune --ws
 RUN if [ "${APP}" = "image-server" ]; then \
       SHARP_VERSION="$(node -p "require('./package-lock.json').packages['node_modules/sharp'].version")"; \
       BUILD_ARCH="$(uname -m)"; \
@@ -70,7 +80,7 @@ RUN if [ "${APP}" = "image-server" ]; then \
         armv7l|armv6l) echo "arm" ;; \
         *) echo "${BUILD_ARCH}" ;; \
       esac)"; \
-      npm install --no-save --package-lock=false --include=optional --os=linux --libc=glibc --cpu="${SHARP_CPU}" "sharp@${SHARP_VERSION}" && \
+      npm install --no-save --package-lock=false --include=optional --os=linux --libc=glibc --cpu="${SHARP_CPU}" --allow-git=all --safe-chain-skip-minimum-package-age "sharp@${SHARP_VERSION}" && \
       node -e "require('sharp')"; \
     fi
 
@@ -104,7 +114,7 @@ ARG OPENSTAD_VERSION
 ENV OPENSTAD_VERSION=$OPENSTAD_VERSION
 ENV NEXT_PUBLIC_OPENSTAD_VERSION=$OPENSTAD_VERSION
 RUN npm run build --if-present -w $WORKSPACE
-RUN npm prune -ws --production
+RUN npm prune --ws --production
 RUN if [ "${APP}" = "image-server" ]; then \
       SHARP_VERSION="$(node -p "require('./package-lock.json').packages['node_modules/sharp'].version")"; \
       BUILD_ARCH="$(uname -m)"; \
@@ -114,7 +124,7 @@ RUN if [ "${APP}" = "image-server" ]; then \
         armv7l|armv6l) echo "arm" ;; \
         *) echo "${BUILD_ARCH}" ;; \
       esac)"; \
-      npm install --no-save --package-lock=false --include=optional --os=linux --libc=glibc --cpu="${SHARP_CPU}" "sharp@${SHARP_VERSION}" && \
+      npm install --no-save --package-lock=false --include=optional --os=linux --libc=glibc --cpu="${SHARP_CPU}" --allow-git=all --safe-chain-skip-minimum-package-age "sharp@${SHARP_VERSION}" && \
       node -e "require('sharp')"; \
     fi
 
