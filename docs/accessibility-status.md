@@ -244,14 +244,48 @@ het huidige item aanvinken. Live-audit-verificatie volgt bij deploy naar audit.d
 
 ---
 
-## ✍️ Content-acties (redacteur/config — code kan dit niet afdwingen)
+## ✍️ Redacteurs-checklist (content/config — code kan dit niet afdwingen)
 
-- Enquête-slider: verwijder de handmatig getypte schaal-tekst in de demo (slider genereert 'm nu zelf).
-- InfoField: kies per infoblok het juiste kopniveau (select "Kopniveau van de titel" in de admin) zodat de koppenhiërarchie klopt. Code staat; alleen nog per blok instellen.
-- Footer-logo `alt` → `"OpenStad.org (logo)"` (via config).
-- Reacties "maximale versie": kop "Voorbeeld 2: Maximale versie" gevolgd door kop van gelijk niveau →
-  eerste kop zonder inhoud (1.3.1). Inhoud toevoegen óf de tweede kop een niveau lager (demo-content).
-- Header-logo (link + `title`): zit in de CMS/demo-header, niet in een widget.
+De code staat; deze punten moet de redacteur in de demo/CMS zetten. Per punt: **wat**, **waar**,
+**hoe**. Vink af bij het nalopen van `audit.draad.dev`.
+
+### Koppen-hiërarchie (1.3.1) — grootste content-post
+
+De regel: precies **één `<h1>`** per pagina, en **geen niveaus overslaan** (h2 → h3 → h4, niet h2 → h4).
+
+- [ ] **`<strong>` als kop** — "Jouw buurt, jouw toekomst" (enquête) is vet gemaakte tekst, geen echte
+      kop. → maak er in de RTE een échte kop van (kop 2/3), niet **B**/bold.
+- [ ] **Nep-koppen** — 2× `<h2>` "Lorem ipsum…" bij de interactieve afbeelding zijn gewoon grote tekst.
+      → haal de kop-opmaak eraf (maak het gewone paragraaf-tekst).
+- [ ] **3× `<h1>`** op één pagina → houd er één over; de rest een niveau lager.
+- [ ] **Lege kop** — Reacties "maximale versie": "Voorbeeld 2: Maximale versie" gevolgd door een kop
+      van gelijk niveau, zonder inhoud ertussen. → voeg inhoud toe **óf** zet de tweede kop een niveau lager.
+- [ ] **Kopniveau per infoblok** (enquête + keuzewijzer) — in de admin bij het info-blok staat nu de
+      select **"Kopniveau van de titel"** (2/3/4). Kies zo dat de titel aansluit op de koppen eromheen.
+- [ ] **Tijdlijn: huidige fase** (contentwidget) — vink bij het tijdlijn-item **"Mark as current phase"**
+      aan voor de fase die nu loopt (zet `aria-current`).
+
+### Paginatitels & navigatie
+
+- [ ] **Paginatitel (2.4.2)** — inzending-detailpagina heet `<title>` "Lorem ipsum dolor sit amet".
+      → geef de pagina een echte, beschrijvende titel.
+- [ ] **Meerdere manieren om te navigeren (2.4.5)** — er is maar één weg naar pagina's. → voeg een
+      **sitemap-pagina** en/of **zoek** toe aan de site-navigatie.
+
+### Logo (config, geldt sitebreed)
+
+- [ ] **Footer-logo `alt`** → `"OpenStad.org (logo)"` (in de site-config, niet per pagina).
+- [ ] **Header-logo** (1.1.1 / 2.4.4) — `alt` moet de zichtbare merknaam bevatten en de logo-**link**
+      een `title`/toegankelijke naam. Zit in de CMS/demo-header-config.
+
+### Demo-assets uitzetten (mixed — code heeft de nette variant al)
+
+- [ ] **Enquête-slider** — verwijder de handmatig getypte schaal-tekst in de demo; de slider genereert
+      die nu zelf (anders spreekt AT dubbele/afwijkende waarden uit — 3.3.2).
+- [ ] **Video-autoplay (1.4.2)** — zet autoplay **uit** in de demo (de stop-control zit in de code, maar
+      de demo moet autoplay niet forceren).
+- [ ] **Bewegende pijl (2.2.2)** — vervang de auto-animerende asset in de demo door een statische
+      (of een variant met pauze).
 
 ---
 
