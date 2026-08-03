@@ -200,6 +200,21 @@ Admin draait `npm run dev` in de container met source gemount → fast-refresh, 
 restart nodig. Overige widgets die InfoField gebruiken (resourceform) kregen géén
 control — niet in de audit; toe te voegen wanneer nodig.
 
+### Homepage 400%-zoom: hamburger-sluitknop achter banner (1.4.10)
+
+Bij een open mobiel menu (fullscreen overlay) zat de sluitknop áchter de sticky
+`.status-banner` bij 400% zoom. Oorzaak: stacking-context-val — de overlay is
+`position:fixed; z-index:99` maar zit gevangen in de stacking-context van `<header>`
+(`z-index:11`), terwijl de banner op root-niveau `z-index:99` heeft (99 > 11 → banner
+bovenop). Fix: `header:has(.header_navbar-container.--show) { z-index: 100 }` — alleen
+in open-state, dus gesloten blijft de banner normaal bovenop.
+
+| Crit   | Fix                                                | Bestand                                                 |
+| ------ | -------------------------------------------------- | ------------------------------------------------------- |
+| 1.4.10 | header boven de sticky banner tillen bij open menu | `cms-server/modules/openstad-assets/ui/src/header.scss` |
+
+cms-server herstart (scss hercompileert bij restart). Live-audit-verificatie volgt bij deploy naar audit.draad.dev.
+
 ---
 
 ## ⏭️ Nog te doen
@@ -209,7 +224,6 @@ control — niet in de audit; toe te voegen wanneer nodig.
   (`openstad-timeline-widget`). De losse agenda-widget heeft `aria-current` al.
 - **Inzending-detail afbeeldingslink (2.5.3)** — `resource-detail.tsx:353` `aria-label` matcht niet de zichtbare
   tekst; verweven met de misleidende, configureerbare "Reageer op deze inzending"-tekst (deels content).
-- **Homepage 400%-zoom** hamburger-sluitknop achter de banner (CMS/demo-header).
 - **Matrix-tabel reflow** — niet getest (laag risico).
 
 ---
