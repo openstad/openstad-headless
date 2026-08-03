@@ -111,6 +111,7 @@ export type Item = {
   showMoreInfo: boolean;
   moreInfoButton?: string;
   moreInfoContent?: string;
+  headingLevel?: number;
   labelA?: string;
   labelB?: string;
   imageA?: string;

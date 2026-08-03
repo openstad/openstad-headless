@@ -182,6 +182,24 @@ scss hercompileert bij restart). Lokaal gedeployd; live-audit-verificatie volgt 
 | 2.5.3 | `aria-label="close message"` → `"sluit melding"`   | `views/elements/flash.html`, `error-flash.html`              |
 | 3.3.1 | e-mail-foutmelding ontkennend i.p.v. instructie    | `public/javascripts/jquery.validate.nl.js`                   |
 
+### Kopniveau instelbaar (1.3.1)
+
+InfoField rendert de titel al als échte kop (niet `<strong>`) en had de prop
+`headingLevel` (2/3/4) — die stond alleen op de default (3) omdat de redacteur 'm
+nergens kon zetten. Nu een select **"Kopniveau van de titel"** in de admin bij het
+info-blok van enquête én keuzewijzer. De waarde stroomt via de bestaande field-spread
+door naar InfoField, dus geen render-wijziging nodig; widgets herbouwd.
+
+| Onderdeel      | Wijziging                                              | Bestand                                                                                                                    |
+| -------------- | ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| enquête-admin  | select 2/3/4 + schema/defaults/reset/onSubmit          | `admin-server/.../widgets/enquete/[id]/items.tsx`                                                                          |
+| enquête-widget | `headingLevel` in `Item` + doorzet in `case 'none'`    | `enquete/src/enquete.tsx`, `enquete/src/types/enquete-props.ts`                                                            |
+| keuzewijzer    | select 2/3/4 (gated op `type==='none'`) + item-doorzet | `admin-server/.../widgets/choiceguide/[id]/items.tsx`, `choiceguide/src/parts/init-fields.tsx`, `choiceguide/src/props.ts` |
+
+Admin draait `npm run dev` in de container met source gemount → fast-refresh, geen
+restart nodig. Overige widgets die InfoField gebruiken (resourceform) kregen géén
+control — niet in de audit; toe te voegen wanneer nodig.
+
 ---
 
 ## ⏭️ Nog te doen
@@ -191,7 +209,6 @@ scss hercompileert bij restart). Lokaal gedeployd; live-audit-verificatie volgt 
   (`openstad-timeline-widget`). De losse agenda-widget heeft `aria-current` al.
 - **Inzending-detail afbeeldingslink (2.5.3)** — `resource-detail.tsx:353` `aria-label` matcht niet de zichtbare
   tekst; verweven met de misleidende, configureerbare "Reageer op deze inzending"-tekst (deels content).
-- **Kopniveau als prop (cross-cutting, groter)** — widgets hardcoden koppen; auditor eist instelbaar kopniveau.
 - **Homepage 400%-zoom** hamburger-sluitknop achter de banner (CMS/demo-header).
 - **Matrix-tabel reflow** — niet getest (laag risico).
 
@@ -200,7 +217,7 @@ scss hercompileert bij restart). Lokaal gedeployd; live-audit-verificatie volgt 
 ## ✍️ Content-acties (redacteur/config — code kan dit niet afdwingen)
 
 - Enquête-slider: verwijder de handmatig getypte schaal-tekst in de demo (slider genereert 'm nu zelf).
-- InfoField: kies per infoblok het juiste `headingLevel` zodat de koppenhiërarchie klopt.
+- InfoField: kies per infoblok het juiste kopniveau (select "Kopniveau van de titel" in de admin) zodat de koppenhiërarchie klopt. Code staat; alleen nog per blok instellen.
 - Footer-logo `alt` → `"OpenStad.org (logo)"` (via config).
 - Reacties "maximale versie": kop "Voorbeeld 2: Maximale versie" gevolgd door kop van gelijk niveau →
   eerste kop zonder inhoud (1.3.1). Inhoud toevoegen óf de tweede kop een niveau lager (demo-content).

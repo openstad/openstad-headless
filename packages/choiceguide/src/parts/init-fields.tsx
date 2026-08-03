@@ -38,6 +38,7 @@ export const InitializeFormFields = (items, data, showForm = true) => {
         showMoreInfo: item.showMoreInfo || false,
         moreInfoButton: item.moreInfoButton || '',
         moreInfoContent: item.moreInfoContent || '',
+        headingLevel: item.headingLevel || 3,
         titleA: item.labelA || '',
         titleB: item.labelB || '',
         descriptionA: item.sliderTitleUnderA || '',

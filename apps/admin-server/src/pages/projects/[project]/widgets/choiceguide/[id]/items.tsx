@@ -118,6 +118,7 @@ const formSchema = z.object({
   showMoreInfo: z.boolean().optional(),
   moreInfoButton: z.string().optional(),
   moreInfoContent: z.string().optional(),
+  headingLevel: z.coerce.number().optional(),
   labelA: z.string().optional(),
   labelB: z.string().optional(),
   sliderTitleUnderA: z.string().optional(),
@@ -282,6 +283,7 @@ export default function WidgetChoiceGuideItems(
           showMoreInfo: values.showMoreInfo || false,
           moreInfoButton: values.moreInfoButton || '',
           moreInfoContent: values.moreInfoContent || '',
+          headingLevel: values.headingLevel || 3,
           labelA: values.labelA || '',
           labelB: values.labelB || '',
           sliderTitleUnderA: values.sliderTitleUnderA || '',
@@ -436,6 +438,7 @@ export default function WidgetChoiceGuideItems(
     multiple: false,
     options: [],
     showMoreInfo: false,
+    headingLevel: 3,
     moreInfoButton: '',
     moreInfoContent: '',
     labelA: '',
@@ -513,6 +516,7 @@ export default function WidgetChoiceGuideItems(
         variant: selectedItem.variant || '',
         multiple: selectedItem.multiple || false,
         showMoreInfo: selectedItem.showMoreInfo || false,
+        headingLevel: selectedItem.headingLevel || 3,
         moreInfoButton: selectedItem.moreInfoButton || '',
         moreInfoContent: selectedItem.moreInfoContent || '',
         labelA: selectedItem.labelA || '',
@@ -1557,6 +1561,38 @@ export default function WidgetChoiceGuideItems(
                           </FormItem>
                         )}
                       />
+                      {form.watch('type') === 'none' && (
+                        <FormField
+                          control={form.control}
+                          name="headingLevel"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Kopniveau van de titel</FormLabel>
+                              <Select
+                                value={String(field.value ?? 3)}
+                                onValueChange={(e) =>
+                                  field.onChange(Number(e))
+                                }>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies kopniveau" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="2">Kop 2 (h2)</SelectItem>
+                                  <SelectItem value="3">Kop 3 (h3)</SelectItem>
+                                  <SelectItem value="4">Kop 4 (h4)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                Kies zo dat de koppenhiërarchie op de pagina
+                                klopt (geen niveaus overslaan).
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
                       <FormField
                         control={form.control}
                         name="description"
