@@ -43,6 +43,38 @@ function applyFilter(
   return captured.body;
 }
 
+// Same as applyFilter, but also reports the status the response ends up with.
+function applyFilterWithStatus(payload, options) {
+  let statusCode = options?.statusCode ?? 200;
+  const captured = { body: null };
+
+  const req = {
+    apiTokenScope: options?.apiTokenScope ?? 'reports',
+    reportingScope: options?.reportingScope,
+  };
+  const res = {
+    get statusCode() {
+      return statusCode;
+    },
+    set statusCode(code) {
+      statusCode = code;
+    },
+    json(body) {
+      captured.body = body;
+      return res;
+    },
+    status(code) {
+      statusCode = code;
+      return res;
+    },
+  };
+
+  reportFieldFilter(req, res, vi.fn());
+  res.json(payload);
+
+  return { body: captured.body, statusCode };
+}
+
 describe('reportFieldFilter', () => {
   describe('non-reporting requests are not filtered', () => {
     it('does not wrap res.json for normal requests', () => {
@@ -315,6 +347,106 @@ describe('reportFieldFilter', () => {
       ];
       const result = applyFilter(payload, { reportingScope: aggregateScope });
       expect(result.error).toBeDefined();
+    });
+  });
+
+  // Aggregate payloads skip filterPayload, so the top-level identifiers that
+  // stripAlwaysBlocked removes on the record path have to be screened by the
+  // aggregate check itself.
+  describe('aggregate endpoints screen top-level identifiers too', () => {
+    const aggregateScope = { componentKey: null, enabledPersonalFields: [] };
+    const statsScope = {
+      componentKey: 'votes',
+      enabledPersonalFields: [],
+      aggregate: true,
+    };
+
+    it.each([['userId'], ['ip']])(
+      'blocks a flat aggregate row carrying %s',
+      (key) => {
+        const payload = [{ counted: 5, [key]: key === 'ip' ? '10.0.0.9' : 42 }];
+
+        const result = applyFilter(payload, {
+          reportingScope: aggregateScope,
+        });
+
+        expect(result.error).toBeDefined();
+        expect(Array.isArray(result)).toBe(false);
+      }
+    );
+
+    it('blocks a stats total that carries a userId', () => {
+      const result = applyFilter(
+        { count: 3, userId: 42 },
+        { reportingScope: statsScope }
+      );
+
+      expect(result.error).toBeDefined();
+    });
+
+    it('blocks a top-level identifier nested in a result array', () => {
+      const payload = [
+        { key: 'k', description: 'd', result: [{ counted: 1, userId: 7 }] },
+      ];
+
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+
+      expect(result.error).toBeDefined();
+    });
+
+    it('still lets a genuine overview payload through', () => {
+      const payload = [
+        { key: 'votes', description: 'Stemmen', result: [{ counted: 8 }] },
+      ];
+
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+
+      expect(result).toEqual(payload);
+    });
+  });
+
+  describe('blocked responses answer with 403', () => {
+    it('uses 403 when the reporting scope was never resolved', () => {
+      const { body, statusCode } = applyFilterWithStatus(
+        { anything: true },
+        { reportingScope: undefined }
+      );
+
+      expect(body.error).toBe('Reporting scope not resolved');
+      expect(statusCode).toBe(403);
+    });
+
+    it('uses 403 when an aggregate payload is blocked', () => {
+      const { body, statusCode } = applyFilterWithStatus(
+        [{ email: 'a@b.nl' }],
+        {
+          reportingScope: { componentKey: null, enabledPersonalFields: [] },
+        }
+      );
+
+      expect(body.error).toBeDefined();
+      expect(statusCode).toBe(403);
+    });
+
+    it('leaves the status alone for a payload that passes', () => {
+      const { statusCode } = applyFilterWithStatus([{ counted: 8 }], {
+        reportingScope: { componentKey: null, enabledPersonalFields: [] },
+      });
+
+      expect(statusCode).toBe(200);
+    });
+
+    it('does not turn an upstream error status into a 403', () => {
+      const { body, statusCode } = applyFilterWithStatus(
+        { error: 'Not found' },
+        {
+          reportingScope: { componentKey: 'votes', enabledPersonalFields: [] },
+          statusCode: 404,
+        }
+      );
+
+      expect(statusCode).toBe(404);
+      expect(body).toEqual({ error: 'Not found' });
     });
   });
 

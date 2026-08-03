@@ -4,7 +4,16 @@ const {
   getExposedFields,
   filterPayload,
   ALWAYS_BLOCKED_USER_KEYS,
+  ALWAYS_BLOCKED_TOP_LEVEL,
 } = require('@openstad-headless/lib/report-data-scope');
+
+// Keys that must never surface on an aggregate response. Aggregate payloads
+// skip filterPayload (and with it stripAlwaysBlocked), so the top-level
+// identifiers that path would remove have to be screened here as well.
+const BLOCKED_AGGREGATE_KEYS = new Set([
+  ...ALWAYS_BLOCKED_USER_KEYS,
+  ...ALWAYS_BLOCKED_TOP_LEVEL,
+]);
 
 const isPrimitive = (v) =>
   v === null ||
@@ -39,14 +48,15 @@ const isAggregateRow = (r) =>
     Object.values(r).every(isAggregateValue));
 
 // Defense in depth for aggregate endpoints: even a shape-valid flat row must
-// never carry a personal-data key (email, postcode, name, …). isAggregateRow
-// accepts any flat object of primitives, so a row like {id, email, postcode}
-// would otherwise pass — this catches it. Also scans flat objects nested in
-// array values (e.g. an aggregate row's `result: [{…}]`).
+// never carry a personal-data key (email, postcode, name, …) or a top-level
+// identifier (ip, userId). isAggregateRow accepts any flat object of
+// primitives, so a row like {counted, userId, ip} would otherwise pass — this
+// catches it. Also scans flat objects nested in array values (e.g. an aggregate
+// row's `result: [{…}]`).
 const hasBlockedKey = (obj) => {
   if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return false;
   for (const [key, value] of Object.entries(obj)) {
-    if (ALWAYS_BLOCKED_USER_KEYS.has(key)) return true;
+    if (BLOCKED_AGGREGATE_KEYS.has(key)) return true;
     if (Array.isArray(value)) {
       for (const item of value) {
         if (hasBlockedKey(item)) return true;
@@ -97,6 +107,9 @@ function reportFieldFilter(req, res, next) {
     // Guard should have set this — if missing, block the response for safety.
     const originalJson = res.json.bind(res);
     res.json = function blockedJson() {
+      // 403, so clients and intermediaries treat this as an access denial
+      // instead of caching a 200 that happens to carry an error body.
+      res.status(403);
       return originalJson.call(res, { error: 'Reporting scope not resolved' });
     };
     return next();
@@ -122,6 +135,7 @@ function reportFieldFilter(req, res, next) {
     // screen for PII instead (fail-closed on anything richer, e.g. a user list).
     if (scope.componentKey === null || scope.aggregate) {
       if (!isSafeAggregate(payload)) {
+        res.status(403);
         return originalJson({
           error: 'Response blocked: unexpected payload on aggregate endpoint',
         });
