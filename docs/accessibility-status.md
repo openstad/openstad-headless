@@ -263,17 +263,28 @@ auth-login e-mail-foutmelding (ontkennend). Auth e-mail-error 3.3.1 is dus live.
    `aria-hidden` (1.1.1), carousel-knoppen hebben lege toegankelijke naam ("Vorige/Volgende slide" in
    `aria-hidden`-wrapper, 4.1.2), tijdlijn mist `aria-current` (1.3.1). De tijdlijn-**linkkleur**
    (`#0b5394`, scss) ís live, en navBar ook → alleen de apostrophe-**widget-assets** ontbreken.
-   **→ Actie (deploy, geen code):** rebuild + kopieer de apostrophe-widget-bundles naar de cms-server op
-   audit.draad.dev + `docker restart` (zie build-sectie). Daarna herverifiëren.
+   - **Extra bevinding (carousel 4.1.2):** de fix zat wél in de gedeelde `packages/ui/src/carousel`
+     (`aria-label="Vorige/Volgende afbeelding"`, commit `0f7727dea`), maar de apostrophe-carousel-bundle
+     `widget-assets/carousel.iife.js` was nooit herbouwd (stond nog op de build van 20-07) → oude, lege
+     namen. **03-08-2026 herbouwd** (`packages/apostrophe-widgets/carousel` → `npm run build` → kopie naar
+     `widget-assets/`) en de bundle bevat nu "Volgende afbeelding".
+   - **Lokaal uitgerold (03-08-2026):** `docker restart openstad-cms-server`; de cms-server serveert nu de
+     gefixte `carousel.iife.js` (met "Volgende afbeelding") en `accordion.iife.js` (met `aria-hidden`).
+     Geverifieerd via `curl /widget-assets/*.iife.js`.
+     **→ Resterende actie (deploy, geen code):** dezelfde bundles + tijdlijn-module naar de cms-server op
+     audit.draad.dev + `docker restart`. Daarna live herverifiëren.
 2. **Auth contactlink (2.4.6) — gemiste template, nu gefixt** (zie ⚠️ Nagekomen hierboven). Code staat;
-   auth-server moet nog uitgerold/gerestart worden op audit.draad.dev.
+   **lokaal uitgerold** (`docker restart openstad-auth-server`, bind-mount → nieuwe tekst bevestigd in de
+   container). Auth-server op audit.draad.dev moet nog uitgerold/gerestart worden.
 
 ---
 
 ## ⏭️ Nog te doen
 
-- **Contentwidgets uitrollen (deploy)** — zie gat #1 hierboven. Enige echte code-blocker die nog live moet.
-- **Auth-server uitrollen (deploy)** — contactlink-fix + (te verifiëren) close-message `aria-label` 2.5.3.
+- **Contentwidgets uitrollen naar audit.draad.dev** — lokaal al live (zie gat #1). Op de audit-server nog
+  te doen: bundles (`accordion`, `share-link`, `carousel`) + tijdlijn-module + `docker restart`.
+- **Auth-server uitrollen naar audit.draad.dev** — lokaal al live. Op de audit-server: contactlink-fix
+  uitrollen + (te verifiëren) close-message `aria-label` 2.5.3.
 - **Matrix-tabel reflow (1.4.10)** — code staat al (`matrix.css`: mobiele card-stack <480px +
   `overflow:auto` fallback); alleen nog handmatig op 320px verifiëren. Laag risico.
 - **Verify-only op de live site** (niet in de browser-automation af te dwingen): reflow 1.4.10 (320/400px),
