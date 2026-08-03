@@ -142,15 +142,42 @@ marker op het kruisje/centrum.
 een pre-existing render-loop; de §3-popup/Image vergen een geconfigureerde resource-kaart-widget). 1.4.10 vraagt nog
 een handmatige 320px-check.
 
+### Widget-batch (losse punten) — commits `0f7727dea`, `32d999737`
+
+Losse audit-punten over kleinere widgets, allemaal via het api-server-pad (build → live). **Code + build geverifieerd**
+(nog niet allemaal los live). Gedekt:
+
+| Crit  | Fix                                                                                                                                   | Bestand                                                         |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| 1.1.1 | like/reactie-duimen `aria-hidden` + altijd een (sr-only) naam, ook in small/micro-variant                                             | `likes/src/likes.tsx`, `comments/src/parts/comment.tsx`         |
+| 4.1.2 | carousel prev/next `aria-label="Vorige/Volgende afbeelding"`                                                                          | `ui/src/carousel/index.tsx`                                     |
+| 1.3.1 | agenda: enkele link niet in een lijst (pas bij ≥2 een `<ul>`)                                                                         | `agenda/src/agenda.tsx`                                         |
+| 1.3.1 | dubbel `id="search"` weg → `useId()` in de gedeelde filter                                                                            | `ui/src/stem-begroot-and-resource-overview/filter/index.tsx`    |
+| 4.1.3 | verdeelmodule fout-containers + gedeelde `NotificationProvider` → `role="status"`/`aria-live` (dekt emoji-slider "Enquête ingediend") | `distribution-module/...tsx`, `lib/NotificationProvider/...tsx` |
+| 1.4.1 | beeldkiezer: zichtbare "✓ Gekozen"-badge op de gekozen optie                                                                          | `ui/src/form-elements/image-choice/index.tsx`                   |
+| 1.3.5 | autocomplete op account (naam/gebruikersnaam/adres) + postcode-veld                                                                   | `account/src/account.tsx`, `ui/src/location/index.tsx`          |
+| 1.4.4 | teller-cijfer niet meer afgesneden bij 200% (`overflow`/relatieve padding)                                                            | `counter/src/counter.css`                                       |
+
+⚠️ **Postcode-autocomplete-caveat:** het postcode-veld is een custom combobox (`role="combobox"`); browser-autofill kan
+met de suggestielijst botsen — functioneel testen. **Teller 1.3.1/1.3.2 bleek al gefixt** (aria-label stond er al).
+
 ---
 
 ## ⏭️ Nog te doen
 
-- **Matrix-tabel reflow** — niet getest (zat niet in de dev-harness mock; audit prees juist de
-  mobiele tabelweergave → laag risico).
-- **Overige audit-onderdelen** buiten deze widgets: teller, interactieve afbeelding, contentwidgets
-  (accordeon/carousel/share/agenda-tijdlijn), begroot/stem-tijdlijn, verdeelmodule/emoji-slider
-  status-messages, beeldkiezer, agenda, auth/login. Zie `.claude/audit-per-onderdeel.md`.
+- **Contentwidgets (CMS/apostrophe-pad — build + kopie + `docker restart cms-server`):** accordeon-chevron
+  `aria-hidden` (`packages/apostrophe-widgets/accordion`), share-links als `<ul><li>`
+  (`apostrophe-widgets/share-links`), agenda-**tijdlijn** `aria-current`
+  (`apps/cms-server/modules/openstad-timeline-widget/views/widget.html`), hyperlink-contrast op grijze
+  achtergrond (timeline- + section-widget `ui/src/index.scss`). _(De carousel-knopfix zit al in `ui`.)_
+- **Auth/login (`apps/auth-server`):** 'Neem contact met ons op' → 'Stuur ons een e-mail' (`views/auth/choose.html`,
+  `url/confirmation.html`); `aria-label="close message"` → `"sluit melding"` (`views/elements/flash.html`,
+  `error-flash.html`); e-mail-foutmelding ontkennend maken (`public/javascripts/jquery.validate.nl.js`).
+- **Inzending-detail afbeeldingslink (2.5.3)** — `resource-detail.tsx:353` `aria-label` matcht niet de zichtbare
+  tekst; verweven met de misleidende, configureerbare "Reageer op deze inzending"-tekst (deels content).
+- **Kopniveau als prop (cross-cutting, groter)** — widgets hardcoden koppen; auditor eist instelbaar kopniveau.
+- **Homepage 400%-zoom** hamburger-sluitknop achter de banner (CMS/demo-header).
+- **Matrix-tabel reflow** — niet getest (laag risico).
 
 ---
 
