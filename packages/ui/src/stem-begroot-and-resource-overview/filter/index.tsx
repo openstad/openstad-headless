@@ -3,7 +3,7 @@ import { IconButton } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
 import { Button, FormLabel } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { useDebounce } from 'rooks';
 
 import PostcodeAutoFill from '../../location';
@@ -129,6 +129,8 @@ export function Filters({
   const [locationValue, setLocationValue] =
     useState<PostcodeAutoFillLocation>(undefined);
   const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
+  // ponytail: uniek id zodat twee filters op één pagina niet allebei id="search" krijgen (1.3.1)
+  const searchId = useId();
   const [disableTransition, setDisableTransition] = useState(true);
   const filtersWrapperRef = useRef<HTMLDivElement>(null);
   const filtersContainerRef = useRef<HTMLDivElement>(null);
@@ -602,7 +604,7 @@ export function Filters({
         }>
         {props.displaySearch ? (
           <div className="form-element">
-            <FormLabel htmlFor="search">Zoeken</FormLabel>
+            <FormLabel htmlFor={searchId}>Zoeken</FormLabel>
             <Input
               value={searchValue}
               onChange={(e) => {
@@ -611,7 +613,7 @@ export function Filters({
               }}
               className="osc-filter-search-bar"
               placeholder={props.searchPlaceholder}
-              id="search"
+              id={searchId}
             />
           </div>
         ) : null}

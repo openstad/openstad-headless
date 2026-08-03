@@ -62,6 +62,7 @@ export function Carousel({
               icon="ri-arrow-left-s-line"
               disabled={index === 0}
               text={buttonText?.previous || 'Vorige slide'}
+              aria-label={buttonText?.previous || 'Vorige afbeelding'}
               iconOnly={true}
               onClick={() => handleIndexChange(index - 1)}
             />
@@ -72,6 +73,7 @@ export function Carousel({
               icon="ri-arrow-right-s-line"
               disabled={index === items.length - 1}
               text={buttonText?.next || 'Volgende slide'}
+              aria-label={buttonText?.next || 'Volgende afbeelding'}
               iconOnly={true}
               onClick={() => handleIndexChange(index + 1)}
             />

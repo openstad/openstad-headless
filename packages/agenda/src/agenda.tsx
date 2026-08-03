@@ -124,10 +124,12 @@ function Agenda({
               )}
             </Heading4>
             <Paragraph>{item.description}</Paragraph>
-            {item.links && item.links?.length > 0 && (
+            {/* ponytail: één link hoort geen lijst te zijn -> losse <a>; pas bij ≥2 een lijst (1.3.1) */}
+            {item.links && item.links.length > 1 && (
               <LinkList className="osc-agenda-list">
-                {item.links?.map((link, index) => (
+                {item.links.map((link, index) => (
                   <LinkListLink
+                    key={index}
                     href={link.url}
                     target={link.openInNewWindow ? '_blank' : '_self'}>
                     {link.title}
@@ -137,6 +139,17 @@ function Agenda({
                   </LinkListLink>
                 ))}
               </LinkList>
+            )}
+            {item.links && item.links.length === 1 && (
+              <a
+                className="osc-agenda-single-link"
+                href={item.links[0].url}
+                target={item.links[0].openInNewWindow ? '_blank' : '_self'}>
+                {item.links[0].title}
+                {item.links[0].openInNewWindow && (
+                  <span className="sr-only"> (opent in nieuw tabblad)</span>
+                )}
+              </a>
             )}
           </div>
         </div>

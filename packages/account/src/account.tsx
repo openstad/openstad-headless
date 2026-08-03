@@ -376,6 +376,19 @@ function Account({
                       label={field[1].label}
                       name={field[1].label}
                       placeholder={field[1].label}
+                      // ponytail: autocomplete-doel per persoonsgegeven-veld (1.3.5)
+                      autoComplete={
+                        {
+                          name: 'name',
+                          naam: 'name',
+                          straatnaam: 'street-address',
+                          huisnummer: 'address-line2',
+                          postalCode: 'postal-code',
+                          postcode: 'postal-code',
+                          city: 'address-level2',
+                          plaats: 'address-level2',
+                        }[field[0] as string]
+                      }
                       maxLength={maxLength}
                       minLength={minLength}
                       value={field[1].value as string}
@@ -421,6 +434,7 @@ function Account({
                     <FormFieldTextbox
                       label={field[1].label}
                       name={field[1].label}
+                      autoComplete="username"
                       maxLength={maxLength}
                       minLength={minLength}
                       placeholder={field[1].label}

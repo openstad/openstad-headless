@@ -181,7 +181,7 @@ export default function PostcodeAutoFill({
             disabled={!!selected}
             className="utrecht-textbox utrecht-textbox--html-input"
             id="locationField"
-            autoComplete="off"
+            autoComplete="postal-code"
             aria-autocomplete="list"
             aria-controls="suggestion-list"
             aria-expanded={showDropdown}

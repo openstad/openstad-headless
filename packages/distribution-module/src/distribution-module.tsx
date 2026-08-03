@@ -166,7 +166,11 @@ function DistributionModule(props: DistributionModuleProps) {
                 />
               )}
 
-              <div className={`osc-distribution-modules-content__error`}>
+              <div
+                className={`osc-distribution-modules-content__error`}
+                role="status"
+                aria-live="assertive"
+                aria-atomic="true">
                 {distributeLeft < 0 &&
                   (props.pointsErrorTitle || props.pointsErrorMessage) && (
                     <Banner big={true}>
@@ -220,7 +224,11 @@ function DistributionModule(props: DistributionModuleProps) {
                 />
               )}
 
-              <div className={`osc-distribution-modules-content__error`}>
+              <div
+                className={`osc-distribution-modules-content__error`}
+                role="status"
+                aria-live="assertive"
+                aria-atomic="true">
                 {distributeLeft < 0 &&
                   (props.budgetErrorTitle || props.budgetErrorMessage) && (
                     <Banner big={true}>

@@ -51,10 +51,12 @@
   color: var(--nlds-counter-amount-color, #333);
 
   background: var(--nlds-counter-amount-background-color, #fff);
-  padding: 2px 4px;
+  /* ponytail: relatieve padding + geen clip zodat het cijfer bij 200% tekstvergroting
+     niet wordt afgesneden in het gekleurde vlak (1.4.4) */
+  padding: 0.1em 0.25em;
   border-radius: 4px;
   position: relative;
-  overflow: clip;
+  overflow: visible;
   margin-inline-end: 0.2rem;
   display: inline-block;
 }
@@ -66,4 +68,5 @@
   position: absolute;
   inset: 0 0 50% 0;
   background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px 4px 0 0;
 }

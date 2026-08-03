@@ -168,8 +168,13 @@ function Likes({
                 disabled={disabled}
                 aria-pressed={resource?.userVote?.opinion === likeVariant.type}>
                 <section className="like-kind">
-                  <i className={likeVariant.icon}></i>
-                  {variant === 'small' ? null : likeVariant.label}
+                  {/* ponytail: icoon decoratief + altijd een naam (ook in small) (1.1.1) */}
+                  <i className={likeVariant.icon} aria-hidden="true"></i>
+                  {variant === 'small' ? (
+                    <span className="sr-only">{likeVariant.label}</span>
+                  ) : (
+                    likeVariant.label
+                  )}
                 </section>
 
                 {!hideCounters ? (
@@ -233,6 +238,7 @@ function Likes({
                   }>
                   <section className="like-kind">
                     <i
+                      aria-hidden="true"
                       className={`${
                         resource?.userVote?.opinion === likeVariant.type
                           ? 'ri-triangle-fill'
