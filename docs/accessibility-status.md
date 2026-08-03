@@ -161,18 +161,34 @@ Losse audit-punten over kleinere widgets, allemaal via het api-server-pad (build
 ⚠️ **Postcode-autocomplete-caveat:** het postcode-veld is een custom combobox (`role="combobox"`); browser-autofill kan
 met de suggestielijst botsen — functioneel testen. **Teller 1.3.1/1.3.2 bleek al gefixt** (aria-label stond er al).
 
+### CMS-contentwidgets — commit `f7001b462`
+
+CMS/apostrophe-pad (build → kopie naar `apps/cms-server/public/widget-assets/` → `docker restart cms-server`;
+scss hercompileert bij restart). Lokaal gedeployd; live-audit-verificatie volgt bij deploy naar audit.draad.dev.
+
+| Crit  | Fix                                                               | Bestand                                                         |
+| ----- | ----------------------------------------------------------------- | --------------------------------------------------------------- |
+| 1.1.1 | accordeon-chevron (Utrecht-svg) via ref+`useEffect` `aria-hidden` | `apostrophe-widgets/accordion/src/accordion.tsx`                |
+| 1.3.1 | share-links nu `<ul>/<li>` i.p.v. losse div-links                 | `apostrophe-widgets/share-links/src/share-links.{tsx,css}`      |
+| 1.4.3 | tijdlijn-blok (#f3f3f3) linkkleur `#0b5394` (≥4,5:1)              | `cms-server/modules/openstad-timeline-widget/ui/src/index.scss` |
+
+### Auth/login — commit `fa4a1be88`
+
+`apps/auth-server` (bind-mount; `docker restart openstad-auth-server`).
+
+| Crit  | Fix                                                | Bestand                                                      |
+| ----- | -------------------------------------------------- | ------------------------------------------------------------ |
+| 2.4.6 | 'Neem contact met ons op' → 'Stuur ons een e-mail' | `views/auth/choose.html`, `views/auth/url/confirmation.html` |
+| 2.5.3 | `aria-label="close message"` → `"sluit melding"`   | `views/elements/flash.html`, `error-flash.html`              |
+| 3.3.1 | e-mail-foutmelding ontkennend i.p.v. instructie    | `public/javascripts/jquery.validate.nl.js`                   |
+
 ---
 
 ## ⏭️ Nog te doen
 
-- **Contentwidgets (CMS/apostrophe-pad — build + kopie + `docker restart cms-server`):** accordeon-chevron
-  `aria-hidden` (`packages/apostrophe-widgets/accordion`), share-links als `<ul><li>`
-  (`apostrophe-widgets/share-links`), agenda-**tijdlijn** `aria-current`
-  (`apps/cms-server/modules/openstad-timeline-widget/views/widget.html`), hyperlink-contrast op grijze
-  achtergrond (timeline- + section-widget `ui/src/index.scss`). _(De carousel-knopfix zit al in `ui`.)_
-- **Auth/login (`apps/auth-server`):** 'Neem contact met ons op' → 'Stuur ons een e-mail' (`views/auth/choose.html`,
-  `url/confirmation.html`); `aria-label="close message"` → `"sluit melding"` (`views/elements/flash.html`,
-  `error-flash.html`); e-mail-foutmelding ontkennend maken (`public/javascripts/jquery.validate.nl.js`).
+- **Tijdlijn `aria-current` (contentwidget, 1.3.1)** — uitgesteld: de content-tijdlijn kent geen "huidige
+  fase"-status (alleen period-vs-moment als type); `aria-current` binden vergt een nieuw schema-veld
+  (`openstad-timeline-widget`). De losse agenda-widget heeft `aria-current` al.
 - **Inzending-detail afbeeldingslink (2.5.3)** — `resource-detail.tsx:353` `aria-label` matcht niet de zichtbare
   tekst; verweven met de misleidende, configureerbare "Reageer op deze inzending"-tekst (deels content).
 - **Kopniveau als prop (cross-cutting, groter)** — widgets hardcoden koppen; auditor eist instelbaar kopniveau.
