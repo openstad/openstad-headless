@@ -56,8 +56,14 @@
 .share-links .link-container {
   display: flex;
   grid-gap: 5px;
-  margin-top: 10px;
+  margin: 10px 0 0 0;
   flex-wrap: wrap;
+  /* ponytail: <ul>-reset zodat de lijst-semantiek geen bullets/inspringing toont (1.3.1) */
+  list-style: none;
+  padding: 0;
+}
+.share-links .link-container li {
+  display: flex;
 }
 
 .sr-only {
