@@ -21,7 +21,8 @@ describe('<Filters />', () => {
       />
     );
 
-    cy.get('input#search').should('exist');
+    // id is nu een gegenereerde useId() (uniek per instance, 1.3.1) — selecteer op class
+    cy.get('input.osc-filter-search-bar').should('exist');
     cy.get('select#sortField').should('exist');
     cy.get('input#locationField').should('exist');
     cy.get('[test-id="filter-reset-button"]')
