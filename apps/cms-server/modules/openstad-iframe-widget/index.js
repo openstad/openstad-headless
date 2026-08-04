@@ -1,5 +1,12 @@
 // Attributes that are rendered from their own field or are unsafe to set freely
-const blockedAttributes = ['src', 'srcdoc', 'sandbox', 'title', 'height', 'width'];
+const blockedAttributes = [
+  'src',
+  'srcdoc',
+  'sandbox',
+  'title',
+  'height',
+  'width',
+];
 
 module.exports = {
   extend: 'base-widget',
@@ -85,7 +92,10 @@ module.exports = {
           }
           if (widget.passUtmParams) {
             Object.entries(req.query || {}).forEach(([key, value]) => {
-              if (key.toLowerCase().startsWith('utm_') && typeof value === 'string') {
+              if (
+                key.toLowerCase().startsWith('utm_') &&
+                typeof value === 'string'
+              ) {
                 url.searchParams.set(key, value);
               }
             });
