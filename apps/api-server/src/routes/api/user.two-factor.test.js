@@ -16,27 +16,32 @@ process.env.SUPPRESS_NO_CONFIG_WARNING = '1';
 // Load through CommonJS so the router and this test share one module cache.
 const require = createRequire(import.meta.url);
 const db = require('../../db');
+const can = require('../../lib/sequelize-authorization/mixins/can');
 const authSettings = require('../../util/auth-settings');
 const userRouter = require('./user');
 
-// `canUpdate` drives the authorization outcome; the role matrix behind it is
-// the User model's own concern and is exercised by the regular update route.
-let canUpdate = false;
 let found = true;
 
 const updateUser = vi.fn(async () => ({}));
 const fetchUserData = vi.fn(async () => ({ twoFactorConfigured: 1 }));
 
+// Stands in for the Sequelize instance the route looks up. It carries the real
+// User.auth and the real can() mixin, so authorization is genuinely exercised
+// rather than stubbed out.
+function targetUser() {
+  return {
+    id: 93,
+    role: 'admin',
+    idpUser: { identifier: 'idp-93', provider: 'openstad' },
+    auth: Object.create(db.User.auth),
+    can,
+    toString: () => 'SequelizeInstance:user',
+    toJSON: () => ({ id: 93 }),
+  };
+}
+
 db.User.scope = () => ({
-  findOne: async () =>
-    found
-      ? {
-          id: 33,
-          idpUser: { identifier: 'idp-33', provider: 'openstad' },
-          can: () => canUpdate,
-          toJSON: () => ({ id: 33 }),
-        }
-      : null,
+  findOne: async () => (found ? targetUser() : null),
 });
 
 authSettings.config = async () => ({});
@@ -57,37 +62,48 @@ function createApp(user) {
 }
 
 const anonymous = { role: 'anonymous', id: null };
-const moderator = { role: 'moderator', id: 2 };
+const member = { role: 'member', id: 7 };
+const moderator = { role: 'moderator', id: 8 };
+const admin = { role: 'admin', id: 1 };
+const self = { role: 'admin', id: 93 };
 
 describe('two-factor routes require authorization', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    canUpdate = false;
     found = true;
   });
 
-  it('rejects an unauthenticated reset without touching the auth server', async () => {
-    const res = await request(createApp(anonymous)).put(
-      '/project/1/user/33/reset-two-factor'
-    );
+  // The target is an admin, so a moderator must not reach it either: you cannot
+  // act on a user with more rights than you have.
+  const denied = [
+    ['anonymous', anonymous],
+    ['a member', member],
+    ['a moderator', moderator],
+  ];
 
-    expect(res.status).toBe(403);
-    expect(updateUser).not.toHaveBeenCalled();
-  });
+  for (const [label, user] of denied) {
+    it(`rejects a reset by ${label} without touching the auth server`, async () => {
+      const res = await request(createApp(user)).put(
+        '/project/1/user/93/reset-two-factor'
+      );
 
-  it('rejects an unauthenticated status read', async () => {
-    const res = await request(createApp(anonymous)).get(
-      '/project/1/user/33/two-factor-status'
-    );
+      expect(res.status).toBe(403);
+      expect(updateUser).not.toHaveBeenCalled();
+    });
 
-    expect(res.status).toBe(403);
-    expect(fetchUserData).not.toHaveBeenCalled();
-  });
+    it(`rejects a status read by ${label}`, async () => {
+      const res = await request(createApp(user)).get(
+        '/project/1/user/93/two-factor-status'
+      );
 
-  it('allows a reset for someone who may update the user', async () => {
-    canUpdate = true;
-    const res = await request(createApp(moderator)).put(
-      '/project/1/user/33/reset-two-factor'
+      expect(res.status).toBe(403);
+      expect(fetchUserData).not.toHaveBeenCalled();
+    });
+  }
+
+  it('allows an admin to reset', async () => {
+    const res = await request(createApp(admin)).put(
+      '/project/1/user/93/reset-two-factor'
     );
 
     expect(res.status).toBe(200);
@@ -101,10 +117,18 @@ describe('two-factor routes require authorization', () => {
     );
   });
 
-  it('allows a status read for someone who may update the user', async () => {
-    canUpdate = true;
-    const res = await request(createApp(moderator)).get(
-      '/project/1/user/33/two-factor-status'
+  it('allows the user themselves to reset', async () => {
+    const res = await request(createApp(self)).put(
+      '/project/1/user/93/reset-two-factor'
+    );
+
+    expect(res.status).toBe(200);
+    expect(updateUser).toHaveBeenCalled();
+  });
+
+  it('allows an admin to read the status', async () => {
+    const res = await request(createApp(admin)).get(
+      '/project/1/user/93/two-factor-status'
     );
 
     expect(res.status).toBe(200);
@@ -112,10 +136,9 @@ describe('two-factor routes require authorization', () => {
   });
 
   it('404s on a missing user', async () => {
-    canUpdate = true;
     found = false;
-    const res = await request(createApp(moderator)).put(
-      '/project/1/user/33/reset-two-factor'
+    const res = await request(createApp(admin)).put(
+      '/project/1/user/93/reset-two-factor'
     );
 
     expect(res.status).toBe(404);
@@ -123,9 +146,8 @@ describe('two-factor routes require authorization', () => {
   });
 
   it('does not match a non-numeric userId', async () => {
-    canUpdate = true;
-    const res = await request(createApp(moderator)).put(
-      '/project/1/user/33abc/reset-two-factor'
+    const res = await request(createApp(admin)).put(
+      '/project/1/user/93abc/reset-two-factor'
     );
 
     expect(res.status).not.toBe(200);
