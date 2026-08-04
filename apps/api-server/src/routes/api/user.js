@@ -865,7 +865,7 @@ router
                 : synchronizedUpdatedUserData
             );
 
-            if (!req.user.can('update', apiUser)) {
+            if (!apiUser.can('update', req.user)) {
               syncErrors.push(
                 new Error(
                   `Not authorized to update user ${apiUser.id} in project ${apiUser.projectId}`
