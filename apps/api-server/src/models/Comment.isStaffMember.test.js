@@ -40,4 +40,9 @@ describe('Comment.isStaffMember', () => {
   it('is false when no author association is loaded', () => {
     expect(db.Comment.build({ id: 1 }).isStaffMember).toBe(false);
   });
+
+  it('is included in the forced reply attributes of includeRepliesOnComments', () => {
+    const scope = db.Comment.options.scopes.includeRepliesOnComments(undefined);
+    expect(scope.include[0].attributes).toContain('isStaffMember');
+  });
 });
