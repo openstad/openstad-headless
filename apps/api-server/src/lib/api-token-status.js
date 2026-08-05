@@ -9,13 +9,12 @@
 // A token is expired once its expiry date has been reached. The comparison is
 // inclusive: at the exact expiry instant the token is already expired, so the
 // stored date is the first moment it no longer works.
-// A null/undefined expiresAt means the token never expires.
+// Every token gets an expiry date, so a missing one is not "valid forever" but a
+// broken row: treat it as expired rather than as an unlimited credential.
 function isExpired(apiToken, now = new Date()) {
-  return !!(
-    apiToken &&
-    apiToken.expiresAt &&
-    new Date(apiToken.expiresAt) <= now
-  );
+  if (!apiToken) return false;
+  if (!apiToken.expiresAt) return true;
+  return new Date(apiToken.expiresAt) <= now;
 }
 
 // Computes the lifecycle status shown in the admin overview.

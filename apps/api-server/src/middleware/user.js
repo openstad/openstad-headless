@@ -123,8 +123,8 @@ async function handleApiToken(req, res, next, rawToken) {
 
     const apiToken = await db.ApiToken.findOne({ where: { tokenHash } });
 
-    // A null expiresAt means the token never expires; only treat a token as
-    // expired when it has an expiry date that is in the past (shared helper).
+    // Every token carries an expiry date, so a token without one is rejected
+    // just like an expired one (shared helper, fail closed).
     if (!apiToken || isExpired(apiToken)) {
       return nextWithEmptyUser(req, res, next);
     }

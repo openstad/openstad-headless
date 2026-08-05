@@ -292,10 +292,12 @@ describe('api-token routes', () => {
       const res = await request(createApp()).get(BASE_URL);
 
       expect(res.status).toBe(200);
+      // The third row has no expiry at all, which new tokens can no longer be:
+      // it fails closed to 'expired' rather than showing as valid forever.
       expect(res.body.map((token) => token.status)).toEqual([
         'active',
         'expired',
-        'active',
+        'expired',
       ]);
     });
 

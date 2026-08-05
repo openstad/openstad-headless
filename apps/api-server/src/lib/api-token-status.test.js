@@ -17,8 +17,9 @@ describe('api-token-status', () => {
       expect(isExpired(undefined, NOW)).toBe(false);
     });
 
-    it('returns false when expiresAt is null (never expires)', () => {
-      expect(isExpired({ expiresAt: null }, NOW)).toBe(false);
+    it('returns true when expiresAt is missing (fail closed)', () => {
+      expect(isExpired({ expiresAt: null }, NOW)).toBe(true);
+      expect(isExpired({}, NOW)).toBe(true);
     });
 
     it('returns true for a past expiry', () => {
@@ -61,9 +62,9 @@ describe('api-token-status', () => {
       );
     });
 
-    it('returns active when there is no expiry (never expires)', () => {
+    it('returns expired when there is no expiry at all (fail closed)', () => {
       expect(computeStatus({ deletedAt: null, expiresAt: null }, NOW)).toBe(
-        'active'
+        'expired'
       );
     });
   });
