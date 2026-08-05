@@ -752,11 +752,11 @@ router
   .route('/:userId(\\d+)')
   .all(function (req, res, next) {
     const userId = parseInt(req.params.userId) || 1;
+    const where = { id: userId };
+    // The bare /api/user mount has no projectId; the project mount must stay tenant-isolated
+    if (req.params.projectId) where.projectId = req.params.projectId;
     db.User.scope(...req.scope)
-      .findOne({
-        //where: {id: userId, projectId: req.params.projectId},
-        where: { id: userId },
-      })
+      .findOne({ where })
       .then((found) => {
         if (!found) throw new createError(404, 'User not found');
         req.results = found;
@@ -767,8 +767,24 @@ router
 
   // view user
   // ---------
-  .get(auth.can('User', 'view'))
   .get(auth.useReqUser)
+  .get(function (req, res, next) {
+    const user = req.user;
+    const target = req.results;
+    const isPrivileged = hasRole(user, 'moderator');
+    const isOwner =
+      (user && user.id && target && user.id === target.id) ||
+      (user &&
+        user.idpUser &&
+        target &&
+        target.idpUser &&
+        user.idpUser.identifier &&
+        user.idpUser.identifier === target.idpUser.identifier);
+    if (!isPrivileged && !isOwner) {
+      return next(createError(403, 'You cannot view this User'));
+    }
+    return next();
+  })
   .get(function (req, res, next) {
     res.json(req.results);
   })
