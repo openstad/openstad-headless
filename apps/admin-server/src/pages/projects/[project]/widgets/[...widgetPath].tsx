@@ -1,7 +1,7 @@
 import PluginComponentLoader from '@/components/plugin-component-loader';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
 import WidgetVersionHistory from '@/components/widget-version-history';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
@@ -124,15 +124,11 @@ export default function PluginWidgetPage({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
           </Tabs>
 
-          <div className="py-6 mt-6 bg-white rounded-md">
-            {previewConfig && (
-              <WidgetPreview
-                type={widgetType}
-                config={previewConfig}
-                projectId={projectId}
-              />
-            )}
-          </div>
+          <WidgetEditorPreview
+            type={widgetType}
+            config={previewConfig}
+            projectId={projectId}
+          />
         </div>
       </PageLayout>
     </div>

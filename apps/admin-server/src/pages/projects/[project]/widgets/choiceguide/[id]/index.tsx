@@ -1,6 +1,6 @@
 import AuditLogTable from '@/components/audit-log-table';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
 import WidgetVersionHistory from '@/components/widget-version-history';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
@@ -193,15 +193,11 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
           </Tabs>
 
-          <div className="py-6 mt-6 bg-white rounded-md">
-            {previewConfig ? (
-              <WidgetPreview
-                type="choiceguide"
-                config={previewConfig}
-                projectId={projectId as string}
-              />
-            ) : null}
-          </div>
+          <WidgetEditorPreview
+            type="choiceguide"
+            config={previewConfig}
+            projectId={projectId as string}
+          />
         </div>
       </PageLayout>
     </div>

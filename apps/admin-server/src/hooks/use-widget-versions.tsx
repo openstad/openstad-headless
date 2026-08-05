@@ -11,6 +11,7 @@ export type WidgetVersion = {
   userName: string | null;
   name: string | null;
   pinned: boolean;
+  restoredFromId: number | null;
   createdAt: string;
 };
 
@@ -46,14 +47,18 @@ export function useWidgetVersions(
   async function getVersionConfig(versionId: number) {
     if (!projectNumber || !widgetNumber) return null;
 
-    const res = await fetch(
-      `/api/openstad/api/project/${projectNumber}/widgets/${widgetNumber}/versions/${versionId}`
-    );
+    try {
+      const res = await fetch(
+        `/api/openstad/api/project/${projectNumber}/widgets/${widgetNumber}/versions/${versionId}`
+      );
 
-    if (!res.ok) return null;
+      if (!res.ok) return null;
 
-    const data = await res.json();
-    return data?.config ?? null;
+      const data = await res.json();
+      return data?.config ?? null;
+    } catch (error) {
+      return null;
+    }
   }
 
   async function restore(versionId: number): Promise<number | null> {

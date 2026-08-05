@@ -1,5 +1,5 @@
 import AuditLogTable from '@/components/audit-log-table';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
 import WidgetVersionHistory from '@/components/widget-version-history';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
@@ -95,15 +95,11 @@ export default function WidgetCounter({ apiUrl }: WithApiUrlProps) {
               />
             </TabsContent>
           </Tabs>
-          <div className="py-6 mt-6 bg-white rounded-md">
-            {previewConfig ? (
-              <WidgetPreview
-                type="counter"
-                config={previewConfig}
-                projectId={projectId as string}
-              />
-            ) : null}
-          </div>
+          <WidgetEditorPreview
+            type="counter"
+            config={previewConfig}
+            projectId={projectId as string}
+          />
         </div>
       </PageLayout>
     </div>

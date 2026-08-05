@@ -1,5 +1,5 @@
 import AuditLogTable from '@/components/audit-log-table';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
 import WidgetVersionHistory from '@/components/widget-version-history';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
@@ -135,15 +135,12 @@ export default function WidgetDistributionModule({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
           </Tabs>
 
-          <div className="container py-6 mt-6 bg-white rounded-md">
-            {previewConfig && (
-              <WidgetPreview
-                type="distributionmodule"
-                config={previewConfig}
-                projectId={projectId as string}
-              />
-            )}
-          </div>
+          <WidgetEditorPreview
+            type="distributionmodule"
+            config={previewConfig}
+            projectId={projectId as string}
+            className="container py-6 mt-6 bg-white rounded-md"
+          />
         </div>
       </PageLayout>
     </div>
