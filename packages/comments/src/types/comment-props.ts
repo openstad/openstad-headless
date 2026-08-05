@@ -12,8 +12,7 @@ export type CommentProps = {
   showDateSeperately?: boolean;
   submitComment?: (e: any) => void;
   setRefreshComments: () => void;
-  adminLabel?: string;
-  editorLabel?: string;
+  staffLabel?: string;
   disableSubmit?: boolean;
   extraReplyButton?: boolean;
   variant?: 'micro-score' | 'medium';

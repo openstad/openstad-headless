@@ -16,11 +16,12 @@ export type Comment = {
   netVotes: number;
   hasUserLiked: boolean;
   hasUserDisliked: boolean;
+  isStaffMember: boolean;
   createDateHumanized: string;
 
   replies: Array<Comment>;
 
-  user?: { displayName: string; role: string };
+  user?: { displayName: string; role?: string };
 
   tags?: Array<{
     id: string;
