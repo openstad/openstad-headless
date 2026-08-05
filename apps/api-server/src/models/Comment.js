@@ -134,17 +134,17 @@ module.exports = function (db, sequelize, DataTypes) {
         },
       },
 
-      isStaffMember: {
+      authorStaffRole: {
         type: DataTypes.VIRTUAL,
         auth: {
-          // intended public signal; carries no role/id/name
+          // intended public signal for the staff badge; carries no id, name or email
           viewableBy: 'all',
         },
         get: function () {
           // real association value, read before serialization masks the role
           const role = this.user && this.user.role;
           // staff set = the roles that get a badge today; add 'moderator' here if desired
-          return role === 'admin' || role === 'editor';
+          return role === 'admin' || role === 'editor' ? role : null;
         },
       },
     },
@@ -300,7 +300,7 @@ module.exports = function (db, sequelize, DataTypes) {
                 'hasUserDisliked',
                 'confirmationSent',
                 'yes',
-                'isStaffMember',
+                'authorStaffRole',
               ],
             },
           ],

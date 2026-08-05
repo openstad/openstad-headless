@@ -1,11 +1,21 @@
 import React from 'react';
 
 type AuthorBadgeProps = {
-  isStaffMember?: boolean;
-  label?: string;
+  staffRole?: 'admin' | 'editor' | null;
+  adminLabel?: string;
+  editorLabel?: string;
 };
 
-export function AuthorBadge({ isStaffMember, label }: AuthorBadgeProps) {
-  if (!isStaffMember || !label) return null;
-  return <span className="--isStaff">{label}</span>;
+export function AuthorBadge({
+  staffRole,
+  adminLabel,
+  editorLabel,
+}: AuthorBadgeProps) {
+  if (staffRole !== 'admin' && staffRole !== 'editor') return null;
+
+  const isAdmin = staffRole === 'admin';
+  const label = isAdmin ? adminLabel : editorLabel;
+  if (!label) return null;
+
+  return <span className={isAdmin ? '--isAdmin' : '--isEditor'}>{label}</span>;
 }
