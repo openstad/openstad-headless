@@ -16,7 +16,7 @@ export type Comment = {
   netVotes: number;
   hasUserLiked: boolean;
   hasUserDisliked: boolean;
-  isStaffMember: boolean;
+  authorStaffRole: 'admin' | 'editor' | null;
   createDateHumanized: string;
 
   replies: Array<Comment>;

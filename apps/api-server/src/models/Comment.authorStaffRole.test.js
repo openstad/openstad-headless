@@ -20,29 +20,29 @@ function comment(authorRole) {
   return c;
 }
 
-describe('Comment.isStaffMember', () => {
-  it('is true for an admin author', () => {
-    expect(comment('admin').isStaffMember).toBe(true);
+describe('Comment.authorStaffRole', () => {
+  it('is "admin" for an admin author', () => {
+    expect(comment('admin').authorStaffRole).toBe('admin');
   });
 
-  it('is true for an editor author', () => {
-    expect(comment('editor').isStaffMember).toBe(true);
+  it('is "editor" for an editor author', () => {
+    expect(comment('editor').authorStaffRole).toBe('editor');
   });
 
-  it('is false for a moderator author (moderator is not badged today)', () => {
-    expect(comment('moderator').isStaffMember).toBe(false);
+  it('is null for a moderator author (moderator is not badged today)', () => {
+    expect(comment('moderator').authorStaffRole).toBe(null);
   });
 
-  it('is false for a regular member author', () => {
-    expect(comment('member').isStaffMember).toBe(false);
+  it('is null for a regular member author', () => {
+    expect(comment('member').authorStaffRole).toBe(null);
   });
 
-  it('is false when no author association is loaded', () => {
-    expect(db.Comment.build({ id: 1 }).isStaffMember).toBe(false);
+  it('is null when no author association is loaded', () => {
+    expect(db.Comment.build({ id: 1 }).authorStaffRole).toBe(null);
   });
 
   it('is included in the forced reply attributes of includeRepliesOnComments', () => {
     const scope = db.Comment.options.scopes.includeRepliesOnComments(undefined);
-    expect(scope.include[0].attributes).toContain('isStaffMember');
+    expect(scope.include[0].attributes).toContain('authorStaffRole');
   });
 });

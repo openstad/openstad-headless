@@ -1323,11 +1323,8 @@ function DocumentMap({
                       disableReplyFeatures
                       disableLocationLink
                       keepMenuIconStatic
-                      staffLabel={
-                        props.comments?.adminLabel ||
-                        props.comments?.editorLabel ||
-                        'webredactie'
-                      }
+                      adminLabel={props.comments?.adminLabel || 'admin'}
+                      editorLabel={props.comments?.editorLabel}
                       setRefreshComments={() =>
                         setRefreshComments((prev) => prev + 1)
                       }

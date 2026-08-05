@@ -38,7 +38,8 @@ function Comment({
   keepMenuIconStatic = false,
   type,
   index,
-  staffLabel,
+  adminLabel,
+  editorLabel,
   disableSubmit = false,
   extraReplyButton = false,
   setRefreshComments,
@@ -50,7 +51,8 @@ function Comment({
   const args = {
     comment,
     selected,
-    staffLabel,
+    adminLabel,
+    editorLabel,
     ...props,
   } as CommentProps;
 
@@ -181,8 +183,9 @@ function Comment({
           className={`reaction-name`}>
           {args.comment.user && args.comment.user.displayName}{' '}
           <AuthorBadge
-            isStaffMember={args.comment.isStaffMember}
-            label={staffLabel}
+            staffRole={args.comment.authorStaffRole}
+            adminLabel={adminLabel}
+            editorLabel={editorLabel}
           />
         </Heading>
         {canEdit() || canDelete() ? (
