@@ -7,8 +7,8 @@ export type ApiToken = {
   name: string | null;
   tokenPrefix: string;
   lastFour: string;
-  // null = the token never expires
-  expiresAt: string | null;
+  // Every token expires; there is no "never expires" state.
+  expiresAt: string;
   lastUsedAt: string | null;
   createdAt: string;
   // Only present immediately after creation

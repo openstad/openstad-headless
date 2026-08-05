@@ -32,10 +32,10 @@ module.exports = {
         type: Sequelize.STRING(4),
         allowNull: false,
       },
-      // null = the token never expires
+      // Every token expires; there is no "never expires" state.
       expiresAt: {
         type: Sequelize.DATE,
-        allowNull: true,
+        allowNull: false,
       },
       lastUsedAt: {
         type: Sequelize.DATE,

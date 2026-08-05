@@ -26,7 +26,8 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import * as z from 'zod';
 
-const NO_EXPIRY = 'none';
+// A token always expires; without an explicit choice it gets the longest preset.
+const DEFAULT_MONTHS = '12';
 
 const formSchema = z.object({
   months: z.string().min(1, 'Kies een geldigheidsperiode'),
@@ -40,7 +41,7 @@ function maskToken(token: ApiToken) {
 }
 
 function formatExpiry(iso: string | null) {
-  if (!iso) return 'Geen einddatum';
+  if (!iso) return '—';
   return new Date(iso).toLocaleDateString('nl-NL');
 }
 
@@ -75,18 +76,13 @@ export default function UserApiTokens() {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { months: NO_EXPIRY, name: '' },
+    defaultValues: { months: DEFAULT_MONTHS, name: '' },
   });
-
-  const selectedMonths = form.watch('months');
 
   async function onSubmit(values: FormValues) {
     try {
       const created = await createToken({
-        months:
-          values.months && values.months !== NO_EXPIRY
-            ? parseInt(values.months, 10)
-            : undefined,
+        months: parseInt(values.months, 10),
         name: values.name || undefined,
       });
       if (created.token) {
@@ -202,18 +198,11 @@ export default function UserApiTokens() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value={NO_EXPIRY}>Geen einddatum</SelectItem>
                     <SelectItem value="1">1 maand</SelectItem>
                     <SelectItem value="3">3 maanden</SelectItem>
                     <SelectItem value="12">12 maanden</SelectItem>
                   </SelectContent>
                 </Select>
-                {selectedMonths === NO_EXPIRY && (
-                  <p className="text-xs text-orange-700 bg-orange-50 border border-orange-200 rounded px-2 py-1 mt-1">
-                    Let op: dit token verloopt <strong>nooit</strong> en blijft
-                    geldig totdat het handmatig wordt ingetrokken.
-                  </p>
-                )}
                 <FormMessage />
               </FormItem>
             )}

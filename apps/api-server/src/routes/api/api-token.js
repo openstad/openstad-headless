@@ -6,7 +6,11 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const router = express.Router({ mergeParams: true });
 
-const VALID_MONTHS = { 1: 1, 3: 3, 12: 12 };
+const VALID_MONTHS = [1, 3, 12];
+// A token always expires: an API key that stays valid forever is a permanent
+// credential with its owner's permissions. Leaving the validity period out
+// falls back to the longest preset instead of "never".
+const DEFAULT_MONTHS = 12;
 
 function mintToken() {
   const raw = crypto.randomBytes(32).toString('base64url');
@@ -59,26 +63,25 @@ router.post('/', async function (req, res, next) {
     const projectId = req.project.id;
     const { months: monthsStr, name } = req.body;
 
-    // Validity period is optional: an empty / 'none' value means the token
-    // never expires. A provided value must be one of the allowed presets.
-    let expiresAt = null;
+    // Validity period is optional in the request, not in the result: leaving it
+    // out uses the default. A provided value must be one of the allowed presets.
     const hasPeriod =
-      monthsStr !== undefined &&
-      monthsStr !== null &&
-      monthsStr !== '' &&
-      monthsStr !== 'none';
+      monthsStr !== undefined && monthsStr !== null && monthsStr !== '';
+    let months = DEFAULT_MONTHS;
     if (hasPeriod) {
-      const months = VALID_MONTHS[String(monthsStr)];
-      if (!months) {
+      // Number() over an object lookup: a key lookup also finds Object.prototype
+      // members, so 'toString' would pass the guard and yield an Invalid Date.
+      months = Number(monthsStr);
+      if (!VALID_MONTHS.includes(months)) {
         return next(
           createError(
             400,
-            'Invalid validity period. Choose 1, 3, or 12 months, or none.'
+            'Invalid validity period. Choose 1, 3, or 12 months.'
           )
         );
       }
-      expiresAt = computeExpiresAt(months);
     }
+    const expiresAt = computeExpiresAt(months);
 
     // Verify the target user belongs to this project
     const targetUser = await db.User.findOne({

@@ -149,21 +149,40 @@ describe('api-token routes', () => {
       expect(res.body.lastFour).toBe(res.body.token.slice(-4));
     });
 
-    it.each([['none'], [''], [null]])(
-      'creates a never-expiring token when months is "%s"',
+    it.each([[''], [null], [undefined]])(
+      'falls back to the 12-month default when months is "%s"',
       async (months) => {
+        const before = Date.now();
+
         const res = await request(createApp()).post(BASE_URL).send({ months });
 
         expect(res.status).toBe(201);
-        expect(db.ApiToken.create.mock.calls[0][0].expiresAt).toBeNull();
+        const { expiresAt } = db.ApiToken.create.mock.calls[0][0];
+        const days = (expiresAt.getTime() - before) / (24 * 60 * 60 * 1000);
+        expect(days).toBeGreaterThanOrEqual(363);
+        expect(days).toBeLessThan(373);
       }
     );
 
-    it('creates a never-expiring token when months is omitted', async () => {
+    it('falls back to the 12-month default when months is omitted', async () => {
+      const before = Date.now();
+
       const res = await request(createApp()).post(BASE_URL).send({});
 
       expect(res.status).toBe(201);
-      expect(db.ApiToken.create.mock.calls[0][0].expiresAt).toBeNull();
+      const { expiresAt } = db.ApiToken.create.mock.calls[0][0];
+      const days = (expiresAt.getTime() - before) / (24 * 60 * 60 * 1000);
+      expect(days).toBeGreaterThanOrEqual(363);
+      expect(days).toBeLessThan(373);
+    });
+
+    it('never creates a token without an expiry date', async () => {
+      const res = await request(createApp()).post(BASE_URL).send({});
+
+      expect(res.status).toBe(201);
+      expect(db.ApiToken.create.mock.calls[0][0].expiresAt).toBeInstanceOf(
+        Date
+      );
     });
 
     it('accepts the numeric months the admin form sends', async () => {
@@ -182,15 +201,22 @@ describe('api-token routes', () => {
       expect(db.ApiToken.create.mock.calls[0][0].name).toBeNull();
     });
 
-    it.each([['7'], ['0'], ['abc'], ['-1']])(
-      'rejects an invalid months value ("%s") with 400',
-      async (months) => {
-        const res = await request(createApp()).post(BASE_URL).send({ months });
+    // 'toString'/'constructor' guard against a plain object lookup, which also
+    // resolves Object.prototype members and would yield an Invalid Date.
+    it.each([
+      ['7'],
+      ['0'],
+      ['abc'],
+      ['-1'],
+      ['none'],
+      ['toString'],
+      ['constructor'],
+    ])('rejects an invalid months value ("%s") with 400', async (months) => {
+      const res = await request(createApp()).post(BASE_URL).send({ months });
 
-        expect(res.status).toBe(400);
-        expect(db.ApiToken.create).not.toHaveBeenCalled();
-      }
-    );
+      expect(res.status).toBe(400);
+      expect(db.ApiToken.create).not.toHaveBeenCalled();
+    });
 
     it('returns 404 when the target user is not in this project', async () => {
       db.User.findOne = vi.fn().mockResolvedValue(null);
