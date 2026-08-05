@@ -4,8 +4,13 @@ import widgetVersionService from './widget-version.js';
 
 vi.mock('../db', () => ({ default: {} }));
 
-const { resolveUserName, isSameConfig, selectPruneIds, MAX_VERSIONS } =
-  widgetVersionService;
+const {
+  resolveUserName,
+  canonicalize,
+  isSameConfig,
+  selectPruneIds,
+  MAX_VERSIONS,
+} = widgetVersionService;
 
 describe('widget-version service', () => {
   describe('resolveUserName', () => {
@@ -21,6 +26,28 @@ describe('widget-version service', () => {
       expect(resolveUserName(null)).toBeNull();
       expect(resolveUserName(undefined)).toBeNull();
       expect(resolveUserName({})).toBeNull();
+    });
+  });
+
+  describe('canonicalize', () => {
+    it('sorts object keys recursively', () => {
+      expect(canonicalize({ b: 1, a: { d: 1, c: 2 } })).toEqual({
+        a: { c: 2, d: 1 },
+        b: 1,
+      });
+    });
+
+    it('preserves array order', () => {
+      expect(canonicalize([3, 1, 2])).toEqual([3, 1, 2]);
+      expect(canonicalize({ list: [{ b: 1, a: 2 }] })).toEqual({
+        list: [{ a: 2, b: 1 }],
+      });
+    });
+
+    it('passes primitives through unchanged', () => {
+      expect(canonicalize(5)).toBe(5);
+      expect(canonicalize('x')).toBe('x');
+      expect(canonicalize(null)).toBeNull();
     });
   });
 
@@ -43,6 +70,16 @@ describe('widget-version service', () => {
         )
       ).toBe(true);
     });
+
+    it('treats different array order as not equal', () => {
+      expect(isSameConfig({ a: [1, 2] }, { a: [2, 1] })).toBe(false);
+    });
+
+    it('handles null and undefined', () => {
+      expect(isSameConfig(null, null)).toBe(true);
+      expect(isSameConfig(undefined, undefined)).toBe(true);
+      expect(isSameConfig({}, null)).toBe(false);
+    });
   });
 
   describe('selectPruneIds', () => {
@@ -63,6 +100,19 @@ describe('widget-version service', () => {
         MAX_VERSIONS + 1,
         MAX_VERSIONS + 2,
         MAX_VERSIONS + 3,
+      ]);
+    });
+
+    it('returns no ids for an empty list', () => {
+      expect(selectPruneIds([], MAX_VERSIONS)).toEqual([]);
+    });
+
+    it('prunes only the single oldest id at cap plus one', () => {
+      const versions = Array.from({ length: MAX_VERSIONS + 1 }, (_, i) => ({
+        id: i + 1,
+      }));
+      expect(selectPruneIds(versions, MAX_VERSIONS)).toEqual([
+        MAX_VERSIONS + 1,
       ]);
     });
   });
