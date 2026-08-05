@@ -15,6 +15,7 @@ import hasRole from '../../../lib/has-role';
 import { CommentWidgetContext } from '../comments';
 import '../index.css';
 import { CommentProps } from '../types/comment-props';
+import { AuthorBadge } from './author-badge';
 import CommentForm from './comment-form.js';
 
 function Comment({
@@ -37,8 +38,7 @@ function Comment({
   keepMenuIconStatic = false,
   type,
   index,
-  adminLabel,
-  editorLabel,
+  staffLabel,
   disableSubmit = false,
   extraReplyButton = false,
   setRefreshComments,
@@ -50,8 +50,7 @@ function Comment({
   const args = {
     comment,
     selected,
-    adminLabel,
-    editorLabel,
+    staffLabel,
     ...props,
   } as CommentProps;
 
@@ -181,16 +180,10 @@ function Comment({
           appearance="utrecht-heading-6"
           className={`reaction-name`}>
           {args.comment.user && args.comment.user.displayName}{' '}
-          {args.comment.user &&
-          args.comment.user.role === 'admin' &&
-          adminLabel ? (
-            <span className="--isAdmin">{adminLabel}</span>
-          ) : null}
-          {args.comment.user &&
-          args.comment.user.role === 'editor' &&
-          editorLabel ? (
-            <span className="--isEditor">{editorLabel}</span>
-          ) : null}
+          <AuthorBadge
+            isStaffMember={args.comment.isStaffMember}
+            label={staffLabel}
+          />
         </Heading>
         {canEdit() || canDelete() ? (
           <div className="edit-delete-button-group">

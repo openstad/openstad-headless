@@ -133,6 +133,20 @@ module.exports = function (db, sequelize, DataTypes) {
           return yes - no;
         },
       },
+
+      isStaffMember: {
+        type: DataTypes.VIRTUAL,
+        auth: {
+          // intended public signal; carries no role/id/name
+          viewableBy: 'all',
+        },
+        get: function () {
+          // real association value, read before serialization masks the role
+          const role = this.user && this.user.role;
+          // staff set = the roles that get a badge today; add 'moderator' here if desired
+          return role === 'admin' || role === 'editor';
+        },
+      },
     },
     {
       hooks: {
