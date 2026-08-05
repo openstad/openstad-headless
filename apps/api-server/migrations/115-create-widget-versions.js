@@ -30,6 +30,19 @@ module.exports = {
         type: require('sequelize').STRING(255),
         allowNull: true,
       },
+      name: {
+        type: require('sequelize').STRING(255),
+        allowNull: true,
+      },
+      pinned: {
+        type: require('sequelize').BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+      },
+      restoredFromId: {
+        type: require('sequelize').INTEGER,
+        allowNull: true,
+      },
       createdAt: {
         type: require('sequelize').DATE,
         allowNull: false,

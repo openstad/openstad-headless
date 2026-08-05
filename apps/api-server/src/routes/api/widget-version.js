@@ -55,6 +55,7 @@ router
         'userName',
         'name',
         'pinned',
+        'restoredFromId',
         'createdAt',
       ],
       raw: true,
@@ -138,7 +139,7 @@ router
     try {
       const widget = req.widget;
       if (!(widget.can && widget.can('update'))) {
-        return next(new Error('You cannot restore this widget'));
+        return next(createError(403, 'You cannot restore this widget'));
       }
 
       const version = await db.WidgetVersion.findOne({
@@ -161,7 +162,9 @@ router
       const undoVersionId = preRestoreLatest ? preRestoreLatest.id : null;
 
       const result = await widget.update({ config: version.config });
-      await snapshotWidgetVersion(result, req.user);
+      await snapshotWidgetVersion(result, req.user, {
+        restoredFromId: version.id,
+      });
 
       return res.json({ widget: result, undoVersionId });
     } catch (err) {

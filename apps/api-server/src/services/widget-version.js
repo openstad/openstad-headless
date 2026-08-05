@@ -46,7 +46,7 @@ async function pruneVersions(widgetId) {
   await db.WidgetVersion.destroy({ where: { id: idsToDelete } });
 }
 
-async function snapshotWidgetVersion(widget, user) {
+async function snapshotWidgetVersion(widget, user, extra = {}) {
   try {
     const config = widget.config;
 
@@ -69,6 +69,7 @@ async function snapshotWidgetVersion(widget, user) {
       config,
       userId: user && user.id ? user.id : null,
       userName: resolveUserName(user),
+      restoredFromId: extra.restoredFromId ?? null,
     });
 
     await pruneVersions(widget.id);
@@ -88,6 +89,7 @@ module.exports = {
   snapshotWidgetVersion,
   pruneVersions,
   resolveUserName,
+  canonicalize,
   isSameConfig,
   selectPruneIds,
   MAX_VERSIONS,

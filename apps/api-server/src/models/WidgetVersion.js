@@ -31,6 +31,10 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: false,
         defaultValue: false,
       },
+      restoredFromId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
     },
     {
       tableName: 'widget_versions',
