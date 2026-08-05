@@ -16,7 +16,7 @@ function formatDate(iso: string) {
 }
 
 function formatExpiry(iso: string | null) {
-  if (!iso) return 'Geen einddatum';
+  if (!iso) return '—';
   return new Date(iso).toLocaleDateString('nl-NL');
 }
 

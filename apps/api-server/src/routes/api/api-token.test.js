@@ -430,7 +430,8 @@ describe('api-token project overview routes', () => {
     return {
       id: 1,
       projectId: PROJECT_ID,
-      expiresAt: null,
+      // Every stored token has an expiry date; the expiry cases override it.
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       deletedAt: null,
       owner: { id: 5, nickName: 'Ana', role: 'editor' },
       ...overrides,
