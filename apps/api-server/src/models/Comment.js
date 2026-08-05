@@ -300,6 +300,7 @@ module.exports = function (db, sequelize, DataTypes) {
                 'hasUserDisliked',
                 'confirmationSent',
                 'yes',
+                'isStaffMember',
               ],
             },
           ],
