@@ -93,8 +93,6 @@ router
     if (!(datalayer && datalayer.can && datalayer.can('update')))
       return next(new Error('You cannot update this datalayer'));
 
-    // authorizeData filters the object it is handed; hand it the body, not
-    // the stored record, or the body goes through unfiltered.
     datalayer
       .authorizeData(req.body, 'update')
       .update({

@@ -18,12 +18,10 @@ const OWNING_PROJECT = 1;
 const OTHER_PROJECT = 2;
 const editor = { role: 'editor', id: 10 };
 
-// Every record here belongs to OWNING_PROJECT. Addressing it through
-// OTHER_PROJECT must not resolve, because the role is granted per URL project.
+// Every record belongs to OWNING_PROJECT and must not resolve via another.
 let lastWhere = null;
 
-// An unscoped `where` returns the record regardless of project — the old
-// behaviour — so a missing projectId makes the cross-project test fail.
+// An unscoped where returns the record anyway, so the test fails without the fix.
 function findOneStub(build) {
   return async (query) => {
     lastWhere = query.where;

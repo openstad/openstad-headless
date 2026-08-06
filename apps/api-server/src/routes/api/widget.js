@@ -121,7 +121,6 @@ router
         }
       }
 
-      // Destroy only what was found and authorized, not the raw id list.
       await db.Widget.destroy({
         where: { id: widgets.map((widget) => widget.id) },
       });
@@ -191,8 +190,7 @@ router
   .route('/:id') //(\\d+)
   .all(function (req, res, next) {
     const id = req.params.id;
-    // Scope by project: roles are resolved per project, so an id from another
-    // project must not resolve here.
+    // Roles are resolved per project, so scope the lookup
     let query = { where: { id, projectId: req.params.projectId } };
 
     db.Widget.scope(...req.scope)
@@ -225,7 +223,7 @@ router
     const description = req.body?.description ?? widget.description;
     const typesToSanitize = ['rawresource', 'resourceoverview'];
 
-    // Sanitize the incoming value, not the already stored one.
+    // Sanitize the incoming value, not the stored one
     if (typesToSanitize.includes(widget.type) && config.rawInput) {
       config.rawInput = sanitize.content(config.rawInput);
     }

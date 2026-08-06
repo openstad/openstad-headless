@@ -12,9 +12,7 @@ process.env.SUPPRESS_NO_CONFIG_WARNING = '1';
 const require = createRequire(import.meta.url);
 const db = require('../db');
 
-// The strip lives in Resource.auth.toAuthorizedJSON, which the serialization
-// mixin calls last. Driving it directly keeps the test off the full
-// extraData authorizeData path, which needs a loaded project.
+// Drive the model hook directly: the full extraData path needs a loaded project.
 const stripFor = (user) => {
   const self = db.Resource.build({ id: 42, projectId: 1, title: 'Titel' });
   self.hasResourceFormConfig = false;
@@ -39,8 +37,7 @@ describe('Resource extraData stripping', () => {
   });
 
   it('strips protected keys when the viewer is unknown', () => {
-    // No identified user falls back to {role:'all'}. That used to skip the
-    // strip entirely, so an unknown viewer saw more than an anonymous one.
+    // No user falls back to {role:'all'}, which used to skip the strip.
     expect(stripFor({ role: 'all' }).extraData.secret).toBeUndefined();
   });
 

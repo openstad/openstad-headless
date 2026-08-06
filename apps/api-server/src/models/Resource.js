@@ -1311,9 +1311,7 @@ module.exports = function (db, sequelize, DataTypes) {
         ? self.resourceFormFieldKeys
         : [];
       const hasResourceFormConfig = !!self.hasResourceFormConfig;
-      // `{role:'all'}` is the fallback for an unidentified viewer, so it must
-      // be stripped hardest, not skipped. Excluding it here made a
-      // serialization without a user leak more than an anonymous one.
+      // {role:'all'} is the unidentified viewer; strip hardest, not skip
       if (
         user &&
         user.role &&

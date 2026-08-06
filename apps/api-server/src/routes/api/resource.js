@@ -971,7 +971,6 @@ router
         }
       }
 
-      // Destroy only what was found and authorized, not the raw id list.
       await db.Resource.destroy({
         where: { id: resources.map((resource) => resource.id) },
       });
@@ -985,8 +984,7 @@ router
 // Duplicate multiple resources
 router
   .route('/duplicate')
-  // `createableBy` is 'all' on Resource, so a per-record can('create') is no
-  // guard here. Duplicating is an editor action; gate it on update instead.
+  // createableBy is 'all', so a per-record can('create') is no guard here
   .post(auth.can('Resource', 'update'))
   .post(auth.useReqUser)
   .post(rateLimiter(), async function (req, res, next) {
@@ -1065,9 +1063,6 @@ router
         })
       );
 
-      // Fresh instances: serialize against the requesting user explicitly,
-      // otherwise toAuthorizedJSON falls back to {role:'all'}, which skips
-      // the extraData strip below in Resource.auth.toAuthorizedJSON.
       res.json(
         duplicatedResources.map((resource) => resource.toJSON(req.user))
       );

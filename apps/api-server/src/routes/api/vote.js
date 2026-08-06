@@ -511,7 +511,7 @@ router
   .all((req, res, next) => {
     var voteId = req.params.voteId;
 
-    // req.scope carries forProjectId; Vote has no projectId column of its own.
+    // Vote has no projectId column; forProjectId lives in req.scope
     db.Vote.scope(...req.scope)
       .findOne({
         where: { id: voteId },
@@ -558,8 +558,7 @@ router
       .catch(next);
   })
   .all(function (req, res, next) {
-    // Check the record, not the model class: canToggle reads self.userId for
-    // the owner branch, which does not exist on the class.
+    // Check the record: canToggle reads self.userId, absent on the class
     if (!req.vote.can('toggle', req.user))
       return next(createError(403, 'You cannot toggle this vote'));
     return next();

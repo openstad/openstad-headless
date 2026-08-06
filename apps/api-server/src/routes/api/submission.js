@@ -270,9 +270,7 @@ router
     var submission = req.results;
     if (!(submission && submission.can && submission.can('update', req.user)))
       return next(createError(403, 'You cannot update this submission'));
-    // Identity fields are not editable: rewriting projectId would move a
-    // submission into another project. Submission has no field-level auth, so
-    // authorizeData alone would let an editor through on all of them.
+    // Identity fields are not editable
     const { projectId, userId, widgetId, ...data } = req.body;
 
     submission

@@ -9,9 +9,7 @@ const db = require('../../../db'); // TODO: dit moet dus anders
  * Add authenticated user to the results object
  * to ensure when toAuthorizedJSON is called
  */
-// `result.auth` resolves to the shared `Model.prototype.auth` object, so
-// assigning `.user` onto it would leak the current user into every other
-// instance of that model, process-wide. Always assign a fresh copy.
+// `auth` is shared with Model.prototype: copy it, never mutate it.
 module.exports = function useReqUser(req, res, next) {
   if (Array.isArray(req.results)) {
     req.results.forEach((result) => {

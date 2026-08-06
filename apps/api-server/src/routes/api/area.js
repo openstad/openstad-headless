@@ -147,8 +147,6 @@ router
     if (!(area && area.can && area.can('update')))
       return next(new Error('You cannot update this area'));
 
-    // authorizeData filters the object it is handed; hand it the body, not
-    // the stored record, or the body goes through unfiltered.
     area
       .authorizeData(req.body, 'update')
       .update({
