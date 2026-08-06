@@ -53,7 +53,6 @@ const formSchema = z.object({
   choicesPreferenceTitle: z.string().optional(),
   choicesNoPreferenceYetTitle: z.string().optional(),
   choicesInBetweenPreferenceTitle: z.string().optional(),
-  beforeUrl: z.string().optional(),
   afterUrl: z.string().optional(),
   introTitle: z.string().optional(),
   introDescription: z.string().optional(),
@@ -115,7 +114,6 @@ export default function ChoicesSelectorForm(
       choicesInBetweenPreferenceTitle:
         widget?.config?.[category]?.choicesInBetweenPreferenceTitle ||
         'Je staat precies tussen meerdere voorkeuren in',
-      beforeUrl: widget?.config?.[category]?.beforeUrl || '',
       afterUrl: widget?.config?.[category]?.afterUrl || '',
       introTitle: widget?.config?.[category]?.introTitle || '',
       introDescription: widget?.config?.[category]?.introDescription || '',
@@ -313,18 +311,6 @@ export default function ChoicesSelectorForm(
                     <SelectItem value="1x1">1:1</SelectItem>
                   </SelectContent>
                 </Select>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="beforeUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>URL van de inleidende pagina</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
               </FormItem>
             )}
           />
