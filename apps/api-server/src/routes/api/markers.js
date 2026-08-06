@@ -115,8 +115,10 @@ router
     if (req.body.name !== undefined) updateData.name = req.body.name;
     if (req.body.markers !== undefined) updateData.markers = req.body.markers;
 
+    // authorizeData filters the object it is handed; hand it the update data,
+    // not the stored record, or the data goes through unfiltered.
     markers
-      .authorizeData(markers, 'update')
+      .authorizeData(updateData, 'update')
       .update(updateData)
       .then((result) => {
         req.results = result;

@@ -268,10 +268,16 @@ router
   .put(auth.useReqUser)
   .put(rateLimiter(), function (req, res, next) {
     var submission = req.results;
-    if (!(submission && submission.can && submission.can('update')))
-      return next(new Error('You cannot update this submission'));
+    if (!(submission && submission.can && submission.can('update', req.user)))
+      return next(createError(403, 'You cannot update this submission'));
+    // Identity fields are not editable: rewriting projectId would move a
+    // submission into another project. Submission has no field-level auth, so
+    // authorizeData alone would let an editor through on all of them.
+    const { projectId, userId, widgetId, ...data } = req.body;
+
     submission
-      .update(req.body)
+      .authorizeData(data, 'update')
+      .update(data)
       .then((result) => {
         res.json(result);
       })
