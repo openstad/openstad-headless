@@ -18,7 +18,6 @@ export type ChoiceGuide = {
   choicesPreferenceTitle?: string;
   choicesNoPreferenceYetTitle?: string;
   choicesInBetweenPreferenceTitle?: string;
-  beforeUrl?: string;
   afterUrl?: string;
   introTitle?: string;
   introDescription?: string;
