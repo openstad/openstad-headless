@@ -42,7 +42,7 @@ export default function WidgetResourceOverviewSearch(
       displaySearchText: props.displaySearchText || false,
       textActiveSearch:
         props.textActiveSearch || 'Je ziet hier zoekresultaten voor [zoekterm]',
-      searchPlaceholder: props.searchPlaceholder || 'Zoeken',
+      searchPlaceholder: props.searchPlaceholder ?? 'Zoeken',
     },
   });
 
