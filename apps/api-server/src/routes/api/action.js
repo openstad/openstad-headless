@@ -72,7 +72,7 @@ router
 
     db.Action
       //   .scope(...req.scope)
-      .findOne({ where: { id: actionId } })
+      .findOne({ where: { id: actionId, projectId: req.params.projectId } })
       .then((found) => {
         if (!found) {
           return next(createError(404, 'Action not found'));

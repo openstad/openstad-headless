@@ -511,9 +511,11 @@ router
   .all((req, res, next) => {
     var voteId = req.params.voteId;
 
-    db.Vote.findOne({
-      where: { id: voteId },
-    })
+    // req.scope carries forProjectId; Vote has no projectId column of its own.
+    db.Vote.scope(...req.scope)
+      .findOne({
+        where: { id: voteId },
+      })
       .then(function (vote) {
         if (vote) {
           req.results = vote;
@@ -525,8 +527,8 @@ router
   .delete(auth.useReqUser)
   .delete(function (req, res, next) {
     const vote = req.results;
-    if (!(vote && vote.can && vote.can('delete')))
-      return next(new Error('You cannot delete this vote'));
+    if (!(vote && vote.can && vote.can('delete', req.user)))
+      return next(createError(403, 'You cannot delete this vote'));
 
     vote
       .destroy()
@@ -541,18 +543,27 @@ router
   .all((req, res, next) => {
     var voteId = req.params.voteId;
 
-    db.Vote.findOne({
-      where: { id: voteId },
-    })
+    // req.scope carries forProjectId; Vote has no projectId column of its own.
+    db.Vote.scope(...req.scope)
+      .findOne({
+        where: { id: voteId },
+      })
       .then(function (vote) {
-        if (vote) {
-          req.vote = vote;
+        if (!vote) {
+          return next(createError(404, 'Vote not found'));
         }
+        req.vote = vote;
         next();
       })
       .catch(next);
   })
-  .all(auth.can('Vote', 'toggle'))
+  .all(function (req, res, next) {
+    // Check the record, not the model class: canToggle reads self.userId for
+    // the owner branch, which does not exist on the class.
+    if (!req.vote.can('toggle', req.user))
+      return next(createError(403, 'You cannot toggle this vote'));
+    return next();
+  })
   .get(function (req, res, next) {
     var resourceId = req.params.resourceId;
     var vote = req.vote;

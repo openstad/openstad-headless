@@ -71,7 +71,7 @@ router
     let notificationId = parseInt(req.params.notificationId) || 1;
     db.Notification.scope(req.scope)
       .findOne({
-        where: { id: notificationId },
+        where: { id: notificationId, projectId: req.params.projectId },
       })
       .then((found) => {
         if (!found) {
