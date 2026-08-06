@@ -133,6 +133,10 @@ router
       const projectId = user.projectId;
       const userIdSalt = process.env.USER_ID_SALT;
 
+      // Without a salt the hash is derived from public values alone
+      if (!userIdSalt)
+        return next(new Error('Users: unsubscribe is not configured'));
+
       const hash = crypto.createHash('md5');
       hash.update(`${userIdSalt}.${userId}.${projectId}`);
       const hashedUserId = hash.digest('hex');
