@@ -794,66 +794,70 @@ export default function WidgetResourceOverviewDisplay(
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="displayDocuments"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Geüploade documenten weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {displayDocuments && (
+          {props.displayType === 'cardgrid' && (
             <>
               <FormField
                 control={form.control}
-                name="documentsTitle"
+                name="displayDocuments"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Welke titel moet er boven de download knop(pen) komen?
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        {...field}
-                        onChange={(e) => {
-                          onFieldChange(field.name, e.target.value);
-                          field.onChange(e);
-                        }}
-                      />
-                    </FormControl>
+                    <FormLabel>Geüploade documenten weergeven</FormLabel>
+                    {YesNoSelect(field, props)}
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="documentsDesc"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Welke beschrijving moet er boven de download knop(pen)
-                      komen?
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        {...field}
-                        onChange={(e) => {
-                          onFieldChange(field.name, e.target.value);
-                          field.onChange(e);
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {displayDocuments && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="documentsTitle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Welke titel moet er boven de download knop(pen) komen?
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            {...field}
+                            onChange={(e) => {
+                              onFieldChange(field.name, e.target.value);
+                              field.onChange(e);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="documentsDesc"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Welke beschrijving moet er boven de download knop(pen)
+                          komen?
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            {...field}
+                            onChange={(e) => {
+                              onFieldChange(field.name, e.target.value);
+                              field.onChange(e);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              )}
             </>
           )}
 
