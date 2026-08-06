@@ -736,8 +736,7 @@ router
     Object.keys(req.results).forEach((which) => {
       req.results[which] &&
         req.results[which].forEach((result) => {
-          result.auth = result.auth || {};
-          result.auth.user = req.user;
+          result.auth = { ...result.auth, user: req.user };
         });
     });
     return next();

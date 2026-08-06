@@ -1380,7 +1380,8 @@ router
   })
   .put(async function (req, res, next) {
     const project = await db.Project.findOne({ where: { id: req.results.id } });
-    if (!(project && project.can && project.can('update')))
+    // Freshly fetched instance: useReqUser never touched it, so pass the user.
+    if (!(project && project.can && project.can('update', req.user)))
       return next(new Error('You cannot update this project'));
 
     req.pendingMessages = [
@@ -1591,8 +1592,7 @@ router
         req.results[which].forEach &&
         req.results[which].forEach((result) => {
           if (typeof result == 'object') {
-            result.auth = result.auth || {};
-            result.auth.user = req.user;
+            result.auth = { ...result.auth, user: req.user };
           }
         });
     });

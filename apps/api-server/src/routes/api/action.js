@@ -55,7 +55,8 @@ router
     db.Action.authorizeData(data, 'create', req.user)
       .create(data)
       .then((result) => {
-        res.json(result);
+        // Fresh instance: serialize against the requesting user explicitly.
+        res.json(result.toJSON(req.user));
       })
       .catch(next);
   });

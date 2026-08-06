@@ -215,7 +215,7 @@ router
         vote.user = entry.user;
 
         if (vote.user && vote.user.auth && typeof vote.user.auth === 'object') {
-          vote.user.auth.user = req.user;
+          vote.user.auth = { ...vote.user.auth, user: req.user };
         }
       }
       vote.userId = entry.userId;
