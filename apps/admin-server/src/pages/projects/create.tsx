@@ -111,41 +111,53 @@ export default function CreateProject() {
     setTemplateErrors([]);
     setDuplicatedData({});
 
-    const response = await fetch('/api/openstad/api/project', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        ...template.data,
-        name: values.templateProjectName,
-        isDuplicateRequest: true,
-      }),
-    });
+    try {
+      const response = await fetch('/api/openstad/api/project', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...template.data,
+          name: values.templateProjectName,
+          isDuplicateRequest: true,
+        }),
+      });
 
-    setTemplateCreating(false);
+      if (!response.ok) {
+        const responseJSON = await response.json();
+        setTemplateErrors(
+          responseJSON.errors || [
+            {
+              step: 'Project aanmaken vanuit template',
+              error: 'Er is een fout opgetreden.',
+            },
+          ]
+        );
+        setDuplicatedData(responseJSON.duplicatedData || {});
+        toast.error(
+          'Er is een fout opgetreden bij het aanmaken van het project.'
+        );
+        return;
+      }
 
-    if (!response.ok) {
-      const responseJSON = await response.json();
-      setTemplateErrors(
-        responseJSON.errors || [
-          {
-            step: 'Project aanmaken vanuit template',
-            error: 'Er is een fout opgetreden.',
-          },
-        ]
-      );
-      setDuplicatedData(responseJSON.duplicatedData || {});
+      const newId = await response.json();
+      toast.success('Project aangemaakt!');
+      if (newId) {
+        router.push(`/projects/${newId}/widgets`);
+      }
+    } catch (error) {
+      setTemplateErrors([
+        {
+          step: 'Project aanmaken vanuit template',
+          error: 'Netwerkfout of ongeldig antwoord van de server.',
+        },
+      ]);
       toast.error(
         'Er is een fout opgetreden bij het aanmaken van het project.'
       );
-      return;
-    }
-
-    const newId = await response.json();
-    toast.success('Project aangemaakt!');
-    if (newId) {
-      router.push(`/projects/${newId}/widgets`);
+    } finally {
+      setTemplateCreating(false);
     }
   }
 

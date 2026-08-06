@@ -19,33 +19,39 @@ const router = express.Router({ mergeParams: true });
 async function anonymizeResourceOwners(resources) {
   if (!Array.isArray(resources)) return resources;
 
-  const roleByUserId = {};
+  const normalizeUserId = (userId) =>
+    typeof userId === 'number' && Number.isInteger(userId)
+      ? userId
+      : typeof userId === 'string' && /^\d+$/.test(userId)
+        ? parseInt(userId, 10)
+        : null;
+
+  const userIds = [
+    ...new Set(
+      resources
+        .filter((resource) => resource && typeof resource === 'object')
+        .map((resource) => normalizeUserId(resource.userId))
+        .filter((id) => id !== null)
+    ),
+  ];
+
+  const users = userIds.length
+    ? await db.User.findAll({
+        where: { id: userIds },
+        attributes: ['id', 'role'],
+      })
+    : [];
+  const roleByUserId = Object.fromEntries(
+    users.map((user) => [user.id, user.role])
+  );
+
   for (const resource of resources) {
     if (!resource || typeof resource !== 'object') continue;
     delete resource.user;
 
-    const userId = resource.userId;
-    const normalizedUserId =
-      typeof userId === 'number' && Number.isInteger(userId)
-        ? userId
-        : typeof userId === 'string' && /^\d+$/.test(userId)
-          ? parseInt(userId, 10)
-          : null;
-
-    if (normalizedUserId === null) {
-      resource.userId = 'anonymous';
-      continue;
-    }
-
-    if (!(normalizedUserId in roleByUserId)) {
-      const user = await db.User.findOne({
-        where: { id: normalizedUserId },
-        attributes: ['id', 'role'],
-      });
-      roleByUserId[normalizedUserId] = user ? user.role : null;
-    }
-
-    const role = roleByUserId[normalizedUserId];
+    const normalizedUserId = normalizeUserId(resource.userId);
+    const role =
+      normalizedUserId === null ? null : roleByUserId[normalizedUserId];
     if (!role || !hasRole({ role }, 'editor')) {
       resource.userId = 'anonymous';
     }
