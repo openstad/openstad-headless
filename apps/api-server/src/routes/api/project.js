@@ -1380,7 +1380,6 @@ router
   })
   .put(async function (req, res, next) {
     const project = await db.Project.findOne({ where: { id: req.results.id } });
-    // Freshly fetched instance: useReqUser never touched it, so pass the user.
     if (!(project && project.can && project.can('update', req.user)))
       return next(new Error('You cannot update this project'));
 
@@ -1525,7 +1524,8 @@ router
 // -------------------
 router
   .route('/:projectId(\\d+)/export')
-  .all(auth.can('Project', 'view'))
+  // 'view' is viewableBy:'all'; this export carries vote ip and userId
+  .all(auth.can('Project', 'update'))
   .all(async function (req, res, next) {
     await getProject(req, res, next, [
       {
@@ -1545,7 +1545,7 @@ router
     ]);
   })
 
-  .get(auth.can('Project', 'view'))
+  .get(auth.can('Project', 'update'))
   .get(auth.useReqUser)
   .get(function (req, res, next) {
     res.json(req.results);
