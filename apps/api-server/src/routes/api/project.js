@@ -49,6 +49,7 @@ router
   .post(ctrl.syncAuthProvidersAfterCreate)
   .post(ctrl.createDuplicatedData)
   .post(ctrl.addCurrentUserAsAdmin)
+  .post(ctrl.addAutoAdminUsers)
   .post(ctrl.publishNewProjectEvent)
   .post(auth.useReqUser)
   .post(ctrl.respondCreatedProject);

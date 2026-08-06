@@ -365,6 +365,20 @@ module.exports = function (db, sequelize, DataTypes) {
         defaultValue: null,
       },
 
+      // Only meaningful on the admin project (config.admin.projectId) row:
+      // flagged admins/editors are auto-added as admin to newly created projects
+      autoAddToNewProjects: {
+        type: DataTypes.BOOLEAN,
+        auth: {
+          listableBy: ['moderator', 'owner'],
+          viewableBy: ['moderator', 'owner'],
+          createableBy: 'admin',
+          updateableBy: 'admin',
+        },
+        allowNull: false,
+        defaultValue: false,
+      },
+
       privacyConsentAt: {
         type: DataTypes.DATE,
         auth: {
