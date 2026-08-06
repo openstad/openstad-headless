@@ -82,6 +82,7 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
 
   const [checkboxInitial, setCheckboxInitial] = useState(true);
   const [showUrl, setShowUrl] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [projectHasEnded, setProjectHasEnded] = useState(false);
   const [basicAuthActive, setBasicAuthActive] = useState(false);
   const [basicAuthInitial, setBasicAuthInitial] = useState(true);
@@ -132,6 +133,7 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
   }, [data, checkboxInitial, basicAuthInitial, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
     try {
       const project = await updateProject(
         {
@@ -159,6 +161,8 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
     } catch (error) {
       console.error('could not update', error);
       toast.error('Er is helaas iets mis gegaan.');
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -416,9 +420,18 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
                         />
                       </>
                     ) : null}
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
+                    <Button
+                      className="w-fit col-span-full"
+                      type="submit"
+                      disabled={isSubmitting}>
+                      {isSubmitting ? 'Bezig met opslaan...' : 'Opslaan'}
                     </Button>
+                    {isSubmitting && showUrl && !!form.watch('url') && (
+                      <p className="col-span-full text-sm text-muted-foreground">
+                        Het aanmaken van de website kan enkele minuten duren.
+                        Laat dit venster open.
+                      </p>
+                    )}
                   </form>
                 </Form>
               </div>
