@@ -64,6 +64,11 @@ const formSchema = z.object({
       })
     )
     .optional(),
+  linkDraft: z.object({
+    title: z.string(),
+    url: z.string(),
+    openInNewWindow: z.boolean(),
+  }),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -122,6 +127,7 @@ const defaults = (): FormData => ({
   activeFrom: '',
   activeTo: '',
   links: [],
+  linkDraft: { title: '', url: '', openInNewWindow: false },
 });
 
 export function AgendaItemsEditor({
@@ -160,6 +166,7 @@ export function AgendaItemsEditor({
         activeFrom: toDateInputValue(selectedItem.activeFrom),
         activeTo: toDateInputValue(selectedItem.activeTo),
         links: selectedItem.links || [],
+        linkDraft: { title: '', url: '', openInNewWindow: false },
       });
       setLinks((selectedItem.links || []).map(withId));
     }
@@ -167,16 +174,13 @@ export function AgendaItemsEditor({
 
   useEffect(() => {
     if (selectedLink) {
-      const updatedLinks = [...links];
-      const index = links.findIndex((link) => link.id === selectedLink.id);
-      updatedLinks[index] = { ...selectedLink };
-
-      form.reset({
-        ...form.getValues(),
-        links: updatedLinks,
+      form.setValue('linkDraft', {
+        title: selectedLink.title,
+        url: selectedLink.url,
+        openInNewWindow: selectedLink.openInNewWindow,
       });
     }
-  }, [selectedLink, form, links]);
+  }, [selectedLink, form]);
 
   function onSubmit(values: FormData) {
     if (selectedItem) {
@@ -215,21 +219,16 @@ export function AgendaItemsEditor({
   }
 
   function handleAddLink(values: FormData) {
+    const draft = values.linkDraft;
     if (selectedLink) {
       setLinks((currentLinks) =>
         currentLinks.map((link) =>
           link.id === selectedLink.id
             ? {
                 ...link,
-                title:
-                  values.links?.find((l) => l.trigger === link.trigger)
-                    ?.title || '',
-                url:
-                  values.links?.find((l) => l.trigger === link.trigger)?.url ||
-                  '',
-                openInNewWindow:
-                  values.links?.find((l) => l.trigger === link.trigger)
-                    ?.openInNewWindow || false,
+                title: draft.title,
+                url: draft.url,
+                openInNewWindow: draft.openInNewWindow,
               }
             : link
         )
@@ -243,13 +242,13 @@ export function AgendaItemsEditor({
       const newLink = {
         id: generateId(),
         trigger: `${maxLinkTrigger + 1}`,
-        title: values.links?.[values.links.length - 1].title || '',
-        url: values.links?.[values.links.length - 1].url || '',
-        openInNewWindow:
-          values.links?.[values.links.length - 1].openInNewWindow || false,
+        title: draft.title,
+        url: draft.url,
+        openInNewWindow: draft.openInNewWindow,
       };
       setLinks((currentLinks) => [...currentLinks, newLink]);
     }
+    form.setValue('linkDraft', { title: '', url: '', openInNewWindow: false });
   }
 
   function handleAction(
@@ -355,7 +354,7 @@ export function AgendaItemsEditor({
                   <Separator className="mt-2" />
                   <FormField
                     control={form.control}
-                    name={`links.${links.length - 1}.title`}
+                    name="linkDraft.title"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Link titel</FormLabel>
@@ -366,7 +365,7 @@ export function AgendaItemsEditor({
                   />
                   <FormField
                     control={form.control}
-                    name={`links.${links.length - 1}.url`}
+                    name="linkDraft.url"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Link URL</FormLabel>
@@ -377,7 +376,7 @@ export function AgendaItemsEditor({
                   />
                   <FormField
                     control={form.control}
-                    name={`links.${links.length - 1}.openInNewWindow`}
+                    name="linkDraft.openInNewWindow"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Open in nieuw venster</FormLabel>
@@ -409,7 +408,11 @@ export function AgendaItemsEditor({
                     onClick={() => {
                       setSettingLinks(false);
                       setLink(null);
-                      setLinks([]);
+                      form.setValue('linkDraft', {
+                        title: '',
+                        url: '',
+                        openInNewWindow: false,
+                      });
                     }}>
                     Annuleer
                   </Button>
