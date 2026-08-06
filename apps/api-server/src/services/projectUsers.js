@@ -78,7 +78,7 @@ async function addAutoAdminUsers(project) {
     where: {
       projectId: adminProjectId,
       autoAddToNewProjects: true,
-      role: ['admin', 'editor'],
+      role: { [Sequelize.Op.in]: ['admin', 'editor'] },
     },
     raw: true,
   });

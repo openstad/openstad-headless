@@ -1,3 +1,4 @@
+import { Op } from 'sequelize';
 import { createRequire } from 'module';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -58,7 +59,7 @@ describe('addAutoAdminUsers', () => {
       where: {
         projectId: 1,
         autoAddToNewProjects: true,
-        role: ['admin', 'editor'],
+        role: { [Op.in]: ['admin', 'editor'] },
       },
       raw: true,
     });
