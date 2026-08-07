@@ -441,7 +441,7 @@ router
       });
   })
   .post(function (req, res, next) {
-    return res.json(req.results);
+    return res.json(req.results.toJSON(req.user));
   });
 
 // two-factor status and reset

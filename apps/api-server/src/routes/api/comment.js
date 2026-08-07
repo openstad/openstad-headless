@@ -368,7 +368,7 @@ router
     }
 
     req.results.confirmationSent = confirmationSent;
-    res.json(req.results);
+    res.json(req.results.toJSON(req.user));
   });
 
 // bulk delete comments
