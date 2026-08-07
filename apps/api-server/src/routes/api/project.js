@@ -1417,7 +1417,7 @@ router
     }
 
     project
-      .authorizeData(req.body, 'update')
+      .authorizeData(req.body, 'update', req.user)
       .update(updateBody)
       .then(async (result) => {
         req.results = result;
