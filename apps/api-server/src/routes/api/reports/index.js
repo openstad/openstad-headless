@@ -30,9 +30,12 @@ router.get('/projects', require('./projects'));
 router.get('/submissions/fields', require('./submissions-fields'));
 router.get('/submissions', require('./submissions'));
 
+// Choice guides (#441).
+router.get('/choice-guides', require('./choice-guides'));
+router.get('/choice-guide-questions', require('./choice-guide-questions'));
+router.get('/choice-guide-results', require('./choice-guide-results'));
+
 // Deferred to other tickets, mounted here when built:
-//   /choice-guides, /choice-guide-questions,
-//   /choice-guide-results                        → #441
 //   /users/anonymized, /users/aggregates         → #442
 
 module.exports = router;
