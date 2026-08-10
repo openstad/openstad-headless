@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const merge = require('merge');
 const db = require('../db');
 const authSettings = require('../util/auth-settings');
+const auditLogService = require('../services/audit-log');
 const { isExpired } = require('../lib/api-token-status');
 
 let adapters = {};
@@ -126,6 +127,10 @@ async function handleApiToken(req, res, next, rawToken) {
     // Every token carries an expiry date, so a token without one is rejected
     // just like an expired one (shared helper, fail closed).
     if (!apiToken || isExpired(apiToken)) {
+      if (apiToken) {
+        // Token exists but is expired: audit the first rejected use
+        logExpiredTokenUse(req, apiToken).catch(() => {});
+      }
       return nextWithEmptyUser(req, res, next);
     }
 
@@ -170,6 +175,34 @@ async function handleApiToken(req, res, next, rawToken) {
     );
     return nextWithEmptyUser(req, res, next);
   }
+}
+
+/**
+ * Write a single 'token_expired' audit entry the first time an expired token
+ * is used. Expiry itself is passive (no event fires when a token expires), so
+ * the first rejected use is the auditable moment. Later uses are not logged
+ * again to avoid noise from external tools that keep polling with a dead token.
+ */
+async function logExpiredTokenUse(req, apiToken) {
+  const existing = await db.AuditLog.findOne({
+    where: {
+      modelName: 'api-token',
+      modelId: apiToken.id,
+      action: 'token_expired',
+    },
+  });
+  if (existing) return;
+
+  const entry = auditLogService.buildEntry(req, {
+    action: 'token_expired',
+    modelName: 'api-token',
+    modelId: apiToken.id,
+    source: 'api',
+    statusCode: 401,
+  });
+  // req.params is not populated at middleware level; take it from the token
+  entry.projectId = apiToken.projectId;
+  auditLogService.logDirect(entry);
 }
 
 /**
