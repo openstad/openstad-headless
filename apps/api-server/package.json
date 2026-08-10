@@ -19,7 +19,8 @@
     "init-database": "node ./scripts/init-database.js",
     "migrate-database": "node ./scripts/migrate-database.js",
     "build-packages": "node ./scripts/build-react-runtime.js && node ./scripts/build-packages.js",
-    "build:react-runtime": "node scripts/build-react-runtime.js"
+    "build:react-runtime": "node scripts/build-react-runtime.js",
+    "run-crons": "node run-crons.js"
   },
   "dependencies": {
     "@azure/identity": "^4.6.0",

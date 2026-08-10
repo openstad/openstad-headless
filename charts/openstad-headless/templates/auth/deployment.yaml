@@ -8,7 +8,7 @@ metadata:
     {{- include "openstad.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ template "openstad.auth.fullname" . }}-deployment
 spec:
-  replicas: {{ .Values.auth.replicas | default 1 }}
+  {{- include "openstad.replicas" (dict "Values" .Values "serviceAutoscaling" .Values.auth.autoscaling "replicas" (.Values.auth.replicas | default 1)) | nindent 2 }}
   selector:
     matchLabels:
       app: {{ .Values.auth.label }}
@@ -21,6 +21,7 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
+      {{- include "openstad.podAntiAffinity" (dict "Values" .Values "Release" .Release "appLabel" .Values.auth.label) | nindent 6 }}
       volumes:
         - name: certs
           secret:

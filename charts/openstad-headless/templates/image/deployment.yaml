@@ -8,7 +8,7 @@ metadata:
     {{- include "openstad.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ template "openstad.image.fullname" . }}-deployment
 spec:
-  replicas: {{ .Values.image.replicas | default 1 }}
+  {{- include "openstad.replicas" (dict "Values" .Values "serviceAutoscaling" .Values.image.autoscaling "replicas" (.Values.image.replicas | default 1)) | nindent 2 }}
   selector:
     matchLabels:
       app: {{ .Values.image.label }}
@@ -21,6 +21,7 @@ spec:
         runAsNonRoot: true
         runAsUser: 1000
         runAsGroup: 1000
+      {{- include "openstad.podAntiAffinity" (dict "Values" .Values "Release" .Release "appLabel" .Values.image.label) | nindent 6 }}
       containers:
       - name: {{ template "openstad.image.fullname" . }}
         image: {{ .Values.image.deploymentContainer.image }}
