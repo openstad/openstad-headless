@@ -155,6 +155,10 @@ async function handleApiToken(req, res, next, rawToken) {
 
     req.user = owner;
     req.apiTokenScope = 'reports';
+    // Expose the token identity so the scope guard can attribute blocked-path
+    // audit entries to the right token/project.
+    req.apiTokenId = apiToken.id;
+    req.apiTokenProjectId = apiToken.projectId;
 
     // Update lastUsedAt asynchronously — do not block the request. Failing to
     // record usage must never fail the request, but it should not be silent
