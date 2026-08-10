@@ -25,8 +25,12 @@ router.get('/comments', require('./comments'));
 router.get('/enquiries', require('./enquiries'));
 router.get('/projects', require('./projects'));
 
+// /submissions/fields MUST be mounted before /submissions so Express routes
+// the more specific path first (#440).
+router.get('/submissions/fields', require('./submissions-fields'));
+router.get('/submissions', require('./submissions'));
+
 // Deferred to other tickets, mounted here when built:
-//   /submissions + /submissions/fields          → #440
 //   /choice-guides, /choice-guide-questions,
 //   /choice-guide-results                        → #441
 //   /users/anonymized, /users/aggregates         → #442
