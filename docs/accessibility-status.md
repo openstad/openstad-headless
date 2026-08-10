@@ -279,70 +279,113 @@ auth-login e-mail-foutmelding (ontkennend). Auth e-mail-error 3.3.1 is dus live.
 
 ---
 
+## 🔎 Herverificatie op audit.draad.dev (10-08-2026)
+
+**De twee openstaande deploys blijken uitgerold.** Gecheckt op de live server:
+`widget-assets/carousel.iife.js` bevat "Volgende afbeelding", `accordion.iife.js` bevat `aria-hidden`,
+`share-link.iife.js` bevat `link-container`/`<li>`, en de auth-loginpagina toont "stuur ons een e-mail"
+(geen "Neem contact met ons op" meer). Gat #1 en #2 hierboven zijn daarmee dicht.
+
+**Drie nieuwe code-punten gevonden en gefixt** (commit volgt op deze doc-update):
+
+| Crit           | Bevinding                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Fix                                                                                                                                                                       |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.3.1 / 2.4.11 | `id="search"` was gefixt, maar er stonden nog meer vaste id's dubbel bij twee filters op één pagina: `stem-begroot-filter`, `filters-container`, `filter-status`, `sortField`, `locationField`, `proximityField`, `suggestion-list`, `suggestion-N`, `a-b-description` + de placeholder-slugs in de tag-filters. Erger: `document.querySelector('#stem-begroot-filter')` pakte altijd de eerste filter, dus reset en focus-terug raakten de verkeerde instance. | Alles wat via `label[for]`/`aria-controls`/`aria-activedescendant` verwezen wordt → `useId()`; de rest → class. Sectie-lookups via een eigen `ref` i.p.v. een gedeeld id. |
+| 1.4.4 / 1.4.10 | Accountgegevens: het e-mailveld was een `readOnly` input en kapte het adres af bij 200% zoom.                                                                                                                                                                                                                                                                                                                                                                   | Leestekst i.p.v. input, met `overflow-wrap: anywhere`.                                                                                                                    |
+| 2.4.6          | `apps/auth-server/config/auth.js` stond bij de unieke-code-helpText nog op "Neem contact met ons op".                                                                                                                                                                                                                                                                                                                                                           | → "stuur ons een e-mail" (laatste van de vier).                                                                                                                           |
+
+**Regressietest:** `packages/ui/cypress/component/stem-begroot-and-resource-overview.cy.tsx` mount twee
+`<Filters>` naast elkaar en eist dat elk `id` uniek is. Negatief gecheckt: faalt zodra één vast id terugkomt.
+**Rebuild:** 18 packages; scan over alle `packages/*/dist/*` geeft nul hardcoded id's.
+
+---
+
 ## ⏭️ Nog te doen
 
-- **Contentwidgets uitrollen naar audit.draad.dev** — lokaal al live (zie gat #1). Op de audit-server nog
-  te doen: bundles (`accordion`, `share-link`, `carousel`) + tijdlijn-module + `docker restart`.
-- **Auth-server uitrollen naar audit.draad.dev** — lokaal al live. Op de audit-server: contactlink-fix
-  uitrollen + (te verifiëren) close-message `aria-label` 2.5.3.
+- **`dist/`-bundles uitrollen naar audit.draad.dev** — de fixes van 10-08 staan lokaal gebouwd.
 - **Matrix-tabel reflow (1.4.10)** — code staat al (`matrix.css`: mobiele card-stack <480px +
   `overflow:auto` fallback); alleen nog handmatig op 320px verifiëren. Laag risico.
 - **Verify-only op de live site** (niet in de browser-automation af te dwingen): reflow 1.4.10 (320/400px),
   resize-text 1.4.4 (200%), contrast 1.4.3 / non-text-contrast 1.4.11 (kleurmeting), text-spacing 1.4.12,
   focus-not-obscured 2.4.11 (200%), close-message 2.5.3 (vereist e-mail-submit), beeldkiezer "✓ Gekozen"-
   badge (samenvattingsstap).
-- **Inzending-detail afbeeldingslink (2.5.3)** — code is in orde: de beeld-only link heeft
-  `aria-label="Bekijk afbeelding… (opent in nieuw tabblad)"` zonder zichtbare-tekst-conflict.
-  Wat rest = content: de misleidende, configureerbare "Reageer op deze inzending"-tekst.
+- **Bewuste afwijking om te kennen (2.4.4)** — de auditor vroeg link + chevron "Alle widgets" samen te
+  voegen tot één interactief element; ze zijn gesplitst gelaten. De link wijst nu wel naar een echte
+  `/alle-widgets`-pagina en de chevron togglet met een naam, dus de kern is weg — maar de auditor kan
+  hierop terugkomen.
 
-> **Code-kant is nagenoeg dicht**, met één correctie t.o.v. de vorige versie: de contactlink zat nog
-> op de verkeerde auth-template (nu gefixt). Resterend zijn **2 deploys** (contentwidgets + auth-server),
-> verify-only checks, en content-/config-acties (zie hieronder) die code niet kan afdwingen.
+> **Code-kant is dicht.** Wat rest is uitrollen, de verify-only metingen, en de content-/config-acties
+> hieronder die code niet kan afdwingen.
 
 ---
 
 ## ✍️ Redacteurs-checklist (content/config — code kan dit niet afdwingen)
 
-De code staat; deze punten moet de redacteur in de demo/CMS zetten. Per punt: **wat**, **waar**,
-**hoe**. Vink af bij het nalopen van `audit.draad.dev`.
+De code staat; deze punten moet de redacteur in de demo/CMS zetten. **Alle punten hieronder zijn op
+10-08-2026 live op `audit.draad.dev` gecontroleerd en stonden op dat moment nog open.** Op volgorde van
+impact.
 
-### Koppen-hiërarchie (1.3.1) — grootste content-post
+### 1. Logo-alt + logo-link (1.1.1 + 2.4.4) — sitebreed, hoogste prioriteit
 
-De regel: precies **één `<h1>`** per pagina, en **geen niveaus overslaan** (h2 → h3 → h4, niet h2 → h4).
+Live is de `alt` nog `"Logo openstad"` (header) en `"Logo OpenStad"` (footer); de link eromheen heeft
+géén `title` of toegankelijke naam.
 
-- [ ] **`<strong>` als kop** — "Jouw buurt, jouw toekomst" (enquête) is vet gemaakte tekst, geen echte
-      kop. → maak er in de RTE een échte kop van (kop 2/3), niet **B**/bold.
-- [ ] **Nep-koppen** — 2× `<h2>` "Lorem ipsum…" bij de interactieve afbeelding zijn gewoon grote tekst.
-      → haal de kop-opmaak eraf (maak het gewone paragraaf-tekst).
-- [ ] **3× `<h1>`** op één pagina → houd er één over; de rest een niveau lager.
-- [ ] **Lege kop** — Reacties "maximale versie": "Voorbeeld 2: Maximale versie" gevolgd door een kop
-      van gelijk niveau, zonder inhoud ertussen. → voeg inhoud toe **óf** zet de tweede kop een niveau lager.
-- [ ] **Kopniveau per infoblok** (enquête + keuzewijzer) — in de admin bij het info-blok staat nu de
-      select **"Kopniveau van de titel"** (2/3/4). Kies zo dat de titel aansluit op de koppen eromheen.
-- [ ] **Tijdlijn: huidige fase** (contentwidget) — vink bij het tijdlijn-item **"Mark as current phase"**
-      aan voor de fase die nu loopt (zet `aria-current`).
+- [ ] `alt` → `"OpenStad.org (logo)"` — in de site-/header-config, niet per pagina.
+- [ ] Logo-**link** een naam geven ("Naar de homepage").
+- [ ] Idem voor het footer-logo.
 
-### Paginatitels & navigatie
+### 2. Koppen-hiërarchie (1.3.1) — grootste content-post
 
-- [ ] **Paginatitel (2.4.2)** — inzending-detailpagina heet `<title>` "Lorem ipsum dolor sit amet".
-      → geef de pagina een echte, beschrijvende titel.
-- [ ] **Meerdere manieren om te navigeren (2.4.5)** — er is maar één weg naar pagina's. → voeg een
-      **sitemap-pagina** en/of **zoek** toe aan de site-navigatie.
+De regel: precies **één `<h1>`** per pagina, en **geen niveaus overslaan**.
 
-### Logo (config, geldt sitebreed)
+- [ ] **3× `<h1>`** op `/interactieve-afbeelding` en `/inzending-detailpagina` (volgens de audit ook op
+      `/begrootmodule` en `/stemmodule`). Het zijn CMS-titelwidgets waar `h1` is gekozen. → houd de
+      pagina-`h1` aan, zet de rest op h2/h3.
+- [ ] **Nep-koppen** — 2× `h2` met de lange "Lorem ipsum…"-zin op `/interactieve-afbeelding`. Dat is
+      gewone tekst, geen kop. → kop-opmaak eraf.
+- [ ] **"Voorbeeld 1/2: …" naar `h2`** — lost twéé bevindingen tegelijk op. Nu staan ze op `h3`: - op `/aftelbalk` lijken ze daardoor subkoppen van h2 "Hoe maak je de widget op maat?"; - op `/reacties` levert het de **lege kop** op (h3 "Voorbeeld 2: Maximale versie" direct gevolgd
+      door h3 "12 reacties oneens").
+      Zet je "Voorbeeld …" op `h2`, dan nestelen de widgetkoppen (h3) correct en vervallen beide.
+- [ ] **Lege kop uit de Reacties-widget** — op `/reacties` staat een volledig lege `<h3>`: de widgettitel
+      is leeggelaten in de config. → vul 'm in, bv. `[[nr]] reacties`.
+- [ ] **Kopniveau per infoblok** (enquête + keuzewijzer) — in de admin bij het info-blok staat de select
+      **"Kopniveau van de titel"** (2/3/4). Kies zo dat de titel aansluit op de koppen eromheen.
+      _(De `<strong>`-als-kop uit de audit — "Jouw buurt, jouw toekomst" — is hiermee al opgelost:
+      live is het nu een echte `H3`.)_
+- [ ] **Tijdlijn: huidige fase** (contentwidget) — geen enkel tijdlijn-item op `/contentwidgets` heeft
+      `aria-current`; het vinkje **"Mark as current phase"** staat nergens aan. → per tijdlijn de lopende
+      fase aanvinken.
 
-- [ ] **Footer-logo `alt`** → `"OpenStad.org (logo)"` (in de site-config, niet per pagina).
-- [ ] **Header-logo** (1.1.1 / 2.4.4) — `alt` moet de zichtbare merknaam bevatten en de logo-**link**
-      een `title`/toegankelijke naam. Zit in de CMS/demo-header-config.
+### 3. Paginatitels & navigatie
 
-### Demo-assets uitzetten (mixed — code heeft de nette variant al)
+- [ ] **Paginatitel (2.4.2)** — de `<title>` van `/inzending-detailpagina` begint nog met "Lorem ipsum
+      dolor sit amet". Beter dan eerst (de paginanaam staat er nu achter), maar nog niet beschrijvend.
+      → geef de demo-inzending een echte titel.
+- [ ] **Meerdere manieren om te navigeren (2.4.5)** — live geen zoekveld en geen sitemap in header of
+      footer. → voeg een **sitemap-pagina** en/of **zoek** toe aan de site-navigatie.
 
-- [ ] **Enquête-slider** — verwijder de handmatig getypte schaal-tekst in de demo; de slider genereert
-      die nu zelf (anders spreekt AT dubbele/afwijkende waarden uit — 3.3.2).
-- [ ] **Video-autoplay (1.4.2)** — zet autoplay **uit** in de demo (de stop-control zit in de code, maar
-      de demo moet autoplay niet forceren).
-- [ ] **Bewegende pijl (2.2.2)** — vervang de auto-animerende asset in de demo door een statische
-      (of een variant met pauze).
+### 4. Misleidende linktekst (2.5.3)
+
+- [ ] Op `/inzending-detailpagina` staat een link met zichtbare tekst **"Reageer op deze inzending"** en
+      `aria-label="Bekijk afbeelding (opent in nieuw tabblad)"`. De link vergroot alleen de afbeelding.
+      → zichtbare tekst wijzigen naar "Bekijk afbeelding". (Het `aria-label` zelf is correct.)
+
+### 5. Formulierteksten
+
+- [ ] **Slider-instructie vs. voorgelezen schaal (3.3.2)** — de code genereert de sr-only schaaltekst uit
+      de ingestelde labels. Typt de redacteur er "1 staat voor zeer ontevreden … 5 voor zeer tevreden"
+      boven terwijl de labels "heel slecht … heel goed" zijn, dan blijft de mismatch. → handmatige
+      schaaltekst weghalen, óf de labels gelijktrekken met de omschrijving.
+- [ ] **Foutmeldingen inzending-formulier (3.3.1)** — de foutteksten per veld (`requiredWarning`) zijn
+      admin-config, geen code. → herschrijf als ontkenning ("Dit is geen geldig e-mailadres…"), niet als
+      instructie ("Controleer of…").
+
+### 6. Demo-assets (code heeft de nette variant al)
+
+- [ ] **Video-autoplay (1.4.2)** — code start de video gepauzeerd; controleer dat de demo autoplay niet
+      alsnog forceert.
+- [ ] **Bewegende pijl (2.2.2)** — code begrenst de animatie; vervang de auto-animerende demo-asset door
+      een statische (of een variant met pauze).
 
 ---
 
