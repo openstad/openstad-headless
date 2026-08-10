@@ -8,12 +8,12 @@ const { COMPONENTS } = require(
 );
 
 // The admin data-scope UI keeps its own catalog (friendly Dutch labels) in
-// data-scope-catalog.ts. The set of personal-field KEYS it offers must match
-// the backend catalog exactly, otherwise the admin could check a field that is
-// silently ignored, or a backend field would never be offered in the UI.
+// lib/data-scope-catalog.ts. The set of personal-field KEYS it offers must
+// match the backend catalog exactly, otherwise the admin could check a field
+// that is silently ignored, or a backend field would never be offered in the UI.
 const ADMIN_CATALOG_PATH = path.resolve(
   __dirname,
-  '../../../admin-server/src/pages/projects/[project]/settings/data-scope-catalog.ts'
+  '../../../admin-server/src/lib/data-scope-catalog.ts'
 );
 
 function extractAdminPersonalFieldKeys(componentKeys) {
