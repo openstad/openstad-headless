@@ -129,9 +129,14 @@ export function Filters({
   const [locationValue, setLocationValue] =
     useState<PostcodeAutoFillLocation>(undefined);
   const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
-  // ponytail: uniek id zodat twee filters op één pagina niet allebei id="search" krijgen (1.3.1)
+  // ponytail: unieke id's zodat twee filters op één pagina elkaars koppelingen niet
+  // overschrijven (1.3.1). Alles wat via label/aria-controls verwezen wordt is per
+  // instance uniek; de rest is class-only.
   const searchId = useId();
+  const sortId = useId();
+  const filtersContainerId = useId();
   const [disableTransition, setDisableTransition] = useState(true);
+  const sectionRef = useRef<HTMLElement>(null);
   const filtersWrapperRef = useRef<HTMLDivElement>(null);
   const filtersContainerRef = useRef<HTMLDivElement>(null);
   const [resetCounter, setResetCounter] = useState(0);
@@ -364,9 +369,11 @@ export function Filters({
   // Sluit de filter-popup en zet focus terug op de toggle-knop (WCAG 2.4.11 / 2.4.3)
   const closeFilters = () => {
     setFiltersVisible(false);
-    const toggle = filtersWrapperRef.current
-      ?.closest('#stem-begroot-filter')
-      ?.querySelector<HTMLElement>('.toggle-filters-button');
+    // ponytail: via de eigen ref, niet via een gedeeld id — anders pakt een tweede
+    // filter op dezelfde pagina de knop van de eerste (2.4.11 / 2.4.3)
+    const toggle = sectionRef.current?.querySelector<HTMLElement>(
+      '.toggle-filters-button'
+    );
     toggle?.focus();
   };
 
@@ -518,12 +525,12 @@ export function Filters({
 
         {props.displaySorting ? (
           <div className="form-element">
-            <FormLabel htmlFor={'sortField'}>Sorteer op</FormLabel>
+            <FormLabel htmlFor={sortId}>Sorteer op</FormLabel>
             <Select
               value={sortValue}
               onValueChange={setSort}
               options={sorting}
-              id="sortField"
+              id={sortId}
               defaultValue={props.defaultSorting || 'createdAt_desc'}
               disableDefaultOption={true}
             />
@@ -542,9 +549,8 @@ export function Filters({
           <Button
             appearance="secondary-action-button"
             onClick={() => {
-              const filterParent = document.querySelector(
-                '#stem-begroot-filter'
-              );
+              // ponytail: eigen sectie, niet de eerste op de pagina
+              const filterParent = sectionRef.current;
 
               const singleSelects: NodeListOf<HTMLSelectElement> | undefined =
                 filterParent?.querySelectorAll(':scope select');
@@ -596,7 +602,7 @@ export function Filters({
     props.displaySorting ||
     props.displayLocationFilter
   ) ? null : (
-    <section id="stem-begroot-filter">
+    <section ref={sectionRef} className="osc-filter-section">
       <form
         className={`osc-resources-filter ${className}`}
         onSubmit={
@@ -631,7 +637,7 @@ export function Filters({
               appearance="primary-action-button"
               type="button"
               aria-expanded={filtersVisible ? 'true' : 'false'}
-              aria-controls="filters-container"
+              aria-controls={filtersContainerId}
               onClick={(e) => {
                 if (!filtersVisible && disableTransition)
                   setDisableTransition(false);
@@ -641,7 +647,7 @@ export function Filters({
               <span className="sr-only">Filters uitklappen</span>
             </Button>
             <div
-              id="filters-container"
+              id={filtersContainerId}
               ref={filtersContainerRef}
               className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''} ${disableTransition ? 'no-transition' : ''}`}
               aria-hidden={!filtersVisible ? 'true' : 'false'}
@@ -696,7 +702,7 @@ export function Filters({
       )}
 
       {activeFilter && (
-        <div id="filter-status" aria-live="polite" className="sr-only">
+        <div aria-live="polite" className="filter-status sr-only">
           <>
             <p>Huidige filterinstellingen:</p>
 

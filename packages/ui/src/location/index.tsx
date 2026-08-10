@@ -1,5 +1,5 @@
 import { FormLabel } from '@utrecht/component-library-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 
 import { Select } from '../select';
 import { PostcodeAutoFillLocation } from '../stem-begroot-and-resource-overview/filter';
@@ -42,6 +42,11 @@ export default function PostcodeAutoFill({
   locationDefault,
   ...props
 }: Props) {
+  // ponytail: unieke id's — dit blok staat vaak twee keer op één pagina (1.3.1)
+  const locationFieldId = useId();
+  const suggestionListId = useId();
+  const proximityFieldId = useId();
+
   const options = props.proximityOptions || proximityOptions;
   const defaultProximity =
     props.proximityDefault ||
@@ -161,7 +166,7 @@ export default function PostcodeAutoFill({
   return (
     <>
       <div className="form-element postcode-autofill" ref={wrapperRef}>
-        <FormLabel htmlFor={'locationField'}>Selecteer postcode</FormLabel>
+        <FormLabel htmlFor={locationFieldId}>Selecteer postcode</FormLabel>
         <div className="input-wrapper">
           <input
             type="text"
@@ -180,14 +185,14 @@ export default function PostcodeAutoFill({
             }}
             disabled={!!selected}
             className="utrecht-textbox utrecht-textbox--html-input"
-            id="locationField"
+            id={locationFieldId}
             autoComplete="postal-code"
             aria-autocomplete="list"
-            aria-controls="suggestion-list"
+            aria-controls={suggestionListId}
             aria-expanded={showDropdown}
             aria-activedescendant={
               showDropdown && suggestions.length > 0
-                ? `suggestion-${highlightedIndex}`
+                ? `${suggestionListId}-${highlightedIndex}`
                 : undefined
             }
             role="combobox"
@@ -212,7 +217,7 @@ export default function PostcodeAutoFill({
         {!loading && showDropdown && suggestions.length > 0 && (
           <ul
             className="suggestion-list"
-            id="suggestion-list"
+            id={suggestionListId}
             role="listbox"
             onKeyDown={(e) => {
               if (showDropdown && suggestions.length > 0) {
@@ -237,7 +242,7 @@ export default function PostcodeAutoFill({
                 key={index}
                 onClick={() => handleSelect(s)}
                 role="option"
-                id={`suggestion-${index}`}
+                id={`${suggestionListId}-${index}`}
                 aria-selected={highlightedIndex === index}
                 tabIndex={-1}>
                 <strong>{s.postcode}</strong> {s.straat}, {s.woonplaats}
@@ -248,11 +253,11 @@ export default function PostcodeAutoFill({
       </div>
 
       <div className="form-element">
-        <FormLabel htmlFor={'proximityField'}>Selecteer straal</FormLabel>
+        <FormLabel htmlFor={proximityFieldId}>Selecteer straal</FormLabel>
         <Select
           onValueChange={(value) => setProximity(value)}
           options={options}
-          id="proximityField"
+          id={proximityFieldId}
           value={proximity}
           disableDefaultOption={true}
         />

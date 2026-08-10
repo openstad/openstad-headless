@@ -286,9 +286,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
         </div>
       </div>
 
-      <Paragraph
-        id="a-b-description"
-        className="a-b-description visually-hidden">
+      {/* ponytail: id weg — nergens naar verwezen en dubbel bij twee sliders (1.3.1) */}
+      <Paragraph className="a-b-description visually-hidden">
         Deze slider vertegenwoordigt de waarde voor {titleA || 'Optie A'} aan de
         linkerkant en de waarde voor {titleB || 'Optie B'} aan de rechterkant.
       </Paragraph>

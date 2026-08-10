@@ -15,13 +15,13 @@
 }
 .resourceOverviewWithMap-container
   .osc-resource-overview-content
-  #stem-begroot-filter {
+  .osc-filter-section {
   grid-column: 1 / -1;
   margin-block-end: 3rem;
 }
 .resourceOverviewWithMap-container
   .osc-resource-overview-content
-  #stem-begroot-filter
+  .osc-filter-section
   .osc-resources-filter.osc-flex-columned {
   width: calc(100% + 2rem);
   padding-inline-start: 2rem;
@@ -132,7 +132,7 @@
 
   .resourceOverviewWithMap-container
     .osc-resource-overview-content
-    #stem-begroot-filter
+    .osc-filter-section
     .osc-resources-filter.osc-flex-columned {
     padding-inline: 1rem;
   }
@@ -154,7 +154,7 @@
   }
   .resourceOverviewWithMap-container
     .osc-resource-overview-content
-    #stem-begroot-filter
+    .osc-filter-section
     .osc-resources-filter.osc-flex-columned {
     grid-template-columns: 1fr;
   }
