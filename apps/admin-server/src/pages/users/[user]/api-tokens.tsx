@@ -70,6 +70,7 @@ export default function UserApiTokens() {
     error,
     isLoading,
     createToken,
+    revokeToken,
   } = useApiTokens(user?.projectId, user?.id);
 
   const [newToken, setNewToken] = useState<string | null>(null);
@@ -94,6 +95,16 @@ export default function UserApiTokens() {
       toast.success('API-token aangemaakt');
     } catch {
       toast.error('Aanmaken van token mislukt');
+    }
+  }
+
+  async function handleRevoke(tokenId: number) {
+    if (!confirm('Weet je zeker dat je dit token wilt intrekken?')) return;
+    try {
+      await revokeToken(tokenId);
+      toast.success('Token ingetrokken');
+    } catch {
+      toast.error('Intrekken van token mislukt');
     }
   }
 
@@ -263,6 +274,15 @@ export default function UserApiTokens() {
                     ` · Laatst gebruikt: ${formatDate(token.lastUsedAt)}`}
                 </p>
               </div>
+              {token.status !== 'revoked' && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleRevoke(token.id)}>
+                  Intrekken
+                </Button>
+              )}
             </div>
           ))}
         </div>

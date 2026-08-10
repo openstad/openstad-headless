@@ -111,7 +111,8 @@ router.post('/', async function (req, res, next) {
   }
 });
 
-// GET /project/:projectId/user/:userId/api-token — list masked tokens
+// GET /project/:projectId/user/:userId/api-token — list masked tokens,
+// including revoked and expired ones (status field tells them apart)
 router.get('/', async function (req, res, next) {
   try {
     const userId = parseInt(req.params.userId, 10);
@@ -119,10 +120,33 @@ router.get('/', async function (req, res, next) {
 
     const tokens = await db.ApiToken.findAll({
       where: { userId, projectId },
+      paranoid: false,
       order: [['createdAt', 'DESC']],
     });
 
     return res.json(tokens.map(maskToken));
+  } catch (err) {
+    return next(err);
+  }
+});
+
+// DELETE /project/:projectId/user/:userId/api-token/:tokenId — revoke (soft-delete)
+router.delete('/:tokenId(\\d+)', async function (req, res, next) {
+  try {
+    const userId = parseInt(req.params.userId, 10);
+    const projectId = req.project.id;
+    const tokenId = parseInt(req.params.tokenId, 10);
+
+    const token = await db.ApiToken.findOne({
+      where: { id: tokenId, userId, projectId },
+    });
+
+    if (!token) {
+      return next(createError(404, 'Token not found'));
+    }
+
+    await token.destroy(); // paranoid soft-delete
+    return res.json({ status: 'ok' });
   } catch (err) {
     return next(err);
   }

@@ -45,5 +45,18 @@ export default function useApiTokens(projectId?: number, userId?: number) {
     return created;
   }
 
-  return { ...swr, createToken };
+  async function revokeToken(tokenId: number) {
+    if (!projectId || !userId)
+      throw new Error('Project of gebruiker ontbreekt');
+
+    const res = await fetch(
+      `/api/openstad/api/project/${projectId}/user/${userId}/api-token/${tokenId}`,
+      { method: 'DELETE' }
+    );
+
+    if (!res.ok) throw new Error('Intrekken van token mislukt');
+    swr.mutate();
+  }
+
+  return { ...swr, createToken, revokeToken };
 }

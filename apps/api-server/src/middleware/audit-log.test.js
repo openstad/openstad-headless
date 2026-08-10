@@ -201,4 +201,55 @@ describe('audit-log middleware', () => {
       })
     );
   });
+
+  // api-token routes are nested one level deeper than the generic
+  // /project/:id/<model> rule, which would otherwise attribute a token action
+  // to the 'user' model and lose the token id.
+  describe('api-token routes', () => {
+    it.each([
+      ['DELETE', '/project/1/user/5/api-token/7', 7],
+      ['POST', '/project/1/user/5/api-token', null],
+      ['DELETE', '/project/1/api-token/7', 7],
+      ['POST', '/project/1/api-token', null],
+    ])(
+      'attributes %s %s to the api-token model',
+      (method, path, expectedModelId) => {
+        const req = createMockReq({
+          method,
+          path,
+          results: { dataValues: { id: 7, name: 'Reporting' } },
+        });
+        const res = createMockRes();
+        const next = vi.fn();
+
+        middleware(req, res, next);
+        res.json({ status: 'ok' });
+
+        expect(mockService.log).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            action: method,
+            modelName: 'api-token',
+            modelId: expectedModelId,
+          })
+        );
+      }
+    );
+
+    it('does not attribute a revoke to the user in the path', () => {
+      const req = createMockReq({
+        method: 'DELETE',
+        path: '/project/1/user/5/api-token/7',
+        results: { dataValues: { id: 7 } },
+      });
+      const res = createMockRes();
+
+      middleware(req, res, vi.fn());
+      res.json({ status: 'ok' });
+
+      const logged = mockService.log.mock.calls[0][1];
+      expect(logged.modelName).not.toBe('user');
+      expect(logged.modelId).not.toBe(5);
+    });
+  });
 });
