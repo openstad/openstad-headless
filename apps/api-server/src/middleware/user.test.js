@@ -1,6 +1,7 @@
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import { createRequire } from 'module';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Use createRequire so we get the same CJS module.exports reference as user.js does
 const require = createRequire(import.meta.url);
@@ -14,6 +15,7 @@ const JWT_SECRET = config.auth.jwtSecret;
 // Store originals for clean restoration
 const originalUserFindOne = db.User.findOne;
 const originalProjectFindOne = db.Project.findOne;
+const originalApiTokenFindOne = db.ApiToken.findOne;
 const originalAuthSettingsConfig = authSettings.config;
 const originalFixedAuthTokens = config.auth.fixedAuthTokens;
 
@@ -32,9 +34,11 @@ function setFixedAuthTokens(value) {
 afterEach(() => {
   db.User.findOne = originalUserFindOne;
   db.Project.findOne = originalProjectFindOne;
+  db.ApiToken.findOne = originalApiTokenFindOne;
   authSettings.config = originalAuthSettingsConfig;
   // Restore fixedAuthTokens in case a test mutated the shared config singleton
   setFixedAuthTokens(originalFixedAuthTokens);
+  vi.restoreAllMocks();
 });
 
 function createMockReq(overrides = {}) {
@@ -253,6 +257,232 @@ describe('user middleware', () => {
       expect(req.user).toBe(fakeUser);
       expect(req.user.role).toBe('member');
       expect(next).toHaveBeenCalledWith();
+    });
+  });
+
+  // Opaque reporting tokens (Bearer osr_…) bypass the JWT/auth-server path and
+  // resolve the owner straight from the database.
+  describe('API token (Bearer osr_…)', () => {
+    const PROJECT_ID = 2; // matches createMockReq's req.project
+    const OWNER = { id: 55, role: 'editor', projectId: PROJECT_ID };
+    const PLAINTEXT = 'osr_a-perfectly-ordinary-opaque-token';
+    const TOKEN_HASH = crypto
+      .createHash('sha256')
+      .update(PLAINTEXT)
+      .digest('hex');
+    const MINUTE = 60 * 1000;
+
+    // The middleware falls back to anonymous both on a deliberate rejection and
+    // on a swallowed exception. Spying on console.error tells the two apart:
+    // only the catch block logs, so a "clean" rejection must log nothing.
+    let errorLog;
+    beforeEach(() => {
+      errorLog = vi.spyOn(console, 'error').mockImplementation(() => {});
+    });
+
+    function apiTokenReq(authorization = `Bearer ${PLAINTEXT}`) {
+      return createMockReq({ headers: { authorization } });
+    }
+
+    function mockApiToken(overrides = {}) {
+      const apiToken = {
+        id: 1,
+        userId: OWNER.id,
+        projectId: PROJECT_ID,
+        lastUsedAt: null,
+        update: vi.fn().mockResolvedValue(undefined),
+        ...overrides,
+      };
+      db.ApiToken.findOne = vi.fn().mockResolvedValue(apiToken);
+      return apiToken;
+    }
+
+    it('authenticates the owner and looks the token up by its sha256 hash', async () => {
+      mockApiToken();
+      db.User.findOne = vi.fn().mockResolvedValue(OWNER);
+
+      const req = apiTokenReq();
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      // The plaintext is never queried — only its hash.
+      expect(db.ApiToken.findOne).toHaveBeenCalledWith({
+        where: { tokenHash: TOKEN_HASH },
+      });
+      expect(req.user).toBe(OWNER);
+      expect(req.apiTokenScope).toBe('reports');
+      expect(next).toHaveBeenCalledWith();
+      expect(errorLog).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['extra spaces after the scheme', `Bearer   ${PLAINTEXT}`],
+      ['a lowercase scheme', `bearer ${PLAINTEXT}`],
+      ['surrounding whitespace', `  Bearer ${PLAINTEXT}\t `],
+    ])('accepts a header with %s', async (_label, authorization) => {
+      mockApiToken();
+      db.User.findOne = vi.fn().mockResolvedValue(OWNER);
+
+      const req = apiTokenReq(authorization);
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      // Same hash as the canonical header: the whitespace never reaches sha256.
+      expect(db.ApiToken.findOne).toHaveBeenCalledWith({
+        where: { tokenHash: TOKEN_HASH },
+      });
+      expect(req.user).toBe(OWNER);
+      expect(next).toHaveBeenCalledWith();
+    });
+
+    it('falls back to anonymous for an unknown token', async () => {
+      db.ApiToken.findOne = vi.fn().mockResolvedValue(null);
+      db.User.findOne = vi.fn();
+
+      const req = apiTokenReq();
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      expect(req.user).toEqual({ role: 'anonymous', id: null });
+      expect(db.User.findOne).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith();
+      // Rejected deliberately, not by way of a swallowed exception.
+      expect(errorLog).not.toHaveBeenCalled();
+    });
+
+    it('falls back to anonymous when the owner no longer exists', async () => {
+      const apiToken = mockApiToken();
+      db.User.findOne = vi.fn().mockResolvedValue(null);
+
+      const req = apiTokenReq();
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      expect(req.user).toEqual({ role: 'anonymous', id: null });
+      expect(apiToken.update).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith();
+      expect(errorLog).not.toHaveBeenCalled();
+    });
+
+    it('falls back to anonymous when the token is bound to another project', async () => {
+      const apiToken = mockApiToken({ projectId: PROJECT_ID + 100 });
+      db.User.findOne = vi
+        .fn()
+        .mockResolvedValue({ ...OWNER, projectId: PROJECT_ID + 100 });
+
+      const req = apiTokenReq();
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      expect(req.user).toEqual({ role: 'anonymous', id: null });
+      expect(req.apiTokenScope).toBeUndefined();
+      expect(apiToken.update).not.toHaveBeenCalled();
+      expect(errorLog).not.toHaveBeenCalled();
+    });
+
+    it('falls back to anonymous when the request has no project', async () => {
+      mockApiToken();
+      db.User.findOne = vi.fn().mockResolvedValue(OWNER);
+
+      const req = apiTokenReq();
+      req.project = null;
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      expect(req.user).toEqual({ role: 'anonymous', id: null });
+      expect(errorLog).not.toHaveBeenCalled();
+    });
+
+    it('lets an admin-project superuser cross the project binding', async () => {
+      mockApiToken({ projectId: config.admin.projectId });
+      const superuser = {
+        id: 9,
+        role: 'admin',
+        projectId: config.admin.projectId,
+      };
+      db.User.findOne = vi.fn().mockResolvedValue(superuser);
+
+      // req.project (2) differs from the token's project, which would be
+      // rejected for any non-superuser owner.
+      const req = apiTokenReq();
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      expect(req.user).toBe(superuser);
+      expect(req.apiTokenScope).toBe('reports');
+      expect(next).toHaveBeenCalledWith();
+    });
+
+    it('falls back to anonymous and logs when the token lookup throws', async () => {
+      db.ApiToken.findOne = vi.fn().mockRejectedValue(new Error('db down'));
+
+      const req = apiTokenReq();
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      expect(req.user).toEqual({ role: 'anonymous', id: null });
+      expect(next).toHaveBeenCalledWith();
+      expect(errorLog).toHaveBeenCalled();
+    });
+
+    describe('lastUsedAt throttling', () => {
+      it('records first use when lastUsedAt is null', async () => {
+        const apiToken = mockApiToken({ lastUsedAt: null });
+        db.User.findOne = vi.fn().mockResolvedValue(OWNER);
+
+        await getUserMiddleware(apiTokenReq(), createMockRes(), vi.fn());
+
+        expect(apiToken.update).toHaveBeenCalledWith({
+          lastUsedAt: expect.any(Date),
+        });
+      });
+
+      it('records use when the stored lastUsedAt is unparseable', async () => {
+        const apiToken = mockApiToken({ lastUsedAt: 'not a date' });
+        db.User.findOne = vi.fn().mockResolvedValue(OWNER);
+
+        await getUserMiddleware(apiTokenReq(), createMockRes(), vi.fn());
+
+        expect(apiToken.update).toHaveBeenCalledWith({
+          lastUsedAt: expect.any(Date),
+        });
+      });
+
+      it('refreshes lastUsedAt once it is older than the throttle window', async () => {
+        const apiToken = mockApiToken({
+          lastUsedAt: new Date(Date.now() - 30 * MINUTE),
+        });
+        db.User.findOne = vi.fn().mockResolvedValue(OWNER);
+
+        await getUserMiddleware(apiTokenReq(), createMockRes(), vi.fn());
+
+        expect(apiToken.update).toHaveBeenCalledTimes(1);
+      });
+
+      it('skips the write for a recently used token, so polling costs no UPDATEs', async () => {
+        const apiToken = mockApiToken({
+          lastUsedAt: new Date(Date.now() - 1 * MINUTE),
+        });
+        db.User.findOne = vi.fn().mockResolvedValue(OWNER);
+
+        const req = apiTokenReq();
+        const next = vi.fn();
+
+        await getUserMiddleware(req, createMockRes(), next);
+
+        expect(apiToken.update).not.toHaveBeenCalled();
+        // Skipping the write must not affect authentication.
+        expect(req.user).toBe(OWNER);
+        expect(next).toHaveBeenCalledWith();
+      });
     });
   });
 });

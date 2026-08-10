@@ -1,10 +1,42 @@
 const config = require('config');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const merge = require('merge');
 const db = require('../db');
 const authSettings = require('../util/auth-settings');
 
 let adapters = {};
+
+// RFC 7235 allows any amount of whitespace between the auth scheme and its
+// credentials, so match the scheme tolerantly instead of assuming a single
+// space. Both quantifiers run over disjoint character classes, so there is no
+// backtracking blow-up on a hostile header.
+const BEARER_SCHEME = /^\s*bearer\s+/i;
+
+// lastUsedAt is informational (shown in the admin token list). A reporting
+// client may poll continuously, so writing it on every request would mean one
+// UPDATE per request per token; only refresh it once per window.
+const LAST_USED_AT_THROTTLE_MS = 5 * 60 * 1000;
+
+/**
+ * Extract the credentials from an `Authorization: Bearer <token>` header.
+ * Returns null when the header is absent or uses a different scheme.
+ */
+function parseBearerToken(header) {
+  if (typeof header !== 'string' || !BEARER_SCHEME.test(header)) return null;
+  return header.replace(BEARER_SCHEME, '').trim();
+}
+
+/**
+ * Whether lastUsedAt is stale enough to be worth an UPDATE.
+ */
+function shouldRefreshLastUsedAt(apiToken, now) {
+  const lastUsedAt = new Date(apiToken.lastUsedAt).getTime();
+  // Missing or unparseable: treat as never used, so a corrupt value cannot
+  // freeze the column forever.
+  if (!Number.isFinite(lastUsedAt)) return true;
+  return now.getTime() - lastUsedAt >= LAST_USED_AT_THROTTLE_MS;
+}
 
 /**
  * Get user from jwt or fixed token and validate with auth server
@@ -17,25 +49,32 @@ module.exports = async function getUser(req, res, next) {
   try {
     if (!req.headers['authorization']) {
       return nextWithEmptyUser(req, res, next);
-    } else {
-      const allowedUploadPaths = ['/upload/images', '/upload/documents'];
-
-      const isUploadRequest = allowedUploadPaths.some((path) =>
-        req.path.endsWith(path)
-      );
-
-      if (isUploadRequest) {
-        const payload = {
-          userId: '9999999',
-          authProvider: 'upload-service',
-          exp: Math.floor(Date.now() / 1000) + 5 * 60,
-        };
-
-        const uploadJwt = jwt.sign(payload, config.auth.jwtSecret);
-
-        req.headers['authorization'] = `Bearer ${uploadJwt}`;
-      }
     }
+
+    // Opaque API token path (Bearer osr_…) — bypasses JWT and auth-server round-trip
+    const bearerToken = parseBearerToken(req.headers['authorization']);
+    if (bearerToken && bearerToken.startsWith('osr_')) {
+      return handleApiToken(req, res, next, bearerToken);
+    }
+
+    const allowedUploadPaths = ['/upload/images', '/upload/documents'];
+
+    const isUploadRequest = allowedUploadPaths.some((path) =>
+      req.path.endsWith(path)
+    );
+
+    if (isUploadRequest) {
+      const payload = {
+        userId: '9999999',
+        authProvider: 'upload-service',
+        exp: Math.floor(Date.now() / 1000) + 5 * 60,
+      };
+
+      const uploadJwt = jwt.sign(payload, config.auth.jwtSecret);
+
+      req.headers['authorization'] = `Bearer ${uploadJwt}`;
+    }
+
     let { userId, isFixed, authProvider } = parseAuthHeader(
       req.headers['authorization']
     );
@@ -69,6 +108,66 @@ module.exports = async function getUser(req, res, next) {
     next(error);
   }
 };
+
+/**
+ * Authenticate using an opaque API token (osr_…) stored hashed in api_tokens.
+ * Skips the auth-server round-trip; loads the owner User directly from DB.
+ */
+async function handleApiToken(req, res, next, rawToken) {
+  try {
+    const tokenHash = crypto
+      .createHash('sha256')
+      .update(rawToken)
+      .digest('hex');
+
+    const apiToken = await db.ApiToken.findOne({ where: { tokenHash } });
+
+    if (!apiToken) {
+      return nextWithEmptyUser(req, res, next);
+    }
+
+    const owner = await db.User.findOne({ where: { id: apiToken.userId } });
+    if (!owner) {
+      return nextWithEmptyUser(req, res, next);
+    }
+
+    // Enforce the token's project binding: stats routes check role only
+    // (hasRole(req.user, 'editor')), so without this check a token from one
+    // project could read another project's stats. Only superusers (admin on
+    // the admin project) may cross project boundaries, mirroring the JWT path.
+    const isSuperUser =
+      owner.projectId == config.admin.projectId &&
+      ['admin', 'superuser'].includes(owner.role);
+    if (
+      !isSuperUser &&
+      (!req.project || req.project.id != apiToken.projectId)
+    ) {
+      return nextWithEmptyUser(req, res, next);
+    }
+
+    req.user = owner;
+    req.apiTokenScope = 'reports';
+
+    // Update lastUsedAt asynchronously — do not block the request. Failing to
+    // record usage must never fail the request, but it should not be silent
+    // either.
+    const now = new Date();
+    if (shouldRefreshLastUsedAt(apiToken, now)) {
+      apiToken.update({ lastUsedAt: now }).catch((err) => {
+        console.error(
+          `[${new Date().toISOString()}][auth-middleware] could not update lastUsedAt: ${err?.message}`
+        );
+      });
+    }
+
+    return next();
+  } catch (err) {
+    console.error(
+      `[${new Date().toISOString()}][auth-middleware] handleApiToken error: ${err?.message}`
+    );
+    return nextWithEmptyUser(req, res, next);
+  }
+}
 
 /**
  * Continue with empty user if user is not set
