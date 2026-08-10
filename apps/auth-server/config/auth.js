@@ -27,7 +27,7 @@ const types = [
       'Vul hieronder je unieke code in om een OpenStad account aan te maken. Deze code heb je thuis gestuurd gekregen van ons.',
     label: 'Mijn stemcode',
     helpText:
-      'Let op, de unieke code is hoofdlettergevoelig! Werkt deze nog steeds niet? <a href="mailto:{{clientEmail}}">Neem contact met ons op.</a>',
+      'Let op, de unieke code is hoofdlettergevoelig! Werkt deze nog steeds niet? <a href="mailto:{{clientEmail}}">stuur ons een e-mail.</a>',
     errorMessage:
       'Vul een geldige stemcode in. Heb je een typefout gemaakt? Stemcodes zijn hoofdlettergevoelig.',
     displaySidebar: false,

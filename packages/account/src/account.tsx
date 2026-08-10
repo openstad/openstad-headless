@@ -315,17 +315,19 @@ function Account({
             {Object.entries(formData).map(
               (field, index) =>
                 field[0] === 'email' && (
-                  <FormFieldTextbox
-                    label={field[1].label}
-                    name={field[1].label}
-                    description="Niet aanpasbaar"
-                    placeholder={field[1].label}
-                    maxLength={maxLength}
-                    minLength={minLength}
-                    value={userFormData?.email?.value}
-                    readOnly
-                    key={index}
-                  />
+                  // ponytail: geen readonly input maar tekst — een input kapt het
+                  // adres af bij 200% zoom en is toch niet aanpasbaar (1.4.4/1.4.10)
+                  <div className="account-readonly-field" key={index}>
+                    <Paragraph className="account-readonly-field__label">
+                      {field[1].label}
+                    </Paragraph>
+                    <Paragraph className="account-readonly-field__value">
+                      {userFormData?.email?.value}
+                    </Paragraph>
+                    <Paragraph className="utrecht-form-field-description">
+                      Niet aanpasbaar
+                    </Paragraph>
+                  </div>
                 )
             )}
           </div>
