@@ -35,7 +35,8 @@ router.get('/choice-guides', require('./choice-guides'));
 router.get('/choice-guide-questions', require('./choice-guide-questions'));
 router.get('/choice-guide-results', require('./choice-guide-results'));
 
-// Deferred to other tickets, mounted here when built:
-//   /users/anonymized, /users/aggregates         → #442
+// Anonymized user data (#442).
+router.get('/users/anonymized', require('./users-anonymized'));
+router.get('/users/aggregates', require('./users-aggregates'));
 
 module.exports = router;

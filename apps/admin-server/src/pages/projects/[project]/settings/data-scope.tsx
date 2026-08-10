@@ -17,13 +17,59 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as Switch from '@radix-ui/react-switch';
 import { AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/router';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
+import { Widget, useWidgetsHook } from '../../../../hooks/use-widgets';
 import { DATA_SCOPE_COMPONENTS } from '../../../../lib/data-scope-catalog';
+
+// Confirmation/meta config keys (packages/enquete's Confirmation type) — never
+// treated as a form field, even if a stray config item happens to collide with
+// one of these names. MUST stay in sync with CONTROL_FIELD_KEYS in
+// apps/api-server/src/lib/reporting/flatten-submission.js (the backend source
+// of truth that actually enforces it) — kept here only so the admin UI doesn't
+// offer a toggle for a field the backend would silently ignore anyway.
+const CONTROL_FIELD_KEYS = new Set([
+  'confirmationUser',
+  'userEmailAddress',
+  'confirmationAdmin',
+  'overwriteEmailAddress',
+]);
+
+type FormFieldOption = { key: string; label: string };
+
+/**
+ * Unions the form-item field keys across every widget of the given type
+ * (e.g. 'enquete' for submissions, 'choiceguide' for choice guides), so the
+ * per-field opt-in list reflects every field the project's forms can produce
+ * — matching the union approach the reporting endpoints themselves use
+ * (see apps/api-server/src/routes/api/reports/submissions.js).
+ */
+function getWidgetFormFields(
+  widgets: Widget[] | undefined,
+  widgetType: string
+): FormFieldOption[] {
+  const seen = new Set<string>();
+  const out: FormFieldOption[] = [];
+
+  for (const widget of widgets || []) {
+    if (widget.type !== widgetType) continue;
+    const items = (widget.config as any)?.items;
+    if (!Array.isArray(items)) continue;
+
+    for (const item of items) {
+      const key = item?.fieldKey || item?.key;
+      if (!key || CONTROL_FIELD_KEYS.has(key) || seen.has(key)) continue;
+      seen.add(key);
+      out.push({ key, label: item.title || key });
+    }
+  }
+
+  return out;
+}
 
 // Single source of truth for labels/fields lives in lib/data-scope-catalog.ts;
 // the personalField keys are kept in sync with the backend catalog
@@ -35,6 +81,12 @@ type ComponentKey = keyof typeof COMPONENTS;
 const componentSchema = z.object({
   enabled: z.boolean().default(false),
   personalFields: z.array(z.string()).default([]),
+  // Per-field opt-in for dynamic form content. Only meaningful for
+  // 'submissions' (formFields, backed by enquete widget items) and
+  // 'choiceguides' (answerFields, backed by choiceguide widget items) — an
+  // empty array on every other component is harmless.
+  formFields: z.array(z.string()).default([]),
+  answerFields: z.array(z.string()).default([]),
 });
 
 const formSchema = z.object({
@@ -43,9 +95,81 @@ const formSchema = z.object({
   comments: componentSchema,
   submissions: componentSchema,
   choiceguides: componentSchema,
+  projects: componentSchema,
+  choiceguideguides: componentSchema,
+  choiceguidequestions: componentSchema,
+  users: componentSchema,
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+/**
+ * Reusable checkbox list bound to `${key}.${fieldName}` (a string[] form
+ * field). Used for the static personalFields catalog as well as the dynamic
+ * formFields/answerFields lists sourced from the project's widgets.
+ */
+function FieldCheckboxGroup({
+  control,
+  keyName,
+  fieldName,
+  sectionLabel,
+  options,
+}: {
+  control: any;
+  keyName: ComponentKey;
+  fieldName: 'personalFields' | 'formFields' | 'answerFields';
+  sectionLabel: string;
+  options: readonly FormFieldOption[];
+}) {
+  if (options.length === 0) return null;
+
+  return (
+    <div className="pl-2 border-l-2 border-yellow-300 space-y-2">
+      <p className="text-sm font-medium text-muted-foreground">
+        {sectionLabel}
+      </p>
+      <FormField
+        control={control}
+        name={`${keyName}.${fieldName}` as any}
+        render={() => (
+          <FormItem className="space-y-2">
+            {options.map((opt) => (
+              <FormField
+                key={opt.key}
+                control={control}
+                name={`${keyName}.${fieldName}` as any}
+                render={({ field }) => {
+                  const currentValues: string[] = field.value || [];
+                  return (
+                    <FormItem
+                      key={opt.key}
+                      className="flex flex-row items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={currentValues.includes(opt.key)}
+                          onCheckedChange={(checked) => {
+                            const next = checked
+                              ? [...currentValues, opt.key]
+                              : currentValues.filter((v) => v !== opt.key);
+                            field.onChange(next);
+                          }}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal cursor-pointer">
+                        {opt.label}
+                      </FormLabel>
+                    </FormItem>
+                  );
+                }}
+              />
+            ))}
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+    </div>
+  );
+}
 
 function buildDefaults(dataScopeConfig: any): FormValues {
   return (Object.keys(COMPONENTS) as ComponentKey[]).reduce(
@@ -54,6 +178,8 @@ function buildDefaults(dataScopeConfig: any): FormValues {
       [key]: {
         enabled: dataScopeConfig?.[key]?.enabled ?? false,
         personalFields: dataScopeConfig?.[key]?.personalFields ?? [],
+        formFields: dataScopeConfig?.[key]?.formFields ?? [],
+        answerFields: dataScopeConfig?.[key]?.answerFields ?? [],
       },
     }),
     {} as FormValues
@@ -64,6 +190,16 @@ export default function ProjectSettingsDataScope() {
   const router = useRouter();
   const { project } = router.query;
   const { data, error, isLoading, updateProject } = useProject();
+  const { data: widgets } = useWidgetsHook(project as string);
+
+  const enqueteFormFields = useMemo(
+    () => getWidgetFormFields(widgets, 'enquete'),
+    [widgets]
+  );
+  const choiceguideAnswerFields = useMemo(
+    () => getWidgetFormFields(widgets, 'choiceguide'),
+    [widgets]
+  );
 
   const defaults = useCallback(
     () => buildDefaults(data?.config?.dataScope),
@@ -87,14 +223,19 @@ export default function ProjectSettingsDataScope() {
         ...acc,
         [key]: values[key].enabled
           ? values[key]
-          : { enabled: false, personalFields: [] },
+          : {
+              enabled: false,
+              personalFields: [],
+              formFields: [],
+              answerFields: [],
+            },
       }),
       {} as FormValues
     );
 
     try {
       const result = await updateProject({ dataScope: normalized });
-      if (result && !result.error) {
+      if (result) {
         toast.success('Project aangepast!');
       } else {
         toast.error('Er is helaas iets mis gegaan.');
@@ -185,56 +326,34 @@ export default function ProjectSettingsDataScope() {
                           )}
                         />
 
-                        {enabled && def.personalFields.length > 0 && (
-                          <div className="pl-2 border-l-2 border-yellow-300 space-y-2">
-                            <p className="text-sm font-medium text-muted-foreground">
-                              Optionele persoonsvelden (gepseudonimiseerd)
-                            </p>
-                            <FormField
-                              control={form.control}
-                              name={`${key}.personalFields` as any}
-                              render={() => (
-                                <FormItem className="space-y-2">
-                                  {def.personalFields.map((pf) => (
-                                    <FormField
-                                      key={pf.key}
-                                      control={form.control}
-                                      name={`${key}.personalFields` as any}
-                                      render={({ field }) => {
-                                        const currentValues: string[] =
-                                          field.value || [];
-                                        return (
-                                          <FormItem
-                                            key={pf.key}
-                                            className="flex flex-row items-start space-x-3 space-y-0">
-                                            <FormControl>
-                                              <Checkbox
-                                                checked={currentValues.includes(
-                                                  pf.key
-                                                )}
-                                                onCheckedChange={(checked) => {
-                                                  const next = checked
-                                                    ? [...currentValues, pf.key]
-                                                    : currentValues.filter(
-                                                        (v) => v !== pf.key
-                                                      );
-                                                  field.onChange(next);
-                                                }}
-                                              />
-                                            </FormControl>
-                                            <FormLabel className="font-normal cursor-pointer">
-                                              {pf.label}
-                                            </FormLabel>
-                                          </FormItem>
-                                        );
-                                      }}
-                                    />
-                                  ))}
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
+                        {enabled && (
+                          <FieldCheckboxGroup
+                            control={form.control}
+                            keyName={key}
+                            fieldName="personalFields"
+                            sectionLabel="Optionele persoonsvelden (gepseudonimiseerd)"
+                            options={def.personalFields}
+                          />
+                        )}
+
+                        {enabled && key === 'submissions' && (
+                          <FieldCheckboxGroup
+                            control={form.control}
+                            keyName={key}
+                            fieldName="formFields"
+                            sectionLabel="Formuliervelden (per veld opt-in)"
+                            options={enqueteFormFields}
+                          />
+                        )}
+
+                        {enabled && key === 'choiceguides' && (
+                          <FieldCheckboxGroup
+                            control={form.control}
+                            keyName={key}
+                            fieldName="answerFields"
+                            sectionLabel="Antwoordvelden (per veld opt-in)"
+                            options={choiceguideAnswerFields}
+                          />
                         )}
                       </div>
                     );
