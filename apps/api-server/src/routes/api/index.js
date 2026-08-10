@@ -77,6 +77,9 @@ router.use('/project/:projectId(\\d+)/choicesguide', require('./choicesguide'));
 // actions
 router.use('/project/:projectId(\\d+)/action', require('./action'));
 
+// reporting endpoints (Power BI) — path-scoped by projectId (issue #1651)
+router.use('/project/:projectId(\\d+)/reports', require('./reports'));
+
 //widgets
 router.use('/project/:projectId(\\d+)/widgets', require('./widget'));
 router.use('/project/:projectId(\\d+)/widgets/:id(\\d+)', require('./widget'));

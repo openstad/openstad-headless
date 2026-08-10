@@ -10,7 +10,10 @@ export type ComponentKey =
   | 'votes'
   | 'comments'
   | 'submissions'
-  | 'choiceguides';
+  | 'choiceguides'
+  | 'projects'
+  | 'choiceguideguides'
+  | 'choiceguidequestions';
 
 export declare const COMPONENTS: Record<ComponentKey, ComponentDefinition>;
 export declare const ALWAYS_BLOCKED_TOP_LEVEL: Set<string>;
