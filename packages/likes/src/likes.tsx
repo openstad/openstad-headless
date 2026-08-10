@@ -4,13 +4,12 @@ import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { LocalStorage } from '@openstad-headless/lib/local-storage';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { ProgressBar } from '@openstad-headless/ui/src';
+import { ProgressBar, headingLevels } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
 import {
   Button,
-  Heading4,
+  Heading,
   Heading5,
-  Heading6,
   Paragraph,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
@@ -37,6 +36,7 @@ export type LikeProps = {
   hideCounters?: boolean;
   showProgressBar?: boolean;
   progressBarDescription?: string;
+  titleHeadingLevel?: number | string;
   disabled?: boolean;
   refreshResourceLikes?: () => void;
 };
@@ -49,10 +49,14 @@ function Likes({
   noLabel = 'Nee',
   displayDislike = false,
   showProgressBar = true,
+  titleHeadingLevel = 4,
   disabled = false,
   refreshResourceLikes,
   ...props
 }: LikeWidgetProps) {
+  // ponytail: niveau komt uit de admin of van de omringende widget; clamp naar 2-6
+  const [hTitle] = headingLevels(titleHeadingLevel);
+
   let resourceId = String(
     getResourceId({
       resourceId: parseInt(props.resourceId || ''),
@@ -151,7 +155,9 @@ function Likes({
       {variant !== 'micro-score' ? (
         <div className={`like-widget-container ${variant}`}>
           {title ? (
-            <Heading4 className="like-widget-title">{title}</Heading4>
+            <Heading level={hTitle} className="like-widget-title">
+              {title}
+            </Heading>
           ) : null}
 
           <div className={`like-option-container`}>
@@ -207,7 +213,8 @@ function Likes({
             {props?.resources?.minimumYesVotes &&
               showProgressBar &&
               props.progressBarDescription && (
-                <Heading6
+                <Paragraph
+                  className="utrecht-heading-6"
                   dangerouslySetInnerHTML={{
                     __html: props.progressBarDescription,
                   }}
@@ -218,7 +225,9 @@ function Likes({
       ) : (
         <div className={`like-widget-container ${variant}`}>
           {title ? (
-            <Heading4 className="like-widget-title">{title}</Heading4>
+            <Heading level={hTitle} className="like-widget-title">
+              {title}
+            </Heading>
           ) : null}
 
           <div className={`like-option-container`}>
@@ -277,7 +286,8 @@ function Likes({
             {props?.resources?.minimumYesVotes &&
               showProgressBar &&
               props.progressBarDescription && (
-                <Heading6
+                <Paragraph
+                  className="utrecht-heading-6"
                   dangerouslySetInnerHTML={{
                     __html: props.progressBarDescription,
                   }}

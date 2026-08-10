@@ -16,6 +16,7 @@ import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -31,6 +32,7 @@ import {
 } from '../../../../../../components/ui/select';
 
 const formSchema = z.object({
+  titleHeadingLevel: z.coerce.number().optional(),
   title: z.string().optional(),
   variant: z.enum(['micro-score', 'small', 'medium', 'large']),
   yesLabel: z.string(),
@@ -76,6 +78,7 @@ export default function LikesDisplay({
   const form = useForm<FinalSchemaInfer>({
     resolver: zodResolver<any>(finalSchema),
     defaultValues: {
+      titleHeadingLevel: Number(props?.titleHeadingLevel) || 4,
       resourceId: props?.resourceId,
       title: props?.title || '',
       variant: props?.variant || 'medium',
@@ -111,6 +114,34 @@ export default function LikesDisplay({
           />
         )}
 
+        <FormField
+          control={form.control}
+          name="titleHeadingLevel"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Kopniveau van de titel</FormLabel>
+              <Select
+                value={String(field.value ?? 4)}
+                onValueChange={(e) => field.onChange(Number(e))}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Kies kopniveau" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="2">Kop 2 (h2)</SelectItem>
+                  <SelectItem value="3">Kop 3 (h3)</SelectItem>
+                  <SelectItem value="4">Kop 4 (h4)</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Kies zo dat de titel aansluit op de koppen eromheen. De widget
+                produceert nooit een h1; die hoort bij de pagina zelf.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         {conditionallyRenderField(
           'title',
           <FormField

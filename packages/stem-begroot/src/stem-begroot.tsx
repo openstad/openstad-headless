@@ -7,7 +7,12 @@ import {
 } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Paginator, Spacer, Stepper } from '@openstad-headless/ui/src';
+import {
+  Paginator,
+  Spacer,
+  Stepper,
+  headingLevels,
+} from '@openstad-headless/ui/src';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import '@utrecht/component-library-css';
 import { Button, ButtonLink, Heading } from '@utrecht/component-library-react';
@@ -73,6 +78,7 @@ export type StemBegrootWidgetProps = BaseProps &
     onlyIncludeTagIds: string;
     onlyIncludeStatusIds?: string;
     resourceListColumns?: number;
+    headingLevel?: number;
     showInfoMenu?: boolean;
     isSimpleView?: boolean;
     step1Title: string;
@@ -113,6 +119,7 @@ function StemBegroot({
   onlyIncludeTagIds = '',
   onlyIncludeStatusIds = '',
   resourceListColumns = 3,
+  headingLevel = 2,
   step1Tab = '',
   step2Tab = '',
   step3Tab = '',
@@ -131,6 +138,10 @@ function StemBegroot({
   displayModBreak = false,
   ...props
 }: StemBegrootWidgetProps) {
+  // ponytail: widget staat onder de <h1> van de CMS-pagina → nooit zelf een h1;
+  // sub-secties volgen de titel zodat er geen niveau wordt overgeslagen (1.3.1)
+  const [hTitle, hSection] = headingLevels(headingLevel);
+
   // Initialize storage instances with project ID
   const votePendingStorage = React.useMemo(
     () => createVotePendingStorage(props.projectId),
@@ -1030,6 +1041,7 @@ function StemBegroot({
                 budgetChosenTitle={props.budgetChosenTitle}
                 budgetRemainingTitle={props.budgetRemainingTitle}
                 step1Title={props.step1Title}
+                headingLevel={hSection}
                 resourceCardTitle={props.resourceCardTitle}
                 introText={props.step1}
                 showInfoMenu={props.showInfoMenu}
@@ -1168,6 +1180,7 @@ function StemBegroot({
             <>
               <Spacer size={1.5} />
               <BegrotenSelectedOverview
+                headingLevel={hSection}
                 panelTitle={props.panelTitle}
                 budgetChosenTitle={props.budgetChosenTitle}
                 budgetRemainingTitle={props.budgetRemainingTitle}
@@ -1410,7 +1423,7 @@ function StemBegroot({
             <StemBegrootResourceList
               header={
                 <>
-                  <Heading level={1} appearance="utrecht-heading-3">
+                  <Heading level={hTitle} appearance="utrecht-heading-3">
                     {overviewTitle || 'Plannen'}
                   </Heading>
                   <Spacer size={1} />

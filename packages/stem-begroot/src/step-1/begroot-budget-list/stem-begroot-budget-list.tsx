@@ -3,7 +3,7 @@ import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatti
 import '@utrecht/component-library-css';
 import {
   Button,
-  Heading5,
+  Heading,
   Paragraph,
   Strong,
 } from '@utrecht/component-library-react';
@@ -25,6 +25,7 @@ export const StemBegrootBudgetList = ({
   decideCanAddMore,
   onSelectedResourceRemove,
   step1Title,
+  headingLevel = 3,
   resourceCardTitle,
   panelTitle,
   budgetChosenTitle,
@@ -46,6 +47,7 @@ export const StemBegrootBudgetList = ({
   decideCanAddMore: () => boolean;
   onSelectedResourceRemove: (resource: { id: number; budget: number }) => void;
   step1Title: string;
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
   resourceCardTitle: string;
   panelTitle?: string;
   budgetChosenTitle?: string;
@@ -105,7 +107,10 @@ export const StemBegrootBudgetList = ({
         </section>
       )}
       <section className="budget-list-container">
-        <Heading5>{step1Title}</Heading5>
+        {/* ponytail: volgt het kopniveau van de widget, geen vaste h5 (1.3.1) */}
+        <Heading level={headingLevel} appearance="utrecht-heading-5">
+          {step1Title}
+        </Heading>
         {!canAddMore && allResourceInList.length > 0 ? (
           <Paragraph className="budget-list-status-text helptext error">
             {typeIsBudgeting

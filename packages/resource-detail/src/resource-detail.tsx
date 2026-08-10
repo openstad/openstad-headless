@@ -19,6 +19,7 @@ import {
   Image,
   Pill,
   Spacer,
+  headingLevels,
 } from '@openstad-headless/ui/src';
 import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
 import '@utrecht/component-library-css';
@@ -83,6 +84,7 @@ export type ResourceDetailWidgetProps = {
     backUrlText?: string;
     urlWithResourceFormForEditing?: string;
     displayDeleteButton?: boolean;
+    headingLevel?: number;
   } & MapPropsType &
   booleanProps & {
     likeWidget?: Omit<
@@ -144,6 +146,7 @@ function ResourceDetail({
   urlWithResourceFormForEditing = '',
   displayDeleteButton = true,
   displayDeleteEditButtonOnTop = false,
+  headingLevel = 2,
   selectedSocialShareOptions = [
     'facebook',
     'x',
@@ -154,6 +157,10 @@ function ResourceDetail({
   ],
   ...props
 }: ResourceDetailWidgetProps) {
+  // ponytail: widget staat onder de <h1> van de CMS-pagina → nooit zelf een h1,
+  // en subkoppen volgen de titel zodat er geen niveau wordt overgeslagen (1.3.1)
+  const [hTitle, hSection, hSub] = headingLevels(headingLevel);
+
   const [refreshComments, setRefreshComments] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showAccordion, setShowAccordion] = useState(false);
@@ -478,7 +485,7 @@ function ResourceDetail({
 
               {displayTitle && resource.title && (
                 <Heading
-                  level={1}
+                  level={hTitle}
                   appearance="utrecht-heading-2"
                   dangerouslySetInnerHTML={{
                     __html: resource.title,
@@ -488,15 +495,15 @@ function ResourceDetail({
               {displayModBreak && resource.modBreak && (
                 <div className="resource-detail-modbreak-banner">
                   <section>
-                    <Heading level={2} appearance="utrecht-heading-6">
+                    <Heading level={hSection} appearance="utrecht-heading-6">
                       {props.resources.modbreakTitle}
                     </Heading>
-                    <Heading level={2} appearance="utrecht-heading-6">
+                    <Heading level={hSection} appearance="utrecht-heading-6">
                       {resource.modBreakDateHumanized}
                     </Heading>
                   </section>
                   <Spacer size={1} />
-                  <Heading level={2} appearance="utrecht-heading-6">
+                  <Heading level={hSection} appearance="utrecht-heading-6">
                     {resource.modBreak}
                   </Heading>
                 </div>
@@ -506,7 +513,7 @@ function ResourceDetail({
                 {displayUser && resource?.user?.displayName && (
                   <div>
                     <Heading
-                      level={2}
+                      level={hSection}
                       appearance="utrecht-heading-6"
                       className="osc-resource-detail-content-item-title">
                       Ingediend door
@@ -519,7 +526,7 @@ function ResourceDetail({
                 {displayDate && resource.startDateHumanized && (
                   <div>
                     <Heading
-                      level={2}
+                      level={hSection}
                       appearance="utrecht-heading-6"
                       className="osc-resource-detail-content-item-title">
                       Datum
@@ -532,7 +539,7 @@ function ResourceDetail({
                 {displayBudget && resource.budget && (
                   <div>
                     <Heading
-                      level={2}
+                      level={hSection}
                       appearance="utrecht-heading-6"
                       className="osc-resource-detail-content-item-title">
                       Budget
@@ -545,12 +552,12 @@ function ResourceDetail({
               </div>
               <div className="resource-detail-content">
                 {displaySummary && (
-                  <Heading
-                    level={2}
-                    appearance="utrecht-heading-4"
+                  <Paragraph
+                    className="utrecht-heading-4"
                     dangerouslySetInnerHTML={{
                       __html: resource.summary,
-                    }}></Heading>
+                    }}
+                  />
                 )}
                 {displayDescription &&
                   (!displayDescriptionExpandable ? (
@@ -612,7 +619,7 @@ function ResourceDetail({
               </div>
               {displayLocation && resource.location && (
                 <>
-                  <Heading level={2} appearance="utrecht-heading-2">
+                  <Heading level={hSection} appearance="utrecht-heading-2">
                     Plaats
                   </Heading>
                   <ResourceDetailMap
@@ -642,6 +649,7 @@ function ResourceDetail({
                   <Likes
                     {...props}
                     disabled={!canLike}
+                    titleHeadingLevel={hSub}
                     title={props.likeWidget?.title}
                     yesLabel={props.likeWidget?.yesLabel}
                     noLabel={props.likeWidget?.noLabel}
@@ -660,7 +668,7 @@ function ResourceDetail({
               {displayStatus ? (
                 <div className="resource-detail-side-section">
                   <Spacer size={1} />
-                  <Heading level={3} appearance="utrecht-heading-4">
+                  <Heading level={hSub} appearance="utrecht-heading-4">
                     Status
                   </Heading>
                   <Spacer size={0.5} />
@@ -676,7 +684,7 @@ function ResourceDetail({
 
               {displayTags ? (
                 <div className="resource-detail-side-section">
-                  <Heading level={3} appearance="utrecht-heading-4">
+                  <Heading level={hSub} appearance="utrecht-heading-4">
                     Tags
                   </Heading>
 
@@ -721,7 +729,7 @@ function ResourceDetail({
                   <Spacer size={2} />
                   <div className="document-download-container">
                     {!!documentsTitle && (
-                      <Heading level={2} appearance="utrecht-heading-4">
+                      <Heading level={hSection} appearance="utrecht-heading-4">
                         {documentsTitle}
                       </Heading>
                     )}

@@ -4,7 +4,6 @@ import '@utrecht/component-library-css';
 import {
   Heading,
   Heading3,
-  Heading5,
   Paragraph,
   Strong,
 } from '@utrecht/component-library-react';
@@ -28,6 +27,7 @@ type Props = {
   budgetRemainingTitle?: string;
   typeIsPerTag?: boolean;
   tagCounter?: Array<TagType>;
+  headingLevel?: 2 | 3 | 4 | 5 | 6;
 };
 
 export const BegrotenSelectedOverview = ({
@@ -44,6 +44,7 @@ export const BegrotenSelectedOverview = ({
   budgetRemainingTitle,
   typeIsPerTag = false,
   tagCounter = [],
+  headingLevel = 3,
 }: Props) => {
   let resourcesToShow = selectedResources;
 
@@ -72,9 +73,9 @@ export const BegrotenSelectedOverview = ({
             return (
               <React.Fragment key={`selected-resources-${tagName}`}>
                 <div className="tag-selected-resources-container">
-                  <Heading5>
+                  <Heading level={headingLevel} appearance="utrecht-heading-5">
                     {tagName.charAt(0).toUpperCase() + tagName.slice(1)}
-                  </Heading5>
+                  </Heading>
                   <Spacer size={1} />
                   {tagData.selectedResources.map((resource) => {
                     let defaultImage = '';

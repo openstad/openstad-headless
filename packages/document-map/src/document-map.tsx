@@ -11,7 +11,7 @@ import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { MultiSelect } from '@openstad-headless/ui/src';
+import { MultiSelect, headingLevels } from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import SelectField from '@openstad-headless/ui/src/form-elements/select';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
@@ -88,6 +88,7 @@ export type DocumentMapProps = BaseProps &
     displayResourceDescription?: string;
     displayResourceTitle?: string;
     displayResourceSummary?: string;
+    headingLevel?: number;
     infoPopupContent?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
@@ -150,6 +151,7 @@ function DocumentMap({
   displayResourceDescription = 'no',
   displayResourceTitle = 'yes',
   displayResourceSummary = 'yes',
+  headingLevel = 2,
   infoPopupContent = 'Op deze afbeelding kun je reacties plaatsen. Klik op de afbeelding om een reactie toe te voegen. Klik op een marker om de bijbehorende reacties te bekijken.',
   largeDoc = false,
   loginText = 'Inloggen om deel te nemen aan de discussie',
@@ -174,6 +176,10 @@ function DocumentMap({
   hideToggleMarkers = false,
   ...props
 }: DocumentMapProps) {
+  // ponytail: de widget staat ingebed onder de <h1> van de CMS-pagina, dus nooit
+  // zelf een h1 (WCAG 1.3.1). Redacteur kan het niveau in de admin zetten.
+  const [hTitle, hSection] = headingLevels(headingLevel);
+
   const [sort, setSort] = useState<string | undefined>(
     defaultSorting || 'createdAt_asc'
   );
@@ -1037,15 +1043,15 @@ function DocumentMap({
         <div className="resource-info-full">
           <section className="content-intro">
             {displayResourceTitle === 'yes' && resource.title ? (
-              <Heading level={1}>{resource.title}</Heading>
+              <Heading level={hTitle}>{resource.title}</Heading>
             ) : null}
             {displayResourceSummary === 'yes' && resource.summary ? (
-              <Heading
-                level={2}
-                appearance="utrecht-heading-4"
+              <Paragraph
+                className="utrecht-heading-4"
                 dangerouslySetInnerHTML={{
                   __html: resource.summary,
-                }}></Heading>
+                }}
+              />
             ) : null}
             {displayResourceDescription === 'yes' && resource.description ? (
               <Paragraph
@@ -1093,15 +1099,15 @@ function DocumentMap({
             {displayResourceInfo === 'left' && (
               <section className="content-intro">
                 {displayResourceTitle === 'yes' && resource.title ? (
-                  <Heading level={1}>{resource.title}</Heading>
+                  <Heading level={hTitle}>{resource.title}</Heading>
                 ) : null}
                 {displayResourceSummary === 'yes' && resource.summary ? (
-                  <Heading
-                    level={2}
-                    appearance="utrecht-heading-4"
+                  <Paragraph
+                    className="utrecht-heading-4"
                     dangerouslySetInnerHTML={{
                       __html: resource.summary,
-                    }}></Heading>
+                    }}
+                  />
                 ) : null}
                 {displayResourceDescription === 'yes' &&
                 resource.description ? (
@@ -1118,15 +1124,15 @@ function DocumentMap({
           <div className="content-container mobileonly">
             <section className="content-intro">
               {displayResourceTitle === 'yes' && resource.title ? (
-                <Heading level={1}>{resource.title}</Heading>
+                <Heading level={hTitle}>{resource.title}</Heading>
               ) : null}
               {displayResourceSummary === 'yes' && resource.summary ? (
-                <Heading
-                  level={2}
-                  appearance="utrecht-heading-4"
+                <Paragraph
+                  className="utrecht-heading-4"
                   dangerouslySetInnerHTML={{
                     __html: resource.summary,
-                  }}></Heading>
+                  }}
+                />
               ) : null}
               {displayResourceDescription === 'yes' && resource.description ? (
                 <Paragraph
@@ -1475,6 +1481,7 @@ function DocumentMap({
                 <Likes
                   {...props}
                   resourceId={resourceId || ''}
+                  titleHeadingLevel={hSection}
                   title={props.likeWidget?.title}
                   yesLabel={props.likeWidget?.yesLabel}
                   noLabel={props.likeWidget?.noLabel}
@@ -1515,19 +1522,19 @@ function DocumentMap({
           <section className="content-intro desktoponly">
             {displayResourceTitle === 'yes' && resource.title ? (
               <>
-                <Heading level={1} appearance="utrecht-heading-2">
+                <Heading level={hTitle} appearance="utrecht-heading-2">
                   {resource.title}
                 </Heading>
                 <Spacer size={1} />
               </>
             ) : null}
             {displayResourceSummary === 'yes' && resource.summary ? (
-              <Heading
-                level={2}
-                appearance="utrecht-heading-4"
+              <Paragraph
+                className="utrecht-heading-4"
                 dangerouslySetInnerHTML={{
                   __html: resource.summary,
-                }}></Heading>
+                }}
+              />
             ) : null}
             {displayResourceDescription === 'yes' && resource.description ? (
               <Paragraph
@@ -1610,15 +1617,15 @@ function DocumentMap({
         <div className="resource-info-full">
           <section className="content-intro">
             {displayResourceTitle === 'yes' && resource.title ? (
-              <Heading level={1}>{resource.title}</Heading>
+              <Heading level={hTitle}>{resource.title}</Heading>
             ) : null}
             {displayResourceSummary === 'yes' && resource.summary ? (
-              <Heading
-                level={2}
-                appearance="utrecht-heading-4"
+              <Paragraph
+                className="utrecht-heading-4"
                 dangerouslySetInnerHTML={{
                   __html: resource.summary,
-                }}></Heading>
+                }}
+              />
             ) : null}
             {displayResourceDescription === 'yes' && resource.description ? (
               <Paragraph

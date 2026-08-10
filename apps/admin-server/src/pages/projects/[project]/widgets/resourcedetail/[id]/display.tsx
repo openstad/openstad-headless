@@ -10,6 +10,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
@@ -54,6 +61,7 @@ const shareItems: ShareItem[] = shareOptions.map((value) => ({
 }));
 
 const formSchema = z.object({
+  headingLevel: z.coerce.number().optional(),
   displayImage: z.boolean(),
   displayImageDescription: z.boolean(),
   displayTitle: z.boolean(),
@@ -100,6 +108,7 @@ export default function WidgetResourceDetailDisplay(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
+      headingLevel: props?.headingLevel || 2,
       displayImage: undefinedToTrueOrProp(props?.displayImage),
       displayImageDescription: undefinedToTrueOrProp(
         props?.displayImageDescription
@@ -151,6 +160,34 @@ export default function WidgetResourceDetailDisplay(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="headingLevel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Kopniveau van de titel</FormLabel>
+                <Select
+                  value={String(field.value ?? 2)}
+                  onValueChange={(e) => field.onChange(Number(e))}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Kies kopniveau" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="2">Kop 2 (h2)</SelectItem>
+                    <SelectItem value="3">Kop 3 (h3)</SelectItem>
+                    <SelectItem value="4">Kop 4 (h4)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Kies zo dat de titel aansluit op de koppen eromheen. De widget
+                  produceert nooit een h1; die hoort bij de pagina zelf.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="displayImage"
