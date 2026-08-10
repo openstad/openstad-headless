@@ -3,6 +3,10 @@ const crypto = require('crypto');
 const createError = require('http-errors');
 const db = require('../../db');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const {
+  computeStatus,
+  computeExpiresAt,
+} = require('../../lib/api-token-status');
 
 const router = express.Router({ mergeParams: true });
 
@@ -21,12 +25,6 @@ function mintToken() {
   return { plaintext, tokenHash, tokenPrefix, lastFour };
 }
 
-function computeExpiresAt(months) {
-  const d = new Date();
-  d.setMonth(d.getMonth() + months);
-  return d;
-}
-
 function maskToken(apiToken) {
   return {
     id: apiToken.id,
@@ -38,6 +36,7 @@ function maskToken(apiToken) {
     expiresAt: apiToken.expiresAt,
     lastUsedAt: apiToken.lastUsedAt,
     createdAt: apiToken.createdAt,
+    status: computeStatus(apiToken),
   };
 }
 

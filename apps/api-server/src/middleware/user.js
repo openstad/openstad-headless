@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const merge = require('merge');
 const db = require('../db');
 const authSettings = require('../util/auth-settings');
+const { isExpired } = require('../lib/api-token-status');
 
 let adapters = {};
 
@@ -122,7 +123,9 @@ async function handleApiToken(req, res, next, rawToken) {
 
     const apiToken = await db.ApiToken.findOne({ where: { tokenHash } });
 
-    if (!apiToken) {
+    // Every token carries an expiry date, so a token without one is rejected
+    // just like an expired one (shared helper, fail closed).
+    if (!apiToken || isExpired(apiToken)) {
       return nextWithEmptyUser(req, res, next);
     }
 

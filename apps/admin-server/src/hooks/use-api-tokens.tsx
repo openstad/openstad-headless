@@ -1,5 +1,7 @@
 import useSWR from 'swr';
 
+export type ApiTokenStatus = 'active' | 'expired' | 'revoked';
+
 export type ApiToken = {
   id: number;
   userId: number;
@@ -11,6 +13,7 @@ export type ApiToken = {
   expiresAt: string;
   lastUsedAt: string | null;
   createdAt: string;
+  status: ApiTokenStatus;
   // Only present immediately after creation
   token?: string;
 };

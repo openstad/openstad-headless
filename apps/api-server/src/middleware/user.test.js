@@ -289,6 +289,9 @@ describe('user middleware', () => {
         id: 1,
         userId: OWNER.id,
         projectId: PROJECT_ID,
+        // Every stored token has an expiry date, so the default fixture has one
+        // too; the expiry cases below override it explicitly.
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
         lastUsedAt: null,
         update: vi.fn().mockResolvedValue(undefined),
         ...overrides,
@@ -314,6 +317,51 @@ describe('user middleware', () => {
       expect(req.apiTokenScope).toBe('reports');
       expect(next).toHaveBeenCalledWith();
       expect(errorLog).not.toHaveBeenCalled();
+    });
+
+    it('rejects an expired token without looking up its owner', async () => {
+      mockApiToken({ expiresAt: new Date(Date.now() - 60 * 1000) });
+      db.User.findOne = vi.fn();
+
+      const req = apiTokenReq();
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      expect(req.user).toEqual({ role: 'anonymous', id: null });
+      expect(req.apiTokenScope).toBeUndefined();
+      expect(db.User.findOne).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith();
+      // Rejected deliberately, not by way of a swallowed exception.
+      expect(errorLog).not.toHaveBeenCalled();
+    });
+
+    it('accepts a token whose expiry is still ahead', async () => {
+      mockApiToken({ expiresAt: new Date(Date.now() + 60 * 1000) });
+      db.User.findOne = vi.fn().mockResolvedValue(OWNER);
+
+      const req = apiTokenReq();
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      expect(req.user).toBe(OWNER);
+      expect(next).toHaveBeenCalledWith();
+    });
+
+    it('rejects a token without an expiry date (fail closed)', async () => {
+      mockApiToken({ expiresAt: null });
+      db.User.findOne = vi.fn();
+
+      const req = apiTokenReq();
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      expect(req.user).toEqual({ role: 'anonymous', id: null });
+      expect(req.apiTokenScope).toBeUndefined();
+      expect(db.User.findOne).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith();
     });
 
     it.each([

@@ -105,6 +105,7 @@ describe('api-token routes', () => {
       expect(values.name).toBe('Reporting');
       expect(values.expiresAt).toBeInstanceOf(Date);
       expect(values.expiresAt.getTime()).toBeGreaterThan(before.getTime());
+      expect(res.body.status).toBe('active');
     });
 
     it.each([
@@ -251,9 +252,10 @@ describe('api-token routes', () => {
           tokenHash: 'should-never-be-exposed',
           tokenPrefix: 'osr_abcd',
           lastFour: 'wxyz',
-          expiresAt: new Date('2026-09-26T12:00:00Z'),
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000),
           lastUsedAt: new Date('2026-06-26T12:00:00Z'),
           createdAt: new Date('2026-06-01T12:00:00Z'),
+          deletedAt: null,
         },
       ]);
 
@@ -268,10 +270,35 @@ describe('api-token routes', () => {
         name: 'Reporting',
         tokenPrefix: 'osr_abcd',
         lastFour: 'wxyz',
-        expiresAt: '2026-09-26T12:00:00.000Z',
+        expiresAt: expect.any(String),
         lastUsedAt: '2026-06-26T12:00:00.000Z',
         createdAt: '2026-06-01T12:00:00.000Z',
+        status: 'active',
       });
+    });
+
+    // Only 'active' and 'expired' are reachable here: the model is paranoid and
+    // this query does not pass `paranoid: false`, so a soft-deleted (revoked)
+    // row can never come back. computeStatus's 'revoked' branch is covered in
+    // lib/api-token-status.test.js.
+    it('computes the status of each listed token', async () => {
+      const hour = 60 * 60 * 1000;
+      db.ApiToken.findAll = vi.fn().mockResolvedValue([
+        { id: 1, expiresAt: new Date(Date.now() + hour), deletedAt: null },
+        { id: 2, expiresAt: new Date(Date.now() - hour), deletedAt: null },
+        { id: 3, expiresAt: null, deletedAt: null },
+      ]);
+
+      const res = await request(createApp()).get(BASE_URL);
+
+      expect(res.status).toBe(200);
+      // The third row has no expiry at all, which new tokens can no longer be:
+      // it fails closed to 'expired' rather than showing as valid forever.
+      expect(res.body.map((token) => token.status)).toEqual([
+        'active',
+        'expired',
+        'expired',
+      ]);
     });
 
     it('scopes the query to this user and project, newest first', async () => {
