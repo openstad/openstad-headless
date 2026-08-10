@@ -23,9 +23,9 @@ import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
-import { DATA_SCOPE_COMPONENTS } from './data-scope-catalog';
+import { DATA_SCOPE_COMPONENTS } from '../../../../lib/data-scope-catalog';
 
-// Single source of truth for labels/fields lives in data-scope-catalog.ts;
+// Single source of truth for labels/fields lives in lib/data-scope-catalog.ts;
 // the personalField keys are kept in sync with the backend catalog
 // (packages/lib/report-data-scope.js) by a parity test.
 const COMPONENTS = DATA_SCOPE_COMPONENTS;
