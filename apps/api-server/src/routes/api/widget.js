@@ -6,6 +6,7 @@ const sanitize = require('../../util/sanitize');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const getWidgetSettings = require('../widget/widget-settings');
 const createError = require('http-errors');
+const { snapshotWidgetVersion } = require('../../services/widget-version');
 router.all('*', function (req, res, next) {
   req.scope = [];
   return next();
@@ -210,23 +211,26 @@ router
     res.json(widget);
   })
 
-  // Update widget
   .put(auth.useReqUser)
   .put(rateLimiter(), async function (req, res, next) {
-    const widget = req.widget;
-    const config = { ...widget.config, ...(req.body?.config || {}) };
-    const description = req.body?.description ?? widget.description;
-    const typesToSanitize = ['rawresource', 'resourceoverview'];
-
-    if (config) {
-      // sanitize rawInput by user
+    try {
+      const widget = req.widget;
+      const config = { ...widget.config, ...(req.body?.config || {}) };
+      const description = req.body?.description ?? widget.description;
+      const typesToSanitize = ['rawresource', 'resourceoverview'];
 
       if (typesToSanitize.includes(widget.dataValues.type)) {
         widget.dataValues.config.rawInput = sanitize.content(
           widget.dataValues.config.rawInput
         );
       }
-      widget.update({ config, description }).then((result) => res.json(result));
+
+      const result = await widget.update({ config, description });
+      await snapshotWidgetVersion(result, req.user);
+
+      return res.json(result);
+    } catch (err) {
+      return next(err);
     }
   })
 
