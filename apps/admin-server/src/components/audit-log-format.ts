@@ -2,13 +2,28 @@ import {
   FIELD_LABELS,
   VALUE_LABELS,
 } from '@/components/audit-log-field-config';
+import { WIDGET_FIELD_LABELS } from '@/components/generated-widget-field-labels';
 
 export function stripHtml(str: string): string {
   return str.replace(/<[^>]*>/g, '').trim();
 }
 
-export function fieldLabel(key: string): string {
-  return FIELD_LABELS[key] || key;
+export function humanizeKey(key: string): string {
+  const spaced = key
+    .replace(/_/g, ' ')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase();
+  if (!spaced) return key;
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+}
+
+export function fieldLabel(key: string, widgetType?: string): string {
+  if (widgetType && WIDGET_FIELD_LABELS[widgetType]?.[key]) {
+    return WIDGET_FIELD_LABELS[widgetType][key];
+  }
+  return FIELD_LABELS[key] || humanizeKey(key);
 }
 
 export function formatValue(value: any): string {
