@@ -30,8 +30,6 @@ export default function WidgetResourceFormInfo(
   type FormData = z.infer<typeof formSchema>;
   const category = 'info';
 
-  // This tab feeds the shared whole-widget draft under the `info` key so the
-  // header save bar persists it together with every other tab in one request.
   const info = (props as any)[category] || {};
 
   const form = useForm<FormData>({
@@ -44,7 +42,6 @@ export default function WidgetResourceFormInfo(
     },
   });
 
-  // Push the whole info object into the draft on any change.
   useEffect(() => {
     const subscription = form.watch((values) => {
       props.onFieldChanged?.(category, values);

@@ -27,8 +27,6 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  // No unconditional "at least one" refine: an empty selection must never block
-  // saving the widget. The tag groups are configured only when the user opts in.
   extraFieldsTagGroups: z.array(
     z.object({
       type: z.string(),
@@ -80,8 +78,6 @@ export default function DocumentExtraFields(
     },
   });
 
-  // No schema passed: the schema requires at least one tag group, which would
-  // block the whole-widget save when none are selected. Fields sync via watch.
   useSyncDraftForm(form, props.onFieldChanged, { label: 'Extra velden' });
 
   return (

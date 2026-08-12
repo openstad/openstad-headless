@@ -163,8 +163,6 @@ export default function WidgetResourceDetailDisplay(
     },
   });
 
-  // Every RHF field on this tab feeds the whole-widget draft automatically,
-  // coerced + validated against the tab schema.
   useSyncDraftForm(form, props.onFieldChanged, {
     schema: formSchema,
     label: 'Weergave',

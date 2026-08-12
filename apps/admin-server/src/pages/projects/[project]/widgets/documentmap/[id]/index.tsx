@@ -41,7 +41,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
   const { widget, previewConfig, updatePreview, updateConfig, onFieldChanged } =
     useWidgetDraft<DocumentMapProps>({ projectId });
 
-  // Kept for legacy tab props; saving now flows through the header save bar.
   const tabUpdateConfig = (config: any) =>
     updateConfig({ ...widget.config, ...config });
 

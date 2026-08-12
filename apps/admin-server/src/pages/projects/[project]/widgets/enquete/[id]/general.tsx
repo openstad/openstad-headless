@@ -106,8 +106,6 @@ export default function WidgetEnqueteGeneral(
   });
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
-  // Every RHF field on this tab feeds the whole-widget draft automatically,
-  // coerced + validated against the tab schema.
   useSyncDraftForm(form, props.onFieldChanged, {
     schema: formSchema,
     label: 'Algemeen',

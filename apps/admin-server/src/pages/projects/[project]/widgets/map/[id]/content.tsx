@@ -60,7 +60,6 @@ export default function WidgetMapContent(
     },
   });
 
-  // Push the whole content object into the draft on any change.
   useEffect(() => {
     const subscription = form.watch((values) => {
       props.onFieldChanged?.(category, values);

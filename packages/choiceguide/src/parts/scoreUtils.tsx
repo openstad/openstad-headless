@@ -51,8 +51,6 @@ export const calculateScoreForItem = (
     choiceOptionsArray = [{ id: 'plane' }];
   }
 
-  // Drop undefined entries: an unconfigured widget passes choiceOption undefined,
-  // which becomes [undefined] and would crash on `option.id`.
   choiceOptionsArray = (choiceOptionsArray || []).filter(Boolean);
 
   choiceOptionsArray.forEach((option) => {

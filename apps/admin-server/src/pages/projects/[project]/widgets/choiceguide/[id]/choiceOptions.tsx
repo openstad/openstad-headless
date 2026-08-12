@@ -97,8 +97,6 @@ export default function WidgetChoiceGuideChoiceOptions(
     keyName: 'reactKey',
   });
 
-  // Push the whole choice-option list into the widget draft under the
-  // `choiceOption` category, so the header save bar persists it in one save.
   const { onFieldChanged } = props;
   useEffect(() => {
     if (!onFieldChanged) return;

@@ -35,11 +35,6 @@ import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
 
-// Radix unmounts inactive tab content, so a field's <FormMessage /> is
-// invisible while its tab isn't active. Every field below currently lives on
-// this one tab (see the JSX further down) — this map lets save() name the
-// failing field and switch to its tab instead of leaving the user with a
-// generic error and no visible indication of what to fix.
 const GENERAL_TAB = { tab: 'general', tabLabel: 'Projectinformatie' };
 const FIELD_LABELS: Record<string, string> = {
   name: 'Projectnaam',

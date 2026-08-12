@@ -175,15 +175,7 @@ export default function ProjectSettingsUsers(
   const usersDirty = usersForm.formState.isDirty;
   const anonymizeDirty = anonymizeForm.formState.isDirty;
 
-  // Both forms share one header save bar. Save whichever tab(s) actually have
-  // unsaved changes — not just the currently-visible one — so switching tabs
-  // before saving never silently drops the other tab's edits.
   const save = useCallback(async () => {
-    // Save the dirty tabs sequentially, not with Promise.all: both saves issue a
-    // PUT /project/:id that does an unlocked read-merge-write on the config, so
-    // concurrent requests read the same base config and the last write silently
-    // drops the other tab's changes. Awaiting in sequence lets the second save
-    // see the merged result of the first.
     if (usersDirty) await saveUsers();
     if (anonymizeDirty) await saveAnonymize();
   }, [usersDirty, anonymizeDirty, saveUsers, saveAnonymize]);

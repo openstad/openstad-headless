@@ -60,8 +60,6 @@ export default function WidgetChoiceGuideGeneralSettings(
     defaultValues: defaults(),
   });
 
-  // Push each field into the whole-widget draft under the `generalSettings`
-  // category, so the header save bar persists them in one save.
   const pushToDraft = useCallback(
     (name: string, value: any) =>
       props.onFieldChanged?.(`${category}.${name}`, value),

@@ -13,11 +13,6 @@ export default function WidgetAgendaItems(
   const [items, setItems] = useState<AgendaItem[]>([]);
 
   const itemsInitialized = React.useRef(false);
-  // Snapshot of `items` that is in sync with the saved config: the initial empty
-  // state and, once loaded, the values seeded from props. A push that only
-  // reproduces this snapshot is not a user edit and must not mark the widget
-  // dirty — otherwise merely mounting/switching to this tab would show a false
-  // "unsaved changes" warning.
   const syncedItemsRef = React.useRef<string>(JSON.stringify(items));
   useEffect(() => {
     if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
@@ -31,11 +26,7 @@ export default function WidgetAgendaItems(
   const { onFieldChanged } = props;
   useEffect(() => {
     if (!onFieldChanged) return;
-    // Only propagate genuine user edits to the draft; skip the mount/seed sync.
     if (JSON.stringify(items) === syncedItemsRef.current) return;
-    // Default a missing `active` to false, same as the old per-tab save handler
-    // did, now that items flow into the whole-widget draft instead of an
-    // immediate per-tab save.
     const normalizedItems = items.map((item) => ({
       ...item,
       active: item.active ?? false,

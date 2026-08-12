@@ -29,7 +29,6 @@ export default function WidgetCounter({ apiUrl }: WithApiUrlProps) {
   const { widget, previewConfig, updateConfig, onFieldChanged } =
     useWidgetDraft<CounterWidgetProps>({ projectId });
 
-  // Kept for legacy tab props; saving now flows through the header save bar.
   const tabUpdateConfig = (config: any) =>
     updateConfig({ ...widget.config, ...config });
 

@@ -24,11 +24,6 @@ export function SaveBar() {
 
   const retryRef = useRef<HTMLButtonElement>(null);
 
-  // When a save fails, the bar swaps to the error layout and the focused
-  // "Wijzigingen opslaan" button unmounts, which drops focus to document.body
-  // (WCAG 2.4.3 Focus Order). Move focus to the retry button on the transition
-  // to the error state so keyboard and screen-reader users land on the
-  // actionable control instead of nowhere.
   useEffect(() => {
     if (state === 'error') {
       retryRef.current?.focus();
@@ -81,9 +76,6 @@ export function SaveBar() {
     );
   }
 
-  // Persistent save button: shown on every page that registered a save handler,
-  // regardless of whether there are unsaved changes. Pages without a save
-  // handler (e.g. list/overview pages) render nothing.
   if (!isRegistered) return null;
 
   const isSaving = state === 'saving';

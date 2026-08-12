@@ -73,8 +73,6 @@ export default function WidgetResourceFormGeneral(
 ) {
   const category = 'general';
 
-  // This tab feeds the shared whole-widget draft under the `general` key so the
-  // header save bar persists it together with every other tab in one request.
   const general = (props as any)[category] || {};
 
   const form = useForm<FormData>({
@@ -102,7 +100,6 @@ export default function WidgetResourceFormGeneral(
     },
   });
 
-  // Push the whole general object into the draft on any change.
   useEffect(() => {
     const subscription = form.watch((values) => {
       props.onFieldChanged?.(category, values);

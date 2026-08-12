@@ -54,16 +54,11 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
   const registrationRef = useRef<SaveRegistration | null>(null);
   const [isRegistered, setIsRegistered] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
-  // 'idle' means the bar just mirrors the dirty/registered state.
   const [phase, setPhase] = useState<'idle' | 'saving' | 'success' | 'error'>(
     'idle'
   );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const successTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Bumped every time a page unmounts. A save captures the token at start and
-  // ignores its own settlement if the token changed meanwhile — this prevents a
-  // save that resolves after the user navigated away from flashing a stale
-  // green/red bar on the next page.
   const registrationToken = useRef(0);
 
   const clearSuccessTimer = useCallback(() => {
@@ -77,8 +72,6 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
     (registration: SaveRegistration | null) => {
       registrationRef.current = registration;
       if (!registration) {
-        // Unmount / leaving the page: clear everything so the bar never carries
-        // a previous page's success or error into the next one.
         registrationToken.current += 1;
         setIsRegistered(false);
         setIsDirty(false);
@@ -87,11 +80,6 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
         setPhase('idle');
         return;
       }
-      // Same page re-registering (e.g. its dirty flag changed after a save):
-      // keep the current phase so a just-shown success/error is not wiped when
-      // isDirty flips to false. Exception: if the user starts editing again
-      // during the success window, drop back to the dirty state so the bar does
-      // not claim "opgeslagen" while there are unsaved changes.
       setIsRegistered(true);
       setIsDirty(!!registration.isDirty);
       if (registration.isDirty) {
@@ -115,13 +103,7 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
     registration
       .save()
       .then(() => {
-        // Ignore the result if the user navigated away mid-save.
         if (isStale()) return;
-        // An edit made while the save was in flight can leave the page dirty
-        // again after its reconcile (see useWidgetDraft's save()) — show that
-        // as still-dirty instead of falsely claiming success on it. Checking
-        // the live registration here is more robust than relying on a re-render
-        // happening to have refreshed `registration` by this point.
         if (registrationRef.current?.isDirty) {
           setIsDirty(true);
           setPhase('idle');
@@ -152,11 +134,6 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
 
   const invalidateInFlightSave = useCallback(() => {
     registrationToken.current += 1;
-    // A page switch without unmount (see useWidgetDraft's widgetId effect)
-    // doesn't go through register(null), so it wouldn't otherwise clear a
-    // leftover success/error from the OLD record. The new record's own
-    // register() call (right after, same commit) sets the correct phase from
-    // its actual isDirty state.
     setErrorMessage(null);
     clearSuccessTimer();
     setPhase('idle');
@@ -172,10 +149,6 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
     return 'neutral';
   }, [phase, isRegistered, isDirty]);
 
-  // Warn on browser close/refresh and in-app navigation whenever ANY
-  // registered page has unsaved changes — centralized here (instead of each
-  // page wiring its own) so every save-bar consumer (widgets and settings
-  // pages alike) gets the warning automatically.
   const { setSavedState, getCurrentStateRef } = useUnsavedChanges();
   useEffect(() => {
     setSavedState(false);

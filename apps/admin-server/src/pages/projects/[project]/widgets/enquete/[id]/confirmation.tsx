@@ -37,9 +37,6 @@ export default function WidgetEnqueteConfirmation(
 ) {
   type FormData = z.infer<typeof formSchema>;
 
-  // This tab used to self-save via useWidgetConfig; it now feeds the shared
-  // whole-widget draft under the `confirmation` key so the header save bar
-  // persists it together with every other tab in a single request.
   const confirmation = (props as any).confirmation || {};
 
   const form = useForm<FormData>({
@@ -52,7 +49,6 @@ export default function WidgetEnqueteConfirmation(
     },
   });
 
-  // Push the whole confirmation object into the draft on any change.
   useEffect(() => {
     const subscription = form.watch((values) => {
       props.onFieldChanged?.('confirmation', values);

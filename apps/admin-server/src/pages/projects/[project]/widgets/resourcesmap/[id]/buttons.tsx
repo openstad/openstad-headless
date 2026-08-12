@@ -51,8 +51,6 @@ export default function WidgetResourcesMapButton(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      // Required objects: fall back to a valid { show: false } so a fresh widget
-      // (no config yet) validates and stays saveable instead of failing "Required".
       countButton: props?.countButton || { show: false },
       ctaButton: props?.ctaButton || { show: false },
     },

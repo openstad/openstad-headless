@@ -37,7 +37,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
   const { widget, previewConfig, updatePreview, updateConfig, onFieldChanged } =
     useWidgetDraft<ResourceDetailWidgetProps>({ projectId });
 
-  // Kept for legacy tab props; saving now flows through the header save bar.
   const tabUpdateConfig = (config: any) =>
     updateConfig({ ...widget.config, ...config });
 

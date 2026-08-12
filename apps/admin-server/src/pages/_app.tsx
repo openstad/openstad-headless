@@ -1,5 +1,3 @@
-// Installs the global Dutch error map for zod (import for side effect only), so
-// zod's English default validation messages never surface in the Dutch admin UI.
 import '@/lib/zod-error-map';
 import '@/styles/globals.css';
 import type { AppProps } from 'next/app';

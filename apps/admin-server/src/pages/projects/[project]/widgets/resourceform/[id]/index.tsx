@@ -38,14 +38,11 @@ export default function WidgetResourceForm({ apiUrl }: WithApiUrlProps) {
 
   const [activeTab, setActiveTab] = useState('general');
 
-  // Flush any pending field debounce into the draft before the current tab
-  // unmounts, so a value typed just before switching tabs is never lost.
   const onTabChange = (value: string) => {
     flushAllFields();
     setActiveTab(value);
   };
 
-  // Kept for legacy tab props; saving now flows through the header save bar.
   const tabUpdateConfig = (config: any) =>
     updateConfig({ ...widget.config, ...config });
 

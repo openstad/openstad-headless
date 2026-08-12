@@ -33,8 +33,6 @@ export default function WidgetResourceFormSubmit(
   type FormData = z.infer<typeof formSchema>;
   const category = 'submit';
 
-  // This tab feeds the shared whole-widget draft under the `submit` key so the
-  // header save bar persists it together with every other tab in one request.
   const submit = (props as any)[category] || {};
 
   const form = useForm<FormData>({
@@ -47,7 +45,6 @@ export default function WidgetResourceFormSubmit(
     },
   });
 
-  // Push the whole submit object into the draft on any change.
   useEffect(() => {
     const subscription = form.watch((values) => {
       props.onFieldChanged?.(category, values);

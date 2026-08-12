@@ -58,9 +58,6 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref
   ) => {
     const Comp = asChild ? Slot : 'button';
-    // `asChild` renders a single child (e.g. a Slot/link), so a spinner cannot
-    // be injected without breaking the single-child contract; only decorate the
-    // plain <button> case.
     const content =
       !asChild && loading ? (
         <>

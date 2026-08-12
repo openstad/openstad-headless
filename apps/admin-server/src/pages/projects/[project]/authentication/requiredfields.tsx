@@ -187,10 +187,8 @@ export default function ProjectAuthenticationRequiredFields() {
     anonymousForm.reset(anonymousDefaults());
   }, [anonymousForm, anonymousDefaults]);
 
-  // Both forms share one header save bar.
   const [activeTab, setActiveTab] = useState('users');
 
-  // Save handler for user form - updates openstad provider
   const saveUser = useCallback(async () => {
     const valid = await userForm.trigger();
     if (!valid) {
@@ -229,7 +227,6 @@ export default function ProjectAuthenticationRequiredFields() {
     }
   }, [userForm, updateProject]);
 
-  // Save handler for anonymous form - updates anonymous provider
   const saveAnonymous = useCallback(async () => {
     const valid = await anonymousForm.trigger();
     if (!valid) {
@@ -271,17 +268,7 @@ export default function ProjectAuthenticationRequiredFields() {
   const userDirty = userForm.formState.isDirty;
   const anonymousDirty = anonymousForm.formState.isDirty;
 
-  // Save whichever tab(s) actually have unsaved changes — not just the
-  // currently-visible one — so switching tabs before saving never silently
-  // drops the other tab's edits (both forms stay mounted at this component
-  // level regardless of which TabsContent is shown, so their state is safe;
-  // only the save trigger needs to account for both).
   const save = useCallback(async () => {
-    // Save the dirty tabs sequentially, not with Promise.all: both saves issue a
-    // PUT /project/:id that does an unlocked read-merge-write on the config, so
-    // concurrent requests read the same base config and the last write silently
-    // drops the other tab's changes. Awaiting in sequence lets the second save
-    // see the merged result of the first.
     if (userDirty) await saveUser();
     if (anonymousDirty) await saveAnonymous();
   }, [userDirty, anonymousDirty, saveUser, saveAnonymous]);

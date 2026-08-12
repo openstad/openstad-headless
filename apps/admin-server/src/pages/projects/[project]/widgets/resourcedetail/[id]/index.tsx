@@ -56,7 +56,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
       'emailNotificationConsent'
     );
 
-  // Kept for legacy tab props; saving now flows through the header save bar.
   const tabUpdateConfig = (config: any) =>
     updateConfig({ ...widget.config, ...config });
 

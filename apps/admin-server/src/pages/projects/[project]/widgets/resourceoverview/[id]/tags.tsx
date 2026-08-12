@@ -55,9 +55,6 @@ const formSchema = z
     filterBehavior: z.string().optional(),
     onlyShowTheseTagIds: z.string().optional(),
   })
-  // Only require at least one tag group when tag filtering is actually enabled.
-  // With the filter off the widget must stay saveable (no false blocker on a
-  // fresh widget), and turning the filter off must clear the message.
   .superRefine((data, ctx) => {
     if (
       data.displayTagFilters &&
@@ -123,8 +120,6 @@ export default function WidgetResourceOverviewTags(
     },
   });
 
-  // Every RHF field on this tab feeds the whole-widget draft automatically,
-  // coerced + validated against the tab schema.
   useSyncDraftForm(form, props.onFieldChanged, {
     schema: formSchema,
     label: 'Tags',

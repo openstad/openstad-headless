@@ -19,14 +19,6 @@ export function useWidgetPreview<T extends { [key: string]: any }>(
   const widgetId = idOverride ?? router.query.id;
   const seededWidgetIdRef = useRef<string | undefined>(undefined);
 
-  // Seed the preview when the widget config loads, and RESEED whenever the
-  // widget id changes. Navigating between two widgets of the same type keeps
-  // this hook mounted, so a plain `if (!previewConfig)` guard would keep the
-  // previous widget's config in the draft — the dirty check would then compare
-  // against the wrong widget and a save could write widget A's config onto
-  // widget B. Keying on the widget id (not on config identity) also means a
-  // background SWR revalidation of the *same* widget never clobbers an
-  // in-progress edit.
   useEffect(() => {
     const currentId = Array.isArray(widgetId) ? widgetId[0] : widgetId;
     if (previewConfig && seededWidgetIdRef.current === currentId) return;
@@ -45,16 +37,6 @@ export function useWidgetPreview<T extends { [key: string]: any }>(
     });
   }, [widget?.config, widgetId, previewConfig, widgetSettings]);
 
-  // Accepts a value or a functional updater. The updater form lets several
-  // field pushes in the same tick compose correctly instead of clobbering each
-  // other (each receives the latest pending draft, not a stale snapshot).
-  //
-  // Memoized with a stable identity: `onFieldChanged`/`save` in useWidgetDraft
-  // depend on this, and useSyncDraftForm's effect depends on `onFieldChanged`.
-  // An unstable identity here made that effect tear down on every render and
-  // its cleanup cancel the pending field debounce — silently dropping an edit
-  // if any render landed inside the 300ms window. setPreviewConfig is stable,
-  // so an empty dep list is correct.
   const updatePreview = useCallback(
     (config: T | ((prev: T | undefined) => T)) => {
       setPreviewConfig(config as any);

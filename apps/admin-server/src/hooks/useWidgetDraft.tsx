@@ -15,7 +15,6 @@ import { useWidgetConfig } from './use-widget-config';
 import { flushAllFields, registerFieldFlusher } from './useFieldDebounce';
 import { useWidgetPreview } from './useWidgetPreview';
 
-// Minimal structural type for a zod schema so we don't couple to a zod version.
 type DraftSchema = {
   safeParse: (value: any) => {
     success: boolean;
@@ -24,18 +23,6 @@ type DraftSchema = {
   };
 };
 
-// Save-time validators of the tabs the user has VISITED, keyed by tab label.
-// Each returns ok=false with a message when its form fails validation, so a save
-// can be blocked and the bar can point the user at the offending tab.
-//
-// A validator persists after its tab unmounts (Radix unmounts inactive tabs):
-// on unmount the live validator is replaced by a frozen snapshot of the tab's
-// last form values, so a tab edited into an invalid state still blocks the save
-// after the user switches away — otherwise the invalid value stays in the draft
-// with no validator left to catch it. Re-mounting the tab replaces the snapshot
-// with a fresh live validator. The whole registry is cleared per-widget (see
-// clearDraftValidators) so a stale validator never leaks to another widget.
-// Never-opened tabs register nothing and keep their already-saved values.
 type DraftValidator = () => { ok: boolean; label?: string; message?: string };
 const draftValidators = new Map<string, DraftValidator>();
 
@@ -57,8 +44,6 @@ function runDraftValidators(): { ok: boolean; message?: string } {
   return { ok: true };
 }
 
-// Stable per-instance key for schema-backed tabs that do not pass a label
-// (they cannot persist across unmount, but still need a unique registry slot).
 let draftValidatorSeq = 0;
 
 /**
@@ -78,11 +63,6 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
 ) {
   const schema = options?.schema;
   const label = options?.label;
-  // Some call sites pass `formSchema.omit(...)` computed inline in the render
-  // body, so `schema` gets a new identity on every render. Read it through a
-  // ref (updated every render, like onChangedRef below) instead of depending
-  // on its identity directly, so those renders don't tear down and rebuild
-  // the subscription/debounce below on every keystroke.
   const hasSchema = !!schema;
   const schemaRef = useRef(schema);
   schemaRef.current = schema;
@@ -91,15 +71,8 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
   onChangedRef.current = onFieldChanged;
   const latestRef = useRef<any>(form.getValues());
   const pendingRef = useRef<Set<string>>(new Set());
-  // Whether the user actually edited a field in this tab during its current
-  // mount. Only edited tabs freeze a blocking snapshot on unmount (below): a
-  // merely-visited tab whose saved config is already invalid must not keep
-  // blocking every save for the whole widget after it unmounts.
   const wasEditedRef = useRef(false);
 
-  // Stable registry key for this tab: the label identifies the tab across
-  // unmount/remount (so a remount replaces its own snapshot); labelless tabs
-  // get a unique per-instance key and simply drop their validator on unmount.
   const validatorKeyRef = useRef<string | undefined>(undefined);
   if (validatorKeyRef.current === undefined) {
     validatorKeyRef.current = label
@@ -151,25 +124,15 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
       return { ok: false, label, message: firstMessage || 'ongeldige waarde.' };
     };
     if (schemaRef.current) {
-      // Live validator: reads the form at save time so it always reflects the
-      // current input while this tab is mounted.
       draftValidators.set(key, () => validateValues(form.getValues()));
     }
 
     return () => {
       subscription.unsubscribe();
-      // Commit (do NOT cancel) any value still inside its debounce window so a
-      // field edited just before switching tabs reaches the draft instead of
-      // being dropped.
       flush.flush();
       unregisterFlush();
       if (schemaRef.current) {
         if (label && wasEditedRef.current) {
-          // Freeze the last form state only for a tab the user actually edited,
-          // so it keeps blocking an invalid save after it unmounts; a remount
-          // replaces this snapshot. A merely-visited (or never-opened) tab drops
-          // its validator instead, so already-invalid saved config no longer
-          // blocks saving the rest of the widget.
           const snapshot = form.getValues();
           draftValidators.set(key, () => validateValues(snapshot));
         } else {
@@ -181,8 +144,6 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
   }, [form, flush, onFieldChanged, hasSchema, label]);
 }
 
-// Keys that only exist on the live preview config and must never be persisted
-// or counted when deciding whether the draft differs from the saved config.
 const PREVIEW_ONLY_KEYS = ['widgetId', 'showAdminHiddenPolygonStyling'];
 
 function stripPreviewOnly<T extends { [key: string]: any }>(
@@ -193,7 +154,6 @@ function stripPreviewOnly<T extends { [key: string]: any }>(
   const skip = [...PREVIEW_ONLY_KEYS, ...extraKeys];
   const clone: any = { ...config };
   skip.forEach((key) => delete clone[key]);
-  // login/logout urls are injected by the preview and stripped on save too.
   if (clone.login?.url) {
     clone.login = { ...clone.login };
     delete clone.login.url;
@@ -205,10 +165,6 @@ function stripPreviewOnly<T extends { [key: string]: any }>(
   return clone;
 }
 
-// Drop `undefined` values and normalize Dates so the dirty diff matches what the
-// server actually stores (JSON.stringify strips `undefined` from the PUT body,
-// and lodash.isEqual({k: undefined}, {}) is false — that mismatch would keep the
-// bar dirty forever after a successful save).
 function normalize(value: any): any {
   try {
     return JSON.parse(JSON.stringify(value ?? {}));
@@ -249,13 +205,6 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
   const widgetSettingsRef = useRef(widgetSettings);
   widgetSettingsRef.current = widgetSettings;
 
-  // `_app.tsx` renders `<Component {...pageProps} />` without a `key`, so a
-  // widget id change on the same dynamic route (e.g. a browser history jump
-  // between two widgets of the same type) does NOT remount this hook. Detect
-  // that during render (not in an effect: child tab effects run before this
-  // parent effect, so an effect-based clear would wipe the validators the new
-  // tabs just registered) and drop every visited-tab validator from the OLD
-  // widget so its frozen snapshot can never block saving the new one.
   const routerWidgetId = useRouter().query.id;
   const widgetId = Array.isArray(routerWidgetId)
     ? routerWidgetId[0]
@@ -266,19 +215,12 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
     lastWidgetIdRef.current = widgetId;
   }
 
-  // Also drop everything on unmount (navigating away from the widget entirely).
   useEffect(() => clearDraftValidators, []);
 
-  // A save started for the OLD widget id must not be able to flash
-  // success/blocked on the new one once it resolves. `register(null)` only
-  // bumps the staleness token on unmount, and switching widget id here does
-  // not unmount, so invalidate explicitly on every id change.
   useEffect(() => {
     invalidateInFlightSave();
   }, [widgetId, invalidateInFlightSave]);
 
-  // Always hold the freshest draft so save() reads flushed values, not a stale
-  // closure from when it was registered.
   const previewRef = useRef(previewConfig);
   previewRef.current = previewConfig;
 
@@ -292,13 +234,8 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
     );
   }, [previewConfig, savedConfig, widgetSettingsKeys]);
 
-  // Write a field into the draft by path so dotted names nest correctly instead
-  // of creating a literal "a.b" key that would be persisted as garbage.
   const onFieldChanged = useCallback(
     (key: string, value: any) => {
-      // Functional update so multiple field pushes in the same tick (e.g. the
-      // coalescing flush pushing every changed field) compose instead of each
-      // one clobbering the previous from a stale snapshot.
       updatePreview((prev) => {
         if (!prev) return prev as any;
         if (typeof key === 'string' && key.includes('.')) {
@@ -313,12 +250,9 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
   );
 
   const save = useCallback(async () => {
-    // Commit any value still inside its debounce window before saving.
     flushAllFields();
-    // Let React apply the setState triggered by the flush so previewRef is fresh.
     await new Promise((resolve) => setTimeout(resolve, 0));
 
-    // Block the save if a mounted tab has an invalid field.
     const validation = runDraftValidators();
     if (!validation.ok) {
       throw new Error(
@@ -327,7 +261,6 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
     }
 
     const draft = stripPreviewOnly(previewRef.current, widgetSettingsKeys);
-    // Silent: the header save bar renders the success/error state itself.
     const saved = await updateConfig(draft as any, { silent: true });
     if (!saved) {
       throw new Error(
@@ -335,10 +268,6 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
       );
     }
 
-    // Reconcile from what the server actually stored, so isDirty reliably
-    // clears after a save. Functional updater: a field changed WHILE the PUT
-    // was in flight (after `draft` was captured above) must survive, or the
-    // input still shows the typed value while the bar falsely reports "saved".
     updatePreview((prevPreview) => {
       const base: any = {
         ...(saved.config as any),
@@ -347,11 +276,6 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
         showAdminHiddenPolygonStyling: true,
       };
       if (!prevPreview) return base as T;
-      // Compare like-for-like: strip prevPreview the same way `draft` already
-      // is, so preview-only bookkeeping (widgetId, showAdminHiddenPolygonStyling)
-      // and the preview-injected login/logout url never look like "in-flight
-      // edits" just because of that asymmetry — only genuinely changed keys
-      // fall through to the override below.
       const strippedPrevPreview = stripPreviewOnly(
         prevPreview,
         widgetSettingsKeys

@@ -93,9 +93,6 @@ export default function WidgetResourcesMapButton(
       data: { id: string; name: string }[];
     }) ?? [];
 
-  // The URL is edited in a separate `customPolygonUrl` map keyed by id; merge it
-  // into each polygon's `url` (as the legacy onSubmit did) and push the whole
-  // `customPolygon` array into the draft so every edit reaches the save bar.
   const onFieldChangedRef = useRef(props.onFieldChanged);
   onFieldChangedRef.current = props.onFieldChanged;
   const syncPolygons = () => {

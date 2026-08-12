@@ -47,8 +47,6 @@ export default function ArgumentsConfirmation(
     },
   });
 
-  // These are flat top-level config keys (not a nested sub-object), so every
-  // field feeds the whole-widget draft directly under its own name.
   useSyncDraftForm(form, props.onFieldChanged, {
     schema: formSchema,
     label: 'Bevestiging',

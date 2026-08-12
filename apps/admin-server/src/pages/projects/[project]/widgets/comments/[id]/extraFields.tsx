@@ -27,8 +27,6 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  // No unconditional "at least one" refine: an empty selection must never block
-  // saving the widget. The tag groups are configured only when the user opts in.
   extraFieldsTagGroups: z.array(
     z.object({
       type: z.string(),
@@ -80,9 +78,6 @@ export default function ArgumentsExtraFields(
     },
   });
 
-  // No schema is passed on purpose: the extraFieldsTagGroups refine requires at
-  // least one group, but an empty selection is a valid/common state, so wiring
-  // it as a save-time validator would wrongly block the whole-widget save.
   useSyncDraftForm(form, props.onFieldChanged);
 
   return (

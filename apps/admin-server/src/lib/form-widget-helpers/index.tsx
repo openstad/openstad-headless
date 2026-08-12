@@ -7,9 +7,6 @@ export function YesNoSelect(
   field: ControllerRenderProps<any, any>,
   props: { onFieldChanged?: (key: string, value: any) => void }
 ) {
-  // Init value. Only seed the react-hook-form field; do NOT push to the draft on
-  // mount — that would mark a widget dirty merely by opening the tab (false
-  // dirty). A real user toggle below still feeds the draft via onFieldChanged.
   useEffect(() => {
     if (field.value === undefined || field.value === null) {
       field.onChange(false);

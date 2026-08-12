@@ -138,8 +138,6 @@ export default function WidgetResourceOverviewDisplay(
     },
   });
 
-  // Every RHF field on this tab feeds the whole-widget draft automatically,
-  // coerced + validated against the tab schema.
   useSyncDraftForm(form, props.onFieldChanged, {
     schema: formSchema,
     label: 'Weergave',
@@ -169,11 +167,6 @@ export default function WidgetResourceOverviewDisplay(
       setGroupedNames(groupNames);
     }
   }, [tags]);
-
-  // When `dialogTagGroups` was never set, all groups are shown as selected by
-  // default (handled display-only in the checkbox below). We intentionally do
-  // NOT write that default into the form/draft on mount: it would falsely mark
-  // the widget dirty. The value is materialized only on the user's first toggle.
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -905,9 +898,6 @@ export default function WidgetResourceOverviewDisplay(
                                         : true
                                     }
                                     onCheckedChange={(checked: boolean) => {
-                                      // Materialize the "all selected" default on
-                                      // the first toggle so unchecking one starts
-                                      // from the full list, not an empty one.
                                       let updatedFields = Array.isArray(
                                         field.value
                                       )

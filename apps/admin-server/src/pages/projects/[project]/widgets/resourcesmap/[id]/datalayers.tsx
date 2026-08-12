@@ -80,8 +80,6 @@ export default function WidgetResourcesMapDatalayers(
         const { activeOnInit, ...rest } = layer;
         return rest;
       });
-      // Only sync when this actually changes the value; otherwise mounting the
-      // tab pushes an identical value and falsely marks the widget dirty.
       if (JSON.stringify(updatedLayers) !== JSON.stringify(current)) {
         form.setValue('datalayer', updatedLayers);
         props.onFieldChanged('datalayer', updatedLayers);

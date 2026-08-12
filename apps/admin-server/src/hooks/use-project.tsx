@@ -76,10 +76,6 @@ export function useProject(scopes?: Array<string>) {
     return await res.json();
   }
 
-  // Returns the updated project (truthy) on success and null on failure, so
-  // callers' existing `if (project) { success } else { error }` checks reflect
-  // the real outcome — the previous `{ error }` object was truthy too, which
-  // made every failed save silently show the success toast.
   async function updateProject(
     config: any,
     name?: any,

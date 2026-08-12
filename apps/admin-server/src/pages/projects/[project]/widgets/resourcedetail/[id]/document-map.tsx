@@ -58,8 +58,6 @@ export default function WidgetResourceDetailDocumentMap(
     form.reset(defaults());
   }, [form, defaults]);
 
-  // Every RHF field on this tab feeds the whole-widget draft automatically,
-  // coerced + validated against the tab schema.
   useSyncDraftForm(form, props.onFieldChanged, {
     schema: formSchema,
     label: 'Interactieve afbeelding',

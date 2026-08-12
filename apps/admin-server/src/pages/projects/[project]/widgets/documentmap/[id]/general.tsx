@@ -88,9 +88,6 @@ export default function DocumentGeneral(
     },
   });
 
-  // No zod schema here: this tab's schema declares zoom fields as
-  // `z.number()` while the inputs feed strings, so validating would
-  // wrongly block the whole-widget save. Fields still sync via watch.
   useSyncDraftForm(form, props.onFieldChanged, { label: 'Algemeen' });
 
   useEffect(() => {

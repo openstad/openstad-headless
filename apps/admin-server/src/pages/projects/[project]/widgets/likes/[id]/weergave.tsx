@@ -77,8 +77,6 @@ export default function LikesDisplay({
   const form = useForm<FinalSchemaInfer>({
     resolver: zodResolver<any>(finalSchema),
     defaultValues: {
-      // Config stores resourceId as null when unset; z.string().optional() rejects
-      // null (only undefined), which would block the whole-widget save. Coerce to ''.
       resourceId: props?.resourceId || '',
       title: props?.title || '',
       variant: props?.variant || 'medium',
@@ -92,8 +90,6 @@ export default function LikesDisplay({
     },
   });
 
-  // Every RHF field on this tab feeds the whole-widget draft automatically,
-  // coerced + validated against the (possibly omitted) tab schema.
   useSyncDraftForm(form, props.onFieldChanged, {
     schema: finalSchema,
     label: 'Weergave',

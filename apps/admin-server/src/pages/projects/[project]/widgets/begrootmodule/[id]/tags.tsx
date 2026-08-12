@@ -87,9 +87,6 @@ export default function WidgetStemBegrootOverviewTags(
     },
   });
 
-  // Feed every RHF field on this tab into the whole-widget draft. No schema is
-  // passed: begrootmodule does not enforce a required tag group, so this tab
-  // never blocks the whole-widget save.
   useSyncDraftForm(form, props.onFieldChanged);
 
   return (

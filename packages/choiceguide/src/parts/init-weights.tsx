@@ -9,10 +9,6 @@ export const InitializeWeights = (
 ) => {
   let weights: WeightOverview = {};
 
-  // Guard against missing config: a choiceguide without choiceOptions/items
-  // (e.g. a freshly created widget, or one that simply doesn't use scoring) must
-  // not crash the render. Previously `choiceOptions.length` and `items.forEach`
-  // threw "Cannot read properties of undefined" on an unconfigured widget.
   if (!Array.isArray(items)) items = [];
 
   if (choicesType === 'plane') {
