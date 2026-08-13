@@ -66,6 +66,7 @@ export const getServerSideProps = withCmsUrl;
 // e.g. "cms.openstad.nl/mijn-wijk". Falls back to a bare slug if CMS_URL is unset.
 function buildDefaultUrl(cmsUrl: string, name: string): string {
   const slug = slugify(name);
+  if (!slug) return '';
   const host = cmsUrl.replace(/^https?:\/\//, '').replace(/\/+$/, '');
   return host ? `${host}/${slug}` : slug;
 }
@@ -309,14 +310,18 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
                               field.onChange(e);
                               setShowUrl(e);
                               if (e && !form.getValues('url')) {
-                                form.setValue(
-                                  'url',
+                                const previous = data?.config?.project?.lastUrl;
+                                const nextUrl =
+                                  previous ||
                                   buildDefaultUrl(
                                     cmsUrl,
                                     form.getValues('name') || ''
-                                  ),
-                                  { shouldValidate: true }
-                                );
+                                  );
+                                if (nextUrl) {
+                                  form.setValue('url', nextUrl, {
+                                    shouldValidate: true,
+                                  });
+                                }
                               }
                             }}
                             checked={field.value}>

@@ -29,4 +29,9 @@ describe('slugify', () => {
   it('keeps existing hyphens without duplicating them', () => {
     expect(slugify('Al-Bestaand')).toBe('al-bestaand');
   });
+
+  it('returns an empty string for non-latin input', () => {
+    expect(slugify('مرحبا')).toBe('');
+    expect(slugify('привет')).toBe('');
+  });
 });
