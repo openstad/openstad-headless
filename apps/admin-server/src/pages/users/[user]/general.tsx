@@ -19,6 +19,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import useAdminProjectId from '@/hooks/use-admin-project-id';
 import useUser from '@/hooks/use-user';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Switch from '@radix-ui/react-switch';
@@ -58,10 +59,11 @@ export default function CreateUserGeneral() {
   let user = data;
   if (Array.isArray(data)) user = data[0];
 
-  // Auto-add to new projects lives on the admin-project (id 1) row and is
-  // only available to users who are admin or editor of the admin panel
   const rows = Array.isArray(data) ? data : data ? [data] : [];
-  const adminProjectUser = rows.find((u: any) => u?.projectId === 1);
+  const adminProjectId = useAdminProjectId();
+  const adminProjectUser = rows.find(
+    (u: any) => u?.projectId === adminProjectId
+  );
   const canAutoAddToNewProjects =
     !!adminProjectUser && ['admin', 'editor'].includes(adminProjectUser.role);
   const [autoAddToNewProjects, setAutoAddToNewProjects] = useState(false);
@@ -345,9 +347,9 @@ export default function CreateUserGeneral() {
           <div>
             <Heading size="lg">Nieuwe projecten</Heading>
             <p className="mt-2 text-sm text-muted-foreground">
-              Voeg deze gebruiker bij het aanmaken of dupliceren van een
-              project automatisch toe als beheerder. De rechten kunnen daarna
-              per project worden aangepast of ingetrokken.
+              Voeg deze gebruiker bij het aanmaken of dupliceren van een project
+              automatisch toe als beheerder. De rechten kunnen daarna per
+              project worden aangepast of ingetrokken.
             </p>
             <label
               htmlFor="auto-add-to-new-projects"
