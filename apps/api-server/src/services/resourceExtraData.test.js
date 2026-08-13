@@ -33,6 +33,7 @@ describe('getResourceFormExtraDataConfig', () => {
     expect(getResourceFormExtraDataConfig({})).toEqual({
       fieldKeys: [],
       moderatorOnlyFieldKeys: [],
+      fieldTypesByKey: {},
     });
   });
 });
