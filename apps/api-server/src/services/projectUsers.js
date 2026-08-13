@@ -11,12 +11,26 @@ const config = require('config');
 const db = require('../db');
 const authSettings = require('../util/auth-settings');
 
-// Clone sourceUser onto project (upsert by idpUser identity) and sync the
-// resulting role to the auth server. Pass `role` to override the copied role.
-async function upsertProjectUser(sourceUser, project, role) {
+async function resolveAuthContext(project) {
+  try {
+    const authConfig = await authSettings.config({
+      project,
+      useAuth: 'default',
+    });
+    const adapter = await authSettings.adapter({ authConfig });
+    return { authConfig, adapter };
+  } catch (err) {
+    console.error(
+      'Failed to resolve auth server context for new project:',
+      err
+    );
+    return null;
+  }
+}
+
+async function upsertProjectUser(sourceUser, project, role, authContext) {
   const userData = { ...sourceUser };
   delete userData.id;
-  // the flag is a per-row setting on the admin project; never copy it along
   delete userData.autoAddToNewProjects;
   userData.projectId = project.id;
   if (role) userData.role = role;
@@ -39,37 +53,29 @@ async function upsertProjectUser(sourceUser, project, role) {
     await db.User.create(userData);
   }
 
-  // Sync user role to auth server so user_roles entry is created
-  try {
-    const authConfig = await authSettings.config({
-      project,
-      useAuth: 'default',
-    });
-    const adapter = await authSettings.adapter({ authConfig });
-    if (
-      userData.idpUser &&
-      userData.idpUser.identifier &&
-      adapter.service.updateUser
-    ) {
-      await adapter.service.updateUser({
-        authConfig,
+  if (
+    authContext &&
+    userData.idpUser &&
+    userData.idpUser.identifier &&
+    authContext.adapter?.service?.updateUser
+  ) {
+    try {
+      await authContext.adapter.service.updateUser({
+        authConfig: authContext.authConfig,
         userData: {
           id: userData.idpUser.identifier,
           role: userData.role,
         },
       });
+    } catch (err) {
+      console.error(
+        'Failed to sync user role to auth server for new project:',
+        err
+      );
     }
-  } catch (err) {
-    console.error(
-      'Failed to sync user role to auth server for new project:',
-      err
-    );
   }
 }
 
-// Give every flagged admin-project user admin rights on the new project.
-// Eligibility (admin or editor on the admin project) is enforced here at
-// grant time, not only in the UI.
 async function addAutoAdminUsers(project) {
   const adminProjectId = Number(config.admin?.projectId) || 1;
   if (project.id == adminProjectId) return;
@@ -83,10 +89,16 @@ async function addAutoAdminUsers(project) {
     raw: true,
   });
 
-  for (const sourceUser of flaggedUsers) {
-    if (!sourceUser?.idpUser?.identifier) continue;
+  const eligibleUsers = flaggedUsers.filter(
+    (sourceUser) => sourceUser?.idpUser?.identifier
+  );
+  if (!eligibleUsers.length) return;
+
+  const authContext = await resolveAuthContext(project);
+
+  for (const sourceUser of eligibleUsers) {
     try {
-      await upsertProjectUser(sourceUser, project, 'admin');
+      await upsertProjectUser(sourceUser, project, 'admin', authContext);
     } catch (err) {
       console.error(
         `Failed to auto-add user ${sourceUser.id} as admin to project ${project.id}:`,
@@ -97,6 +109,7 @@ async function addAutoAdminUsers(project) {
 }
 
 module.exports = {
+  resolveAuthContext,
   upsertProjectUser,
   addAutoAdminUsers,
 };

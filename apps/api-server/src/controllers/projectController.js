@@ -718,7 +718,13 @@ async function addCurrentUserAsAdmin(req, res, next) {
   });
 
   if (sourceUser && req.user) {
-    await projectUsers.upsertProjectUser(sourceUser, project);
+    const authContext = await projectUsers.resolveAuthContext(project);
+    await projectUsers.upsertProjectUser(
+      sourceUser,
+      project,
+      undefined,
+      authContext
+    );
   }
 
   return next();

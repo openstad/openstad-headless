@@ -1,5 +1,5 @@
-import { Op } from 'sequelize';
 import { createRequire } from 'module';
+import { Op } from 'sequelize';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // Use createRequire so we get the same CJS module.exports reference (the db
@@ -149,13 +149,44 @@ describe('addAutoAdminUsers', () => {
     await projectUsers.addAutoAdminUsers(project);
 
     expect(db.User.create).toHaveBeenCalledTimes(2);
+    expect(authSettings.config).toHaveBeenCalledTimes(1);
+    expect(authSettings.adapter).toHaveBeenCalledTimes(1);
     consoleError.mockRestore();
   });
 });
 
 describe('upsertProjectUser', () => {
-  it('copies the source role when no override is given', async () => {
-    stubAuth();
+  it('copies the source role and syncs it with the given auth context', async () => {
+    db.User.findOne = vi.fn().mockResolvedValue(null);
+    db.User.create = vi.fn().mockResolvedValue({});
+
+    const authContext = {
+      authConfig: { provider: 'openstad' },
+      adapter: { service: { updateUser: updateUserOnAuthServer } },
+    };
+
+    await projectUsers.upsertProjectUser(
+      {
+        id: 3,
+        projectId: 2,
+        role: 'editor',
+        idpUser: { identifier: 'idp-3', provider: 'openstad' },
+      },
+      { id: 9 },
+      undefined,
+      authContext
+    );
+
+    const created = db.User.create.mock.calls[0][0];
+    expect(created.role).toBe('editor');
+    expect(created.projectId).toBe(9);
+    expect(updateUserOnAuthServer).toHaveBeenCalledWith({
+      authConfig: { provider: 'openstad' },
+      userData: { id: 'idp-3', role: 'editor' },
+    });
+  });
+
+  it('does not sync to the auth server without an auth context', async () => {
     db.User.findOne = vi.fn().mockResolvedValue(null);
     db.User.create = vi.fn().mockResolvedValue({});
 
@@ -169,8 +200,7 @@ describe('upsertProjectUser', () => {
       { id: 9 }
     );
 
-    const created = db.User.create.mock.calls[0][0];
-    expect(created.role).toBe('editor');
-    expect(created.projectId).toBe(9);
+    expect(db.User.create).toHaveBeenCalledTimes(1);
+    expect(updateUserOnAuthServer).not.toHaveBeenCalled();
   });
 });
