@@ -31,6 +31,27 @@ export default function useTemplates() {
     return template;
   }
 
+  async function createTemplateFromProject(
+    name: string,
+    sourceProjectId: number | string
+  ) {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, sourceProjectId }),
+    });
+
+    if (!res.ok) {
+      throw new Error('Kon de template niet opslaan');
+    }
+
+    const template = await res.json();
+    templatesSwr.mutate();
+    return template;
+  }
+
   async function renameTemplate(id: number, name: string) {
     const res = await fetch(`${url}/${id}`, {
       method: 'PUT',
@@ -64,5 +85,11 @@ export default function useTemplates() {
     templatesSwr.mutate();
   }
 
-  return { ...templatesSwr, createTemplate, renameTemplate, removeTemplate };
+  return {
+    ...templatesSwr,
+    createTemplate,
+    createTemplateFromProject,
+    renameTemplate,
+    removeTemplate,
+  };
 }

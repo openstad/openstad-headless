@@ -11,7 +11,6 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useTemplates from '@/hooks/use-template';
-import { collectDuplicationPayload } from '@/lib/collect-duplication-payload';
 import { HasAccess } from '@/lib/hasAccess';
 import { Check, ChevronRight, LayoutTemplate, Plus } from 'lucide-react';
 import Link from 'next/link';
@@ -110,7 +109,7 @@ export default function Projects() {
   const displayData = sortedData ?? filteredData;
 
   const sessionData = useContext(SessionContext);
-  const { createTemplate } = useTemplates();
+  const { createTemplateFromProject } = useTemplates();
 
   const [templateSource, setTemplateSource] = useState<any>(null);
   const [templateName, setTemplateName] = useState('');
@@ -120,8 +119,7 @@ export default function Projects() {
     if (!templateSource || !templateName.trim()) return;
     setTemplateSaving(true);
     try {
-      const payload = await collectDuplicationPayload(templateSource.id);
-      await createTemplate(templateName.trim(), payload);
+      await createTemplateFromProject(templateName.trim(), templateSource.id);
       toast.success('Template opgeslagen.');
       setTemplateSource(null);
     } catch (error) {
