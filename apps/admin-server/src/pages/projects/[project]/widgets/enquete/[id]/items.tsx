@@ -72,6 +72,7 @@ const formSchema = z.object({
   feedbackCorrect: z.string().optional(),
   feedbackIncorrect: z.string().optional(),
   scaleFeedback: z.array(z.string()).optional(),
+  instantFeedback: z.boolean().optional(),
   fieldKey: z.string(),
   minCharacters: z.string().optional(),
   maxCharacters: z.string().optional(),
@@ -372,6 +373,7 @@ export default function WidgetEnqueteItems(
             feedbackCorrect: values.feedbackCorrect || '',
             feedbackIncorrect: values.feedbackIncorrect || '',
             scaleFeedback: values.scaleFeedback || [],
+            instantFeedback: values.instantFeedback || false,
             minCharacters: values.minCharacters,
             maxCharacters: values.maxCharacters,
             nextPageText: values.nextPageText || '',
@@ -563,6 +565,7 @@ export default function WidgetEnqueteItems(
     feedbackCorrect: '',
     feedbackIncorrect: '',
     scaleFeedback: [],
+    instantFeedback: false,
     fieldKey: '',
     minCharacters: '',
     maxCharacters: '',
@@ -666,6 +669,7 @@ export default function WidgetEnqueteItems(
       feedbackCorrect: item.feedbackCorrect || '',
       feedbackIncorrect: item.feedbackIncorrect || '',
       scaleFeedback: item.scaleFeedback || [],
+      instantFeedback: item.instantFeedback || false,
       minCharacters: item.minCharacters || '',
       maxCharacters: item.maxCharacters || '',
       nextPageText: item.nextPageText || '',
@@ -3068,6 +3072,42 @@ export default function WidgetEnqueteItems(
                             een toelichting bij komt.
                           </FormDescription>
                         </FormItem>
+                      )}
+
+                    {props.isQuiz &&
+                      form.watch('questionType') === 'multiplechoice' &&
+                      (form.watch('options') || []).some(
+                        (option: any) => option?.titles?.[0]?.isCorrect === true
+                      ) && (
+                        <FormField
+                          control={form.control}
+                          name="instantFeedback"
+                          render={({ field }) => (
+                            <>
+                              <FormItem
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'flex-start',
+                                  flexDirection: 'row',
+                                  marginTop: '10px',
+                                }}>
+                                {YesNoSelect(field, props)}
+                                <FormLabel
+                                  style={{ marginTop: 0, marginLeft: '6px' }}>
+                                  Antwoord direct tonen (zonder bevestigen)
+                                </FormLabel>
+                                <FormMessage />
+                              </FormItem>
+                              <FormDescription>
+                                Wanneer aan, ziet de bezoeker meteen bij het
+                                aanklikken van een antwoord wat goed en fout
+                                was, zonder eerst te hoeven bevestigen. Staat
+                                standaard uit.
+                              </FormDescription>
+                            </>
+                          )}
+                        />
                       )}
 
                     {props.isQuiz &&

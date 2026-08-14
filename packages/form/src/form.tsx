@@ -357,6 +357,19 @@ function Form({
       setTouchedFields((prev) =>
         prev[name] ? prev : { ...prev, [name]: true }
       );
+
+      const changedField = fields.find((f: any) => f.fieldKey === name);
+      if (
+        changedField &&
+        isInstant(changedField) &&
+        value !== undefined &&
+        value !== null &&
+        value !== ''
+      ) {
+        setConfirmedFields((prev) =>
+          prev[name] ? prev : { ...prev, [name]: true }
+        );
+      }
     }
 
     if (triggerSetLastKey !== false) {
@@ -470,6 +483,9 @@ function Form({
     isGraded(field) || (!!field.feedbackMode && field.feedbackMode !== 'none');
 
   const needsConfirm = (field: any): boolean => isGraded(field);
+
+  const isInstant = (field: any): boolean =>
+    field?.type === 'radiobox' && isGraded(field) && !!field.instantFeedback;
 
   const meetsMinChoices = (field: any): boolean => {
     const min = parseInt(String(field.minChoices ?? ''), 10);
@@ -634,30 +650,33 @@ function Form({
                     </span>
                   )}
                 </FormFieldErrorMessage>
-                {needsConfirm(field) && field.fieldKey && !confirmed && (
-                  <div className="question-confirm">
-                    <Button
-                      type="button"
-                      appearance="secondary-action-button"
-                      className="osc-confirm-answer-button"
-                      disabled={
-                        !isFieldAnswered(field) || !meetsMinChoices(field)
-                      }
-                      onClick={() => {
-                        setConfirmedFields((prev) => ({
-                          ...prev,
-                          [field.fieldKey as string]: true,
-                        }));
-                        setFormErrors((prev) => {
-                          const next = { ...prev };
-                          delete next[field.fieldKey as string];
-                          return next;
-                        });
-                      }}>
-                      Bevestig antwoord
-                    </Button>
-                  </div>
-                )}
+                {needsConfirm(field) &&
+                  !isInstant(field) &&
+                  field.fieldKey &&
+                  !confirmed && (
+                    <div className="question-confirm">
+                      <Button
+                        type="button"
+                        appearance="secondary-action-button"
+                        className="osc-confirm-answer-button"
+                        disabled={
+                          !isFieldAnswered(field) || !meetsMinChoices(field)
+                        }
+                        onClick={() => {
+                          setConfirmedFields((prev) => ({
+                            ...prev,
+                            [field.fieldKey as string]: true,
+                          }));
+                          setFormErrors((prev) => {
+                            const next = { ...prev };
+                            delete next[field.fieldKey as string];
+                            return next;
+                          });
+                        }}>
+                        Bevestig antwoord
+                      </Button>
+                    </div>
+                  )}
                 {hasFeedback(field) &&
                   field.fieldKey &&
                   (needsConfirm(field)
