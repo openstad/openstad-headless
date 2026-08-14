@@ -388,8 +388,11 @@ ul.osc-choices {
   transition: grid-template-rows 0.2s linear;
 }
 
+/* ponytail: was grid-template-rows: 0fr. Die truc klapte hier niets in — live
+   gemeten bleef de rij op 610px staan, ook met !important. display:none werkt
+   wel, en houdt de verborgen knoppen meteen buiten de tabvolgorde. */
 .expand-container[aria-hidden='true'] {
-  grid-template-rows: 0fr;
+  display: none;
 }
 .expand-container[aria-hidden='false'] {
   grid-template-rows: 1fr;

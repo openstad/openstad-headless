@@ -18,6 +18,16 @@ describe('choiceguide maatvoering', () => {
     expect(zonderFallback).toBeNull();
   });
 
+  // De 0fr-truc klapte het paneel live niet in: de rij bleef op de
+  // contenthoogte staan, ook met !important. Zonder inklappen blijft het paneel
+  // bij 200% zoom over de pagina liggen.
+  it('klapt het paneel echt in als het dicht staat', () => {
+    const dicht = css.match(
+      /\.expand-container\[aria-hidden='true'\]\s*\{[^}]*\}/
+    );
+    expect(dicht?.[0]).toMatch(/display:\s*none/);
+  });
+
   it('heeft de defaults nog in :root staan als bron van waarheid', () => {
     expect(css).toMatch(/--choiceguide-base-size:\s*180px/);
     expect(css).toMatch(/--choiceguide-half-base-size:\s*90px/);

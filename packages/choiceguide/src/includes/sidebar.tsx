@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { calculateScoreForItem } from '../parts/scoreUtils';
 import { ChoiceGuideSidebarProps, ChoiceOptions, Score } from '../props';
@@ -6,7 +6,6 @@ import ChoiceItem from './sidebarItem';
 
 const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
   const [score, setScore] = useState<Score>({ x: 50, y: 50, z: 0 });
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // Calculate score for this item
   useEffect(() => {
@@ -21,22 +20,12 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
     setScore(itemScore);
   }, [props.choiceOptions, props.answers, props.weights]);
 
-  useEffect(() => {
-    // ponytail: containerRef hing nergens aan, dus dit blok liep nooit en de
-    // variabelen bleven leeg. Guard op > 0, want een breedte van 0 tijdens de
-    // eerste render zou het keuzevlak juist laten verdwijnen.
-    const baseSize = containerRef.current?.clientWidth ?? 0;
-    if (baseSize > 0) {
-      document.documentElement.style.setProperty(
-        '--choiceguide-base-size',
-        `${baseSize}px`
-      );
-      document.documentElement.style.setProperty(
-        '--choiceguide-half-base-size',
-        `${baseSize / 2}px`
-      );
-    }
-  }, [props.widgetId]);
+  // ponytail: hier stond een effect dat --choiceguide-base-size op de
+  // containerbreedte zette. Het hing aan een ref die nergens aan vastzat, dus
+  // het liep nooit; toen die ref wél was aangehangen bleek het schadelijk — het
+  // keuzevlak is vierkant, dus een breedte van 610px gaf ook 610px hoogte en
+  // een schermvullend paneel (GTT-33.F10). De defaults staan gewoon in de CSS
+  // (.openstad { --choiceguide-base-size: 180px }), dus weg ermee.
 
   useEffect(() => {
     document.documentElement.style.setProperty(
@@ -57,7 +46,6 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
 
   return (
     <div
-      ref={containerRef}
       className="osc-choices-container"
       role="status"
       id={`osc-choice-container-${props.widgetId || ''}`}>
