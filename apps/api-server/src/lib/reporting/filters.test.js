@@ -94,6 +94,74 @@ describe('buildReportingWhere', () => {
     expect(err.param).toBe('dateFrom');
   });
 
+  // new Date() accepts all of these, silently querying a window the client
+  // never asked for instead of returning the documented 400.
+  it.each([
+    ['01/02/2026', 'not ISO-8601, and read in the server timezone'],
+    ['Jan 5 2026', 'not ISO-8601'],
+    ['2026', 'year only'],
+    ['2026-01-01T12:00:00', 'no zone, so server-local'],
+    ['2026-02-31', 'impossible day, rolls into March'],
+    ['2026-02-30T00:00:00Z', 'impossible day with a zone'],
+    ['2026-01-01T24:00:00Z', 'hour out of range'],
+    ['2026-01-01T00:60:00Z', 'minute out of range'],
+    [' 2026-01-01', 'leading whitespace'],
+    ['2026-1-1', 'unpadded components'],
+  ])('rejects %s (%s)', (value) => {
+    let err;
+    try {
+      buildReportingWhere(req({ dateFrom: value }), 'resources', {
+        fieldTypes: TYPES_WITH_STATUS,
+      });
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(ReportingFilterError);
+    expect(err.code).toBe('invalid_date');
+    expect(err.param).toBe('dateFrom');
+  });
+
+  it('rejects a non-string date param without echoing a coerced value', () => {
+    let err;
+    try {
+      buildReportingWhere(
+        req({ dateFrom: ['2026-01-01', '2026-02-01'] }),
+        'resources',
+        { fieldTypes: TYPES_WITH_STATUS }
+      );
+    } catch (e) {
+      err = e;
+    }
+    expect(err).toBeInstanceOf(ReportingFilterError);
+    expect(err.code).toBe('invalid_date');
+  });
+
+  it.each([['2026-02-29'], ['2025-02-29']])(
+    'rejects %s: Feb 29 in a non-leap year',
+    (value) => {
+      expect(() =>
+        buildReportingWhere(req({ dateFrom: value }), 'resources', {
+          fieldTypes: TYPES_WITH_STATUS,
+        })
+      ).toThrow(ReportingFilterError);
+    }
+  );
+
+  it.each([
+    ['2024-02-29', '2024-02-29T00:00:00.000Z'], // leap day in a leap year
+    ['2026-12-31', '2026-12-31T00:00:00.000Z'], // December, days-in-month rollover
+    ['2026-01-01T00:00:00.500Z', '2026-01-01T00:00:00.500Z'], // milliseconds
+    ['2026-01-01T12:30Z', '2026-01-01T12:30:00.000Z'], // seconds optional
+    ['2026-01-01T01:00:00+02:00', '2025-12-31T23:00:00.000Z'], // explicit offset
+  ])('accepts %s', (value, expected) => {
+    const { where } = buildReportingWhere(
+      req({ dateFrom: value }),
+      'resources',
+      { fieldTypes: TYPES_WITH_STATUS }
+    );
+    expect(where.createdAt[Op.gte].toISOString()).toBe(expected);
+  });
+
   it('applies status only where the component has a status column', () => {
     const ok = buildReportingWhere(req({ status: 'approved' }), 'resources', {
       fieldTypes: TYPES_WITH_STATUS,

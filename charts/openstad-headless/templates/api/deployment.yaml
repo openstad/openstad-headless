@@ -184,6 +184,17 @@ spec:
                 key: fixedAuthTokens
                 name: {{ template "openstad.api.secret.fullname" . }}
 
+          # Salt for the reporting API's pseudonymous user ids. Optional so an
+          # externally managed secret without this key can never CrashLoop the
+          # whole api container; reporting itself fails with a clear error when
+          # the value is missing.
+          - name: OPENSTAD_REPORT_PSEUDONYM_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: reportPseudonymSecret
+                name: {{ template "openstad.api.secret.fullname" . }}
+                optional: true
+
           - name: AUTH_ADAPTER_OPENSTAD_SERVERURL
             value: https://{{ template "openstad.auth.url" . }}
 
