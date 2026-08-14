@@ -74,6 +74,7 @@ export type CheckboxFieldProps = {
   selectAll?: boolean;
   selectAllLabel?: string;
   confirmed?: boolean;
+  instantFeedback?: boolean;
   optionFeedback?: Record<string, 'correct' | 'incorrect' | 'missed'>;
 };
 
@@ -102,6 +103,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
   selectAll = false,
   selectAllLabel = '',
   confirmed = false,
+  instantFeedback = false,
   optionFeedback = {},
 }) => {
   let initialValue = defaultValue || [];
@@ -195,6 +197,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
   ): void => {
     if (confirmed) return;
     const choiceValue = event.target.value;
+    if (instantFeedback && selectedChoices.includes(choiceValue)) return;
     if (event.target.checked) {
       setSelectedChoices([...selectedChoices, choiceValue]);
     } else {
@@ -337,10 +340,13 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
         )}
 
         {displayChoices?.map((choice, index) => {
-          const optionState =
-            confirmed && choice?.value
-              ? optionFeedback?.[choice.value]
-              : undefined;
+          const optionRevealed =
+            !!choice?.value &&
+            (confirmed ||
+              (instantFeedback && selectedChoices.includes(choice.value)));
+          const optionState = optionRevealed
+            ? optionFeedback?.[choice.value]
+            : undefined;
           const feedbackClass =
             optionState === 'correct'
               ? ' --feedback-correct'
@@ -372,9 +378,15 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                       onChange={(e) =>
                         handleChoiceChange(e, choice.trigger || `${index}`)
                       }
-                      aria-disabled={confirmed}
+                      aria-disabled={
+                        confirmed ||
+                        (instantFeedback &&
+                          selectedChoices.includes(choice.value))
+                      }
                       disabled={
                         disabled ||
+                        (instantFeedback &&
+                          selectedChoices.includes(choice.value)) ||
                         (maxReached && !selectedChoices.includes(choice.value))
                       }
                     />

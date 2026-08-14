@@ -381,10 +381,12 @@ function Enquete(props: EnqueteWidgetProps) {
             fieldData['feedbackText'] = item.feedbackText;
             fieldData['feedbackCorrect'] = item.feedbackCorrect;
             fieldData['feedbackIncorrect'] = item.feedbackIncorrect;
-            fieldData['instantFeedback'] =
-              item.questionType === 'multiplechoice'
-                ? item.instantFeedback || false
-                : false;
+            fieldData['instantFeedback'] = [
+              'multiplechoice',
+              'multiple',
+            ].includes(item.questionType || '')
+              ? item.instantFeedback || false
+              : false;
           }
 
           if (draftValue !== undefined) {
