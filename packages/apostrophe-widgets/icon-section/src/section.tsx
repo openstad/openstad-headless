@@ -7,7 +7,7 @@ import {
   Paragraph,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React from 'react';
+import React, { useId } from 'react';
 import { createRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
 
@@ -20,12 +20,15 @@ interface Item {
   expanded: string;
 }
 
-const renderCards = (items) => {
+const renderCards = (items, idPrefix: string) => {
   return (
     <div className="icon-section-grid">
       <ul className="container u-small-dropdowns icon-section-list" role="list">
         {items.map((item: any, index: number) => {
-          const headingId = `icon-section-heading-${index}`;
+          // ponytail: prefix per widget-instance — meerdere icon-sections op één
+          // pagina gaven anders allemaal dezelfde id's, waardoor aria-labelledby
+          // naar de kop van de eerste sectie wees (WCAG 1.3.1)
+          const headingId = `${idPrefix}-heading-${index}`;
           const isBlank =
             typeof item.target === 'undefined' || item.target !== false;
           const linkProps = item.href
@@ -78,8 +81,9 @@ const renderCards = (items) => {
 };
 
 function IconSection({ content, expandable, expandablelabel, expanded }: Item) {
+  const idPrefix = useId();
   const items = JSON.parse(content);
-  const renderedCards = renderToString(renderCards(items));
+  const renderedCards = renderToString(renderCards(items, idPrefix));
   return (
     <section className="icon-section">
       {expandable === 'true' ? (
