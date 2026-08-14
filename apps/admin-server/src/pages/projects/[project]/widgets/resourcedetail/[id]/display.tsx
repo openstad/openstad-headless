@@ -175,14 +175,19 @@ export default function WidgetResourceDetailDisplay(
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
+                    <SelectItem value="1">Kop 1 (h1)</SelectItem>
                     <SelectItem value="2">Kop 2 (h2)</SelectItem>
                     <SelectItem value="3">Kop 3 (h3)</SelectItem>
                     <SelectItem value="4">Kop 4 (h4)</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormDescription>
-                  Kies zo dat de titel aansluit op de koppen eromheen. De widget
-                  produceert nooit een h1; die hoort bij de pagina zelf.
+                  Kies zo dat de titel aansluit op de koppen eromheen. Kop 1
+                  alleen als deze widget de hoofdinhoud van de pagina is — dat
+                  is bijvoorbeeld het geval als &quot;Inzending titel gebruiken
+                  als paginatitel&quot; aanstaat. Er mag maar één h1 per pagina
+                  zijn, dus niet doen als de pagina zelf al een titelkop heeft
+                  of als er meerdere van deze widgets op één pagina staan.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

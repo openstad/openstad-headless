@@ -3,10 +3,17 @@ import { describe, expect, it } from 'vitest';
 import { headingLevels } from './heading-level';
 
 describe('headingLevels', () => {
-  it('geeft nooit een h1 terug — die hoort bij de pagina, niet bij de widget', () => {
-    expect(headingLevels(1)[0]).toBe(2);
+  it('valt terug op h2 als er niets of onzin is ingesteld', () => {
     expect(headingLevels(0)[0]).toBe(2);
     expect(headingLevels(undefined)[0]).toBe(2);
+    expect(headingLevels('')[0]).toBe(2);
+  });
+
+  // Alleen als de redacteur er expliciet om vraagt: de widget is dan zelf de
+  // hoofdinhoud van de pagina (resource-detail met de titel als paginatitel).
+  it('geeft h1 alleen als die expliciet gekozen is, en nestelt daaronder door', () => {
+    expect(headingLevels(1)).toEqual([1, 2, 3]);
+    expect(headingLevels('1')).toEqual([1, 2, 3]);
   });
 
   it('laat subkoppen aansluiten zonder een niveau over te slaan', () => {
