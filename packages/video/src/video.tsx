@@ -137,17 +137,24 @@ const VideoField: FC<VideoFieldProps> = ({
 
   return (
     <>
-      <button
-        onClick={(e) => handlePlayPause(e)}
-        className={`playPauseToggle ${playing ? '--playing' : '--paused'}`}
-        role="button"
-        tabIndex={0}>
-        <span className="sr-only">{playing ? 'Pause' : 'Play'}</span>
-        <div className="icon"></div>
-      </button>
       <div className="video-field">
         {videoId ? (
           <>
+            {/* ponytail: de knop stond búiten .video-field, dus zijn absolute
+                positie hing af van een willekeurige voorouder. Nu hoort hij bij
+                het videovlak, zodat "groot in het midden als hij gepauzeerd is"
+                ook echt het midden van de video is. */}
+            <button
+              onClick={(e) => handlePlayPause(e)}
+              className={`playPauseToggle ${
+                playing ? '--playing' : '--paused'
+              }`}
+              tabIndex={0}>
+              <span className="sr-only">
+                {playing ? 'Video pauzeren' : 'Video afspelen'}
+              </span>
+              <div className="icon"></div>
+            </button>
             <div className="video-container" aria-hidden="true">
               <div
                 ref={playerRef}
@@ -156,16 +163,20 @@ const VideoField: FC<VideoFieldProps> = ({
                 tabIndex={-1}
               />
             </div>
-            <div
+            {/* ponytail: was een <div role="button">, die reageert niet op Enter
+                of spatie (2.1.1). En de naam stond in het Engels op een
+                Nederlandse pagina (2.5.3). */}
+            <button
               onClick={handleVideoClick}
               className={`muteToggle ${muted ? '--muted' : '--unmuted'} ${
                 muteToggle ? '--toggle' : ''
               }`}
-              role="button"
               tabIndex={0}>
-              <span className="sr-only">{muted ? 'Unmute' : 'Mute'}</span>
+              <span className="sr-only">
+                {muted ? 'Geluid aanzetten' : 'Geluid uitzetten'}
+              </span>
               <div className="icon"></div>
-            </div>
+            </button>
           </>
         ) : (
           <div>No video URL provided.</div>
