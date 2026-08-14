@@ -7,6 +7,12 @@ criteria) en de **Den Haag-inspectie** (spreadsheet, 19 rijen). Peildatum: **14-
 > Op audit.draad.dev draaien nog de widget-bundles van vóór 10-08; denhaag.nl draait een oudere
 > versie. Alles met status 🔧 is dus wel opgelost, maar nog niet te hertesten.
 
+## Waar staat wat?
+
+Alle paden in **Deel A** zijn relatief aan `https://audit.draad.dev` (login-pagina's aan
+`https://auth.audit.draad.dev`). **Deel B** verwijst naar drie pagina's op `www.denhaag.nl`; die
+staan met een eigen legenda bovenaan dat deel.
+
 ## Legenda — wie lost het op?
 
 |     | Wie           | Betekenis                                                                     |
@@ -28,20 +34,20 @@ redacteur nog iets zetten voordat het effect heeft. Dat staat er dan expliciet b
 
 Geen enkele hiervan vraagt een release. Alles kan vandaag in het CMS of de admin.
 
-| #   | Actie                                                                                                                                 | Waar                                   | Lost op                                                                                               |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| 1   | Logo-**link** een naam geven ("Naar de homepage")                                                                                     | Header-/footerconfig                   | 2.4.4                                                                                                 |
-| 2   | "Voorbeeld 1/2: …"-koppen van h3 naar **h2**                                                                                          | CMS-pagina's                           | 1.3.1 — twee bevindingen tegelijk: de scheve hiërarchie op /aftelbalk **én** de lege kop op /reacties |
-| 3   | Kop-opmaak weghalen bij de 2× "Lorem ipsum…"-`h2`                                                                                     | /interactieve-afbeelding               | 1.3.1                                                                                                 |
-| 4   | Widgettitel Reacties invullen (`[[nr]] reacties`)                                                                                     | Widgetconfig                           | 1.3.1 — nu een lege `<h3>`                                                                            |
-| 5   | Demo-inzending een echte titel geven                                                                                                  | Resource                               | 2.4.2 — `<title>` begint nog met "Lorem ipsum"                                                        |
-| 6   | Zoekfunctie en/of sitemap toevoegen                                                                                                   | Site-navigatie                         | 2.4.5                                                                                                 |
-| 7   | Linktekst "Reageer op deze inzending" → "Bekijk afbeelding"                                                                           | Widgetconfig                           | 2.5.3                                                                                                 |
-| 8   | Schaaltekst bij de slider gelijktrekken met de ingestelde labels                                                                      | Enquête-veld                           | 3.3.2                                                                                                 |
-| 9   | Foutmeldingen als ontkenning herschrijven, niet als instructie                                                                        | `requiredWarning` per veld             | 3.3.1                                                                                                 |
-| 10  | Autoplay uit                                                                                                                          | Video in de demo                       | 1.4.2                                                                                                 |
-| 11  | Auto-animerende pijl vervangen door een statische                                                                                     | Demo-asset                             | 2.2.2                                                                                                 |
-| 12  | **Ná de deploy:** kopniveau per widget zetten (op de demo-pagina's **h4**, want de widgets staan daar onder een `h3` "Voorbeeld 1/2") | Admin, select "Kopniveau van de titel" | 1.3.1                                                                                                 |
+| #   | Actie                                                                                                                            | Pagina                                                                                                                          | Lost op                                                                                                       |
+| --- | -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| 1   | Logo-**link** een naam geven ("Naar de homepage")                                                                                | Sitebreed — header- en footerconfig                                                                                             | 2.4.4                                                                                                         |
+| 2   | "Voorbeeld 1/2: …"-koppen van h3 naar **h2**                                                                                     | `/aftelbalk` en `/reacties` (en dezelfde opzet op de andere widgetpagina's)                                                     | 1.3.1 — lost twee bevindingen tegelijk op: de scheve hiërarchie op /aftelbalk **én** de lege kop op /reacties |
+| 3   | Kop-opmaak weghalen bij de 2× "Lorem ipsum…"-`h2`                                                                                | `/interactieve-afbeelding`                                                                                                      | 1.3.1                                                                                                         |
+| 4   | Widgettitel Reacties invullen (`[[nr]] reacties`)                                                                                | `/reacties` — widgetconfig                                                                                                      | 1.3.1 — nu een lege `<h3>`                                                                                    |
+| 5   | Demo-inzending een echte titel geven                                                                                             | `/inzending-detailpagina` — de resource zelf                                                                                    | 2.4.2 — `<title>` begint nog met "Lorem ipsum"                                                                |
+| 6   | Zoekfunctie en/of sitemap toevoegen                                                                                              | Sitebreed — navigatie                                                                                                           | 2.4.5                                                                                                         |
+| 7   | Linktekst "Reageer op deze inzending" → "Bekijk afbeelding"                                                                      | `/inzending-detailpagina` — widgetconfig                                                                                        | 2.5.3                                                                                                         |
+| 8   | Schaaltekst bij de slider gelijktrekken met de ingestelde labels                                                                 | `/enquete` — het sliderveld                                                                                                     | 3.3.2                                                                                                         |
+| 9   | Foutmeldingen als ontkenning herschrijven, niet als instructie                                                                   | `/inzending-formulier` — `requiredWarning` per veld                                                                             | 3.3.1                                                                                                         |
+| 10  | Autoplay uit                                                                                                                     | `/enquete` — de video                                                                                                           | 1.4.2                                                                                                         |
+| 11  | Auto-animerende pijl vervangen door een statische                                                                                | `/enquete` — demo-asset                                                                                                         | 2.2.2                                                                                                         |
+| 12  | **Ná de deploy:** kopniveau per widget zetten (op deze pagina's **h4**, want de widgets staan er onder een `h3` "Voorbeeld 1/2") | `/interactieve-afbeelding`, `/inzending-detailpagina`, `/begrootmodule`, `/stemmodule` — admin, select "Kopniveau van de titel" | 1.3.1                                                                                                         |
 
 Al gedaan door de redacteur: logo-`alt` staat inmiddels op "OpenStad.org (logo)", de
 `<strong>`-kop is een echte `H3`, de paginatitels zijn beschrijvend, en de tijdlijn op
@@ -74,16 +80,18 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 
 ## C. Ligt bij de gemeente
 
-| Nr    | Bevinding                                    | Type              |
-| ----- | -------------------------------------------- | ----------------- |
-| 24939 | Statusbalk-contrast 2,5:1 (wit op `#F08600`) | Styling           |
-| 25100 | Alinea onterecht als kop gemarkeerd          | Projectinstelling |
+| Pagina | Nr    | Bevinding                                    | Type              |
+| ------ | ----- | -------------------------------------------- | ----------------- |
+| P      | 24939 | Statusbalk-contrast 2,5:1 (wit op `#F08600`) | Styling           |
+| O      | 25100 | Alinea onterecht als kop gemarkeerd          | Projectinstelling |
 
 ---
 
 # Deel A — audit.draad.dev (27 gefaalde criteria)
 
 ## 1.1.1 Niet-tekstuele content
+
+**Pagina's:** /interactieve-kaart, /inzendingen-overzicht, /reacties, /projectenoverzicht, /contentwidgets + het logo op alle pagina's
 
 | Bevinding                                              | Status | Toelichting                                                                                                                                                                                                                                                     |
 | ------------------------------------------------------ | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -94,6 +102,8 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 | Logo-alt bevat niet de zichtbare merknaam              | ✅     | Staat live op "OpenStad.org (logo)" — door de redacteur opgepakt                                                                                                                                                                                                |
 
 ## 1.3.1 Info en relaties — grootste post
+
+**Pagina's:** /aftelbalk, /interactieve-afbeelding, /inzending-detailpagina, /begrootmodule, /stemmodule, /enquete, /contentwidgets, /agenda, /teller, /reacties, /keuzewijzer
 
 | Bevinding                                                                    | Status | Toelichting                                                                                                                                      |
 | ---------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -119,17 +129,23 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 
 ## 1.3.2 Betekenisvolle volgorde
 
+**Pagina's:** /teller
+
 | Bevinding                                          | Status                              |
 | -------------------------------------------------- | ----------------------------------- |
 | Teller leest cijfers los voor, tekst `aria-hidden` | ✅ Samengevoegd in één `aria-label` |
 
 ## 1.3.5 Doel van de invoer
 
+**Pagina's:** /accountgegevens, /inzendingen-overzicht, /inzending-formulier
+
 | Bevinding                                                                                      | Status                                            |
 | ---------------------------------------------------------------------------------------------- | ------------------------------------------------- |
 | `autocomplete` ontbreekt (naam, gebruikersnaam, postcode) en `tel` had ongeldige waarde `"on"` | ✅ Live: `name`, `username`, `postal-code`, `tel` |
 
 ## 1.4.1 Gebruik van kleur
+
+**Pagina's:** /keuzewijzer, /stemmodule, /beeldkiezer
 
 | Bevinding                                  | Status | Toelichting                                                              |
 | ------------------------------------------ | ------ | ------------------------------------------------------------------------ |
@@ -139,11 +155,15 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 
 ## 1.4.2 Audiobediening
 
+**Pagina's:** /enquete
+
 | Bevinding                   | Status  | Toelichting                                                                                                     |
 | --------------------------- | ------- | --------------------------------------------------------------------------------------------------------------- |
 | Video speelt automatisch af | ✅ / ✍️ | Code start gepauzeerd, live geen `autoplay=1` in de iframe-src. Controleer dat de demo het niet alsnog forceert |
 
 ## 1.4.3 Contrast (minimum)
+
+**Pagina's:** /enquete, /contentwidgets
 
 | Bevinding                                       | Status  | Toelichting                                         |
 | ----------------------------------------------- | ------- | --------------------------------------------------- |
@@ -151,6 +171,8 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 | Tijdlijn-hyperlink op grijs = 4,1:1             | ✅ / ❓ | Linkkleur `#0b5394`                                 |
 
 ## 1.4.4 Herschalen van tekst (200%)
+
+**Pagina's:** /teller, /reacties, /keuzewijzer, /accountgegevens
 
 | Bevinding                                              | Status  | Toelichting                                                          |
 | ------------------------------------------------------ | ------- | -------------------------------------------------------------------- |
@@ -160,6 +182,8 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 | Accountgegevens: e-mailadres niet volledig leesbaar    | 🔧      | Was een `readOnly` input; nu leestekst met `overflow-wrap: anywhere` |
 
 ## 1.4.10 Reflow (320px / 400%)
+
+**Pagina's:** /enquete, /interactieve-kaart, /begrootmodule, /stemmodule, /keuzewijzer, /accountgegevens en de homepage /
 
 | Bevinding                                                    | Status  | Toelichting                                               |
 | ------------------------------------------------------------ | ------- | --------------------------------------------------------- |
@@ -172,11 +196,15 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 
 ## 1.4.11 Contrast van niet-tekstuele content
 
+**Pagina's:** /enquete
+
 | Bevinding                                                                             | Status                                        |
 | ------------------------------------------------------------------------------------- | --------------------------------------------- |
 | Uitzoom-icoon `#BBBBBB` = 1,8:1 · voortgangs-dots · scorebalk-track `#A9B2BA` = 2,2:1 | ✅ / ❓ Alle drie donkerder; meting handmatig |
 
 ## 1.4.12 Tekstafstand
+
+**Pagina's:** /begrootmodule, /stemmodule
 
 | Bevinding                         | Status                                                         |
 | --------------------------------- | -------------------------------------------------------------- |
@@ -184,11 +212,15 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 
 ## 1.4.13 Content bij hover of focus
 
+**Pagina's:** alle pagina's (menu-item "Alle widgets")
+
 | Bevinding                                                            | Status                                |
 | -------------------------------------------------------------------- | ------------------------------------- |
 | Submenu "Alle widgets" niet te sluiten zonder de muis te verplaatsen | ✅ Escape sluit en zet de focus terug |
 
 ## 2.1.1 Toetsenbord
+
+**Pagina's:** /interactieve-afbeelding, /inzending-formulier, /enquete
 
 | Bevinding                                                   | Status                                     |
 | ----------------------------------------------------------- | ------------------------------------------ |
@@ -196,17 +228,23 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 
 ## 2.2.2 Pauzeren, stoppen, verbergen
 
+**Pagina's:** /enquete
+
 | Bevinding                    | Status  | Toelichting                                                                     |
 | ---------------------------- | ------- | ------------------------------------------------------------------------------- |
 | Automatisch bewegend pijltje | ✅ / ✍️ | Animatie niet meer `infinite` + `prefers-reduced-motion`; vervang de demo-asset |
 
 ## 2.4.2 Paginatitel
 
+**Pagina's:** /inzending-detailpagina
+
 | Bevinding                                                | Status | Toelichting                                                                                               |
 | -------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------- |
 | Inzending-detailpagina heet "Lorem ipsum dolor sit amet" | ✍️     | Titel is nu "Lorem ipsum dolor sit amet - Inzending detailpagina": beter, maar begint nog met Lorem ipsum |
 
 ## 2.4.3 Focusvolgorde
+
+**Pagina's:** /enquete, /projectenoverzicht, /inzendingen-overzicht, /interactieve-afbeelding
 
 | Bevinding                                                         | Status | Toelichting                  |
 | ----------------------------------------------------------------- | ------ | ---------------------------- |
@@ -217,6 +255,8 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 
 ## 2.4.4 Linkdoel (in context)
 
+**Pagina's:** alle pagina's (logo + "Alle widgets") en /interactieve-kaart
+
 | Bevinding                                                            | Status | Toelichting                                                                                                                                                                                     |
 | -------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Logo-link mist een naam                                              | ✍️     | De `alt` is inmiddels goed, de **link** heeft nog geen `title`/naam                                                                                                                             |
@@ -225,11 +265,15 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 
 ## 2.4.5 Meerdere manieren
 
+**Pagina's:** sitebreed
+
 | Bevinding                                             | Status                                                        |
 | ----------------------------------------------------- | ------------------------------------------------------------- |
 | Links volgen is de enige manier om pagina's te vinden | ✍️ Live nog geen zoekveld en geen sitemap in header of footer |
 
 ## 2.4.6 Koppen en labels
+
+**Pagina's:** /inzendingen-overzicht, /reacties, /projectenoverzicht + auth.audit.draad.dev/auth/url/login
 
 | Bevinding                                               | Status                                                  |
 | ------------------------------------------------------- | ------------------------------------------------------- |
@@ -238,11 +282,15 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 
 ## 2.4.11 Focus niet verborgen
 
+**Pagina's:** /reacties, /inzendingen-overzicht, /keuzewijzer
+
 | Bevinding                                              | Status                                    |
 | ------------------------------------------------------ | ----------------------------------------- |
 | Filter-popup: focus loopt door naar elementen erachter | ✅ / ❓ Focus-trap; nog te meten bij 200% |
 
 ## 2.5.3 Label in naam
+
+**Pagina's:** auth.audit.draad.dev/auth/url/login, /enquete, /inzending-detailpagina, /inzendingen-overzicht
 
 | Bevinding                                                                   | Status | Toelichting                                                                     |
 | --------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------- |
@@ -253,17 +301,23 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 
 ## 2.5.7 Sleepbewegingen
 
+**Pagina's:** /interactieve-kaart
+
 | Bevinding                              | Status                                    |
 | -------------------------------------- | ----------------------------------------- |
 | Kaart alleen met slepen te verplaatsen | ✅ Kompas met pan-knoppen, live bevestigd |
 
 ## 2.5.8 Grootte van het doelgebied
 
+**Pagina's:** alle pagina's (chevron naast "Alle widgets")
+
 | Bevinding                                             | Status                 |
 | ----------------------------------------------------- | ---------------------- |
 | Chevron 20×20 met negatieve marge → 20px tussenruimte | ✅ Live 40×40, marge 0 |
 
 ## 3.3.1 Foutidentificatie
+
+**Pagina's:** auth.audit.draad.dev/auth/url/login, /inzending-formulier
 
 | Bevinding                                           | Status | Toelichting                                                 |
 | --------------------------------------------------- | ------ | ----------------------------------------------------------- |
@@ -272,6 +326,8 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 
 ## 3.3.2 Labels of instructies
 
+**Pagina's:** /enquete, /reacties
+
 | Bevinding                                               | Status  | Toelichting                                                                                                 |
 | ------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------- |
 | Slider leest andere waarden voor dan de instructie zegt | ✅ / ✍️ | Sr-only schaal wordt uit de labels gegenereerd; de handmatig getypte omschrijving moet daarmee overeenkomen |
@@ -279,12 +335,16 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 
 ## 4.1.2 Naam, rol, waarde
 
+**Pagina's:** /interactieve-afbeelding, /contentwidgets
+
 | Bevinding                                  | Status                                       |
 | ------------------------------------------ | -------------------------------------------- |
 | "Terug naar boven"-knop zonder naam        | ✅ `aria-label` + `aria-hidden` op het icoon |
 | Carousel-knoppen zonder toegankelijke naam | ✅ Live "Vorige/Volgende afbeelding"         |
 
 ## 4.1.3 Statusberichten
+
+**Pagina's:** /verdeelmodule, /emoji-slider
 
 | Bevinding                                                   | Status                                                   |
 | ----------------------------------------------------------- | -------------------------------------------------------- |
@@ -295,31 +355,39 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 
 # Deel B — Den Haag-inspectie (spreadsheet)
 
+De bevindingen verwijzen naar drie pagina's op `www.denhaag.nl`. Ze worden hieronder afgekort:
+
+| Ref   | Pagina                                                                                                                                                                           |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **P** | [/nl/denk-mee/wijkbudget-bloemenbuurt/plannen/](https://www.denhaag.nl/nl/denk-mee/wijkbudget-bloemenbuurt/plannen/)                                                             |
+| **O** | [/nl/denk-mee/oracs-laakkwartier-oost/denk-mee-over-oracs-laakkwartier-oost/](https://www.denhaag.nl/nl/denk-mee/oracs-laakkwartier-oost/denk-mee-over-oracs-laakkwartier-oost/) |
+| **G** | [/nl/denk-mee/groenprojecten/](https://www.denhaag.nl/nl/denk-mee/groenprojecten/)                                                                                               |
+
 ## Nog open volgens de sheet — 9 van de 11 zijn gedekt
 
-| Nr    | Bevinding                                        | Status | Toelichting                                                                                                                                                                                                                                                               |
-| ----- | ------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 24915 | Interactieve kaart heeft geen toegankelijke naam | 🔧     | **Het ís een OpenStad-kaart** (de tab "Kaart" laadt `base-map` uit resource-overview). Opgelost: `role="application"` + `aria-label="Interactieve kaart"`. Let op: het `data-draad-aria-label` uit de bevinding staat live níet meer — de kaart heeft simpelweg géén naam |
-| 25130 | Kaart mist een skiplink                          | 🔧     | "Sla kaart over" zat alleen in `resource-overview-map`; nu in `BaseMap`, dus in alle vier de kaartvarianten                                                                                                                                                               |
-| 24984 | Skiplink krijgt focus maar is onzichtbaar        | 🔧     | Was permanent `clip`-verborgen, ook mét focus; nu zichtbaar bij focus met eigen focusrand                                                                                                                                                                                 |
-| 25010 | Geen focusindicator op de zoomknoppen            | 🔧     | 3px `#1471ef` (4,5:1 op wit) + `z-index` zodat de rand niet achter de buurknop wegvalt                                                                                                                                                                                    |
-| 25135 | Focusindicator op markers haalt 3:1 niet         | 🔧     | Donkere rand met witte halo, werkt op lichte én donkere kaartdelen                                                                                                                                                                                                        |
-| 25009 | Uitklapmenu sluit niet, overlapt bij 400%        | 🔧     | Sluit nu op focusverlies en met Escape, focus terug naar de knop                                                                                                                                                                                                          |
-| 25006 | Tags/categorieën alleen visueel herkenbaar       | 🔧     | `role="list"`/`listitem` op alle zes de tag-grids; de twee zonder kop erboven krijgen `aria-label="Categorieën"`                                                                                                                                                          |
-| 24994 | Checkbox-labels niet gekoppeld                   | ✅     | Was al goed: `htmlFor`/`id` in `multiselect-tag-filter`                                                                                                                                                                                                                   |
-| 25031 | Visuele koppen zijn `<strong>`                   | ✅     | Was al goed: `InfoField` rendert een echte kop met instelbaar niveau                                                                                                                                                                                                      |
-| 24939 | Statusbalk-contrast 2,5:1 (wit op `#F08600`)     | 🏛️     | Styling bij de gemeente                                                                                                                                                                                                                                                   |
-| 25100 | Alinea onterecht als kop gemarkeerd              | 🏛️     | Projectinstelling                                                                                                                                                                                                                                                         |
+| Pagina | Nr    | Bevinding                                        | Status | Toelichting                                                                                                                                                                                                                                                               |
+| ------ | ----- | ------------------------------------------------ | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P      | 24915 | Interactieve kaart heeft geen toegankelijke naam | 🔧     | **Het ís een OpenStad-kaart** (de tab "Kaart" laadt `base-map` uit resource-overview). Opgelost: `role="application"` + `aria-label="Interactieve kaart"`. Let op: het `data-draad-aria-label` uit de bevinding staat live níet meer — de kaart heeft simpelweg géén naam |
+| O      | 25130 | Kaart mist een skiplink                          | 🔧     | "Sla kaart over" zat alleen in `resource-overview-map`; nu in `BaseMap`, dus in alle vier de kaartvarianten                                                                                                                                                               |
+| P      | 24984 | Skiplink krijgt focus maar is onzichtbaar        | 🔧     | Was permanent `clip`-verborgen, ook mét focus; nu zichtbaar bij focus met eigen focusrand                                                                                                                                                                                 |
+| P + O  | 25010 | Geen focusindicator op de zoomknoppen            | 🔧     | 3px `#1471ef` (4,5:1 op wit) + `z-index` zodat de rand niet achter de buurknop wegvalt                                                                                                                                                                                    |
+| O      | 25135 | Focusindicator op markers haalt 3:1 niet         | 🔧     | Donkere rand met witte halo, werkt op lichte én donkere kaartdelen                                                                                                                                                                                                        |
+| P      | 25009 | Uitklapmenu sluit niet, overlapt bij 400%        | 🔧     | Sluit nu op focusverlies en met Escape, focus terug naar de knop                                                                                                                                                                                                          |
+| P      | 25006 | Tags/categorieën alleen visueel herkenbaar       | 🔧     | `role="list"`/`listitem` op alle zes de tag-grids; de twee zonder kop erboven krijgen `aria-label="Categorieën"`                                                                                                                                                          |
+| P      | 24994 | Checkbox-labels niet gekoppeld                   | ✅     | Was al goed: `htmlFor`/`id` in `multiselect-tag-filter`                                                                                                                                                                                                                   |
+| G      | 25031 | Visuele koppen zijn `<strong>`                   | ✅     | Was al goed: `InfoField` rendert een echte kop met instelbaar niveau                                                                                                                                                                                                      |
+| P      | 24939 | Statusbalk-contrast 2,5:1 (wit op `#F08600`)     | 🏛️     | Styling bij de gemeente                                                                                                                                                                                                                                                   |
+| O      | 25100 | Alinea onterecht als kop gemarkeerd              | 🏛️     | Projectinstelling                                                                                                                                                                                                                                                         |
 
 ## Al afgehandeld volgens de sheet
 
-| Nr                            | Bevinding                                                      | Aantekening                                                                                                 |
-| ----------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| 25005                         | Linkdoel onduidelijk in context                                | Opgelost via een instelling                                                                                 |
-| 25011                         | Knop zonder naam (carousel)                                    | ⚠️ Den Haag meldt 12/13-08 dat de carousel weg is en dat een ándere carousel het probleem nog heeft         |
-| 25143                         | Knop zonder naam                                               | ⚠️ Den Haag meldt 13-08: "De knop heeft nog geen toegankelijke naam" — status en werkelijkheid lopen uiteen |
-| 25032                         | Visuele lijst niet als lijst gemarkeerd                        | Wordt niet opgelost: er is nu een RTE-functie voor, enquête staat offline                                   |
-| 25132 / 25133 / 25134 / 25139 | Tekstalternatief, programmatisch label, linkdoel, kleurgebruik | Wordt niet opgelost: afgerond project; voorstel is de methode voortaan anders in te richten                 |
+| Pagina | Nr                            | Bevinding                                                      | Aantekening                                                                                                 |
+| ------ | ----------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| P      | 25005                         | Linkdoel onduidelijk in context                                | Opgelost via een instelling                                                                                 |
+| G      | 25011                         | Knop zonder naam (carousel)                                    | ⚠️ Den Haag meldt 12/13-08 dat de carousel weg is en dat een ándere carousel het probleem nog heeft         |
+| O      | 25143                         | Knop zonder naam                                               | ⚠️ Den Haag meldt 13-08: "De knop heeft nog geen toegankelijke naam" — status en werkelijkheid lopen uiteen |
+| G      | 25032                         | Visuele lijst niet als lijst gemarkeerd                        | Wordt niet opgelost: er is nu een RTE-functie voor, enquête staat offline                                   |
+| O      | 25132 / 25133 / 25134 / 25139 | Tekstalternatief, programmatisch label, linkdoel, kleurgebruik | Wordt niet opgelost: afgerond project; voorstel is de methode voortaan anders in te richten                 |
 
 > **Let op bij 25011 en 25143:** die staan op "Opgelost", maar Den Haag schrijft er op 12 en 13
 > augustus bij dat de knop nog steeds geen naam heeft. De carousel-knopnamen ("Vorige/Volgende
