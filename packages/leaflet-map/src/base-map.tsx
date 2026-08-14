@@ -1042,10 +1042,11 @@ const BaseMap = ({
             </button>
           )}
         </div>
-
-        <div aria-live="polite" className="osc-map-sr-status">
-          {placeMessage}
-        </div>
+      </div>
+      {/* ponytail: buiten .osc-map — die heeft een vaste hoogte/aspect-ratio,
+          een melding erbinnen zou de kaart wegduwen of geclipt worden */}
+      <div aria-live="polite" role="status" className="osc-map-status">
+        {placeMessage}
       </div>
       <div ref={skipTargetRef} tabIndex={-1} className="osc-map-skip-target" />
     </>
