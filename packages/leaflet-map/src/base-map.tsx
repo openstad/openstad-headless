@@ -805,6 +805,9 @@ const BaseMap = ({
   }, []);
 
   const mapContainerRef = useRef<any>(null);
+  // ponytail: elke kaart krijgt een skiplink — de markers zijn allemaal tabbaar,
+  // dus zonder deze link tab je door honderden pins voor je verder komt (2.4.1)
+  const skipTargetRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const map = mapContainerRef.current;
     let mapInteractionInstance: any;
@@ -894,6 +897,12 @@ const BaseMap = ({
           ))}
         </ul>
       )}
+      <button
+        type="button"
+        className="osc-map-skip-link"
+        onClick={() => skipTargetRef.current?.focus()}>
+        Sla kaart over
+      </button>
       <div
         className="map-container osc-map"
         role="application"
@@ -1038,6 +1047,7 @@ const BaseMap = ({
           {placeMessage}
         </div>
       </div>
+      <div ref={skipTargetRef} tabIndex={-1} className="osc-map-skip-target" />
     </>
   );
 };

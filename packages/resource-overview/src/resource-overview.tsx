@@ -535,7 +535,9 @@ const defaultItemRenderer = (
             {displayOverviewTagGroups && resourceFilteredTags.length > 0 && (
               <>
                 <Spacer size={0.5} />
-                <div className="pill-grid">
+                {/* ponytail: zonder rol/naam leest AT de tags als losse woorden
+                    zonder context (WCAG 1.3.1) */}
+                <div className="pill-grid" role="list" aria-label="Categorieën">
                   {(
                     resourceFilteredTags as Array<{
                       type: string;
@@ -544,7 +546,11 @@ const defaultItemRenderer = (
                   )
                     ?.filter((t) => t.type !== 'status')
                     ?.map((t) => (
-                      <Pill text={t.name} />
+                      <Pill
+                        key={`${t.type}-${t.name}`}
+                        role="listitem"
+                        text={t.name}
+                      />
                     ))}
                 </div>
               </>
@@ -683,7 +689,9 @@ const defaultItemRenderer = (
             {displayOverviewTagGroups && resourceFilteredTags.length > 0 && (
               <>
                 <Spacer size={0.5} />
-                <div className="pill-grid">
+                {/* ponytail: zonder rol/naam leest AT de tags als losse woorden
+                    zonder context (WCAG 1.3.1) */}
+                <div className="pill-grid" role="list" aria-label="Categorieën">
                   {(
                     resourceFilteredTags as Array<{
                       type: string;
@@ -692,7 +700,11 @@ const defaultItemRenderer = (
                   )
                     ?.filter((t) => t.type !== 'status')
                     ?.map((t) => (
-                      <Pill text={t.name} />
+                      <Pill
+                        key={`${t.type}-${t.name}`}
+                        role="listitem"
+                        text={t.name}
+                      />
                     ))}
                 </div>
               </>

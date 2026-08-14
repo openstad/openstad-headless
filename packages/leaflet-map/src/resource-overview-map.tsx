@@ -273,7 +273,6 @@ const ResourceOverviewMap = ({
   }
 
   const [center, setCenter] = useState<LocationType | undefined>(undefined);
-  const skipTargetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!!polygon) {
@@ -284,12 +283,6 @@ const ResourceOverviewMap = ({
   const zoom = {
     minZoom: props?.map?.minZoom ? parseInt(props.map.minZoom) : 7,
     maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20,
-  };
-
-  const skipMarkers = () => {
-    if (skipTargetRef.current) {
-      skipTargetRef.current.focus();
-    }
   };
 
   if (!!props?.map && typeof props?.map === 'object') {
@@ -309,12 +302,6 @@ const ResourceOverviewMap = ({
 
   return (polygon && center) || !Number(areaId) ? (
     <div className="map-container--buttons">
-      <Button
-        appearance="primary-action-button"
-        className="skip-link"
-        onClick={skipMarkers}>
-        Sla kaart over
-      </Button>
       <BaseMap
         {...props}
         {...zoom}
@@ -325,7 +312,6 @@ const ResourceOverviewMap = ({
         markers={currentMarkers}
         locationProx={locationProx}
         dataLayerSettings={dataLayerSettings}></BaseMap>
-      <div ref={skipTargetRef} tabIndex={-1} style={{ outline: 'none' }} />
       <div className="map-buttons">
         {ctaButtonElement}
         {countButtonElement}

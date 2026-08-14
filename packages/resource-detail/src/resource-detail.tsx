@@ -672,9 +672,14 @@ function ResourceDetail({
                     Status
                   </Heading>
                   <Spacer size={0.5} />
-                  <div className="resource-detail-pil-list-content">
+                  <div className="resource-detail-pil-list-content" role="list">
                     {statuses?.map((s: { name: string }) => (
-                      <Pill light rounded text={s.name}></Pill>
+                      <Pill
+                        key={s.name}
+                        role="listitem"
+                        light
+                        rounded
+                        text={s.name}></Pill>
                     ))}
                   </div>
 
@@ -689,7 +694,7 @@ function ResourceDetail({
                   </Heading>
 
                   <Spacer size={0.5} />
-                  <div className="resource-detail-pil-list-content">
+                  <div className="resource-detail-pil-list-content" role="list">
                     {(
                       resource.tags as Array<{
                         type: string;
@@ -705,7 +710,11 @@ function ResourceDetail({
                         return a.seqnr - b.seqnr;
                       })
                       ?.map((t) => (
-                        <Pill text={t.name} />
+                        <Pill
+                          key={`${t.type}-${t.name}`}
+                          role="listitem"
+                          text={t.name}
+                        />
                       ))}
                   </div>
                   <Spacer size={2} />

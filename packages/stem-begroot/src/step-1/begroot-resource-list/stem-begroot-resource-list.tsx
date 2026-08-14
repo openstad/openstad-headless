@@ -285,7 +285,7 @@ export const StemBegrootResourceList = ({
                     <Heading level={2} appearance="utrecht-heading-6">
                       Tags
                     </Heading>
-                    <div className="pill-grid stembegroot">
+                    <div className="pill-grid stembegroot" role="list">
                       {(
                         resource.tags as Array<{
                           type: string;
@@ -304,7 +304,9 @@ export const StemBegrootResourceList = ({
                           }
                         )
                         ?.map((t) => (
-                          <span>{t.name || 'Geen thema'}</span>
+                          <span key={`${t.type}-${t.name}`} role="listitem">
+                            {t.name || 'Geen thema'}
+                          </span>
                         ))}
                     </div>
                   </div>

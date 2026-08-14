@@ -49,6 +49,29 @@ export function MultiSelect({
     };
   }, []);
 
+  // ponytail: sluiten met muis was er al, met toetsenbord niet. Het menu bleef
+  // openstaan als de focus doorliep naar het volgende menu en overlapte dat dan
+  // bij 400% zoom — en was zelf niet te sluiten (WCAG 1.4.10 / 2.1.1).
+  const closeOnFocusLeave = (event: React.FocusEvent<HTMLDivElement>) => {
+    if (inlineOptions) return;
+    const next = event.relatedTarget as Node | null;
+    // Geen relatedTarget = focus ging nergens heen, bv. een klik op een optie
+    // (die is zelf niet focusbaar). Dan niet sluiten — buiten klikken wordt al
+    // door de mousedown-listener hierboven afgevangen.
+    if (!next) return;
+    if (containerRef.current?.contains(next)) return;
+    setOpen(false);
+  };
+
+  const closeOnEscape = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (inlineOptions || event.key !== 'Escape' || !isOpen) return;
+    event.stopPropagation();
+    setOpen(false);
+    containerRef.current
+      ?.querySelector<HTMLElement>('[test-id="multi-select-button"]')
+      ?.focus();
+  };
+
   const checkedOptions = options?.filter((option) => option.checked) || [];
   let openButtonLabel = label;
   if (checkedOptions.length > 1) {
@@ -64,7 +87,9 @@ export function MultiSelect({
       className={`multi-select ${
         inlineOptions ? 'multiselect-container--inline' : ''
       }`}
-      ref={containerRef}>
+      ref={containerRef}
+      onBlur={closeOnFocusLeave}
+      onKeyDown={closeOnEscape}>
       {!inlineOptions && (
         <Button
           appearance="default-button"

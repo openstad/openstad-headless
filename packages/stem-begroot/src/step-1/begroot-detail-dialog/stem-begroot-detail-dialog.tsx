@@ -350,7 +350,7 @@ export const StemBegrootResourceDetailDialog = ({
                         <Spacer size={1} />
                         <Heading4>Tags</Heading4>
                         <Spacer size={0.5} />
-                        <div className="pill-grid">
+                        <div className="pill-grid" role="list">
                           {(
                             resource?.tags as Array<{
                               type: string;
@@ -372,7 +372,11 @@ export const StemBegrootResourceDetailDialog = ({
                               }
                             )
                             ?.map((t) => (
-                              <Pill text={t.name || 'Geen thema'} />
+                              <Pill
+                                key={`${t.type}-${t.name}`}
+                                role="listitem"
+                                text={t.name || 'Geen thema'}
+                              />
                             ))}
                         </div>
                         {showOriginalResource && originalUrl ? (

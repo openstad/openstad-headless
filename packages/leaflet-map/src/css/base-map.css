@@ -296,3 +296,69 @@
 .leaflet-overlay-pane .leaflet-interactive {
   pointer-events: none;
 }
+
+/* ── Kaart-toegankelijkheid ────────────────────────────────────────────────
+   Skiplink: standaard onzichtbaar, maar wél zichtbaar zodra hij focus krijgt.
+   Onzichtbaar-bij-focus is een eigen faalpunt: toetsenbordgebruikers zonder
+   voorleessoftware zien dan niet waar de focus staat (WCAG 2.4.7). */
+.osc-map-skip-link {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.osc-map-skip-link:focus,
+.osc-map-skip-link:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0 0 0.5rem;
+  padding: 8px 12px;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  white-space: normal;
+  cursor: pointer;
+  border: 1px solid #767676;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a1a1a;
+  font-size: 15px;
+  outline: 3px solid #1471ef;
+  outline-offset: 2px;
+}
+
+.osc-map-skip-target {
+  outline: none;
+}
+
+/* Zoomknoppen van Leaflet hadden helemaal geen focusindicator; op de uitzoomknop
+   was niets te zien en op de inzoomknop alleen een streepje (WCAG 2.4.7). */
+.osc-map .leaflet-control-zoom a:focus,
+.osc-map .leaflet-control-zoom a:focus-visible {
+  outline: 3px solid #1471ef;
+  outline-offset: 2px;
+  /* boven de aangrenzende knop en de kaarttegels, anders knipt de rand weg */
+  position: relative;
+  z-index: 1000;
+}
+
+/* Markerfocus haalde 2:1 tot 2,8:1 tegen de kaartachtergrond. Dubbele rand:
+   een donkere kern met een witte halo, zodat het contrast klopt op zowel
+   lichte als donkere kaartdelen (WCAG 1.4.11). */
+.osc-map .leaflet-marker-icon:focus,
+.osc-map .leaflet-marker-icon:focus-visible {
+  outline: 3px solid #1a1a1a;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px #fff;
+  border-radius: 4px;
+  position: relative;
+  z-index: 1000;
+}

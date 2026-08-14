@@ -163,7 +163,7 @@ export const GridderResourceDetail = ({
               <>
                 <Heading4>Tags</Heading4>
                 <Spacer size={0.5} />
-                <div className="pill-grid">
+                <div className="pill-grid" role="list">
                   {(
                     resourceFilteredTags as Array<{
                       type: string;
@@ -172,7 +172,11 @@ export const GridderResourceDetail = ({
                   )
                     ?.filter((t) => t.type !== 'status')
                     ?.map((t) => (
-                      <Pill text={t.name} />
+                      <Pill
+                        key={`${t.type}-${t.name}`}
+                        role="listitem"
+                        text={t.name}
+                      />
                     ))}
                 </div>
               </>
