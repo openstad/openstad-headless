@@ -126,12 +126,12 @@ carrousel-knopnamen, kaart-skiplink, live regions op de verdeelmodule en de kapo
 
 **Niet machinaal vast te stellen** — hiervoor is een visuele of schermlezercontrole nodig:
 
-| Wat                                      | Bevindingen                       |
-| ---------------------------------------- | --------------------------------- |
-| Contrastwaarden                          | F16, F17, F18, F22, F56, F58, F61 |
-| Zoom 200% en reflow op 320px             | F9–F15, F60, F66                  |
-| Focusvolgorde en focus-in-beeld          | F20, F21, F25, F35, F63           |
-| Informatie die alleen via kleur overkomt | F8, F54, F55                      |
+| Wat                                      | Bevindingen                       | Stand 14-08                                                                                                                      |
+| ---------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Contrastwaarden                          | F16, F17, F18, F22, F56, F58, F61 | Nog niet gemeten                                                                                                                 |
+| Zoom 200% en reflow op 320px             | F9–F15, F60, F66                  | **Gemeten**: horizontaal scrollen is overal weg, zie het kader bij 1.4.10. Alleen overlap en afkapping binnen een vakje resteren |
+| Focusvolgorde en focus-in-beeld          | F20, F21, F25, F35, F63           | Nog niet gemeten                                                                                                                 |
+| Informatie die alleen via kleur overkomt | F8, F54, F55                      | Nog niet gemeten                                                                                                                 |
 
 `/agenda`, `/likes`, `/keuzewijzer`, `/stemmodule`, `/beeldkiezer`, `/emoji-slider`,
 `/keuzeswipe` en `/projectenoverzicht` zijn in deze ronde niet apart nagelopen; die stonden
@@ -247,6 +247,23 @@ eerder op de dag wel groen.
 | Homepage 400%: sluitknop achter de status-banner             | ✅      | Stacking-context opgelost via `header:has(...)`                                                                              |
 | Keuzewijzer en accountgegevens                               | ✅ / ❓ | Volgen 1.4.4. Accountgegevens is 14-08 op 320px en 640px nagemeten en daarna opgelost; keuzewijzer nog handmatig te bekijken |
 | Matrix-tabel                                                 | ✅ / ❓ | Card-stack onder 480px; nog handmatig op 320px te checken                                                                    |
+
+> **Meting 14-08 — horizontaal scrollen is overal weg.** Elke pagina in een iframe geladen op
+> exact 320px en op 640px (= 1280 met 200% zoom), met de CMS-adminbalk verwijderd omdat een
+> bezoeker die nooit ziet. Uitkomst: `document.scrollWidth` is **314px op een viewport van
+> 320px** op `/`, `/teller`, `/keuzewijzer`, `/enquete`, `/begrootmodule`, `/stemmodule`,
+> `/reacties`, `/accountgegevens` en `/interactieve-kaart` — de inhoud past dus, met ruimte
+> over. Op 640px komt geen van de 21 gemeten pagina's buiten beeld.
+>
+> Twee dingen die deze meting **niet** ziet, en die dus nog een paar ogen vragen: content die
+> ergens óver valt zonder de pagina breder te maken (bevinding F66, het sluit-icoon achter de
+> banner, en F10, het keuzewijzer-paneel), en tekst die binnen een vakje wordt afgekapt. Voor
+> dat laatste kwam één kandidaat boven: `p.a-b-description` op `/keuzewijzer` toont 1px van
+> 921px. Waarschijnlijk bewust verborgen, maar het is niet nagelopen.
+>
+> Valkuil voor wie dit overdoet: laad de pagina **direct** op de doelbreedte. Eerst op 640px
+> laden en dan verkleinen geeft een spookoverschrijding van 7px, omdat iets zijn breedte bij
+> het laden vastlegt en niet herberekent.
 
 ## 1.4.11 Contrast van niet-tekstuele content
 
