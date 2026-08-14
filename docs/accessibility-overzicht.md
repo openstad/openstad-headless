@@ -30,7 +30,7 @@ redacteur nog iets zetten voordat het effect heeft. Dat staat er dan expliciet b
 
 # Deel 0 — de scheidslijn: content of code?
 
-## A. Kan de redacteur zelf oplossen — 10 acties
+## A. Kan de redacteur zelf oplossen — 9 acties
 
 Geen enkele hiervan vraagt een release. Alles kan vandaag in het CMS of de admin.
 
@@ -41,7 +41,7 @@ Geen enkele hiervan vraagt een release. Alles kan vandaag in het CMS of de admin
 | 3   | ~~Widgettitel Reacties invullen~~ — **gedaan 14-08**, staat op `[[nr]] Reacties`                                                                                       | `/reacties` — widgetconfig                                                                                                                                                                                                                                                                                                        | 1.3.1                                                                                                      |
 | 4   | Demo-inzending een echte titel geven                                                                                                                                   | `/inzending-detailpagina` — de resource zelf                                                                                                                                                                                                                                                                                      | 2.4.2 — `<title>` begint nog met "Lorem ipsum"                                                             |
 | 5   | ~~Kop **H1 "Sitemap"** boven de lijst zetten~~ — **gedaan 14-08**, `h1` "Sitemap" gevolgd door vier `h2`'s                                                             | `/sitemap`                                                                                                                                                                                                                                                                                                                        | 1.3.1 / 2.4.6                                                                                              |
-| 6   | Linktekst "Reageer op deze inzending" → "Bekijk afbeelding"                                                                                                            | `/inzending-detailpagina` — widgetconfig                                                                                                                                                                                                                                                                                          | 2.5.3                                                                                                      |
+| 6   | ~~Linktekst "Reageer op deze inzending" → "Bekijk afbeelding"~~ — **vervallen 14-08: dit is code, zie Deel 0B**                                                        | `/inzending-detailpagina`                                                                                                                                                                                                                                                                                                         | 2.5.3                                                                                                      |
 | 7   | Schaaltekst bij de slider gelijktrekken met de ingestelde labels                                                                                                       | `/enquete` — het sliderveld                                                                                                                                                                                                                                                                                                       | 3.3.2                                                                                                      |
 | 8   | Foutmeldingen als ontkenning herschrijven, niet als instructie                                                                                                         | `/inzending-formulier` — `requiredWarning` per veld                                                                                                                                                                                                                                                                               | 3.3.1                                                                                                      |
 | 9   | Autoplay uit                                                                                                                                                           | `/enquete` — de video                                                                                                                                                                                                                                                                                                             | 1.4.2                                                                                                      |
@@ -77,12 +77,22 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 | Alle vijf de kaart-punten uit Den Haag     | Skiplink, focusindicatoren — allemaal componentcode                                                                                                           |
 | Uitklapmenu sluit niet met toetsenbord     | Ontbrekende focusout-/Escape-afhandeling                                                                                                                      |
 | Tags zonder lijstsemantiek                 | Zit in de render van de kaartjes                                                                                                                              |
+| Linktekst "Reageer op deze inzending"      | De klikbare afbeelding omsloot óók de statusbalk, dus de status werd de zichtbare linknaam. Die status is instelbaar, maar hernoemen maakt de status onzin    |
 
 > ⚠️ **Let op — deze leken content, maar zijn het niet.** De "3× `h1`" en de 2× "nepkop Lorem
 > ipsum" stonden aanvankelijk op de redacteurslijst. Ze komen allebei uit de widgets zelf: de
 > `h1` is de titel van de inzending, de `h2` is de samenvatting die `document-map` als kop
 > rendert. Op /interactieve-afbeelding staan twee document-map-widgets, vandaar twee van elk.
 > Wie hiervoor in het CMS gaat zoeken vindt niets om aan te passen — er ís daar niets.
+>
+> Sinds 14-08 hoort de linktekst "Reageer op deze inzending" ook in dit rijtje thuis. Die tekst
+> is geen widgetinstelling maar een **projectstatus** — de standaardstatus die
+> `apps/api-server/src/models/Project.js:213` bij elk nieuw project aanmaakt en die dankzij
+> `addToNewResources` op elke inzending staat. Hij is dus wél instelbaar, maar op de verkeerde
+> plek: de status wordt ook op de kaartjes en in het overzicht getoond, dus hem "Bekijk
+> afbeelding" noemen maakt de linknaam goed en de status onzin. Het echte probleem zat in
+> `resource-detail.tsx`: de klikbare-afbeelding-link omsloot het hele `Image`-blok, inclusief de
+> statusbalk in `imageFooter`.
 >
 > En andersom: de "lege `<h3>`" op /reacties en de ontbrekende `aria-current` op de tijdlijn
 > zien er uit als codefouten, maar zijn een leeg configveld en een niet-aangevinkt vinkje.
@@ -301,12 +311,12 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 
 **Pagina's:** auth.audit.draad.dev/auth/url/login, /enquete, /inzending-detailpagina, /inzendingen-overzicht
 
-| Bevinding                                                                   | Status | Toelichting                                                                     |
-| --------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------- |
-| `aria-label="close message"` op een Nederlandse pagina                      | ✅     | "sluit melding"                                                                 |
-| Engelse FilePond-knoppen (retry, abort)                                     | ✅     | Vertaald                                                                        |
-| Linktekst "Reageer op deze inzending" vs. `aria-label` "Bekijk afbeelding…" | ✍️     | Het `aria-label` is correct; de zichtbare tekst moet "Bekijk afbeelding" worden |
-| Zoekicoon "Filters toepassen" terwijl label en placeholder "Zoeken" zijn    | ✅     | Nu "Zoeken"                                                                     |
+| Bevinding                                                                   | Status | Toelichting                                                                                                                                                                                                                                                                                                                                                                               |
+| --------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `aria-label="close message"` op een Nederlandse pagina                      | ✅     | "sluit melding"                                                                                                                                                                                                                                                                                                                                                                           |
+| Engelse FilePond-knoppen (retry, abort)                                     | ✅     | Vertaald                                                                                                                                                                                                                                                                                                                                                                                  |
+| Linktekst "Reageer op deze inzending" vs. `aria-label` "Bekijk afbeelding…" | 🔧     | **Bleek géén content.** De zichtbare tekst is de projectstatus van de inzending; die stond binnen de link omdat die het hele `Image`-blok omsloot, statusbalk incl. De link omsluit nu alleen de `<img>` — `Image` kreeg daarvoor `href`/`linkLabel`, de statusbalk blijft als `figcaption` erbuiten. Daarmee is `aria-label` de enige naam en maakt het niet meer uit hoe de status heet |
+| Zoekicoon "Filters toepassen" terwijl label en placeholder "Zoeken" zijn    | ✅     | Nu "Zoeken"                                                                                                                                                                                                                                                                                                                                                                               |
 
 ## 2.5.7 Sleepbewegingen
 
@@ -413,6 +423,7 @@ De bevindingen verwijzen naar drie pagina's op `www.denhaag.nl`. Ze worden hiero
 | Focus-trap greep de verkéérde filter        | 🔧      | `document.querySelector('#stem-begroot-filter')` pakte altijd de eerste instance; nu via een eigen ref                                                                                                                                                                             |
 | Vijf icon-sections met identieke kop-id's   | 🔧      | Op de homepage `icon-section-heading-0` ×5 enz.; `aria-labelledby` wees bij vier van de vijf naar de kop van de eerste sectie                                                                                                                                                      |
 | Ontbrekende React-keys in de tag-maps       | 🔧      | Meegenomen bij de lijstsemantiek                                                                                                                                                                                                                                                   |
+| Naamloze link om de gridder-afbeelding      | 🔧      | `gridder-resource-detail`: de klikbare afbeelding zat in een `<a>` zonder naam — de `<img>` erin heeft geen alt en dus `role="presentation"`. Zelfde constructie als de 2.5.3-bevinding, ander gebrek. Nu via `href`/`linkLabel` op `Image`                                        |
 | Footer stond nog vol themavoorbeelden       | ✅      | Koppen "Kolom 1"/"Kolom 2" en twee links "Link 1"/"Link 2" naar dezelfde pagina. Op 14-08 vervangen door drie echte kolommen; raakt 2.4.4 en 2.4.6, stond in geen van beide rapporten                                                                                              |
 | Skiplink mikt op een leeg `<a name="main">` | ⚠️ open | Werkt, maar `name` is verouderd en de focus landt vóór de landmark in plaats van erin. `id="main"` op het `<main>`-element zelf is de nette variant. Zit in het Apostrophe-template, niet in de widgets                                                                            |
 | **`npm run build` typecheckt niets**        | ⚠️ open | De `include` in `packages/configs/tsconfig.json` is relatief en resolvet naar `packages/configs/`, dus `tsc` leest **nul bestanden** en geeft altijd exit 0. Aanzetten legt pre-existing fouten bloot in `leaflet-map/parse-location.ts`, `ui/carousel` en `ui/form-elements/text` |
@@ -425,7 +436,7 @@ Deze twee sporen lopen onafhankelijk van elkaar — de redacteur hoeft niet op d
 op punt 13 na.
 
 **Spoor 1 — redacteur (nu al mogelijk)**
-De 10 acties uit Deel 0A. Ze staan ook als afvinkbare lijst in
+De 9 acties uit Deel 0A. Ze staan ook als afvinkbare lijst in
 [`accessibility-status.md`](accessibility-status.md) § Redacteurs-checklist. Grootste post is de
 koppenhiërarchie; actie 2 ("Voorbeeld 1/2" naar h2) lost er in één klap twee op.
 

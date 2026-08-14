@@ -10,7 +10,8 @@
   border: 4px solid var(--osc-primary);
 }
 
-.osc .image-container > img {
+.osc .image-container > img,
+.osc .image-container > a > img {
   width: 100%;
   height: 100%;
   object-fit: cover;

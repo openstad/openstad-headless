@@ -361,14 +361,16 @@ De regel: precies **één `<h1>`** per pagina, en **geen niveaus overslaan**.
 - [ ] **Paginatitel (2.4.2)** — de `<title>` van `/inzending-detailpagina` begint nog met "Lorem ipsum
       dolor sit amet". Beter dan eerst (de paginanaam staat er nu achter), maar nog niet beschrijvend.
       → geef de demo-inzending een echte titel.
-- [ ] **Meerdere manieren om te navigeren (2.4.5)** — live geen zoekveld en geen sitemap in header of
-      footer. → voeg een **sitemap-pagina** en/of **zoek** toe aan de site-navigatie.
+- [x] **Meerdere manieren om te navigeren (2.4.5)** — opgelost 14-08: `/sitemap` staat live met een
+      `h1` en 31 links, en de footer verwijst er op elke pagina naartoe. Navigatie + sitemap zijn
+      samen de twee vereiste manieren; een zoekveld is niet meer nodig.
 
-### 4. Misleidende linktekst (2.5.3)
+### 4. Misleidende linktekst (2.5.3) — **niet de redacteur**
 
-- [ ] Op `/inzending-detailpagina` staat een link met zichtbare tekst **"Reageer op deze inzending"** en
-      `aria-label="Bekijk afbeelding (opent in nieuw tabblad)"`. De link vergroot alleen de afbeelding.
-      → zichtbare tekst wijzigen naar "Bekijk afbeelding". (Het `aria-label` zelf is correct.)
+- Vervallen als redacteursactie op 14-08. De zichtbare tekst **"Reageer op deze inzending"** op
+  `/inzending-detailpagina` is geen widgettekst maar de **projectstatus** van de inzending, die binnen
+  de klikbare-afbeelding-link viel. Hernoemen zou de status kapotmaken (die staat ook op de kaartjes),
+  dus dit is opgelost in code: de link omsluit nu alleen de afbeelding. Wacht op de deploy.
 
 ### 5. Formulierteksten
 

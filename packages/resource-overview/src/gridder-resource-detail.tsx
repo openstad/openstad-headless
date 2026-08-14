@@ -124,17 +124,16 @@ export const GridderResourceDetail = ({
   const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
   const canLike = canLikeResource(resource);
 
-  const renderImage = (image: string, clickableImage: boolean) => {
-    const imageComponent = <Image src={image} className="--aspectRatio-16-9" />;
-
-    return clickableImage ? (
-      <a href={image} target="_blank" rel="noreferrer">
-        {imageComponent}
-      </a>
-    ) : (
-      imageComponent
-    );
-  };
+  const renderImage = (image: string, clickableImage: boolean) => (
+    // ponytail: link via Image, anders had de <a> geen naam — de <img> erin
+    // heeft geen alt en dus role="presentation" (WCAG 2.4.4 / 4.1.2)
+    <Image
+      src={image}
+      className="--aspectRatio-16-9"
+      href={clickableImage ? image : undefined}
+      linkLabel="Bekijk afbeelding (opent in nieuw tabblad)"
+    />
+  );
 
   return (
     <>

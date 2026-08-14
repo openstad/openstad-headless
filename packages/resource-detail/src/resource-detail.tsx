@@ -321,10 +321,14 @@ function ResourceDetail({
     clickableImage: boolean,
     imageDescription?: string
   ) => {
-    const imageElement = (
+    return (
       <>
         <Image
           src={src}
+          href={clickableImage ? src : undefined}
+          linkLabel={`Bekijk afbeelding${
+            imageDescription ? `: ${imageDescription}` : ''
+          } (opent in nieuw tabblad)`}
           imageFooter={
             displayStatusBar &&
             resource.statuses &&
@@ -350,18 +354,6 @@ function ResourceDetail({
           <p className="carousel-image-description">{imageDescription}</p>
         )}
       </>
-    );
-
-    return clickableImage ? (
-      <a
-        href={src}
-        target="_blank"
-        rel="noreferrer"
-        aria-label={`Bekijk afbeelding${imageDescription ? `: ${imageDescription}` : ''} (opent in nieuw tabblad)`}>
-        {imageElement}
-      </a>
-    ) : (
-      imageElement
     );
   };
 
