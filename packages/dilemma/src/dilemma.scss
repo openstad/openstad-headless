@@ -132,6 +132,21 @@
             outline-width: var(--dilemmaOptionOutlineWidthActive);
             outline-offset: var(--dilemmaOptionOutlineOffsetActive);
           }
+
+          // ponytail: het verschil tussen gekozen en niet-gekozen zat in de
+          // kleur en dikte van de rand. Dit zet er een woord bij, zodat de
+          // keuze ook zonder kleurwaarneming te zien is (WCAG 1.4.1). De
+          // checked-status zelf staat al in de radio, dus dit mag decoratief.
+          .dilemma-option-content::before {
+            content: '✓ Gekozen';
+            align-self: start;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 0.85em;
+            font-weight: 700;
+          }
         }
       }
 

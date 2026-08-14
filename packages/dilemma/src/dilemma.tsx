@@ -434,7 +434,11 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       aria-label="Dilemma keuze"
       data-required={required}>
       <div className="dilemma-intro">
-        <Heading level={2} dangerouslySetInnerHTML={{ __html: title || '' }} />
+        <Heading
+          level={2}
+          id={`dilemma-titel-${currentDilemma.id}`}
+          dangerouslySetInnerHTML={{ __html: title || '' }}
+        />
         <div
           className="dilemma-progress"
           role="status"
@@ -445,7 +449,14 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         </div>
       </div>
 
-      <div className="dilemma-options">
+      {/* ponytail: de twee opties delen al een name en zijn dus één radiogroep —
+          je wisselt ertussen met de pijltjestoetsen, niet met Tab. Alleen was dat
+          nergens aangekondigd: zonder groep hoor je "keuze A" zonder de vraag en
+          zonder "1 van 2". Vandaar de expliciete radiogroup met de vraag als naam. */}
+      <div
+        className="dilemma-options"
+        role="radiogroup"
+        aria-labelledby={`dilemma-titel-${currentDilemma.id}`}>
         <span className="dilemma-label" aria-hidden="true">
           <span>OF</span>
         </span>
