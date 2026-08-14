@@ -113,4 +113,58 @@ describe('<Form />', () => {
     cy.get('input[type="radio"]').should('be.disabled');
     cy.get('.question-feedback').should('contain.text', 'Goed zo');
   });
+
+  it('requires confirmation for a graded radio without instantFeedback', () => {
+    const fields = [
+      {
+        type: 'radiobox',
+        fieldKey: 'quiz1',
+        title: 'Quizvraag',
+        fieldRequired: false,
+        feedbackMode: 'correctIncorrect',
+        feedbackCorrect: 'Goed zo',
+        choices: [
+          { value: 'a', label: 'A', isCorrect: true },
+          { value: 'b', label: 'B' },
+        ],
+      },
+    ];
+
+    cy.mount(<Form {...({ fields, submitHandler: () => {} } as any)} />);
+
+    cy.get('#quiz1_0').check({ force: true });
+
+    cy.get('.osc-confirm-answer-button').should('exist');
+    cy.get('.question-feedback').should('not.exist');
+    cy.get('input[type="radio"]').should('not.be.disabled');
+  });
+
+  it('reveals feedback immediately for a graded radio with instantFeedback', () => {
+    const fields = [
+      {
+        type: 'radiobox',
+        fieldKey: 'quiz1',
+        title: 'Quizvraag',
+        fieldRequired: false,
+        instantFeedback: true,
+        feedbackMode: 'correctIncorrect',
+        feedbackCorrect: 'Goed zo',
+        choices: [
+          { value: 'a', label: 'A', isCorrect: true },
+          { value: 'b', label: 'B' },
+        ],
+      },
+    ];
+
+    cy.mount(<Form {...({ fields, submitHandler: () => {} } as any)} />);
+
+    cy.get('.osc-confirm-answer-button').should('not.exist');
+
+    cy.get('#quiz1_0').check({ force: true });
+
+    cy.get('.question-feedback').should('contain.text', 'Goed zo');
+    cy.get('input[type="radio"]').should('be.disabled');
+    cy.get('.osc-confirm-answer-button').should('not.exist');
+    cy.get('.question').should('have.class', '--answer-correct');
+  });
 });

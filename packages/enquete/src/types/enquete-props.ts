@@ -92,6 +92,7 @@ export type Item = {
   feedbackCorrect?: string;
   feedbackIncorrect?: string;
   scaleFeedback?: string[];
+  instantFeedback?: boolean;
 
   // Keeping this for backwards compatibility
   image1?: string;

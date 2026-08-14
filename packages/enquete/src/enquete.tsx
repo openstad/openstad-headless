@@ -381,12 +381,19 @@ function Enquete(props: EnqueteWidgetProps) {
             fieldData['feedbackText'] = item.feedbackText;
             fieldData['feedbackCorrect'] = item.feedbackCorrect;
             fieldData['feedbackIncorrect'] = item.feedbackIncorrect;
+            fieldData['instantFeedback'] =
+              item.questionType === 'multiplechoice'
+                ? item.instantFeedback || false
+                : false;
           }
 
           if (draftValue !== undefined) {
             // For radiobox, draftValue is a single string; for checkbox, array of strings.
             fieldData['defaultValue'] = draftValue;
-          } else if (configuredDefault.length > 0) {
+          } else if (
+            configuredDefault.length > 0 &&
+            !fieldData['instantFeedback']
+          ) {
             fieldData['defaultValue'] =
               item.questionType === 'multiplechoice'
                 ? configuredDefault[0]
