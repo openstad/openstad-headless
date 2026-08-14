@@ -76,12 +76,17 @@
   top: 270px;
 }
 
+/* ponytail: fallback in elke var() — de :root-defaults hieronder overleven de
+   widget-build niet (die scopet alles onder .openstad, :root sneuvelt daarbij).
+   Zonder fallback wordt width/height ongeldig en dus `auto`: het keuzevlak groeit
+   dan van 180px naar de natuurlijke beeldgrootte en het paneel bedekt het hele
+   scherm bij 200% zoom (1.4.4, bevinding GTT-33.F10). */
 #choice-plane {
   position: relative;
-  height: var(--choiceguide-base-size);
-  width: var(--choiceguide-base-size);
+  height: var(--choiceguide-base-size, 180px);
+  width: var(--choiceguide-base-size, 180px);
   display: grid;
-  grid-template-columns: repeat(2, var(--choiceguide-half-base-size));
+  grid-template-columns: repeat(2, var(--choiceguide-half-base-size, 90px));
   margin: 0 auto;
 }
 
@@ -96,8 +101,8 @@
 
 #choice-plane .osc-choice-plane {
   position: relative;
-  width: var(--choiceguide-half-base-size);
-  height: var(--choiceguide-half-base-size);
+  width: var(--choiceguide-half-base-size, 90px);
+  height: var(--choiceguide-half-base-size, 90px);
   float: left;
   display: inline-block;
 }
@@ -105,8 +110,8 @@
 #choice-plane .osc-choice-plane-background-image {
   position: relative;
   object-fit: cover;
-  width: var(--choiceguide-half-base-size);
-  height: var(--choiceguide-half-base-size);
+  width: var(--choiceguide-half-base-size, 90px);
+  height: var(--choiceguide-half-base-size, 90px);
 }
 
 .osc-choiceguide-container {

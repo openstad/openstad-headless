@@ -22,8 +22,11 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
   }, [props.choiceOptions, props.answers, props.weights]);
 
   useEffect(() => {
-    if (containerRef.current) {
-      const baseSize = containerRef.current.clientWidth;
+    // ponytail: containerRef hing nergens aan, dus dit blok liep nooit en de
+    // variabelen bleven leeg. Guard op > 0, want een breedte van 0 tijdens de
+    // eerste render zou het keuzevlak juist laten verdwijnen.
+    const baseSize = containerRef.current?.clientWidth ?? 0;
+    if (baseSize > 0) {
       document.documentElement.style.setProperty(
         '--choiceguide-base-size',
         `${baseSize}px`
@@ -54,6 +57,7 @@ const ChoiceGuideSidebar: React.FC<ChoiceGuideSidebarProps> = (props) => {
 
   return (
     <div
+      ref={containerRef}
       className="osc-choices-container"
       role="status"
       id={`osc-choice-container-${props.widgetId || ''}`}>
