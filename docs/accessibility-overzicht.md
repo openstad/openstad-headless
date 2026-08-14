@@ -24,7 +24,7 @@ redacteur nog iets zetten voordat het effect heeft. Dat staat er dan expliciet b
 
 # Deel 0 — de scheidslijn: content of code?
 
-## A. Kan de redacteur zelf oplossen — 13 acties
+## A. Kan de redacteur zelf oplossen — 12 acties
 
 Geen enkele hiervan vraagt een release. Alles kan vandaag in het CMS of de admin.
 
@@ -34,18 +34,18 @@ Geen enkele hiervan vraagt een release. Alles kan vandaag in het CMS of de admin
 | 2   | "Voorbeeld 1/2: …"-koppen van h3 naar **h2**                                                                                          | CMS-pagina's                           | 1.3.1 — twee bevindingen tegelijk: de scheve hiërarchie op /aftelbalk **én** de lege kop op /reacties |
 | 3   | Kop-opmaak weghalen bij de 2× "Lorem ipsum…"-`h2`                                                                                     | /interactieve-afbeelding               | 1.3.1                                                                                                 |
 | 4   | Widgettitel Reacties invullen (`[[nr]] reacties`)                                                                                     | Widgetconfig                           | 1.3.1 — nu een lege `<h3>`                                                                            |
-| 5   | "Mark as current phase" aanvinken                                                                                                     | Tijdlijn-contentwidget                 | 1.3.1                                                                                                 |
-| 6   | Demo-inzending een echte titel geven                                                                                                  | Resource                               | 2.4.2 — `<title>` begint nog met "Lorem ipsum"                                                        |
-| 7   | Zoekfunctie en/of sitemap toevoegen                                                                                                   | Site-navigatie                         | 2.4.5                                                                                                 |
-| 8   | Linktekst "Reageer op deze inzending" → "Bekijk afbeelding"                                                                           | Widgetconfig                           | 2.5.3                                                                                                 |
-| 9   | Schaaltekst bij de slider gelijktrekken met de ingestelde labels                                                                      | Enquête-veld                           | 3.3.2                                                                                                 |
-| 10  | Foutmeldingen als ontkenning herschrijven, niet als instructie                                                                        | `requiredWarning` per veld             | 3.3.1                                                                                                 |
-| 11  | Autoplay uit                                                                                                                          | Video in de demo                       | 1.4.2                                                                                                 |
-| 12  | Auto-animerende pijl vervangen door een statische                                                                                     | Demo-asset                             | 2.2.2                                                                                                 |
-| 13  | **Ná de deploy:** kopniveau per widget zetten (op de demo-pagina's **h4**, want de widgets staan daar onder een `h3` "Voorbeeld 1/2") | Admin, select "Kopniveau van de titel" | 1.3.1                                                                                                 |
+| 5   | Demo-inzending een echte titel geven                                                                                                  | Resource                               | 2.4.2 — `<title>` begint nog met "Lorem ipsum"                                                        |
+| 6   | Zoekfunctie en/of sitemap toevoegen                                                                                                   | Site-navigatie                         | 2.4.5                                                                                                 |
+| 7   | Linktekst "Reageer op deze inzending" → "Bekijk afbeelding"                                                                           | Widgetconfig                           | 2.5.3                                                                                                 |
+| 8   | Schaaltekst bij de slider gelijktrekken met de ingestelde labels                                                                      | Enquête-veld                           | 3.3.2                                                                                                 |
+| 9   | Foutmeldingen als ontkenning herschrijven, niet als instructie                                                                        | `requiredWarning` per veld             | 3.3.1                                                                                                 |
+| 10  | Autoplay uit                                                                                                                          | Video in de demo                       | 1.4.2                                                                                                 |
+| 11  | Auto-animerende pijl vervangen door een statische                                                                                     | Demo-asset                             | 2.2.2                                                                                                 |
+| 12  | **Ná de deploy:** kopniveau per widget zetten (op de demo-pagina's **h4**, want de widgets staan daar onder een `h3` "Voorbeeld 1/2") | Admin, select "Kopniveau van de titel" | 1.3.1                                                                                                 |
 
 Al gedaan door de redacteur: logo-`alt` staat inmiddels op "OpenStad.org (logo)", de
-`<strong>`-kop is een echte `H3`, en de paginatitels zijn beschrijvend.
+`<strong>`-kop is een echte `H3`, de paginatitels zijn beschrijvend, en de tijdlijn op
+/contentwidgets heeft sinds 14-08 `aria-current="step"` op de tweede fase.
 
 ## B. Kan de redacteur **niet** oplossen — vereist code
 
@@ -105,7 +105,7 @@ Alles hieronder is al opgelost op deze branch, maar wacht op een deploy.
 | Nepkoppen: 2× `h2` "Lorem ipsum…" op interactieve-afbeelding                 | ✍️     | Kop-opmaak eraf, het is gewone tekst                                                                                                             |
 | Lege kop op /reacties ("Voorbeeld 2" direct gevolgd door gelijk niveau)      | ✍️     | Zelfde fix als hierboven: "Voorbeeld" naar h2, dan nestelt de widget-h3 correct                                                                  |
 | Lege `<h3>` uit de Reacties-widget                                           | ✍️     | Widgettitel is leeggelaten in de config; vul `[[nr]] reacties` in                                                                                |
-| Tijdlijn mist `aria-current` op de huidige fase                              | ✍️     | Code staat live; vink "Mark as current phase" aan                                                                                                |
+| ~~Tijdlijn mist `aria-current`~~ — opgelost 14-08                            | ✅     | Aangevinkt op het tweede item, live bevestigd. Template zet `aria-current="step"`; auditor stelde `"true"` voor — beide geldig                   |
 | Share-links niet als lijst                                                   | ✅     | `ul`/`li`, 6 items                                                                                                                               |
 | Agenda: enkele link in een lijst                                             | ✅     | Pas een `<ul>` vanaf 2 items                                                                                                                     |
 | Teller: "ideeën ingestuurd" wordt niet voorgelezen                           | ✅     | `aria-label="56 ideeën ingestuurd"` + `role="status"`                                                                                            |
@@ -346,7 +346,7 @@ Deze twee sporen lopen onafhankelijk van elkaar — de redacteur hoeft niet op d
 op punt 13 na.
 
 **Spoor 1 — redacteur (nu al mogelijk)**
-De 13 acties uit Deel 0A. Ze staan ook als afvinkbare lijst in
+De 12 acties uit Deel 0A. Ze staan ook als afvinkbare lijst in
 [`accessibility-status.md`](accessibility-status.md) § Redacteurs-checklist. Grootste post is de
 koppenhiërarchie; actie 2 ("Voorbeeld 1/2" naar h2) lost er in één klap twee op.
 
