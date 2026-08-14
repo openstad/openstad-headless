@@ -20,3 +20,6 @@ apps/*/package-lock.json
 
 # Git worktrees
 .worktrees/
+
+# Lokale Claude-werkmap (analyse + worktrees, honderden MB's)
+.claude/

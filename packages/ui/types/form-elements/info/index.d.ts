@@ -17,6 +17,7 @@ export type InfoFieldProps = {
     moreInfoButton?: string;
     moreInfoContent?: string;
     infoImage?: string;
+    headingLevel?: 2 | 3 | 4;
     defaultValue?: string;
     prevPageText?: string;
     nextPageText?: string;

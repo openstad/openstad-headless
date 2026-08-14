@@ -39,6 +39,7 @@ export type MatrixFieldProps = {
     imageClickable?: boolean;
     nextPageText?: string;
     prevPageText?: string;
+    rowHeaderLabel?: string;
 };
 declare const MatrixField: FC<MatrixFieldProps>;
 export default MatrixField;
