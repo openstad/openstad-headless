@@ -29,6 +29,30 @@ describe('loadConfig', () => {
     expect(config.port).toBe(0);
   });
 
+  it('accepts the highest valid port', () => {
+    expect(loadConfig({ MCP_PORT: '65535' }).port).toBe(65535);
+  });
+
+  // These reached listen() before and threw a RangeError there
+  // ("options.port should be >= 0 and < 65536"), taking the server down at
+  // startup instead of falling back to the default.
+  it.each([
+    ['3900.5', 'not an integer'],
+    ['65536', 'one above the maximum'],
+    ['99999', 'far out of range'],
+    ['-1', 'negative'],
+    ['abc', 'not a number'],
+    ['1e4000', 'Infinity'],
+    [' ', 'whitespace only — Number(" ") is 0, which would mean "random port"'],
+    ['\t\n', 'whitespace only'],
+  ])('falls back to the default for MCP_PORT=%s (%s)', (value) => {
+    expect(loadConfig({ MCP_PORT: value }).port).toBe(3900);
+  });
+
+  it('still accepts a padded value', () => {
+    expect(loadConfig({ MCP_PORT: ' 4000 ' }).port).toBe(4000);
+  });
+
   it('honors an explicit MCP_HOST override', () => {
     const config = loadConfig({
       MCP_HOST: '0.0.0.0',

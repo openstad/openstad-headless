@@ -4,6 +4,11 @@ Exposes the Openstad reporting API (`/api/project/:projectId/reports/v1/...`) as
 
 ## Deployment model: one server per installation, multi-project within it
 
+> **Not deployable from this repo yet.** There is no `docker-compose` service, no
+> Helm chart template and no entry in the image-build matrix for this app — it
+> ships as source. The section below describes how it is _meant_ to be deployed;
+> the compose service, chart template and `MCP_*` wiring land with that work.
+
 `MCP_REPORTING_API_BASE_URL` binds an MCP server to exactly **one** api-server, and Openstad is deployed as one installation per municipality. So deploy **one MCP server per Openstad installation** (alongside its api-server, in the same namespace) — a token issued on another installation only yields 401s here.
 
 Within that installation the server is stateless and serves **every project**: it holds no reporting credentials of its own, and one process handles concurrent requests for different projects without shared state. Every request to `/mcp` carries its own credentials:

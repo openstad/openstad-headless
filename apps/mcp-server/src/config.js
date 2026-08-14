@@ -9,15 +9,30 @@
  * ever ask for data that request's own token already scopes it to.
  */
 
+// Node's listen() accepts an integer in [0, 65535]; anything else is a
+// RangeError, which would crash the server at startup instead of using the
+// default. Verified: both 3900.5 and 99999 throw
+// "options.port should be >= 0 and < 65536".
+const MAX_PORT = 65535;
+
 /**
  * Parses a port number, treating 0 as a valid explicit value (the standard
  * "let the OS assign a free port" convention) rather than falling back to the
  * default — a plain `Number(x) || default` would incorrectly treat 0 as unset.
+ *
+ * Anything that is not an integer in the valid TCP range falls back to the
+ * default rather than reaching listen(): a typo in MCP_PORT should not take the
+ * server down.
  */
 function parsePort(value, fallback) {
-  if (value === undefined || value === '') return fallback;
-  const n = Number(value);
-  return Number.isFinite(n) && n >= 0 ? n : fallback;
+  if (value === undefined) return fallback;
+  // Trimmed first: Number(' ') is 0, so an all-whitespace MCP_PORT would
+  // otherwise read as the explicit "pick a random free port" value.
+  const trimmed = String(value).trim();
+  if (trimmed === '') return fallback;
+  const n = Number(trimmed);
+  if (!Number.isInteger(n) || n < 0 || n > MAX_PORT) return fallback;
+  return n;
 }
 
 /**
