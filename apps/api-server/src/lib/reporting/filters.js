@@ -31,27 +31,70 @@ class ReportingFilterError extends Error {
   }
 }
 
-const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/;
+const DATE_ONLY_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+// Full datetime, always with an explicit zone: 'Z' or ±HH:MM. A zone-less
+// datetime is rejected on purpose — new Date() would read it in the SERVER's
+// local timezone, so the same query would cover a different window depending on
+// where the api-server runs.
+const DATE_TIME_RE =
+  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/;
+
+const DATE_HINT =
+  'Use YYYY-MM-DD or ISO-8601 with an explicit zone, e.g. 2026-01-01 or 2026-01-01T00:00:00Z';
 
 /**
  * Parses a date param. Accepts a bare 'YYYY-MM-DD' (interpreted as UTC
- * midnight) or a full ISO-8601 datetime. All UTC. Throws ReportingFilterError
- * on an unparseable value.
+ * midnight) or an ISO-8601 datetime carrying an explicit zone ('Z' or ±HH:MM),
+ * which is normalised to UTC. Throws ReportingFilterError on anything else.
+ *
+ * Deliberately stricter than `new Date(str)`, which silently accepts values the
+ * API does not document and would turn a typo into a wrong result instead of a
+ * 400: '01/02/2026' (ambiguous, read in server-local time), 'Jan 5 2026',
+ * '2026' and a zone-less '2026-01-01T12:00:00'. It also rolls an impossible
+ * calendar date forward — '2026-02-31' becomes 2026-03-03 — so the calendar
+ * components are range-checked before the Date is built.
+ *
  * @returns {Date}
  */
 function parseDateParam(value, param) {
-  const str = String(value);
-  const d = DATE_ONLY_RE.test(str)
-    ? new Date(`${str}T00:00:00Z`)
-    : new Date(str);
-  if (Number.isNaN(d.getTime())) {
+  const fail = (str) => {
     throw new ReportingFilterError(
       'invalid_date',
       `'${param}' is not a valid date: '${str}'`,
       param,
-      'Use YYYY-MM-DD or ISO-8601 UTC, e.g. 2026-01-01 or 2026-01-01T00:00:00Z'
+      DATE_HINT
     );
+  };
+
+  // A repeated query param arrives as an array, a bracketed one as an object.
+  // String() would turn those into 'a,b' / '[object Object]' and report that
+  // coerced value back at the client, so reject the shape itself.
+  if (typeof value !== 'string') fail(String(value));
+
+  const dateOnly = DATE_ONLY_RE.exec(value);
+  const match = dateOnly || DATE_TIME_RE.exec(value);
+  if (!match) fail(value);
+
+  const [, year, month, day, hour = '0', minute = '0', second = '0'] = match;
+  // Days in `month`, using day 0 of the next month; Date's own year/month
+  // arithmetic handles leap years and the December rollover.
+  const daysInMonth = new Date(
+    Date.UTC(Number(year), Number(month), 0)
+  ).getUTCDate();
+  if (
+    Number(month) < 1 ||
+    Number(month) > 12 ||
+    Number(day) < 1 ||
+    Number(day) > daysInMonth ||
+    Number(hour) > 23 ||
+    Number(minute) > 59 ||
+    Number(second) > 59
+  ) {
+    fail(value);
   }
+
+  const d = new Date(dateOnly ? `${value}T00:00:00Z` : value);
+  if (Number.isNaN(d.getTime())) fail(value);
   return d;
 }
 
