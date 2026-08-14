@@ -14,7 +14,11 @@
 /* ponytail: kaartbediening — kompas (pannen zonder slepen, 2.5.7) + plaats-knop (keyboard, 2.1.1) */
 .osc-map .osc-map-controls {
   position: absolute;
-  z-index: 1000;
+  /* ponytail: 800 is de laag van Leaflets eigen bediening (leaflet-control),
+     boven de tegels, markers en kaartpopups. Dit stond op 1000 — gelijk aan de
+     dialog uit packages/ui — en dan wint de laatste in de DOM: de pijltjes
+     kwamen over de detailpopup heen te liggen. */
+  z-index: 800;
   right: 10px;
   bottom: 10px;
   display: flex;

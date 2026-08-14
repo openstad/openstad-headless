@@ -87,14 +87,20 @@
   );
 }
 
+/* De afgeronde stap houdt het rondje. De randkleur stond eerder gelijk aan de
+   achtergrondkleur, en die is in de nlds-default wit — op een witte pagina
+   verdween de cirkel daarmee helemaal en zweefde het vinkje los. Nu: dezelfde
+   rand als de andere stappen, met een lichte vulling zodat "afgerond" ook zonder
+   kleur te zien is (het vinkje) én er duidelijk anders uitziet dan een stap die
+   nog moet komen (die is doorzichtig). */
 .step-icon.done {
   background-color: var(
     --nlds-stepper-icon-done-background-color,
-    var(--utrecht-button-secondary-action-background-color)
+    var(--utrecht-button-secondary-action-hover-background-color, #e6edf5)
   );
   border-color: var(
     --nlds-stepper-icon-done-border-color,
-    var(--utrecht-button-secondary-action-background-color)
+    var(--utrecht-button-primary-action-background-color)
   );
 }
 

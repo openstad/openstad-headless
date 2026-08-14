@@ -70,6 +70,13 @@
   justify-content: stretch;
 }
 
+/* ponytail: die -1rem haalt de ruimte tussen twee kaarten weg, maar bóven de
+   eerste kaart is er niets om weg te halen — die werd 16px buiten de container
+   getrokken en daar knipt de scrollende ouder hem af. */
+.resourceOverviewWithMap-container .resource-card--link:first-child {
+  margin-block-start: 0;
+}
+
 .resourceOverviewWithMap-container .osc .image-container {
   grid-row: span 2;
   align-self: center;

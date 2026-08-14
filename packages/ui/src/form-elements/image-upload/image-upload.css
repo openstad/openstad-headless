@@ -17,8 +17,9 @@
 }
 
 /* ponytail: FilePond-default groen #369763 = 3,6:1 met witte tekst. Donkerder groen
-   (#2b7d4f ≈ 5:1) zodat bestandsnaam/grootte/status leesbaar zijn (WCAG 1.4.3). */
-html .filepond--file-status,
+   (#2b7d4f ≈ 5:1) zodat bestandsnaam/grootte/status leesbaar zijn (WCAG 1.4.3).
+   Alleen op het paneel: de statustekst zelf had ook een eigen groen vlak en dat
+   plakte strak om de letters. Het paneel eronder is al groen, dus dat is genoeg. */
 html [data-filepond-item-state*='processing-complete'] .filepond--item-panel,
 html [data-filepond-item-state*='load-complete'] .filepond--item-panel {
   background-color: #2b7d4f !important;

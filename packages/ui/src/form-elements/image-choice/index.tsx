@@ -247,23 +247,11 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                               />
                             </>
                           )}
-                        {/* ponytail: niet-kleur-indicatie van de gekozen optie (1.4.1) */}
-                        {isSelected && (
-                          <span
-                            className="image-choice-selected-badge"
-                            style={{
-                              display: 'inline-block',
-                              marginTop: '0.25rem',
-                              padding: '0.1rem 0.4rem',
-                              fontWeight: 700,
-                              fontSize: '0.85em',
-                              background: '#1a1a1a',
-                              color: '#fff',
-                              borderRadius: '4px',
-                            }}>
-                            <span aria-hidden="true">✓ </span>Gekozen
-                          </span>
-                        )}
+                        {/* ponytail: hier stond een "✓ Gekozen"-badge voor 1.4.1.
+                            Die hoorde bij de beeldkiezer (het dilemma-vraagtype)
+                            en staat daar nu; hier was hij dubbelop, want de
+                            gekozen afbeelding krijgt al een rand van 3px waar de
+                            andere er geen heeft — dat is geen kleurverschil. */}
                       </figcaption>
                     </figure>
                   </FormLabel>
