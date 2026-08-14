@@ -261,6 +261,7 @@ function Form({
       const hidden = routingKey && routingHiddenFields.includes(routingKey);
       return (
         needsConfirm(f) &&
+        !isInstant(f) &&
         f.fieldKey &&
         !hidden &&
         isFieldAnswered(f) &&
@@ -359,16 +360,35 @@ function Form({
       );
 
       const changedField = fields.find((f: any) => f.fieldKey === name);
-      if (
-        changedField &&
-        isInstant(changedField) &&
-        value !== undefined &&
-        value !== null &&
-        value !== ''
-      ) {
-        setConfirmedFields((prev) =>
-          prev[name] ? prev : { ...prev, [name]: true }
-        );
+      if (changedField && isInstant(changedField)) {
+        const confirmInstant = () =>
+          setConfirmedFields((prev) =>
+            prev[name] ? prev : { ...prev, [name]: true }
+          );
+
+        if (changedField.type === 'checkbox') {
+          const maxChoicesNum = parseInt(
+            String((changedField as any).maxChoices ?? ''),
+            10
+          );
+          let selectedCount = 0;
+          try {
+            const parsed =
+              typeof value === 'string' ? JSON.parse(value) : value;
+            selectedCount = Array.isArray(parsed) ? parsed.length : 0;
+          } catch {
+            selectedCount = 0;
+          }
+          if (
+            Number.isFinite(maxChoicesNum) &&
+            maxChoicesNum > 0 &&
+            selectedCount >= maxChoicesNum
+          ) {
+            confirmInstant();
+          }
+        } else if (value !== undefined && value !== null && value !== '') {
+          confirmInstant();
+        }
       }
     }
 
@@ -485,7 +505,9 @@ function Form({
   const needsConfirm = (field: any): boolean => isGraded(field);
 
   const isInstant = (field: any): boolean =>
-    field?.type === 'radiobox' && isGraded(field) && !!field.instantFeedback;
+    isGraded(field) &&
+    !!field.instantFeedback &&
+    (field?.type === 'radiobox' || field?.type === 'checkbox');
 
   const meetsMinChoices = (field: any): boolean => {
     const min = parseInt(String(field.minChoices ?? ''), 10);

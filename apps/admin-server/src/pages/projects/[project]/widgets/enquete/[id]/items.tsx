@@ -3075,42 +3075,6 @@ export default function WidgetEnqueteItems(
                       )}
 
                     {props.isQuiz &&
-                      form.watch('questionType') === 'multiplechoice' &&
-                      (form.watch('options') || []).some(
-                        (option: any) => option?.titles?.[0]?.isCorrect === true
-                      ) && (
-                        <FormField
-                          control={form.control}
-                          name="instantFeedback"
-                          render={({ field }) => (
-                            <>
-                              <FormItem
-                                style={{
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'flex-start',
-                                  flexDirection: 'row',
-                                  marginTop: '10px',
-                                }}>
-                                {YesNoSelect(field, props)}
-                                <FormLabel
-                                  style={{ marginTop: 0, marginLeft: '6px' }}>
-                                  Antwoord direct tonen (zonder bevestigen)
-                                </FormLabel>
-                                <FormMessage />
-                              </FormItem>
-                              <FormDescription>
-                                Wanneer aan, ziet de bezoeker meteen bij het
-                                aanklikken van een antwoord wat goed en fout
-                                was, zonder eerst te hoeven bevestigen. Staat
-                                standaard uit.
-                              </FormDescription>
-                            </>
-                          )}
-                        />
-                      )}
-
-                    {props.isQuiz &&
                       form.watch('feedbackMode') === 'static' && (
                         <FormField
                           control={form.control}
@@ -3413,6 +3377,40 @@ export default function WidgetEnqueteItems(
                         )}
                       />
                     )}
+
+                    {props.isQuiz &&
+                      ['multiplechoice', 'multiple'].includes(
+                        form.watch('questionType') || ''
+                      ) && (
+                        <FormField
+                          control={form.control}
+                          name="instantFeedback"
+                          render={({ field }) => (
+                            <>
+                              <FormItem
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'flex-start',
+                                  flexDirection: 'row',
+                                  marginTop: '10px',
+                                }}>
+                                {YesNoSelect(field, props)}
+                                <FormLabel
+                                  style={{ marginTop: 0, marginLeft: '6px' }}>
+                                  Antwoord direct tonen (zonder bevestigen)
+                                </FormLabel>
+                                <FormMessage />
+                              </FormItem>
+                              <FormDescription>
+                                Wanneer aan, ziet de bezoeker meteen bij het
+                                aanklikken van een antwoord wat goed en fout
+                                was, zonder eerst te hoeven bevestigen.
+                              </FormDescription>
+                            </>
+                          )}
+                        />
+                      )}
 
                     {form.watch('routingInitiallyHide') && (
                       <>
