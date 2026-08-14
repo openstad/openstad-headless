@@ -5,6 +5,8 @@ const {
   fieldKeyOf,
   CONTROL_FIELD_KEYS,
 } = require('../../../lib/reporting/flatten-submission');
+const { parseWidgetId } = require('../../../lib/reporting/parse-widget-id');
+const { respondFilterError } = require('../../../lib/reporting/filters');
 
 // questionType values (packages/enquete/.../items.tsx hasOptions() switch)
 // that render as a choice list.
@@ -133,8 +135,15 @@ async function resolveSubmissionFields({
 // project must have submissions reporting enabled to see its form schema.
 module.exports = async function submissionsFields(req, res, next) {
   try {
-    const widgetId = req.query.widgetId;
-    if (!widgetId) {
+    // Shared with /reports/submissions so both endpoints reject the same
+    // shapes; here the param is required rather than optional.
+    let widgetId;
+    try {
+      widgetId = parseWidgetId(req.query.widgetId);
+    } catch (err) {
+      return respondFilterError(res, err);
+    }
+    if (widgetId === undefined) {
       return res.status(400).json({
         error: {
           code: 'missing_widget_id',
