@@ -855,8 +855,8 @@ const BaseMap = ({
     onClick({ latlng: center, isInArea } as any, map);
     setPlaceMessage(
       isInArea
-        ? 'Locatie op het midden van de kaart geplaatst.'
-        : 'Het midden van de kaart valt buiten het toegestane gebied.'
+        ? 'Marker geplaatst op het midden van de kaart.'
+        : 'Hier kun je geen marker plaatsen. Verschuif de kaart tot het kruisje binnen het gemarkeerde gebied valt.'
     );
   };
 
@@ -991,7 +991,7 @@ const BaseMap = ({
           )}
         </MapContainer>
 
-        {/* ponytail: kruisje toont waar "Plaats op het midden" landt (2.1.1) */}
+        {/* ponytail: kruisje toont waar "Marker plaatsen" landt (2.1.1) */}
         {canPlaceViaKeyboard && (
           <div className="osc-map-crosshair" aria-hidden="true">
             <span />
@@ -1038,7 +1038,11 @@ const BaseMap = ({
               type="button"
               className="osc-map-place-comment"
               onClick={placeAtCenter}>
-              Plaats op het midden
+              Marker plaatsen
+              {/* ponytail: zichtbare tekst zegt wát er gebeurt, de sr-only
+                  aanvulling wáár — het kruisje is voor AT niet zichtbaar. De
+                  toegankelijke naam bevat de zichtbare tekst, dus 2.5.3 blijft goed. */}
+              <span className="sr-only"> op het midden van de kaart</span>
             </button>
           )}
         </div>

@@ -1360,7 +1360,7 @@ function DocumentMap({
               )}
           </MapContainer>
 
-          {/* ponytail: kruisje toont waar "Plaats reactie in het midden" landt (2.1.1) */}
+          {/* ponytail: kruisje toont waar "Reactie plaatsen" landt (2.1.1) */}
           {!popupPosition && !!args.canComment && !isDefinitive && (
             <div className="osc-map-crosshair" aria-hidden="true">
               <span />
@@ -1407,7 +1407,11 @@ function DocumentMap({
                 type="button"
                 className="osc-map-place-comment"
                 onClick={placeCommentAtCenter}>
-                Plaats reactie in het midden
+                Reactie plaatsen
+                <span className="sr-only">
+                  {' '}
+                  op het midden van de afbeelding
+                </span>
               </button>
             )}
           </div>

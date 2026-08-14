@@ -95,7 +95,7 @@
   outline-offset: 2px;
 }
 
-/* centraal kruisje: toont waar "Plaats op het midden" landt */
+/* centraal kruisje: toont waar "Marker plaatsen" landt */
 .osc-map .osc-map-crosshair {
   position: absolute;
   z-index: 999;
@@ -131,7 +131,7 @@
   transform: translateY(-50%);
 }
 
-/* Terugkoppeling bij "Plaats op het midden". Was sr-only, waardoor een ziende
+/* Terugkoppeling bij "Marker plaatsen". Was sr-only, waardoor een ziende
    toetsenbordgebruiker niets zag gebeuren als het midden buiten het toegestane
    gebied lag — de actie faalde stil (WCAG 3.3.1). Nu zichtbaar voor iedereen;
    het element blijft altijd in de DOM staan zodat aria-live blijft werken. */

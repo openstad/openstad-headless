@@ -363,7 +363,7 @@ a + .url-list:before {
   outline-offset: 2px;
 }
 
-/* centraal kruisje: toont waar "Plaats reactie in het midden" landt */
+/* centraal kruisje: toont waar "Reactie plaatsen" landt */
 .documentMap--container .osc-map-crosshair {
   position: absolute;
   z-index: 1;
