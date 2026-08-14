@@ -448,11 +448,13 @@ export const StemBegrootResourceDetailDialog = ({
                           <>
                             <Icon
                               icon="ri-thumb-up-line"
+                              description="Stemmen voor"
                               variant="regular"
                               text={resource?.yes}
                             />
                             <Icon
                               icon="ri-thumb-down-line"
+                              description="Stemmen tegen"
                               variant="regular"
                               text={resource?.no}
                             />
@@ -462,6 +464,7 @@ export const StemBegrootResourceDetailDialog = ({
                         {displayRanking ? (
                           <Icon
                             icon="ri-trophy-line"
+                            description="Positie in de ranglijst"
                             variant="regular"
                             text={resource?.extraData?.ranking || 0}
                           />

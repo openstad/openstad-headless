@@ -730,6 +730,7 @@ const defaultItemRenderer = (
                     icon="ri-thumb-up-line"
                     variant="big"
                     text={resource.yes}
+                    description="Stemmen voor"
                     className={selectedOpinion === 'yes' ? 'selected' : ''}
                   />
                   {props.likeWidget?.displayDislike && (
@@ -737,6 +738,7 @@ const defaultItemRenderer = (
                       icon="ri-thumb-down-line"
                       variant="big"
                       text={resource.no}
+                      description="Stemmen tegen"
                       className={selectedOpinion === 'no' ? 'selected' : ''}
                     />
                   )}
@@ -753,6 +755,7 @@ const defaultItemRenderer = (
                         : 'ri-triangle-line'
                     } micro-score-triangle`}
                     variant="big"
+                    description="Stemmen voor"
                     className={`micro-score-vote micro-score-vote--yes ${
                       selectedOpinion === 'yes' ? 'selected' : ''
                     }`}
@@ -768,6 +771,7 @@ const defaultItemRenderer = (
                           : 'ri-triangle-line'
                       } micro-score-triangle micro-score-triangle-down`}
                       variant="big"
+                      description="Stemmen tegen"
                       className={`micro-score-vote micro-score-vote--no ${
                         selectedOpinion === 'no' ? 'selected' : ''
                       }`}
@@ -781,6 +785,7 @@ const defaultItemRenderer = (
                 icon="ri-message-line"
                 variant="big"
                 text={resource.commentCount}
+                description="Aantal reacties"
               />
             ) : null}
           </div>
@@ -1498,11 +1503,11 @@ function ResourceOverviewInner({
             <div className="osc-resource-overview-tabs-container">
               <TabsList>
                 <TabsTrigger value="list">
-                  <Icon icon="ri-list-unordered" />
+                  <Icon icon="ri-list-unordered" iconOnly />
                   {listTabTitle}
                 </TabsTrigger>
                 <TabsTrigger value="map">
-                  <Icon icon="ri-map-pin-line" />
+                  <Icon icon="ri-map-pin-line" iconOnly />
                   {mapTabTitle}
                 </TabsTrigger>
               </TabsList>
