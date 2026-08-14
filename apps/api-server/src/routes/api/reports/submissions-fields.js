@@ -9,6 +9,8 @@ const {
   buildProblem,
   sendProblem,
 } = require('../../../lib/reporting/problem-json');
+const { parseWidgetId } = require('../../../lib/reporting/parse-widget-id');
+const { respondFilterError } = require('../../../lib/reporting/filters');
 
 // questionType values (packages/enquete/.../items.tsx hasOptions() switch)
 // that render as a choice list.
@@ -172,8 +174,17 @@ async function resolveSubmissionFields({
 // project must have submissions reporting enabled to see its form schema.
 module.exports = async function submissionsFields(req, res, next) {
   try {
-    const widgetId = req.query.widgetId;
-    if (!widgetId) {
+    // Shared with /reports/submissions so both endpoints reject the same
+    // shapes; here the param is required rather than optional. An invalid shape
+    // is reported by respondFilterError, which emits the same problem+json
+    // document as every other reporting validation error.
+    let widgetId;
+    try {
+      widgetId = parseWidgetId(req.query.widgetId);
+    } catch (err) {
+      return respondFilterError(res, err);
+    }
+    if (widgetId === undefined) {
       return sendProblem(
         res,
         400,

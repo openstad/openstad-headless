@@ -191,4 +191,38 @@ describe('submissionsFields handler', () => {
       findOne.mockRestore();
     }
   });
+
+  it('treats an empty ?widgetId= as absent', async () => {
+    const req = { query: { widgetId: '' }, project: { id: 1 } };
+    const res = makeRes();
+    const next = vi.fn();
+
+    await submissionsFields(req, res, next);
+
+    expect(res._status).toBe(400);
+    expect(res._body.code).toBe('missing_widget_id');
+  });
+
+  // Previously these passed the truthiness check and reached Sequelize as a
+  // where-clause operand: the array really queried, and findOne answered 200
+  // with whichever form matched first, while the object and the non-numeric
+  // string tripped typeValidation and surfaced as a 500. Either way the caller
+  // never learned the parameter was malformed.
+  it.each([
+    [['1', '2'], 'repeated param, parsed into an array'],
+    [{ a: '1' }, 'bracketed param, parsed into an object'],
+    ['abc', 'not numeric'],
+  ])('returns 400 invalid_widget_id for %s (%s)', async (widgetId) => {
+    const req = { query: { widgetId }, project: { id: 1 } };
+    const res = makeRes();
+    const next = vi.fn();
+
+    await submissionsFields(req, res, next);
+
+    expect(res._status).toBe(400);
+    expect(res._headers['Content-Type']).toBe('application/problem+json');
+    expect(res._body.code).toBe('invalid_widget_id');
+    expect(res._body.param).toBe('widgetId');
+    expect(next).not.toHaveBeenCalled();
+  });
 });

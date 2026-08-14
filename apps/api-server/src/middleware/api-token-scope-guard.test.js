@@ -365,6 +365,30 @@ describe('apiTokenScopeGuard', () => {
       expect(next).not.toHaveBeenCalled();
     });
 
+    // The allowlist used to key on the terminal segment alone. Because this
+    // guard is mounted app-wide, that allowlisted ANY path ending in
+    // 'aggregates'/'anonymized' as soon as dataScope.users was enabled.
+    it.each([
+      '/project/1/reports/audit-log/aggregates',
+      '/project/1/reports/payments/anonymized',
+      '/project/1/user/aggregates',
+      '/project/1/aggregates',
+    ])('blocks %s even when the users component is enabled', (path) => {
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path,
+        projectDataScope: { users: { enabled: true } },
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
+      expect(res._status).toBe(403);
+      expect(next).not.toHaveBeenCalled();
+    });
+
     it('blocks /reports/users/anonymized when no component is enabled (fail-closed)', () => {
       const req = makeReq({
         apiTokenScope: 'reports',

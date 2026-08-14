@@ -57,8 +57,16 @@ async function dataScopeAdminGate(req, res, next) {
   if (incomingDataScope === undefined) return next();
   if (hasRole(req.user, 'admin')) return next();
 
-  const project = await db.Project.findOne({ where: { id: req.results.id } });
-  const savedDataScope = project?.config?.dataScope;
+  // Express 4 does not catch a rejected promise from an async middleware, so an
+  // unwrapped await here would surface as an unhandled rejection and leave the
+  // request hanging instead of reaching the app-wide error handler.
+  let savedDataScope;
+  try {
+    const project = await db.Project.findOne({ where: { id: req.results.id } });
+    savedDataScope = project?.config?.dataScope;
+  } catch (err) {
+    return next(err);
+  }
 
   if (!requiresAdmin({ incomingDataScope, savedDataScope, user: req.user })) {
     return next();

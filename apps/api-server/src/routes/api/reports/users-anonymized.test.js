@@ -1,13 +1,28 @@
-import { beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const {
   toParticipantRow,
   toIsoOrNull,
-  EXCLUDED_ROLES,
+  PARTICIPANT_ROLES,
 } = require('./users-anonymized');
+
+// Restored afterwards so this file leaves no worker-wide env state behind:
+// vitest shares process.env across the files in a worker, and a test that
+// depends on the secret being ABSENT would then pass or fail on file ordering.
+// pseudonymize.test.js is immune today because it deletes the var itself, but
+// that is its choice, not something this file may rely on.
+const previousSecret = process.env.OPENSTAD_REPORT_PSEUDONYM_SECRET;
 
 beforeAll(() => {
   process.env.OPENSTAD_REPORT_PSEUDONYM_SECRET = 'test-secret';
+});
+
+afterAll(() => {
+  if (previousSecret === undefined) {
+    delete process.env.OPENSTAD_REPORT_PSEUDONYM_SECRET;
+  } else {
+    process.env.OPENSTAD_REPORT_PSEUDONYM_SECRET = previousSecret;
+  }
 });
 
 describe('toIsoOrNull', () => {
@@ -23,20 +38,26 @@ describe('toIsoOrNull', () => {
   });
 });
 
-describe('EXCLUDED_ROLES', () => {
-  it('keeps staff out of the roster — a unique role would single someone out', () => {
-    for (const role of ['admin', 'editor', 'moderator']) {
-      expect(EXCLUDED_ROLES).toContain(role);
-    }
-  });
-
-  it('still excludes the placeholder roles', () => {
-    expect(EXCLUDED_ROLES).toContain('anonymous');
-    expect(EXCLUDED_ROLES).toContain('unknown');
-  });
-
+describe('PARTICIPANT_ROLES', () => {
   it('keeps real participants in', () => {
-    expect(EXCLUDED_ROLES).not.toContain('member');
+    expect(PARTICIPANT_ROLES).toContain('member');
+  });
+
+  // Allowlist, so every non-participant role is out by construction. These are
+  // every value User.role accepts (models/User.js) plus the roles.js spellings —
+  // a blocklist missed 'su' and 'superAdmin'.
+  it.each([
+    'anonymous',
+    'unknown',
+    'admin',
+    'editor',
+    'moderator',
+    'su',
+    'superAdmin',
+    'superuser',
+    'owner',
+  ])('keeps %s out of the roster', (role) => {
+    expect(PARTICIPANT_ROLES).not.toContain(role);
   });
 });
 

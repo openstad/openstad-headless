@@ -15,9 +15,15 @@ const { API_VERSION } = require('../lib/reporting/api-version');
 // reporting tokens that only send GET requests.
 const MUTATING_GET_SEGMENTS = ['/toggle', '/confirm', '/like', '/dislike'];
 
-// Non-component path segments a reporting token may still reach. Everything
-// else is denied (fail-closed). Only aggregate/stats endpoints belong here.
-const OVERVIEW_SEGMENT = 'overview';
+// Non-component paths a reporting token may still reach. Everything else is
+// denied (fail-closed). Only aggregate/stats endpoints belong here.
+//
+// Two allowlists with DIFFERENT matching, deliberately kept apart: a bare
+// terminal segment (below) and a 'users/<segment>' pair (further down). Add a
+// new entry to the pair set, not to the segment set — this guard is mounted
+// app-wide (Server.js), so a bare word allowlists every path in the API that
+// ends in it.
+const ALLOWED_SEGMENTS = new Set(['overview']);
 
 // ADDITIVE (#442): /reports/users/anonymized + /reports/users/aggregates are
 // deliberately NOT a normal report-data-scope component — there is no raw
@@ -29,7 +35,11 @@ const OVERVIEW_SEGMENT = 'overview';
 // (dataScope.users.enabled), not "any component enabled" (that would let
 // enabling e.g. just 'votes' reporting silently unlock the full participant
 // list too).
-const USER_DATA_SEGMENTS = new Set(['anonymized', 'aggregates']);
+//
+// Matched on the trailing 'users/<segment>' PAIR, not on the terminal segment
+// alone, so 'aggregates' / 'anonymized' cannot allowlist an unrelated endpoint
+// elsewhere in the API that happens to end in one of those words.
+const USER_DATA_PATHS = new Set(['users/anonymized', 'users/aggregates']);
 
 // The OpenAPI spec is documentation, not project data. reports/index.js mounts
 // it BEFORE the auth gate, so it is already served to anyone without a token —
@@ -39,10 +49,22 @@ const USER_DATA_SEGMENTS = new Set(['anonymized', 'aggregates']);
 // same reason: there is no project data here to scope.
 const SPEC_SEGMENT = 'openapi.json';
 
-const ALLOWED_NON_COMPONENT_SEGMENTS = new Set([
-  OVERVIEW_SEGMENT,
-  ...USER_DATA_SEGMENTS,
-]);
+/**
+ * The trailing one- and two-segment forms of a path, lowercased, for lookup
+ * against the two allowlists above — e.g.
+ * '/api/project/2/reports/users/aggregates' yields
+ * ['aggregates', 'users/aggregates'].
+ * @returns {{segment: string|undefined, pair: string|undefined}}
+ */
+function trailingPathForms(pathLower) {
+  const segments = pathLower.split('/').filter(Boolean);
+  const segment = segments[segments.length - 1];
+  const prev = segments[segments.length - 2];
+  return {
+    segment,
+    pair: segment && prev ? `${prev}/${segment}` : undefined,
+  };
+}
 
 /**
  * Records a blocked non-component request so operators can later decide to add
@@ -195,16 +217,17 @@ function apiTokenScopeGuard(req, res, next) {
     // Non-component path: deny by default. Only explicitly allowlisted
     // aggregate endpoints (e.g. /overview) may pass; anything else is a path a
     // reporting token has no business reaching (e.g. /user, /audit-log).
-    // Anchor on the terminal path segment (consistent with matchComponent),
-    // so an allowlisted word elsewhere in the path cannot open it up.
-    const segments = pathLower.split('/').filter(Boolean);
-    const lastSegment = segments[segments.length - 1];
+    // Anchor on the END of the path (consistent with matchComponent), so an
+    // allowlisted word elsewhere in the path cannot open it up. /overview and
+    // the spec match on their own segment; the user-data endpoints must match
+    // the full 'users/<segment>' pair.
+    const { segment, pair } = trailingPathForms(pathLower);
 
     // Checked before the dataScope-dependent branches below: the spec must
     // stay readable even for a project that has enabled no components at all.
     // A scope is still attached, because report-field-filter blocks any
     // reporting response that reaches it without one.
-    if (lastSegment === SPEC_SEGMENT) {
+    if (segment === SPEC_SEGMENT) {
       req.reportingScope = {
         componentKey: null,
         enabledPersonalFields: [],
@@ -213,7 +236,8 @@ function apiTokenScopeGuard(req, res, next) {
       return next();
     }
 
-    const allowed = ALLOWED_NON_COMPONENT_SEGMENTS.has(lastSegment);
+    const isUserDataPath = pair !== undefined && USER_DATA_PATHS.has(pair);
+    const allowed = isUserDataPath || ALLOWED_SEGMENTS.has(segment);
 
     if (!allowed) {
       logBlockedReportingPath(req).catch(() => {});
@@ -224,7 +248,7 @@ function apiTokenScopeGuard(req, res, next) {
       );
     }
 
-    if (USER_DATA_SEGMENTS.has(lastSegment)) {
+    if (isUserDataPath) {
       // Dedicated gate: enabling any single component must NOT unlock the
       // project-wide participant roster/aggregates — only its own toggle does.
       const dataScope =

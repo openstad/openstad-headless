@@ -166,6 +166,13 @@ const COMPONENTS = {
     safeFields: ['id', 'projectId', 'description', 'createdAt', 'updatedAt'],
     personalFields: [],
   },
+  // Question definitions live in Widget.config.items, so there is no Sequelize
+  // model to page through: the endpoint (added later in this reporting series)
+  // is a bespoke handler that does not go through makeReportEndpoint /
+  // buildReportingWhere. That is why this is the one component key with NO
+  // entry in the api-server's component-registry, which exists only to map a
+  // component onto a model + project-scope strategy — deliberate, not an
+  // oversight.
   choiceguidequestions: {
     label: 'Keuzewijzer vragen',
     pathPattern: '/reports/choice-guide-questions',

@@ -8,12 +8,18 @@ const {
 } = require('../../../lib/reporting/paginate');
 const { pseudonymizeUserId } = require('../../../lib/reporting/pseudonymize');
 
-// Real participants only: excludes the system placeholder (id 0), the
-// anonymous/unknown roles, and staff — a staff role is often unique in a
-// project, which singles that person out via the participantId <-> userId join.
+// Real participants only: excludes the system placeholder (id 0) and every role
+// that is not a participant. A staff role is often unique in a project, which
+// singles that person out via the participantId <-> userId join.
 // /reports/users/aggregates still counts all activity, so its participant count
 // can exceed this roster's row count.
-const EXCLUDED_ROLES = ['anonymous', 'unknown', 'admin', 'editor', 'moderator'];
+//
+// Deliberately an ALLOWLIST rather than a list of roles to exclude: User.role
+// (models/User.js) also permits 'su' and 'superAdmin', and roles.js knows
+// 'superuser' and 'owner'. Blocklisting means every role added later leaks into
+// the roster until someone remembers to extend the list; allowlisting fails
+// closed instead.
+const PARTICIPANT_ROLES = ['member'];
 
 function toIsoOrNull(value) {
   if (!value) return null;
@@ -80,7 +86,7 @@ async function usersAnonymized(req, res, next) {
       where: {
         projectId: req.project.id,
         id: { [Op.ne]: 0 },
-        role: { [Op.notIn]: EXCLUDED_ROLES },
+        role: { [Op.in]: PARTICIPANT_ROLES },
       },
       attributes: ['id', 'role', 'projectId', 'createdAt', 'lastLogin'],
       order: [['id', 'ASC']],
@@ -102,4 +108,4 @@ async function usersAnonymized(req, res, next) {
 module.exports = usersAnonymized;
 module.exports.toParticipantRow = toParticipantRow;
 module.exports.toIsoOrNull = toIsoOrNull;
-module.exports.EXCLUDED_ROLES = EXCLUDED_ROLES;
+module.exports.PARTICIPANT_ROLES = PARTICIPANT_ROLES;
