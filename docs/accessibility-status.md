@@ -325,6 +325,14 @@ De code staat; deze punten moet de redacteur in de demo/CMS zetten. **Alle punte
 10-08-2026 live op `audit.draad.dev` gecontroleerd en stonden op dat moment nog open.** Op volgorde van
 impact.
 
+> **Stand 14-08-2026 (tweede hercontrole) — het meeste hieronder is inmiddels gedaan.** Nog open
+> zijn er twee: het **kopniveau van de widget op `h3`** op zeven pagina's, en de **eigen CSS bij de
+> twee keuzewijzer-widgets** (die blaast het keuzevlak op van 180 naar 610px, waardoor het paneel
+> het scherm bedekt bij 200% zoom). De rest — logo-alt, de "Voorbeeld"-koppen, de lege kop op
+> `/reacties`, de tijdlijn, de paginatitel, de sitemap, de autoplay, de schaaltekst — is live
+> nagemeten en afgevinkt. De actuele lijst staat in
+> [`accessibility-overzicht.md`](accessibility-overzicht.md) § Deel 0A; deze sectie is de historie.
+
 ### 1. Logo-alt + logo-link (1.1.1 + 2.4.4) — sitebreed, hoogste prioriteit
 
 Live is de `alt` nog `"Logo openstad"` (header) en `"Logo OpenStad"` (footer); de link eromheen heeft
