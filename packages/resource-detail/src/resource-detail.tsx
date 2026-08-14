@@ -545,7 +545,7 @@ function ResourceDetail({
               <div className="resource-detail-content">
                 {displaySummary && (
                   <Paragraph
-                    className="utrecht-heading-4"
+                    className="osc-summary"
                     dangerouslySetInnerHTML={{
                       __html: resource.summary,
                     }}

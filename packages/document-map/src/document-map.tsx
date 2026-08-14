@@ -908,13 +908,22 @@ function DocumentMap({
     if (map) setPopupPosition(map.getCenter());
   };
 
-  // ponytail: focus de reactie-textarea zodra de popup opent, zodat de keyboard-flow doorloopt (2.1.1)
+  // ponytail: focus de reactie-textarea zodra de popup opent, zodat de keyboard-flow doorloopt (2.1.1).
+  // Wie niet is ingelogd krijgt geen textarea maar een inlogtekst met knop; dan
+  // stond er niets om te focussen en bleef de focus achter op de kaart.
   useEffect(() => {
     if (!popupPosition) return;
     const t = setTimeout(() => {
-      (
-        document.getElementById('commentBox') as HTMLTextAreaElement | null
-      )?.focus();
+      const inhoud = document.querySelector('.leaflet-popup-content');
+      const doel =
+        (document.getElementById('commentBox') as HTMLElement | null) ||
+        (inhoud?.querySelector(
+          'button, a[href], textarea, input, select'
+        ) as HTMLElement | null) ||
+        (document.querySelector(
+          '.leaflet-popup .leaflet-popup-close-button'
+        ) as HTMLElement | null);
+      doel?.focus();
     }, 50);
     return () => clearTimeout(t);
   }, [popupPosition]);
@@ -1047,7 +1056,7 @@ function DocumentMap({
             ) : null}
             {displayResourceSummary === 'yes' && resource.summary ? (
               <Paragraph
-                className="utrecht-heading-4"
+                className="osc-summary"
                 dangerouslySetInnerHTML={{
                   __html: resource.summary,
                 }}
@@ -1103,7 +1112,7 @@ function DocumentMap({
                 ) : null}
                 {displayResourceSummary === 'yes' && resource.summary ? (
                   <Paragraph
-                    className="utrecht-heading-4"
+                    className="osc-summary"
                     dangerouslySetInnerHTML={{
                       __html: resource.summary,
                     }}
@@ -1128,7 +1137,7 @@ function DocumentMap({
               ) : null}
               {displayResourceSummary === 'yes' && resource.summary ? (
                 <Paragraph
-                  className="utrecht-heading-4"
+                  className="osc-summary"
                   dangerouslySetInnerHTML={{
                     __html: resource.summary,
                   }}
@@ -1534,7 +1543,7 @@ function DocumentMap({
             ) : null}
             {displayResourceSummary === 'yes' && resource.summary ? (
               <Paragraph
-                className="utrecht-heading-4"
+                className="osc-summary"
                 dangerouslySetInnerHTML={{
                   __html: resource.summary,
                 }}
@@ -1625,7 +1634,7 @@ function DocumentMap({
             ) : null}
             {displayResourceSummary === 'yes' && resource.summary ? (
               <Paragraph
-                className="utrecht-heading-4"
+                className="osc-summary"
                 dangerouslySetInnerHTML={{
                   __html: resource.summary,
                 }}

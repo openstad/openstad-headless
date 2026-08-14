@@ -1,3 +1,12 @@
+/* De samenvatting was een <h2> en is nu een paragraaf (het is geen kop). De
+   klasse utrecht-heading-4 die daarbij stond deed niets — utrecht-paragraph wint.
+   Dit geeft de samenvatting weer eigen nadruk, zonder kop-semantiek. */
+.osc-summary {
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
 .documentMap--container {
   height: calc(100vh - 193px);
   display: grid;
