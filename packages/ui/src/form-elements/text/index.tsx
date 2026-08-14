@@ -485,11 +485,17 @@ const TextInput: FC<TextInputProps> = ({
           autoComplete={
             variant === 'email' ? 'email' : getAutocomplete(fieldKey)
           }
-          aria-describedby={`${randomId}_error${
-            (isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText
-              ? ` ${helpTextId}`
-              : ''
-          }`}
+          aria-describedby={
+            [
+              // ponytail: het foutelement bestaat pas als er een fout is
+              checkInvalid ? `${randomId}_error` : '',
+              (isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText
+                ? helpTextId
+                : '',
+            ]
+              .filter(Boolean)
+              .join(' ') || undefined
+          }
           aria-invalid={checkInvalid}
         />
         {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText && (

@@ -154,7 +154,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     <div className={`question`}>
       <Fieldset
         aria-invalid={checkInvalid}
-        aria-describedby={`${randomId}_error`}>
+        aria-describedby={checkInvalid ? `${randomId}_error` : undefined}>
         {title && (
           <FieldsetLegend>
             <RteContent

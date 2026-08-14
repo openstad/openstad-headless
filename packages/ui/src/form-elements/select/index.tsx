@@ -189,7 +189,7 @@ const SelectField: FC<SelectFieldProps> = ({
             }}
             disabled={disabled}
             aria-invalid={fieldInvalid}
-            aria-describedby={`${randomId}_error`}
+            aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}
             value={selected}>
             <SelectOption value="">{defaultOption}</SelectOption>
             {choices?.map((value, index) => (

@@ -141,7 +141,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
       <Fieldset
         role="group"
         aria-invalid={fieldInvalid}
-        aria-describedby={`${randomId}_error`}>
+        aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}>
         {title && (
           <FieldsetLegend>
             <RteContent

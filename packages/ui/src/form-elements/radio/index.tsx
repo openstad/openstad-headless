@@ -196,7 +196,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
       <Fieldset
         role="radiogroup"
         aria-invalid={checkInvalid}
-        aria-describedby={`${randomId}_error`}>
+        aria-describedby={checkInvalid ? `${randomId}_error` : undefined}>
         {title && (
           <FieldsetLegend>
             <RteContent

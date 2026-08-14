@@ -277,7 +277,7 @@ const RangeSlider: FC<RangeSliderProps> = ({
           }
           disabled={disabled || fieldDisabled}
           aria-invalid={fieldInvalid}
-          aria-describedby={`${randomId}_error`}
+          aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}
         />
         <div
           className={`slider_line-container ${getSliderClass(rangeValue)}`}

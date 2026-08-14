@@ -186,7 +186,10 @@ const NumberInput: FC<NumberInputProps> = ({
           placeholder={placeholder}
           aria-invalid={fieldInvalid}
           aria-describedby={
-            [description ? `${randomID}_desc` : '', `${randomId}_error`]
+            [
+              description ? `${randomID}_desc` : '',
+              fieldInvalid ? `${randomId}_error` : '',
+            ]
               .filter(Boolean)
               .join(' ') || undefined
           }

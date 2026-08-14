@@ -380,7 +380,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
             });
           }}
           aria-invalid={fieldInvalid}
-          aria-describedby={`${randomId}_error`}
+          aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}
           onremovefile={(
             error: FilePondErrorDescription | null,
             file: FilePondFile

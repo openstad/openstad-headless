@@ -346,7 +346,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
               : acceptAttribute
           }
           aria-invalid={fieldInvalid}
-          aria-describedby={`${randomId}_error`}
+          aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}
           {...filePondSettings}
         />
       </div>

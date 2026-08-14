@@ -190,12 +190,15 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
         }}
         disabled={disabled}
         aria-invalid={checkInvalid}
-        aria-describedby={[
-          scaleHint ? `${randomId}_scalehint` : '',
-          `${randomId}_error`,
-        ]
-          .filter(Boolean)
-          .join(' ')}
+        aria-describedby={
+          [
+            scaleHint ? `${randomId}_scalehint` : '',
+            // ponytail: het foutelement bestaat pas als er een fout is
+            checkInvalid ? `${randomId}_error` : '',
+          ]
+            .filter(Boolean)
+            .join(' ') || undefined
+        }
         aria-valuetext={(() => {
           const opt = fieldOptions.find((opt) => opt.value === value);
           if (!opt) return value;
