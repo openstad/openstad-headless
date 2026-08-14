@@ -20,3 +20,5 @@ export { List } from './list';
 export { Stepper } from './stepper';
 export { Pill } from './pill';
 export { Separator } from './separator';
+export { headingLevels } from './heading-level';
+export type { HeadingLevel } from './heading-level';

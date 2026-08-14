@@ -18,6 +18,10 @@ docker-compose.override.yml
 apps/*/package-lock.json
 /packages/ui/dist
 
+# Typedeclaraties van testbestanden: leeg (`export {}`) en niet elders gebruikt.
+# De echte .d.ts in packages/*/types worden wel gecommit.
+*.test.d.ts
+
 # Git worktrees
 .worktrees/
 
