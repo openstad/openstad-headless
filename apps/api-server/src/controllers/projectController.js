@@ -617,6 +617,49 @@ async function syncAuthProvidersAfterCreate(req, res, next) {
   }
 }
 
+async function enqueueDuplicationJob(req, res, next) {
+  if (!req.isDuplicationPayload) return next();
+  try {
+    const job = await db.DuplicationJob.create({
+      projectId: req.projectId,
+      userId: req.user && req.user.id,
+      status: 'pending',
+      payload: {
+        widgets: req.widgets || [],
+        tags: req.tags || [],
+        statuses: req.statuses || [],
+        resources: req.resources || [],
+        notificationTemplates: req.notificationTemplates || [],
+        resourceSettings: req.resourceSettings || {},
+      },
+    });
+    req.duplicationJobId = job.id;
+    return next();
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getDuplicationStatus(req, res, next) {
+  try {
+    const job = await db.DuplicationJob.findOne({
+      where: { projectId: parseInt(req.params.projectId, 10) },
+      order: [['id', 'DESC']],
+      attributes: ['id', 'projectId', 'status', 'result'],
+    });
+    if (!job) return res.json({ status: 'none', errors: [] });
+    const errors =
+      job.result && Array.isArray(job.result.errors) ? job.result.errors : [];
+    const rollbackSessionId = job.result && job.result.rollbackSessionId;
+    const duplicatedData = rollbackSessionId
+      ? { rollbackSessionId, projectId: job.projectId }
+      : undefined;
+    return res.json({ status: job.status, errors, duplicatedData });
+  } catch (err) {
+    return next(err);
+  }
+}
+
 async function createDuplicatedData(req, res, next) {
   const errors = [];
 
@@ -783,7 +826,14 @@ async function publishNewProjectEvent(req, res, next) {
 }
 
 function respondCreatedProject(req, res, next) {
-  return res.json(req.isDuplicationPayload ? req.projectId : req.results);
+  if (req.isDuplicationPayload) {
+    return res.json({
+      id: req.projectId,
+      duplicationJobId: req.duplicationJobId,
+      duplicationStatus: 'pending',
+    });
+  }
+  return res.json(req.results);
 }
 
 // ----------------------------------------------------------------------------
@@ -1250,6 +1300,8 @@ module.exports = {
   createProjectRecord,
   syncAuthProvidersAfterCreate,
   createDuplicatedData,
+  enqueueDuplicationJob,
+  getDuplicationStatus,
   addCurrentUserAsAdmin,
   publishNewProjectEvent,
   respondCreatedProject,

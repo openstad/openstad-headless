@@ -47,7 +47,7 @@ router
   .post(rateLimiter(), ctrl.prepareDuplicationPayload)
   .post(ctrl.createProjectRecord)
   .post(ctrl.syncAuthProvidersAfterCreate)
-  .post(ctrl.createDuplicatedData)
+  .post(ctrl.enqueueDuplicationJob)
   .post(ctrl.addCurrentUserAsAdmin)
   .post(ctrl.publishNewProjectEvent)
   .post(auth.useReqUser)
@@ -105,6 +105,13 @@ router
   .get(auth.can('Project', 'view'))
   .get(auth.useReqUser)
   .get(ctrl.viewProject);
+
+// duplication status
+// -------------------
+router
+  .route('/:projectId(\\d+)/duplication-status')
+  .get(auth.can('Project', 'update'))
+  .get(ctrl.getDuplicationStatus);
 
 // anonymize all users
 // -------------------
