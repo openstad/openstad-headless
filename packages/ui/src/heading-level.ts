@@ -12,10 +12,16 @@
 
 export type HeadingLevel = 1 | 2 | 3 | 4;
 type Level = 1 | 2 | 3 | 4 | 5 | 6;
+// Subkoppen zitten altijd onder de titel, dus die kunnen nooit h1 zijn. Dat is
+// niet alleen waar in de praktijk maar ook in het type, zodat componenten die
+// een subkop verwachten geen h1 aangeboden kunnen krijgen.
+type SubLevel = 2 | 3 | 4 | 5 | 6;
 
-const clamp = (n: number): Level => Math.min(Math.max(n, 2), 6) as Level;
+const clamp = (n: number): SubLevel => Math.min(Math.max(n, 2), 6) as SubLevel;
 
-export function headingLevels(base?: number | string): [Level, Level, Level] {
+export function headingLevels(
+  base?: number | string
+): [Level, SubLevel, SubLevel] {
   const gevraagd = Number(base);
   const b: Level = gevraagd === 1 ? 1 : clamp(gevraagd || 2);
   return [b, clamp(b + 1), clamp(b + 2)];
