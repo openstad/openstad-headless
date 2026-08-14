@@ -66,11 +66,14 @@ describe('createTags', () => {
     await dup.createTags([{ originalId: 1, name: 'x' }], 5, tagMap, errors);
     expect(tagMap).toEqual({ 1: 99 });
     expect(errors).toEqual([]);
-    expect(db.Tag.create).toHaveBeenCalledWith({
-      originalId: 1,
-      name: 'x',
-      projectId: 5,
-    });
+    expect(db.Tag.create).toHaveBeenCalledWith(
+      {
+        originalId: 1,
+        name: 'x',
+        projectId: 5,
+      },
+      { hooks: false }
+    );
   });
 
   it('collects an error instead of throwing on failure', async () => {

@@ -17,7 +17,10 @@ const db = require('../db');
 async function createTags(tags, projectId, tagMap, errors) {
   for (const tag of tags) {
     try {
-      const newTag = await db.Tag.create({ ...tag, projectId });
+      const newTag = await db.Tag.create(
+        { ...tag, projectId },
+        { hooks: false }
+      );
       tagMap[tag.originalId] = newTag.id;
     } catch (error) {
       errors.push({ step: 'Create tags', error: error.message });
@@ -29,7 +32,10 @@ async function createTags(tags, projectId, tagMap, errors) {
 async function createStatuses(statuses, projectId, statusMap, errors) {
   for (const status of statuses) {
     try {
-      const newStatus = await db.Status.create({ ...status, projectId });
+      const newStatus = await db.Status.create(
+        { ...status, projectId },
+        { hooks: false }
+      );
       statusMap[status.originalId] = newStatus.id;
     } catch (error) {
       errors.push({ step: 'Create statuses', error: error.message });
@@ -362,6 +368,68 @@ async function getValidTags(projectId, tags) {
   return validTags.map((tag) => tag.id);
 }
 
+async function runProjectDuplication({ projectId, payload }) {
+  const data = payload || {};
+  const errors = [];
+
+  const tagMap = {};
+  const statusMap = {};
+  const widgetMap = {};
+  const resourceMap = {};
+  const userMap = {};
+  const createdUserIds = new Set();
+  const newWidgets = [];
+
+  await createTags(data.tags || [], projectId, tagMap, errors);
+  await createStatuses(data.statuses || [], projectId, statusMap, errors);
+  await createWidgets(
+    data.widgets || [],
+    projectId,
+    widgetMap,
+    newWidgets,
+    errors
+  );
+  await createNotificationTemplates(
+    data.notificationTemplates || [],
+    projectId,
+    errors
+  );
+  await createResources(
+    data.resources || [],
+    projectId,
+    resourceMap,
+    widgetMap,
+    tagMap,
+    statusMap,
+    userMap,
+    createdUserIds,
+    errors
+  );
+  await updateWidgetIdsInNewWidgets(
+    newWidgets,
+    widgetMap,
+    resourceMap,
+    tagMap,
+    statusMap,
+    projectId,
+    errors
+  );
+  await revertConfigResourceSettings(projectId, data.resourceSettings, errors);
+
+  return {
+    errors,
+    maps: {
+      projectId,
+      tagMap,
+      statusMap,
+      widgetMap,
+      resourceMap,
+      createdUserIds: Array.from(createdUserIds),
+      newWidgets,
+    },
+  };
+}
+
 module.exports = {
   createTags,
   createStatuses,
@@ -375,4 +443,5 @@ module.exports = {
   revertConfigResourceSettings,
   getValidStatuses,
   getValidTags,
+  runProjectDuplication,
 };
