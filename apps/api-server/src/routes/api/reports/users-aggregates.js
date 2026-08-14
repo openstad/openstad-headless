@@ -40,12 +40,47 @@ const UNIQUE_PARTICIPANTS_QUERY = `
       WHERE projectId = ? AND deletedAt IS NULL AND userId IS NOT NULL AND userId != 0
   ) AS combined`;
 
-async function countDistinct(query, bindvars) {
-  const [rows] = await sequelize.query(query, {
+async function countDistinct(runner, query, bindvars) {
+  const [rows] = await runner.query(query, {
     replacements: bindvars,
-    type: sequelize.QueryTypes.SELECT,
+    type: runner.QueryTypes.SELECT,
   });
   return (rows && rows.counted) || 0;
+}
+
+/**
+ * Builds the aggregate response. The query runner is passed in (rather than read
+ * from the module-level `sequelize`) so this can be unit-tested with a stub and
+ * without a real DB connection — mirrors submissions-fields.js's
+ * resolveSubmissionFields seam.
+ *
+ * @param {{runner: object, projectId: number}} args
+ * @returns {Promise<{uniqueParticipants:number, byType:Array<{type:string,count:number}>}>}
+ */
+async function resolveUserAggregates({ runner, projectId }) {
+  const [uniqueParticipants, votes, comments, submissions, choiceGuides] =
+    await Promise.all([
+      countDistinct(runner, UNIQUE_PARTICIPANTS_QUERY, [
+        projectId,
+        projectId,
+        projectId,
+        projectId,
+      ]),
+      countDistinct(runner, BY_TYPE_QUERIES.votes, [projectId]),
+      countDistinct(runner, BY_TYPE_QUERIES.comments, [projectId]),
+      countDistinct(runner, BY_TYPE_QUERIES.submissions, [projectId]),
+      countDistinct(runner, BY_TYPE_QUERIES.choiceGuides, [projectId]),
+    ]);
+
+  return {
+    uniqueParticipants,
+    byType: [
+      { type: 'votes', count: votes },
+      { type: 'comments', count: comments },
+      { type: 'submissions', count: submissions },
+      { type: 'choiceGuides', count: choiceGuides },
+    ],
+  };
 }
 
 // GET /api/project/:projectId/reports/users/aggregates
@@ -59,32 +94,17 @@ async function countDistinct(query, bindvars) {
 // report-field-filter.test.js) rather than a nested keyed object.
 module.exports = async function usersAggregates(req, res, next) {
   try {
-    const projectId = req.project.id;
-
-    const [uniqueParticipants, votes, comments, submissions, choiceGuides] =
-      await Promise.all([
-        countDistinct(UNIQUE_PARTICIPANTS_QUERY, [
-          projectId,
-          projectId,
-          projectId,
-          projectId,
-        ]),
-        countDistinct(BY_TYPE_QUERIES.votes, [projectId]),
-        countDistinct(BY_TYPE_QUERIES.comments, [projectId]),
-        countDistinct(BY_TYPE_QUERIES.submissions, [projectId]),
-        countDistinct(BY_TYPE_QUERIES.choiceGuides, [projectId]),
-      ]);
-
-    return res.json({
-      uniqueParticipants,
-      byType: [
-        { type: 'votes', count: votes },
-        { type: 'comments', count: comments },
-        { type: 'submissions', count: submissions },
-        { type: 'choiceGuides', count: choiceGuides },
-      ],
+    const payload = await resolveUserAggregates({
+      runner: sequelize,
+      projectId: req.project.id,
     });
+    return res.json(payload);
   } catch (err) {
     return next(err);
   }
 };
+
+// Test seams — pure/DB-free given a stub runner.
+module.exports.resolveUserAggregates = resolveUserAggregates;
+module.exports.BY_TYPE_QUERIES = BY_TYPE_QUERIES;
+module.exports.UNIQUE_PARTICIPANTS_QUERY = UNIQUE_PARTICIPANTS_QUERY;
