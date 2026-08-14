@@ -157,4 +157,29 @@ describe('normalizeContributedUrl', () => {
   test('rejects values that cannot be parsed as a URL', () => {
     expect(normalizeContributedUrl('https://')).toEqual({ ok: false });
   });
+  // Word/Excel emit these instead of a normal space. The replacement that was
+  // meant to map them used a plain space on both sides, so a separator inside
+  // the path was stored percent-encoded as-is (e.g. '%C2%A0') and the link was
+  // dead. Escapes rather than literals: a literal one is unreviewable here.
+  test.each([
+    ['\u00A0', 'no-break space'],
+    ['\u202F', 'narrow no-break space'],
+    ['\u2009', 'thin space'],
+    ['\u3000', 'ideographic space'],
+    ['\u2002', 'en space'],
+  ])('normalizes a %s (%s) in the path to a regular space', (sep) => {
+    expect(normalizeContributedUrl(`https://example.org/a${sep}b`)).toEqual({
+      ok: true,
+      value: 'https://example.org/a%20b',
+    });
+  });
+
+  test('a value of only typographic spaces is treated as blank, not a URL', () => {
+    for (const blank of ['\u00A0', '\u3000', '\u00A0 \u2009']) {
+      expect(normalizeContributedUrl(blank)).toEqual({
+        ok: true,
+        value: blank,
+      });
+    }
+  });
 });

@@ -1,5 +1,12 @@
 const WRAPPING_QUOTES = '"\'“”‘’';
 
+// Unicode space separators other than a plain U+0020 — Word/Excel and rich-text
+// editors emit these instead of a normal space. Written with \u escapes on
+// purpose: the literal characters are indistinguishable from a space in a source
+// file, which is how this replacement came to map a space onto itself — a no-op
+// CodeQL flagged, and which left every separator below unhandled.
+const UNICODE_SPACES = /[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g;
+
 // Strips quotes from both ends. Written as a loop rather than a regex on
 // purpose: an anchored /["']+$/ backtracks quadratically, and with a 10mb body
 // limit a long run of quotes would block the event loop for minutes.
@@ -29,7 +36,7 @@ function normalizeContributedUrl(value) {
   if (typeof value !== 'string') {
     return { ok: false };
   }
-  if (value.replace(/ /g, ' ').trim() === '') {
+  if (value.replace(UNICODE_SPACES, ' ').trim() === '') {
     return { ok: true, value: value };
   }
 
@@ -41,7 +48,7 @@ function normalizeContributedUrl(value) {
       .replace(/[“”]/g, '"')
       .replace(/[‘’]/g, "'")
       .replace(/[–—]/g, '-')
-      .replace(/ /g, ' ')
+      .replace(UNICODE_SPACES, ' ')
       .trim()
   ).trim();
 
