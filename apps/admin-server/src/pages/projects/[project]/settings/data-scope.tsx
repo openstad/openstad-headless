@@ -1,3 +1,4 @@
+import { stripHtml } from '@/components/audit-log-format';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -64,7 +65,10 @@ function getWidgetFormFields(
       const key = item?.fieldKey || item?.key;
       if (!key || CONTROL_FIELD_KEYS.has(key) || seen.has(key)) continue;
       seen.add(key);
-      out.push({ key, label: item.title || key });
+      // item.title holds the TrixEditor's HTML, so it would render as literal
+      // '<div>…</div>' in the checkbox label. Fall back to the key when the
+      // title carries no text of its own (e.g. an image-only question).
+      out.push({ key, label: stripHtml(item.title || '') || key });
     }
   }
 
