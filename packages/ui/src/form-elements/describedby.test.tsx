@@ -2,6 +2,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 
+import RadioboxField from './radio';
 import SelectField from './select';
 
 // De auditor vond op /verdeelmodule en /emoji-slider invoervelden met een
@@ -27,5 +28,17 @@ describe('aria-describedby naar het foutelement', () => {
       <SelectField {...props} fieldInvalid={true} />
     );
     expect(markup).toContain('aria-describedby="abc_error"');
+  });
+
+  // Tweede ronde: een verplicht veld is bij het laden al "ongeldig" volgens de
+  // eigen checkInvalid van het component, maar form.tsx heeft dan nog geen
+  // foutmelding gerenderd. Live gemeten op /enquete: 4 velden wezen zo alsnog
+  // naar een id dat niet bestaat.
+  it('verwijst niet naar _error bij een verplicht veld dat nog leeg is', () => {
+    const markup = renderToStaticMarkup(
+      <RadioboxField {...props} fieldRequired={true} />
+    );
+    expect(markup).toContain('aria-invalid="true"');
+    expect(markup).not.toContain('abc_error');
   });
 });

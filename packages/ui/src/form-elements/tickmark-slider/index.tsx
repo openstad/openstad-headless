@@ -193,8 +193,10 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
         aria-describedby={
           [
             scaleHint ? `${randomId}_scalehint` : '',
-            // ponytail: het foutelement bestaat pas als er een fout is
-            checkInvalid ? `${randomId}_error` : '',
+            // ponytail: fieldInvalid komt uit form.tsx en is alleen waar als
+            // het foutelement daadwerkelijk gerenderd is. checkInvalid staat al
+            // op waar bij "verplicht en nog leeg", dus dat wees naar niets.
+            fieldInvalid ? `${randomId}_error` : '',
           ]
             .filter(Boolean)
             .join(' ') || undefined

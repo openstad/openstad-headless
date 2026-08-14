@@ -230,9 +230,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
       <Fieldset
         role="group"
         aria-invalid={checkFieldValidation() ? 'false' : 'true'}
-        aria-describedby={
-          checkFieldValidation() ? undefined : `${randomId}_error`
-        }>
+        aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}>
         {title && (
           <FieldsetLegend>
             <RteContent
