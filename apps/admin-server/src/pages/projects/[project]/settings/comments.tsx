@@ -70,16 +70,16 @@ export default function ProjectSettingsComments() {
       descriptionMaxLength: data?.config?.comments?.descriptionMaxLength,
       adminLabel: data?.config?.comments?.adminLabel,
       minCharactersWarning:
-        data?.config?.minCharactersWarning ||
+        data?.config?.comments?.minCharactersWarning ||
         'Nog minimaal {minCharacters} tekens',
       maxCharactersWarning:
-        data?.config?.maxCharactersWarning ||
+        data?.config?.comments?.maxCharactersWarning ||
         'Je hebt nog {maxCharacters} tekens over',
       minCharactersError:
-        data?.config?.minCharactersError ||
+        data?.config?.comments?.minCharactersError ||
         'Tekst moet minimaal {minCharacters} karakters bevatten',
       maxCharactersError:
-        data?.config?.maxCharactersError ||
+        data?.config?.comments?.maxCharactersError ||
         'Tekst moet maximaal {maxCharacters} karakters bevatten',
       editorLabel: data?.config?.comments?.editorLabel,
     }),
