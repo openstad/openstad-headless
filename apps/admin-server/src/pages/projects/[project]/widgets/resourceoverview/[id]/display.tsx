@@ -744,58 +744,59 @@ export default function WidgetResourceOverviewDisplay(
             )}
           />
 
-          <Heading size="xl" className="col-span-full mt-6">
-            Dialog
-          </Heading>
-          <Separator
-            style={{ margin: '-10px 0 0' }}
-            className="my-4 col-span-full"
-          />
-
-          <FormField
-            control={form.control}
-            name="displayLikeButton"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Like button weergeven in de dialog</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="displayBudget"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Budget in dialog weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="clickableImage"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Moet de afbeelding in de dialog klikbaar zijn?
-                </FormLabel>
-                <FormDescription>
-                  Als je dit aanvinkt, wordt de afbeelding in de dialog klikbaar
-                  en wordt de afbeelding geopend in een nieuw tabblad.
-                </FormDescription>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           {props.displayType === 'cardgrid' && (
             <>
+              <Heading size="xl" className="col-span-full mt-6">
+                Dialog
+              </Heading>
+              <Separator
+                style={{ margin: '-10px 0 0' }}
+                className="my-4 col-span-full"
+              />
+
+              <FormField
+                control={form.control}
+                name="displayLikeButton"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Like button weergeven in de dialog</FormLabel>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="displayBudget"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Budget in dialog weergeven</FormLabel>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="clickableImage"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Moet de afbeelding in de dialog klikbaar zijn?
+                    </FormLabel>
+                    <FormDescription>
+                      Als je dit aanvinkt, wordt de afbeelding in de dialog
+                      klikbaar en wordt de afbeelding geopend in een nieuw
+                      tabblad.
+                    </FormDescription>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="displayDocuments"
@@ -858,83 +859,84 @@ export default function WidgetResourceOverviewDisplay(
                   />
                 </>
               )}
-            </>
-          )}
 
-          <FormField
-            control={form.control}
-            name="displayTags"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tags in dialog weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <FormField
+                control={form.control}
+                name="displayTags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tags in dialog weergeven</FormLabel>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          {displayTags && (
-            <FormField
-              control={form.control}
-              name="dialogTagGroups"
-              render={() => (
-                <FormItem className="col-span-full">
-                  <div>
-                    <FormLabel>
-                      Selecteer van welke tag groepen de tags getoond moeten
-                      worden in de dialog
-                    </FormLabel>
-                  </div>
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-2 items-center">
-                    {(tagGroupNames || []).map((groupName, index) => (
-                      <>
-                        <FormField
-                          key={`parent${groupName}`}
-                          control={form.control}
-                          name="dialogTagGroups"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
-                                key={groupName}
-                                className="flex flex-row items-start space-x-3 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={(field.value ?? []).includes(
-                                      groupName
-                                    )}
-                                    onCheckedChange={(checked: boolean) => {
-                                      let updatedFields = field.value ?? [];
-                                      if (checked) {
-                                        updatedFields = [
-                                          ...updatedFields,
-                                          groupName,
-                                        ];
-                                      } else {
-                                        updatedFields = updatedFields.filter(
-                                          (name) => name !== groupName
-                                        );
-                                      }
-                                      field.onChange(updatedFields);
-                                      props.onFieldChanged(
-                                        field.name,
-                                        updatedFields
-                                      );
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="font-normal">
-                                  {groupName}
-                                </FormLabel>
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      </>
-                    ))}
-                  </div>
-                </FormItem>
+              {displayTags && (
+                <FormField
+                  control={form.control}
+                  name="dialogTagGroups"
+                  render={() => (
+                    <FormItem className="col-span-full">
+                      <div>
+                        <FormLabel>
+                          Selecteer van welke tag groepen de tags getoond moeten
+                          worden in de dialog
+                        </FormLabel>
+                      </div>
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-2 items-center">
+                        {(tagGroupNames || []).map((groupName, index) => (
+                          <>
+                            <FormField
+                              key={`parent${groupName}`}
+                              control={form.control}
+                              name="dialogTagGroups"
+                              render={({ field }) => {
+                                return (
+                                  <FormItem
+                                    key={groupName}
+                                    className="flex flex-row items-start space-x-3 space-y-0">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={(field.value ?? []).includes(
+                                          groupName
+                                        )}
+                                        onCheckedChange={(checked: boolean) => {
+                                          let updatedFields = field.value ?? [];
+                                          if (checked) {
+                                            updatedFields = [
+                                              ...updatedFields,
+                                              groupName,
+                                            ];
+                                          } else {
+                                            updatedFields =
+                                              updatedFields.filter(
+                                                (name) => name !== groupName
+                                              );
+                                          }
+                                          field.onChange(updatedFields);
+                                          props.onFieldChanged(
+                                            field.name,
+                                            updatedFields
+                                          );
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {groupName}
+                                    </FormLabel>
+                                  </FormItem>
+                                );
+                              }}
+                            />
+                          </>
+                        ))}
+                      </div>
+                    </FormItem>
+                  )}
+                />
               )}
-            />
+            </>
           )}
 
           <Heading size="xl" className="col-span-full mt-6">
