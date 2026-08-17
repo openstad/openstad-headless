@@ -312,6 +312,9 @@ export default function WidgetEnqueteItems(
             infoBlockShareButton: values.infoBlockShareButton || false,
             infoBlockExtraButton: values.infoBlockExtraButton || '',
             infoBlockExtraButtonTitle: values.infoBlockExtraButtonTitle || '',
+            videoUrl: values.videoUrl || '',
+            videoSubtitle: values.videoSubtitle || false,
+            videoLang: values.videoLang || '',
             numberingStyle: values.numberingStyle || 'none',
             images: values?.images || [],
             // Keeping these for backwards compatibility
