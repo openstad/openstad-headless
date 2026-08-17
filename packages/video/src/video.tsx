@@ -183,6 +183,7 @@ const VideoField: FC<VideoFieldProps> = ({
                 het videovlak, zodat "groot in het midden als hij gepauzeerd is"
                 ook echt het midden van de video is. */}
             <button
+              type="button"
               onClick={(e) => handlePlayPause(e)}
               className={`playPauseToggle ${
                 playing ? '--playing' : '--paused'
@@ -213,6 +214,7 @@ const VideoField: FC<VideoFieldProps> = ({
                 of spatie (2.1.1). En de naam stond in het Engels op een
                 Nederlandse pagina (2.5.3). */}
             <button
+              type="button"
               onClick={handleVideoClick}
               className={`muteToggle ${muted ? '--muted' : '--unmuted'} ${
                 muteToggle ? '--toggle' : ''
