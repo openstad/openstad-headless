@@ -570,7 +570,20 @@ function DocumentMap({
         setIsSubmittingComment(false);
       }
     } else {
-      return;
+      const min = props.comments?.descriptionMinLength || 0;
+      const max = props.comments?.descriptionMaxLength || Infinity;
+
+      if (commentValue.length < min) {
+        const minErrorText =
+          props?.minCharactersError ||
+          'Tekst moet minimaal {minCharacters} karakters bevatten';
+        setHelpText(minErrorText.replace('{minCharacters}', min.toString()));
+      } else {
+        const maxErrorText =
+          props?.maxCharactersError ||
+          'Tekst moet maximaal {maxCharacters} karakters bevatten';
+        setHelpText(maxErrorText.replace('{maxCharacters}', String(max)));
+      }
     }
   };
 
