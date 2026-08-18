@@ -10,6 +10,7 @@ const searchInResults = require('../../middleware/search-in-results');
 const merge = require('merge');
 const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const { applyUserSearchFilter } = require('../../lib/user-search-filter');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const crypto = require('crypto');
 
@@ -239,18 +240,8 @@ router
       delete dbQuery.pageSize;
     }
 
-    const q =
-      req.query.q && typeof req.query.q === 'string' ? req.query.q.trim() : '';
-    if (q) {
-      const like =
-        '%' +
-        String(q).replace(/[\\%_]/g, (m) => (m === '\\' ? '\\\\' : '\\' + m)) +
-        '%';
-      dbQuery.where[Op.or] = [
-        { name: { [Op.like]: like } },
-        { email: { [Op.like]: like } },
-        { postcode: { [Op.like]: like } },
-      ];
+    if (hasRole(req.user, 'moderator')) {
+      applyUserSearchFilter(dbQuery.where, req.query.q);
     }
 
     db.User.scope(...req.scope)
@@ -291,12 +282,14 @@ router
   })
   .post(function (req, res, next) {
     // check config
-    if (!(
-      ['admin', 'editor'].includes(req.body?.role) || // Allow admin/editor creation for projects that have ended
-      (req.project.config &&
-        req.project.config.users &&
-        req.project.config.users.canCreateNewUsers)
-    ))
+    if (
+      !(
+        ['admin', 'editor'].includes(req.body?.role) || // Allow admin/editor creation for projects that have ended
+        (req.project.config &&
+          req.project.config.users &&
+          req.project.config.users.canCreateNewUsers)
+      )
+    )
       return next(createError(401, 'Gebruikers mogen niet aangemaakt worden'));
     return next();
   })
@@ -626,11 +619,13 @@ router
   })
   .put(async function (req, res, next) {
     let result;
-    if (!(
-      req.targetUser &&
-      req.targetUser.can &&
-      req.targetUser.can('update', req.user)
-    ))
+    if (
+      !(
+        req.targetUser &&
+        req.targetUser.can &&
+        req.targetUser.can('update', req.user)
+      )
+    )
       return next(createError(403, 'You cannot update this User'));
     if (req.onlyUserIds && !req.onlyUserIds.includes(req.targetUser.id)) {
       req.results = {
