@@ -41,7 +41,7 @@ export default function WidgetResourceOverviewSearch(
       displaySearch: props.displaySearch || false,
       displaySearchText: props.displaySearchText || false,
       textActiveSearch:
-        props.textActiveSearch || 'Je ziet hier zoekresultaten voor [zoekterm]',
+        props.textActiveSearch ?? 'Je ziet hier zoekresultaten voor [zoekterm]',
       searchPlaceholder: props.searchPlaceholder ?? 'Zoeken',
     },
   });
