@@ -89,7 +89,6 @@ module.exports = function (db, sequelize, DataTypes) {
             // by default return anonymous role if none of the conditions are met
             let roleToReturn;
             // only for create and update check if allowed, the other option, view and list
-            // for now its ok if a the public sees the role
             // for fields no DELETE action exists
             if (action === 'create' || action === 'update') {
               // if user is allowed to update all status
