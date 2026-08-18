@@ -916,15 +916,10 @@ export default function WidgetEnqueteItems(
                               <SelectItem value="multiplechoice">
                                 Enkele keuze
                               </SelectItem>
-                              <SelectItem value="open">Open vraag</SelectItem>
                               <SelectItem value="multiple">
                                 Meerkeuze
                               </SelectItem>
-                              <SelectItem value="map">Locatie</SelectItem>
                               <SelectItem value="scale">Schaal</SelectItem>
-                              <SelectItem value="imageUpload">
-                                Afbeelding upload
-                              </SelectItem>
                               <SelectItem value="swipe">Swipe</SelectItem>
                             </SelectContent>
                           </Select>
