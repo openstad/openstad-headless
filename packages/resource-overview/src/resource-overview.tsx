@@ -110,7 +110,6 @@ export type ResourceOverviewWidgetProps = BaseProps &
       projectId?: any;
       inlineOptions?: boolean;
     }>;
-    displayTagGroupName?: boolean;
     displayBanner?: boolean;
     displayMap?: boolean;
     displayAsTabs?: boolean;
