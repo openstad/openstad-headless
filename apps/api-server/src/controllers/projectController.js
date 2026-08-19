@@ -29,7 +29,6 @@ const {
 } = require('../util/duplicate-rollback-session');
 const getWidgetSettings = require('../routes/widget/widget-settings');
 
-const dup = require('../services/projectDuplication');
 const authClientSync = require('../services/authClientSync');
 const projectCertificates = require('../services/projectCertificates');
 
@@ -617,93 +616,74 @@ async function syncAuthProvidersAfterCreate(req, res, next) {
   }
 }
 
-async function createDuplicatedData(req, res, next) {
-  const errors = [];
-
+async function enqueueDuplicationJob(req, res, next) {
+  if (!req.isDuplicationPayload) return next();
   try {
-    req.query.nomail = true;
-
-    const tagMap = {};
-    const statusMap = {};
-    const widgetMap = {};
-    const userMap = {};
-    req.createdUserIds = new Set();
-    const newWidgets = [];
-    const resourceMap = {};
-
-    await dup.createTags(req.tags, req.projectId, tagMap, errors);
-    await dup.createStatuses(req.statuses, req.projectId, statusMap, errors);
-    await dup.createWidgets(
-      req.widgets,
-      req.projectId,
-      widgetMap,
-      newWidgets,
-      errors
-    );
-    await dup.createNotificationTemplates(
-      req.notificationTemplates,
-      req.projectId,
-      errors
-    );
-    await dup.createResources(
-      req.resources,
-      req.projectId,
-      resourceMap,
-      widgetMap,
-      tagMap,
-      statusMap,
-      userMap,
-      req.createdUserIds,
-      errors
-    );
-    await dup.updateWidgetIdsInNewWidgets(
-      newWidgets,
-      widgetMap,
-      resourceMap,
-      tagMap,
-      statusMap,
-      req.projectId,
-      errors
-    );
-    await dup.revertConfigResourceSettings(
-      req.projectId,
-      req.resourceSettings,
-      errors
-    );
-
-    if (errors.length > 0) {
-      const rollbackData = {
-        projectId: req.projectId,
-        tagMap,
-        statusMap,
-        widgetMap,
-        resourceMap,
-        createdUserIds: Array.from(req.createdUserIds || []),
-        newWidgets,
-      };
-      const rollbackSessionId = duplicateRollbackSessionStore.createSession({
-        userId: req.user.id,
-        data: rollbackData,
-      });
-      await duplicateRollbackSessionStore.saveSessionOnProject({
-        projectId: req.projectId,
-        sessionId: rollbackSessionId,
-        userId: req.user.id,
-        data: rollbackData,
-      });
-      return res.status(500).json({
-        errors: errors,
-        duplicatedData: {
-          rollbackSessionId,
-          projectId: req.projectId,
-        },
-      });
-    }
-
+    const job = await db.DuplicationJob.create({
+      projectId: req.projectId,
+      sourceProjectId: req.sourceProjectId,
+      userId: req.user && req.user.id,
+      status: 'pending',
+      payload: {
+        widgets: req.widgets || [],
+        tags: req.tags || [],
+        statuses: req.statuses || [],
+        resources: req.resources || [],
+        notificationTemplates: req.notificationTemplates || [],
+        resourceSettings: req.resourceSettings || {},
+      },
+    });
+    req.duplicationJobId = job.id;
     return next();
-  } catch (error) {
-    errors.push({ step: 'Overall', error: error.message });
-    res.status(500).json({ errors });
+  } catch (err) {
+    return next(err);
+  }
+}
+
+async function getDuplicationStatus(req, res, next) {
+  try {
+    const projectId = parseInt(req.params.projectId, 10);
+    const attributes = ['id', 'projectId', 'status', 'result'];
+
+    const toDuplicatedData = (job) => {
+      const rollbackSessionId = job.result && job.result.rollbackSessionId;
+      if (!rollbackSessionId) return undefined;
+      return { rollbackSessionId, projectId: job.projectId };
+    };
+
+    const failedFromThisProject = await db.DuplicationJob.findOne({
+      where: { sourceProjectId: projectId, status: 'failed' },
+      order: [['id', 'DESC']],
+      attributes,
+    });
+    const previousFailure = failedFromThisProject
+      ? {
+          errors:
+            failedFromThisProject.result &&
+            Array.isArray(failedFromThisProject.result.errors)
+              ? failedFromThisProject.result.errors
+              : [],
+          duplicatedData: toDuplicatedData(failedFromThisProject),
+        }
+      : undefined;
+
+    const job = await db.DuplicationJob.findOne({
+      where: { projectId },
+      order: [['id', 'DESC']],
+      attributes,
+    });
+
+    if (!job) return res.json({ status: 'none', errors: [], previousFailure });
+    const errors =
+      job.result && Array.isArray(job.result.errors) ? job.result.errors : [];
+    return res.json({
+      status: job.status,
+      errors,
+      duplicatedData: toDuplicatedData(job),
+      previousFailure,
+    });
+  } catch (err) {
+    return next(err);
   }
 }
 
@@ -783,7 +763,14 @@ async function publishNewProjectEvent(req, res, next) {
 }
 
 function respondCreatedProject(req, res, next) {
-  return res.json(req.isDuplicationPayload ? req.projectId : req.results);
+  if (req.isDuplicationPayload) {
+    return res.json({
+      id: req.projectId,
+      duplicationJobId: req.duplicationJobId,
+      duplicationStatus: 'pending',
+    });
+  }
+  return res.json(req.results);
 }
 
 // ----------------------------------------------------------------------------
@@ -1249,7 +1236,8 @@ module.exports = {
   prepareDuplicationPayload,
   createProjectRecord,
   syncAuthProvidersAfterCreate,
-  createDuplicatedData,
+  enqueueDuplicationJob,
+  getDuplicationStatus,
   addCurrentUserAsAdmin,
   publishNewProjectEvent,
   respondCreatedProject,
