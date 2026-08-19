@@ -225,8 +225,14 @@ router
         );
       }
 
-      const result = await widget.update({ config, description });
-      await snapshotWidgetVersion(result, req.user);
+      const result = await db.sequelize.transaction(async (transaction) => {
+        const updated = await widget.update(
+          { config, description },
+          { transaction }
+        );
+        await snapshotWidgetVersion(updated, req.user, {}, { transaction });
+        return updated;
+      });
 
       return res.json(result);
     } catch (err) {
