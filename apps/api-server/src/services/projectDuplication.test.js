@@ -13,6 +13,7 @@ const orig = {
   tagFindAll: db.Tag.findAll,
   userFindOne: db.User.findOne,
   userCreate: db.User.create,
+  projectFindOne: db.Project.findOne,
 };
 
 afterEach(() => {
@@ -20,6 +21,7 @@ afterEach(() => {
   db.Tag.findAll = orig.tagFindAll;
   db.User.findOne = orig.userFindOne;
   db.User.create = orig.userCreate;
+  db.Project.findOne = orig.projectFindOne;
 });
 
 describe('updateWidgetIds (pure id remap)', () => {
@@ -114,5 +116,64 @@ describe('getOrCreateUser', () => {
     const created = db.User.create.mock.calls[0][0];
     expect(created.id).toBeUndefined();
     expect(created.projectId).toBe(5);
+  });
+});
+
+describe('runProjectDuplication (orchestration)', () => {
+  function stubProject() {
+    db.Project.findOne = vi
+      .fn()
+      .mockResolvedValue({ config: {}, update: vi.fn().mockResolvedValue({}) });
+  }
+
+  it('reports progress after every stage and returns the full map shape', async () => {
+    stubProject();
+    const progress = [];
+
+    const { errors, maps } = await dup.runProjectDuplication({
+      projectId: 5,
+      payload: {},
+      onProgress: async (m) => progress.push(m),
+    });
+
+    expect(errors).toEqual([]);
+    expect(progress).toHaveLength(7);
+    expect(Object.keys(maps).sort()).toEqual([
+      'createdUserIds',
+      'newWidgets',
+      'projectId',
+      'resourceMap',
+      'statusMap',
+      'tagMap',
+      'widgetMap',
+    ]);
+    expect(maps.projectId).toBe(5);
+  });
+
+  it('carries stage results into the reported and returned maps', async () => {
+    stubProject();
+    db.Tag.create = vi.fn().mockResolvedValue({ id: 99 });
+    const progress = [];
+
+    const { maps } = await dup.runProjectDuplication({
+      projectId: 5,
+      payload: { tags: [{ originalId: 1, name: 'Groen' }] },
+      onProgress: async (m) => progress.push(m),
+    });
+
+    expect(maps.tagMap).toEqual({ 1: 99 });
+    expect(progress[0].tagMap).toEqual({ 1: 99 });
+  });
+
+  it('works without an onProgress callback', async () => {
+    stubProject();
+
+    const { errors, maps } = await dup.runProjectDuplication({
+      projectId: 5,
+      payload: {},
+    });
+
+    expect(errors).toEqual([]);
+    expect(maps.projectId).toBe(5);
   });
 });

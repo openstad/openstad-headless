@@ -57,6 +57,7 @@ module.exports = {
     });
 
     await queryInterface.addIndex('duplicationJobs', ['status']);
+    await queryInterface.addIndex('duplicationJobs', ['projectId', 'id']);
   },
 
   async down({ context: queryInterface }) {
