@@ -1,12 +1,13 @@
 import express from 'express';
 import { createRequire } from 'module';
 import request from 'supertest';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 
 const require = createRequire(import.meta.url);
 const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 
+const origUseReqUser = auth.useReqUser;
 auth.useReqUser = (req, res, next) => next();
 
 const router = require('./widget-version');
@@ -19,6 +20,10 @@ const orig = {
   versionDestroy: db.WidgetVersion.destroy,
   transaction: db.sequelize.transaction,
 };
+
+afterAll(() => {
+  auth.useReqUser = origUseReqUser;
+});
 
 afterEach(() => {
   db.Widget.scope = orig.widgetScope;
