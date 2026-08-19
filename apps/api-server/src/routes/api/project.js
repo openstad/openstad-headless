@@ -110,7 +110,8 @@ router
 // -------------------
 router
   .route('/:projectId(\\d+)/duplication-status')
-  .get(auth.can('Project', 'update'))
+  .all(auth.can('Project', 'update'))
+  .all(ctrl.loadProject)
   .get(ctrl.getDuplicationStatus);
 
 // anonymize all users
