@@ -46,6 +46,7 @@ export default function CreateProject() {
   const { data: templates } = useTemplates();
   const [file, setFile] = React.useState('');
   const [templateCreating, setTemplateCreating] = React.useState(false);
+  const [templateStillRunning, setTemplateStillRunning] = React.useState(false);
   const [templateErrors, setTemplateErrors] = React.useState<
     Array<{ step: string; error: string }>
   >([]);
@@ -151,6 +152,12 @@ export default function CreateProject() {
       if (outcome.status === 'done') {
         toast.success('Project aangemaakt!');
         router.push(`/projects/${newId}/widgets`);
+      } else if (outcome.status === 'running') {
+        setTemplateStillRunning(true);
+        toast(
+          'Het aanmaken duurt langer dan verwacht en gaat op de achtergrond door. Het project verschijnt vanzelf in het overzicht.',
+          { duration: 8000 }
+        );
       } else {
         setTemplateErrors(outcome.errors);
         setDuplicatedData(outcome.duplicatedData || {});
@@ -309,7 +316,7 @@ export default function CreateProject() {
                   variant="default"
                   type="submit"
                   className="w-fit"
-                  disabled={templateCreating}>
+                  disabled={templateCreating || templateStillRunning}>
                   {templateCreating ? 'Bezig met aanmaken' : 'Aanmaken'}
                 </Button>
               </form>

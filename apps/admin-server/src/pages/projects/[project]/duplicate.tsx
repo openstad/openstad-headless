@@ -39,6 +39,7 @@ export default function ProjectDuplicate() {
   const [isErrorsVisible, setIsErrorsVisible] = useState(false);
   const [duplicatingInProgress, setDuplicatingInProgress] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  const [stillRunning, setStillRunning] = useState(false);
   const [
     removePreviousDuplicatedDataInProgress,
     setRemovePreviousDuplicatedDataInProgress,
@@ -148,6 +149,15 @@ export default function ProjectDuplicate() {
 
       const outcome = await waitForDuplication(newId);
 
+      if (outcome.status === 'running') {
+        setStillRunning(true);
+        toast(
+          'Het dupliceren duurt langer dan verwacht en gaat op de achtergrond door. Het project verschijnt vanzelf in het overzicht.',
+          { duration: 8000 }
+        );
+        return;
+      }
+
       if (outcome.status !== 'done') {
         setErrors(outcome.errors);
         setDuplicatedData(outcome.duplicatedData || {});
@@ -232,7 +242,9 @@ export default function ProjectDuplicate() {
                 <Button
                   type="submit"
                   variant={'default'}
-                  disabled={duplicatingInProgress || redirecting}>
+                  disabled={
+                    duplicatingInProgress || redirecting || stillRunning
+                  }>
                   {duplicatingInProgress
                     ? 'Bezig met dupliceren'
                     : 'Dupliceren'}
