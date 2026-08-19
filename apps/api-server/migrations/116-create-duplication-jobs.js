@@ -17,6 +17,10 @@ module.exports = {
         type: Sequelize.INTEGER,
         allowNull: true,
       },
+      sourceProjectId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
       status: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -58,6 +62,7 @@ module.exports = {
 
     await queryInterface.addIndex('duplicationJobs', ['status']);
     await queryInterface.addIndex('duplicationJobs', ['projectId', 'id']);
+    await queryInterface.addIndex('duplicationJobs', ['sourceProjectId', 'id']);
   },
 
   async down({ context: queryInterface }) {
