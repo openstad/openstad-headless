@@ -621,6 +621,7 @@ async function enqueueDuplicationJob(req, res, next) {
   try {
     const job = await db.DuplicationJob.create({
       projectId: req.projectId,
+      sourceProjectId: req.sourceProjectId,
       userId: req.user && req.user.id,
       status: 'pending',
       payload: {
@@ -641,19 +642,46 @@ async function enqueueDuplicationJob(req, res, next) {
 
 async function getDuplicationStatus(req, res, next) {
   try {
-    const job = await db.DuplicationJob.findOne({
-      where: { projectId: parseInt(req.params.projectId, 10) },
+    const projectId = parseInt(req.params.projectId, 10);
+    const attributes = ['id', 'projectId', 'status', 'result'];
+
+    const toDuplicatedData = (job) => {
+      const rollbackSessionId = job.result && job.result.rollbackSessionId;
+      if (!rollbackSessionId) return undefined;
+      return { rollbackSessionId, projectId: job.projectId };
+    };
+
+    const failedFromThisProject = await db.DuplicationJob.findOne({
+      where: { sourceProjectId: projectId, status: 'failed' },
       order: [['id', 'DESC']],
-      attributes: ['id', 'projectId', 'status', 'result'],
+      attributes,
     });
-    if (!job) return res.json({ status: 'none', errors: [] });
+    const previousFailure = failedFromThisProject
+      ? {
+          errors:
+            failedFromThisProject.result &&
+            Array.isArray(failedFromThisProject.result.errors)
+              ? failedFromThisProject.result.errors
+              : [],
+          duplicatedData: toDuplicatedData(failedFromThisProject),
+        }
+      : undefined;
+
+    const job = await db.DuplicationJob.findOne({
+      where: { projectId },
+      order: [['id', 'DESC']],
+      attributes,
+    });
+
+    if (!job) return res.json({ status: 'none', errors: [], previousFailure });
     const errors =
       job.result && Array.isArray(job.result.errors) ? job.result.errors : [];
-    const rollbackSessionId = job.result && job.result.rollbackSessionId;
-    const duplicatedData = rollbackSessionId
-      ? { rollbackSessionId, projectId: job.projectId }
-      : undefined;
-    return res.json({ status: job.status, errors, duplicatedData });
+    return res.json({
+      status: job.status,
+      errors,
+      duplicatedData: toDuplicatedData(job),
+      previousFailure,
+    });
   } catch (err) {
     return next(err);
   }

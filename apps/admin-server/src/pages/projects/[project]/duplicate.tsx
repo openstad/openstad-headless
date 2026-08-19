@@ -62,6 +62,35 @@ export default function ProjectDuplicate() {
     form.reset(defaults());
   }, [form, defaults]);
 
+  useEffect(() => {
+    if (!project) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch(
+          `/api/openstad/api/project/${project}/duplication-status`
+        );
+        if (!res.ok) {
+          console.error(
+            `Duplicatiestatus opvragen mislukt met status ${res.status}`
+          );
+          return;
+        }
+        const data = await res.json();
+        if (cancelled || !data.previousFailure?.duplicatedData) return;
+        setDuplicatedData(data.previousFailure.duplicatedData);
+        setErrors(data.previousFailure.errors || []);
+      } catch (e) {
+        console.error('Duplicatiestatus opvragen mislukt', e);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [project]);
+
   if (!data) return null;
 
   const removePreviousDuplicatedData = async () => {

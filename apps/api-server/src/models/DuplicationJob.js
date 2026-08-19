@@ -12,6 +12,11 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: true,
       },
 
+      sourceProjectId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
+
       status: {
         type: DataTypes.STRING,
         allowNull: false,
