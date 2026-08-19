@@ -61,8 +61,11 @@ export function useWidgetVersions(
     }
   }
 
-  async function restore(versionId: number): Promise<number | null> {
-    if (!projectNumber || !widgetNumber) return null;
+  async function restore(
+    versionId: number
+  ): Promise<{ ok: boolean; undoVersionId: number | null }> {
+    const failed = { ok: false, undoVersionId: null };
+    if (!projectNumber || !widgetNumber) return failed;
 
     try {
       const res = await fetch(
@@ -75,7 +78,7 @@ export function useWidgetVersions(
 
       if (!res.ok) {
         toast.error('De versie kon niet worden hersteld');
-        return null;
+        return failed;
       }
 
       const data = await res.json();
@@ -83,10 +86,10 @@ export function useWidgetVersions(
       await globalMutate(
         `/api/openstad/api/project/${projectNumber}/widgets/${widgetNumber}?includeType=1`
       );
-      return data?.undoVersionId ?? null;
+      return { ok: true, undoVersionId: data?.undoVersionId ?? null };
     } catch (error) {
       toast.error('De versie kon niet worden hersteld');
-      return null;
+      return failed;
     }
   }
 

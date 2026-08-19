@@ -372,7 +372,9 @@ export default function WidgetVersionHistory({
   }, [selectedId, selected?.name]);
 
   async function handleRestore(versionId: number) {
-    const undoVersionId = await restore(versionId);
+    const { ok, undoVersionId } = await restore(versionId);
+    if (!ok) return;
+
     if (undoVersionId == null) {
       toast.success('Versie teruggezet');
       return;
