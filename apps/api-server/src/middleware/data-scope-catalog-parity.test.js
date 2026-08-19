@@ -52,4 +52,19 @@ describe('data-scope catalog parity (admin UI ↔ backend lib)', () => {
       expect(adminKeys[key]).toEqual(libFields);
     });
   }
+
+  // Undeclared keys survive only via config-field.js's legacy passthrough,
+  // which is marked for removal — after that the guard denies them silently.
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const projectConfig = require('../models/lib/project-config');
+
+  for (const key of Object.keys(COMPONENTS)) {
+    it(`'${key}' is declared in the project-config dataScope schema`, () => {
+      expect(projectConfig.dataScope.subset[key]).toBeDefined();
+      expect(projectConfig.dataScope.subset[key].subset.enabled).toEqual({
+        type: 'boolean',
+        default: false,
+      });
+    });
+  }
 });

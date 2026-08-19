@@ -511,6 +511,10 @@ secrets:
   api:
     jwtSecret:
     dbNameKey:
+    # Salt for the reporting API's pseudonymous user ids. Leave empty to have a
+    # random one generated; set it explicitly to keep pseudonyms stable when the
+    # secret is recreated.
+    reportPseudonymSecret:
   auth:
     sessionSecret:
     phoneHashSalt:

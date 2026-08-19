@@ -37,7 +37,8 @@ function applyFilter(
   // Apply the middleware — it wraps res.json synchronously then calls next.
   reportFieldFilter(req, res, next);
 
-  // Simulate the downstream route handler calling res.json(payload).
+  // Simulate the downstream route handler calling res.status(x).json(payload).
+  if (statusCode !== undefined) res.status(statusCode);
   res.json(payload);
 
   return captured.body;
@@ -120,7 +121,7 @@ describe('reportFieldFilter', () => {
       expect(result.extraData).toBeUndefined();
     });
 
-    it('keeps user.displayName only when opted in', () => {
+    it('never exposes user.* — not even when asked for explicitly', () => {
       const scopeWithPersonal = {
         componentKey: 'votes',
         enabledPersonalFields: ['user.displayName'],
@@ -140,11 +141,9 @@ describe('reportFieldFilter', () => {
         reportingScope: scopeWithPersonal,
       });
 
-      expect(result.user).toBeDefined();
-      expect(result.user.displayName).toBe('User-42');
-      // PII in user always stripped
-      expect(result.user.email).toBeUndefined();
-      expect(result.user.phoneNumber).toBeUndefined();
+      // user.* is no longer part of the reporting catalog: the joined user
+      // object is dropped wholesale rather than projected down.
+      expect(result.user).toBeUndefined();
       // userId at top level still stripped
       expect(result.userId).toBeUndefined();
     });
@@ -322,6 +321,46 @@ describe('reportFieldFilter', () => {
       expect(result.error).toBeDefined();
     });
 
+    it('passes through the real /reports/users/anonymized shape (#442)', () => {
+      const payload = {
+        data: [
+          {
+            participantId: 'abc123',
+            role: 'member',
+            projectId: 2,
+            createdAt: '2026-01-01T00:00:00.000Z',
+            lastLogin: '2026-02-01T00:00:00.000Z',
+          },
+        ],
+        nextLink: null,
+      };
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+      expect(result).toEqual(payload);
+    });
+
+    it('passes through the real /reports/users/aggregates shape (#442)', () => {
+      const payload = {
+        uniqueParticipants: 12,
+        byType: [
+          { type: 'votes', count: 5 },
+          { type: 'comments', count: 3 },
+          { type: 'submissions', count: 2 },
+          { type: 'choiceGuides', count: 1 },
+        ],
+      };
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+      expect(result).toEqual(payload);
+    });
+
+    it('blocks /reports/users/anonymized rows if a PII key ever leaked in (defense in depth)', () => {
+      const payload = {
+        data: [{ participantId: 'abc', role: 'member', email: 'leak@x.nl' }],
+        nextLink: null,
+      };
+      const result = applyFilter(payload, { reportingScope: aggregateScope });
+      expect(result.error).toBeDefined();
+    });
+
     it('blocks an array of rich records (e.g. a user list) — PII leak guard', () => {
       const payload = [
         { id: 1, email: 'jan@example.com', postcode: '1234AB' },
@@ -405,6 +444,53 @@ describe('reportFieldFilter', () => {
     });
   });
 
+  describe('error responses (4xx/5xx) pass through unfiltered', () => {
+    const scope = { componentKey: 'votes', enabledPersonalFields: [] };
+
+    it('does not mangle a 400 filter-error body on a component endpoint', () => {
+      const payload = {
+        error: {
+          code: 'unsupported_status_filter',
+          message: "The 'votes' report has no status field to filter on",
+          param: 'status',
+          hint: 'Remove the status parameter for this endpoint',
+        },
+      };
+
+      const result = applyFilter(payload, {
+        reportingScope: scope,
+        statusCode: 400,
+      });
+
+      expect(result).toEqual(payload);
+    });
+
+    it('still filters a normal 200 component response', () => {
+      const payload = { id: 1, opinion: 'yes', ip: '1.2.3.4', userId: 9 };
+
+      const result = applyFilter(payload, {
+        reportingScope: scope,
+        statusCode: 200,
+      });
+
+      expect(result.ip).toBeUndefined();
+      expect(result.userId).toBeUndefined();
+      expect(result.opinion).toBe('yes');
+    });
+
+    it('does not mangle a 400 body on an aggregate (componentKey null) endpoint either', () => {
+      const aggregateScope = { componentKey: null, enabledPersonalFields: [] };
+      const payload = { error: { code: 'bad_request', message: 'nope' } };
+
+      const result = applyFilter(payload, {
+        reportingScope: aggregateScope,
+        statusCode: 400,
+      });
+
+      expect(result).toEqual(payload);
+    });
+  });
+
   describe('blocked responses answer with 403', () => {
     it('uses 403 when the reporting scope was never resolved', () => {
       const { body, statusCode } = applyFilterWithStatus(
@@ -447,6 +533,42 @@ describe('reportFieldFilter', () => {
 
       expect(statusCode).toBe(404);
       expect(body).toEqual({ error: 'Not found' });
+    });
+  });
+
+  describe('schema/metadata responses bypass the field filter (#440)', () => {
+    it('passes through a {name,label,type} field-metadata array unfiltered', () => {
+      const scope = { componentKey: 'submissions', enabledPersonalFields: [] };
+      const payload = [{ name: 'field_name', label: 'Naam', type: 'text' }];
+
+      const captured = { body: null };
+      const req = {
+        apiTokenScope: 'reports',
+        reportingScope: scope,
+        reportSchemaResponse: true,
+      };
+      const res = {
+        statusCode: 200,
+        json(body) {
+          captured.body = body;
+          return res;
+        },
+      };
+      const next = vi.fn();
+      require('./report-field-filter')(req, res, next);
+      res.json(payload);
+
+      expect(captured.body).toEqual(payload);
+    });
+
+    it('still filters normally when reportSchemaResponse is not set', () => {
+      const scope = { componentKey: 'submissions', enabledPersonalFields: [] };
+      const payload = { id: 1, status: 'approved', userId: 9 };
+
+      const result = applyFilter(payload, { reportingScope: scope });
+
+      expect(result.status).toBe('approved');
+      expect(result.userId).toBeUndefined();
     });
   });
 
