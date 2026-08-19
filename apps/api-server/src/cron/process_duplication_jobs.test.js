@@ -9,13 +9,27 @@ const worker = require('./process_duplication_jobs');
 const origRun = dup.runProjectDuplication;
 const origProjectFindByPk = db.Project.findByPk;
 const origFindAll = db.DuplicationJob.findAll;
+const origUpdate = db.DuplicationJob.update;
 
 afterEach(() => {
   dup.runProjectDuplication = origRun;
   db.Project.findByPk = origProjectFindByPk;
   db.DuplicationJob.findAll = origFindAll;
+  db.DuplicationJob.update = origUpdate;
   vi.clearAllMocks();
 });
+
+function staleJob(overrides = {}) {
+  return {
+    id: 7,
+    projectId: 5,
+    claimedAt: new Date('2020-01-01T00:00:00Z'),
+    result: null,
+    attempts: 0,
+    update: vi.fn().mockResolvedValue({}),
+    ...overrides,
+  };
+}
 
 function fakeJob() {
   return { projectId: 5, payload: {}, update: vi.fn().mockResolvedValue({}) };
@@ -63,51 +77,71 @@ describe('worker runJob', () => {
 });
 
 describe('worker reclaimStaleJobs', () => {
-  it('fails a stale job that already started, without requeueing', async () => {
-    const job = {
-      result: { started: true },
-      attempts: 0,
-      update: vi.fn().mockResolvedValue({}),
-    };
+  it('fails a stale job that already started, guarded on the claim it read', async () => {
+    const job = staleJob({ result: { started: true } });
     db.DuplicationJob.findAll = vi.fn().mockResolvedValue([job]);
+    db.DuplicationJob.update = vi.fn().mockResolvedValue([1]);
 
     await worker.reclaimStaleJobs();
 
-    expect(job.update).toHaveBeenCalledTimes(1);
-    const arg = job.update.mock.calls[0][0];
-    expect(arg.status).toBe('failed');
-    expect(arg.claimedAt).toBeNull();
-    expect(arg.result.errors[0].error).toMatch(/interrupted/);
+    const [values, options] = db.DuplicationJob.update.mock.calls[0];
+    expect(values.status).toBe('failed');
+    expect(values.claimedAt).toBeNull();
+    expect(values.result.errors[0].error).toMatch(/interrupted/);
+    expect(options.where).toEqual({
+      id: job.id,
+      status: 'running',
+      claimedAt: job.claimedAt,
+    });
+  });
+
+  it('does nothing further when another process already reclaimed the job', async () => {
+    const job = staleJob({ result: { started: true, maps: { projectId: 5 } } });
+    db.DuplicationJob.findAll = vi.fn().mockResolvedValue([job]);
+    db.DuplicationJob.update = vi.fn().mockResolvedValue([0]);
+
+    await worker.reclaimStaleJobs();
+
+    expect(db.DuplicationJob.update).toHaveBeenCalledTimes(1);
+  });
+
+  it('stores a rollback session for an interrupted job that has maps', async () => {
+    const job = staleJob({ result: { started: true, maps: { projectId: 5 } } });
+    db.DuplicationJob.findAll = vi.fn().mockResolvedValue([job]);
+    db.DuplicationJob.update = vi.fn().mockResolvedValue([1]);
+    db.Project.findByPk = vi.fn().mockResolvedValue(null);
+
+    await worker.reclaimStaleJobs();
+
+    expect(db.DuplicationJob.update).toHaveBeenCalledTimes(2);
+    const [values] = db.DuplicationJob.update.mock.calls[1];
+    expect(typeof values.result.rollbackSessionId).toBe('string');
+    expect(values.result.maps).toEqual({ projectId: 5 });
   });
 
   it('requeues a stale job that never started', async () => {
-    const job = {
-      result: null,
-      attempts: 0,
-      update: vi.fn().mockResolvedValue({}),
-    };
+    const job = staleJob();
     db.DuplicationJob.findAll = vi.fn().mockResolvedValue([job]);
+    db.DuplicationJob.update = vi.fn().mockResolvedValue([1]);
 
     await worker.reclaimStaleJobs();
 
-    const arg = job.update.mock.calls[0][0];
-    expect(arg.status).toBe('pending');
-    expect(arg.attempts).toBe(1);
-    expect(arg.claimedAt).toBeNull();
+    const [values, options] = db.DuplicationJob.update.mock.calls[0];
+    expect(values.status).toBe('pending');
+    expect(values.attempts).toBe(1);
+    expect(values.claimedAt).toBeNull();
+    expect(options.where.claimedAt).toBe(job.claimedAt);
   });
 
   it('fails a stale job that exceeded max attempts', async () => {
-    const job = {
-      result: null,
-      attempts: 3,
-      update: vi.fn().mockResolvedValue({}),
-    };
+    const job = staleJob({ attempts: 3 });
     db.DuplicationJob.findAll = vi.fn().mockResolvedValue([job]);
+    db.DuplicationJob.update = vi.fn().mockResolvedValue([1]);
 
     await worker.reclaimStaleJobs();
 
-    const arg = job.update.mock.calls[0][0];
-    expect(arg.status).toBe('failed');
-    expect(arg.result.errors[0].error).toMatch(/max attempts/);
+    const [values] = db.DuplicationJob.update.mock.calls[0];
+    expect(values.status).toBe('failed');
+    expect(values.result.errors[0].error).toMatch(/max attempts/);
   });
 });

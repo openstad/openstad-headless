@@ -24,39 +24,68 @@ async function reclaimStaleJobs() {
   });
 
   for (const job of staleJobs) {
+    const claimGuard = {
+      id: job.id,
+      status: 'running',
+      claimedAt: job.claimedAt,
+    };
+
     if (job.result && job.result.started) {
-      await job.update({
-        status: 'failed',
-        result: {
-          errors: [
-            {
-              step: 'worker',
-              error:
-                'duplication interrupted, existing data may need manual cleanup',
-            },
-          ],
+      const maps = job.result.maps;
+      const interruptedErrors = [
+        {
+          step: 'worker',
+          error:
+            'duplication interrupted, existing data may need manual cleanup',
         },
-        claimedAt: null,
-      });
+      ];
+
+      const [reclaimed] = await db.DuplicationJob.update(
+        {
+          status: 'failed',
+          result: { errors: interruptedErrors, maps },
+          claimedAt: null,
+        },
+        { where: claimGuard }
+      );
+      if (!reclaimed) continue;
+
+      if (maps) {
+        const rollbackSessionId = await createRollbackSession(job, maps);
+        if (rollbackSessionId) {
+          await db.DuplicationJob.update(
+            {
+              result: { errors: interruptedErrors, maps, rollbackSessionId },
+            },
+            { where: { id: job.id } }
+          );
+        }
+      }
       continue;
     }
 
     if (job.attempts >= MAX_ATTEMPTS) {
-      await job.update({
-        status: 'failed',
-        result: {
-          errors: [{ step: 'worker', error: 'exceeded max attempts' }],
+      await db.DuplicationJob.update(
+        {
+          status: 'failed',
+          result: {
+            errors: [{ step: 'worker', error: 'exceeded max attempts' }],
+          },
+          claimedAt: null,
         },
-        claimedAt: null,
-      });
+        { where: claimGuard }
+      );
       continue;
     }
 
-    await job.update({
-      status: 'pending',
-      claimedAt: null,
-      attempts: job.attempts + 1,
-    });
+    await db.DuplicationJob.update(
+      {
+        status: 'pending',
+        claimedAt: null,
+        attempts: job.attempts + 1,
+      },
+      { where: claimGuard }
+    );
   }
 }
 
@@ -112,6 +141,9 @@ async function runJob(job) {
     const { errors, maps } = await dup.runProjectDuplication({
       projectId: job.projectId,
       payload: job.payload,
+      onProgress: async (progressMaps) => {
+        await job.update({ result: { started: true, maps: progressMaps } });
+      },
     });
     if (errors.length) {
       const rollbackSessionId = await createRollbackSession(job, maps);
@@ -128,10 +160,18 @@ async function runJob(job) {
       });
     }
   } catch (err) {
+    const maps = job.result && job.result.maps;
+    const rollbackSessionId = maps
+      ? await createRollbackSession(job, maps)
+      : undefined;
     await job
       .update({
         status: 'failed',
-        result: { errors: [{ step: 'worker', error: err.message }] },
+        result: {
+          errors: [{ step: 'worker', error: err.message }],
+          maps,
+          rollbackSessionId,
+        },
         claimedAt: null,
       })
       .catch((updateErr) => {
