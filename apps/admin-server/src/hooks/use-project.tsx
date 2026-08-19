@@ -137,16 +137,27 @@ export function useProject(scopes?: Array<string>) {
 
   async function waitForDuplication(
     projectId: number | string,
-    { interval = 1500, timeoutMs = 15 * 60 * 1000 } = {}
+    {
+      interval = 1500,
+      timeoutMs = 15 * 60 * 1000,
+      maxConsecutiveFailures = 5,
+    } = {}
   ): Promise<{ status: string; errors: any[]; duplicatedData?: any }> {
     const deadline = Date.now() + timeoutMs;
+    let consecutiveFailures = 0;
+    let lastFailure = '';
+
     while (Date.now() < deadline) {
       await new Promise((resolve) => setTimeout(resolve, interval));
       try {
         const res = await fetch(
           `/api/openstad/api/project/${projectId}/duplication-status`
         );
-        if (res.ok) {
+        if (!res.ok) {
+          consecutiveFailures++;
+          lastFailure = `De server antwoordde met status ${res.status}.`;
+        } else {
+          consecutiveFailures = 0;
           const data = await res.json();
           if (data.status === 'done') return { status: 'done', errors: [] };
           if (data.status === 'failed')
@@ -156,17 +167,25 @@ export function useProject(scopes?: Array<string>) {
               duplicatedData: data.duplicatedData,
             };
         }
-      } catch (e) {}
+      } catch (e) {
+        consecutiveFailures++;
+        lastFailure = e instanceof Error ? e.message : 'Onbekende netwerkfout.';
+      }
+
+      if (consecutiveFailures >= maxConsecutiveFailures) {
+        return {
+          status: 'unavailable',
+          errors: [
+            {
+              step: 'Duplicatie',
+              error: `De status kon ${consecutiveFailures} keer achter elkaar niet worden opgehaald. ${lastFailure}`,
+            },
+          ],
+        };
+      }
     }
-    return {
-      status: 'timeout',
-      errors: [
-        {
-          step: 'Duplicatie',
-          error: 'Het aanmaken duurt langer dan verwacht.',
-        },
-      ],
-    };
+
+    return { status: 'running', errors: [] };
   }
 
   return {
