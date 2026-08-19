@@ -368,7 +368,7 @@ async function getValidTags(projectId, tags) {
   return validTags.map((tag) => tag.id);
 }
 
-async function runProjectDuplication({ projectId, payload }) {
+async function runProjectDuplication({ projectId, payload, onProgress }) {
   const data = payload || {};
   const errors = [];
 
@@ -380,8 +380,25 @@ async function runProjectDuplication({ projectId, payload }) {
   const createdUserIds = new Set();
   const newWidgets = [];
 
+  const buildMaps = () => ({
+    projectId,
+    tagMap,
+    statusMap,
+    widgetMap,
+    resourceMap,
+    createdUserIds: Array.from(createdUserIds),
+    newWidgets,
+  });
+
+  const reportProgress = async () => {
+    if (!onProgress) return;
+    await onProgress(buildMaps());
+  };
+
   await createTags(data.tags || [], projectId, tagMap, errors);
+  await reportProgress();
   await createStatuses(data.statuses || [], projectId, statusMap, errors);
+  await reportProgress();
   await createWidgets(
     data.widgets || [],
     projectId,
@@ -389,11 +406,13 @@ async function runProjectDuplication({ projectId, payload }) {
     newWidgets,
     errors
   );
+  await reportProgress();
   await createNotificationTemplates(
     data.notificationTemplates || [],
     projectId,
     errors
   );
+  await reportProgress();
   await createResources(
     data.resources || [],
     projectId,
@@ -405,6 +424,7 @@ async function runProjectDuplication({ projectId, payload }) {
     createdUserIds,
     errors
   );
+  await reportProgress();
   await updateWidgetIdsInNewWidgets(
     newWidgets,
     widgetMap,
@@ -414,19 +434,13 @@ async function runProjectDuplication({ projectId, payload }) {
     projectId,
     errors
   );
+  await reportProgress();
   await revertConfigResourceSettings(projectId, data.resourceSettings, errors);
+  await reportProgress();
 
   return {
     errors,
-    maps: {
-      projectId,
-      tagMap,
-      statusMap,
-      widgetMap,
-      resourceMap,
-      createdUserIds: Array.from(createdUserIds),
-      newWidgets,
-    },
+    maps: buildMaps(),
   };
 }
 
