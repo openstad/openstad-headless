@@ -29,7 +29,7 @@ function selectPruneIds(orderedNewestFirst, max) {
   return orderedNewestFirst.slice(max).map((v) => v.id);
 }
 
-async function pruneVersions(widgetId) {
+async function pruneVersions(widgetId, { transaction } = {}) {
   const versions = await db.WidgetVersion.findAll({
     where: { widgetId, pinned: false },
     order: [
@@ -38,51 +38,48 @@ async function pruneVersions(widgetId) {
     ],
     attributes: ['id'],
     raw: true,
+    transaction,
   });
 
   const idsToDelete = selectPruneIds(versions, MAX_VERSIONS);
   if (idsToDelete.length === 0) return;
 
-  await db.WidgetVersion.destroy({ where: { id: idsToDelete } });
+  await db.WidgetVersion.destroy({ where: { id: idsToDelete }, transaction });
 }
 
-async function snapshotWidgetVersion(widget, user, extra = {}) {
-  try {
-    const config = widget.config;
+async function snapshotWidgetVersion(widget, user, extra = {}, options = {}) {
+  const { transaction } = options;
+  const config = widget.config;
 
-    const latest = await db.WidgetVersion.findOne({
-      where: { widgetId: widget.id },
-      order: [
-        ['createdAt', 'DESC'],
-        ['id', 'DESC'],
-      ],
-      raw: true,
-    });
+  const latest = await db.WidgetVersion.findOne({
+    where: { widgetId: widget.id },
+    order: [
+      ['createdAt', 'DESC'],
+      ['id', 'DESC'],
+    ],
+    raw: true,
+    transaction,
+  });
 
-    if (latest && isSameConfig(latest.config, config)) {
-      return null;
-    }
+  if (latest && isSameConfig(latest.config, config)) {
+    return null;
+  }
 
-    const version = await db.WidgetVersion.create({
+  const version = await db.WidgetVersion.create(
+    {
       projectId: widget.projectId,
       widgetId: widget.id,
       config,
       userId: user && user.id ? user.id : null,
       userName: resolveUserName(user),
       restoredFromId: extra.restoredFromId ?? null,
-    });
+    },
+    { transaction }
+  );
 
-    await pruneVersions(widget.id);
+  await pruneVersions(widget.id, { transaction });
 
-    return version;
-  } catch (err) {
-    console.error('Failed to snapshot widget version:', {
-      error: err.message,
-      widgetId: widget && widget.id,
-      projectId: widget && widget.projectId,
-    });
-    return null;
-  }
+  return version;
 }
 
 module.exports = {
