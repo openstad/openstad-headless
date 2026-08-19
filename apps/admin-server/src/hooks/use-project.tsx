@@ -137,15 +137,9 @@ export function useProject(scopes?: Array<string>) {
 
   async function waitForDuplication(
     projectId: number | string,
-    {
-      interval = 1500,
-      timeoutMs = 15 * 60 * 1000,
-      maxConsecutiveFailures = 5,
-    } = {}
+    { interval = 1500, timeoutMs = 15 * 60 * 1000 } = {}
   ): Promise<{ status: string; errors: any[]; duplicatedData?: any }> {
     const deadline = Date.now() + timeoutMs;
-    let consecutiveFailures = 0;
-    let lastFailure = '';
 
     while (Date.now() < deadline) {
       await new Promise((resolve) => setTimeout(resolve, interval));
@@ -154,34 +148,21 @@ export function useProject(scopes?: Array<string>) {
           `/api/openstad/api/project/${projectId}/duplication-status`
         );
         if (!res.ok) {
-          consecutiveFailures++;
-          lastFailure = `De server antwoordde met status ${res.status}.`;
-        } else {
-          consecutiveFailures = 0;
-          const data = await res.json();
-          if (data.status === 'done') return { status: 'done', errors: [] };
-          if (data.status === 'failed')
-            return {
-              status: 'failed',
-              errors: data.errors || [],
-              duplicatedData: data.duplicatedData,
-            };
+          console.error(
+            `Duplicatiestatus opvragen mislukt met status ${res.status}`
+          );
+          continue;
         }
+        const data = await res.json();
+        if (data.status === 'done') return { status: 'done', errors: [] };
+        if (data.status === 'failed')
+          return {
+            status: 'failed',
+            errors: data.errors || [],
+            duplicatedData: data.duplicatedData,
+          };
       } catch (e) {
-        consecutiveFailures++;
-        lastFailure = e instanceof Error ? e.message : 'Onbekende netwerkfout.';
-      }
-
-      if (consecutiveFailures >= maxConsecutiveFailures) {
-        return {
-          status: 'unavailable',
-          errors: [
-            {
-              step: 'Duplicatie',
-              error: `De status kon ${consecutiveFailures} keer achter elkaar niet worden opgehaald. ${lastFailure}`,
-            },
-          ],
-        };
+        console.error('Duplicatiestatus opvragen mislukt', e);
       }
     }
 
