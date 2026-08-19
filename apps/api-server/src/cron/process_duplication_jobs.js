@@ -155,7 +155,8 @@ async function runJob(job) {
     } else {
       await job.update({
         status: 'done',
-        result: { errors, maps },
+        payload: {},
+        result: { errors },
         claimedAt: null,
       });
     }
