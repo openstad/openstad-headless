@@ -4,7 +4,10 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const db = require('../../db');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const createError = require('http-errors');
-const { snapshotWidgetVersion } = require('../../services/widget-version');
+const {
+  snapshotWidgetVersion,
+  pruneVersions,
+} = require('../../services/widget-version');
 
 router.all('*', function (req, res, next) {
   req.scope = [];
@@ -119,7 +122,12 @@ router
         return next(createError(400, 'Nothing to update'));
       }
 
+      const wasPinned = version.pinned;
       await version.update(updates);
+
+      if (wasPinned && updates.pinned === false) {
+        await pruneVersions(widget.id);
+      }
 
       return res.json({
         id: version.id,
@@ -161,9 +169,18 @@ router
       });
       const undoVersionId = preRestoreLatest ? preRestoreLatest.id : null;
 
-      const result = await widget.update({ config: version.config });
-      await snapshotWidgetVersion(result, req.user, {
-        restoredFromId: version.id,
+      const result = await db.sequelize.transaction(async (transaction) => {
+        const updated = await widget.update(
+          { config: version.config },
+          { transaction }
+        );
+        await snapshotWidgetVersion(
+          updated,
+          req.user,
+          { restoredFromId: version.id },
+          { transaction }
+        );
+        return updated;
       });
 
       return res.json({ widget: result, undoVersionId });

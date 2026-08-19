@@ -219,14 +219,21 @@ router
       const description = req.body?.description ?? widget.description;
       const typesToSanitize = ['rawresource', 'resourceoverview'];
 
-      if (typesToSanitize.includes(widget.dataValues.type)) {
-        widget.dataValues.config.rawInput = sanitize.content(
-          widget.dataValues.config.rawInput
-        );
+      if (
+        typesToSanitize.includes(widget.dataValues.type) &&
+        config.rawInput !== undefined
+      ) {
+        config.rawInput = sanitize.content(config.rawInput);
       }
 
-      const result = await widget.update({ config, description });
-      await snapshotWidgetVersion(result, req.user);
+      const result = await db.sequelize.transaction(async (transaction) => {
+        const updated = await widget.update(
+          { config, description },
+          { transaction }
+        );
+        await snapshotWidgetVersion(updated, req.user, {}, { transaction });
+        return updated;
+      });
 
       return res.json(result);
     } catch (err) {
