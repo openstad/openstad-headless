@@ -42,6 +42,23 @@ describe('sanitizeAuthConfigForDuplication', () => {
     expect(p.authProviderId).toBeUndefined();
     expect(p.config).toEqual({ keep: 1 });
   });
+
+  it('does not mutate the input config', () => {
+    const input = {
+      auth: { provider: { openstad: { clientId: 'id' } } },
+    };
+    authClientSync.sanitizeAuthConfigForDuplication(input);
+    expect(input.auth.provider.openstad.clientId).toBe('id');
+  });
+
+  it('handles missing auth config gracefully', () => {
+    expect(authClientSync.sanitizeAuthConfigForDuplication(undefined)).toEqual(
+      {}
+    );
+    expect(
+      authClientSync.sanitizeAuthConfigForDuplication({ title: 'x' })
+    ).toEqual({ title: 'x' });
+  });
 });
 
 describe('stripAuthClientManagedFieldsFromProjectConfig', () => {
