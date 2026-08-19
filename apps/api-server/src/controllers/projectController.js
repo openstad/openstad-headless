@@ -29,7 +29,6 @@ const {
 } = require('../util/duplicate-rollback-session');
 const getWidgetSettings = require('../routes/widget/widget-settings');
 
-const dup = require('../services/projectDuplication');
 const authClientSync = require('../services/authClientSync');
 const projectCertificates = require('../services/projectCertificates');
 
@@ -660,96 +659,6 @@ async function getDuplicationStatus(req, res, next) {
   }
 }
 
-async function createDuplicatedData(req, res, next) {
-  const errors = [];
-
-  try {
-    req.query.nomail = true;
-
-    const tagMap = {};
-    const statusMap = {};
-    const widgetMap = {};
-    const userMap = {};
-    req.createdUserIds = new Set();
-    const newWidgets = [];
-    const resourceMap = {};
-
-    await dup.createTags(req.tags, req.projectId, tagMap, errors);
-    await dup.createStatuses(req.statuses, req.projectId, statusMap, errors);
-    await dup.createWidgets(
-      req.widgets,
-      req.projectId,
-      widgetMap,
-      newWidgets,
-      errors
-    );
-    await dup.createNotificationTemplates(
-      req.notificationTemplates,
-      req.projectId,
-      errors
-    );
-    await dup.createResources(
-      req.resources,
-      req.projectId,
-      resourceMap,
-      widgetMap,
-      tagMap,
-      statusMap,
-      userMap,
-      req.createdUserIds,
-      errors
-    );
-    await dup.updateWidgetIdsInNewWidgets(
-      newWidgets,
-      widgetMap,
-      resourceMap,
-      tagMap,
-      statusMap,
-      req.projectId,
-      errors
-    );
-    await dup.revertConfigResourceSettings(
-      req.projectId,
-      req.resourceSettings,
-      errors
-    );
-
-    if (errors.length > 0) {
-      const rollbackData = {
-        projectId: req.projectId,
-        tagMap,
-        statusMap,
-        widgetMap,
-        resourceMap,
-        createdUserIds: Array.from(req.createdUserIds || []),
-        newWidgets,
-      };
-      const rollbackSessionId = duplicateRollbackSessionStore.createSession({
-        userId: req.user.id,
-        data: rollbackData,
-      });
-      await duplicateRollbackSessionStore.saveSessionOnProject({
-        projectId: req.projectId,
-        sessionId: rollbackSessionId,
-        userId: req.user.id,
-        data: rollbackData,
-      });
-      return res.status(500).json({
-        errors: errors,
-        duplicatedData: {
-          rollbackSessionId,
-          projectId: req.projectId,
-        },
-      });
-    }
-
-    return next();
-  } catch (error) {
-    errors.push({ step: 'Overall', error: error.message });
-    res.status(500).json({ errors });
-  }
-}
-
 async function addCurrentUserAsAdmin(req, res, next) {
   // Add current user as admin to the newly made project
   const project = await db.Project.findOne({ where: { id: req.results.id } });
@@ -1299,7 +1208,6 @@ module.exports = {
   prepareDuplicationPayload,
   createProjectRecord,
   syncAuthProvidersAfterCreate,
-  createDuplicatedData,
   enqueueDuplicationJob,
   getDuplicationStatus,
   addCurrentUserAsAdmin,
