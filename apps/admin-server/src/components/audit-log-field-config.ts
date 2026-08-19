@@ -260,7 +260,6 @@ export const VALUE_LABELS: Record<string, Record<string, string>> = {
 
 const HIDDEN_ITEM_FIELDS = new Set([
   'trigger',
-  'key',
   'key1',
   'key2',
   'key_b',
@@ -284,7 +283,6 @@ const HIDDEN_ITEM_FIELDS = new Set([
 export const INTERNAL_FIELDS = new Set([
   'id',
   'trigger',
-  'key',
   'uuid',
   'widgetId',
   'projectId',
