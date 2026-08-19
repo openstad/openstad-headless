@@ -219,10 +219,11 @@ router
       const description = req.body?.description ?? widget.description;
       const typesToSanitize = ['rawresource', 'resourceoverview'];
 
-      if (typesToSanitize.includes(widget.dataValues.type)) {
-        widget.dataValues.config.rawInput = sanitize.content(
-          widget.dataValues.config.rawInput
-        );
+      if (
+        typesToSanitize.includes(widget.dataValues.type) &&
+        config.rawInput !== undefined
+      ) {
+        config.rawInput = sanitize.content(config.rawInput);
       }
 
       const result = await db.sequelize.transaction(async (transaction) => {
