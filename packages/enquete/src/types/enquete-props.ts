@@ -49,6 +49,7 @@ export type Item = {
   multiple?: boolean;
   maxUploadSizeMB?: number;
   randomizeItems?: boolean;
+  randomizeQuestions?: boolean;
   image?: string;
   imageAlt?: string;
   imageDescription?: string;
@@ -62,6 +63,9 @@ export type Item = {
   minChoices?: string;
   minChoicesMessage?: string;
   showSmileys?: boolean;
+  scaleDisplay?: 'numbers' | 'smileys' | 'custom';
+  scaleStepCount?: number;
+  scaleSteps?: Array<ScaleStepConfig>;
   placeholder?: string;
   defaultValue?: string;
   imageOptionUpload?: string;
@@ -100,6 +104,12 @@ export type Item = {
   image2?: string;
   text2?: string;
   key2?: string;
+};
+
+export type ScaleStepConfig = {
+  label?: string;
+  imageUrl?: string;
+  imageAlt?: string;
 };
 
 export type Option = {
