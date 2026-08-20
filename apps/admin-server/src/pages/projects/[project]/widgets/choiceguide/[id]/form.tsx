@@ -47,13 +47,8 @@ const formSchema = z.object({
   showPageCountAndCurrentPageInButton: z.boolean(),
   showBackButtonInTopOfPage: z.boolean().optional(),
   choicesType: z.enum(['default', 'minus-to-plus-100', 'plane', 'hidden']),
-  imageAspectRatio: z.enum(['16x9', '1x1']),
   choicesPreferenceMinColor: z.string().optional(),
   choicesPreferenceMaxColor: z.string().optional(),
-  choicesPreferenceTitle: z.string().optional(),
-  choicesNoPreferenceYetTitle: z.string().optional(),
-  choicesInBetweenPreferenceTitle: z.string().optional(),
-  beforeUrl: z.string().optional(),
   afterUrl: z.string().optional(),
   introTitle: z.string().optional(),
   introDescription: z.string().optional(),
@@ -101,21 +96,10 @@ export default function ChoicesSelectorForm(
       showBackButtonInTopOfPage:
         widget?.config?.[category]?.showBackButtonInTopOfPage || false,
       choicesType: widget?.config?.[category]?.choicesType || 'default',
-      imageAspectRatio: widget?.config?.[category]?.imageAspectRatio || '16x9',
       choicesPreferenceMinColor:
         widget?.config?.[category]?.choicesPreferenceMinColor || '#ff9100',
       choicesPreferenceMaxColor:
         widget?.config?.[category]?.choicesPreferenceMaxColor || '#bed200',
-      choicesPreferenceTitle:
-        widget?.config?.[category]?.choicesPreferenceTitle ||
-        'Jouw voorkeur is {preferredChoice}',
-      choicesNoPreferenceYetTitle:
-        widget?.config?.[category]?.choicesNoPreferenceYetTitle ||
-        'Je hebt nog geen keuze gemaakt',
-      choicesInBetweenPreferenceTitle:
-        widget?.config?.[category]?.choicesInBetweenPreferenceTitle ||
-        'Je staat precies tussen meerdere voorkeuren in',
-      beforeUrl: widget?.config?.[category]?.beforeUrl || '',
       afterUrl: widget?.config?.[category]?.afterUrl || '',
       introTitle: widget?.config?.[category]?.introTitle || '',
       introDescription: widget?.config?.[category]?.introDescription || '',
@@ -241,32 +225,6 @@ export default function ChoicesSelectorForm(
               )}
               <FormField
                 control={form.control}
-                name="choicesPreferenceTitle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Titel boven de keuzes, met voorkeur</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="choicesNoPreferenceYetTitle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Titel boven de keuzes, nog geen voorkeur
-                    </FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="showMinMaxAfterBlur"
                 render={({ field }) => (
                   <FormItem>
@@ -278,56 +236,8 @@ export default function ChoicesSelectorForm(
                   </FormItem>
                 )}
               />
-              {watchChoicesType === 'plane' && (
-                <FormField
-                  control={form.control}
-                  name="choicesInBetweenPreferenceTitle"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>
-                        Titel boven de keuzes, tussen twee voorkeuren in
-                      </FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              )}
             </>
           )}
-          <FormField
-            control={form.control}
-            name="imageAspectRatio"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Weergave: afbeeldingen aspect ratio</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="16:9" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="16x9">16:9</SelectItem>
-                    <SelectItem value="1x1">1:1</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="beforeUrl"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>URL van de inleidende pagina</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="afterUrl"
