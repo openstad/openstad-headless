@@ -100,6 +100,7 @@ export type Item = {
   fieldKey?: string;
   fieldRequired?: boolean;
   onlyForModerator?: boolean;
+  enableAddressSearch?: boolean;
   minCharacters?: string;
   maxCharacters?: string;
   variant?: string;

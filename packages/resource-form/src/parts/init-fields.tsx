@@ -187,6 +187,7 @@ export const InitializeFormFields = (items, data) => {
             fieldData['allowedPolygons'] = data.allowedPolygons;
           }
 
+          fieldData['enableAddressSearch'] = !!item.enableAddressSearch;
           fieldData['enablePolygonTags'] = true;
 
           break;
