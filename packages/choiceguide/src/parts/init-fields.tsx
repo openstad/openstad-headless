@@ -192,6 +192,8 @@ export const InitializeFormFields = (
             fieldData['allowedPolygons'] = data.allowedPolygons;
           }
 
+          fieldData['enableAddressSearch'] = !!item.enableAddressSearch;
+
           break;
         case 'matrix':
           fieldData['type'] = 'matrix';

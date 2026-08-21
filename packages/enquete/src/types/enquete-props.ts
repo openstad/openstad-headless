@@ -57,6 +57,7 @@ export type Item = {
   infoBlockExtraButton?: string;
   infoBlockExtraButtonTitle?: string;
   fieldRequired?: boolean;
+  enableAddressSearch?: boolean;
   maxChoices?: string;
   maxChoicesMessage?: string;
   minChoices?: string;
