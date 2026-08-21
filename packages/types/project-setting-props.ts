@@ -83,5 +83,9 @@ export type ProjectSettingProps = {
     tilesVariant?: string;
     customUrl?: string;
     autoZoomAndCenter?: 'area' | 'markers';
+    addressSearchFoundText?: string;
+    addressSearchNotFoundText?: string;
+    addressSearchErrorText?: string;
+    addressSearchOutsideAreaText?: string;
   };
 };
