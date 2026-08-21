@@ -53,7 +53,9 @@ const formSchema = z.object({
 
 export default function WidgetMultiProjectSettings(
   props: MultiProjectResourceOverviewProps &
-    EditFieldProps<MultiProjectResourceOverviewProps>
+    EditFieldProps<MultiProjectResourceOverviewProps> & {
+      updatePreview?: (config: MultiProjectResourceOverviewProps) => void;
+    }
 ) {
   type FormData = z.infer<typeof formSchema>;
 
@@ -101,6 +103,7 @@ export default function WidgetMultiProjectSettings(
       excludeResourcesInOverview: false,
     };
     props.updateConfig({ ...props, ...updatedValues });
+    props.updatePreview?.({ ...props, ...updatedValues });
   }
 
   return (
@@ -191,7 +194,7 @@ export default function WidgetMultiProjectSettings(
                               field.onChange(updatedProjects);
                             },
                           },
-                          props
+                          {}
                         )}
                       </FormControl>
 
@@ -211,7 +214,7 @@ export default function WidgetMultiProjectSettings(
                                   Toon dit project zelf als tegel in het
                                   overzicht
                                 </FormLabel>
-                                {YesNoSelect(field, props)}
+                                {YesNoSelect(field, {})}
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -244,7 +247,7 @@ export default function WidgetMultiProjectSettings(
                                   project zelf getoond als tegel in het
                                   overzicht, zonder de inzendingen.
                                 </FormDescription>
-                                {YesNoSelect(field, props)}
+                                {YesNoSelect(field, {})}
                                 <FormMessage />
                               </FormItem>
                             )}
