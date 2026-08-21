@@ -50,8 +50,8 @@ function MultiProjectResourceOverview({
         const url = `${props?.api?.url}/api/project?includeConfig=1&getBasicInformation=1`;
         const data = await fetchResource(url);
 
-        const updatedProjects = selectedProjects
-          ?.map((selectedProject: any) => {
+        const updatedProjects = (selectedProjects || [])
+          .map((selectedProject: any) => {
             const project =
               Array.isArray(data) &&
               data.find((p: any) => p.id === selectedProject.id);
