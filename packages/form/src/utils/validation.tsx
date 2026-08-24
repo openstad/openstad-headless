@@ -149,17 +149,34 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
       return undefined;
     }
     case 'documentUpload':
-    case 'imageUpload':
-      if (typeof field.fieldRequired !== 'undefined' && field.fieldRequired) {
-        return z
-          .array(fileSchema)
-          .min(
-            1,
-            field.requiredWarning || 'Het veld' + fieldTitle + 'is verplicht'
-          );
-      } else {
+    case 'imageUpload': {
+      const isFieldRequired =
+        typeof field.fieldRequired !== 'undefined' && field.fieldRequired;
+      const isCropRequired =
+        field.type === 'imageUpload' &&
+        !!(field as any).imageCropEnabled &&
+        !!(field as any).imageCropRequired;
+
+      if (!isFieldRequired && !isCropRequired) {
         return undefined;
       }
+
+      let uploadSchema = z.array(fileSchema);
+      if (isFieldRequired) {
+        uploadSchema = uploadSchema.min(
+          1,
+          field.requiredWarning || 'Het veld' + fieldTitle + 'is verplicht'
+        );
+      }
+      if (isCropRequired) {
+        return uploadSchema.refine(
+          (uploads) => uploads.every((upload) => upload.url.includes('/:/cr=')),
+          { message: 'Snijd de afbeelding(en) eerst bij.' }
+        );
+      }
+
+      return uploadSchema;
+    }
     case 'map':
       const mapSchema = z.object({
         lat: z.number().optional(),

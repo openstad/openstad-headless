@@ -69,6 +69,10 @@ export type Item = {
   variant?: string;
   multiple?: boolean;
   maxUploadSizeMB?: number;
+  imageCropEnabled?: boolean;
+  imageCropRequired?: boolean;
+  imageCropRatioWidth?: number;
+  imageCropRatioHeight?: number;
   images?: Array<{
     image?: never;
     src: string;
