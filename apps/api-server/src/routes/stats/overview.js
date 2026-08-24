@@ -129,6 +129,10 @@ router
       fromDate && toDate
         ? ' AND choices_guide_results.createdAt >= ? AND choices_guide_results.createdAt < DATE_ADD(?, INTERVAL 1 DAY)'
         : '';
+    const submissionDateFilter =
+      fromDate && toDate
+        ? ' AND submissions.createdAt >= ? AND submissions.createdAt < DATE_ADD(?, INTERVAL 1 DAY)'
+        : '';
     const dateVars = fromDate && toDate ? [fromDate, toDate] : [];
 
     const queries = [
@@ -231,6 +235,25 @@ router
         description: 'Amount of choices guide results',
         sql: `SELECT count(choices_guide_results.id) AS counted FROM choices_guide_results WHERE choices_guide_results.deletedAt IS NULL AND choices_guide_results.projectId=?${choicesGuideDateFilter}`,
         variables: [req.params.projectId, ...dateVars],
+      },
+      {
+        key: 'enqueteSubmissionsCountTotal',
+        description: 'Amount of enquete (survey) submissions',
+        sql: `SELECT count(submissions.id) AS counted FROM submissions LEFT JOIN widgets ON widgets.id = submissions.widgetId WHERE submissions.deletedAt IS NULL AND submissions.projectId=? AND widgets.type = 'enquete'${submissionDateFilter}`,
+        variables: [req.params.projectId, ...dateVars],
+      },
+      {
+        key: 'enqueteSubmissionsPerDay',
+        description: 'Amount of enquete (survey) submissions per day',
+        sql: `SELECT count(submissions.id) AS counted, DATE_FORMAT(submissions.createdAt, '%Y-%m-%d') as date
+                    FROM submissions
+                    LEFT JOIN widgets ON widgets.id = submissions.widgetId
+                    WHERE submissions.deletedAt IS NULL
+                    AND submissions.projectId=? AND widgets.type = 'enquete'${submissionDateFilter}
+                    GROUP BY date
+                    ORDER BY date ASC`,
+        variables: [req.params.projectId, ...dateVars],
+        formatResults: addMissingDays,
       },
     ];
 
