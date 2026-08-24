@@ -219,6 +219,8 @@ router
       req.query.uniqueByIdpUser !== '0' &&
       !hasByIdpUserFilter;
     const shouldExcludeAnonymous = req.query.excludeAnonymous === '1';
+    const shouldHideMembersWithoutEmail =
+      req.query.hideMembersWithoutEmail === '1';
 
     dbQuery.where = {
       ...req.queryConditions,
@@ -227,6 +229,14 @@ router
     if (req.params.projectId) dbQuery.where.projectId = req.params.projectId;
     if (shouldExcludeAnonymous) {
       dbQuery.where.role = { [Op.not]: 'anonymous' };
+    }
+    if (shouldHideMembersWithoutEmail) {
+      const isNotMemberOrHasEmail = {
+        [Op.or]: [{ role: { [Op.ne]: 'member' } }, { email: { [Op.ne]: '' } }],
+      };
+      dbQuery.where[Op.and] = (dbQuery.where[Op.and] || []).concat(
+        isNotMemberOrHasEmail
+      );
     }
 
     if (shouldDedupeByIdpUser) {
