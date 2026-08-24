@@ -9,6 +9,7 @@ import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Carousel, Image } from '@openstad-headless/ui/src';
+import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
 import '@utrecht/component-library-css';
 import { Heading, Paragraph } from '@utrecht/component-library-react';
 import { Button, ButtonLink } from '@utrecht/component-library-react';
@@ -41,6 +42,7 @@ type booleanProps = {
 export type ResourceDetailWidgetProps = {
   documentsTitle?: string;
   documentsDesc?: string;
+  descriptionHeadingLevel?: string;
 } & BaseProps &
   ProjectSettingProps & {
     projectId?: string;
@@ -88,6 +90,7 @@ function ResourceDetailWithMap({
   countButton = undefined,
   ctaButton = undefined,
   backUrl = '/',
+  descriptionHeadingLevel = '3',
   ...props
 }: ResourceDetailWidgetProps) {
   let resourceId: string | undefined = String(
@@ -291,7 +294,9 @@ function ResourceDetailWithMap({
               {displayDescription && (
                 <Paragraph
                   dangerouslySetInnerHTML={{
-                    __html: sanitizeHtml(resource.description),
+                    __html: RenderContent(resource.description, {
+                      headingBaseLevel: Number(descriptionHeadingLevel) || 3,
+                    }),
                   }}
                 />
               )}
