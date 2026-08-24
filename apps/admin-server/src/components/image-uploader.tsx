@@ -1,8 +1,11 @@
 import { UploadDocument } from '@/hooks/upload-document';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
-import React, { useEffect } from 'react';
+import { parseImageCropUrl } from '@openstad-headless/lib/image-crop/crop-url';
+import React, { useEffect, useState } from 'react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 
+import { ImageCropDialog } from './image-crop-dialog';
+import { Button } from './ui/button';
 import {
   FormControl,
   FormDescription,
@@ -34,6 +37,11 @@ export const ImageUploader: React.FC<{
 }) => {
   const [file, setFile] = React.useState<{ url: string }>();
   const [fileUrl, setFileUrl] = React.useState<string>('');
+  const [cropOpen, setCropOpen] = useState(false);
+
+  const currentValue = form.watch(fieldName);
+  const hasImage = typeof currentValue === 'string' && currentValue.length > 0;
+  const currentCrop = hasImage ? parseImageCropUrl(currentValue).crop : null;
 
   function prepareFile(image: any) {
     const formData = new FormData();
@@ -109,6 +117,31 @@ export const ImageUploader: React.FC<{
               }}
             />
           </FormControl>
+          {hasImage && (
+            <div className="flex items-center gap-2 mt-2">
+              <img
+                src={currentValue}
+                alt=""
+                className="h-12 w-16 object-cover rounded"
+              />
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setCropOpen(true)}>
+                {currentCrop ? 'Bijsnijden aanpassen' : 'Bijsnijden'}
+              </Button>
+            </div>
+          )}
+          {cropOpen && hasImage && (
+            <ImageCropDialog
+              imageUrl={currentValue}
+              onClose={() => setCropOpen(false)}
+              onSave={(url) => {
+                form.setValue(fieldName, url);
+                setCropOpen(false);
+              }}
+            />
+          )}
           <FormMessage />
         </FormItem>
       )}

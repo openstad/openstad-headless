@@ -81,6 +81,16 @@ const formSchema = z.object({
     (val) => (val === '' || val === null ? undefined : val),
     z.coerce.number().positive().optional()
   ),
+  imageCropEnabled: z.boolean().optional(),
+  imageCropRequired: z.boolean().optional(),
+  imageCropRatioWidth: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number().int().positive().optional()
+  ),
+  imageCropRatioHeight: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number().int().positive().optional()
+  ),
   prevPageText: z.string().optional(),
   nextPageText: z.string().optional(),
   placeholder: z.string().optional(),
@@ -246,6 +256,10 @@ export default function WidgetResourceFormItems(
             variant: values.variant || 'text input',
             multiple: values.multiple || false,
             maxUploadSizeMB: values.maxUploadSizeMB || 25,
+            imageCropEnabled: values.imageCropEnabled || false,
+            imageCropRequired: values.imageCropRequired || false,
+            imageCropRatioWidth: values.imageCropRatioWidth,
+            imageCropRatioHeight: values.imageCropRatioHeight,
             prevPageText: values.prevPageText || '',
             nextPageText: values.nextPageText || '',
             options: values.options || [],
@@ -394,6 +408,10 @@ export default function WidgetResourceFormItems(
     variant: 'text input',
     multiple: false,
     maxUploadSizeMB: 25,
+    imageCropEnabled: false,
+    imageCropRequired: false,
+    imageCropRatioWidth: undefined,
+    imageCropRatioHeight: undefined,
     prevPageText: '',
     nextPageText: '',
     options: [],
@@ -449,6 +467,10 @@ export default function WidgetResourceFormItems(
         variant: selectedItem.variant || '',
         multiple: selectedItem.multiple || false,
         maxUploadSizeMB: selectedItem.maxUploadSizeMB || 25,
+        imageCropEnabled: selectedItem.imageCropEnabled || false,
+        imageCropRequired: selectedItem.imageCropRequired || false,
+        imageCropRatioWidth: selectedItem.imageCropRatioWidth,
+        imageCropRatioHeight: selectedItem.imageCropRatioHeight,
         prevPageText: selectedItem.prevPageText || '',
         nextPageText: selectedItem.nextPageText || '',
         matrix: selectedItem.matrix || matrixDefault,
@@ -1841,6 +1863,67 @@ export default function WidgetResourceFormItems(
                         )}
                       />
                     )}
+
+                    {(form.watch('type') === 'imageUpload' ||
+                      form.watch('type') === 'images') && (
+                      <FormField
+                        control={form.control}
+                        name="imageCropEnabled"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Mag de gebruiker de afbeelding bijsnijden?
+                            </FormLabel>
+                            <Select
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
+                              value={field.value ? 'true' : 'false'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="true">Ja</SelectItem>
+                                <SelectItem value="false">Nee</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {(form.watch('type') === 'imageUpload' ||
+                      form.watch('type') === 'images') &&
+                      form.watch('imageCropEnabled') && (
+                        <FormField
+                          control={form.control}
+                          name="imageCropRequired"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Is bijsnijden verplicht?</FormLabel>
+                              <Select
+                                onValueChange={(e: string) =>
+                                  field.onChange(e === 'true')
+                                }
+                                value={field.value ? 'true' : 'false'}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
 
                     {form.watch('type') !== 'pagination' && (
                       <FormField

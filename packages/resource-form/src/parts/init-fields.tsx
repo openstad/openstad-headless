@@ -136,9 +136,18 @@ export const InitializeFormFields = (items, data) => {
             fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
           }
           break;
+        case 'images':
         case 'imageUpload':
           fieldData['allowedTypes'] = item.allowedTypes || ['image/*'];
           fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
+          fieldData['imageCropEnabled'] = item.imageCropEnabled || false;
+          fieldData['imageCropRequired'] = item.imageCropRequired || false;
+          fieldData['imageCropRatioWidth'] =
+            item.imageCropRatioWidth || data.project?.imageCropRatioWidth || 16;
+          fieldData['imageCropRatioHeight'] =
+            item.imageCropRatioHeight ||
+            data.project?.imageCropRatioHeight ||
+            9;
           break;
         case 'documentUpload':
           fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
