@@ -34,6 +34,7 @@ export default function Users() {
     sort: `${sortField}_${sortDirection}`,
     uniqueByIdpUser: true,
     excludeAnonymous: true,
+    hideIncompleteMembers: true,
   });
   const lastDataRef = useRef<userType[] | null>(null);
 
@@ -71,7 +72,7 @@ export default function Users() {
 
   async function transform() {
     const today = new Date();
-    const allUsers = await fetchAll();
+    const allUsers = await fetchAll({ hideIncompleteMembers: false });
     const projectId = router.query.project ?? 'users';
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
     exportData(allUsers, `${projectId}_gebruikers_${formattedDate}.xlsx`);

@@ -10,6 +10,7 @@ const searchInResults = require('../../middleware/search-in-results');
 const merge = require('merge');
 const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const { hideIncompleteMembersClause } = require('../../lib/user-list-filters');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const crypto = require('crypto');
 
@@ -219,6 +220,7 @@ router
       req.query.uniqueByIdpUser !== '0' &&
       !hasByIdpUserFilter;
     const shouldExcludeAnonymous = req.query.excludeAnonymous === '1';
+    const shouldHideIncompleteMembers = req.query.hideIncompleteMembers === '1';
 
     dbQuery.where = {
       ...req.queryConditions,
@@ -227,6 +229,11 @@ router
     if (req.params.projectId) dbQuery.where.projectId = req.params.projectId;
     if (shouldExcludeAnonymous) {
       dbQuery.where.role = { [Op.not]: 'anonymous' };
+    }
+    if (shouldHideIncompleteMembers) {
+      dbQuery.where[Op.and] = (dbQuery.where[Op.and] || []).concat(
+        hideIncompleteMembersClause()
+      );
     }
 
     if (shouldDedupeByIdpUser) {
