@@ -14,6 +14,7 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
+import { stripTrailingBreaks } from './strip-trailing-breaks';
 import './style.css';
 
 declare module 'react' {
@@ -272,6 +273,11 @@ const TrixEditor: React.FC<{
             inputEl.value = html;
           }
         }
+      }
+
+      html = stripTrailingBreaks(html);
+      if (html === stripTrailingBreaks(valueRef.current || '')) {
+        return;
       }
 
       const syntheticEvent = {
