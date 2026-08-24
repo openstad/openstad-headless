@@ -1,18 +1,54 @@
 /**
  * Q&A processor service.
  * Extracts questions and answers from widget items + data source (resource or submission).
- * Applies HTML escaping at the source to prevent XSS in email and PDF output.
+ * Sanitizes user values at the source to prevent XSS in email and PDF output,
+ * while keeping safe rich text formatting intact.
  */
 
+const sanitizeHtml = require('sanitize-html');
+
 const { escapeHtml, escapeAttr, stripHtml } = require('./pdf-service');
+
+/**
+ * Sanitize a user-submitted answer that may contain rich text HTML.
+ * Keeps safe formatting tags, strips everything else, and normalizes
+ * non-breaking spaces so no literal entities end up in emails.
+ */
+function sanitizeAnswerHtml(str) {
+  const cleaned = String(str).replace(/&nbsp;|\u00a0/gi, ' ');
+  return sanitizeHtml(cleaned, {
+    allowedTags: [
+      'p',
+      'br',
+      'strong',
+      'em',
+      'b',
+      'i',
+      'u',
+      's',
+      'ul',
+      'ol',
+      'li',
+      'a',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+    ],
+    allowedAttributes: { a: ['href', 'target', 'rel'] },
+    transformTags: { h1: 'h3', h2: 'h4' },
+  }).trim();
+}
 
 /**
  * Transform a raw answer value into a safe, display-ready string.
  * Handles: strings, JSON-encoded arrays, object arrays with URLs,
  * plain arrays, and plain objects.
  *
- * All user-submitted values are HTML-escaped at this level so that
- * the returned string is safe to embed in HTML templates.
+ * All user-submitted values are sanitized or escaped at this level so
+ * that the returned string is safe to embed in HTML templates.
  */
 function transformAnswer(answer, fieldKey, tags) {
   // Handle tag fields like tags[type]
@@ -76,10 +112,10 @@ function transformAnswer(answer, fieldKey, tags) {
 
   // Plain string (or anything else)
   if (typeof answer === 'string') {
-    return escapeHtml(answer);
+    return sanitizeAnswerHtml(answer);
   }
 
-  return escapeHtml(String(answer || ''));
+  return sanitizeAnswerHtml(String(answer || ''));
 }
 
 /**
