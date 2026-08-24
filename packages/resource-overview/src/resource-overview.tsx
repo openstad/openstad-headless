@@ -402,12 +402,16 @@ const defaultItemRenderer = (
         className={`osc-resource-overview-content-item-footer ${
           doVote ? 'liking-allowed' : ''
         }`}>
-        {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
+        {props.likeWidget?.variant != 'micro-score' && (
           <>
             <Icon
               icon="ri-thumb-up-line"
               variant="big"
-              text={displayResource.yes}
+              text={
+                props.displayVote && props.votes?.isViewable
+                  ? displayResource.yes
+                  : undefined
+              }
               description="Stemmen voor"
               onClick={() => vote('yes')}
               className={opinion === 'yes' ? 'selected' : ''}
@@ -417,7 +421,11 @@ const defaultItemRenderer = (
               <Icon
                 icon="ri-thumb-down-line"
                 variant="big"
-                text={displayResource.no}
+                text={
+                  props.displayVote && props.votes?.isViewable
+                    ? displayResource.no
+                    : undefined
+                }
                 description="Stemmen tegen"
                 onClick={() => vote('no')}
                 className={opinion === 'no' ? 'selected' : ''}
@@ -426,7 +434,7 @@ const defaultItemRenderer = (
           </>
         )}
 
-        {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
+        {props.likeWidget?.variant == 'micro-score' && (
           <div className="micro-score-container">
             <Icon
               icon={`${
@@ -439,9 +447,11 @@ const defaultItemRenderer = (
                 opinion === 'yes' ? 'selected' : ''
               }`}
             />
-            <Paragraph className="votes-score">
-              {displayResource.netVotes}
-            </Paragraph>
+            {props.displayVote && props.votes?.isViewable && (
+              <Paragraph className="votes-score">
+                {displayResource.netVotes}
+              </Paragraph>
+            )}
             {props.likeWidget?.displayDislike && (
               <Icon
                 icon={`${
@@ -690,58 +700,66 @@ const defaultItemRenderer = (
           </div>
 
           <div className="osc-resource-overview-content-item-footer">
-            {props.likeWidget?.variant != 'micro-score' &&
-              props.displayVote && (
-                <>
+            {props.likeWidget?.variant != 'micro-score' && (
+              <>
+                <Icon
+                  icon="ri-thumb-up-line"
+                  variant="big"
+                  text={
+                    props.displayVote && props.votes?.isViewable
+                      ? resource.yes
+                      : undefined
+                  }
+                  className={selectedOpinion === 'yes' ? 'selected' : ''}
+                />
+                {props.likeWidget?.displayDislike && (
                   <Icon
-                    icon="ri-thumb-up-line"
+                    icon="ri-thumb-down-line"
                     variant="big"
-                    text={resource.yes}
-                    className={selectedOpinion === 'yes' ? 'selected' : ''}
+                    text={
+                      props.displayVote && props.votes?.isViewable
+                        ? resource.no
+                        : undefined
+                    }
+                    className={selectedOpinion === 'no' ? 'selected' : ''}
                   />
-                  {props.likeWidget?.displayDislike && (
-                    <Icon
-                      icon="ri-thumb-down-line"
-                      variant="big"
-                      text={resource.no}
-                      className={selectedOpinion === 'no' ? 'selected' : ''}
-                    />
-                  )}
-                </>
-              )}
+                )}
+              </>
+            )}
 
-            {props.likeWidget?.variant == 'micro-score' &&
-              props.displayVote && (
-                <>
-                  <Icon
-                    icon={`${
-                      selectedOpinion === 'yes'
-                        ? 'ri-triangle-fill'
-                        : 'ri-triangle-line'
-                    } micro-score-triangle`}
-                    variant="big"
-                    className={`micro-score-vote micro-score-vote--yes ${
-                      selectedOpinion === 'yes' ? 'selected' : ''
-                    }`}
-                  />
+            {props.likeWidget?.variant == 'micro-score' && (
+              <>
+                <Icon
+                  icon={`${
+                    selectedOpinion === 'yes'
+                      ? 'ri-triangle-fill'
+                      : 'ri-triangle-line'
+                  } micro-score-triangle`}
+                  variant="big"
+                  className={`micro-score-vote micro-score-vote--yes ${
+                    selectedOpinion === 'yes' ? 'selected' : ''
+                  }`}
+                />
+                {props.displayVote && props.votes?.isViewable && (
                   <Paragraph className="votes-score">
                     {resource.netVotes}
                   </Paragraph>
-                  {props.likeWidget?.displayDislike && (
-                    <Icon
-                      icon={`${
-                        selectedOpinion === 'no'
-                          ? 'ri-triangle-fill'
-                          : 'ri-triangle-line'
-                      } micro-score-triangle micro-score-triangle-down`}
-                      variant="big"
-                      className={`micro-score-vote micro-score-vote--no ${
-                        selectedOpinion === 'no' ? 'selected' : ''
-                      }`}
-                    />
-                  )}
-                </>
-              )}
+                )}
+                {props.likeWidget?.displayDislike && (
+                  <Icon
+                    icon={`${
+                      selectedOpinion === 'no'
+                        ? 'ri-triangle-fill'
+                        : 'ri-triangle-line'
+                    } micro-score-triangle micro-score-triangle-down`}
+                    variant="big"
+                    className={`micro-score-vote micro-score-vote--no ${
+                      selectedOpinion === 'no' ? 'selected' : ''
+                    }`}
+                  />
+                )}
+              </>
+            )}
 
             {props.displayArguments ? (
               <Icon
@@ -817,6 +835,7 @@ type DialogResourceItemProps = {
   clickableImage?: boolean;
   onRemoveClick: (resource: any) => void;
   forwardProps: ResourceOverviewWidgetProps;
+  refreshResourceLikes?: () => void;
 };
 
 function DialogResourceItem({
@@ -1469,6 +1488,7 @@ function ResourceOverviewInner({
                     console.error(e);
                   }
                 }}
+                refreshResourceLikes={refreshLikes}
                 forwardProps={props}
               />
             )}></Carousel>
