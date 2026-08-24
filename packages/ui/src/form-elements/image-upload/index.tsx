@@ -3,6 +3,10 @@ import { FormValue } from '@openstad-headless/form/src/form';
 import NotificationProvider from '@openstad-headless/lib/NotificationProvider/notification-provider';
 import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
 import {
+  buildImageCropUrl,
+  parseImageCropUrl,
+} from '@openstad-headless/lib/image-crop/crop-url';
+import {
   AccordionProvider,
   FormField,
   FormFieldDescription,
@@ -22,9 +26,11 @@ import 'filepond/dist/filepond.min.css';
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { FilePond, registerPlugin } from 'react-filepond';
 
+import { SecondaryButton } from '../../button';
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
 import { Spacer } from '../../spacer';
+import ImageCropDialog from './image-crop-dialog';
 import './image-upload.css';
 
 registerPlugin(
@@ -32,6 +38,9 @@ registerPlugin(
   FilePondPluginImagePreview,
   FilePondPluginFileValidateType
 );
+
+const sanitizeFileName = (fileName: string) =>
+  fileName.replace(/[^a-z0-9_\-]/gi, '_').replace(/_+/g, '_');
 
 const filePondSettings = {
   labelIdle: 'Upload hier uw bestand(en)',
@@ -88,6 +97,10 @@ export type ImageUploadProps = {
   disabled?: boolean;
   multiple?: boolean;
   maxUploadSizeMB?: number;
+  imageCropEnabled?: boolean;
+  imageCropRequired?: boolean;
+  imageCropRatioWidth?: number;
+  imageCropRatioHeight?: number;
   type?: string;
   onChange?: (
     e: {
@@ -127,6 +140,10 @@ const ImageUploadField: FC<ImageUploadProps> = ({
   onChange,
   allowedTypes = ['image/*'],
   disabled = false,
+  imageCropEnabled = false,
+  imageCropRequired = false,
+  imageCropRatioWidth,
+  imageCropRatioHeight,
   showMoreInfo = false,
   moreInfoButton = 'Meer informatie',
   moreInfoContent = '',
@@ -172,6 +189,90 @@ const ImageUploadField: FC<ImageUploadProps> = ({
   const [uploadedImages, setUploadedImages] = useState<
     { name: string; url: string }[]
   >([]);
+  const [cropQueue, setCropQueue] = useState<
+    { kind: 'uploaded' | 'mock'; index: number }[]
+  >([]);
+  const cropTarget = cropQueue[0] || null;
+  const pondRef = useRef<any>(null);
+  const cropOpenerRef = useRef<HTMLElement | null>(null);
+
+  const advanceCropQueue = () => {
+    setCropQueue((prev) => prev.slice(1));
+    cropOpenerRef.current?.focus();
+    cropOpenerRef.current = null;
+  };
+
+  const pruneCropQueue = (kind: 'uploaded' | 'mock', removedIndex: number) => {
+    setCropQueue((prev) =>
+      prev
+        .filter((entry) => entry.kind !== kind || entry.index !== removedIndex)
+        .map((entry) =>
+          entry.kind === kind && entry.index > removedIndex
+            ? { ...entry, index: entry.index - 1 }
+            : entry
+        )
+    );
+  };
+
+  const cropRatioWidth = imageCropRatioWidth || 16;
+  const cropRatioHeight = imageCropRatioHeight || 9;
+  const thumbRatio = cropRatioWidth / cropRatioHeight;
+  const thumbHeight = Math.min(160, 280 / thumbRatio);
+
+  const updateImageUrl = (
+    kind: 'uploaded' | 'mock',
+    index: number,
+    newUrl: string
+  ) => {
+    if (kind === 'uploaded') {
+      setUploadedImages((prev) =>
+        prev.map((image, i) =>
+          i === index ? { ...image, url: newUrl } : image
+        )
+      );
+    } else {
+      setMockImages((prev) =>
+        prev.map((image, i) =>
+          i === index ? { ...image, source: newUrl } : image
+        )
+      );
+    }
+  };
+
+  const removeUploadedImage = (index: number) => {
+    const target = uploadedImages[index];
+    if (!target) return;
+    const pondFile = pondRef.current
+      ?.getFiles()
+      ?.find(
+        (item: FilePondFile) => sanitizeFileName(item.file.name) === target.name
+      );
+    if (pondFile) {
+      pondRef.current.removeFile(pondFile.id);
+      setImages((prev) =>
+        prev.filter((item) => item.file.name !== pondFile.file.name)
+      );
+    }
+    setUploadedImages((prev) => prev.filter((image, i) => i !== index));
+  };
+
+  const closeCropDialog = (hadCrop: boolean) => {
+    if (
+      cropTarget &&
+      cropTarget.kind === 'uploaded' &&
+      imageCropRequired &&
+      !hadCrop
+    ) {
+      removeUploadedImage(cropTarget.index);
+      notifyFailed(
+        'Bijsnijden is verplicht voor deze afbeelding. De upload is verwijderd.'
+      );
+      setCropQueue([]);
+      cropOpenerRef.current = null;
+      return;
+    }
+    advanceCropQueue();
+  };
 
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
@@ -197,7 +298,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
       });
     }
     didInitRef.current = true;
-  }, [uploadedImages.length, mockImages.length, setImages, setUploadedImages]);
+  }, [uploadedImages, mockImages]);
 
   const acceptAttribute = allowedTypes ? allowedTypes : '';
 
@@ -282,6 +383,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
 
       <div className="utrecht-form-field__input">
         <FilePond
+          ref={pondRef}
           files={finalImages as File[] | FilePondInitialFile[]}
           onupdatefiles={(fileItems: FilePondFile[]) => {
             const imagesExceptMockedImages = fileItems
@@ -299,6 +401,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
             setImages(imagesExceptMockedImages);
           }}
           allowMultiple={multiple}
+          allowImagePreview={!imageCropEnabled}
           server={{
             process: {
               url: props?.imageUrl + '/images',
@@ -311,6 +414,13 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                 currentImages.push(JSON.parse(response)[0]);
 
                 setUploadedImages(currentImages);
+
+                if (imageCropEnabled && imageCropRequired) {
+                  setCropQueue((prev) => [
+                    ...prev,
+                    { kind: 'uploaded', index: currentImages.length - 1 },
+                  ]);
+                }
 
                 return JSON.stringify(currentImages); // Dit heeft echt geen nut, maar het lost wel de TS problemen op
               },
@@ -325,16 +435,17 @@ const ImageUploadField: FC<ImageUploadProps> = ({
             const fileName = file?.file?.name;
 
             if (!!fileName) {
-              const uploadImageFileName = fileName.replace(/\./g, '_');
-              const fileIsInUploadedImages = uploadedImages.find(
+              const uploadImageFileName = sanitizeFileName(fileName);
+              const uploadedIndex = uploadedImages.findIndex(
                 (item) => item.name === uploadImageFileName
               );
 
-              const fileIsInMockImages = mockImages.find(
+              const mockIndex = mockImages.findIndex(
                 (item) => item.options.file.name === fileName
               );
 
-              if (fileIsInMockImages) {
+              if (mockIndex >= 0) {
+                pruneCropQueue('mock', mockIndex);
                 const updatedMockImages = mockImages.filter(
                   (item) => item.options.file.name !== fileName
                 );
@@ -342,8 +453,9 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                 return;
               }
 
-              if (!fileIsInUploadedImages) return;
+              if (uploadedIndex < 0) return;
 
+              pruneCropQueue('uploaded', uploadedIndex);
               const updatedImages = uploadedImages.filter(
                 (item) => item.name !== uploadImageFileName
               );
@@ -381,6 +493,91 @@ const ImageUploadField: FC<ImageUploadProps> = ({
           aria-describedby={`${randomId}_error`}
           {...filePondSettings}
         />
+        {imageCropEnabled &&
+          (mockImages.length > 0 || uploadedImages.length > 0) && (
+            <div className="image-crop-list">
+              {[
+                ...mockImages.map((mockImage, index) => ({
+                  url: mockImage.source,
+                  name: mockImage.options.file.name,
+                  kind: 'mock' as const,
+                  index,
+                })),
+                ...uploadedImages.map((image, index) => ({
+                  url: image.url,
+                  name: image.name,
+                  kind: 'uploaded' as const,
+                  index,
+                })),
+              ].map((entry) => {
+                const { baseUrl, crop } = parseImageCropUrl(entry.url);
+                return (
+                  <div
+                    className="image-crop-list-row"
+                    key={`${entry.kind}-${entry.url}`}>
+                    <img
+                      src={entry.url}
+                      alt=""
+                      className="image-crop-list-thumb"
+                      style={{
+                        width: thumbHeight * thumbRatio,
+                        height: thumbHeight,
+                      }}
+                    />
+                    <span className="image-crop-list-name">{entry.name}</span>
+                    <SecondaryButton
+                      type="button"
+                      aria-label={`Afbeelding ${entry.name} bijsnijden`}
+                      onClick={(event) => {
+                        cropOpenerRef.current = event.currentTarget;
+                        setCropQueue([
+                          { kind: entry.kind, index: entry.index },
+                        ]);
+                      }}>
+                      {crop ? 'Bijsnijden aanpassen' : 'Bijsnijden'}
+                    </SecondaryButton>
+                    {crop && !imageCropRequired && (
+                      <SecondaryButton
+                        type="button"
+                        aria-label={`Herstel origineel van ${entry.name}`}
+                        onClick={() =>
+                          updateImageUrl(entry.kind, entry.index, baseUrl)
+                        }>
+                        Herstel origineel
+                      </SecondaryButton>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        {cropTarget &&
+          (() => {
+            const targetUrl =
+              cropTarget.kind === 'uploaded'
+                ? uploadedImages[cropTarget.index]?.url
+                : mockImages[cropTarget.index]?.source;
+            if (!targetUrl) return null;
+            const { crop } = parseImageCropUrl(targetUrl);
+            return (
+              <ImageCropDialog
+                key={`${cropTarget.kind}-${cropTarget.index}`}
+                imageUrl={targetUrl}
+                ratioWidth={cropRatioWidth}
+                ratioHeight={cropRatioHeight}
+                initialCrop={crop}
+                onConfirm={(rect) => {
+                  updateImageUrl(
+                    cropTarget.kind,
+                    cropTarget.index,
+                    buildImageCropUrl(targetUrl, rect)
+                  );
+                  advanceCropQueue();
+                }}
+                onCancel={() => closeCropDialog(!!crop)}
+              />
+            );
+          })()}
         <NotificationProvider />
       </div>
     </FormField>

@@ -1,0 +1,197 @@
+import { useProject } from '@/hooks/use-project';
+import {
+  CropRect,
+  buildImageCropUrl,
+  parseImageCropUrl,
+} from '@openstad-headless/lib/image-crop/crop-url';
+import React, { useEffect, useState } from 'react';
+import Cropper, { Area, MediaSize } from 'react-easy-crop';
+
+import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogTitle } from './ui/dialog';
+import { Input } from './ui/input';
+
+export const ImageCropDialog: React.FC<{
+  imageUrl: string;
+  onSave: (url: string) => void;
+  onClose: () => void;
+}> = ({ imageUrl, onSave, onClose }) => {
+  const { data } = useProject();
+  const { baseUrl, crop: initialCrop } = parseImageCropUrl(imageUrl);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [ratioWidth, setRatioWidth] = useState<number>(
+    data?.config?.project?.imageCropRatioWidth || 16
+  );
+  const [ratioHeight, setRatioHeight] = useState<number>(
+    data?.config?.project?.imageCropRatioHeight || 9
+  );
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropRect | null>(
+    initialCrop
+  );
+  const [ratioTouched, setRatioTouched] = useState(false);
+
+  const projectRatioWidth = data?.config?.project?.imageCropRatioWidth || 16;
+  const projectRatioHeight = data?.config?.project?.imageCropRatioHeight || 9;
+
+  useEffect(() => {
+    if (!ratioTouched) {
+      setRatioWidth(projectRatioWidth);
+      setRatioHeight(projectRatioHeight);
+    }
+  }, [projectRatioWidth, projectRatioHeight, ratioTouched]);
+
+  const aspect =
+    ratioWidth > 0 && ratioHeight > 0 ? ratioWidth / ratioHeight : 16 / 9;
+
+  const [cropperEl, setCropperEl] = useState<HTMLDivElement | null>(null);
+  const [cropSize, setCropSize] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+  const [mediaSize, setMediaSize] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+  const [minZoom, setMinZoom] = useState(1);
+
+  useEffect(() => {
+    if (!cropperEl) return;
+    let rafId = 0;
+    let attempts = 0;
+
+    const measureWhenStable = () => {
+      const rect = cropperEl.getBoundingClientRect();
+      const isStable =
+        Math.abs(rect.width - cropperEl.clientWidth) < 1 &&
+        Math.abs(rect.height - cropperEl.clientHeight) < 1;
+      if (!isStable && attempts < 60) {
+        attempts += 1;
+        rafId = requestAnimationFrame(measureWhenStable);
+        return;
+      }
+      let width = cropperEl.clientWidth;
+      let height = width / aspect;
+      if (height > cropperEl.clientHeight) {
+        height = cropperEl.clientHeight;
+        width = height * aspect;
+      }
+      setCropSize({ width: Math.floor(width), height: Math.floor(height) });
+    };
+
+    rafId = requestAnimationFrame(measureWhenStable);
+    return () => cancelAnimationFrame(rafId);
+  }, [cropperEl, aspect]);
+
+  useEffect(() => {
+    if (!cropSize || !mediaSize || !mediaSize.width || !mediaSize.height) {
+      return;
+    }
+    const coverZoom = Math.max(
+      cropSize.width / mediaSize.width,
+      cropSize.height / mediaSize.height
+    );
+    const nextMinZoom = Math.max(1, coverZoom);
+    setMinZoom(nextMinZoom);
+    setZoom((prev) => (prev < nextMinZoom ? nextMinZoom : prev));
+  }, [cropSize, mediaSize]);
+
+  return (
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}>
+      <DialogContent className="max-w-xl">
+        <DialogTitle>Afbeelding bijsnijden</DialogTitle>
+        <div
+          className="relative w-full h-80"
+          ref={setCropperEl}
+          style={{
+            background:
+              'repeating-conic-gradient(#c8c8c8 0% 25%, #e8e8e8 0% 50%) 0 0 / 16px 16px',
+          }}>
+          {cropSize && (
+            <Cropper
+              image={baseUrl}
+              crop={crop}
+              zoom={zoom}
+              aspect={aspect}
+              cropSize={cropSize}
+              minZoom={minZoom}
+              maxZoom={Math.max(3, minZoom * 3)}
+              initialCroppedAreaPixels={initialCrop || undefined}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onMediaLoaded={(media: MediaSize) =>
+                setMediaSize({ width: media.width, height: media.height })
+              }
+              onCropComplete={(
+                croppedArea: Area,
+                croppedAreaInPixels: Area
+              ) => {
+                const { x, y, width, height } = croppedAreaInPixels;
+                if ([x, y, width, height].every(Number.isFinite)) {
+                  setCroppedAreaPixels(croppedAreaInPixels);
+                }
+              }}
+            />
+          )}
+        </div>
+        <div className="flex items-end gap-2">
+          <label className="flex flex-col gap-1 text-sm">
+            Verhouding breedte
+            <Input
+              type="number"
+              min={1}
+              className="w-24"
+              value={ratioWidth}
+              onChange={(event) => {
+                setRatioTouched(true);
+                setRatioWidth(Number(event.target.value));
+              }}
+            />
+          </label>
+          <span className="pb-2" aria-hidden="true">
+            x
+          </span>
+          <label className="flex flex-col gap-1 text-sm">
+            Verhouding hoogte
+            <Input
+              type="number"
+              min={1}
+              className="w-24"
+              value={ratioHeight}
+              onChange={(event) => {
+                setRatioTouched(true);
+                setRatioHeight(Number(event.target.value));
+              }}
+            />
+          </label>
+        </div>
+        <DialogFooter>
+          {initialCrop && (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => onSave(baseUrl)}>
+              Herstel origineel
+            </Button>
+          )}
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Annuleren
+          </Button>
+          <Button
+            type="button"
+            disabled={!croppedAreaPixels}
+            onClick={() =>
+              croppedAreaPixels &&
+              onSave(buildImageCropUrl(imageUrl, croppedAreaPixels))
+            }>
+            Opslaan
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
