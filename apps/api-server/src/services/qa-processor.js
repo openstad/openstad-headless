@@ -38,7 +38,11 @@ function sanitizeAnswerHtml(str) {
       'h6',
     ],
     allowedAttributes: { a: ['href', 'target', 'rel'] },
-    transformTags: { h1: 'h3', h2: 'h4' },
+    transformTags: {
+      h1: 'h3',
+      h2: 'h4',
+      a: sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer' }),
+    },
   }).trim();
 }
 

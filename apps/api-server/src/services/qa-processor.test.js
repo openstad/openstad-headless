@@ -67,6 +67,18 @@ describe('qa-processor processSubmissionQA', () => {
     expect(result.questionsAndAnswers[0].answer).toContain('1 &lt; 2');
   });
 
+  it('forces safe rel on links in answers', async () => {
+    const db = buildDb([{ type: 'text', fieldKey: 'link', title: 'Link' }], {
+      link: '<a href="https://evil.example" target="_blank" rel="opener">klik</a>',
+    });
+
+    const result = await processSubmissionQA(instance, db);
+    const answer = result.questionsAndAnswers[0].answer;
+
+    expect(answer).toContain('rel="noopener noreferrer"');
+    expect(answer).not.toContain('rel="opener"');
+  });
+
   it('demotes h1 headings in answers to h3', async () => {
     const db = buildDb([{ type: 'text', fieldKey: 'kop', title: 'Kop' }], {
       kop: '<h1>Kop</h1>',
