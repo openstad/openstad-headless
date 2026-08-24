@@ -20,6 +20,10 @@ module.exports = {
         let projects = await db.Project.findAll();
 
         for (const project of projects) {
+          if (!project?.config?.anonymize?.allowAnonymizeUsersAfterInactivity) {
+            continue;
+          }
+
           let users = await db.User.findAll({
             where: {
               projectId: project.id,
