@@ -74,6 +74,7 @@ describe('local.postLogin - invalid credentials', () => {
   it('redirects back to login with clientId and an error flash when no user', () => {
     const req = makeReq({
       query: { redirect_uri: 'https://app.example.com/cb' },
+      redirectUri: 'https://app.example.com/cb',
     });
     const res = makeRes();
 

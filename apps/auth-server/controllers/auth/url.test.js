@@ -110,6 +110,7 @@ describe('url.postLogin (magic-login send path)', () => {
     const req = makeReq({
       body: { email: 'exists@x.com' },
       query: { redirect_uri: 'https://app.x/cb' },
+      redirectUri: 'https://app.x/cb',
     });
     const res = makeRes();
 
