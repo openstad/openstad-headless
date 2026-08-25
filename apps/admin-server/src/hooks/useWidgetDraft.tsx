@@ -241,8 +241,10 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
     ? routerWidgetId[0]
     : routerWidgetId;
   const lastWidgetIdRef = useRef(widgetId);
-  if (lastWidgetIdRef.current !== widgetId) {
+  const validatorsClearedRef = useRef(false);
+  if (!validatorsClearedRef.current || lastWidgetIdRef.current !== widgetId) {
     clearDraftValidators();
+    validatorsClearedRef.current = true;
     lastWidgetIdRef.current = widgetId;
   }
 
