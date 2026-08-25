@@ -233,8 +233,7 @@ exports.checkPhonenumberAuth = (errorCallback) => {
  */
 exports.check2FA = (req, res, next) => {
   const twoFactorRoles = req.client.twoFactorRoles;
-  const twoFactorValid =
-    req.currentClientAuth?.twoFactorValid || req.session?.twoFactorValid;
+  const twoFactorValid = req.currentClientAuth?.twoFactorValid;
 
   // if no role is present, assume default role
   const userRole = req.currentClientRole || req.user.role || defaultRole;
