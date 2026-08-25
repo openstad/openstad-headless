@@ -391,7 +391,6 @@ function Enquete(props: EnqueteWidgetProps) {
         }
         case 'dropdown': {
           fieldData['type'] = 'select';
-          fieldData['randomizeItems'] = item.randomizeItems || false;
 
           const configuredDefault: string[] = [];
           if (item.options && item.options.length > 0) {
@@ -413,13 +412,6 @@ function Enquete(props: EnqueteWidgetProps) {
             fieldData['defaultValue'] = draftValue;
           } else if (configuredDefault.length > 0) {
             fieldData['defaultValue'] = configuredDefault[0];
-          }
-
-          if (item.maxChoices) {
-            fieldData['maxChoices'] = item.maxChoices;
-          }
-          if (item.maxChoicesMessage) {
-            fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
           }
 
           break;

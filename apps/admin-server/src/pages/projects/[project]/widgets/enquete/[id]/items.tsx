@@ -2768,8 +2768,7 @@ export default function WidgetEnqueteItems(
                     )}
 
                     {(form.watch('questionType') === 'multiplechoice' ||
-                      form.watch('questionType') === 'multiple' ||
-                      form.watch('questionType') === 'dropdown') && (
+                      form.watch('questionType') === 'multiple') && (
                       <FormField
                         control={form.control}
                         // @ts-ignore
