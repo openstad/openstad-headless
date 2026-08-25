@@ -166,6 +166,11 @@ router
         returnTo +
         (returnTo.includes('?') ? '&' : '?') +
         'openstadlogintoken=[[jwt]]';
+    if (req.params.projectId && !returnTo.includes('openstadprojectid='))
+      returnTo =
+        returnTo +
+        (returnTo.includes('?') ? '&' : '?') +
+        `openstadprojectid=${req.params.projectId}`;
     let redirectUrl = returnTo;
     redirectUrl =
       redirectUrl ||

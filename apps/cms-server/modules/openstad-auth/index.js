@@ -128,6 +128,7 @@ module.exports = {
                 id: user.id,
                 role: user.role,
                 jwt,
+                projectId,
               };
 
               if (

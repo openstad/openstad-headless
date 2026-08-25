@@ -17,6 +17,30 @@ function activateExpireOnClose(storage) {
   setActiveCookie();
 }
 
+export function consumeLoginTokenFromUrl({ search, projectId }) {
+  const params = new URLSearchParams(search);
+  const tokenProjectId = params.get('openstadprojectid');
+  let jwt = params.get('openstadlogintoken');
+  if (jwt && tokenProjectId && tokenProjectId !== String(projectId)) {
+    jwt = null;
+  }
+  if (!jwt) {
+    return { jwt: null, search };
+  }
+  params.delete('openstadlogintoken');
+  params.delete('openstadprojectid');
+  const query = params.toString();
+  return { jwt, search: query ? `?${query}` : '' };
+}
+
+export function pickInitialUser({ globalUser, propsUser, projectId }) {
+  const globalUserIsForThisProject =
+    globalUser &&
+    (!globalUser.projectId ||
+      String(globalUser.projectId) === String(projectId));
+  return (globalUserIsForThisProject ? globalUser : null) || propsUser || {};
+}
+
 export default function useCurrentUser(props) {
   let self = this;
 
@@ -57,7 +81,11 @@ export default function useCurrentUser(props) {
     // get user from props
     let initialUser = {};
     try {
-      initialUser = globalOpenStadUser || props.openStadUser || {};
+      initialUser = pickInitialUser({
+        globalUser: globalOpenStadUser,
+        propsUser: props.openStadUser,
+        projectId,
+      });
     } catch (err) {}
 
     if (params.has('expireOnClose')) {
@@ -68,13 +96,19 @@ export default function useCurrentUser(props) {
     }
 
     let jwt;
-    if (params.has('openstadlogintoken')) {
-      jwt = params.get('openstadlogintoken');
+    const tokenPickup = consumeLoginTokenFromUrl({
+      search: window.location.search,
+      projectId,
+    });
+    if (tokenPickup.jwt) {
+      jwt = tokenPickup.jwt;
       console.log('[osc-auth] login token received from URL');
       storage.set('openStadUser', { jwt });
-      let url = window.location.href;
-      url = url.replace(new RegExp(`[?&]openstadlogintoken=${jwt}`), '');
-      history.replaceState(null, '', url);
+      history.replaceState(
+        null,
+        '',
+        `${window.location.pathname}${tokenPickup.search}${window.location.hash}`
+      );
     }
 
     let cmsUser = {};
