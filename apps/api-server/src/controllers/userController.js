@@ -771,6 +771,7 @@ async function updateUser(req, res, next) {
       await Promise.all(
         apiUsers.map((apiUser) => {
           let data = merge.recursive(
+            true,
             {},
             apiUser.projectId == req.params.projectId
               ? updatedUserDataForProject
