@@ -78,6 +78,7 @@ export type ResourceDetailWidgetProps = {
   displayDescriptionExpandable_expandBeforeText?: string;
   displayDescriptionExpandable_expandAfterText?: string;
   displayDescriptionExpandable_visibleLines?: string;
+  descriptionHeadingLevel?: string;
   selectedSocialShareOptions?: Array<
     'facebook' | 'x' | 'mail' | 'whatsapp' | 'linkedin' | 'copylink'
   >;
@@ -179,6 +180,7 @@ function ResourceDetail({
   displayDescriptionExpandable_expandBeforeText = 'Lees meer',
   displayDescriptionExpandable_expandAfterText = 'Lees minder',
   displayDescriptionExpandable_visibleLines = '4',
+  descriptionHeadingLevel = '3',
   displayUser = true,
   displayDate = true,
   displayBudget = true,
@@ -680,7 +682,10 @@ function ResourceDetail({
                     <div className="resource-detail-description">
                       <Paragraph
                         dangerouslySetInnerHTML={{
-                          __html: RenderContent(resource.description),
+                          __html: RenderContent(resource.description, {
+                            headingBaseLevel:
+                              Number(descriptionHeadingLevel) || 3,
+                          }),
                         }}></Paragraph>
                     </div>
                   ) : showAccordion ? (
@@ -701,7 +706,10 @@ function ResourceDetail({
                               ref={descriptionRef}>
                               <Paragraph
                                 dangerouslySetInnerHTML={{
-                                  __html: RenderContent(resource.description),
+                                  __html: RenderContent(resource.description, {
+                                    headingBaseLevel:
+                                      Number(descriptionHeadingLevel) || 3,
+                                  }),
                                 }}></Paragraph>
                             </div>
                           </div>
@@ -727,7 +735,10 @@ function ResourceDetail({
                       <div ref={descriptionRef}>
                         <Paragraph
                           dangerouslySetInnerHTML={{
-                            __html: RenderContent(resource.description),
+                            __html: RenderContent(resource.description, {
+                              headingBaseLevel:
+                                Number(descriptionHeadingLevel) || 3,
+                            }),
                           }}></Paragraph>
                       </div>
                     </div>
