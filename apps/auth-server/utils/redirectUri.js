@@ -10,37 +10,14 @@
  */
 
 const URL = require('url').URL;
+const {
+  parseHost,
+  getParentDomains,
+  addWithParents,
+} = require('@openstad-headless/lib/allowed-domains');
 
 const MAX_URI_LENGTH = 2000;
 const LOCAL_HOSTNAMES = ['localhost', '127.0.0.1', '[::1]'];
-
-function parseHost(value) {
-  if (!value) return null;
-  try {
-    if (value.indexOf('http') !== 0) value = 'https://' + value;
-    return new URL(value).host;
-  } catch {
-    return null;
-  }
-}
-
-function getParentDomains(hostname) {
-  const host = hostname.split(':')[0];
-  const parts = host.split('.');
-  const parents = [];
-  for (let i = 1; i < parts.length - 1; i++) {
-    parents.push(parts.slice(i).join('.'));
-  }
-  return parents;
-}
-
-function addWithParents(list, host) {
-  if (!host) return;
-  list.push(host);
-  for (const parent of getParentDomains(host)) {
-    list.push(parent);
-  }
-}
 
 /**
  * Bouwt de volledige allowlist op uit de geregistreerde client-domeinen,

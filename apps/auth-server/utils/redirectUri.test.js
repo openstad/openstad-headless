@@ -37,6 +37,20 @@ describe('validateRedirectUri', () => {
     ).toThrow();
   });
 
+  test('accepts the www variant of a registered bare domain', () => {
+    expect(validateRedirectUri('https://www.example.nl/cb', client)).toBe(
+      'https://www.example.nl/cb'
+    );
+  });
+
+  test('accepts the bare domain when www is registered', () => {
+    expect(
+      validateRedirectUri('https://example.com/cb', {
+        allowedDomains: ['www.example.com'],
+      })
+    ).toBe('https://example.com/cb');
+  });
+
   test('allows the parent domain of a registered subdomain (compat)', () => {
     expect(validateRedirectUri('https://example.org/x', client)).toBe(
       'https://example.org/x'
