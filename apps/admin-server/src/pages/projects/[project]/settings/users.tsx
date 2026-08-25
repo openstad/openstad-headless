@@ -42,6 +42,7 @@ const anonymizeFormSchema = z.object({
   anonymizeUsersAfterXDaysOfInactivity: z.coerce.number(),
   anonymizeUserName: z.string().optional(),
   allowAnonymizeUsersAfterEndDate: z.boolean().optional(),
+  allowAnonymizeUsersAfterInactivity: z.boolean().optional(),
 });
 
 const emailFormSchema = z.object({
@@ -56,6 +57,7 @@ type ProjectSettingsUsersProps = {
   anonymizeUsersAfterXDaysOfInactivity?: number;
   anonymizeUserName?: string;
   allowAnonymizeUsersAfterEndDate?: boolean;
+  allowAnonymizeUsersAfterInactivity?: boolean;
 };
 
 export default function ProjectSettingsUsers(
@@ -78,6 +80,9 @@ export default function ProjectSettingsUsers(
     () => ({
       allowAnonymizeUsersAfterEndDate:
         data?.config?.[anonymizeCategory]?.allowAnonymizeUsersAfterEndDate ||
+        false,
+      allowAnonymizeUsersAfterInactivity:
+        data?.config?.[anonymizeCategory]?.allowAnonymizeUsersAfterInactivity ||
         false,
       anonymizeUsersXDaysAfterEndDate:
         data?.config?.[anonymizeCategory]?.anonymizeUsersXDaysAfterEndDate ||
@@ -286,56 +291,87 @@ export default function ProjectSettingsUsers(
                         )}
                       />
                     )}
-                    {isSendEmailNotSet && (
-                      <Alert variant="error" className="mb-4">
-                        <AlertTitle>Let op!</AlertTitle>
-                        <AlertDescription>
-                          Het e-mailadres voor het versturen van notificaties is
-                          nog niet ingesteld. Stel deze eerst in bij de{' '}
-                          <a
-                            href={`/projects/${project}/settings/notifications`}
-                            className="underline">
-                            e-mail instellingen
-                          </a>
-                          . Zonder een juist ingesteld e-mailadres kunnen er
-                          geen waarschuwingsmails worden verstuurd en zullen
-                          gebruikers worden geanonimiseerd zonder waarschuwing.
-                        </AlertDescription>
-                      </Alert>
+                    <FormField
+                      control={anonymizeForm.control}
+                      name="allowAnonymizeUsersAfterInactivity"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            Gebruikers automatisch anonimiseren na langdurige
+                            inactiviteit?
+                            <InfoDialog content="Als je deze optie aanzet krijgen gebruikers na het hieronder ingestelde aantal dagen inactiviteit automatisch een waarschuwingsmail, en worden ze daarna geanonimiseerd als ze niet opnieuw inloggen. Staat deze optie uit, dan worden er geen waarschuwingsmails verstuurd en worden gebruikers niet om deze reden geanonimiseerd." />
+                          </FormLabel>
+                          {YesNoSelect(field, props)}
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {!!anonymizeForm.watch(
+                      'allowAnonymizeUsersAfterInactivity'
+                    ) && (
+                      <>
+                        {isSendEmailNotSet && (
+                          <Alert variant="error" className="mb-4">
+                            <AlertTitle>Let op!</AlertTitle>
+                            <AlertDescription>
+                              Het e-mailadres voor het versturen van
+                              notificaties is nog niet ingesteld. Stel deze
+                              eerst in bij de{' '}
+                              <a
+                                href={`/projects/${project}/settings/notifications`}
+                                className="underline">
+                                e-mail instellingen
+                              </a>
+                              . Zonder een juist ingesteld e-mailadres kunnen er
+                              geen waarschuwingsmails worden verstuurd en zullen
+                              gebruikers worden geanonimiseerd zonder
+                              waarschuwing.
+                            </AlertDescription>
+                          </Alert>
+                        )}
+                        <FormField
+                          control={anonymizeForm.control}
+                          name="warnUsersAfterXDaysOfInactivity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Na hoeveel dagen inactiviteit krijgen gebruikers
+                                een waarschuwing?
+                                <InfoDialog content="Na het ingevoerde aantal dagen krijgen geregistreerde gebruikers van het project automatisch een mailtje dat hun account geanonimiseerd gaat worden. De tekst van deze mail kun je hieronder aanpassen." />
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  placeholder="180"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <FormField
+                          control={anonymizeForm.control}
+                          name="anonymizeUsersAfterXDaysOfInactivity"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Na hoeveel dagen aan inactiviteit worden
+                                gebruikers automatisch geanonimiseerd?
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  placeholder="200"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
                     )}
-                    <FormField
-                      control={anonymizeForm.control}
-                      name="warnUsersAfterXDaysOfInactivity"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            Na hoeveel dagen inactiviteit krijgen gebruikers een
-                            waarschuwing?
-                            <InfoDialog content="Na het ingevoerde aantal dagen krijgen geregistreerde gebruikers van het project automatisch een mailtje dat hun account geanonimiseerd gaat worden. De tekst van deze mail kun je hieronder aanpassen." />
-                          </FormLabel>
-                          <FormControl>
-                            <Input type="number" placeholder="180" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={anonymizeForm.control}
-                      name="anonymizeUsersAfterXDaysOfInactivity"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            Na hoeveel dagen aan inactiviteit worden gebruikers
-                            automatisch geanonimiseerd?
-                          </FormLabel>
-                          <FormControl>
-                            <Input type="number" placeholder="200" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                     <FormField
                       control={anonymizeForm.control}
                       name="anonymizeUserName"
