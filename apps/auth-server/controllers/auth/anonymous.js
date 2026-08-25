@@ -55,7 +55,7 @@ exports.register = (req, res, next) => {
 
         req.user = user;
 
-        req.logIn(user, function (err) {
+        clientAuth.loginWithFreshSession(req, user, function (err) {
           if (err) {
             return next(err);
           }

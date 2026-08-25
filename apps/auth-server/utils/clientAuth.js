@@ -105,6 +105,32 @@ const initializeClientAuth = async (session, client, user, data = {}) => {
   });
 };
 
+const regenerateSession = (req) => {
+  if (!req.session || typeof req.session.regenerate !== 'function') {
+    return Promise.resolve();
+  }
+
+  const existingClientAuth = req.session.clientAuth;
+
+  return new Promise((resolve, reject) => {
+    req.session.regenerate((err) => {
+      if (err) return reject(err);
+      if (existingClientAuth) {
+        req.session.clientAuth = existingClientAuth;
+      }
+      return resolve();
+    });
+  });
+};
+
+const loginWithFreshSession = (req, user, done) => {
+  regenerateSession(req)
+    .then(() => {
+      req.logIn(user, { keepSessionInfo: true }, done);
+    })
+    .catch(done);
+};
+
 const saveSession = (session) => {
   if (!session || typeof session.save !== 'function') {
     return Promise.resolve();
@@ -124,6 +150,8 @@ module.exports = {
   getSessionMaxAgeMsForRole,
   initializeClientAuth,
   isClientAuthExpired,
+  loginWithFreshSession,
+  regenerateSession,
   resolveRoleForClient,
   saveSession,
   setClientAuth,
