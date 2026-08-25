@@ -3,6 +3,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useWidgetConfig } from './use-widget-config';
 
+const reseedListeners = new Set<() => void>();
+
+/**
+ * Forces every mounted preview to re-seed from the server config. Call this
+ * after the widget config was replaced outside the editor (a version restore),
+ * so the draft does not keep the pre-restore config and report itself dirty.
+ */
+export function requestPreviewReseed() {
+  reseedListeners.forEach((listener) => listener());
+}
+
 export function useWidgetPreview<T extends { [key: string]: any }>(
   widgetSettings: Partial<{
     [key in keyof T]: T[key];
@@ -36,6 +47,17 @@ export function useWidgetPreview<T extends { [key: string]: any }>(
       widgetId,
     });
   }, [widget?.config, widgetId, previewConfig, widgetSettings]);
+
+  useEffect(() => {
+    const reseed = () => {
+      seededWidgetIdRef.current = undefined;
+      setPreviewConfig(undefined);
+    };
+    reseedListeners.add(reseed);
+    return () => {
+      reseedListeners.delete(reseed);
+    };
+  }, []);
 
   const updatePreview = useCallback(
     (config: T | ((prev: T | undefined) => T)) => {

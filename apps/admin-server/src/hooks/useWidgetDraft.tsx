@@ -260,6 +260,12 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
       );
     }
 
+    if (!previewRef.current) {
+      throw new Error(
+        'De configuratie is opnieuw geladen. Controleer je wijzigingen en probeer opnieuw.'
+      );
+    }
+
     const draft = stripPreviewOnly(previewRef.current, widgetSettingsKeys);
     const saved = await updateConfig(draft as any, { silent: true });
     if (!saved) {
