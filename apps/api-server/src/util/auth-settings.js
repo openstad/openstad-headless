@@ -32,6 +32,19 @@ let createProjectConfig = function ({
 };
 
 let getConfig = async function ({ project, useAuth = 'default' }) {
+  const globalJwtSecret =
+    (config && config.auth && config.auth.jwtSecret) || null;
+  const projectJwtSecret =
+    (project && project.config && project.config.auth?.jwtSecret) || null;
+  if (projectJwtSecret && projectJwtSecret !== globalJwtSecret) {
+    console.error(
+      `[${new Date().toISOString()}][auth-settings] project ${project.id} overrides config.auth.jwtSecret; tokens are verified with the global secret, so per-project overrides break login`
+    );
+    throw new Error(
+      `Project ${project.id} overrides config.auth.jwtSecret; per-project jwtSecret overrides are not supported`
+    );
+  }
+
   let projectConfig = createProjectConfig({ project });
 
   if (useAuth == 'default' && projectConfig.default)
