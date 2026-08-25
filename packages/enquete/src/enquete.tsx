@@ -389,6 +389,33 @@ function Enquete(props: EnqueteWidgetProps) {
 
           break;
         }
+        case 'dropdown': {
+          fieldData['type'] = 'select';
+
+          const configuredDefault: string[] = [];
+          if (item.options && item.options.length > 0) {
+            fieldData['choices'] = item.options.map((option) => {
+              if (option.titles[0].defaultValue) {
+                configuredDefault.push(option.titles[0].key);
+              }
+              return {
+                value: option.titles[0].key,
+                label: option.titles[0].key,
+                isOtherOption: option.titles[0].isOtherOption,
+                defaultValue: option.titles[0].defaultValue,
+                trigger: option.trigger || '',
+              };
+            });
+          }
+
+          if (draftValue !== undefined) {
+            fieldData['defaultValue'] = draftValue;
+          } else if (configuredDefault.length > 0) {
+            fieldData['defaultValue'] = configuredDefault[0];
+          }
+
+          break;
+        }
         case 'images':
           fieldData['type'] = 'imageChoice';
           fieldData['multiple'] = item.multiple || false;
