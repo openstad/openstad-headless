@@ -126,6 +126,14 @@ const TrixEditor: React.FC<{
   const valueRef = useRef(value);
   const isFocusedRef = useRef(false);
 
+  /**
+   * Trix normalizes whatever we load into it (plain text becomes
+   * `<div>text</div>`) and fires trix-change for it. That is our own load, not
+   * an edit by the user, so reporting it would mark the surrounding form dirty
+   * on mount. Stays true until the user focuses the editor.
+   */
+  const pendingProgrammaticLoadRef = useRef(false);
+
   const targetBlankHrefsRef = useRef<Set<string>>(new Set());
 
   const idRef = useRef(
@@ -248,11 +256,14 @@ const TrixEditor: React.FC<{
 
       if (valueRef.current && editorInstance.current) {
         targetBlankHrefsRef.current = getTargetBlankHrefs(valueRef.current);
+        pendingProgrammaticLoadRef.current = true;
         editorInstance.current.loadHTML(valueRef.current);
       }
     };
 
     const handleTrixChange = () => {
+      if (pendingProgrammaticLoadRef.current && !isFocusedRef.current) return;
+
       let html = inputEl.value;
 
       if (targetBlankHrefsRef.current.size > 0) {
@@ -296,6 +307,7 @@ const TrixEditor: React.FC<{
     };
 
     const handleTrixFocus = () => {
+      pendingProgrammaticLoadRef.current = false;
       isFocusedRef.current = true;
       if (onFocusRef.current) onFocusRef.current();
     };
@@ -332,6 +344,7 @@ const TrixEditor: React.FC<{
     if (newHrefs.size > 0) {
       newHrefs.forEach((h) => targetBlankHrefsRef.current.add(h));
     }
+    pendingProgrammaticLoadRef.current = true;
     editorInstance.current.loadHTML(value || '');
   }, [value]);
 
