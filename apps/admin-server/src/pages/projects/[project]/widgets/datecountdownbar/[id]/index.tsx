@@ -2,8 +2,7 @@ import AuditLogTable from '@/components/audit-log-table';
 import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
 import WidgetVersionHistory from '@/components/widget-version-history';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -28,26 +27,8 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<DateCountdownBarWidgetProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<DateCountdownBarWidgetProps>({});
-
-  const totalPropPackage = {
-    ...widget?.config,
-    updateConfig: (config: DateCountdownBarWidgetProps) =>
-      updateConfig({ ...widget.config, ...config }),
-
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
-    projectId,
-  };
+  const { previewConfig, updateConfig, onFieldChanged } =
+    useWidgetDraft<DateCountdownBarWidgetProps>({});
 
   return (
     <div>
@@ -76,7 +57,11 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig ? (
-                <CountdownBarGeneral {...totalPropPackage} {...previewConfig} />
+                <CountdownBarGeneral
+                  {...previewConfig}
+                  updateConfig={updateConfig}
+                  onFieldChanged={onFieldChanged}
+                />
               ) : null}
             </TabsContent>
             <TabsContent value="publish" className="p-0">

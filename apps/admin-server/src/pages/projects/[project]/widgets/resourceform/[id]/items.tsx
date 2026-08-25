@@ -31,6 +31,7 @@ import {
   Matrix,
   MatrixOption,
 } from '@openstad-headless/enquete/src/types/enquete-props';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { defaultFormValues } from '@openstad-headless/resource-form/src/parts/default-values';
 import {
   Item,
@@ -411,18 +412,21 @@ export default function WidgetResourceFormItems(
   });
 
   const itemsInitialized = React.useRef(false);
+  const syncedItemsRef = React.useRef<string>(JSON.stringify(items));
   useEffect(() => {
     if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
       itemsInitialized.current = true;
-      setItems(props.items.map(withId));
+      const seeded = props.items.map(withId);
+      syncedItemsRef.current = JSON.stringify(seeded);
+      setItems(seeded);
     }
   }, [props?.items]);
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    if (onFieldChanged) {
-      onFieldChanged('items', items);
-    }
+    if (!onFieldChanged) return;
+    if (JSON.stringify(items) === syncedItemsRef.current) return;
+    onFieldChanged('items', items);
   }, [items]);
 
   // Sets form to selected item values when item is selected
@@ -606,20 +610,6 @@ export default function WidgetResourceFormItems(
     return sorted;
   }
 
-  function handleSaveItems() {
-    const updatedProps = { ...props };
-
-    Object.keys(updatedProps).forEach((key: string) => {
-      if (key.startsWith('options.')) {
-        // @ts-ignore
-        delete updatedProps[key];
-      }
-    });
-
-    props.updateConfig({ ...updatedProps, items });
-    setMatrixOptions(matrixDefault);
-  }
-
   const hasOptions = () => {
     switch (form.watch('type')) {
       case 'checkbox':
@@ -703,6 +693,11 @@ export default function WidgetResourceFormItems(
             : '';
 
       form.setValue('fieldKey', recommendedFieldKey);
+    } else if (form.watch('type') === 'timeline') {
+      if (form.watch('fieldKey') === '') {
+        form.setValue('fieldKey', 'timeline');
+      }
+      form.setValue('fieldType', 'timeline');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.watch('type')]);
@@ -775,10 +770,11 @@ export default function WidgetResourceFormItems(
                               }}>
                               <span
                                 dangerouslySetInnerHTML={{
-                                  __html:
+                                  __html: sanitizeHtml(
                                     item.type === 'pagination'
                                       ? '--- Nieuwe pagina ---'
-                                      : item.title || 'Geen titel',
+                                      : item.title || 'Geen titel'
+                                  ),
                                 }}
                               />
                             </span>
@@ -794,14 +790,6 @@ export default function WidgetResourceFormItems(
                         ))
                     : 'Geen items'}
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={() => handleSaveItems()}>
-                  Configuratie opslaan
-                </Button>
               </div>
             </div>
 
@@ -1238,6 +1226,9 @@ export default function WidgetResourceFormItems(
                               <SelectItem value="budget">
                                 Inzending: Budget
                               </SelectItem>
+                              <SelectItem value="timeline">
+                                Inzending: Tijdlijn
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -1339,6 +1330,7 @@ export default function WidgetResourceFormItems(
                               'documentUpload',
                               'select',
                               'matrix',
+                              'timeline',
                             ];
                             const type = form.watch('type');
                             const fieldKey = !nonStaticType.includes(type || '')
@@ -2102,6 +2094,25 @@ export default function WidgetResourceFormItems(
                           />
                         )}
                       </>
+                    )}
+
+                    {form.watch('type') === 'timeline' && (
+                      <div
+                        style={{
+                          padding: '11px',
+                          borderLeft: '4px solid #3b82f6',
+                          backgroundColor: '#eff6ff',
+                          borderTopRightRadius: '5px',
+                          borderBottomRightRadius: '5px',
+                          fontSize: '14px',
+                        }}>
+                        <strong>
+                          Tijdlijn-items worden beheerd door de indiener.
+                        </strong>
+                        <br />
+                        De indiener kan bij het invullen van het formulier zelf
+                        tijdlijn-items toevoegen, bewerken en verwijderen.
+                      </div>
                     )}
 
                     {hasOptions() && (

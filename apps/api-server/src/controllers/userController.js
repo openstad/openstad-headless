@@ -24,6 +24,7 @@ const filterBody = (req, res, next) => {
     'password',
     'name',
     'nickName',
+    'projectDisplayName',
     'email',
     'phoneNumber',
     'address',
@@ -260,14 +261,12 @@ function requireProject(req, res, next) {
 }
 
 function requireCanCreateUsers(req, res, next) {
-  if (
-    !(
-      ['admin', 'editor'].includes(req.body?.role) || // Allow admin/editor creation for projects that have ended
-      (req.project.config &&
-        req.project.config.users &&
-        req.project.config.users.canCreateNewUsers)
-    )
-  )
+  if (!(
+    ['admin', 'editor'].includes(req.body?.role) || // Allow admin/editor creation for projects that have ended
+    (req.project.config &&
+      req.project.config.users &&
+      req.project.config.users.canCreateNewUsers)
+  ))
     return next(createError(401, 'Gebruikers mogen niet aangemaakt worden'));
   return next();
 }
@@ -566,13 +565,11 @@ function parseAnonymizeUserName(req, res, next) {
 
 async function anonymizeTargetUser(req, res, next) {
   let result;
-  if (
-    !(
-      req.targetUser &&
-      req.targetUser.can &&
-      req.targetUser.can('update', req.user)
-    )
-  )
+  if (!(
+    req.targetUser &&
+    req.targetUser.can &&
+    req.targetUser.can('update', req.user)
+  ))
     return next(createError(403, 'You cannot update this User'));
   if (req.onlyUserIds && !req.onlyUserIds.includes(req.targetUser.id)) {
     req.results = {
@@ -746,9 +743,14 @@ async function updateUser(req, res, next) {
       let synchronizedUpdatedUserData = merge.recursive({}, updatedUserData);
       let userProjectSpecificFields = [
         'nickName',
+        'projectDisplayName',
         'role',
         'emailNotificationConsent',
         'privacyConsentAt',
+        'listableByRole',
+        'detailsViewableByRole',
+        'lastLogin',
+        'isNotifiedAboutAnonymization',
       ]; // todo: dit moet natuurlijk niet hier, maar dat is nu minder relevant
       for (let userProjectSpecificField of userProjectSpecificFields) {
         delete synchronizedUpdatedUserData[userProjectSpecificField];
@@ -768,10 +770,12 @@ async function updateUser(req, res, next) {
       // the update did not fully succeed.
       await Promise.all(
         apiUsers.map((apiUser) => {
-          let data =
+          let data = merge.recursive(
+            {},
             apiUser.projectId == req.params.projectId
               ? updatedUserDataForProject
-              : synchronizedUpdatedUserData;
+              : synchronizedUpdatedUserData
+          );
 
           if (!req.user.can('update', apiUser)) {
             console.error(`Not authorized to update linked user ${apiUser.id}`);

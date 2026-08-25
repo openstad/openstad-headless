@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,6 +9,7 @@ import {
 import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterSave } from '@/components/ui/save-controller';
 import {
   Select,
   SelectContent,
@@ -25,7 +25,6 @@ import { useRouter } from 'next/router';
 import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
@@ -134,30 +133,31 @@ export default function ProjectSettingsVoting() {
     setFieldValue(data?.config?.[category]?.voteType);
   }, [data]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const project = await updateProject({
-        [category]: {
-          isViewable: values.isViewable,
-          isActive: values.isActive,
-          withExisting: values.withExisting,
-          requiredUserRole: values.requiredUserRole,
-          voteType: values.voteType,
-          minResources: values.minResources,
-          maxResources: values.maxResources,
-          minBudget: values.minBudget,
-          maxBudget: values.maxBudget,
-        },
-      });
-      if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('could not update', error);
+  const save = useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
     }
-  }
+    const values = formSchema.parse(form.getValues());
+    const result = await updateProject({
+      [category]: {
+        isViewable: values.isViewable,
+        isActive: values.isActive,
+        withExisting: values.withExisting,
+        requiredUserRole: values.requiredUserRole,
+        voteType: values.voteType,
+        minResources: values.minResources,
+        maxResources: values.maxResources,
+        minBudget: values.minBudget,
+        maxBudget: values.maxBudget,
+      },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+  }, [form, updateProject]);
+
+  useRegisterSave({ isDirty: form.formState.isDirty, save });
 
   return (
     <div>
@@ -180,9 +180,7 @@ export default function ProjectSettingsVoting() {
           <Form {...form} className="p-6 bg-white rounded-md">
             <Heading size="xl">Stemmen</Heading>
             <Separator className="my-4" />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
+            <div className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-8">
               <FormField
                 control={form.control}
                 name="isViewable"
@@ -417,10 +415,7 @@ export default function ProjectSettingsVoting() {
                   )}
                 />
               )}
-              <Button type="submit" className="w-fit col-span-full">
-                Opslaan
-              </Button>
-            </form>
+            </div>
           </Form>
         </div>
       </PageLayout>

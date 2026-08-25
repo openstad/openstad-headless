@@ -17,6 +17,7 @@ module.exports = {
     '@apostrophecms/anchors': {},
     '@apostrophecms/sitemap': {},
     'openstad-login': {},
+    'openstad-template-filters': {},
     'openstad-section-widget': {},
     'openstad-assets': {},
     'openstad-auth': {},
@@ -37,5 +38,6 @@ module.exports = {
     'openstad-carousel-widget': {},
     'openstad-blog-post-widget': {},
     'openstad-breadcrumbs-widget': {},
+    'openstad-iframe-widget': {},
   },
 };

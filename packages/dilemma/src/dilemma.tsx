@@ -1,7 +1,15 @@
 import { FormValue } from '@openstad-headless/form/src/form';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import type { BaseProps } from '@openstad-headless/types';
 import { Button, Heading, Paragraph } from '@utrecht/component-library-react';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  FC,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import './dilemma.scss';
 
@@ -37,7 +45,12 @@ export type DilemmaProps = {
   required?: boolean;
   overrideDefaultValue?: FormValue;
   onChange?: (
-    e: { name: string; value: FormValue },
+    e: {
+      name: string;
+      value: FormValue;
+      isInitial?: boolean;
+      interactionKey?: string;
+    },
     triggerSetLastKey?: boolean
   ) => void;
 };
@@ -92,6 +105,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   const [infoDialog, setInfoDialog] = useState<boolean>(false);
   const [showExplanationDialog, setShowExplanationDialog] =
     useState<boolean>(false);
+  // Mount detection + marking whether the next emit is an explanation.
+  const didInitRef = useRef(false);
+  const pendingExplanationRef = useRef(false);
+
   const [explanations, setExplanations] = useState<Record<string, string>>(
     initialAnswersExplanation
   );
@@ -153,6 +170,29 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     previousAnswers,
     fieldKey,
   ]);
+
+  const handleSkip = useCallback(() => {
+    if (!currentDilemma) return;
+
+    const newAnswers = {
+      ...dilemmaAnswers,
+      [currentDilemma.id]: 'skipped',
+    };
+    setDilemmaAnswers(newAnswers);
+    setSelectedOption(null);
+    setPreviousAnswers((prev) => {
+      const updated = { ...prev };
+      delete updated[currentDilemma.id];
+      return updated;
+    });
+
+    const unanswered = dilemmaCards.filter((d) => !newAnswers[d.id]);
+    if (unanswered.length > 0) {
+      setCurrentDilemmaIndex(0);
+    } else {
+      setIsFinished(true);
+    }
+  }, [currentDilemma, dilemmaAnswers, dilemmaCards]);
 
   const moveToPrevious = useCallback(() => {
     const answeredDilemmas = dilemmaCards.filter(
@@ -245,6 +285,8 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   };
 
   const handleExplanationChange = (dilemmaId: string, explanation: string) => {
+    // Mark that the next emit concerns an explanation interaction.
+    pendingExplanationRef.current = true;
     setExplanations((prev) => ({
       ...prev,
       [dilemmaId]: explanation,
@@ -304,8 +346,20 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         })
         .filter((item) => item.answer !== undefined);
 
-      onChange({ name: fieldKey, value: combinedAnswers });
+      const isInitial = !didInitRef.current;
+      const isExplanation = pendingExplanationRef.current;
+      pendingExplanationRef.current = false;
+
+      onChange({
+        name: fieldKey,
+        value: combinedAnswers,
+        ...(isInitial ? { isInitial: true } : {}),
+        ...(isExplanation
+          ? { interactionKey: `${fieldKey}::explanation` }
+          : {}),
+      });
     }
+    didInitRef.current = true;
   }, [dilemmaAnswers, explanations]);
 
   useEffect(() => {
@@ -428,7 +482,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       }
       data-required={required}>
       <div className="dilemma-intro">
-        <Heading level={2} dangerouslySetInnerHTML={{ __html: title || '' }} />
+        <Heading
+          level={2}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(title || '') }}
+        />
         <div className="dilemma-progress">
           <span>
             {currentIndex + 1} van {dilemmas.length}
@@ -467,11 +524,13 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
               <Heading
                 level={3}
                 appearance="utrecht-heading-4"
-                dangerouslySetInnerHTML={{ __html: currentDilemma.a.title }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(currentDilemma.a.title),
+                }}
               />
               <Paragraph
                 dangerouslySetInnerHTML={{
-                  __html: currentDilemma.a.description,
+                  __html: sanitizeHtml(currentDilemma.a.description),
                 }}
               />
             </div>
@@ -504,11 +563,13 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
               <Heading
                 level={3}
                 appearance="utrecht-heading-4"
-                dangerouslySetInnerHTML={{ __html: currentDilemma.b.title }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(currentDilemma.b.title),
+                }}
               />
               <Paragraph
                 dangerouslySetInnerHTML={{
-                  __html: currentDilemma.b.description,
+                  __html: sanitizeHtml(currentDilemma.b.description),
                 }}
               />
             </div>
@@ -517,6 +578,15 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       </div>
 
       <div className="dilemma-actions">
+        <button
+          className="dilemma-skip-button"
+          onClick={(e) => (e.preventDefault(), handleSkip())}
+          disabled={required}
+          type="button"
+          aria-label="Dit dilemma overslaan">
+          <span>Overslaan</span>
+        </button>
+
         <button
           className="more-info-btn dilemma-info-button"
           onClick={(e) => (e.preventDefault(), setInfoDialog(true))}
@@ -593,7 +663,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         <div className="info-card-container">
           <Paragraph
             dangerouslySetInnerHTML={{
-              __html: currentDilemma?.infoField || '',
+              __html: sanitizeHtml(currentDilemma?.infoField || ''),
             }}
           />
           <button

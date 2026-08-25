@@ -1,16 +1,15 @@
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ChoiceGuideProps } from '@openstad-headless/choiceguide/src/props';
 import dynamic from 'next/dynamic';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
   FormControl,
@@ -80,57 +79,46 @@ export default function ChoicesSelectorForm(
 ) {
   const category = 'choiceGuide';
 
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
   const defaults = useCallback(
     () => ({
-      noOfQuestionsToShow:
-        widget?.config?.[category]?.noOfQuestionsToShow || '100',
+      noOfQuestionsToShow: props?.[category]?.noOfQuestionsToShow || '100',
       showPageCountAndCurrentPageInButton: undefinedToTrueOrProp(
-        widget?.config?.[category]?.showPageCountAndCurrentPageInButton
+        props?.[category]?.showPageCountAndCurrentPageInButton
       ),
       showBackButtonInTopOfPage:
-        widget?.config?.[category]?.showBackButtonInTopOfPage || false,
-      choicesType: widget?.config?.[category]?.choicesType || 'default',
+        props?.[category]?.showBackButtonInTopOfPage || false,
+      choicesType: props?.[category]?.choicesType || 'default',
       choicesPreferenceMinColor:
-        widget?.config?.[category]?.choicesPreferenceMinColor || '#ff9100',
+        props?.[category]?.choicesPreferenceMinColor || '#ff9100',
       choicesPreferenceMaxColor:
-        widget?.config?.[category]?.choicesPreferenceMaxColor || '#bed200',
-      afterUrl: widget?.config?.[category]?.afterUrl || '',
-      introTitle: widget?.config?.[category]?.introTitle || '',
-      introDescription: widget?.config?.[category]?.introDescription || '',
+        props?.[category]?.choicesPreferenceMaxColor || '#bed200',
+      afterUrl: props?.[category]?.afterUrl || '',
+      introTitle: props?.[category]?.introTitle || '',
+      introDescription: props?.[category]?.introDescription || '',
       minCharactersWarning:
-        widget?.config?.[category]?.minCharactersWarning ||
+        props?.[category]?.minCharactersWarning ||
         'Nog minimaal {minCharacters} tekens',
       maxCharactersWarning:
-        widget?.config?.[category]?.maxCharactersWarning ||
+        props?.[category]?.maxCharactersWarning ||
         'Je hebt nog {maxCharacters} tekens over',
       minCharactersError:
-        widget?.config?.[category]?.minCharactersError ||
+        props?.[category]?.minCharactersError ||
         'Tekst moet minimaal {minCharacters} karakters bevatten',
       maxCharactersError:
-        widget?.config?.[category]?.maxCharactersError ||
+        props?.[category]?.maxCharactersError ||
         'Tekst moet maximaal {maxCharacters} karakters bevatten',
-      showMinMaxAfterBlur:
-        widget?.config?.[category]?.showMinMaxAfterBlur || false,
+      showMinMaxAfterBlur: props?.[category]?.showMinMaxAfterBlur || false,
       maxCharactersOverWarning:
-        widget?.config?.[category]?.maxCharactersOverWarning ||
+        props?.[category]?.maxCharactersOverWarning ||
         'Je hebt {overCharacters} tekens teveel',
     }),
-    [widget?.config]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   type FormData = z.infer<typeof formSchema>;
   async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
+    props.updateConfig({ ...props, [category]: values });
   }
 
   const form = useForm<FormData>({
@@ -138,9 +126,17 @@ export default function ChoicesSelectorForm(
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  const pushToDraft = useCallback(
+    (name: string, value: any) =>
+      props.onFieldChanged?.(`${category}.${name}`, value),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [props.onFieldChanged]
+  );
+  useSyncDraftForm(form, pushToDraft, {
+    schema: formSchema,
+    label: 'Formulier instellingen',
+  });
+  const draftProps = { ...props, onFieldChanged: pushToDraft };
 
   const watchChoicesType = form.watch('choicesType');
 
@@ -162,7 +158,7 @@ export default function ChoicesSelectorForm(
                   &apos;Volgende&apos; knop?
                 </FormLabel>
                 {/*@ts-ignore*/}
-                {YesNoSelect(field, props)}
+                {YesNoSelect(field, draftProps)}
               </FormItem>
             )}
           />
@@ -232,7 +228,7 @@ export default function ChoicesSelectorForm(
                       Toon min/max waarschuwing na verlaten van het veld
                     </FormLabel>
                     {/*@ts-ignore*/}
-                    {YesNoSelect(field, props)}
+                    {YesNoSelect(field, draftProps)}
                   </FormItem>
                 )}
               />
@@ -374,14 +370,10 @@ export default function ChoicesSelectorForm(
                 <FormLabel>
                   Toon de &apos;Vorige&apos; knop bovenaan de pagina?
                 </FormLabel>
-                {YesNoSelect(field, props)}
+                {YesNoSelect(field, draftProps)}
               </FormItem>
             )}
           />
-
-          <Button type="submit" className="w-fit col-span-full">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

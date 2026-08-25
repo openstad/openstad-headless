@@ -150,9 +150,19 @@ class PluginLoader {
       }
     }
 
+    // Only ever read a file literally named plugins.json, regardless of how
+    // the path was derived, so an unexpected path can't turn into an arbitrary
+    // file read.
+    const resolvedPath = path.resolve(filePath);
+    if (path.basename(resolvedPath) !== 'plugins.json') {
+      throw new Error(
+        `[plugin-loader] Refusing to read non-plugins.json file: ${resolvedPath}`
+      );
+    }
+
     let pluginsConfig: { plugins?: PluginEntry[] };
     try {
-      const raw = fs.readFileSync(filePath, 'utf-8');
+      const raw = fs.readFileSync(resolvedPath, 'utf-8');
       pluginsConfig = JSON.parse(raw);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);

@@ -1,4 +1,5 @@
 import { canLikeResource } from '@openstad-headless/lib';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { elipsizeHTML } from '@openstad-headless/lib/ui-helpers';
 import {
   Carousel,
@@ -187,7 +188,9 @@ export const StemBegrootResourceList = ({
                 <Heading
                   level={2}
                   appearance="utrecht-heading-4"
-                  dangerouslySetInnerHTML={{ __html: resource.title }}
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeHtml(resource.title),
+                  }}
                 />
               ) : null}
               {displaySummary ? (

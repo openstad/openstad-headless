@@ -24,12 +24,16 @@ spec:
       serviceAccountName: openstad-headless-ingress-sa
       containers:
       - name: {{ template "openstad.admin.fullname" . }}
-        securityContext:
-          allowPrivilegeEscalation: false
         image: {{ .Values.admin.deploymentContainer.image }}
         imagePullPolicy: IfNotPresent
         securityContext:
+          allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
         ports:
           - containerPort: {{ .Values.admin.service.httpPort }}
             name: http
@@ -116,6 +120,8 @@ spec:
       volumes:
         - name: plugin-modules
           emptyDir: {}
+        - name: install-tmp
+          emptyDir: {}
         {{- if .Values.plugins.npmrcSecret }}
         - name: npmrc-secret
           secret:
@@ -124,6 +130,22 @@ spec:
       initContainers:
         - name: install-plugins
           image: {{ .Values.plugins.nodeImage }}
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            seccompProfile:
+              type: RuntimeDefault
+          env:
+            # npm install schrijft package.json/.npmrc naar installPath (gemount) en
+            # cache/logs naar $HOME/.npm; wijs die naar de /tmp emptyDir zodat
+            # readOnlyRootFilesystem: true kan.
+            - name: HOME
+              value: /tmp
+            - name: npm_config_cache
+              value: /tmp/.npm
           command: ["/bin/sh", "-c"]
           args:
             - |
@@ -135,6 +157,8 @@ spec:
               {{- end }}
               npm install --no-save {{ range .Values.plugins.items }}{{ if .enabled }}{{ .packageName }}{{ if .version }}@{{ .version }}{{ end }} {{ end }}{{ end }}
           volumeMounts:
+            - mountPath: /tmp
+              name: install-tmp
             - name: plugin-modules
               mountPath: {{ .Values.plugins.installPath }}
             {{- if .Values.plugins.npmrcSecret }}

@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useWidgetConfig } from './use-widget-config';
 
@@ -10,35 +10,38 @@ export function useWidgetPreview<T extends { [key: string]: any }>(
   idOverride?: string
 ): {
   previewConfig: T | undefined;
-  updatePreview: (arg: T) => void;
+  updatePreview: (arg: T | ((prev: T | undefined) => T)) => void;
 } {
   const [previewConfig, setPreviewConfig] = useState<T>();
   const { data: widget, isLoading: isLoadingWidget } =
     useWidgetConfig<T>(idOverride);
   const router = useRouter();
   const widgetId = idOverride ?? router.query.id;
+  const seededWidgetIdRef = useRef<string | undefined>(undefined);
 
-  // Set the preview the first time the widget config is loaded
   useEffect(() => {
-    if (!previewConfig) {
-      const config = widget?.config;
-      if (typeof config === 'object')
-        (
-          config as { showAdminHiddenPolygonStyling?: boolean }
-        ).showAdminHiddenPolygonStyling = true;
+    const currentId = Array.isArray(widgetId) ? widgetId[0] : widgetId;
+    if (previewConfig && seededWidgetIdRef.current === currentId) return;
 
-      if (config) {
-        setPreviewConfig({
-          ...config,
-          ...widgetSettings,
-          widgetId,
-        });
-      }
+    const config = widget?.config;
+    if (!config) return;
+    if (typeof config === 'object') {
+      (config as any).showAdminHiddenPolygonStyling = true;
     }
-  }, [widget?.config, previewConfig, widgetSettings]);
 
-  function updatePreview(config: T) {
-    setPreviewConfig(config);
-  }
+    seededWidgetIdRef.current = currentId;
+    setPreviewConfig({
+      ...config,
+      ...widgetSettings,
+      widgetId,
+    });
+  }, [widget?.config, widgetId, previewConfig, widgetSettings]);
+
+  const updatePreview = useCallback(
+    (config: T | ((prev: T | undefined) => T)) => {
+      setPreviewConfig(config as any);
+    },
+    []
+  );
   return { previewConfig, updatePreview };
 }

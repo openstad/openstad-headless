@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -41,6 +41,10 @@ export default function ArgumentsForm(
   }
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Formulier',
+  });
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -104,7 +108,6 @@ export default function ArgumentsForm(
               </FormItem>
             )}
           />
-          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

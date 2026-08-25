@@ -15,6 +15,7 @@ import {
 } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
@@ -248,7 +249,7 @@ const defaultItemRenderer = (
       return (
         <div
           dangerouslySetInnerHTML={{
-            __html: render,
+            __html: sanitizeHtml(render),
           }}></div>
       );
     } catch (e) {
@@ -991,11 +992,6 @@ function ResourceOverviewInner({
   const needsAllResourcesFetch =
     listUsesAllResources || !!displayMap || !!onFilteredResourcesChange;
 
-  // Build API filter params — always send filters to the API
-  const apiTags = useMemo(
-    () => [...(includeTags.length > 0 ? includeTags : []), ...tags],
-    [includeTags, tags]
-  );
   const apiExcludeTags = useMemo(() => excludeTags, [excludeTags]);
   const apiStatuses = useMemo(
     () => (includeOrExcludeStatusIds === 'include' ? statuses : []),
@@ -1020,25 +1016,25 @@ function ResourceOverviewInner({
     return tagsMap;
   }, [allTags]);
 
-  // When AND behavior is needed, group selected tags by their type for the API.
-  // Handle includeTags and user tags separately — they can have different behavior settings.
   const apiTagGroups = useMemo(() => {
     const groups: number[][] = [];
 
-    // includeTags: group by type when filterBehaviorInclude is 'and'
-    if (filterBehaviorInclude === 'and' && includeTags.length > 0) {
-      Object.keys(groupedTags).forEach((tagType) => {
-        const tagsOfType = groupedTags[tagType];
-        const selectedOfType = includeTags.filter((tagId) =>
-          tagsOfType.includes(tagId)
-        );
-        if (selectedOfType.length > 0) {
-          groups.push(selectedOfType);
-        }
-      });
+    if (includeTags.length > 0) {
+      if (filterBehaviorInclude === 'and') {
+        Object.keys(groupedTags).forEach((tagType) => {
+          const tagsOfType = groupedTags[tagType];
+          const selectedOfType = includeTags.filter((tagId) =>
+            tagsOfType.includes(tagId)
+          );
+          if (selectedOfType.length > 0) {
+            groups.push(selectedOfType);
+          }
+        });
+      } else {
+        groups.push(includeTags);
+      }
     }
 
-    // user-selected tags: group by type when filterBehavior is 'and'
     if (filterBehavior === 'and' && tags.length > 0) {
       Object.keys(groupedTags).forEach((tagType) => {
         const tagsOfType = groupedTags[tagType];
@@ -1054,13 +1050,10 @@ function ResourceOverviewInner({
     return groups;
   }, [filterBehavior, filterBehaviorInclude, tags, includeTags, groupedTags]);
 
-  // When tag groups handle the AND logic, send only the remaining OR tags as flat params
   const flatApiTags = useMemo(() => {
-    if (filterBehaviorInclude === 'and' && filterBehavior === 'and') return [];
-    if (filterBehaviorInclude === 'and') return tags;
-    if (filterBehavior === 'and') return includeTags;
-    return apiTags;
-  }, [filterBehavior, filterBehaviorInclude, tags, includeTags, apiTags]);
+    if (filterBehavior === 'and') return [];
+    return tags;
+  }, [filterBehavior, tags]);
 
   const {
     data: resourcesWithPagination,
@@ -1167,7 +1160,22 @@ function ResourceOverviewInner({
         }
       );
 
-      const combined = [...uniqueResources, ...allRecords].sort(
+      const filteredProjectCards = uniqueResources.filter((card: any) => {
+        const cardTagIds: number[] =
+          card.tags?.map((tag: { id: number }) => tag.id) ?? [];
+        if (cardTagIds.some((id) => excludeTags.includes(id))) return false;
+        if (
+          flatApiTags.length > 0 &&
+          !flatApiTags.some((id: number) => cardTagIds.includes(id))
+        )
+          return false;
+        return apiTagGroups.every(
+          (group: number[]) =>
+            group.length === 0 || group.some((id) => cardTagIds.includes(id))
+        );
+      });
+
+      const combined = [...filteredProjectCards, ...allRecords].sort(
         (a: any, b: any) => {
           if (sort === 'createdAt_desc')
             return (
@@ -1203,6 +1211,9 @@ function ResourceOverviewInner({
     allTags,
     search,
     sort,
+    excludeTags,
+    flatApiTags,
+    apiTagGroups,
   ]);
 
   useEffect(() => {

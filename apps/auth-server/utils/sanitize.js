@@ -80,7 +80,7 @@ var allSafeTags = {
       'name',
       'title',
     ],
-    a: ['href', 'name', 'rel', 'target'],
+    a: ['href', 'name', 'rel', 'target', 'aria-label'],
     img: ['height', 'src', 'width'],
   },
   // allowedClasses: {
@@ -96,6 +96,18 @@ var allSafeTags = {
       return { tagName: tagName, attribs: attrs };
     },
   },
+};
+
+// sanitize-html laat entities achter (& -> &amp;); waarden die daarna nog door
+// nunjucks autoescape gaan zouden dubbel escapen. Decoden naar plain text,
+// autoescape doet daarna de (enige) escaping.
+var decodeEntities = function (text) {
+  return text
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&amp;/g, '&');
 };
 
 module.exports = {
@@ -116,10 +128,30 @@ module.exports = {
 
   // TODO: Transform all call to these two options, instead
   //       of the content-type-named versions above.
+  // Non-strings (false/undefined als "niet gezet" in render locals) gaan
+  // ongewijzigd door.
   safeTags: function (text) {
-    return sanitize(text, allSafeTags);
+    return typeof text === 'string' ? sanitize(text, allSafeTags) : text;
   },
   noTags: function (text) {
-    return sanitize(text, noTags);
+    return typeof text === 'string' ? sanitize(text, noTags) : text;
+  },
+
+  // Voor render locals die de template onder autoescape toont: tags strippen,
+  // entities terugdecoden zodat autoescape niet dubbel escapet.
+  plainText: function (text) {
+    return typeof text === 'string'
+      ? decodeEntities(sanitize(text, noTags))
+      : text;
+  },
+
+  // Views gebruiken alleen client.name en client.clientId; geef nooit het
+  // hele (Sequelize-)clientobject aan res.render.
+  client: function (client) {
+    if (!client) return {};
+    return {
+      name: module.exports.plainText(client.name),
+      clientId: module.exports.plainText(client.clientId),
+    };
   },
 };

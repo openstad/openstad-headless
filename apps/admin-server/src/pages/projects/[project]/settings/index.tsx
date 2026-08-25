@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
@@ -34,26 +35,45 @@ import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
 
-const formSchema = z.object({
-  name: z.string().min(1, {
-    message: 'De naam van een project mag niet leeg zijn!',
-  }),
-  username: z.string().optional(),
-  password: z.string().optional(),
-  endDate: z.date().min(new Date(), {
-    message: 'De datum moet nog niet geweest zijn!',
-  }),
-  // We don't want to restrict this URL too much
-  url: z
-    .string()
-    .regex(/^(?:([a-z0-9.:\-_\/]+))?$/g, {
-      message:
-        'De URL mag alleen kleine letters, cijfers, punten, dubbele punten, koppeltekens, onderstrepingstekens en schuine strepen bevatten.',
-    })
-    .optional(),
-  basicAuthActive: z.coerce.boolean().optional(),
-  projectToggle: z.boolean().optional(),
-});
+const GENERAL_TAB = { tab: 'general', tabLabel: 'Projectinformatie' };
+const FIELD_LABELS: Record<string, string> = {
+  name: 'Projectnaam',
+  endDate: 'Einddatum',
+  url: 'Project URL',
+  basicAuthActive: 'Beveiliging met wachtwoord',
+  password: 'Wachtwoord',
+  projectToggle: 'Website aan/uit',
+};
+
+const formSchema = z
+  .object({
+    name: z.string().min(1, {
+      message: 'De naam van een project mag niet leeg zijn!',
+    }),
+    password: z.string().optional(),
+    endDate: z.date().min(new Date(), {
+      message: 'De datum moet nog niet geweest zijn!',
+    }),
+    // We don't want to restrict this URL too much
+    url: z
+      .string()
+      .regex(/^(?:([a-z0-9.:\-_\/]+))?$/g, {
+        message:
+          'De URL mag alleen kleine letters, cijfers, punten, dubbele punten, koppeltekens, onderstrepingstekens en schuine strepen bevatten.',
+      })
+      .optional(),
+    basicAuthActive: z.coerce.boolean().optional(),
+    projectToggle: z.boolean().optional(),
+  })
+  .superRefine((values, ctx) => {
+    if (values.basicAuthActive && !values.password?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['password'],
+        message: 'Vul een wachtwoord in om de beveiliging te activeren.',
+      });
+    }
+  });
 
 export default function ProjectSettings() {
   const router = useRouter();
@@ -72,6 +92,7 @@ export default function ProjectSettings() {
   const [basicAuthInitial, setBasicAuthInitial] = useState(true);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('general');
 
   const defaults = useCallback(() => {
     const currentDate = new Date();
@@ -83,7 +104,6 @@ export default function ProjectSettings() {
         : new Date(currentDate.getFullYear(), currentDate.getMonth() + 3),
       url: data?.url || '',
       basicAuthActive: data?.config?.basicAuth?.active || false,
-      username: data?.config?.basicAuth?.username || '',
       password: data?.config?.basicAuth?.password || '',
       projectToggle: data?.config?.project?.projectToggle ?? !!data?.url,
     };
@@ -116,10 +136,23 @@ export default function ProjectSettings() {
     }
   }, [data, checkboxInitial, basicAuthInitial, form]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const save = useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      const firstErrorField = Object.keys(form.formState.errors)[0];
+      const label = firstErrorField ? FIELD_LABELS[firstErrorField] : undefined;
+      if (label) {
+        setActiveTab(GENERAL_TAB.tab);
+        throw new Error(
+          `Controleer het veld "${label}" op het tabblad "${GENERAL_TAB.tabLabel}".`
+        );
+      }
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
     setIsSubmitting(true);
     try {
-      const project = await updateProject(
+      const result = await updateProject(
         {
           project: {
             endDate: values.endDate,
@@ -128,27 +161,21 @@ export default function ProjectSettings() {
           },
           basicAuth: {
             active: values.basicAuthActive,
-            username: values.username,
             password: values.password,
           },
         },
         values.name,
         values.projectToggle ? values.url : ''
       );
-      if (project?.error) {
-        toast.error(project.error);
-      } else if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
+      if (!result) {
+        throw new Error('Er is helaas iets mis gegaan.');
       }
-    } catch (error) {
-      console.error('could not update', error);
-      toast.error('Er is helaas iets mis gegaan.');
     } finally {
       setIsSubmitting(false);
     }
-  }
+  }, [form, updateProject, data]);
+
+  useRegisterSave({ isDirty: form.formState.isDirty, save });
 
   async function saveProjectHasEnded(value: boolean) {
     try {
@@ -247,7 +274,7 @@ export default function ProjectSettings() {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="general">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Projectinformatie</TabsTrigger>
               <TabsTrigger value="csp">Beveiligingsheaders</TabsTrigger>
@@ -261,9 +288,7 @@ export default function ProjectSettings() {
                 <Form {...form}>
                   <Heading size="xl">Projectinformatie</Heading>
                   <Separator className="my-4" />
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="grid grid-cols-2 gap-x-4 gap-y-8">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-8">
                     <FormField
                       control={form.control}
                       name="name"
@@ -340,9 +365,12 @@ export default function ProjectSettings() {
                           return (
                             <FormItem className="col-span-full md:col-span-1 flex flex-col">
                               <FormLabel>
-                                Wil je de website beveiligen met een
-                                gebruikersnaam en wachtwoord?
+                                Wil je de website beveiligen met een wachtwoord?
                               </FormLabel>
+                              <em className="text-xs">
+                                Let op: het kan enkele minuten duren voordat een
+                                wijziging op de website zichtbaar is.
+                              </em>
                               <Switch.Root
                                 className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
                                 onCheckedChange={(e: boolean) => {
@@ -361,22 +389,6 @@ export default function ProjectSettings() {
                       <>
                         <FormField
                           control={form.control}
-                          name="username"
-                          render={({ field }) => (
-                            <FormItem className="col-span-full md:col-span-1 flex flex-col">
-                              <FormLabel>Gebruikersnaam</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder="Gebruikersnaam"
-                                  {...field}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
                           name="password"
                           render={({ field }) => (
                             <FormItem className="col-span-full md:col-span-1 flex flex-col">
@@ -390,19 +402,13 @@ export default function ProjectSettings() {
                         />
                       </>
                     ) : null}
-                    <Button
-                      className="w-fit col-span-full"
-                      type="submit"
-                      disabled={isSubmitting}>
-                      {isSubmitting ? 'Bezig met opslaan...' : 'Opslaan'}
-                    </Button>
                     {isSubmitting && showUrl && !!form.watch('url') && (
                       <p className="col-span-full text-sm text-muted-foreground">
                         Het aanmaken van de website kan enkele minuten duren.
                         Laat dit venster open.
                       </p>
                     )}
-                  </form>
+                  </div>
                 </Form>
               </div>
             </TabsContent>

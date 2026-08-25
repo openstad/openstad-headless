@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -21,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,6 +33,13 @@ import { ArgumentWidgetTabProps } from '.';
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
+  resourceIdRelativePath: z
+    .string()
+    .optional()
+    .refine(
+      (value) => !value || value.includes('[id]'),
+      'Specificeer een [id] veld'
+    ),
   sentiment: z.string(),
   useSentiments: z.string().optional(),
   itemsPerPage: z.coerce.number(),
@@ -71,7 +78,10 @@ export default function ArgumentsGeneral({
   const form = useForm<finalSchemaInfer>({
     resolver: zodResolver<any>(finalSchema),
     defaultValues: {
-      resourceId: props.resourceId,
+      resourceId: props?.resourceId || undefined,
+      resourceIdRelativePath: props?.resourceId
+        ? ''
+        : props?.resourceIdRelativePath || '',
       sentiment: props.sentiment || 'for',
       useSentiments: JSON.stringify(props.useSentiments || ['for', 'against']),
       itemsPerPage: props?.itemsPerPage || 9999,
@@ -89,8 +99,20 @@ export default function ArgumentsGeneral({
     try {
       useSentiments = JSON.parse(values.useSentiments || '');
     } catch (err) {}
-    props.updateConfig({ ...props, ...values, useSentiments });
+    props.updateConfig({
+      ...props,
+      ...values,
+      resourceIdRelativePath: values.resourceId
+        ? ''
+        : values.resourceIdRelativePath,
+      useSentiments,
+    });
   }
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: finalSchema,
+    label: 'Algemeen',
+  });
 
   const { data } = useResources(props.projectId);
   const resources: Array<{ id: string | number; title: string }> = data || [];
@@ -113,9 +135,44 @@ export default function ArgumentsGeneral({
               items={resources}
               keyForValue="id"
               label={(resource) => `${resource.id} ${resource.title}`}
-              onFieldChanged={props.onFieldChanged}
-              noSelection="Niet koppelen (gebruik queryparam openstadResourceId)"
+              onFieldChanged={(key, value) => {
+                if (value) {
+                  form.setValue('resourceIdRelativePath', '');
+                }
+                props.onFieldChanged(key, value);
+              }}
+              noSelection="Niet koppelen - beschrijf het path of gebruik queryparam openstadResourceId"
             />
+          )}
+
+          {conditionallyRenderField(
+            'resourceIdRelativePath',
+            !form.watch('resourceId') ? (
+              <FormField
+                control={form.control}
+                name="resourceIdRelativePath"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Geen specifieke inzending gekoppeld?</FormLabel>
+                    <FormDescription className="italic">
+                      Beschrijf hoe de inzending gehaald wordt uit de url:
+                      (/pad/naar/[id]) of laat leeg om terug te vallen op
+                      ?openstadResourceId
+                    </FormDescription>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : null
           )}
 
           {conditionallyRenderField(
@@ -324,8 +381,6 @@ export default function ArgumentsGeneral({
               </FormItem>
             )}
           />
-
-          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

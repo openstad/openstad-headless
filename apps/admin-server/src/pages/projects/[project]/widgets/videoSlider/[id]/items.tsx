@@ -390,20 +390,6 @@ export default function WidgetEnqueteItems(
     return sorted;
   }
 
-  function handleSaveItems() {
-    const updatedProps = { ...props };
-
-    Object.keys(updatedProps).forEach((key: string) => {
-      if (key.startsWith('options.')) {
-        // @ts-ignore
-        delete updatedProps[key];
-      }
-    });
-
-    props.updateConfig({ ...updatedProps, items });
-    setOptions([]);
-  }
-
   const hasOptions = () => {
     switch (form.watch('questionType')) {
       case 'multiplechoice':
@@ -510,14 +496,6 @@ export default function WidgetEnqueteItems(
                         ))
                     : 'Geen items'}
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={() => handleSaveItems()}>
-                  Configuratie opslaan
-                </Button>
               </div>
             </div>
 

@@ -24,7 +24,6 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { generateId, withId } from '@/lib/widget-item-helpers';
@@ -39,6 +38,7 @@ import {
   Matrix,
   MatrixOption,
 } from '@openstad-headless/enquete/src/types/enquete-props';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
@@ -208,8 +208,6 @@ export default function WidgetChoiceGuideItems(
     (MatrixOption & { type: 'rows' | 'columns' }) | null
   >(null);
   const [imageIndexOpen, setImageIndexOpen] = useState<number | null>(null);
-
-  const { data: widget } = useWidgetConfig<any>();
 
   const router = useRouter();
   const { project } = router.query;
@@ -528,18 +526,21 @@ export default function WidgetChoiceGuideItems(
   });
 
   const itemsInitialized = React.useRef(false);
+  const syncedItemsRef = React.useRef<string>(JSON.stringify(items));
   useEffect(() => {
     if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
       itemsInitialized.current = true;
-      setItems(props.items.map(withId));
+      const seeded = props.items.map(withId);
+      syncedItemsRef.current = JSON.stringify(seeded);
+      setItems(seeded);
     }
   }, [props?.items]);
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    if (onFieldChanged) {
-      onFieldChanged('items', items);
-    }
+    if (!onFieldChanged) return;
+    if (JSON.stringify(items) === syncedItemsRef.current) return;
+    onFieldChanged('items', items);
   }, [items]);
 
   // Sets form to selected item values when item is selected
@@ -756,7 +757,7 @@ export default function WidgetChoiceGuideItems(
 
   useEffect(() => {
     const chosenType = form.watch('type') || '';
-    const chosenConfig = widget?.config?.choiceGuide?.choicesType || 'default';
+    const chosenConfig = props?.choiceGuide?.choicesType || 'default';
 
     let dimensions = chosenConfig === 'plane' ? ['X', 'Y'] : ['X'];
 
@@ -779,61 +780,6 @@ export default function WidgetChoiceGuideItems(
 
     setDimensions(finalDimensions);
   }, [form.watch('type')]);
-
-  function handleSaveItems() {
-    let itemsToSave = [...items];
-
-    if (selectedItem) {
-      const values = form.getValues();
-      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
-      if (valuesWithoutTrigger?.options) {
-        valuesWithoutTrigger.options = options;
-      }
-      if (valuesWithoutTrigger?.matrix) {
-        valuesWithoutTrigger.matrix = matrixOptions;
-      }
-
-      const normalizedValuesWeights = ensureABDefaultsOnWeights(
-        valuesWithoutTrigger.type,
-        valuesWithoutTrigger.weights || {}
-      );
-      const selectedItemWeights = structuredClone(selectedItem.weights || {});
-      const mergedWeights = {
-        ...selectedItemWeights,
-        ...structuredClone(normalizedValuesWeights),
-      };
-      const normalizedMergedWeights = ensureABDefaultsOnWeights(
-        valuesWithoutTrigger.type,
-        mergedWeights
-      );
-
-      itemsToSave = itemsToSave.map((item) =>
-        item.id === selectedItem.id
-          ? {
-              ...item,
-              ...valuesWithoutTrigger,
-              weights: normalizedMergedWeights,
-            }
-          : item
-      );
-    }
-
-    const updatedProps = { ...props };
-
-    Object.keys(updatedProps).forEach((key: string) => {
-      if (key.startsWith('options.')) {
-        // @ts-ignore
-        delete updatedProps[key];
-      }
-    });
-
-    setItems(itemsToSave);
-    props.updateConfig({ ...updatedProps, items: itemsToSave });
-    setSelectedItemId(null);
-    form.reset(defaults());
-    setOptions([]);
-    setMatrixOptions(matrixDefault);
-  }
 
   const hasOptions = () => {
     switch (form.watch('type')) {
@@ -1132,10 +1078,11 @@ export default function WidgetChoiceGuideItems(
                               }}>
                               <span
                                 dangerouslySetInnerHTML={{
-                                  __html:
+                                  __html: sanitizeHtml(
                                     item.type === 'pagination'
                                       ? '--- Nieuwe pagina ---'
-                                      : item.title || 'Geen titel',
+                                      : item.title || 'Geen titel'
+                                  ),
                                 }}
                               />
                             </span>
@@ -1151,14 +1098,6 @@ export default function WidgetChoiceGuideItems(
                         ))
                     : 'Geen items'}
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={() => handleSaveItems()}>
-                  Configuratie opslaan
-                </Button>
               </div>
             </div>
 
@@ -2869,8 +2808,7 @@ export default function WidgetChoiceGuideItems(
                       <div className="w-full mt-4 flex flex-col gap-y-4">
                         {(() => {
                           const isPlaneType =
-                            widget?.config?.choiceGuide?.choicesType ===
-                            'plane';
+                            props?.choiceGuide?.choicesType === 'plane';
                           const isCheckboxType = [
                             'checkbox',
                             'radiobox',
@@ -2883,7 +2821,7 @@ export default function WidgetChoiceGuideItems(
                           }
 
                           if (isCheckboxType) {
-                            return widget?.config?.choiceOption?.choiceOptions?.map(
+                            return props?.choiceOption?.choiceOptions?.map(
                               (singleGroup: ChoiceOptions, index: number) =>
                                 weightOptionsFields(singleGroup, index)
                             );
@@ -2893,7 +2831,7 @@ export default function WidgetChoiceGuideItems(
                             return weightFields({ id: 'plane' }, 999);
                           }
 
-                          return widget?.config?.choiceOption?.choiceOptions?.map(
+                          return props?.choiceOption?.choiceOptions?.map(
                             (singleGroup: ChoiceOptions, index: number) =>
                               weightFields(singleGroup, index)
                           );

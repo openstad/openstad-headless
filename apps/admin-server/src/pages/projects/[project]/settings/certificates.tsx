@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterSave } from '@/components/ui/save-controller';
 import {
   Select,
   SelectContent,
@@ -21,7 +22,7 @@ import { Heading } from '@/components/ui/typography';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -93,24 +94,25 @@ export default function ProjectSettingsCertificates() {
     }
   }, [data, form]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const result = await updateProject({
-        certificates: {
-          certificateMethod: values.certificateMethod,
-          externalCertSlug: values.externalCertSlug || '',
-        },
-      });
-      if (result) {
-        toast.success('Certificaatinstellingen opgeslagen!');
-        mutate();
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (e) {
-      toast.error('Er is helaas iets mis gegaan.');
+  const save = useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
     }
-  }
+    const values = formSchema.parse(form.getValues());
+    const result = await updateProject({
+      certificates: {
+        certificateMethod: values.certificateMethod,
+        externalCertSlug: values.externalCertSlug || '',
+      },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+    mutate();
+  }, [form, updateProject, mutate]);
+
+  useRegisterSave({ isDirty: form.formState.isDirty, save });
 
   async function handleRetry() {
     setRetryLoading(true);
@@ -163,9 +165,7 @@ export default function ProjectSettingsCertificates() {
         ]}>
         <div className="container py-6">
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="p-6 bg-white rounded-md">
+            <div className="p-6 bg-white rounded-md">
               <Heading size="xl">TLS Certificaat (SSL)</Heading>
               <Separator className="my-4" />
 
@@ -241,11 +241,8 @@ export default function ProjectSettingsCertificates() {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-4">
-                <Button type="submit" disabled={isLoading}>
-                  Opslaan
-                </Button>
-                {showExternalCertConfig && (
+              {showExternalCertConfig && (
+                <div className="flex gap-4">
                   <Button
                     type="button"
                     variant="outline"
@@ -255,9 +252,9 @@ export default function ProjectSettingsCertificates() {
                       ? 'Bezig...'
                       : 'Certificaat opnieuw controleren'}
                   </Button>
-                )}
-              </div>
-            </form>
+                </div>
+              )}
+            </div>
           </Form>
         </div>
       </PageLayout>

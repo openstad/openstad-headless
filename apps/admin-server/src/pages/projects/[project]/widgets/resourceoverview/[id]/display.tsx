@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -21,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -93,7 +93,7 @@ export default function WidgetResourceOverviewDisplay(
       displayMap: props?.displayMap || false,
       displayAsTabs: props?.displayAsTabs || false,
       displayTitle: props?.displayTitle || false,
-      headingLevel: props?.headingLevel,
+      headingLevel: props?.headingLevel || '2',
       bannerText: props?.bannerText,
       titleMaxLength: props?.titleMaxLength || 20,
       displayDescription: props?.displayDescription || false,
@@ -138,6 +138,11 @@ export default function WidgetResourceOverviewDisplay(
     },
   });
 
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Weergave',
+  });
+
   const { watch } = form;
   const displayBanner = watch('displayBanner');
   const displayMap = watch('displayMap');
@@ -162,14 +167,6 @@ export default function WidgetResourceOverviewDisplay(
       setGroupedNames(groupNames);
     }
   }, [tags]);
-
-  useEffect(() => {
-    if (displayTags && typeof props.dialogTagGroups === 'undefined') {
-      const allTagGroups = tagGroupNames;
-      form.setValue('dialogTagGroups', allTagGroups);
-      props.onFieldChanged('dialogTagGroups', allTagGroups);
-    }
-  }, [displayTags, tagGroupNames]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -994,10 +991,6 @@ export default function WidgetResourceOverviewDisplay(
               )}
             />
           )}
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

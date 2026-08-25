@@ -19,7 +19,7 @@ import {
   FormFieldDescription,
   Paragraph,
 } from '@utrecht/component-library-react';
-import React, { FC, ReactNode, useEffect, useState } from 'react';
+import React, { FC, ReactNode, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
@@ -53,7 +53,7 @@ export type SortFieldProps = {
   createImageSlider?: boolean;
   imageClickable?: boolean;
   onChange?: (
-    e: { name: string; value: any },
+    e: { name: string; value: any; isInitial?: boolean },
     triggerSetLastKey?: boolean
   ) => void;
   prevPageText?: string;
@@ -150,6 +150,7 @@ const SortField: FC<SortFieldProps> = ({
     }
   };
 
+  const didInitRef = useRef(false);
   useEffect(() => {
     const value = items
       .filter((opt) => !!opt.titles)
@@ -159,7 +160,10 @@ const SortField: FC<SortFieldProps> = ({
       onChange({
         name: fieldKey,
         value: sortValue,
+        // The first emit is the mount initialisation, not a user interaction.
+        isInitial: !didInitRef.current,
       });
+    didInitRef.current = true;
   }, [items, touched]);
 
   return (

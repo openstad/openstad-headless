@@ -11,6 +11,7 @@ const Sequelize = require('sequelize');
 const createError = require('http-errors');
 const db = require('../db');
 const hasRole = require('../lib/sequelize-authorization/lib/hasRole');
+const { stripVisibilityScope } = require('../lib/resource-create-scope');
 const {
   analyzeSpamPayload,
   isSpamFilterEnabled,
@@ -406,9 +407,15 @@ function createResource(req, res, next) {
   db.Resource.authorizeData(data, 'create', req.user, null, req.project)
     .create(data)
     .then((resourceInstance) => {
-      db.Resource.scope(...req.scope)
+      const createScope = stripVisibilityScope(req.scope);
+      db.Resource.scope(...createScope)
         .findByPk(resourceInstance.id)
         .then(async (result) => {
+          if (!result) {
+            return next(
+              createError(500, 'Failed to load resource after creation')
+            );
+          }
           result.project = req.project;
           await attachModeratorOnlyExtraDataKeys(result);
           req.results = result;
@@ -624,13 +631,11 @@ function loadResource(req, res, next) {
 }
 
 function checkResourceEditable(req, res, next) {
-  if (
-    !(
-      req.project.config &&
-      req.project.config.resources &&
-      req.project.config.resources.canAddNewResources
-    )
-  ) {
+  if (!(
+    req.project.config &&
+    req.project.config.resources &&
+    req.project.config.resources.canAddNewResources
+  )) {
     if (!req.results.dataValues.publishDate) {
       return next(
         createError(

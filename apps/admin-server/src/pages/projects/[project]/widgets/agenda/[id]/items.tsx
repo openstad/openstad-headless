@@ -2,7 +2,6 @@ import {
   AgendaItem,
   AgendaItemsEditor,
 } from '@/components/agenda-items-editor';
-import { Button } from '@/components/ui/button';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { withId } from '@/lib/widget-item-helpers';
 import { AgendaWidgetProps } from '@openstad-headless/agenda/src/agenda';
@@ -14,23 +13,26 @@ export default function WidgetAgendaItems(
   const [items, setItems] = useState<AgendaItem[]>([]);
 
   const itemsInitialized = React.useRef(false);
+  const syncedItemsRef = React.useRef<string>(JSON.stringify(items));
   useEffect(() => {
     if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
       itemsInitialized.current = true;
-      setItems(props.items.map(withId) as AgendaItem[]);
+      const seeded = props.items.map(withId) as AgendaItem[];
+      syncedItemsRef.current = JSON.stringify(seeded);
+      setItems(seeded);
     }
   }, [props?.items]);
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    if (onFieldChanged) {
-      onFieldChanged('items', items);
-    }
+    if (!onFieldChanged) return;
+    if (JSON.stringify(items) === syncedItemsRef.current) return;
+    const normalizedItems = items.map((item) => ({
+      ...item,
+      active: item.active ?? false,
+    }));
+    onFieldChanged('items', normalizedItems);
   }, [items]);
-
-  function handleSaveItems() {
-    props.updateConfig({ ...props, items });
-  }
 
   return (
     <div>
@@ -39,14 +41,6 @@ export default function WidgetAgendaItems(
         onItemsChange={setItems}
         showActiveDates={props.useActiveDates}
       />
-      <div className="flex gap-2 mt-4">
-        <Button
-          className="w-fit"
-          type="button"
-          onClick={() => handleSaveItems()}>
-          Configuratie opslaan
-        </Button>
-      </div>
     </div>
   );
 }

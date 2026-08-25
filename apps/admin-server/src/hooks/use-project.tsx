@@ -76,7 +76,11 @@ export function useProject(scopes?: Array<string>) {
     return await res.json();
   }
 
-  async function updateProject(config: any, name?: any, url?: any) {
+  async function updateProject(
+    config: any,
+    name?: any,
+    url?: any
+  ): Promise<any | null> {
     const body: { config: any; name?: string; url?: string } = { config };
     if (name) {
       body.name = name;
@@ -93,12 +97,11 @@ export function useProject(scopes?: Array<string>) {
       body: JSON.stringify(body),
     });
 
-    const data = await res.json();
-
     if (!res.ok) {
-      return { error: data.message || 'Er is helaas iets mis gegaan.' };
+      return null;
     }
 
+    const data = await res.json();
     projectSwr.mutate(data);
 
     return data;

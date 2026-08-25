@@ -57,9 +57,7 @@ if canonicalUrl and not ((data.piece._seoCanonical and data.piece._seoCanonical
 <link rel="canonical" href="{{ canonicalUrl | e }}" />
 {% endif %} {% endblock %} {% block beforeMain %}
 
-<div
-  id="logout-data"
-  data-logout-url="{{ data.global.logoutUrl | safe }}"></div>
+<div id="logout-data" data-logout-url="{{ data.global.logoutUrl }}"></div>
 
 <a
   class="skip-link utrecht-button-link utrecht-button-link--html-a utrecht-button-link--primary-action"

@@ -50,17 +50,18 @@
   <div class="container relative main-header-container">
     <div class="row">
       <div class="col-xs-12">
-        {% if data.global.siteLogo === 'amsterdam' %}
-        <a
-          href="{{data.baseUrlWithPrefix}}{{logoLink}}/"
-          class="logo-container">
+        {% if data.global.logoLink %} {% if '://' in data.global.logoLink or
+        (data.global.logoLink | first) == '/' %} {% set logoHref =
+        data.global.logoLink %} {% else %} {% set logoHref = 'https://' +
+        data.global.logoLink %} {% endif %} {% else %} {% set logoHref =
+        data.baseUrlWithPrefix + '/' %} {% endif %} {% if data.global.siteLogo
+        === 'amsterdam' %}
+        <a href="{{logoHref}}" class="logo-container">
           <img src="/modules/openstad-assets/img/andreas.svg" alt="logo" />
           <div id="amsterdam">Gemeente<br />Amsterdam</div>
         </a>
         {% elif data.global.siteLogo %}
-        <a
-          href="{{data.baseUrlWithPrefix}}{{logoLink}}/"
-          class="logo-uploaded logo-main-container">
+        <a href="{{logoHref}}" class="logo-uploaded logo-main-container">
           <img
             src="{{apos.attachment.url(data.global.siteLogo)}}"
             alt="{{data.global.logoAltText}}"
@@ -71,9 +72,7 @@
           {% endif %} {% endif %}
         </a>
         {% else %}
-        <a
-          href="{{data.baseUrlWithPrefix}}{{logoLink}}/"
-          class="logo-default logo-main-container">
+        <a href="{{logoHref}}" class="logo-default logo-main-container">
           <img
             class="default"
             src="/images/logo.png"

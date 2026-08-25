@@ -3,6 +3,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,7 +13,6 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 import { LikeWidgetTabProps } from '.';
-import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
   FormControl,
@@ -77,7 +77,7 @@ export default function LikesDisplay({
   const form = useForm<FinalSchemaInfer>({
     resolver: zodResolver<any>(finalSchema),
     defaultValues: {
-      resourceId: props?.resourceId,
+      resourceId: props?.resourceId || '',
       title: props?.title || '',
       variant: props?.variant || 'medium',
       yesLabel: props?.yesLabel || 'Ja',
@@ -88,6 +88,11 @@ export default function LikesDisplay({
       progressBarDescription: props?.progressBarDescription || '',
       showConfetti: props?.showConfetti || false,
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: finalSchema,
+    label: 'Weergave',
   });
 
   return (
@@ -316,8 +321,6 @@ export default function LikesDisplay({
             )}
           />
         )}
-
-        <Button type="submit">Opslaan</Button>
       </form>
     </Form>
   );

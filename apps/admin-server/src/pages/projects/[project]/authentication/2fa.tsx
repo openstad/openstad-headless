@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -10,6 +9,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
@@ -17,7 +17,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
@@ -94,39 +93,40 @@ export default function ProjectAuthentication2FA() {
     form.reset(defaults());
   }, [form, defaults]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const project = await updateProject({
-        auth: {
-          provider: {
-            openstad: {
-              twoFactorRoles: values.twoFactorRoles,
-              config: {
-                twoFactor: {
-                  title: values.title,
-                  description: values.description,
-                  buttonText: values.buttonText,
-                  info: values.info,
-                },
-                configureTwoFactor: {
-                  title: values.configTitle,
-                  description: values.configDescription,
-                  buttonText: values.configButtonText,
-                },
+  const save = useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
+    const result = await updateProject({
+      auth: {
+        provider: {
+          openstad: {
+            twoFactorRoles: values.twoFactorRoles,
+            config: {
+              twoFactor: {
+                title: values.title,
+                description: values.description,
+                buttonText: values.buttonText,
+                info: values.info,
+              },
+              configureTwoFactor: {
+                title: values.configTitle,
+                description: values.configDescription,
+                buttonText: values.configButtonText,
               },
             },
           },
         },
-      });
-      if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('Could not update', error);
+      },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+  }, [form, updateProject]);
+
+  useRegisterSave({ isDirty: form.formState.isDirty, save });
 
   const [showPageFields, setShowPageFields] = useState(false);
   useEffect(() => {
@@ -157,9 +157,7 @@ export default function ProjectAuthentication2FA() {
           <Form {...form} className="p-6 bg-white rounded-md">
             <Heading size="xl">Tweestapsverificatie</Heading>
             <Separator className="my-4" />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="space-y-4 lg:w-1/2">
+            <div className="space-y-4 lg:w-1/2">
               <div>
                 <FormLabel>
                   Gebruikers met de onderstaande rollen moeten inloggen met
@@ -333,9 +331,7 @@ export default function ProjectAuthentication2FA() {
                   />
                 </>
               ) : null}
-
-              <Button type="submit">Opslaan</Button>
-            </form>
+            </div>
           </Form>
         </div>
       </PageLayout>

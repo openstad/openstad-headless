@@ -4,9 +4,12 @@ import { Separator } from '@/components/ui/separator';
 import { Spacer } from '@/components/ui/spacer';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChoiceOptions } from '@openstad-headless/choiceguide/src/props';
+import {
+  ChoiceGuideProps,
+  ChoiceOptions,
+} from '@openstad-headless/choiceguide/src/props';
 import { X } from 'lucide-react';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useRef } from 'react';
@@ -36,21 +39,13 @@ const formSchema = z.object({
   ),
 });
 
-export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
+export default function WidgetChoiceGuideChoiceOptions(
+  props: ChoiceGuideProps & EditFieldProps<ChoiceGuideProps>
+) {
   const category = 'choiceOption';
 
   const router = useRouter();
   const { project } = router.query;
-
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
-  const chosenConfig = widget?.config?.choiceGuide?.choicesType || 'default';
-  let dimensions = chosenConfig === 'plane' ? ['X', 'Y'] : ['X'];
-  dimensions = chosenConfig === 'hidden' ? [] : dimensions;
 
   const nextIdRef = useRef<number>(1);
   const normalizeChoiceOptions = (
@@ -72,7 +67,7 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
 
   const defaults = useCallback(() => {
     const choiceOptions = normalizeChoiceOptions(
-      widget?.config?.[category]?.choiceOptions || []
+      props?.[category]?.choiceOptions || []
     );
 
     if (choiceOptions.length > 0) {
@@ -86,7 +81,8 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
     return {
       choiceOptions,
     };
-  }, [widget?.config]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   type FormData = z.infer<typeof formSchema>;
 
@@ -101,26 +97,27 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
     keyName: 'reactKey',
   });
 
+  const { onFieldChanged } = props;
   useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+    if (!onFieldChanged) return;
+    const subscription = form.watch((values) => {
+      const normalized = normalizeChoiceOptions(
+        (values.choiceOptions || []) as ChoiceOptions[]
+      );
+      onFieldChanged(category, { choiceOptions: normalized });
+    });
+    return () => subscription.unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [form, onFieldChanged]);
 
   async function onSubmit(values: FormData) {
     const normalizedChoiceOptions = normalizeChoiceOptions(
       values.choiceOptions || []
     );
-
-    const updatedConfig = {
-      ...widget.config,
+    props.updateConfig({
+      ...props,
       [category]: { choiceOptions: normalizedChoiceOptions },
-    };
-
-    try {
-      await updateConfig(updatedConfig);
-      window.location.reload();
-    } catch (error) {
-      console.error('could not update', error);
-    }
+    });
   }
 
   const handleAddGroup = () => {
@@ -280,10 +277,6 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
             onClick={handleAddGroup}
             className="w-fit col-span-full mt-4 block">
             Voeg Keuze optie Toe
-          </Button>
-
-          <Button type="submit" className="w-fit col-span-full mt-4">
-            Opslaan
           </Button>
         </form>
       </Form>

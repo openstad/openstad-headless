@@ -101,13 +101,8 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
   },
   choiceguide: {
     afterUrl: 'URL van de resultaat pagina',
-    beforeUrl: 'URL van de inleidende pagina',
-    choicesInBetweenPreferenceTitle:
-      'Titel boven de keuzes, tussen twee voorkeuren in',
-    choicesNoPreferenceYetTitle: 'Titel boven de keuzes, nog geen voorkeur',
     choicesPreferenceMaxColor: 'Kleur van de balken, maximaal',
     choicesPreferenceMinColor: 'Kleur van de balken, minimaal',
-    choicesPreferenceTitle: 'Titel boven de keuzes, met voorkeur',
     choicesType: 'Weergave van de voorkeuren',
     createImageSlider: 'Wil je van de afbeeldingen een slider maken?',
     defaultValue: 'Standaard aangevinkt?',
@@ -117,7 +112,6 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     fieldRequired: 'Is dit veld verplicht?',
     hideLabel: 'Titel verbergen?',
     imageAlt: 'Afbeelding beschrijving voor screenreaders',
-    imageAspectRatio: 'Weergave: afbeeldingen aspect ratio',
     imageClickable:
       'Moeten de afbeeldingen uitvergroot worden als erop geklikt wordt?',
     imageDescription: 'Beschrijving afbeelding',
@@ -211,6 +205,7 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
       'Overschrijf het e-mailadres voor de mail naar de inzender van de inzending',
     placeholder: 'Placeholder tekst',
     resourceId: 'Koppel aan een specifieke inzending',
+    resourceIdRelativePath: 'Geen specifieke inzending gekoppeld?',
     sentiment: 'Sentiment',
     sorting: 'Selecteer uw gewenste sorteeropties',
     title: 'Titel',
@@ -328,6 +323,7 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
   },
   enquete: {
     afterSubmitUrl: 'Url voor redirecten na opslaan (optioneel)',
+    confirmAnswerMessage: 'Melding bij niet-bevestigd antwoord',
     confirmationAdmin:
       'Krijgt de beheerder een bevestiging per mail bij een nieuwe inzending?',
     confirmationUser:
@@ -341,6 +337,10 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     draftRetentionHours: 'Bewaartijd concept (uren)',
     enableDraftPersistence: 'Concept automatisch opslaan',
     explanationRequired: 'Toelichting vragen',
+    feedbackCorrect: 'Feedback als alles goed is',
+    feedbackIncorrect: 'Feedback als er minstens 1 fout is',
+    feedbackMode: 'Feedbackmodus',
+    feedbackText: 'Feedback bij dit antwoord',
     fieldKey: 'Key voor het opslaan',
     fieldRequired: 'Is dit veld verplicht?',
     formStyle: 'Visuele stijl van het formulier',
@@ -356,6 +356,7 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     infoBlockStyle: 'Informatie blok stijl',
     infoField: 'Extra info veld',
     isOtherOption: "Is 'Anders, namelijk...'",
+    isQuiz: 'Is dit een quiz?',
     key: 'Optie tekst',
     key_b: 'Titel',
     matrixMultiple: 'Mogen er meerdere antwoorden per rij worden geselecteerd?',
@@ -370,6 +371,8 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     minCharacters: 'Minimaal aantal tekens',
     minCharactersError: 'Foutmelding voor minimaal aantal karakters',
     minCharactersWarning: 'Waarschuwing voor minimaal aantal karakters',
+    minChoices: 'Minimaal te selecteren opties',
+    minChoicesMessage: 'Minimaal aantal niet bereikt melding',
     multiple: 'Mogen er meerdere tegelijkertijd geüpload worden?',
     nextPageText: 'Tekst voor: Volgende pagina',
     numberingStyle: 'Nummeringstijl',
@@ -384,6 +387,7 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
       'Welke vraag beïnvloedt de zichtbaarheid van deze vraag?',
     showMinMaxAfterBlur: 'Toon min/max waarschuwing na verlaten van het veld',
     showSmileys: 'Wil je smileys tonen in plaats van een schaal?',
+    stepName: 'Stapnaam (analytics)',
     title: 'Titel/Vraag',
     userEmailAddress:
       'Welk veld moet er worden gebruikt voor de bevestiging naar de gebruiker',
@@ -470,8 +474,9 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     backUrlIdRelativePath: 'Relatief pad naar document',
     backUrlText: 'Tekst van de terug knop',
     clickableImage: 'Moet de afbeelding in de dialog klikbaar zijn?',
+    collapseTagLabel: 'Label bij volledige selectie (terugval)',
+    collapseTagType: 'Tag type samenvouwen bij volledige selectie',
     displayBudget: 'Budget weergeven',
-    displayBudgetDocuments: 'Budget bestanden weergeven',
     displayDate: 'Publicatiedatum weergeven',
     displayDeleteButton: 'Toon de knop om de inzending te verwijderen',
     displayDeleteEditButtonOnTop:
@@ -514,7 +519,6 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
   resourcedetailwithmap: {
     backUrl: 'Overzicht url:',
     displayBudget: 'Budget weergeven',
-    displayBudgetDocuments: 'Budget bestanden weergeven',
     displayDate: 'Publicatiedatum weergeven',
     displayDescription: 'Beschrijving weergeven',
     displayImage: 'Afbeelding weergeven',
@@ -539,9 +543,6 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     description: 'Beschrijving',
     fieldKey: 'Key voor het opslaan',
     fieldType: 'Hoe wil je de tags weergeven in het formulier?',
-    formName: 'Naam formulier',
-    hideAdmin:
-      'Wordt de admin verborgen van het project na de eerste publieke actie?',
     isOtherOption: "Is 'Anders, namelijk...'",
     key: 'Optie tekst',
     loginButtonText: 'Login knoptekst',
@@ -559,15 +560,12 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     minCharactersError: 'Foutmelding voor minimaal aantal karakters',
     minCharactersWarning: 'Waarschuwing voor minimaal aantal karakters',
     multiple: 'Mogen er meerdere tegelijkertijd geüpload worden?',
-    nameInHeader:
-      'Wordt de gebruikersnaam weergegeven in de header van het formulier?',
     nextPageText: 'Tekst voor: Volgende pagina',
     onlyForModerator: 'Wie mag de ingevulde waarde van dit veld zien?',
     placeholder: 'Placeholder',
     prevPageText: 'Tekst voor: Vorige pagina',
     redirectUrl:
       'Naar welke URL moet de gebruiker geleid worden na het invullen van het formulier?',
-    resource: 'Soort inzending (vanuit de configuratie)',
     routingInitiallyHide: 'Is deze vraag altijd zichtbaar?',
     routingSelectedQuestion:
       'Welke vraag beïnvloedt de zichtbaarheid van deze vraag?',
@@ -673,19 +671,12 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
   },
   videoSlider: {
     afterSubmitUrl: 'Url voor redirecten na opslaan (optioneel)',
-    confirmationAdmin:
-      'Krijgt de beheerder een bevestiging per mail bij een nieuwe inzending?',
-    confirmationUser:
-      'Krijgt de gebruiker een bevestiging per mail van zijn inzending?',
     defaultValue: 'Standaard aangevinkt?',
     description: 'Beschrijving',
-    displayDescription: 'Enquête beschrijving weergeven',
-    displayTitle: 'Enquête titel weergeven',
     fieldKey: 'Key voor het opslaan',
     fieldRequired: 'Is dit veld verplicht?',
     finalSlideDescription: 'Bevestiging -- beschrijving',
     finalSlideTitle: 'Bevestiging -- titel',
-    formVisibility: 'Voor wie is de enquête zichtbaar?',
     group: 'Groeperen',
     hideLabel: 'Titel verbergen?',
     imageAlt: 'Afbeelding beschrijving voor screenreaders',
@@ -697,14 +688,10 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     maxChoicesMessage: 'Maximaal aantal bereikt melding',
     minCharacters: 'Minimaal aantal tekens',
     multiple: 'Mogen er meerdere afbeeldingen tegelijkertijd geüpload worden?',
-    overwriteEmailAddress:
-      'Overschrijf het e-mailadres waar de bevesting naartoe wordt gestuurd',
     placeholder: 'Placeholder',
     questionType: 'Type antwoorden',
     showSmileys: 'Wil je smileys tonen in plaats van een schaal?',
     title: 'Titel/Vraag',
-    userEmailAddress:
-      'Welk veld moet er worden gebruikt voor de bevestiging naar de gebruiker',
     variant: 'Is het veld qua grootte 1 regel of een tekstvak?',
     videoUrl: 'Video Url',
     view: 'Weergave',

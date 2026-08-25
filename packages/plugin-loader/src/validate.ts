@@ -72,8 +72,7 @@ export function validateManifest(
 
   // Validate widgets section
   const widgets = manifest.widgets as
-    | Record<string, Record<string, unknown>>
-    | undefined;
+    Record<string, Record<string, unknown>> | undefined;
   if (widgets) {
     const requiredWidgetKeys = [
       'packageName',

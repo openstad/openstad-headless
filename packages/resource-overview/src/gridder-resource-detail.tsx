@@ -23,6 +23,7 @@ import '@utrecht/design-tokens/dist/root.css';
 import React, { useState } from 'react';
 
 import { canLikeResource, hasRole } from '../../lib';
+import { sanitizeHtml } from '../../lib/sanitize';
 import { Icon } from '../../ui/src/icon';
 import './gridder-resource-detail.css';
 
@@ -66,6 +67,7 @@ export const GridderResourceDetail = ({
   ...props
 }: GridderResourceDetailProps) => {
   const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
+  const [lightboxAlt, setLightboxAlt] = useState<string | undefined>(undefined);
 
   // When resource is correctly typed the we will not need :any
 
@@ -127,17 +129,27 @@ export const GridderResourceDetail = ({
   const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
   const canLike = canLikeResource(resource);
 
-  const renderImage = (image: string, clickableImage: boolean) => {
+  const renderImage = (
+    image: string,
+    clickableImage: boolean,
+    alt?: string
+  ) => {
     const imageComponent = <Image src={image} className="--aspectRatio-16-9" />;
 
     return clickableImage ? (
       <div
         style={{ cursor: 'zoom-in' }}
-        onClick={() => setLightboxSrc(image)}
+        onClick={() => {
+          setLightboxSrc(image);
+          setLightboxAlt(alt);
+        }}
         role="button"
         tabIndex={0}
         aria-label="Afbeelding uitvergroot bekijken"
-        onKeyDown={(e) => e.key === 'Enter' && setLightboxSrc(image)}>
+        onKeyDown={(e) =>
+          (e.key === 'Enter' || e.key === ' ') &&
+          (setLightboxSrc(image), setLightboxAlt(alt))
+        }>
         {imageComponent}
       </div>
     ) : (
@@ -148,13 +160,18 @@ export const GridderResourceDetail = ({
   return (
     <>
       {lightboxSrc && (
-        <Lightbox src={lightboxSrc} onClose={() => setLightboxSrc(null)} />
+        <Lightbox
+          src={lightboxSrc}
+          alt={lightboxAlt}
+          onClose={() => setLightboxSrc(null)}
+        />
       )}
       <div className="osc-gridder-resource-detail">
         <section className={`osc-gridder-resource-detail-photo ${hasImages}`}>
           {renderImage(
             resource.images?.at(0)?.url || defaultImage,
-            clickableImage
+            clickableImage,
+            resource.images?.at(0)?.alt
           )}
 
           <div className="osc-gridder-resource-detail-budget-theme-bar">
@@ -197,15 +214,17 @@ export const GridderResourceDetail = ({
           <div>
             <div>
               <Heading1
-                dangerouslySetInnerHTML={{ __html: resource.title }}></Heading1>
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(resource.title),
+                }}></Heading1>
               <Paragraph
                 className="strong"
                 dangerouslySetInnerHTML={{
-                  __html: resource.summary,
+                  __html: sanitizeHtml(resource.summary),
                 }}></Paragraph>
               <Paragraph
                 dangerouslySetInnerHTML={{
-                  __html: resource.description,
+                  __html: sanitizeHtml(resource.description),
                 }}></Paragraph>
             </div>
           </div>

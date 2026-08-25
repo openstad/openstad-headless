@@ -2,6 +2,7 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import {
   Paginator,
@@ -38,6 +39,7 @@ import { Step3 } from './step-3';
 import { Step3Success } from './step-3-success';
 import { Step4 } from './step-4';
 import { createSelectedResourcesStorage } from './utils/selected-resources-storage';
+import { createVoteCompletedStorage } from './utils/vote-completed-storage';
 import { createVotePendingStorage } from './utils/vote-pending-storage';
 
 type TagTypeSingle = {
@@ -152,6 +154,11 @@ function StemBegroot({
 
   const selectedResourcesStorage = React.useMemo(
     () => createSelectedResourcesStorage(props.projectId),
+    [props.projectId]
+  );
+
+  const voteCompletedStorage = React.useMemo(
+    () => createVoteCompletedStorage(props.projectId),
     [props.projectId]
   );
 
@@ -635,10 +642,7 @@ function StemBegroot({
         );
         const submitted = await submitVoteAndCleanup();
         if (submitted) {
-          if (props.showConfetti) {
-            fireConfetti();
-          }
-          setCurrentStep(4);
+          await moveToStep4AndLogout();
         }
       })();
     }
@@ -975,6 +979,54 @@ function StemBegroot({
     ? filteredResources
     : resources?.records || [];
 
+  useEffect(() => {
+    const shouldShowStep4 = voteCompletedStorage.consumeShowStep4AfterLogout();
+    if (shouldShowStep4) {
+      setCurrentStep(4);
+      if (props.showConfetti) {
+        fireConfetti();
+      }
+    }
+  }, [voteCompletedStorage, props.showConfetti]);
+
+  function clearPlanSelection() {
+    votePendingStorage.clearAllVotePending();
+    selectedResourcesStorage.clearSelectedResources();
+    setSelectedResources([]);
+    setTagCounter((prevTagCounter) =>
+      prevTagCounter.map((tagObj) => {
+        const tagName = Object.keys(tagObj)[0];
+        return {
+          [tagName]: {
+            ...tagObj[tagName],
+            current: 0,
+            selectedResources: [],
+          },
+        };
+      })
+    );
+  }
+
+  async function moveToStep4AndLogout() {
+    clearPlanSelection();
+
+    if (!currentUser?.logout) {
+      setCurrentStep(4);
+      if (props.showConfetti) {
+        fireConfetti();
+      }
+      return;
+    }
+
+    voteCompletedStorage.setState({ showStep4AfterLogout: true });
+
+    const currentUrl = new URL(location.href);
+    const params = currentUrl.searchParams;
+    params.delete('openstadlogintoken');
+
+    await currentUser.logout({ url: currentUrl.toString() });
+  }
+
   const computeCanAddMore = useCallback((): boolean => {
     let canAddMore = true;
 
@@ -1056,6 +1108,27 @@ function StemBegroot({
       divElement.scrollIntoView({ block: 'start', behavior: 'auto' });
     }
   };
+
+  const stepsRef = useRef<HTMLDivElement | null>(null);
+  const scrollToSteps = () => {
+    if (stepsRef.current) {
+      const targetPosition =
+        stepsRef.current.getBoundingClientRect().top + window.scrollY;
+
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  const prevStepRef = useRef(currentStep);
+  useEffect(() => {
+    if (prevStepRef.current !== currentStep) {
+      prevStepRef.current = currentStep;
+      scrollToSteps();
+    }
+  }, [currentStep]);
 
   // Keep previous totalPages while loading to prevent UI flicker
   const totalPagesRef = useRef(1);
@@ -1196,15 +1269,18 @@ function StemBegroot({
       />
 
       <div className="osc">
-        <Stepper
-          currentStep={currentStep}
-          steps={steps}
-          isSimpleView={props.isSimpleView}
-        />
+        <div ref={stepsRef}>
+          <Stepper
+            currentStep={currentStep}
+            steps={steps}
+            isSimpleView={props.isSimpleView}
+          />
+        </div>
         <Spacer size={1} />
 
-        {props.votes.voteType === 'budgeting' ||
-        props?.votes?.voteType === 'budgetingPerTag' ? (
+        {(props.votes.voteType === 'budgeting' ||
+          props?.votes?.voteType === 'budgetingPerTag') &&
+        currentStep !== 4 ? (
           <>
             {usedBudgetList}
             <Spacer size={1.5} />
@@ -1216,7 +1292,9 @@ function StemBegroot({
             <div className="vote-per-theme-container">
               <div
                 className="vote-per-theme-intro"
-                dangerouslySetInnerHTML={{ __html: step0 }}></div>
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(step0),
+                }}></div>
               <div className="themes-container">
                 {tagsToDisplay.map((tag: string) => (
                   <div className="theme" key={tag}>
@@ -1411,6 +1489,13 @@ function StemBegroot({
                 <Button
                   appearance="primary-action-button"
                   onClick={async () => {
+                    if (currentStep === 4) {
+                      clearPlanSelection();
+                      voteCompletedStorage.clearState();
+                      setCurrentStep(startingStep);
+                      return;
+                    }
+
                     if (currentStep === 0) {
                       if (
                         props.votes.voteType === 'countPerTag' ||
@@ -1466,21 +1551,17 @@ function StemBegroot({
                     if (currentStep === 3) {
                       const submitted = await submitVoteAndCleanup();
                       if (submitted) {
-                        if (props.showConfetti) {
-                          fireConfetti();
-                        }
-                        setCurrentStep(4);
+                        await moveToStep4AndLogout();
                       }
-                    } else if (currentStep === 4) {
-                      const currentUrl = new URL(location.href);
-                      const params = currentUrl.searchParams;
-                      params.delete('openstadlogintoken');
-                      await currentUser.logout({ url: currentUrl.toString() });
                     } else {
                       setCurrentStep(currentStep + 1);
                     }
                   }}
                   disabled={(() => {
+                    if (currentStep === 4) {
+                      return false;
+                    }
+
                     if (
                       props.votes.voteType === 'count' &&
                       selectedResources.length < props.votes.minResources

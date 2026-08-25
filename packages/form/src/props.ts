@@ -14,6 +14,7 @@ import type { SelectFieldProps } from '@openstad-headless/ui/src/form-elements/s
 import type { SortFieldProps } from '@openstad-headless/ui/src/form-elements/sort';
 import type { TextInputProps } from '@openstad-headless/ui/src/form-elements/text';
 import type { TickmarkSliderProps } from '@openstad-headless/ui/src/form-elements/tickmark-slider';
+import type { TimelineFieldProps } from '@openstad-headless/ui/src/form-elements/timeline';
 
 export type FormProps = {
   title?: string;
@@ -42,6 +43,11 @@ export type FormProps = {
   totalFieldCount?: number;
   formStyle?: string;
   initialValues?: { [p: string]: FormValue };
+  confirmAnswerMessage?: string;
+  onFieldInteraction?: (fieldKey: string) => void;
+  onValidationErrors?: (
+    errors: Array<{ fieldKey: string; errorMessage: string | null }>
+  ) => void;
 };
 
 type PaginationFieldProps = {
@@ -69,7 +75,8 @@ type CombinedFieldPropsWithType =
   | ({ type?: 'matrix' } & MatrixFieldProps)
   | ({ type?: 'pagination' } & PaginationFieldProps)
   | ({ type?: 'sort' } & SortFieldProps)
-  | ({ type?: 'none' } & InfoFieldProps);
+  | ({ type?: 'none' } & InfoFieldProps)
+  | ({ type?: 'timeline' } & TimelineFieldProps);
 
 type ComponentFieldProps = {
   index?: number;
@@ -93,6 +100,7 @@ type CombinedFieldProps =
   | NumberInputProps
   | MatrixFieldProps
   | InfoFieldProps
+  | TimelineFieldProps
   | (SortFieldProps & {
       infoBlockStyle?: string;
       infoBlockExtraButtonTitle?: string;
@@ -106,6 +114,13 @@ type FieldWithOptionalFields = CombinedFieldProps & {
   routingSelectedQuestion?: string;
   routingSelectedAnswer?: string | string[];
   infoBlockStyle?: string;
+  feedbackMode?: 'none' | 'static' | 'perAnswer' | 'correctIncorrect';
+  feedbackText?: string;
+  feedbackCorrect?: string;
+  feedbackIncorrect?: string;
+  scaleFeedback?: string[];
+  minChoices?: string;
+  minChoicesMessage?: string;
 };
 
 export type {
@@ -114,3 +129,7 @@ export type {
   CombinedFieldPropsWithType,
   ComponentFieldProps,
 };
+export type {
+  TimelineItem,
+  TimelineFieldProps,
+} from '@openstad-headless/ui/src/form-elements/timeline';

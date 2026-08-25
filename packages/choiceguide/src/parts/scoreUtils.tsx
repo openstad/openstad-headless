@@ -51,6 +51,8 @@ export const calculateScoreForItem = (
     choiceOptionsArray = [{ id: 'plane' }];
   }
 
+  choiceOptionsArray = (choiceOptionsArray || []).filter(Boolean);
+
   choiceOptionsArray.forEach((option) => {
     Object.keys(weights[option.id] || {}).forEach((answerKey) => {
       const optionWeights = weights[option.id][answerKey];

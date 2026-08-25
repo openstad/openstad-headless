@@ -28,6 +28,11 @@ spec:
         securityContext:
           readOnlyRootFilesystem: true
           allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          seccompProfile:
+            type: RuntimeDefault
         ports:
           - containerPort: {{ .Values.image.service.httpPort }}
             name: http

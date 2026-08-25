@@ -23,7 +23,7 @@ import { AutoZoom } from './auto-zoom';
 import './css/base-map.css';
 import { InvalidateSizeOnResize } from './invalidate-size-on-resize';
 import parseLocation from './lib/parse-location';
-import { isSafeUrl, sanitizeColor } from './lib/sanitize';
+import { sanitizeColor } from './lib/sanitize';
 import { MapConsumer } from './map-consumer';
 import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
@@ -841,7 +841,24 @@ const BaseMap = ({
                         : MarkerIcon({ icon: { color: m.color || '#555588' } });
                       const target = m.openInNewTab ? '_blank' : '_self';
                       const btnText = m.buttonText || 'Lees verder';
-                      const safeUrl = m.url && isSafeUrl(m.url) ? m.url : '';
+                      // Validate inline so the sanitisation is visible at the
+                      // call-site: only http/https/mailto survive, and we use
+                      // the serialised URL rather than the raw input.
+                      let safeUrl = '';
+                      if (m.url) {
+                        try {
+                          const parsed = new URL(m.url, window.location.origin);
+                          if (
+                            ['http:', 'https:', 'mailto:'].includes(
+                              parsed.protocol
+                            )
+                          ) {
+                            safeUrl = parsed.href;
+                          }
+                        } catch {
+                          safeUrl = '';
+                        }
+                      }
 
                       const isDirect = markerInteractionType === 'direct';
 

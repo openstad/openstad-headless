@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -11,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ActivityWidgetProps } from '@openstad-headless/activity/src/activity';
@@ -59,6 +59,11 @@ export default function ActivityDisplay(
         props.noActivityTextOther ||
         'U heeft geen activiteit op andere websites.',
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Algemeen',
   });
 
   return (
@@ -151,10 +156,6 @@ export default function ActivityDisplay(
             </FormItem>
           )}
         />
-
-        <Button className="w-fit col-span-full" type="submit">
-          Opslaan
-        </Button>
       </form>
     </Form>
   );

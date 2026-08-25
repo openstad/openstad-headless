@@ -5,6 +5,7 @@ import NotificationService from '@openstad-headless/lib/NotificationProvider/not
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { LocalStorage } from '@openstad-headless/lib/local-storage';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { ProgressBar, fireConfetti } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
@@ -229,7 +230,7 @@ function Likes({
               props.progressBarDescription && (
                 <Heading6
                   dangerouslySetInnerHTML={{
-                    __html: props.progressBarDescription,
+                    __html: sanitizeHtml(props.progressBarDescription),
                   }}
                 />
               )}
@@ -296,7 +297,7 @@ function Likes({
               props.progressBarDescription && (
                 <Heading6
                   dangerouslySetInnerHTML={{
-                    __html: props.progressBarDescription,
+                    __html: sanitizeHtml(props.progressBarDescription),
                   }}
                 />
               )}

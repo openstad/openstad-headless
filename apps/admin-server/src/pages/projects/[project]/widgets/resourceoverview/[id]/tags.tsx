@@ -1,6 +1,5 @@
 import { CheckboxList } from '@/components/checkbox-list';
 import AccordionUI from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -25,6 +24,7 @@ import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import {
@@ -126,6 +126,11 @@ export default function WidgetResourceOverviewTags(
       tagGroups: props.tagGroups || [],
       onlyShowTheseTagIds: props?.onlyShowTheseTagIds || '',
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Tags',
   });
 
   return (
@@ -447,10 +452,6 @@ export default function WidgetResourceOverviewTags(
               },
             ]}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

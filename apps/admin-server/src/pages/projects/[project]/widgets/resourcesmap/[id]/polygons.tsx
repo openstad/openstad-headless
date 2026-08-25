@@ -1,5 +1,4 @@
 import ColorPicker from '@/components/colorpicker';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -21,11 +20,12 @@ import { Separator } from '@/components/ui/separator';
 import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import useAreas from '@/hooks/use-areas';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { registerFieldFlusher } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import debounce from 'lodash/debounce';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -69,8 +69,6 @@ export default function WidgetResourcesMapButton(
     props.updateConfig({ ...props, ...values });
   }
 
-  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
-
   const existingPolygons = (props?.customPolygon || []).reduce(
     (acc: any, p: any) => {
       acc[p.id] = p;
@@ -94,6 +92,31 @@ export default function WidgetResourcesMapButton(
     (useAreas(props.projectId === undefined ? projectId : props.projectId) as {
       data: { id: string; name: string }[];
     }) ?? [];
+
+  const onFieldChangedRef = useRef(props.onFieldChanged);
+  onFieldChangedRef.current = props.onFieldChanged;
+  const syncPolygons = () => {
+    const values = form.getValues();
+    const merged = (values.customPolygon || []).map((item: any) => {
+      const url = values?.customPolygonUrl?.[item.id] ?? item.url ?? '';
+      return { ...item, url };
+    });
+    onFieldChangedRef.current('customPolygon', merged);
+  };
+  const syncRef = useRef(syncPolygons);
+  syncRef.current = syncPolygons;
+
+  const debouncedSync = useMemo(
+    () => debounce(() => syncRef.current(), 300),
+    []
+  );
+  useEffect(() => {
+    const unregister = registerFieldFlusher(() => debouncedSync.flush());
+    return () => {
+      debouncedSync.cancel();
+      unregister();
+    };
+  }, [debouncedSync]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -144,20 +167,14 @@ export default function WidgetResourcesMapButton(
                                     buttonText: '',
                                   },
                                 ]);
-                                props.onFieldChanged(field.name, [
-                                  ...values,
-                                  { name, id: Number(item.id) },
-                                ]);
+                                syncRef.current();
                               }
                             } else {
                               const filteredValues = values.filter(
                                 (obj) => obj.id !== Number(item.id)
                               );
                               form.setValue('customPolygon', filteredValues);
-                              props.onFieldChanged(
-                                'customPolygon',
-                                filteredValues
-                              );
+                              syncRef.current();
                             }
                           }}
                         />
@@ -178,8 +195,8 @@ export default function WidgetResourcesMapButton(
                                   type="text"
                                   {...field}
                                   onChange={(e) => {
-                                    onFieldChange(field.name, e.target.value);
                                     field.onChange(e);
+                                    debouncedSync();
                                   }}
                                 />
                               </FormControl>
@@ -206,9 +223,10 @@ export default function WidgetResourcesMapButton(
                                         existingData.color ||
                                         ''
                                       }
-                                      onChange={(e) =>
-                                        colorField.onChange(e.target.value)
-                                      }
+                                      onChange={(e) => {
+                                        colorField.onChange(e.target.value);
+                                        syncRef.current();
+                                      }}
                                     />
                                   </FormControl>
                                 </FormItem>
@@ -237,9 +255,10 @@ export default function WidgetResourcesMapButton(
                                         existingData.buttonText ||
                                         ''
                                       }
-                                      onChange={(e) =>
-                                        btnField.onChange(e.target.value)
-                                      }
+                                      onChange={(e) => {
+                                        btnField.onChange(e.target.value);
+                                        debouncedSync();
+                                      }}
                                     />
                                   </FormControl>
                                 </FormItem>
@@ -265,7 +284,10 @@ export default function WidgetResourcesMapButton(
                                         existingData.openInNewTab ??
                                         false
                                       }
-                                      onCheckedChange={tabField.onChange}
+                                      onCheckedChange={(checked) => {
+                                        tabField.onChange(checked);
+                                        syncRef.current();
+                                      }}
                                     />
                                   </FormControl>
                                   <FormLabel>Open in nieuw tabblad</FormLabel>
@@ -294,7 +316,10 @@ export default function WidgetResourcesMapButton(
                   Hoe wil je dat de interactie werkt met de polygonen?
                 </FormLabel>
                 <Select
-                  onValueChange={field.onChange}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    props.onFieldChanged('interactionType', value);
+                  }}
                   value={field.value || 'default'}>
                   <FormControl>
                     <SelectTrigger>
@@ -318,8 +343,6 @@ export default function WidgetResourcesMapButton(
               </FormItem>
             )}
           />
-
-          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

@@ -1,3 +1,4 @@
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { Parser as HtmlToReactParser } from 'html-to-react';
 import React from 'react';
 
@@ -54,7 +55,11 @@ export default function RteContent({
 
   if (InlineComponent && (forceInline || !hasBlock)) {
     const inlineHtml = forceInline ? flattenToInlineHtml(html) : html;
-    return <InlineComponent dangerouslySetInnerHTML={{ __html: inlineHtml }} />;
+    return (
+      <InlineComponent
+        dangerouslySetInnerHTML={{ __html: sanitizeHtml(inlineHtml) }}
+      />
+    );
   }
 
   return <>{parseChildren(html)}</>;

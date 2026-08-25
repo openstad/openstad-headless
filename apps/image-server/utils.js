@@ -9,6 +9,8 @@ const sanitizeFileName = (fileName) => {
   return sanitizedFileName.replace(/_+/g, '_');
 };
 
+const MAX_FILENAME_LENGTH = 255;
+
 const createFilename = (originalFileName) => {
   const fileExtension = originalFileName.split('.').pop();
   const fileNameWithoutExtension =
@@ -18,7 +20,11 @@ const createFilename = (originalFileName) => {
 
   const randomUUID = crypto.randomUUID();
 
-  return `${sanitizedFileName}-${randomUUID}.${fileExtension}`;
+  const suffixLength = randomUUID.length + fileExtension.length + 2;
+  const maxBaseLength = Math.max(0, MAX_FILENAME_LENGTH - suffixLength);
+  const truncatedFileName = sanitizedFileName.slice(0, maxBaseLength);
+
+  return `${truncatedFileName}-${randomUUID}.${fileExtension}`;
 };
 
 const getFileUrl = (file, fileType = 'image') => {

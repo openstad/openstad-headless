@@ -43,8 +43,19 @@ exports.index = (req, res, next) => {
   const requiredUserFieldsLabels =
     (config && config.requiredFields?.requiredUserFieldsLabels) || {};
 
-  const privacyPolicyUrl =
-    req.client.clientDisclaimerUrl || config?.clientDisclaimerUrl || '';
+  // Alleen absolute http(s)-URL's; new URL(...).href percent-encodeert
+  // quotes zodat de waarde veilig in het href-attribuut kan
+  let privacyPolicyUrl = '';
+  try {
+    const parsed = new URL(
+      req.client.clientDisclaimerUrl || config?.clientDisclaimerUrl || ''
+    );
+    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+      privacyPolicyUrl = parsed.href;
+    }
+  } catch {
+    privacyPolicyUrl = '';
+  }
   const privacyPolicyTextRaw = sanitize.noTags(
     req.client.clientDisclaimerText ||
       config?.clientDisclaimerText ||
@@ -67,35 +78,38 @@ exports.index = (req, res, next) => {
     });
   }
 
-  // Replace {link} placeholder in privacyConsent label with actual anchor tag
+  // Split the {link} placeholder in the privacyConsent label into structured
+  // parts so the template can build the anchor under autoescape. No server-side
+  // HTML composition, so the view needs no |safe on the label.
   requiredUserFields = requiredUserFields.map((field) => {
     if (field.key === 'privacyConsent' && field.label.includes('{link}')) {
-      const anchor = privacyPolicyUrl
-        ? `<a href="${privacyPolicyUrl}" target="_blank" rel="noopener noreferrer" aria-label="${privacyPolicyText} (opent in nieuw tabblad)">${privacyPolicyText}</a>`
-        : privacyPolicyText;
-      field.label = sanitize.noTags(field.label).replace('{link}', anchor);
+      const [labelPrefix, labelSuffix] = sanitize
+        .noTags(field.label)
+        .split('{link}');
+      field.labelPrefix = labelPrefix;
+      field.labelSuffix = labelSuffix || '';
+      field.privacyUrl = privacyPolicyUrl;
+      field.privacyText = privacyPolicyText;
     }
     return field;
   });
 
   res.render('auth/required-fields', {
-    client: req.client,
-    clientId: req.client.clientId,
+    client: sanitize.client(req.client),
+    clientId: sanitize.plainText(req.client.clientId),
     requiredFields: requiredUserFields,
-    info: configRequiredFields.info,
-    description: configRequiredFields.description,
-    title: configRequiredFields.title,
-    buttonText: configRequiredFields.buttonText,
-    redirect_uri: req.query.redirect_uri
-      ? encodeURIComponent(req.query.redirect_uri)
-      : '',
+    info: sanitize.safeTags(configRequiredFields.info),
+    description: sanitize.safeTags(configRequiredFields.description),
+    title: sanitize.safeTags(configRequiredFields.title),
+    buttonText: sanitize.safeTags(configRequiredFields.buttonText),
+    redirect_uri: req.redirectUri ? encodeURIComponent(req.redirectUri) : '',
   });
 };
 
 exports.post = (req, res, next) => {
   const clientRequiredUserFields = req.client.requiredUserFields;
-  const redirectUrl = req.query.redirect_uri
-    ? encodeURIComponent(req.query.redirect_uri)
+  const redirectUrl = req.redirectUri
+    ? encodeURIComponent(req.redirectUri)
     : req.client.redirectUrl;
   if (!redirectUrl)
     return next(

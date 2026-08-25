@@ -38,7 +38,12 @@ export type SwipeProps = {
   required?: boolean;
   overrideDefaultValue?: FormValue;
   onChange?: (
-    e: { name: string; value: FormValue },
+    e: {
+      name: string;
+      value: FormValue;
+      isInitial?: boolean;
+      interactionKey?: string;
+    },
     triggerSetLastKey?: boolean
   ) => void;
   agreeText?: string;
@@ -131,6 +136,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   // Track if we've already initialized from overrideDefaultValue to prevent loops
   const hasInitialized = useRef(false);
+  // Mount detection + marking whether the next emit is an explanation.
+  const didInitRef = useRef(false);
+  const pendingExplanationRef = useRef(false);
   // Track the cards this component was initialized with
   const initializedCardIds = useRef<Set<string>>(componentCardIds);
   const [isFinished, setIsFinished] = useState(false);
@@ -706,6 +714,8 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   };
 
   const handleExplanationChange = (cardId: string, explanation: string) => {
+    // Mark that the next emit concerns an explanation interaction.
+    pendingExplanationRef.current = true;
     setExplanations((prev) => ({
       ...prev,
       [cardId]: explanation,
@@ -751,8 +761,20 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         }))
         .filter((item) => item.answer !== undefined);
 
-      onChange({ name: fieldKey, value: combinedAnswers });
+      const isInitial = !didInitRef.current;
+      const isExplanation = pendingExplanationRef.current;
+      pendingExplanationRef.current = false;
+
+      onChange({
+        name: fieldKey,
+        value: combinedAnswers,
+        ...(isInitial ? { isInitial: true } : {}),
+        ...(isExplanation
+          ? { interactionKey: `${fieldKey}::explanation` }
+          : {}),
+      });
     }
+    didInitRef.current = true;
   }, [swipeAnswers, explanations]);
 
   const unansweredCards = getUnansweredCards();

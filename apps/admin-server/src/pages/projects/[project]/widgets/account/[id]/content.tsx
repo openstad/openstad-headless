@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AccountWidgetProps } from '@openstad-headless/account/src/account';
@@ -53,6 +53,11 @@ export default function AccountContent(
         props.user_description ||
         'Deze gegevens zijn alleen van toepassing op deze website.',
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Content',
   });
 
   return (
@@ -174,9 +179,6 @@ export default function AccountContent(
             </FormItem>
           )}
         />
-        <Button className="w-fit col-span-full" type="submit">
-          Opslaan
-        </Button>
       </form>
     </Form>
   );

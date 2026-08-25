@@ -2,6 +2,7 @@ import { Separator } from '@/components/ui/separator';
 import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetsHook } from '@/hooks/use-widgets';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,7 +12,6 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
   FormControl,
@@ -59,6 +59,11 @@ export default function ChoiceGuideResultSettings(
       displayAsFeaturedOnly: props?.displayAsFeaturedOnly || false,
       hideScores: props?.hideScores || false,
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Instellingen',
   });
 
   const { data: widgetData } = useWidgetsHook(project as string);
@@ -207,9 +212,6 @@ export default function ChoiceGuideResultSettings(
             />
           )}
           <Spacer size={1} />
-          <Button type="submit" className="w-fit col-span-full">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

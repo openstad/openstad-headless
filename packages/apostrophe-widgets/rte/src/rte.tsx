@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 
+import { sanitizeHtml } from '../../../lib/sanitize';
 import RenderContent from '../../../ui/src/rte-formatting/rte-formatting';
 
 interface Item {
@@ -11,7 +12,7 @@ function RTE({ content }: Item) {
   return (
     <div
       className="rte"
-      dangerouslySetInnerHTML={{ __html: RenderContent(content) }}
+      dangerouslySetInnerHTML={{ __html: sanitizeHtml(RenderContent(content)) }}
     />
   );
 }

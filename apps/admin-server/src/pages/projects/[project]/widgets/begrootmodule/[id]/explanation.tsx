@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -13,6 +12,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useProject } from '@/hooks/use-project';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -57,6 +57,11 @@ export default function BegrootmoduleExplanation(
       thankMessage: props.thankMessage ?? '',
       showNewsletterButton: props.showNewsletterButton ?? false,
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Uitleg',
   });
 
   return (
@@ -224,7 +229,6 @@ export default function BegrootmoduleExplanation(
               </FormItem>
             )}
           />
-          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

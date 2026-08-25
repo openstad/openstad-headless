@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -19,6 +18,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import {
@@ -107,6 +107,8 @@ export default function WidgetStemBegrootOverviewTags(
       filterBehavior: props?.filterBehavior || 'or',
     },
   });
+
+  useSyncDraftForm(form, props.onFieldChanged);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -321,10 +323,6 @@ export default function WidgetStemBegrootOverviewTags(
               </FormItem>
             )}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

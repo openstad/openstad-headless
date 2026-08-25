@@ -3,9 +3,16 @@ export default function useTags(props) {
   const projectId = props.projectId;
   const type = props.type;
   const onlyIncludeIds = props.onlyIncludeIds;
+  // Callers can opt out of fetching (e.g. when a feature that needs tags is
+  // turned off) without breaking the rules of hooks. Defaults to enabled for
+  // backward compatibility.
+  const enabled = props.enabled !== false;
+  const resolvedProjectId = projectId || self.projectId;
 
   const { data, error, isLoading } = self.useSWR(
-    { projectId: projectId || self.projectId, type, onlyIncludeIds },
+    enabled && resolvedProjectId
+      ? { projectId: resolvedProjectId, type, onlyIncludeIds }
+      : null,
     'tags.fetch'
   );
 

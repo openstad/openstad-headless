@@ -23,8 +23,8 @@ exports.check = (req, res, next) => {
   if (!req.isAuthenticated || !isAuthenticated) {
     let url = '/login?clientId=' + req.client.clientId;
 
-    if (req.query.redirect_uri) {
-      url = url + '&redirect_uri=' + encodeURIComponent(req.query.redirect_uri);
+    if (req.redirectUri) {
+      url = url + '&redirect_uri=' + encodeURIComponent(req.redirectUri);
     }
 
     if (req.session) {
@@ -40,11 +40,8 @@ exports.check = (req, res, next) => {
         if (req.client?.id === 1 && !req.currentClientAuth?.authenticatedAt) {
           let url = '/login?clientId=' + req.client.clientId;
 
-          if (req.query.redirect_uri) {
-            url =
-              url +
-              '&redirect_uri=' +
-              encodeURIComponent(req.query.redirect_uri);
+          if (req.redirectUri) {
+            url = url + '&redirect_uri=' + encodeURIComponent(req.redirectUri);
           }
 
           if (req.session) {
@@ -71,11 +68,9 @@ exports.check = (req, res, next) => {
 
             let url = '/login?clientId=' + req.client.clientId;
 
-            if (req.query.redirect_uri) {
+            if (req.redirectUri) {
               url =
-                url +
-                '&redirect_uri=' +
-                encodeURIComponent(req.query.redirect_uri);
+                url + '&redirect_uri=' + encodeURIComponent(req.redirectUri);
             }
 
             if (req.session) {
