@@ -104,11 +104,6 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
       .save()
       .then(() => {
         if (isStale()) return;
-        if (registrationRef.current?.isDirty) {
-          setIsDirty(true);
-          setPhase('idle');
-          return;
-        }
         setPhase('success');
         clearSuccessTimer();
         successTimer.current = setTimeout(() => {
