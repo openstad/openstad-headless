@@ -502,11 +502,14 @@ async function applyDefaultTags(req, res, next) {
 
 function refetchCreatedResource(req, res, next) {
   // refetch after tags and status updates
-  db.Resource.scope(...req.scope)
+  db.Resource.scope(...stripVisibilityScope(req.scope))
     .findOne({
       where: { id: req.results.id, projectId: req.params.projectId },
     })
     .then(async (result) => {
+      if (!result) {
+        return next(createError(500, 'Failed to load resource after creation'));
+      }
       await attachModeratorOnlyExtraDataKeys(result);
       req.results = result;
       return next();
