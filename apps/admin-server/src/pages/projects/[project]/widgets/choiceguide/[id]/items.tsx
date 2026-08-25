@@ -194,6 +194,16 @@ export default function WidgetChoiceGuideItems(
 ) {
   type FormData = z.infer<typeof formSchema>;
   const [items, setItems] = useState<Item[]>([]);
+  /**
+   * The list starts empty and is seeded from the saved config afterwards, so the
+   * draft may only be updated once the user actually changed the list. Pushing
+   * on a render that still holds the empty list wipes the stored items.
+   */
+  const itemsTouchedRef = React.useRef(false);
+  const updateItems: typeof setItems = (updater) => {
+    itemsTouchedRef.current = true;
+    setItems(updater);
+  };
   const [options, setOptions] = useState<Option[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
@@ -275,7 +285,7 @@ export default function WidgetChoiceGuideItems(
 
       const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
 
-      setItems((currentItems) =>
+      updateItems((currentItems) =>
         currentItems.map((item) => {
           if (item.id === selectedItem.id) {
             return {
@@ -303,7 +313,7 @@ export default function WidgetChoiceGuideItems(
       );
       setSelectedItemId(null);
     } else {
-      setItems((currentItems) => {
+      updateItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
           (max, i) => Math.max(max, parseInt(i.trigger) || 0),
           0
@@ -539,7 +549,10 @@ export default function WidgetChoiceGuideItems(
   const { onFieldChanged } = props;
   useEffect(() => {
     if (!onFieldChanged) return;
-    if (JSON.stringify(items) === syncedItemsRef.current) return;
+    if (!itemsTouchedRef.current) return;
+    const serialized = JSON.stringify(items);
+    if (serialized === syncedItemsRef.current) return;
+    syncedItemsRef.current = serialized;
     onFieldChanged('items', items);
   }, [items]);
 
@@ -651,7 +664,7 @@ export default function WidgetChoiceGuideItems(
     matrixType: 'rows' | 'columns' = 'rows'
   ) => {
     if (isItemAction) {
-      setItems((currentItems) => {
+      updateItems((currentItems) => {
         const index = currentItems.findIndex(
           (entry) => entry.trigger === clickedTrigger
         );

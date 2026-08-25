@@ -11,6 +11,16 @@ export default function WidgetAgendaItems(
   props: AgendaWidgetProps & EditFieldProps<AgendaWidgetProps>
 ) {
   const [items, setItems] = useState<AgendaItem[]>([]);
+  /**
+   * The list starts empty and is seeded from the saved config afterwards, so the
+   * draft may only be updated once the user actually changed the list. Pushing
+   * on a render that still holds the empty list wipes the stored items.
+   */
+  const itemsTouchedRef = React.useRef(false);
+  const updateItems: typeof setItems = (updater) => {
+    itemsTouchedRef.current = true;
+    setItems(updater);
+  };
 
   const itemsInitialized = React.useRef(false);
   const syncedItemsRef = React.useRef<string>(JSON.stringify(items));
@@ -26,7 +36,10 @@ export default function WidgetAgendaItems(
   const { onFieldChanged } = props;
   useEffect(() => {
     if (!onFieldChanged) return;
-    if (JSON.stringify(items) === syncedItemsRef.current) return;
+    if (!itemsTouchedRef.current) return;
+    const serialized = JSON.stringify(items);
+    if (serialized === syncedItemsRef.current) return;
+    syncedItemsRef.current = serialized;
     const normalizedItems = items.map((item) => ({
       ...item,
       active: item.active ?? false,
@@ -38,7 +51,7 @@ export default function WidgetAgendaItems(
     <div>
       <AgendaItemsEditor
         items={items}
-        onItemsChange={setItems}
+        onItemsChange={updateItems}
         showActiveDates={props.useActiveDates}
       />
     </div>

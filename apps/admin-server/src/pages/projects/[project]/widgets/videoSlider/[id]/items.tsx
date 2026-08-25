@@ -95,6 +95,16 @@ export default function WidgetEnqueteItems(
 ) {
   type FormData = z.infer<typeof formSchema>;
   const [items, setItems] = useState<Item[]>([]);
+  /**
+   * The list starts empty and is seeded from the saved config afterwards, so the
+   * draft may only be updated once the user actually changed the list. Pushing
+   * on a render that still holds the empty list wipes the stored items.
+   */
+  const itemsTouchedRef = React.useRef(false);
+  const updateItems: typeof setItems = (updater) => {
+    itemsTouchedRef.current = true;
+    setItems(updater);
+  };
   const [options, setOptions] = useState<Option[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
@@ -117,7 +127,7 @@ export default function WidgetEnqueteItems(
     if (selectedItem) {
       const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
 
-      setItems((currentItems) =>
+      updateItems((currentItems) =>
         currentItems.map((item) =>
           item.id === selectedItem.id
             ? { ...item, ...valuesWithoutTrigger }
@@ -126,7 +136,7 @@ export default function WidgetEnqueteItems(
       );
       setSelectedItemId(null);
     } else {
-      setItems((currentItems) => {
+      updateItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
           (max, i) => Math.max(max, parseInt(i.trigger) || 0),
           0
@@ -265,9 +275,9 @@ export default function WidgetEnqueteItems(
 
   const { onFieldChanged } = props;
   useEffect(() => {
-    if (onFieldChanged) {
-      onFieldChanged('items', items);
-    }
+    if (!onFieldChanged) return;
+    if (!itemsTouchedRef.current) return;
+    onFieldChanged('items', items);
   }, [items]);
 
   // Sets form to selected item values when item is selected
@@ -334,7 +344,7 @@ export default function WidgetEnqueteItems(
     isItemAction: boolean // Determines if the action is for items or options
   ) => {
     if (isItemAction) {
-      setItems((currentItems) => {
+      updateItems((currentItems) => {
         return handleMovementOrDeletion(
           currentItems,
           actionType,
