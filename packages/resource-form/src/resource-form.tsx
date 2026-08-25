@@ -49,10 +49,9 @@ const getExistingValue = (fieldKey, resource, multiple) => {
 };
 
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
-  const { submitButton, saveConceptButton, defaultAddedTags } =
-    props.submit || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
+  const { submitButton, saveButton, defaultAddedTags } = props.submit || {};
   const { loginText, loginButtonText, allowAnonymousSubmissions } =
-    props.info || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
+    props.info || {};
   const { confirmationUser, confirmationAdmin } = props.confirmation || {};
   const [disableSubmit, setDisableSubmit] = useState(false);
   const formStartTimeRef = useRef<number>(Date.now());
@@ -281,7 +280,9 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     existingResource &&
     existingResource.id &&
     existingResource.update;
-  const submitButtonText = editMode ? 'Opslaan' : submitButton || 'Versturen';
+  const submitButtonText = editMode
+    ? saveButton || 'Opslaan'
+    : submitButton || 'Versturen';
 
   async function onSubmit(formData: any) {
     setDisableSubmit(true);
@@ -415,7 +416,6 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         ) : (
           <Form
             fields={formFields}
-            secondaryLabel={saveConceptButton || ''}
             submitHandler={onSubmit}
             submitText={submitButtonText}
             title=""

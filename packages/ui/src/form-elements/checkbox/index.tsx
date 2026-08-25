@@ -138,12 +138,26 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
     if (randomizeItems) {
       const storageKey = `randomizedChoices_${fieldKey}`;
       const stored = sessionStorage.getItem(storageKey);
-      if (stored) {
-        setDisplayChoices(JSON.parse(stored));
-      } else {
+      let parsed: typeof normalizedChoices | null = null;
+      try {
+        parsed = stored ? JSON.parse(stored) : null;
+      } catch {
+        parsed = null;
+      }
+      const storedMatchesChoices =
+        Array.isArray(parsed) &&
+        parsed.length === normalizedChoices.length &&
+        normalizedChoices.every((choice) =>
+          parsed!.some((stored) => stored.value === choice.value)
+        );
+      if (storedMatchesChoices) {
+        setDisplayChoices(parsed as typeof normalizedChoices);
+      } else if (normalizedChoices.length > 0) {
         const shuffled = shuffleArray(normalizedChoices);
         setDisplayChoices(shuffled);
         sessionStorage.setItem(storageKey, JSON.stringify(shuffled));
+      } else {
+        setDisplayChoices(normalizedChoices);
       }
     } else {
       setDisplayChoices(normalizedChoices);
