@@ -1,3 +1,4 @@
+import { requestPreviewReseed } from '@/hooks/useWidgetPreview';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { useMemo } from 'react';
 import toast from 'react-hot-toast';
@@ -86,6 +87,7 @@ export function useWidgetVersions(
       await globalMutate(
         `/api/openstad/api/project/${projectNumber}/widgets/${widgetNumber}?includeType=1`
       );
+      requestPreviewReseed();
       return { ok: true, undoVersionId: data?.undoVersionId ?? null };
     } catch (error) {
       toast.error('De versie kon niet worden hersteld');
