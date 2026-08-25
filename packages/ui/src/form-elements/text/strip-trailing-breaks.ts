@@ -1,3 +1,5 @@
+import DOMPurify from 'dompurify';
+
 const INLINE_TAGS = new Set([
   'STRONG',
   'EM',
@@ -40,6 +42,17 @@ function trimTrailing(el: Element): void {
   }
 }
 
+// Parse editor HTML into an inert, sanitized document body. DOMPurify breaks
+// the untrusted-text -> HTML flow before it reaches the parser; target/rel are
+// kept so existing "open in new tab" links survive a round-trip.
+export function parseEditorHtml(html: string): HTMLElement | null {
+  if (typeof document === 'undefined') return null;
+  const clean = DOMPurify.sanitize(html || '', {
+    ADD_ATTR: ['target', 'rel'],
+  });
+  return new DOMParser().parseFromString(clean, 'text/html').body;
+}
+
 /**
  * Trix appends trailing <br> elements to block ends when it serializes
  * editor content, so every load/serialize round-trip grows the stored
@@ -48,8 +61,9 @@ function trimTrailing(el: Element): void {
  * middle of a block intact.
  */
 export function stripTrailingBreaks(html: string): string {
-  if (!html || typeof document === 'undefined') return html;
-  const body = new DOMParser().parseFromString(html, 'text/html').body;
+  if (!html) return html;
+  const body = parseEditorHtml(html);
+  if (!body) return html;
   body.querySelectorAll(BLOCK_SELECTOR).forEach((block) => {
     const hadContent = block.hasChildNodes();
     trimTrailing(block);

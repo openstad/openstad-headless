@@ -9,12 +9,11 @@ import {
   Textarea,
   Textbox,
 } from '@utrecht/component-library-react';
-import DOMPurify from 'dompurify';
 import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
-import { stripTrailingBreaks } from './strip-trailing-breaks';
+import { parseEditorHtml, stripTrailingBreaks } from './strip-trailing-breaks';
 import './style.css';
 
 declare module 'react' {
@@ -38,17 +37,6 @@ declare global {
       >;
     }
   }
-}
-
-// Parse editor HTML into an inert, sanitized document body. DOMPurify breaks
-// the untrusted-text -> HTML flow before it reaches the parser; target/rel are
-// kept so existing "open in new tab" links survive a round-trip.
-function parseEditorHtml(html: string): HTMLElement | null {
-  if (typeof document === 'undefined') return null;
-  const clean = DOMPurify.sanitize(html || '', {
-    ADD_ATTR: ['target', 'rel'],
-  });
-  return new DOMParser().parseFromString(clean, 'text/html').body;
 }
 
 function getTargetBlankHrefs(html: string): Set<string> {
