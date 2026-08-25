@@ -54,7 +54,7 @@ const formSchema = z.object({
 export default function WidgetMultiProjectSettings(
   props: MultiProjectResourceOverviewProps &
     EditFieldProps<MultiProjectResourceOverviewProps> & {
-      updatePreview?: (config: MultiProjectResourceOverviewProps) => void;
+      updatePreview: (config: MultiProjectResourceOverviewProps) => void;
     }
 ) {
   type FormData = z.infer<typeof formSchema>;
@@ -102,8 +102,11 @@ export default function WidgetMultiProjectSettings(
       includeProjectsInOverview: false,
       excludeResourcesInOverview: false,
     };
-    props.updateConfig({ ...props, ...updatedValues });
-    props.updatePreview?.({ ...props, ...updatedValues });
+    const saved = await props.updateConfig({ ...props, ...updatedValues });
+
+    if (saved) {
+      props.updatePreview({ ...props, ...updatedValues });
+    }
   }
 
   return (
