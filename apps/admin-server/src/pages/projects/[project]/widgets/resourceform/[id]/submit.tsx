@@ -13,10 +13,11 @@ import { Separator } from '@/components/ui/separator';
 import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceFormWidgetProps } from '@openstad-headless/resource-form/src/props';
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -43,12 +44,16 @@ export default function WidgetResourceFormSubmit(
     },
   });
 
-  useEffect(() => {
-    const subscription = form.watch((values) => {
-      props.onFieldChanged?.(category, values);
-    });
-    return () => subscription.unsubscribe();
-  }, [form, props]);
+  const { onFieldChanged } = props;
+  const pushToDraft = useCallback(
+    (name: string, value: any) =>
+      onFieldChanged?.(`${category}.${name}`, value),
+    [onFieldChanged, category]
+  );
+  useSyncDraftForm(form, pushToDraft, {
+    schema: formSchema,
+    label: 'Opleveren',
+  });
 
   const projectId = props.projectId;
   const { data: loadedTags } = useTags(projectId);
