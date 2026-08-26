@@ -9,6 +9,7 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const isRedirectAllowed = require('../../services/isRedirectAllowed');
 const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
 const sessionDuration = require('../../util/session-duration');
+const { setQueryParam } = require('./return-to');
 let router = express.Router({ mergeParams: true });
 
 // Todo: dit is 'openstad', dus veel configuratie mag hier hardcoded en uit de config gehaald
@@ -170,11 +171,12 @@ router
         returnTo +
         (returnTo.includes('?') ? '&' : '?') +
         'openstadlogintoken=[[jwt]]';
-    if (req.params.projectId && !returnTo.includes('openstadprojectid='))
-      returnTo =
-        returnTo +
-        (returnTo.includes('?') ? '&' : '?') +
-        `openstadprojectid=${req.params.projectId}`;
+    if (req.params.projectId)
+      returnTo = setQueryParam(
+        returnTo,
+        'openstadprojectid',
+        req.params.projectId
+      );
     let redirectUrl = returnTo;
     redirectUrl =
       redirectUrl ||
