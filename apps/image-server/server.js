@@ -61,6 +61,7 @@ async function detectImageMimeType(response, extension) {
 }
 const { createFilename, sanitizeFileName, getFileUrl } = require('./utils');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('path');
 
 console.log('S3 enabled:', s3.isEnabled());
@@ -71,6 +72,12 @@ console.log('S3 enabled:', s3.isEnabled());
 // that would otherwise stream until a socket timeout and hang without feedback.
 const maxFileUploadBytes =
   (Number(process.env.MAX_FILE_UPLOAD_SIZE_MB) || 25) * 1024 * 1024;
+
+const getPublicS3BaseUrl = () =>
+  process.env.S3_ENDPOINT.replace(
+    'https://',
+    `https://${process.env.S3_BUCKET}.`
+  );
 
 const swapLastDotUnderscore = (name) => {
   if (!name) return null;
@@ -166,11 +173,13 @@ const imageSteamConfig = {
 
 if (s3.isEnabled()) {
   imageSteamConfig.storage.defaults = {
-    driverPath: 'image-steam-s3',
-    endpoint: process.env.S3_ENDPOINT,
-    bucket: process.env.S3_BUCKET,
-    accessKey: process.env.S3_KEY,
-    secretKey: process.env.S3_SECRET,
+    driver: 'http',
+    endpoint: getPublicS3BaseUrl(),
+    bucket: '',
+  };
+  imageSteamConfig.storage.cache = {
+    driver: 'fs',
+    path: path.join(os.tmpdir(), 'image-steam-cache'),
   };
 }
 
@@ -277,10 +286,7 @@ app.get('/image/*', rateLimiter(), async function (req, res, next) {
       return res.status(400).send('Invalid image filename or path');
     }
 
-    const endpoint = process.env.S3_ENDPOINT.replace(
-      'https://',
-      `https://${process.env.S3_BUCKET}.`
-    );
+    const endpoint = getPublicS3BaseUrl();
 
     const { pipeline, Readable } = require('stream');
     const { promisify } = require('util');
@@ -482,10 +488,7 @@ app.get('/document/*', rateLimiter(), async function (req, res, next) {
     // get mime type for extension
     const mimeType = mime.lookup(extension);
 
-    const endpoint = process.env.S3_ENDPOINT.replace(
-      'https://',
-      `https://${process.env.S3_BUCKET}.`
-    );
+    const endpoint = getPublicS3BaseUrl();
 
     const { pipeline, Readable } = require('stream');
     const { promisify } = require('util');
