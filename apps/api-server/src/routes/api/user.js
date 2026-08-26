@@ -265,7 +265,7 @@ router
           : result.rows;
 
         req.results = rows;
-        req.dbQuery.count = rows.length;
+        req.dbQuery.count = shouldDedupeByIdpUser ? rows.length : result.count;
         return next();
       })
       .catch(next);
