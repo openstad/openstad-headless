@@ -31,18 +31,48 @@ let createProjectConfig = function ({
   return mergedConfig;
 };
 
-let getConfig = async function ({ project, useAuth = 'default' }) {
+let collectJwtSecrets = function (authConfig) {
+  if (!authConfig || typeof authConfig !== 'object') return [];
+
+  const secrets = [];
+  if (typeof authConfig.jwtSecret !== 'undefined') {
+    secrets.push(authConfig.jwtSecret);
+  }
+
+  ['provider', 'adapter'].forEach((group) => {
+    const entries = authConfig[group];
+    if (!entries || typeof entries !== 'object') return;
+    Object.keys(entries).forEach((name) => {
+      const entry = entries[name];
+      if (entry && typeof entry.jwtSecret !== 'undefined') {
+        secrets.push(entry.jwtSecret);
+      }
+    });
+  });
+
+  return secrets;
+};
+
+let hasJwtSecretOverride = function (project) {
   const globalJwtSecret =
     (config && config.auth && config.auth.jwtSecret) || null;
-  const projectJwtSecret =
-    (project && project.config && project.config.auth?.jwtSecret) || null;
-  if (projectJwtSecret && projectJwtSecret !== globalJwtSecret) {
-    console.error(
-      `[${new Date().toISOString()}][auth-settings] project ${project.id} overrides config.auth.jwtSecret; tokens are verified with the global secret, so per-project overrides break login`
-    );
-    throw new Error(
-      `Project ${project.id} overrides config.auth.jwtSecret; per-project jwtSecret overrides are not supported`
-    );
+  const projectAuth = project && project.config && project.config.auth;
+
+  return collectJwtSecrets(projectAuth).some(
+    (secret) => secret !== globalJwtSecret
+  );
+};
+
+let getConfig = async function ({ project, useAuth = 'default' }) {
+  if (hasJwtSecretOverride(project)) {
+    getConfig._jwtOverridesReported =
+      getConfig._jwtOverridesReported || new Set();
+    if (!getConfig._jwtOverridesReported.has(project.id)) {
+      console.error(
+        `[${new Date().toISOString()}][auth-settings] project ${project.id} overrides config.auth.jwtSecret; tokens are minted with that secret but verified with the global one, so logins for this project will fail`
+      );
+      getConfig._jwtOverridesReported.add(project.id);
+    }
   }
 
   let projectConfig = createProjectConfig({ project });
@@ -100,4 +130,5 @@ module.exports = {
   config: getConfig,
   adapter: getAdapter,
   providers: getProviders,
+  hasJwtSecretOverride,
 };
