@@ -33,6 +33,23 @@ export function consumeLoginTokenFromUrl({ search, projectId }) {
   return { jwt, search: query ? `?${query}` : '' };
 }
 
+export function consumeLoginToken({ storage, projectId, location, history }) {
+  const pickup = consumeLoginTokenFromUrl({
+    search: location.search,
+    projectId,
+  });
+  if (!pickup.jwt) return null;
+
+  storage.set('openStadUser', { jwt: pickup.jwt });
+  history.replaceState(
+    null,
+    '',
+    `${location.pathname}${pickup.search}${location.hash}`
+  );
+
+  return pickup.jwt;
+}
+
 export function pickInitialUser({ globalUser, propsUser, projectId }) {
   const globalUserIsForThisProject =
     globalUser &&
@@ -96,19 +113,15 @@ export default function useCurrentUser(props) {
     }
 
     let jwt;
-    const tokenPickup = consumeLoginTokenFromUrl({
-      search: window.location.search,
+    const jwtFromUrl = consumeLoginToken({
+      storage,
       projectId,
+      location: window.location,
+      history: window.history,
     });
-    if (tokenPickup.jwt) {
-      jwt = tokenPickup.jwt;
+    if (jwtFromUrl) {
+      jwt = jwtFromUrl;
       console.log('[osc-auth] login token received from URL');
-      storage.set('openStadUser', { jwt });
-      history.replaceState(
-        null,
-        '',
-        `${window.location.pathname}${tokenPickup.search}${window.location.hash}`
-      );
     }
 
     let cmsUser = {};

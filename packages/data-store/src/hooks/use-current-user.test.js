@@ -1,7 +1,11 @@
 import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import { LocalStorage } from '../../../lib/local-storage';
-import { consumeLoginTokenFromUrl, pickInitialUser } from './use-current-user';
+import {
+  consumeLoginToken,
+  consumeLoginTokenFromUrl,
+  pickInitialUser,
+} from './use-current-user';
 
 describe('consumeLoginTokenFromUrl', () => {
   test('consumes the token when openstadprojectid matches the widget project', () => {
@@ -118,22 +122,72 @@ describe('project-scoped token pickup with namespaced storage', () => {
     global.window = originalWindow;
   });
 
+  function fakeLocation(search, hash = '') {
+    return { pathname: '/page', search, hash };
+  }
+
+  function recordingHistory(sink) {
+    return { replaceState: (state, title, url) => sink.push(url) };
+  }
+
   test('only the target project namespace receives the token', () => {
-    const search = '?openstadlogintoken=jwt-x&openstadprojectid=2';
+    const location = fakeLocation(
+      '?openstadlogintoken=jwt-x&openstadprojectid=2'
+    );
+    const replaced = [];
+    const history = recordingHistory(replaced);
     const storageOne = new LocalStorage({ projectId: '1' });
     const storageTwo = new LocalStorage({ projectId: '2' });
 
-    for (const [projectId, storage] of [
-      ['1', storageOne],
-      ['2', storageTwo],
-    ]) {
-      const pickup = consumeLoginTokenFromUrl({ search, projectId });
-      if (pickup.jwt) {
-        storage.set('openStadUser', { jwt: pickup.jwt });
-      }
-    }
+    const resultOne = consumeLoginToken({
+      storage: storageOne,
+      projectId: '1',
+      location,
+      history,
+    });
+    const resultTwo = consumeLoginToken({
+      storage: storageTwo,
+      projectId: '2',
+      location,
+      history,
+    });
 
+    expect(resultOne).toBeNull();
+    expect(resultTwo).toBe('jwt-x');
     expect(storageOne.get('openStadUser')).toBeUndefined();
     expect(storageTwo.get('openStadUser')).toEqual({ jwt: 'jwt-x' });
+    expect(replaced).toEqual(['/page']);
+  });
+
+  test('leaves the url untouched for a widget of another project', () => {
+    const replaced = [];
+    const storage = new LocalStorage({ projectId: '1' });
+
+    const result = consumeLoginToken({
+      storage,
+      projectId: '1',
+      location: fakeLocation('?openstadlogintoken=jwt-x&openstadprojectid=2'),
+      history: recordingHistory(replaced),
+    });
+
+    expect(result).toBeNull();
+    expect(replaced).toEqual([]);
+  });
+
+  test('keeps unrelated params and the hash when rewriting the url', () => {
+    const replaced = [];
+    const storage = new LocalStorage({ projectId: '2' });
+
+    consumeLoginToken({
+      storage,
+      projectId: '2',
+      location: fakeLocation(
+        '?foo=bar&openstadlogintoken=jwt-x&openstadprojectid=2',
+        '#section'
+      ),
+      history: recordingHistory(replaced),
+    });
+
+    expect(replaced).toEqual(['/page?foo=bar#section']);
   });
 });
