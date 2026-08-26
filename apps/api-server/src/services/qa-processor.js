@@ -6,6 +6,14 @@
 
 const { escapeHtml, escapeAttr, stripHtml } = require('./pdf-service');
 
+const SKIPPED_ANSWER = 'skipped';
+const SKIPPED_LABEL = 'Overgeslagen';
+
+function choiceLabel(id, index) {
+  const number = Number(id);
+  return `Keuze ${Number.isFinite(number) ? number + 1 : index + 1}`;
+}
+
 /**
  * Transform a raw answer value into a safe, display-ready string.
  * Handles: strings, JSON-encoded arrays, object arrays with URLs,
@@ -61,19 +69,21 @@ function transformAnswer(answer, fieldKey, tags, questionType) {
         .join(', ');
     }
 
-    // Swipe/dilemma: each item is a card/dilemma answer, not a plain value
     if (questionType === 'swipe' || questionType === 'dilemma') {
+      const isSwipe = questionType === 'swipe';
       return answer
         .map((item, index) => {
-          const label =
-            questionType === 'swipe'
-              ? item.title || `Keuze ${item.cardId ?? index}`
-              : `Keuze ${
-                  !isNaN(Number(item.dilemmaId))
-                    ? Number(item.dilemmaId) + 1
-                    : (item.dilemmaId ?? index)
-                }`;
-          const value = questionType === 'swipe' ? item.answer : item.title;
+          const fallback = choiceLabel(
+            isSwipe ? item.cardId : item.dilemmaId,
+            index
+          );
+          const label = isSwipe ? item.title || fallback : fallback;
+          const value =
+            item.answer === SKIPPED_ANSWER
+              ? SKIPPED_LABEL
+              : isSwipe
+                ? item.answer
+                : item.title;
           let line = `${escapeHtml(String(label))}: ${escapeHtml(String(value || ''))}`;
           if (item.explanation) {
             line += `: ${escapeHtml(String(item.explanation))}`;

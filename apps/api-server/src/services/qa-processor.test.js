@@ -29,11 +29,39 @@ describe('transformAnswer', () => {
     );
   });
 
-  it('falls back to "Keuze {cardId}" when a swipe card has no title', () => {
+  it('falls back to a 1-based "Keuze N" when a swipe card has no title', () => {
     const answer = [{ cardId: 3, answer: 'Eens', title: '', explanation: '' }];
 
     expect(transformAnswer(answer, 'swipe_field', undefined, 'swipe')).toBe(
-      'Keuze 3: Eens'
+      'Keuze 4: Eens'
+    );
+  });
+
+  it('numbers swipe cards the same way as dilemmas', () => {
+    const answer = [{ cardId: 0, answer: 'Eens', title: '', explanation: '' }];
+
+    expect(transformAnswer(answer, 'swipe_field', undefined, 'swipe')).toBe(
+      'Keuze 1: Eens'
+    );
+  });
+
+  it('renders a skipped swipe card as "Overgeslagen"', () => {
+    const answer = [
+      { cardId: 1, answer: 'skipped', title: 'Statement one', explanation: '' },
+    ];
+
+    expect(transformAnswer(answer, 'swipe_field', undefined, 'swipe')).toBe(
+      'Statement one: Overgeslagen'
+    );
+  });
+
+  it('renders a skipped dilemma as "Overgeslagen" instead of an empty title', () => {
+    const answer = [
+      { dilemmaId: 0, answer: 'skipped', title: '', explanation: '' },
+    ];
+
+    expect(transformAnswer(answer, 'dilemma_field', undefined, 'dilemma')).toBe(
+      'Keuze 1: Overgeslagen'
     );
   });
 
