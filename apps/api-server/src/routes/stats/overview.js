@@ -239,7 +239,7 @@ router
       {
         key: 'enqueteSubmissionsCountTotal',
         description: 'Amount of enquete (survey) submissions',
-        sql: `SELECT count(submissions.id) AS counted FROM submissions LEFT JOIN widgets ON widgets.id = submissions.widgetId WHERE submissions.deletedAt IS NULL AND submissions.projectId=? AND widgets.type = 'enquete'${submissionDateFilter}`,
+        sql: `SELECT count(submissions.id) AS counted FROM submissions LEFT JOIN widgets ON widgets.id = submissions.widgetId WHERE submissions.deletedAt IS NULL AND submissions.projectId=? AND widgets.deletedAt IS NULL AND widgets.type = 'enquete'${submissionDateFilter}`,
         variables: [req.params.projectId, ...dateVars],
       },
       {
@@ -249,6 +249,7 @@ router
                     FROM submissions
                     LEFT JOIN widgets ON widgets.id = submissions.widgetId
                     WHERE submissions.deletedAt IS NULL
+                    AND widgets.deletedAt IS NULL
                     AND submissions.projectId=? AND widgets.type = 'enquete'${submissionDateFilter}
                     GROUP BY date
                     ORDER BY date ASC`,
