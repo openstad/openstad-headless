@@ -38,7 +38,10 @@ const setClientAuth = (session, client, data = {}) => {
   const previous = store[key] || {};
 
   store[key] = {
-    authenticatedAt: previous.authenticatedAt || Date.now(),
+    authenticatedAt:
+      typeof data.authenticatedAt !== 'undefined'
+        ? data.authenticatedAt
+        : previous.authenticatedAt || Date.now(),
     role:
       typeof data.role !== 'undefined' && data.role !== null
         ? data.role
@@ -100,17 +103,30 @@ const initializeClientAuth = async (session, client, user, data = {}) => {
       : await resolveRoleForClient(user, client);
 
   return setClientAuth(session, client, {
+    authenticatedAt: Date.now(),
     ...data,
     role,
   });
 };
 
-const regenerateSession = (req) => {
+const isSameSessionUser = (session, user) => {
+  const sessionUserId = session && session.passport && session.passport.user;
+  if (sessionUserId === null || typeof sessionUserId === 'undefined') {
+    return false;
+  }
+  if (!user || user.id === null || typeof user.id === 'undefined') {
+    return false;
+  }
+
+  return String(sessionUserId) === String(user.id);
+};
+
+const regenerateSession = (req, { preserveClientAuth = false } = {}) => {
   if (!req.session || typeof req.session.regenerate !== 'function') {
     return Promise.resolve();
   }
 
-  const existingClientAuth = req.session.clientAuth;
+  const existingClientAuth = preserveClientAuth ? req.session.clientAuth : null;
 
   return new Promise((resolve, reject) => {
     req.session.regenerate((err) => {
@@ -124,7 +140,9 @@ const regenerateSession = (req) => {
 };
 
 const loginWithFreshSession = (req, user, done) => {
-  regenerateSession(req)
+  const preserveClientAuth = isSameSessionUser(req.session, user);
+
+  regenerateSession(req, { preserveClientAuth })
     .then(() => {
       req.logIn(user, { keepSessionInfo: true }, done);
     })
@@ -150,6 +168,7 @@ module.exports = {
   getSessionMaxAgeMsForRole,
   initializeClientAuth,
   isClientAuthExpired,
+  isSameSessionUser,
   loginWithFreshSession,
   regenerateSession,
   resolveRoleForClient,
