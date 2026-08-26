@@ -34,52 +34,51 @@ function splitUrlAnnotation(str) {
   return { url: str, label: '' };
 }
 
+function annotatedUrlToItem(str, annotationKey) {
+  const { url, label } = splitUrlAnnotation(str.trim());
+  return label ? { url, [annotationKey]: label } : { url };
+}
+
+function cleanText(value) {
+  return sanitize.noTags(asString(value).trim());
+}
+
+function toMediaItems(value, annotationKey) {
+  const items = [];
+
+  for (const entry of parseArrayLikeJsonValue(value)) {
+    const item =
+      typeof entry === 'string'
+        ? annotatedUrlToItem(entry, annotationKey)
+        : entry;
+
+    if (!item || typeof item !== 'object') continue;
+
+    const url = asString(item.url).trim();
+    if (url) items.push({ ...item, url });
+  }
+
+  return items;
+}
+
 function normalizeImages(value) {
-  return parseArrayLikeJsonValue(value)
-    .map((entry) => {
-      if (typeof entry !== 'string') return entry;
-      const { url, label } = splitUrlAnnotation(entry.trim());
-      return label ? { url, description: label } : { url };
-    })
-    .filter(
-      (entry) =>
-        entry && typeof entry === 'object' && asString(entry.url).trim()
-    )
-    .map((entry) => {
-      const cleaned = { url: asString(entry.url).trim() };
-      if (entry.name)
-        cleaned.name = sanitize.noTags(asString(entry.name).trim());
-      if (entry.description) {
-        cleaned.description = sanitize.noTags(
-          asString(entry.description).trim()
-        );
-      }
-      return cleaned;
-    });
+  return toMediaItems(value, 'description').map((item) => {
+    const cleaned = { url: item.url };
+    if (item.name) cleaned.name = cleanText(item.name);
+    if (item.description) cleaned.description = cleanText(item.description);
+    return cleaned;
+  });
 }
 
 function normalizeDocuments(value) {
-  return parseArrayLikeJsonValue(value)
-    .map((entry) => {
-      if (typeof entry !== 'string') return entry;
-      const { url, label } = splitUrlAnnotation(entry.trim());
-      return label ? { url, name: label } : { url };
-    })
-    .filter(
-      (entry) =>
-        entry && typeof entry === 'object' && asString(entry.url).trim()
-    )
-    .map((entry) => {
-      const cleaned = { url: asString(entry.url).trim() };
-      if (entry.name)
-        cleaned.name = sanitize.noTags(asString(entry.name).trim());
-      if (entry.mimeType) {
-        cleaned.mimeType = sanitize.noTags(asString(entry.mimeType).trim());
-      }
-      const size = Number(entry.size);
-      if (Number.isFinite(size)) cleaned.size = size;
-      return cleaned;
-    });
+  return toMediaItems(value, 'name').map((item) => {
+    const cleaned = { url: item.url };
+    if (item.name) cleaned.name = cleanText(item.name);
+    if (item.mimeType) cleaned.mimeType = cleanText(item.mimeType);
+    const size = Number(item.size);
+    if (Number.isFinite(size)) cleaned.size = size;
+    return cleaned;
+  });
 }
 
 module.exports = { normalizeImages, normalizeDocuments };
