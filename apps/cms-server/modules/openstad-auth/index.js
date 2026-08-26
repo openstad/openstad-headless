@@ -81,7 +81,10 @@ module.exports = {
           let returnTo =
             req.session && req.session.returnTo
               ? req.session.returnTo
-              : removeURLParameter(fullUrlPath, 'openstadlogintoken');
+              : removeURLParameter(
+                  removeURLParameter(fullUrlPath, 'openstadlogintoken'),
+                  'openstadprojectid'
+                );
 
           returnTo = Url.parse(returnTo, true);
           returnTo = returnTo.path;
