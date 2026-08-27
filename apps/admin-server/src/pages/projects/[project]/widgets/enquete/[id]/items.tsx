@@ -26,6 +26,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { usePanelSwitchFocus } from '@/hooks/usePanelSwitchFocus';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { generateId, withId } from '@/lib/widget-item-helpers';
@@ -222,6 +223,7 @@ export default function WidgetEnqueteItems(
     : null;
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
+  const panelRef = usePanelSwitchFocus(settingOptions);
   const [file, setFile] = useState<File>();
   const [isFieldKeyUnique, setIsFieldKeyUnique] = useState(true);
   const [imageIndexOpen, setImageIndexOpen] = useState<number | null>(null);
@@ -564,7 +566,10 @@ export default function WidgetEnqueteItems(
       fieldKey: item.fieldKey || '',
       description: item.description || '',
       questionType: item.questionType || '',
-      feedbackMode: item.feedbackMode || 'none',
+      feedbackMode:
+        item.feedbackMode === 'correctIncorrect'
+          ? 'none'
+          : item.feedbackMode || 'none',
       feedbackText: item.feedbackText || '',
       feedbackCorrect: item.feedbackCorrect || '',
       feedbackIncorrect: item.feedbackIncorrect || '',
@@ -979,7 +984,12 @@ export default function WidgetEnqueteItems(
             </div>
 
             {settingOptions ? (
-              <div className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
+              <div
+                ref={panelRef}
+                tabIndex={-1}
+                role="group"
+                aria-label="Antwoordopties"
+                className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
                 {form.watch('questionType') === 'matrix' ? (
                   matrixList.map((matrixItem) => (
                     <>
@@ -1241,8 +1251,7 @@ export default function WidgetEnqueteItems(
                                   />
                                 )}
 
-                              {form.watch('feedbackMode') ===
-                                'correctIncorrect' &&
+                              {props.isQuiz &&
                                 ['multiplechoice', 'multiple'].includes(
                                   form.watch('questionType') || ''
                                 ) && (
@@ -1661,7 +1670,12 @@ export default function WidgetEnqueteItems(
                 )}
               </div>
             ) : (
-              <div className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
+              <div
+                ref={panelRef}
+                tabIndex={-1}
+                role="group"
+                aria-label="Enquete items"
+                className="p-6 bg-white rounded-md flex flex-col justify-between col-span-2">
                 <div>
                   <Heading size="xl">Enquete items</Heading>
                   <Separator className="my-4" />
@@ -2345,6 +2359,39 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
+                    {['images', 'dilemma', 'swipe'].includes(
+                      form.watch('questionType') || ''
+                    ) && (
+                      <FormField
+                        control={form.control}
+                        name="imageClickable"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Moeten de afbeeldingen uitvergroot worden als erop
+                              geklikt wordt?
+                            </FormLabel>
+                            <Select
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
+                              value={field.value ? 'true' : 'false'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="false">Nee</SelectItem>
+                                <SelectItem value="true">Ja</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
                     {![
                       'pagination',
                       'sort',
@@ -2463,10 +2510,11 @@ export default function WidgetEnqueteItems(
                           name="feedbackMode"
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Feedbackmodus</FormLabel>
+                              <FormLabel>Extra toelichtende tekst</FormLabel>
                               <FormDescription>
-                                Bepaal welke feedback de bezoeker ziet nadat een
-                                antwoord is bevestigd.
+                                Bepaalt of er naast goed/fout nog een
+                                toelichting verschijnt nadat een antwoord is
+                                bevestigd.
                               </FormDescription>
                               <Select
                                 value={field.value || 'none'}
@@ -2484,19 +2532,40 @@ export default function WidgetEnqueteItems(
                                   <SelectItem value="perAnswer">
                                     Per antwoord
                                   </SelectItem>
-                                  {['multiplechoice', 'multiple'].includes(
-                                    form.watch('questionType') || ''
-                                  ) && (
-                                    <SelectItem value="correctIncorrect">
-                                      Goed / fout
-                                    </SelectItem>
-                                  )}
                                 </SelectContent>
                               </Select>
+                              {field.value === 'perAnswer' &&
+                                ['multiplechoice', 'multiple'].includes(
+                                  form.watch('questionType') || ''
+                                ) && (
+                                  <FormDescription>
+                                    De feedbacktekst vul je per antwoord in bij
+                                    de betreffende antwoordoptie.
+                                  </FormDescription>
+                                )}
                               <FormMessage />
                             </FormItem>
                           )}
                         />
+                      )}
+
+                    {props.isQuiz &&
+                      ['multiplechoice', 'multiple'].includes(
+                        form.watch('questionType') || ''
+                      ) && (
+                        <FormItem>
+                          <FormLabel>Quizvraag maken</FormLabel>
+                          <FormDescription>
+                            Markeer minstens één antwoord als &apos;goed&apos;
+                            via &apos;Antwoordopties aanpassen&apos; (per
+                            optie). Dan wordt dit een quizvraag: de bezoeker
+                            krijgt een bevestigknop en ziet na bevestigen wat
+                            goed en fout was. Antwoorden staan standaard op
+                            fout. De instelling &apos;Extra toelichtende
+                            tekst&apos; hierboven bepaalt los daarvan of er nog
+                            een toelichting bij komt.
+                          </FormDescription>
+                        </FormItem>
                       )}
 
                     {props.isQuiz &&
@@ -2520,11 +2589,21 @@ export default function WidgetEnqueteItems(
                       )}
 
                     {props.isQuiz &&
-                      form.watch('feedbackMode') === 'correctIncorrect' &&
                       ['multiplechoice', 'multiple'].includes(
                         form.watch('questionType') || ''
+                      ) &&
+                      (form.watch('options') || []).some(
+                        (option: any) => option?.titles?.[0]?.isCorrect === true
                       ) && (
                         <>
+                          <Separator className="mt-4" />
+                          <Heading size="lg">
+                            Feedback bij een quizvraag (goed/fout)
+                          </Heading>
+                          <FormDescription>
+                            Deze teksten horen bij het markeren van goede
+                            antwoorden en staan los van de instelling hierboven.
+                          </FormDescription>
                           <FormField
                             control={form.control}
                             name="feedbackCorrect"

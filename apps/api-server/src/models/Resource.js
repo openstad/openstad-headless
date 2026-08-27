@@ -1311,10 +1311,10 @@ module.exports = function (db, sequelize, DataTypes) {
         ? self.resourceFormFieldKeys
         : [];
       const hasResourceFormConfig = !!self.hasResourceFormConfig;
+      // {role:'all'} is the unidentified viewer; strip hardest, not skip
       if (
         user &&
         user.role &&
-        user.role !== 'all' &&
         !canViewModeratorOnlyExtraData(user, self) &&
         data.extraData &&
         typeof data.extraData === 'object'

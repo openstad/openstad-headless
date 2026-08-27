@@ -71,7 +71,6 @@ router.use('/project/:projectId(\\d+)/action', require('./action'));
 
 //widgets
 router.use('/project/:projectId(\\d+)/widgets', require('./widget'));
-router.use('/project/:projectId(\\d+)/widgets/:id(\\d+)', require('./widget'));
 
 router.use('/project/:projectId(\\d+)/upload', require('./upload'));
 

@@ -23,3 +23,4 @@ export { Separator } from './separator';
 export { formatFileSize, getFileFormat } from './lib/format-file-size';
 export { fireConfetti } from './fire-confetti';
 export { Lightbox } from './lightbox';
+export { ClickableImage } from './clickable-image';

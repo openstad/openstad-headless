@@ -1380,7 +1380,7 @@ router
   })
   .put(async function (req, res, next) {
     const project = await db.Project.findOne({ where: { id: req.results.id } });
-    if (!(project && project.can && project.can('update')))
+    if (!(project && project.can && project.can('update', req.user)))
       return next(new Error('You cannot update this project'));
 
     req.pendingMessages = [
@@ -1417,7 +1417,7 @@ router
     }
 
     project
-      .authorizeData(req.body, 'update')
+      .authorizeData(req.body, 'update', req.user)
       .update(updateBody)
       .then(async (result) => {
         req.results = result;
@@ -1524,7 +1524,8 @@ router
 // -------------------
 router
   .route('/:projectId(\\d+)/export')
-  .all(auth.can('Project', 'view'))
+  // 'view' is viewableBy:'all'; this export carries vote ip and userId
+  .all(auth.can('Project', 'update'))
   .all(async function (req, res, next) {
     await getProject(req, res, next, [
       {
@@ -1538,12 +1539,13 @@ router
           { model: db.Poll, as: 'poll' },
         ],
       },
-      { model: db.Tag },
+      // Project has no Tag association (tags are linked via projectId only),
+      // so tags are exported nested under Resource above.
       { model: db.Status },
     ]);
   })
 
-  .get(auth.can('Project', 'view'))
+  .get(auth.can('Project', 'update'))
   .get(auth.useReqUser)
   .get(function (req, res, next) {
     res.json(req.results);
@@ -1590,8 +1592,7 @@ router
         req.results[which].forEach &&
         req.results[which].forEach((result) => {
           if (typeof result == 'object') {
-            result.auth = result.auth || {};
-            result.auth.user = req.user;
+            result.auth = { ...result.auth, user: req.user };
           }
         });
     });

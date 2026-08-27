@@ -17,10 +17,10 @@ import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import {
   Carousel,
+  ClickableImage,
   Icon,
   IconButton,
   Image,
-  Lightbox,
   Pill,
   Spacer,
 } from '@openstad-headless/ui/src';
@@ -216,8 +216,6 @@ function ResourceDetail({
   const [refreshComments, setRefreshComments] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showAccordion, setShowAccordion] = useState(false);
-  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
-  const [lightboxAlt, setLightboxAlt] = useState<string | undefined>(undefined);
   const descriptionRef = React.useRef<HTMLDivElement>(null);
   const id = useId();
 
@@ -450,24 +448,10 @@ function ResourceDetail({
       </>
     );
 
-    return clickableImage ? (
-      <div
-        style={{ cursor: 'zoom-in' }}
-        onClick={() => {
-          setLightboxSrc(src);
-          setLightboxAlt(imageAlt);
-        }}
-        role="button"
-        tabIndex={0}
-        aria-label="Afbeelding uitvergroot bekijken"
-        onKeyDown={(e) =>
-          (e.key === 'Enter' || e.key === ' ') &&
-          (setLightboxSrc(src), setLightboxAlt(imageAlt))
-        }>
+    return (
+      <ClickableImage clickable={clickableImage} src={src} alt={imageAlt}>
         {imageElement}
-      </div>
-    ) : (
-      imageElement
+      </ClickableImage>
     );
   };
 
@@ -564,13 +548,6 @@ function ResourceDetail({
 
   return (
     <section className="osc-resource-detail-widget-container">
-      {lightboxSrc && (
-        <Lightbox
-          src={lightboxSrc}
-          alt={lightboxAlt}
-          onClose={() => setLightboxSrc(null)}
-        />
-      )}
       {displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit />}
       <div
         className={`osc ${

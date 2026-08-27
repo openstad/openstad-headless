@@ -25,6 +25,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { usePanelSwitchFocus } from '@/hooks/usePanelSwitchFocus';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { generateId, withId } from '@/lib/widget-item-helpers';
@@ -202,6 +203,7 @@ export default function WidgetChoiceGuideItems(
     : null;
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
+  const panelRef = usePanelSwitchFocus(settingOptions);
   const [activeTab, setActiveTab] = useState<string>('1');
   const [dimensions, setDimensions] = useState<string[]>([]);
   const [matrixOptions, setMatrixOptions] = useState<Matrix>(matrixDefault);
@@ -1165,7 +1167,12 @@ export default function WidgetChoiceGuideItems(
             </div>
 
             {settingOptions ? (
-              <div className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
+              <div
+                ref={panelRef}
+                tabIndex={-1}
+                role="group"
+                aria-label="Antwoordopties"
+                className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
                 {form.watch('type') === 'matrix' ? (
                   matrixList.map((matrixItem) => (
                     <>
@@ -1589,7 +1596,12 @@ export default function WidgetChoiceGuideItems(
                 )}
               </div>
             ) : (
-              <div className="p-0 bg-transparent rounded-md flex flex-col justify-start col-span-2">
+              <div
+                ref={panelRef}
+                tabIndex={-1}
+                role="group"
+                aria-label="Vraag instellingen"
+                className="p-0 bg-transparent rounded-md flex flex-col justify-start col-span-2">
                 <div className="w-full px-4 py-3 bg-white border-b-0 mb-4 rounded-md improvised-tab-list flex gap-4">
                   <button
                     type="button"

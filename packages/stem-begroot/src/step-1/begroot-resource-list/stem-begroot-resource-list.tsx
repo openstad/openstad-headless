@@ -3,6 +3,7 @@ import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { elipsizeHTML } from '@openstad-headless/lib/ui-helpers';
 import {
   Carousel,
+  ClickableImage,
   Icon,
   Image,
   List,
@@ -41,6 +42,7 @@ export const StemBegrootResourceList = ({
   showOriginalResource = true,
   displayTitle = true,
   displaySummary = true,
+  clickableImage = false,
   header,
 }: {
   resourceListColumns?: number;
@@ -66,6 +68,7 @@ export const StemBegrootResourceList = ({
   hideReadMore?: boolean;
   displayTitle?: boolean;
   displaySummary?: boolean;
+  clickableImage?: boolean;
 }) => {
   const filtered = useMemo(() => {
     if (!resources) return [];
@@ -151,7 +154,11 @@ export const StemBegrootResourceList = ({
                   next: 'Volgende afbeelding',
                   previous: 'Vorige afbeelding',
                 }}
-                itemRenderer={(i) => <Image src={i.url} />}
+                itemRenderer={(i) => (
+                  <ClickableImage clickable={clickableImage} src={i.url}>
+                    <Image src={i.url} />
+                  </ClickableImage>
+                )}
               />
               {!hideTagsForResources && (
                 <section className="stembegroot-content-item-header">

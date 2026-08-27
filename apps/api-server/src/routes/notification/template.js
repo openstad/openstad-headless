@@ -73,7 +73,7 @@ router
     let templateId = parseInt(req.params.templateId) || 1;
     db.NotificationTemplate.scope(req.scope)
       .findOne({
-        where: { id: templateId },
+        where: { id: templateId, projectId: req.params.projectId },
       })
       .then((found) => {
         if (!found) {

@@ -260,6 +260,55 @@ const initialDataCommentReplyNotification = `<mjml>
 </mjml>
 `;
 
+// Mirrors apps/api-server/src/notifications/default-templates/new comment - admin
+const initialDataCommentAdminNotification = `<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column width="200px">
+        <mj-image src="{{ imagePath }}/logo-openstad.png"></mj-image>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+      <mj-column width="600px">
+        <mj-image src="{{ imagePath }}/mail-header.jpg"></mj-image>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+      <mj-column width="500px">
+        {% if parentComment %}
+          <mj-text font-size="20px" font-family="Helvetica Neue">Er is een nieuwe reactie op een reactie geplaatst.</mj-text>
+          <mj-text>Beste administrator,</mj-text>
+          <mj-text color="#525252">Op de resource {{ resource.title }} is er zojuist gereageerd op een eerdere reactie.</mj-text>
+          <mj-text color="#525252"><em>Oorspronkelijke reactie:</em></mj-text>
+          <mj-text color="#525252">{{ parentComment.description }}</mj-text>
+          <mj-text color="#525252"><em>Nieuwe reactie:</em></mj-text>
+          <mj-text color="#525252">{{ comment.description }}</mj-text>
+        {% else %}
+          <mj-text font-size="20px" font-family="Helvetica Neue">Er is een nieuwe reactie geplaatst.</mj-text>
+          <mj-text>Beste administrator,</mj-text>
+          <mj-text color="#525252">Op de resource {{ resource.title }} is er zojuist een nieuwe reactie geplaatst.</mj-text>
+          <mj-text color="#525252"><em>Reactie:</em></mj-text>
+          <mj-text color="#525252">{{ comment.description }}</mj-text>
+        {% endif %}
+        {% if redirectUrl %}
+          <mj-button background-color="#12B886" href="{{ redirectUrl }}">Weergeven</mj-button>
+        {% endif %}
+      </mj-column>
+    </mj-section>
+    {% if redirectUrl %}
+      <mj-section>
+        <mj-column width="400px">
+          <mj-text>Of gebruik deze link in je browser:</mj-text>
+        </mj-column>
+        <mj-column>
+          <mj-text>{{ redirectUrl }}</mj-text>
+        </mj-column>
+      </mj-section>
+    {% endif %}
+  </mj-body>
+</mjml>
+`;
+
 const initialDataEnqueteSubmissionAdmin = `<mjml>
   <mj-body background-color="#f6f6f7">
     <mj-section background-color="#ffffff" padding="20px">
@@ -344,7 +393,8 @@ type Props = {
     | 'new enquete - admin'
     | 'new enquete - user'
     | 'notification comment - user'
-    | 'notification comment reply - user';
+    | 'notification comment reply - user'
+    | 'new comment - admin';
   engine?: 'email' | 'sms';
   id?: string;
   label?: string;
@@ -371,6 +421,7 @@ const notificationTypes = {
     'Nieuwe reactie op een inzending - Notificatie naar de gebruiker',
   'notification comment reply - user':
     'Nieuwe reactie op een reactie - Notificatie naar de gebruiker',
+  'new comment - admin': 'Nieuwe reactie - Notificatie naar de admin',
 };
 
 const formSchema = z.object({
@@ -457,6 +508,9 @@ export function NotificationForm({
       : '') ||
     (type === 'notification comment reply - user'
       ? initialDataCommentReplyNotification
+      : '') ||
+    (type === 'new comment - admin'
+      ? initialDataCommentAdminNotification
       : '') ||
     (type === 'user account about to expire' ? initialDataAccountExpiry : '');
 

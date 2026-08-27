@@ -150,7 +150,8 @@ router
     db.Submission.authorizeData(data, 'create', req.user)
       .create(data)
       .then((result) => {
-        res.json(result);
+        // Fresh instance: serialize against the requesting user explicitly.
+        res.json(result.toJSON(req.user));
         req.results = result;
         return next();
       });
@@ -267,10 +268,14 @@ router
   .put(auth.useReqUser)
   .put(rateLimiter(), function (req, res, next) {
     var submission = req.results;
-    if (!(submission && submission.can && submission.can('update')))
-      return next(new Error('You cannot update this submission'));
+    if (!(submission && submission.can && submission.can('update', req.user)))
+      return next(createError(403, 'You cannot update this submission'));
+    // Identity fields are not editable
+    const { projectId, userId, widgetId, ...data } = req.body;
+
     submission
-      .update(req.body)
+      .authorizeData(data, 'update')
+      .update(data)
       .then((result) => {
         res.json(result);
       })

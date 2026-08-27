@@ -8,6 +8,7 @@ const bruteForce = require('../../middleware/brute-force');
 const { Op, Sequelize } = require('sequelize');
 const pagination = require('../../middleware/pagination');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const { buildLikeActions } = require('../../lib/vote-actions');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
 const router = express.Router({ mergeParams: true });
@@ -214,7 +215,7 @@ router
         vote.user = entry.user;
 
         if (vote.user && vote.user.auth && typeof vote.user.auth === 'object') {
-          vote.user.auth.user = req.user;
+          vote.user.auth = { ...vote.user.auth, user: req.user };
         }
       }
       vote.userId = entry.userId;
@@ -377,41 +378,7 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
         let actions = [];
         switch (req.project.config.votes.voteType) {
           case 'likes':
-            votes.forEach((vote) => {
-              const existingVote = existingVotes.find(
-                (entry) => entry.resourceId == vote.resourceId
-              );
-              const otherExisting = existingVotes.filter(
-                (entry) => entry.resourceId != vote.resourceId
-              );
-
-              if (existingVote) {
-                if (existingVote.opinion == vote.opinion) {
-                  actions.push({ action: 'delete', vote: existingVote });
-                } else {
-                  existingVote.opinion = vote.opinion;
-                  actions.push({ action: 'update', vote: existingVote });
-                }
-                if (
-                  otherExisting.length > 0 &&
-                  req.project.config.votes.withExisting === 'replace'
-                ) {
-                  otherExisting.forEach((v) =>
-                    actions.push({ action: 'delete', vote: v })
-                  );
-                }
-              } else {
-                if (otherExisting.length > 0) {
-                  if (req.project.config.votes.withExisting === 'error') {
-                    throw createError(403, 'Je hebt al gestemd');
-                  }
-                  otherExisting.forEach((v) =>
-                    actions.push({ action: 'delete', vote: v })
-                  );
-                }
-                actions.push({ action: 'create', vote: vote });
-              }
-            });
+            actions.push(...buildLikeActions(votes, existingVotes));
             break;
 
           case 'count':
@@ -544,9 +511,11 @@ router
   .all((req, res, next) => {
     var voteId = req.params.voteId;
 
-    db.Vote.findOne({
-      where: { id: voteId },
-    })
+    // Vote has no projectId column; forProjectId lives in req.scope
+    db.Vote.scope(...req.scope)
+      .findOne({
+        where: { id: voteId },
+      })
       .then(function (vote) {
         if (vote) {
           req.results = vote;
@@ -558,8 +527,8 @@ router
   .delete(auth.useReqUser)
   .delete(function (req, res, next) {
     const vote = req.results;
-    if (!(vote && vote.can && vote.can('delete')))
-      return next(new Error('You cannot delete this vote'));
+    if (!(vote && vote.can && vote.can('delete', req.user)))
+      return next(createError(403, 'You cannot delete this vote'));
 
     vote
       .destroy()
@@ -574,18 +543,26 @@ router
   .all((req, res, next) => {
     var voteId = req.params.voteId;
 
-    db.Vote.findOne({
-      where: { id: voteId },
-    })
+    // req.scope carries forProjectId; Vote has no projectId column of its own.
+    db.Vote.scope(...req.scope)
+      .findOne({
+        where: { id: voteId },
+      })
       .then(function (vote) {
-        if (vote) {
-          req.vote = vote;
+        if (!vote) {
+          return next(createError(404, 'Vote not found'));
         }
+        req.vote = vote;
         next();
       })
       .catch(next);
   })
-  .all(auth.can('Vote', 'toggle'))
+  .all(function (req, res, next) {
+    // Check the record: canToggle reads self.userId, absent on the class
+    if (!req.vote.can('toggle', req.user))
+      return next(createError(403, 'You cannot toggle this vote'));
+    return next();
+  })
   .get(function (req, res, next) {
     var resourceId = req.params.resourceId;
     var vote = req.vote;

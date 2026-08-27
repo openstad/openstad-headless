@@ -38,10 +38,16 @@ import { EnquetePropsType } from './types/';
 
 // Helper types and functions for draft persistence
 
+type DraftFieldState = {
+  confirmed: string[];
+  touched: string[];
+};
+
 type EnqueteDraft = {
   data: Record<string, any>;
   updatedAt: number;
   version?: number;
+  fieldState?: DraftFieldState;
 };
 
 function getStorageKey(
@@ -92,7 +98,11 @@ function loadDraft(key: string, retentionHours: number): EnqueteDraft | null {
   }
 }
 
-function saveDraft(key: string, data: Record<string, any>): void {
+function saveDraft(
+  key: string,
+  data: Record<string, any>,
+  fieldState?: DraftFieldState
+): void {
   if (
     typeof window === 'undefined' ||
     typeof window.localStorage === 'undefined'
@@ -104,6 +114,7 @@ function saveDraft(key: string, data: Record<string, any>): void {
     data,
     updatedAt: Date.now(),
     version: 1,
+    fieldState,
   };
 
   try {
@@ -140,8 +151,11 @@ function Enquete(props: EnqueteWidgetProps) {
   const [savedDraft, setSavedDraft] = useState<Record<string, unknown> | null>(
     null
   );
+  const [savedFieldState, setSavedFieldState] =
+    useState<DraftFieldState | null>(null);
   const [draftChecked, setDraftChecked] = useState(false);
   const latestValuesRef = useRef<Record<string, unknown> | null>(null);
+  const latestFieldStateRef = useRef<DraftFieldState | undefined>(undefined);
   const saveTimeoutRef = useRef<number | null>(null);
   const formStartTimeRef = useRef<number>(Date.now());
   const formStartFiredRef = useRef(false);
@@ -169,6 +183,10 @@ function Enquete(props: EnqueteWidgetProps) {
     if (draft && draft.data) {
       setSavedDraft(draft.data);
       latestValuesRef.current = draft.data;
+      if (draft.fieldState) {
+        setSavedFieldState(draft.fieldState);
+        latestFieldStateRef.current = draft.fieldState;
+      }
     }
     setDraftChecked(true);
   }, [
@@ -260,6 +278,7 @@ function Enquete(props: EnqueteWidgetProps) {
         );
         clearDraft(storageKey);
         latestValuesRef.current = null;
+        latestFieldStateRef.current = undefined;
       }
 
       if (props.afterSubmitUrl) {
@@ -393,6 +412,7 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['type'] = 'imageChoice';
           fieldData['multiple'] = item.multiple || false;
           fieldData['infoField'] = item.infoField || '';
+          fieldData['imageClickable'] = item?.imageClickable || false;
 
           if (item.options && item.options.length > 0) {
             fieldData['choices'] = item.options.map((option) => {
@@ -539,6 +559,7 @@ function Enquete(props: EnqueteWidgetProps) {
         case 'swipe':
           fieldData['type'] = 'swipe';
           fieldData['required'] = item?.fieldRequired || false;
+          fieldData['imageClickable'] = item?.imageClickable || false;
           fieldData['cards'] = item?.options?.map((card) => {
             return {
               id: card.trigger,
@@ -558,6 +579,7 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['type'] = 'dilemma';
           fieldData['title'] = item?.title || '';
           fieldData['required'] = item?.fieldRequired || false;
+          fieldData['imageClickable'] = item?.imageClickable || false;
           fieldData['infoField'] = item?.infoField || '';
           fieldData['infofieldExplanation'] =
             item?.infofieldExplanation || false;
@@ -762,7 +784,11 @@ function Enquete(props: EnqueteWidgetProps) {
     });
   };
 
-  const handleValuesChange = (values: Record<string, unknown>) => {
+  const handleValuesChange = (
+    values: Record<string, unknown>,
+    _hiddenFields?: string[],
+    fieldState?: { confirmed: string[]; touched: string[] }
+  ) => {
     if (typeof window === 'undefined') return;
 
     // form_start has been moved to handleFieldInteraction so it only fires on
@@ -771,6 +797,9 @@ function Enquete(props: EnqueteWidgetProps) {
     if (props.enableDraftPersistence !== true) return;
 
     latestValuesRef.current = values;
+    if (fieldState) {
+      latestFieldStateRef.current = fieldState;
+    }
 
     if (saveTimeoutRef.current !== null) {
       window.clearTimeout(saveTimeoutRef.current);
@@ -782,7 +811,11 @@ function Enquete(props: EnqueteWidgetProps) {
 
     saveTimeoutRef.current = window.setTimeout(() => {
       if (latestValuesRef.current) {
-        saveDraft(storageKey, latestValuesRef.current);
+        saveDraft(
+          storageKey,
+          latestValuesRef.current,
+          latestFieldStateRef.current
+        );
       }
     }, delay);
   };
@@ -892,6 +925,8 @@ function Enquete(props: EnqueteWidgetProps) {
               totalFieldCount={totalFieldCount}
               totalPages={totalPages}
               initialValues={initialValues}
+              initialConfirmedFields={savedFieldState?.confirmed}
+              initialTouchedFields={savedFieldState?.touched}
               onFieldInteraction={handleFieldInteraction}
               onValidationErrors={handleValidationErrors}
             />

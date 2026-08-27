@@ -33,10 +33,11 @@ import type {
   ComponentFieldProps,
   FormProps,
 } from './props';
-import { evaluateFeedback } from './utils/feedback';
+import { evaluateFeedback, isGraded } from './utils/feedback';
 import { resolveFieldInteraction } from './utils/interaction';
 import { computeEffectivePagination } from './utils/pagination';
 import { updateRouting } from './utils/routing';
+import { scrollToFirstError } from './utils/scroll';
 import { handleSubmit } from './utils/submit';
 
 export type FormValue =
@@ -71,6 +72,8 @@ function Form({
   totalFieldCount = 0,
   formStyle = 'default',
   initialValues,
+  initialConfirmedFields,
+  initialTouchedFields,
   confirmAnswerMessage = 'Bevestig eerst je antwoord voordat je verdergaat.',
   onFieldInteraction,
   onValidationErrors,
@@ -136,7 +139,15 @@ function Form({
   const [lastUpdatedKey, setLastUpdatedKey] = useState<string>('');
   const [confirmedFields, setConfirmedFields] = useState<
     Record<string, boolean>
-  >({});
+  >(() =>
+    Object.fromEntries((initialConfirmedFields || []).map((key) => [key, true]))
+  );
+  // Fields the user actually interacted with; seeded values (e.g. the
+  // tickmark-slider default) do not count until the user touches the field.
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>(
+    () =>
+      Object.fromEntries((initialTouchedFields || []).map((key) => [key, true]))
+  );
 
   const {
     effectiveTotalPages,
@@ -258,13 +269,8 @@ function Form({
         newErrors[f.fieldKey] = confirmAnswerMessage;
       });
       setFormErrors((prev) => ({ ...prev, ...newErrors }));
-      const firstKey = unconfirmed[0].fieldKey;
       if (formRef.current) {
-        const el = formRef.current.querySelector(`[name="${firstKey}"]`);
-        if (el) {
-          const top = el.getBoundingClientRect().top + window.scrollY - 100;
-          window.scrollTo({ top, behavior: 'smooth' });
-        }
+        scrollToFirstError(formRef.current, Object.keys(newErrors));
       }
       return;
     }
@@ -286,21 +292,14 @@ function Form({
       onValidationErrors(errorEntries);
     }
 
-    if (firstErrorKey && formRef.current) {
-      const namedElement = formRef.current.querySelector(
-        `[name="${firstErrorKey}"]`
-      );
-      // ponytail: named element can be a type="hidden" input (e.g. map) with no
-      // layout box; scroll to its visible .question wrapper instead.
-      const errorElement = namedElement?.closest('.question') ?? namedElement;
-      if (errorElement) {
-        const elementPosition =
-          errorElement.getBoundingClientRect().top + window.scrollY;
-        const offsetPosition = elementPosition - 100;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth',
-        });
+    if (firstErrorKey) {
+      if (formRef.current) {
+        scrollToFirstError(
+          formRef.current,
+          Object.keys(validationErrors).filter(
+            (key) => validationErrors[key] !== null
+          )
+        );
       }
     } else if (allowResetAfterSubmit) {
       resetForm();
@@ -349,6 +348,12 @@ function Form({
     const { name, value } = event;
     setFormValues((prevFormValues) => ({ ...prevFormValues, [name]: value }));
 
+    if (!event.isInitial) {
+      setTouchedFields((prev) =>
+        prev[name] ? prev : { ...prev, [name]: true }
+      );
+    }
+
     if (triggerSetLastKey !== false) {
       setLastUpdatedKey(name);
     }
@@ -363,6 +368,7 @@ function Form({
     setFormValues(initialFormValues);
     setFormErrors({});
     setConfirmedFields({});
+    setTouchedFields({});
     resetFunctions.current.forEach((reset) => reset());
   };
 
@@ -371,7 +377,12 @@ function Form({
       const externalHiddenFields = routingHiddenFields.filter(
         (key) => !key.startsWith('_routing_')
       );
-      getValuesOnChange(formValues, externalHiddenFields);
+      getValuesOnChange(formValues, externalHiddenFields, {
+        confirmed: Object.keys(confirmedFields).filter(
+          (key) => confirmedFields[key]
+        ),
+        touched: Object.keys(touchedFields).filter((key) => touchedFields[key]),
+      });
     }
 
     if (
@@ -389,12 +400,15 @@ function Form({
         formValues,
       });
     }
-  }, [formValues]);
+  }, [formValues, confirmedFields, touchedFields]);
 
   const scrollTop = () => {
-    const formWidget = document.querySelector(
-      '.osc-enquete-item-content, .osc-resource-form-item-content'
-    );
+    // Scope to this form's own widget container: a page can hold multiple
+    // form widgets and a document-wide query would scroll to the first one.
+    const formWidget =
+      formRef.current?.closest(
+        '.osc-enquete-item-content, .osc-resource-form-item-content'
+      ) ?? formRef.current;
 
     if (formWidget) {
       const elementPosition =
@@ -448,10 +462,9 @@ function Form({
   };
 
   const hasFeedback = (field: any): boolean =>
-    !!field.feedbackMode && field.feedbackMode !== 'none';
+    isGraded(field) || (!!field.feedbackMode && field.feedbackMode !== 'none');
 
-  const needsConfirm = (field: any): boolean =>
-    field.feedbackMode === 'correctIncorrect';
+  const needsConfirm = (field: any): boolean => isGraded(field);
 
   const meetsMinChoices = (field: any): boolean => {
     const min = parseInt(String(field.minChoices ?? ''), 10);
@@ -573,9 +586,11 @@ function Form({
 
             const stateClasses = [
               hasFeedback(field) ? '--has-feedback' : '',
-              hasFeedback(field)
+              (field as any).feedbackMode &&
+              (field as any).feedbackMode !== 'none'
                 ? `--feedback-${(field as any).feedbackMode}`
                 : '',
+              isGraded(field as any) ? '--graded' : '',
               confirmed ? '--confirmed' : '',
               needsConfirm(field) && confirmed && feedback
                 ? feedback.isFullyCorrect
@@ -640,7 +655,10 @@ function Form({
                 )}
                 {hasFeedback(field) &&
                   field.fieldKey &&
-                  (needsConfirm(field) ? confirmed : isFieldAnswered(field)) &&
+                  (needsConfirm(field)
+                    ? confirmed
+                    : isFieldAnswered(field) &&
+                      !!touchedFields[field.fieldKey]) &&
                   feedback &&
                   feedback.textToShow.length > 0 && (
                     <div className="question-feedback" aria-live="polite">

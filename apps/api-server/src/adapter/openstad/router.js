@@ -467,7 +467,12 @@ router
             const allowed =
               projectId && (await isRedirectAllowed(projectId, rawRedirectUri));
             if (allowed) {
-              safeRedirect = parsedRedirect.origin + '?openstadlogout=true';
+              // keep the path (e.g. /juli2026) but drop search/hash to avoid
+              // reintroducing stale login tokens
+              safeRedirect =
+                parsedRedirect.origin +
+                parsedRedirect.pathname +
+                '?openstadlogout=true';
             }
           }
         } catch (e) {

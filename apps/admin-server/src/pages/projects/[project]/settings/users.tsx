@@ -180,7 +180,8 @@ export default function ProjectSettingsUsers(
   );
 
   const sendEmail = data?.emailConfig?.notifications?.fromAddress;
-  const isSendEmailNotSet = sendEmail === '' || sendEmail === 'email@not.set';
+  const isSendEmailNotSet =
+    sendEmail === '' || sendEmail === 'EMAIL@NOT.DEFINED';
 
   return (
     <div>

@@ -951,7 +951,7 @@ router
 
     try {
       const resources = await db.Resource.scope(...req.scope).findAll({
-        where: { id: ids },
+        where: { id: ids, projectId: req.params.projectId },
       });
 
       if (resources.length === 0) {
@@ -961,15 +961,18 @@ router
       }
 
       for (const resource of resources) {
-        if (!resource.can || !resource.can('delete')) {
+        if (!resource.can || !resource.can('delete', req.user)) {
           return next(
-            new Error(`You cannot delete resource with ID ${resource.id}`)
+            createError(
+              403,
+              `You cannot delete resource with ID ${resource.id}`
+            )
           );
         }
       }
 
       await db.Resource.destroy({
-        where: { id: ids },
+        where: { id: resources.map((resource) => resource.id) },
       });
 
       res.json({ message: 'Resources deleted successfully' });
@@ -981,6 +984,8 @@ router
 // Duplicate multiple resources
 router
   .route('/duplicate')
+  // createableBy is 'all', so a per-record can('create') is no guard here
+  .post(auth.can('Resource', 'update'))
   .post(auth.useReqUser)
   .post(rateLimiter(), async function (req, res, next) {
     let ids = req.body.ids;
@@ -998,7 +1003,7 @@ router
     try {
       req.scope.push('includeTags', 'includeStatuses');
       const resources = await db.Resource.scope(...req.scope).findAll({
-        where: { id: ids },
+        where: { id: ids, projectId: req.params.projectId },
       });
 
       if (resources.length === 0) {
@@ -1008,9 +1013,12 @@ router
       }
 
       for (const resource of resources) {
-        if (!resource.can || !resource.can('create')) {
+        if (!resource.can || !resource.can('create', req.user)) {
           return next(
-            new Error(`You cannot duplicate resource with ID ${resource.id}`)
+            createError(
+              403,
+              `You cannot duplicate resource with ID ${resource.id}`
+            )
           );
         }
       }
@@ -1055,7 +1063,9 @@ router
         })
       );
 
-      res.json(duplicatedResources);
+      res.json(
+        duplicatedResources.map((resource) => resource.toJSON(req.user))
+      );
     } catch (error) {
       next(error);
     }

@@ -133,6 +133,20 @@ module.exports = function (db, sequelize, DataTypes) {
           return yes - no;
         },
       },
+
+      authorStaffRole: {
+        type: DataTypes.VIRTUAL,
+        auth: {
+          // intended public signal for the staff badge; carries no id, name or email
+          viewableBy: 'all',
+        },
+        get: function () {
+          // real association value, read before serialization masks the role
+          const role = this.user && this.user.role;
+          // staff set = the roles that get a badge today; add 'moderator' here if desired
+          return role === 'admin' || role === 'editor' ? role : null;
+        },
+      },
     },
     {
       hooks: {
@@ -286,6 +300,7 @@ module.exports = function (db, sequelize, DataTypes) {
                 'hasUserDisliked',
                 'confirmationSent',
                 'yes',
+                'authorStaffRole',
               ],
             },
           ],

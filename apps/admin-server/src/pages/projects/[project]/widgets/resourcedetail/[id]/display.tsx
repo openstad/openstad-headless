@@ -526,7 +526,9 @@ export default function WidgetResourceDetailDisplay(
                 <FormLabel>Tijdlijn weergeven</FormLabel>
                 <FormDescription>
                   Tijdlijn items worden per resource beheerd in het tabblad
-                  Tijdlijn bij de resource.
+                  Tijdlijn bij de resource. Toont ook de tijdlijn die de
+                  indiener heeft ingevuld via een tijdlijn-vraag in het
+                  inzendingformulier.
                 </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />
