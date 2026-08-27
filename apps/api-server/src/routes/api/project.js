@@ -780,7 +780,11 @@ router
       }
 
       // now find the corresponding projects
-      let result = await db.Project.scope(req.scope).findAndCountAll({
+      const listScope = req.scope.includes('getBasicInformation')
+        ? req.scope.filter((scopeName) => scopeName !== 'excludeConfig')
+        : req.scope;
+
+      let result = await db.Project.scope(listScope).findAndCountAll({
         offset: req.dbQuery.offset,
         limit: req.dbQuery.limit,
         where,
