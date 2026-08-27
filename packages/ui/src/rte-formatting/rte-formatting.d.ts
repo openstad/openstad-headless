@@ -1,5 +1,6 @@
 export interface RenderContentOptions {
   unwrapSingleRootDiv?: boolean;
+  headingBaseLevel?: number;
 }
 
 export declare function unwrapSingleRootDiv(content: string): string;

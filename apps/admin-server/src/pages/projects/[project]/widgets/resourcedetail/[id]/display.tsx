@@ -66,6 +66,7 @@ const formSchema = z.object({
   displayDescriptionExpandable_expandBeforeText: z.string().optional(),
   displayDescriptionExpandable_expandAfterText: z.string().optional(),
   displayDescriptionExpandable_visibleLines: z.string().optional(),
+  descriptionHeadingLevel: z.string().optional(),
   displaySummary: z.boolean(),
   displayUser: z.boolean(),
   displayDate: z.boolean(),
@@ -129,6 +130,7 @@ export default function WidgetResourceDetailDisplay(
         props?.displayDescriptionExpandable_expandAfterText || 'Lees minder',
       displayDescriptionExpandable_visibleLines:
         props?.displayDescriptionExpandable_visibleLines || '4',
+      descriptionHeadingLevel: props?.descriptionHeadingLevel || '3',
       displayTitle: undefinedToTrueOrProp(props?.displayTitle),
       displaySummary: undefinedToTrueOrProp(props?.displaySummary),
       displayDescription: undefinedToTrueOrProp(props?.displayDescription),
@@ -342,6 +344,39 @@ export default function WidgetResourceDetailDisplay(
                   </>
                 )}
               </div>
+            )}
+            {form.watch('displayDescription') && (
+              <FormField
+                control={form.control}
+                name="descriptionHeadingLevel"
+                render={({ field }) => (
+                  <FormItem className="mt-4">
+                    <FormLabel>Heading-niveau opmaak in beschrijving</FormLabel>
+                    <FormDescription>
+                      Bepaalt als welk kopniveau een &apos;Heading&apos; uit de
+                      tekstopmaak van de inzender wordt weergegeven.
+                    </FormDescription>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        props.onFieldChanged(field.name, value);
+                      }}
+                      value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecteer een optie" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={'2'}>Heading 2 (H2)</SelectItem>
+                        <SelectItem value={'3'}>Heading 3 (H3)</SelectItem>
+                        <SelectItem value={'4'}>Heading 4 (H4)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             )}
           </div>
           <FormField

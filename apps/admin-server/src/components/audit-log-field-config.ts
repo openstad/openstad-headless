@@ -96,6 +96,7 @@ export const FIELD_LABELS: Record<string, string> = {
   displayLocationFilter: 'Locatie filter weergeven',
   displayTitle: 'Titel weergeven',
   displayDescription: 'Beschrijving weergeven',
+  descriptionHeadingLevel: 'Heading-niveau opmaak beschrijving',
   displaySummary: 'Samenvatting weergeven',
   displayArguments: 'Aantal argumenten weergeven',
   displayVote: 'Aantal stemmen weergeven',
