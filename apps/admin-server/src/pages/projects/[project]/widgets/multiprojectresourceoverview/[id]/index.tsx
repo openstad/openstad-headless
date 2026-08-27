@@ -64,6 +64,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
         });
       }
     },
+    updatePreview,
     projectId,
     selectedProjects: widget?.config?.selectedProjects || [],
     widgetName: 'multiprojectresourceoverview',

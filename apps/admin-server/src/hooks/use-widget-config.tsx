@@ -36,13 +36,16 @@ export function useWidgetConfig<R>(idOverride?: string) {
 
       if (!res.ok) {
         toast.error('De configuratie kon niet worden aangepast');
-      } else {
-        const data = await res.json();
-        swr.mutate(data);
+        return false;
       }
+
+      const data = await res.json();
+      swr.mutate(data);
       toast.success('Configuratie aangepast');
+      return true;
     } catch (error) {
       toast.error('De configuratie kon niet worden aangepast');
+      return false;
     }
   }
 
