@@ -442,6 +442,15 @@ function ResourceDetail({
               </div>
             )
           }
+          cornerBadge={
+            clickableImage && (
+              <Icon
+                icon="ri-zoom-in-line"
+                iconOnly
+                className="osc-resource-detail-image-zoom-badge"
+              />
+            )
+          }
         />
 
         {displayImageDescription && imageDescription && (
