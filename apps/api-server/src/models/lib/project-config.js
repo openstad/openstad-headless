@@ -41,6 +41,10 @@ module.exports = {
         type: 'int',
         default: 60,
       },
+      allowAnonymizeUsersAfterInactivity: {
+        type: 'boolean',
+        default: false,
+      },
       warnUsersAfterXDaysOfInactivity: {
         type: 'int',
         default: 770,
