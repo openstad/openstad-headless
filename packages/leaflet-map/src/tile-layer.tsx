@@ -111,7 +111,7 @@ export default function TileLayer({
       return (
         <LeafletTileLayer
           {...props}
-          attribution="Kaartgegevens &copy; <a href='kadaster.nl'>Kadaster</a>"
+          attribution="Kaartgegevens &copy; <a href='https://kadaster.nl'>Kadaster</a>"
           bounds={[
             [50.5, 3.25],
             [54, 7.6],
