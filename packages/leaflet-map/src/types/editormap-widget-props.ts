@@ -14,9 +14,10 @@ export type EditorMapWidgetProps = BaseProps &
     centerOnEditorMarker: boolean;
     onChange?: (e: {
       name: string;
-      value: string | Record<number, never> | [];
+      value: string | Record<number, never> | [] | { lat: number; lng: number };
     }) => void;
     fieldRequired?: boolean;
+    searchLocation?: { lat: number; lng: number };
     minZoom: number;
     maxZoom: number;
     overrideDefaultValue?: FormValue;

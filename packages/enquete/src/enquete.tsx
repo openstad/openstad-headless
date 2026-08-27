@@ -559,6 +559,8 @@ function Enquete(props: EnqueteWidgetProps) {
             fieldData['allowedPolygons'] = props.allowedPolygons;
           }
 
+          fieldData['enableAddressSearch'] = !!item.enableAddressSearch;
+
           break;
         case 'pagination':
           fieldData['type'] = 'pagination';
