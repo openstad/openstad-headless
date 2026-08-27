@@ -2,6 +2,7 @@ import { useProject } from '@/hooks/use-project';
 import {
   CropRect,
   buildImageCropUrl,
+  buildImagePreviewUrl,
   parseImageCropUrl,
 } from '@openstad-headless/lib/image-crop/crop-url';
 import React, { useEffect, useState } from 'react';
@@ -11,13 +12,16 @@ import { Button } from './ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogTitle } from './ui/dialog';
 import { Input } from './ui/input';
 
+const PREVIEW_MAX_SIZE = 1600;
+
 export const ImageCropDialog: React.FC<{
   imageUrl: string;
   onSave: (url: string) => void;
   onClose: () => void;
 }> = ({ imageUrl, onSave, onClose }) => {
   const { data } = useProject();
-  const { baseUrl, crop: initialCrop } = parseImageCropUrl(imageUrl);
+  const { baseUrl, crop: initialCrop, hasCrop } = parseImageCropUrl(imageUrl);
+  const previewUrl = buildImagePreviewUrl(baseUrl, PREVIEW_MAX_SIZE);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [ratioWidth, setRatioWidth] = useState<number>(
@@ -26,10 +30,11 @@ export const ImageCropDialog: React.FC<{
   const [ratioHeight, setRatioHeight] = useState<number>(
     data?.config?.project?.imageCropRatioHeight || 9
   );
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropRect | null>(
-    initialCrop
-  );
+  const [croppedArea, setCroppedArea] = useState<CropRect | null>(initialCrop);
   const [ratioTouched, setRatioTouched] = useState(false);
+  const [loadStatus, setLoadStatus] = useState<'loading' | 'ready' | 'error'>(
+    'loading'
+  );
 
   const projectRatioWidth = data?.config?.project?.imageCropRatioWidth || 16;
   const projectRatioHeight = data?.config?.project?.imageCropRatioHeight || 9;
@@ -40,6 +45,24 @@ export const ImageCropDialog: React.FC<{
       setRatioHeight(projectRatioHeight);
     }
   }, [projectRatioWidth, projectRatioHeight, ratioTouched]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const probe = new Image();
+    probe.onload = () => {
+      if (!cancelled) setLoadStatus('ready');
+    };
+    probe.onerror = () => {
+      if (!cancelled) setLoadStatus('error');
+    };
+    probe.src = previewUrl;
+
+    return () => {
+      cancelled = true;
+      probe.onload = null;
+      probe.onerror = null;
+    };
+  }, [previewUrl]);
 
   const aspect =
     ratioWidth > 0 && ratioHeight > 0 ? ratioWidth / ratioHeight : 16 / 9;
@@ -96,6 +119,8 @@ export const ImageCropDialog: React.FC<{
     setZoom((prev) => (prev < nextMinZoom ? nextMinZoom : prev));
   }, [cropSize, mediaSize]);
 
+  const hasLoadError = loadStatus === 'error';
+
   return (
     <Dialog
       open
@@ -111,31 +136,38 @@ export const ImageCropDialog: React.FC<{
             background:
               'repeating-conic-gradient(#c8c8c8 0% 25%, #e8e8e8 0% 50%) 0 0 / 16px 16px',
           }}>
-          {cropSize && (
-            <Cropper
-              image={baseUrl}
-              crop={crop}
-              zoom={zoom}
-              aspect={aspect}
-              cropSize={cropSize}
-              minZoom={minZoom}
-              maxZoom={Math.max(3, minZoom * 3)}
-              initialCroppedAreaPixels={initialCrop || undefined}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onMediaLoaded={(media: MediaSize) =>
-                setMediaSize({ width: media.width, height: media.height })
-              }
-              onCropComplete={(
-                croppedArea: Area,
-                croppedAreaInPixels: Area
-              ) => {
-                const { x, y, width, height } = croppedAreaInPixels;
-                if ([x, y, width, height].every(Number.isFinite)) {
-                  setCroppedAreaPixels(croppedAreaInPixels);
+          {hasLoadError ? (
+            <p
+              className="absolute inset-0 flex items-center justify-center p-4 text-center text-sm"
+              role="alert">
+              Deze afbeelding kan niet worden weergegeven en kan daarom niet
+              worden bijgesneden.
+            </p>
+          ) : (
+            cropSize &&
+            loadStatus === 'ready' && (
+              <Cropper
+                image={previewUrl}
+                crop={crop}
+                zoom={zoom}
+                aspect={aspect}
+                cropSize={cropSize}
+                minZoom={minZoom}
+                maxZoom={Math.max(3, minZoom * 3)}
+                initialCroppedAreaPercentages={initialCrop || undefined}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onMediaLoaded={(media: MediaSize) =>
+                  setMediaSize({ width: media.width, height: media.height })
                 }
-              }}
-            />
+                onCropComplete={(croppedAreaPercentages: Area) => {
+                  const { x, y, width, height } = croppedAreaPercentages;
+                  if ([x, y, width, height].every(Number.isFinite)) {
+                    setCroppedArea(croppedAreaPercentages);
+                  }
+                }}
+              />
+            )
           )}
         </div>
         <div className="flex items-end gap-2">
@@ -170,7 +202,7 @@ export const ImageCropDialog: React.FC<{
           </label>
         </div>
         <DialogFooter>
-          {initialCrop && (
+          {hasCrop && (
             <Button
               type="button"
               variant="secondary"
@@ -183,10 +215,9 @@ export const ImageCropDialog: React.FC<{
           </Button>
           <Button
             type="button"
-            disabled={!croppedAreaPixels}
+            disabled={!croppedArea || hasLoadError}
             onClick={() =>
-              croppedAreaPixels &&
-              onSave(buildImageCropUrl(imageUrl, croppedAreaPixels))
+              croppedArea && onSave(buildImageCropUrl(imageUrl, croppedArea))
             }>
             Opslaan
           </Button>

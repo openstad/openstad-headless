@@ -31,3 +31,15 @@
   justify-content: flex-end;
   gap: 8px;
 }
+
+.image-crop-dialog-message {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  block-size: 100%;
+  overflow-y: auto;
+  margin: 0;
+  padding: 16px;
+  text-align: center;
+}

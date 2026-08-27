@@ -28,6 +28,7 @@ import {
   defaultAddressSearchTexts,
   renderFoundAddressText,
 } from '@openstad-headless/lib/address-search-texts';
+import { buildImagePreviewUrl } from '@openstad-headless/lib/image-crop/crop-url';
 import {
   ArrowDown,
   ArrowLeft,
@@ -55,6 +56,8 @@ const TrixEditor = dynamic(
     ),
   { ssr: false }
 );
+
+const THUMB_MAX_SIZE = 480;
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -674,8 +677,8 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                         }}>
                         <div className="image-container">
                           <img
-                            src={url}
-                            alt={url}
+                            src={buildImagePreviewUrl(url, THUMB_MAX_SIZE)}
+                            alt={`Afbeelding ${index + 1}`}
                             onClick={() => {
                               if (index === imageIndexOpen) {
                                 setImageIndexOpen(-1);
