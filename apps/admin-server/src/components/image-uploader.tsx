@@ -1,6 +1,9 @@
 import { UploadDocument } from '@/hooks/upload-document';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
-import { parseImageCropUrl } from '@openstad-headless/lib/image-crop/crop-url';
+import {
+  buildImagePreviewUrl,
+  parseImageCropUrl,
+} from '@openstad-headless/lib/image-crop/crop-url';
 import React, { useEffect, useState } from 'react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 
@@ -15,6 +18,8 @@ import {
   FormMessage,
 } from './ui/form';
 import { Input } from './ui/input';
+
+const THUMB_MAX_SIZE = 480;
 
 export const ImageUploader: React.FC<{
   form: UseFormReturn<any>;
@@ -41,7 +46,7 @@ export const ImageUploader: React.FC<{
 
   const currentValue = form.watch(fieldName);
   const hasImage = typeof currentValue === 'string' && currentValue.length > 0;
-  const currentCrop = hasImage ? parseImageCropUrl(currentValue).crop : null;
+  const hasCrop = hasImage ? parseImageCropUrl(currentValue).hasCrop : false;
 
   function prepareFile(image: any) {
     const formData = new FormData();
@@ -120,7 +125,7 @@ export const ImageUploader: React.FC<{
           {hasImage && (
             <div className="flex items-center gap-2 mt-2">
               <img
-                src={currentValue}
+                src={buildImagePreviewUrl(currentValue, THUMB_MAX_SIZE)}
                 alt=""
                 className="h-12 w-16 object-cover rounded"
               />
@@ -128,7 +133,7 @@ export const ImageUploader: React.FC<{
                 type="button"
                 variant="secondary"
                 onClick={() => setCropOpen(true)}>
-                {currentCrop ? 'Bijsnijden aanpassen' : 'Bijsnijden'}
+                {hasCrop ? 'Bijsnijden aanpassen' : 'Bijsnijden'}
               </Button>
             </div>
           )}

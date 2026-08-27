@@ -359,16 +359,20 @@ app.get('/image/*', rateLimiter(), async function (req, res, next) {
     req.url = req.url.replace('/image', '');
 
     const unsafePath = req.url.replace(/^\//, '');
-    const baseName = path.basename(unsafePath);
-    if (baseName === unsafePath) {
+    const stepsIndex = unsafePath.indexOf('/:/');
+    const fileNamePart =
+      stepsIndex === -1 ? unsafePath : unsafePath.slice(0, stepsIndex);
+    const steps = stepsIndex === -1 ? '' : unsafePath.slice(stepsIndex);
+
+    if (path.basename(fileNamePart) === fileNamePart) {
       const imagesDir = process.env.IMAGES_DIR || 'images/';
-      const resolvedPath = path.resolve(imagesDir, baseName);
+      const resolvedPath = path.resolve(imagesDir, fileNamePart);
       if (!fs.existsSync(resolvedPath)) {
-        const altName = swapLastDotUnderscore(baseName);
+        const altName = swapLastDotUnderscore(fileNamePart);
         if (altName) {
           const altPath = path.resolve(imagesDir, altName);
           if (fs.existsSync(altPath)) {
-            req.url = `/${altName}`;
+            req.url = `/${altName}${steps}`;
           }
         }
       }

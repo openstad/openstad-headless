@@ -4,6 +4,7 @@ import NotificationProvider from '@openstad-headless/lib/NotificationProvider/no
 import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
 import {
   buildImageCropUrl,
+  buildImagePreviewUrl,
   parseImageCropUrl,
 } from '@openstad-headless/lib/image-crop/crop-url';
 import {
@@ -41,6 +42,8 @@ registerPlugin(
 
 const sanitizeFileName = (fileName: string) =>
   fileName.replace(/[^a-z0-9_\-]/gi, '_').replace(/_+/g, '_');
+
+const THUMB_MAX_SIZE = 480;
 
 const filePondSettings = {
   labelIdle: 'Upload hier uw bestand(en)',
@@ -256,6 +259,14 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     setUploadedImages((prev) => prev.filter((image, i) => i !== index));
   };
 
+  const discardCropTarget = () => {
+    if (cropTarget && cropTarget.kind === 'uploaded') {
+      removeUploadedImage(cropTarget.index);
+    }
+    setCropQueue([]);
+    cropOpenerRef.current = null;
+  };
+
   const closeCropDialog = (hadCrop: boolean) => {
     if (
       cropTarget &&
@@ -263,12 +274,24 @@ const ImageUploadField: FC<ImageUploadProps> = ({
       imageCropRequired &&
       !hadCrop
     ) {
-      removeUploadedImage(cropTarget.index);
+      discardCropTarget();
       notifyFailed(
         'Bijsnijden is verplicht voor deze afbeelding. De upload is verwijderd.'
       );
-      setCropQueue([]);
-      cropOpenerRef.current = null;
+      return;
+    }
+    advanceCropQueue();
+  };
+
+  /**
+   * The cropper cannot produce a crop for an image it is unable to display, so
+   * with cropping required the upload can never satisfy validation. Drop it so
+   * the field is free for another file instead of leaving a dialog whose only
+   * enabled action is cancel. The dialog states this, so no extra notification.
+   */
+  const handleCropLoadError = () => {
+    if (imageCropRequired) {
+      discardCropTarget();
       return;
     }
     advanceCropQueue();
@@ -510,13 +533,13 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                   index,
                 })),
               ].map((entry) => {
-                const { baseUrl, crop } = parseImageCropUrl(entry.url);
+                const { baseUrl, hasCrop } = parseImageCropUrl(entry.url);
                 return (
                   <div
                     className="image-crop-list-row"
                     key={`${entry.kind}-${entry.url}`}>
                     <img
-                      src={entry.url}
+                      src={buildImagePreviewUrl(entry.url, THUMB_MAX_SIZE)}
                       alt=""
                       className="image-crop-list-thumb"
                       style={{
@@ -534,9 +557,9 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                           { kind: entry.kind, index: entry.index },
                         ]);
                       }}>
-                      {crop ? 'Bijsnijden aanpassen' : 'Bijsnijden'}
+                      {hasCrop ? 'Bijsnijden aanpassen' : 'Bijsnijden'}
                     </SecondaryButton>
-                    {crop && !imageCropRequired && (
+                    {hasCrop && !imageCropRequired && (
                       <SecondaryButton
                         type="button"
                         aria-label={`Herstel origineel van ${entry.name}`}
@@ -558,7 +581,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                 ? uploadedImages[cropTarget.index]?.url
                 : mockImages[cropTarget.index]?.source;
             if (!targetUrl) return null;
-            const { crop } = parseImageCropUrl(targetUrl);
+            const { crop, hasCrop } = parseImageCropUrl(targetUrl);
             return (
               <ImageCropDialog
                 key={`${cropTarget.kind}-${cropTarget.index}`}
@@ -574,7 +597,8 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                   );
                   advanceCropQueue();
                 }}
-                onCancel={() => closeCropDialog(!!crop)}
+                onCancel={() => closeCropDialog(hasCrop)}
+                onLoadError={handleCropLoadError}
               />
             );
           })()}

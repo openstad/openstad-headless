@@ -1,5 +1,6 @@
 import {
   CropRect,
+  buildImagePreviewUrl,
   parseImageCropUrl,
 } from '@openstad-headless/lib/image-crop/crop-url';
 import React, { FC, useEffect, useRef, useState } from 'react';
@@ -8,6 +9,8 @@ import Cropper, { Area, MediaSize } from 'react-easy-crop';
 import { Button, SecondaryButton } from '../../button';
 import './image-crop-dialog.css';
 
+const PREVIEW_MAX_SIZE = 1600;
+
 export type ImageCropDialogProps = {
   imageUrl: string;
   ratioWidth: number;
@@ -15,6 +18,7 @@ export type ImageCropDialogProps = {
   initialCrop?: CropRect | null;
   onConfirm: (crop: CropRect) => void;
   onCancel: () => void;
+  onLoadError: () => void;
 };
 
 const ImageCropDialog: FC<ImageCropDialogProps> = ({
@@ -24,12 +28,15 @@ const ImageCropDialog: FC<ImageCropDialogProps> = ({
   initialCrop = null,
   onConfirm,
   onCancel,
+  onLoadError,
 }) => {
   const { baseUrl } = parseImageCropUrl(imageUrl);
+  const previewUrl = buildImagePreviewUrl(baseUrl, PREVIEW_MAX_SIZE);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<CropRect | null>(
-    initialCrop
+  const [croppedArea, setCroppedArea] = useState<CropRect | null>(initialCrop);
+  const [loadStatus, setLoadStatus] = useState<'loading' | 'ready' | 'error'>(
+    'loading'
   );
   const dialogRef = useRef<HTMLDivElement>(null);
   const [cropperEl, setCropperEl] = useState<HTMLDivElement | null>(null);
@@ -46,6 +53,24 @@ const ImageCropDialog: FC<ImageCropDialogProps> = ({
   useEffect(() => {
     dialogRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const probe = new Image();
+    probe.onload = () => {
+      if (!cancelled) setLoadStatus('ready');
+    };
+    probe.onerror = () => {
+      if (!cancelled) setLoadStatus('error');
+    };
+    probe.src = previewUrl;
+
+    return () => {
+      cancelled = true;
+      probe.onload = null;
+      probe.onerror = null;
+    };
+  }, [previewUrl]);
 
   const aspect = ratioWidth / ratioHeight;
 
@@ -73,6 +98,8 @@ const ImageCropDialog: FC<ImageCropDialogProps> = ({
     setZoom((prev) => (prev < nextMinZoom ? nextMinZoom : prev));
   }, [cropSize, mediaSize]);
 
+  const hasLoadError = loadStatus === 'error';
+
   return (
     <div className="image-crop-dialog-overlay">
       <div
@@ -84,7 +111,11 @@ const ImageCropDialog: FC<ImageCropDialogProps> = ({
         ref={dialogRef}
         onKeyDown={(event) => {
           if (event.key === 'Escape') {
-            onCancel();
+            if (hasLoadError) {
+              onLoadError();
+            } else {
+              onCancel();
+            }
             return;
           }
           if (event.key !== 'Tab') return;
@@ -108,43 +139,56 @@ const ImageCropDialog: FC<ImageCropDialogProps> = ({
           }
         }}>
         <div className="image-crop-dialog-cropper" ref={setCropperEl}>
-          {cropSize && (
-            <Cropper
-              image={baseUrl}
-              crop={crop}
-              zoom={zoom}
-              aspect={aspect}
-              cropSize={cropSize}
-              minZoom={minZoom}
-              maxZoom={Math.max(3, minZoom * 3)}
-              initialCroppedAreaPixels={initialCrop || undefined}
-              onCropChange={setCrop}
-              onZoomChange={setZoom}
-              onMediaLoaded={(media: MediaSize) =>
-                setMediaSize({ width: media.width, height: media.height })
-              }
-              onCropComplete={(
-                croppedArea: Area,
-                croppedAreaInPixels: Area
-              ) => {
-                const { x, y, width, height } = croppedAreaInPixels;
-                if ([x, y, width, height].every(Number.isFinite)) {
-                  setCroppedAreaPixels(croppedAreaInPixels);
+          {hasLoadError ? (
+            <p className="image-crop-dialog-message" role="alert">
+              Deze afbeelding kan niet worden weergegeven en is daarom niet
+              toegevoegd. Probeer een ander bestand.
+            </p>
+          ) : (
+            cropSize &&
+            loadStatus === 'ready' && (
+              <Cropper
+                image={previewUrl}
+                crop={crop}
+                zoom={zoom}
+                aspect={aspect}
+                cropSize={cropSize}
+                minZoom={minZoom}
+                maxZoom={Math.max(3, minZoom * 3)}
+                initialCroppedAreaPercentages={initialCrop || undefined}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onMediaLoaded={(media: MediaSize) =>
+                  setMediaSize({ width: media.width, height: media.height })
                 }
-              }}
-            />
+                onCropComplete={(croppedAreaPercentages: Area) => {
+                  const { x, y, width, height } = croppedAreaPercentages;
+                  if ([x, y, width, height].every(Number.isFinite)) {
+                    setCroppedArea(croppedAreaPercentages);
+                  }
+                }}
+              />
+            )
           )}
         </div>
         <div className="image-crop-dialog-actions">
-          <SecondaryButton type="button" onClick={onCancel}>
-            Annuleren
-          </SecondaryButton>
-          <Button
-            type="button"
-            disabled={!croppedAreaPixels}
-            onClick={() => croppedAreaPixels && onConfirm(croppedAreaPixels)}>
-            Opslaan
-          </Button>
+          {hasLoadError ? (
+            <Button type="button" onClick={onLoadError}>
+              Sluiten
+            </Button>
+          ) : (
+            <>
+              <SecondaryButton type="button" onClick={onCancel}>
+                Annuleren
+              </SecondaryButton>
+              <Button
+                type="button"
+                disabled={!croppedArea}
+                onClick={() => croppedArea && onConfirm(croppedArea)}>
+                Opslaan
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>
