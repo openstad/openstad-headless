@@ -129,6 +129,16 @@ const formSchema = z.object({
     (val) => (val === '' || val === null ? undefined : val),
     z.coerce.number().positive().optional()
   ),
+  imageCropEnabled: z.boolean().optional(),
+  imageCropRequired: z.boolean().optional(),
+  imageCropRatioWidth: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number().int().positive().optional()
+  ),
+  imageCropRatioHeight: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number().int().positive().optional()
+  ),
   randomizeItems: z.boolean().optional(),
   randomizeQuestions: z.boolean().optional(),
   image: z.string().optional(),
@@ -371,6 +381,10 @@ export default function WidgetEnqueteItems(
             options: values.options || [],
             multiple: values.multiple || false,
             maxUploadSizeMB: values.maxUploadSizeMB || 25,
+            imageCropEnabled: values.imageCropEnabled || false,
+            imageCropRequired: values.imageCropRequired || false,
+            imageCropRatioWidth: values.imageCropRatioWidth,
+            imageCropRatioHeight: values.imageCropRatioHeight,
             randomizeItems: values.randomizeItems || false,
             randomizeQuestions: values.randomizeQuestions || false,
             image_b: values.image_b || '',
@@ -559,6 +573,10 @@ export default function WidgetEnqueteItems(
     options: [],
     multiple: false,
     maxUploadSizeMB: 25,
+    imageCropEnabled: false,
+    imageCropRequired: false,
+    imageCropRatioWidth: undefined,
+    imageCropRatioHeight: undefined,
     randomizeItems: false,
     randomizeQuestions: false,
     infoBlockStyle: 'default',
@@ -657,6 +675,10 @@ export default function WidgetEnqueteItems(
       options: item.options || [],
       multiple: item.multiple || false,
       maxUploadSizeMB: item.maxUploadSizeMB || 25,
+      imageCropEnabled: item.imageCropEnabled || false,
+      imageCropRequired: item.imageCropRequired || false,
+      imageCropRatioWidth: item.imageCropRatioWidth,
+      imageCropRatioHeight: item.imageCropRatioHeight,
       randomizeItems: item.randomizeItems || false,
       randomizeQuestions: item.randomizeQuestions || false,
       infoBlockStyle: item.infoBlockStyle || 'default',
@@ -2694,6 +2716,65 @@ export default function WidgetEnqueteItems(
                         )}
                       />
                     )}
+
+                    {form.watch('questionType') === 'imageUpload' && (
+                      <FormField
+                        control={form.control}
+                        name="imageCropEnabled"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Mag de gebruiker de afbeelding bijsnijden?
+                            </FormLabel>
+                            <Select
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
+                              value={field.value ? 'true' : 'false'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="true">Ja</SelectItem>
+                                <SelectItem value="false">Nee</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {form.watch('questionType') === 'imageUpload' &&
+                      form.watch('imageCropEnabled') && (
+                        <FormField
+                          control={form.control}
+                          name="imageCropRequired"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Is bijsnijden verplicht?</FormLabel>
+                              <Select
+                                onValueChange={(e: string) =>
+                                  field.onChange(e === 'true')
+                                }
+                                value={field.value ? 'true' : 'false'}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
 
                     {![
                       'pagination',

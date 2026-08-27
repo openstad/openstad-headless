@@ -5,6 +5,8 @@ export type ProjectSettingProps = {
     endDateNotificationSent: boolean;
     projectHasEnded: boolean;
     areaId: string;
+    imageCropRatioWidth: number;
+    imageCropRatioHeight: number;
   };
   anonymize: {
     anonymizeUsersXDaysAfterEndDate: number;

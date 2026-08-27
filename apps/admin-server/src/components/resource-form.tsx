@@ -1,3 +1,4 @@
+import { ImageCropDialog } from '@/components/image-crop-dialog';
 import ImageGalleryStyle from '@/components/image-gallery-style';
 import MapInput from '@/components/maps/leaflet-input';
 import { MapErrorBoundary } from '@/components/maps/map-error-boundary';
@@ -32,6 +33,7 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUp,
+  Crop,
   Plus,
   X,
 } from 'lucide-react';
@@ -414,10 +416,13 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     fields: imageFields,
     remove: removeImage,
     swap: swapImage,
+    update: updateImage,
   } = useFieldArray({
     control: form.control,
     name: 'images',
   });
+
+  const [cropImageIndex, setCropImageIndex] = useState(-1);
 
   const { fields: documentFields, remove: removeFile } = useFieldArray({
     control: form.control,
@@ -688,6 +693,15 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                           className="absolute left-0 top-0">
                           <X size={24} />
                         </Button>
+                        <Button
+                          type="button"
+                          aria-label="Afbeelding bijsnijden"
+                          onClick={() => {
+                            setCropImageIndex(index);
+                          }}
+                          className="absolute right-0 top-0 z-10">
+                          <Crop size={24} />
+                        </Button>
 
                         <div
                           className="grid gap-y-4 items-center"
@@ -733,6 +747,19 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                   })}
                 </section>
               </div>
+            )}
+            {cropImageIndex >= 0 && imageFields[cropImageIndex] && (
+              <ImageCropDialog
+                imageUrl={imageFields[cropImageIndex].url}
+                onClose={() => setCropImageIndex(-1)}
+                onSave={(url) => {
+                  updateImage(cropImageIndex, {
+                    ...form.getValues(`images.${cropImageIndex}`),
+                    url,
+                  });
+                  setCropImageIndex(-1);
+                }}
+              />
             )}
           </div>
 
