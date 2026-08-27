@@ -180,6 +180,7 @@ export const FIELD_LABELS: Record<string, string> = {
 const QUESTION_TYPES: Record<string, string> = {
   open: 'Open vraag',
   multiplechoice: 'Enkele keuze',
+  dropdown: 'Enkele keuze (uitklapbaar)',
   multiple: 'Meerkeuze',
   checkbox: 'Meerkeuze',
   radiobox: 'Enkele keuze',

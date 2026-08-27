@@ -907,6 +907,7 @@ export default function WidgetEnqueteItems(
   const hasOptions = () => {
     switch (form.watch('questionType')) {
       case 'multiplechoice':
+      case 'dropdown':
       case 'swipe':
       case 'dilemma':
       case 'multiple':
@@ -922,6 +923,7 @@ export default function WidgetEnqueteItems(
   const hasList = () => {
     switch (form.watch('questionType')) {
       case 'multiplechoice':
+      case 'dropdown':
       case 'multiple':
       case 'swipe':
       case 'dilemma':
@@ -2064,6 +2066,9 @@ export default function WidgetEnqueteItems(
                               </SelectItem>
                               <SelectItem value="multiplechoice">
                                 Enkele keuze
+                              </SelectItem>
+                              <SelectItem value="dropdown">
+                                Enkele keuze (uitklapbaar)
                               </SelectItem>
                               <SelectItem value="open">Open vraag</SelectItem>
                               <SelectItem value="multiple">
@@ -3382,6 +3387,7 @@ export default function WidgetEnqueteItems(
                                   f.questionType === 'multiple' ||
                                   f.questionType === 'images' ||
                                   f.questionType === 'select' ||
+                                  f.questionType === 'dropdown' ||
                                   f.questionType === 'scale') &&
                                 f.trigger !== form.watch('trigger')
                             );
