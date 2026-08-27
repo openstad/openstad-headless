@@ -45,6 +45,39 @@ const sanitizeFileName = (fileName: string) =>
 
 const THUMB_MAX_SIZE = 480;
 
+const getFileExtension = (fileName: string) =>
+  fileName.includes('.') ? fileName.split('.').pop()!.toLowerCase() : '';
+
+const MIME_BY_EXTENSION: Record<string, string> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  gif: 'image/gif',
+  bmp: 'image/bmp',
+  webp: 'image/webp',
+  tif: 'image/tiff',
+  tiff: 'image/tiff',
+  heic: 'image/heic',
+  heif: 'image/heif',
+};
+
+const UNKNOWN_TYPE = 'application/octet-stream';
+
+/**
+ * Browsers report the type of a picked file inconsistently: HEIC arrives as
+ * `image/heic`, as an empty string, or not at all depending on whether it came
+ * from the file picker or a drop, which made the accepted-types check pass on
+ * some attempts and fail on others. Resolving an empty type from the extension
+ * removes that inconsistency. The image server converts HEIC to JPEG on upload.
+ */
+const detectFileType = (source: File, type: string): Promise<string> =>
+  new Promise((resolve) => {
+    if (type) {
+      return resolve(type);
+    }
+    resolve(MIME_BY_EXTENSION[getFileExtension(source.name)] || UNKNOWN_TYPE);
+  });
+
 const filePondSettings = {
   labelIdle: 'Upload hier uw bestand(en)',
   labelInvalidField: 'Veld bevat ongeldige bestanden',
@@ -498,6 +531,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
               ? [acceptAttribute]
               : acceptAttribute
           }
+          fileValidateTypeDetectType={detectFileType}
           beforeAddFile={(fileItem) => {
             return new Promise<boolean>((resolve, reject) => {
               if (fileItem.file.size > maxBytes) {

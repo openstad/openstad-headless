@@ -83,7 +83,9 @@ export const ImageUploader: React.FC<{
       response = await uploadCall.json();
     }
 
-    setFile(response);
+    if (response && response.url) {
+      setFile(response);
+    }
   }
 
   useEffect(() => {
