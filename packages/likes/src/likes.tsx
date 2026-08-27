@@ -91,9 +91,20 @@ function Likes({
     type: 'yes' | 'no';
     label: string;
     icon: 'ri-thumb-up-line' | 'ri-thumb-down-line';
+    filledIcon: 'ri-thumb-up-fill' | 'ri-thumb-down-fill';
   }> = [
-    { type: 'yes', label: yesLabel, icon: 'ri-thumb-up-line' },
-    { type: 'no', label: noLabel, icon: 'ri-thumb-down-line' },
+    {
+      type: 'yes',
+      label: yesLabel,
+      icon: 'ri-thumb-up-line',
+      filledIcon: 'ri-thumb-up-fill',
+    },
+    {
+      type: 'no',
+      label: noLabel,
+      icon: 'ri-thumb-down-line',
+      filledIcon: 'ri-thumb-down-fill',
+    },
   ];
 
   if (!displayDislike) {
@@ -197,11 +208,16 @@ function Likes({
                 }`}
                 disabled={disabled}>
                 <section className="like-kind">
-                  <i className={likeVariant.icon}></i>
+                  <i
+                    className={
+                      resource?.userVote?.opinion === likeVariant.type
+                        ? likeVariant.filledIcon
+                        : likeVariant.icon
+                    }></i>
                   {variant === 'small' ? null : likeVariant.label}
                 </section>
 
-                {!hideCounters ? (
+                {!hideCounters && props.votes?.isViewable ? (
                   <section className="like-counter">
                     {resource[likeVariant.type] &&
                     resource[likeVariant.type] < 10
@@ -214,7 +230,9 @@ function Likes({
             ))}
           </div>
 
-          {props?.resources?.minimumYesVotes && showProgressBar ? (
+          {props?.resources?.minimumYesVotes &&
+          showProgressBar &&
+          props.votes?.isViewable ? (
             <div className="progressbar-container">
               <ProgressBar progress={(resource.yes / necessaryVotes) * 100} />
               <Paragraph className="progressbar-counter">
@@ -269,7 +287,7 @@ function Likes({
                     <span className="sr-only">{likeVariant.label}</span>
                   </section>
                 </Button>
-                {!hideCounters && index === 0 ? (
+                {!hideCounters && props.votes?.isViewable && index === 0 ? (
                   <section className="like-counter">
                     <span className="sr-only">Score</span>{' '}
                     {resource['netVotes'] ? resource['netVotes'] : '0'}

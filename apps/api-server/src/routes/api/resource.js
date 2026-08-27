@@ -45,6 +45,15 @@ function getResourceFormExtraDataConfig(widgetConfig) {
   };
 }
 
+function stripHiddenVoteScore(resources, canIncludeVoteCount) {
+  if (canIncludeVoteCount) return;
+
+  const records = Array.isArray(resources) ? resources : [resources];
+  records.filter(Boolean).forEach((resource) => {
+    resource.score = undefined;
+  });
+}
+
 async function attachModeratorOnlyExtraDataKeys(resources) {
   const records = Array.isArray(resources) ? resources : [resources];
   const activeRecords = records.filter(Boolean);
@@ -146,15 +155,7 @@ router.all('*', function (req, res, next) {
       });
     }
 
-    if (
-      req.query.includeUserVote &&
-      req.project &&
-      req.project.config &&
-      req.project.config.votes &&
-      req.project.config.votes.isViewable &&
-      req.user &&
-      req.user.id
-    ) {
+    if (req.query.includeUserVote && req.user && req.user.id) {
       // ik denk dat je daar niet het hele object wilt?
       req.scope.push({ method: ['includeUserVote', req.user.id] });
     }
@@ -404,6 +405,7 @@ router
           if (req.query.includePoll && resource.poll)
             resource.poll.countVotes(!req.query.includeVotes);
         });
+        stripHiddenVoteScore(result.rows, req.canIncludeVoteCount);
         await attachModeratorOnlyExtraDataKeys(result.rows);
         const { rows } = result;
         req.results = rows;
@@ -756,6 +758,7 @@ router
           return next(createError(404, 'Resource not found'));
         }
         found.project = req.project;
+        stripHiddenVoteScore(found, req.canIncludeVoteCount);
         await attachModeratorOnlyExtraDataKeys(found);
         if (req.query.includePoll) {
           // TODO: naar poll hooks
@@ -898,6 +901,7 @@ router
             if (found.poll) found.poll.countVotes(!req.query.includeVotes);
           }
           found.project = req.project;
+          stripHiddenVoteScore(found, req.canIncludeVoteCount);
           await attachModeratorOnlyExtraDataKeys(found);
           req.results = found;
           next();
@@ -947,6 +951,7 @@ router
             if (found.poll) found.poll.countVotes(!req.query.includeVotes);
           }
           found.project = req.project;
+          stripHiddenVoteScore(found, req.canIncludeVoteCount);
           await attachModeratorOnlyExtraDataKeys(found);
           req.results = found;
           next();

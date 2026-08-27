@@ -42,6 +42,7 @@ export type GridderResourceDetailProps = BaseProps &
     displayTags?: boolean;
     displayBudget?: boolean;
     dialogTagGroups?: string[];
+    refreshResourceLikes?: () => void;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
