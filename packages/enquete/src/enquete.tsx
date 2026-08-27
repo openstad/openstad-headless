@@ -34,6 +34,20 @@ import hasRole from '../../lib/has-role';
 import RteContent from '../../ui/src/rte-formatting/rte-content';
 import './enquete.scss';
 import { buildQuestionIdMap, resolveQuestionId } from './gtm-helpers';
+import {
+  buildRandomizePerPage,
+  clearOrderSeed,
+  getOrderSeed,
+  getOrderStorageKey,
+  randomizeFieldsPerPage,
+} from './randomize-questions';
+import {
+  buildCustomScaleFieldOptions,
+  buildScaleChoices,
+  getScaleDefaultStep,
+  getScaleDisplay,
+  getScaleStepCount,
+} from './scale-steps';
 import { EnquetePropsType } from './types/';
 
 // Helper types and functions for draft persistence
@@ -281,6 +295,16 @@ function Enquete(props: EnqueteWidgetProps) {
         latestFieldStateRef.current = undefined;
       }
 
+      if (typeof window !== 'undefined') {
+        clearOrderSeed(
+          getOrderStorageKey(
+            props.projectId,
+            props.widgetId,
+            window.location.pathname
+          )
+        );
+      }
+
       if (props.afterSubmitUrl) {
         location.href = props.afterSubmitUrl.replace('[id]', result.id);
       } else {
@@ -463,40 +487,48 @@ function Enquete(props: EnqueteWidgetProps) {
           break;
         case 'scale': {
           fieldData['type'] = 'tickmark-slider';
-          fieldData['showSmileys'] = item.showSmileys;
+          const scaleDisplay = getScaleDisplay(item);
+          const stepCount = getScaleStepCount(item);
+          fieldData['showSmileys'] = scaleDisplay === 'smileys';
+          fieldData['clickableSteps'] = scaleDisplay === 'custom';
 
-          const labelOptions = [
-            <Icon icon="ri-emotion-unhappy-line" key={1} />,
-            <Icon icon="ri-emotion-sad-line" key={2} />,
-            <Icon icon="ri-emotion-normal-line" key={3} />,
-            <Icon icon="ri-emotion-happy-line" key={4} />,
-            <Icon icon="ri-emotion-laugh-line" key={5} />,
-          ];
+          if (scaleDisplay === 'smileys') {
+            const labelOptions = [
+              <Icon icon="ri-emotion-unhappy-line" key={1} />,
+              <Icon icon="ri-emotion-sad-line" key={2} />,
+              <Icon icon="ri-emotion-normal-line" key={3} />,
+              <Icon icon="ri-emotion-happy-line" key={4} />,
+              <Icon icon="ri-emotion-laugh-line" key={5} />,
+            ];
 
-          if (props.formStyle === 'youth') {
-            labelOptions[0] = <span key={1}>😡</span>;
-            labelOptions[1] = <span key={2}>🙁</span>;
-            labelOptions[2] = <span key={3}>😐</span>;
-            labelOptions[3] = <span key={4}>😀</span>;
-            labelOptions[4] = <span key={5}>😍</span>;
+            if (props.formStyle === 'youth') {
+              labelOptions[0] = <span key={1}>😡</span>;
+              labelOptions[1] = <span key={2}>🙁</span>;
+              labelOptions[2] = <span key={3}>😐</span>;
+              labelOptions[3] = <span key={4}>😀</span>;
+              labelOptions[4] = <span key={5}>😍</span>;
+            }
+
+            fieldData['fieldOptions'] = labelOptions.map((label, index) => ({
+              value: (index + 1).toString(),
+              label,
+            }));
+          } else if (scaleDisplay === 'custom') {
+            fieldData['fieldOptions'] = buildCustomScaleFieldOptions(
+              item.scaleSteps
+            );
+          } else {
+            fieldData['fieldOptions'] = Array.from(
+              { length: stepCount },
+              (_, index) => ({
+                value: (index + 1).toString(),
+                label: (index + 1).toString(),
+              })
+            );
           }
 
-          fieldData['fieldOptions'] = labelOptions.map((label, index) => {
-            const currentValue = index + 1;
-            return {
-              value: currentValue.toString(),
-              label: item.showSmileys ? label : currentValue,
-            };
-          });
-
-          fieldData['choices'] = labelOptions.map((label, index) => {
-            const currentValue = index + 1;
-            return {
-              value: currentValue.toString(),
-              label: currentValue.toString(),
-              trigger: `scale-${currentValue}`,
-            };
-          });
+          fieldData['choices'] = buildScaleChoices(stepCount);
+          fieldData['defaultValue'] = getScaleDefaultStep(item, stepCount);
 
           // TickmarkSlider uses overrideDefaultValue (string) for its initial value
           if (
@@ -533,6 +565,7 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['prevPageText'] = item?.prevPageText || '1';
           fieldData['nextPageText'] = item?.nextPageText || '2';
           fieldData['stepName'] = item?.stepName || '';
+          fieldData['randomizeQuestions'] = item?.randomizeQuestions || false;
           break;
         case 'sort':
           fieldData['options'] = item?.options || [];
@@ -652,6 +685,29 @@ function Enquete(props: EnqueteWidgetProps) {
     ...paginationFieldPositions,
     formFields.length,
   ];
+
+  const [orderSeed] = useState<number>(() =>
+    getOrderSeed(
+      getOrderStorageKey(
+        props.projectId,
+        props.widgetId,
+        typeof window !== 'undefined' ? window.location.pathname : ''
+      )
+    )
+  );
+
+  const randomizePerPage = buildRandomizePerPage({
+    fields: formFields,
+    paginationPositions: paginationFieldPositions,
+  });
+
+  const orderedFormFields = randomizeFieldsPerPage({
+    fields: formFields,
+    startPositions: pageFieldStartPositions,
+    endPositions: pageFieldEndPositions,
+    randomizePerPage,
+    seed: orderSeed,
+  });
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -907,7 +963,7 @@ function Enquete(props: EnqueteWidgetProps) {
           {draftChecked && (
             <Form
               {...props}
-              fields={formFields}
+              fields={orderedFormFields}
               formStyle={props.formStyle || 'default'}
               getValuesOnChange={handleValuesChange}
               submitDisabled={

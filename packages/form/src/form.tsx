@@ -96,9 +96,14 @@ function Form({
         field.type === 'map' ? {} : initialFormValues[fieldKey];
 
       if (field.type === 'tickmark-slider') {
-        initialFormValues[fieldKey] = Math.ceil(
-          (field?.fieldOptions?.length || 2) / 2
-        ).toString();
+        const stepCount = field?.fieldOptions?.length || 2;
+        const configuredDefault = Number(field.defaultValue);
+        initialFormValues[fieldKey] =
+          Number.isInteger(configuredDefault) &&
+          configuredDefault >= 1 &&
+          configuredDefault <= stepCount
+            ? String(configuredDefault)
+            : Math.ceil(stepCount / 2).toString();
       }
     }
 
