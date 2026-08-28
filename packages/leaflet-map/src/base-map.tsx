@@ -17,6 +17,7 @@ import { MapContainer } from 'react-leaflet/MapContainer';
 // @ts-ignore
 import { useMap, useMapEvents } from 'react-leaflet/hooks';
 
+import { toCssLength } from '../../lib/css-length';
 import { loadWidget } from '../../lib/load-widget';
 import { Area, isPointInArea } from './area';
 import { AutoZoom } from './auto-zoom';
@@ -642,18 +643,16 @@ const BaseMap = ({
     const el = containerWrapperRef.current;
     if (!el) return;
 
-    const unitPattern =
-      /\d+(px|%|vh|vw|em|rem|ex|ch|vmin|vmax|cm|mm|in|pt|pc)$/;
+    const widthValue = toCssLength(width);
+    const heightValue = toCssLength(height);
 
-    if (width) {
-      const widthValue = width.match(unitPattern) ? width : `${width}px`;
+    if (widthValue) {
       el.style.setProperty('--basemap-map-width', widthValue);
     } else {
       el.style.removeProperty('--basemap-map-width');
     }
 
-    if (height) {
-      const heightValue = height.match(unitPattern) ? height : `${height}px`;
+    if (heightValue) {
       el.style.setProperty('--basemap-map-height', heightValue);
       el.style.setProperty('--basemap-map-aspect-ratio', 'unset');
     } else {
