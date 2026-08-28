@@ -9,7 +9,7 @@ data.piece.title }}{% endblock %} {% block main %}
           <figure>
             <img
               src="{{ apos.attachment.url(data.piece.image, { size: 'full' }) }}"
-              role="presentation" />
+              alt="{{ data.piece.image.title or data.piece.title }}" />
           </figure>
         </div>
       </div>
@@ -17,9 +17,12 @@ data.piece.title }}{% endblock %} {% block main %}
       <div class="col-md-4 col-xs-12">
         <aside class="news-detail-sidebar">
           <div class="publication-date">
-            <h2 class="utrecht-heading-4">Gepubliceerd op</h2>
+            <p class="utrecht-heading-4 share-links__label">Gepubliceerd op</p>
             <p class="utrecht-paragraph">
-              {{ data.piece.publishedAt | date('D MMMM YYYY') }}
+              <time
+                datetime="{{ data.piece.publishedAt | date('YYYY-MM-DD') }}">
+                {{ data.piece.publishedAt | date('D MMMM YYYY') }}
+              </time>
             </p>
           </div>
 
@@ -38,5 +41,27 @@ data.piece.title }}{% endblock %} {% block main %}
     </div>
   </div>
 </div>
+
+<script>
+  (function () {
+    var button = document.querySelector('[data-copy-link]');
+    var statusEl = document.querySelector('[data-copy-status]');
+    if (!button || !navigator.clipboard) return;
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(window.location.href).then(function () {
+        button.classList.add('is-copied');
+        if (statusEl) {
+          statusEl.textContent = 'Link gekopieerd';
+        }
+        setTimeout(function () {
+          button.classList.remove('is-copied');
+          if (statusEl) {
+            statusEl.textContent = '';
+          }
+        }, 2000);
+      });
+    });
+  })();
+</script>
 
 {% endblock %}

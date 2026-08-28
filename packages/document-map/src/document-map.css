@@ -1,3 +1,12 @@
+/* De samenvatting was een <h2> en is nu een paragraaf (het is geen kop). De
+   klasse utrecht-heading-4 die daarbij stond deed niets — utrecht-paragraph wint.
+   Dit geeft de samenvatting weer eigen nadruk, zonder kop-semantiek. */
+.osc-summary {
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
 .documentMap--container {
   height: calc(100vh - 193px);
   display: grid;
@@ -313,6 +322,128 @@ a + .url-list:before {
   border-bottom: 1px solid #ccc;
 }
 
+/* ponytail: kaartbediening — kompas (pannen zonder slepen, 2.5.7) + reactie-plaats-knop (keyboard, 2.1.1) */
+.documentMap--container .document-container .osc-map-controls {
+  position: absolute;
+  z-index: 2;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+/* ponytail: zelfde compacte maatvoering als de geografische kaart */
+.documentMap--container .osc-map-compass {
+  display: grid;
+  grid-template-columns: repeat(3, 32px);
+  grid-template-rows: repeat(3, 32px);
+  gap: 1px;
+}
+
+.documentMap--container .osc-map-pan {
+  grid-column: 2;
+  grid-row: 2;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  border: 1px solid #767676;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 92%);
+  color: #1a1a1a;
+  padding: 0;
+}
+
+.documentMap--container .osc-map-pan:hover {
+  background: #f0f0f0;
+}
+
+.documentMap--container .osc-map-pan:focus-visible {
+  outline: 2px solid #1471ef;
+  outline-offset: 2px;
+}
+
+.documentMap--container .osc-map-pan--up {
+  grid-column: 2;
+  grid-row: 1;
+}
+.documentMap--container .osc-map-pan--left {
+  grid-column: 1;
+  grid-row: 2;
+}
+.documentMap--container .osc-map-pan--right {
+  grid-column: 3;
+  grid-row: 2;
+}
+.documentMap--container .osc-map-pan--down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.documentMap--container .osc-map-place-comment {
+  cursor: pointer;
+  border: 1px solid #767676;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 92%);
+  color: #1a1a1a;
+  padding: 0 10px;
+  font-size: 13px;
+  line-height: 1.2;
+  min-height: 32px;
+  white-space: nowrap;
+}
+
+.documentMap--container .osc-map-place-comment:hover {
+  background: #f0f0f0;
+}
+
+.documentMap--container .osc-map-place-comment:focus-visible {
+  outline: 2px solid #1471ef;
+  outline-offset: 2px;
+}
+
+/* centraal kruisje: toont waar "Reactie plaatsen" landt */
+.documentMap--container .osc-map-crosshair {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  width: 28px;
+  height: 28px;
+}
+
+.documentMap--container .osc-map-crosshair::before,
+.documentMap--container .osc-map-crosshair::after {
+  content: '';
+  position: absolute;
+  background: #1a1a1a;
+  box-shadow: 0 0 0 1px #fff;
+}
+
+.documentMap--container .osc-map-crosshair::before {
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  transform: translateX(-50%);
+}
+
+.documentMap--container .osc-map-crosshair::after {
+  top: 50%;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  transform: translateY(-50%);
+}
+
 .modal-overlay[aria-hidden='true'] {
   display: none;
 }
@@ -483,7 +614,7 @@ a + .url-list:before {
   justify-content: space-between;
 }
 
-.documentMap--container #stem-begroot-filter {
+.documentMap--container .osc-filter-section {
   margin-block-end: 1rem;
   width: 100%;
   margin-top: 15px;

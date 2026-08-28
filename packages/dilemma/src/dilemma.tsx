@@ -106,6 +106,8 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   >({});
 
   const [infoDialog, setInfoDialog] = useState<boolean>(false);
+  const [interacted, setInteracted] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [showExplanationDialog, setShowExplanationDialog] =
     useState<boolean>(false);
   // Mount detection + marking whether the next emit is an explanation.
@@ -127,6 +129,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     (option: 'a' | 'b') => {
       if (!currentDilemma) return;
 
+      setInteracted(true);
       const optionToSet = option === selectedOption ? null : option;
       setSelectedOption(optionToSet);
     },
@@ -154,6 +157,8 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     }
 
     setSelectedOption(null);
+    setInteracted(false);
+    setSubmitted(false);
 
     // Find next unanswered dilemma index
     const unanswered = dilemmaCards.filter((d) => !newAnswers[d.id]);
@@ -220,6 +225,8 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     }));
 
     setSelectedOption(null);
+    setInteracted(false);
+    setSubmitted(false);
 
     const futureUnanswered = dilemmaCards.filter(
       (dilemma) => !newDilemmaAnswers[dilemma.id]
@@ -252,7 +259,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     if (!answerToUse && previousAnswers[currentDilemma?.id]) {
       answerToUse = previousAnswers[currentDilemma.id] as 'a' | 'b';
     }
-    if (!answerToUse || !currentDilemma) return;
+    if (!answerToUse || !currentDilemma) {
+      setSubmitted(true);
+      return;
+    }
 
     if (currentDilemma.infofieldExplanation) {
       setShowExplanationDialog(true);
@@ -373,9 +383,6 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     setIsFinished(unanswered.length === 0);
   }, [dilemmas, dilemmaCards, getUnansweredDilemmas]);
 
-  useEffect(() => {
-    console.log('test');
-  }, []);
   if (isFinished || unansweredDilemmas.length === 0) {
     return (
       <div
@@ -409,6 +416,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
                     <div className="dilemma-summary-content">
                       <div className="dilemma-summary-option">
                         <button
+                          type="button"
                           className={`dilemma-summary-btn ${
                             answer === 'a' ? 'active' : ''
                           }`}
@@ -431,6 +439,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
                       <div className="dilemma-summary-option">
                         <button
+                          type="button"
                           className={`dilemma-summary-btn ${
                             answer === 'b' ? 'active' : ''
                           }`}
@@ -480,23 +489,31 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       className={`dilemma-field ${infofieldExplanation ? '--explanation' : ''}`}
       role="region"
       aria-label="Dilemma keuze"
-      aria-invalid={
-        required && !dilemmaAnswers[currentDilemma.id] ? 'true' : 'false'
-      }
       data-required={required}>
       <div className="dilemma-intro">
         <Heading
           level={2}
+          id={`dilemma-titel-${currentDilemma.id}`}
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(title || '') }}
         />
-        <div className="dilemma-progress">
-          <span>
+        <div
+          className="dilemma-progress"
+          role="status"
+          aria-label={`Stap ${currentIndex + 1} van ${dilemmas.length}`}>
+          <span aria-hidden="true">
             {currentIndex + 1} van {dilemmas.length}
           </span>
         </div>
       </div>
 
-      <div className="dilemma-options">
+      {/* ponytail: de twee opties delen al een name en zijn dus één radiogroep —
+          je wisselt ertussen met de pijltjestoetsen, niet met Tab. Alleen was dat
+          nergens aangekondigd: zonder groep hoor je "keuze A" zonder de vraag en
+          zonder "1 van 2". Vandaar de expliciete radiogroup met de vraag als naam. */}
+      <div
+        className="dilemma-options"
+        role="radiogroup"
+        aria-labelledby={`dilemma-titel-${currentDilemma.id}`}>
         <span className="dilemma-label" aria-hidden="true">
           <span>OF</span>
         </span>
@@ -515,6 +532,14 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
             checked={
               selectedOption === 'a' ||
               (!selectedOption && previousAnswers[currentDilemma.id] === 'a')
+            }
+            aria-invalid={
+              required &&
+              submitted &&
+              !selectedOption &&
+              !previousAnswers[currentDilemma.id]
+                ? 'true'
+                : undefined
             }
             onChange={() => handleOptionSelect('a')}
             onClick={() => handleOptionSelect('a')}
@@ -564,6 +589,14 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
               selectedOption === 'b' ||
               (!selectedOption && previousAnswers[currentDilemma.id] === 'b')
             }
+            aria-invalid={
+              required &&
+              submitted &&
+              !selectedOption &&
+              !previousAnswers[currentDilemma.id]
+                ? 'true'
+                : undefined
+            }
             onChange={() => handleOptionSelect('b')}
             onClick={() => handleOptionSelect('b')}
           />
@@ -598,6 +631,15 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         </div>
       </div>
 
+      {required &&
+        submitted &&
+        !selectedOption &&
+        !previousAnswers[currentDilemma.id] && (
+          <p role="alert" className="sr-only">
+            Maak een keuze voordat je verder gaat.
+          </p>
+        )}
+
       <div className="dilemma-actions">
         <button
           className="dilemma-skip-button"
@@ -613,8 +655,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           onClick={(e) => (e.preventDefault(), setInfoDialog(true))}
           type="button"
           disabled={!currentDilemma?.infoField}
-          aria-expanded={infoDialog}>
-          <span>Info</span>
+          aria-expanded={infoDialog}
+          aria-controls="dilemma-info-panel"
+          aria-label="Meer informatie over deze vraag">
+          <span aria-hidden="true">Info</span>
         </button>
 
         <div className="dilemma-navigation-buttons">
@@ -680,7 +724,11 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         </div>
       )}
 
-      <div className="info-card dilemma-info-field" aria-hidden={!infoDialog}>
+      <div
+        id="dilemma-info-panel"
+        className="info-card dilemma-info-field"
+        aria-hidden={!infoDialog ? 'true' : undefined}
+        {...(!infoDialog ? { inert: 'true' as any } : {})}>
         <div className="info-card-container">
           <Paragraph
             dangerouslySetInnerHTML={{

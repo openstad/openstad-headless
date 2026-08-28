@@ -41,7 +41,7 @@ function NavBar({ home, content, prefix = '' }: Item) {
 
   return (
     <div className="container">
-      <nav id="main-menu">
+      <nav id="main-menu" aria-label="Hoofdnavigatie">
         {homeItems.map((item: any, index: number) => {
           return (
             <div key={index} className="item-container">

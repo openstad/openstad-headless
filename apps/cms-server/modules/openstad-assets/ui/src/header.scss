@@ -344,6 +344,16 @@ header:has(.header_navbar-container.--show) ~ #navbar {
   }
 }
 
+// Bij een open mobiel menu moet de fullscreen-overlay boven de sticky
+// .status-banner (z-index:99) uitkomen. De overlay is z-index:99 maar zit
+// gevangen in de stacking-context van <header> (z-index:11), dus de banner (99
+// op root-niveau) overlapt anders de sluitknop — zichtbaar bij 400% zoom
+// (1.4.10). Til daarom de hele header boven de banner zodra het menu open is.
+// ponytail: alleen in open-state; gesloten blijft header 11 en banner bovenop.
+header:has(.header_navbar-container.--show) {
+  z-index: 100;
+}
+
 .header_navbar-container.--show {
   position: fixed;
   inset: 0;

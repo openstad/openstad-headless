@@ -204,7 +204,10 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
       <Fieldset
         role="radiogroup"
         aria-invalid={checkInvalid}
-        aria-describedby={`${randomId}_error`}>
+        // ponytail: fieldInvalid, niet checkInvalid. checkInvalid betekent
+        // "verplicht en nog leeg" en is dus al waar bij het laden, terwijl
+        // form.tsx het foutelement pas rendert als er echt een melding is.
+        aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}>
         {title && (
           <FieldsetLegend>
             <RteContent

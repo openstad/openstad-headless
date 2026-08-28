@@ -12,7 +12,7 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { MultiSelect } from '@openstad-headless/ui/src';
+import { MultiSelect, headingLevels } from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import SelectField from '@openstad-headless/ui/src/form-elements/select';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
@@ -89,6 +89,7 @@ export type DocumentMapProps = BaseProps &
     displayResourceDescription?: string;
     displayResourceTitle?: string;
     displayResourceSummary?: string;
+    headingLevel?: number;
     infoPopupContent?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
@@ -151,6 +152,7 @@ function DocumentMap({
   displayResourceDescription = 'no',
   displayResourceTitle = 'yes',
   displayResourceSummary = 'yes',
+  headingLevel = 2,
   infoPopupContent = 'Op deze afbeelding kun je reacties plaatsen. Klik op de afbeelding om een reactie toe te voegen. Klik op een marker om de bijbehorende reacties te bekijken.',
   largeDoc = false,
   loginText = 'Inloggen om deel te nemen aan de discussie',
@@ -175,6 +177,10 @@ function DocumentMap({
   hideToggleMarkers = false,
   ...props
 }: DocumentMapProps) {
+  // ponytail: de widget staat ingebed onder de <h1> van de CMS-pagina, dus nooit
+  // zelf een h1 (WCAG 1.3.1). Redacteur kan het niveau in de admin zetten.
+  const [hTitle, hSection] = headingLevels(headingLevel);
+
   const [sort, setSort] = useState<string | undefined>(
     defaultSorting || 'createdAt_asc'
   );
@@ -635,6 +641,7 @@ function DocumentMap({
     id: string;
     index: number;
     color: string;
+    label?: string;
   }
 
   const [overridePage, setoverridePage] = useState<number | undefined>(
@@ -732,10 +739,18 @@ function DocumentMap({
     id,
     index,
     color,
+    label,
     ...props
   }) => {
     const markerRef = useRef<any>(null);
     const isDefaultColor = color === '#555588';
+
+    useEffect(() => {
+      const el = markerRef.current?.getElement?.();
+      if (el && label) {
+        el.setAttribute('aria-label', label);
+      }
+    }, [label]);
 
     return (
       <Marker
@@ -911,6 +926,50 @@ function DocumentMap({
     updateMapBounds(hasOpenPopup);
   }, [bounds, hasOpenPopup]);
 
+  // ponytail: toetsenbord/single-pointer alternatief voor slepen + reactie plaatsen (WCAG 2.1.1, 2.5.7)
+  const PAN_STEP_PX = 100;
+  const panMapBy = (x: number, y: number) => {
+    mapRef.current?.panBy([x, y], { animate: true });
+  };
+  const placeCommentAtCenter = () => {
+    const map = mapRef.current;
+    if (map) setPopupPosition(map.getCenter());
+  };
+
+  // ponytail: focus de reactie-textarea zodra de popup opent, zodat de keyboard-flow doorloopt (2.1.1).
+  // Wie niet is ingelogd krijgt geen textarea maar een inlogtekst met knop; dan
+  // stond er niets om te focussen en bleef de focus achter op de kaart.
+  useEffect(() => {
+    if (!popupPosition) return;
+    const t = setTimeout(() => {
+      const inhoud = document.querySelector('.leaflet-popup-content');
+      const doel =
+        (document.getElementById('commentBox') as HTMLElement | null) ||
+        (inhoud?.querySelector(
+          'button, a[href], textarea, input, select'
+        ) as HTMLElement | null) ||
+        (document.querySelector(
+          '.leaflet-popup .leaflet-popup-close-button'
+        ) as HTMLElement | null);
+      doel?.focus();
+    }, 50);
+    return () => clearTimeout(t);
+  }, [popupPosition]);
+
+  // ponytail: bij een geopende marker-popup focus direct in de popup zetten i.p.v. op de
+  // zoom-/info-knoppen die in de DOM ervóór staan (WCAG 2.4.3 focusvolgorde).
+  useEffect(() => {
+    if (popupPosition || !popupComment) return;
+    const t = setTimeout(() => {
+      (
+        document.querySelector(
+          '.leaflet-popup .leaflet-popup-close-button'
+        ) as HTMLElement | null
+      )?.focus();
+    }, 50);
+    return () => clearTimeout(t);
+  }, [popupComment, popupPosition]);
+
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -1021,15 +1080,15 @@ function DocumentMap({
         <div className="resource-info-full">
           <section className="content-intro">
             {displayResourceTitle === 'yes' && resource.title ? (
-              <Heading level={1}>{resource.title}</Heading>
+              <Heading level={hTitle}>{resource.title}</Heading>
             ) : null}
             {displayResourceSummary === 'yes' && resource.summary ? (
-              <Heading
-                level={2}
-                appearance="utrecht-heading-4"
+              <Paragraph
+                className="osc-summary"
                 dangerouslySetInnerHTML={{
                   __html: sanitizeHtml(resource.summary),
-                }}></Heading>
+                }}
+              />
             ) : null}
             {displayResourceDescription === 'yes' && resource.description ? (
               <Paragraph
@@ -1079,15 +1138,15 @@ function DocumentMap({
             {displayResourceInfo === 'left' && (
               <section className="content-intro">
                 {displayResourceTitle === 'yes' && resource.title ? (
-                  <Heading level={1}>{resource.title}</Heading>
+                  <Heading level={hTitle}>{resource.title}</Heading>
                 ) : null}
                 {displayResourceSummary === 'yes' && resource.summary ? (
-                  <Heading
-                    level={2}
-                    appearance="utrecht-heading-4"
+                  <Paragraph
+                    className="osc-summary"
                     dangerouslySetInnerHTML={{
                       __html: sanitizeHtml(resource.summary),
-                    }}></Heading>
+                    }}
+                  />
                 ) : null}
                 {displayResourceDescription === 'yes' &&
                 resource.description ? (
@@ -1106,15 +1165,15 @@ function DocumentMap({
           <div className="content-container mobileonly">
             <section className="content-intro">
               {displayResourceTitle === 'yes' && resource.title ? (
-                <Heading level={1}>{resource.title}</Heading>
+                <Heading level={hTitle}>{resource.title}</Heading>
               ) : null}
               {displayResourceSummary === 'yes' && resource.summary ? (
-                <Heading
-                  level={2}
-                  appearance="utrecht-heading-4"
+                <Paragraph
+                  className="osc-summary"
                   dangerouslySetInnerHTML={{
                     __html: sanitizeHtml(resource.summary),
-                  }}></Heading>
+                  }}
+                />
               ) : null}
               {displayResourceDescription === 'yes' && resource.description ? (
                 <Paragraph
@@ -1126,7 +1185,10 @@ function DocumentMap({
             </section>
           </div>
         )}
-        <div className="document-container">
+        <div
+          className="document-container"
+          role="application"
+          aria-label="Interactieve afbeelding">
           <MapContainer
             ref={mapRef}
             center={[0, 0]}
@@ -1169,6 +1231,11 @@ function DocumentMap({
                       index={comment?.id}
                       position={comment.location}
                       color={documentMapIconColor}
+                      label={
+                        comment?.description
+                          ? `Reactie: ${comment.description.substring(0, 80)}`
+                          : `Reactie ${comment?.id}`
+                      }
                     />
                   );
                 })}
@@ -1338,6 +1405,62 @@ function DocumentMap({
               )}
           </MapContainer>
 
+          {/* ponytail: kruisje toont waar "Reactie plaatsen" landt (2.1.1) */}
+          {!popupPosition && !!args.canComment && !isDefinitive && (
+            <div className="osc-map-crosshair" aria-hidden="true">
+              <span />
+            </div>
+          )}
+
+          {/* ponytail: single-pointer/keyboard pan-knoppen (2.5.7) + reactie-plaats-knop (2.1.1) */}
+          <div
+            className="osc-map-controls"
+            role="group"
+            aria-label="Kaartbediening">
+            <div className="osc-map-compass">
+              <button
+                type="button"
+                className="osc-map-pan osc-map-pan--up"
+                aria-label="Kaart naar boven verplaatsen"
+                onClick={() => panMapBy(0, -PAN_STEP_PX)}>
+                <span aria-hidden="true">↑</span>
+              </button>
+              <button
+                type="button"
+                className="osc-map-pan osc-map-pan--left"
+                aria-label="Kaart naar links verplaatsen"
+                onClick={() => panMapBy(-PAN_STEP_PX, 0)}>
+                <span aria-hidden="true">←</span>
+              </button>
+              <button
+                type="button"
+                className="osc-map-pan osc-map-pan--right"
+                aria-label="Kaart naar rechts verplaatsen"
+                onClick={() => panMapBy(PAN_STEP_PX, 0)}>
+                <span aria-hidden="true">→</span>
+              </button>
+              <button
+                type="button"
+                className="osc-map-pan osc-map-pan--down"
+                aria-label="Kaart naar onderen verplaatsen"
+                onClick={() => panMapBy(0, PAN_STEP_PX)}>
+                <span aria-hidden="true">↓</span>
+              </button>
+            </div>
+            {!popupPosition && !!args.canComment && !isDefinitive && (
+              <button
+                type="button"
+                className="osc-map-place-comment"
+                onClick={placeCommentAtCenter}>
+                Reactie plaatsen
+                <span className="sr-only">
+                  {' '}
+                  op het midden van de afbeelding
+                </span>
+              </button>
+            )}
+          </div>
+
           {!!args.canComment && (
             <>
               <Button
@@ -1345,6 +1468,8 @@ function DocumentMap({
                   infoPopupButtonText ? 'button-has-text' : ''
                 }`}
                 appearance="primary-action-button"
+                aria-expanded={isModalOpen}
+                aria-controls="info-panel-id"
                 onClick={() => setModalOpen(true)}>
                 <i className="ri-information-line"></i>
                 {infoPopupButtonText && (
@@ -1359,6 +1484,7 @@ function DocumentMap({
                 className="modal-overlay"
                 aria-hidden={isModalOpen ? 'false' : 'true'}>
                 <div
+                  id="info-panel-id"
                   ref={modalRef}
                   className="modal"
                   role="dialog"
@@ -1372,7 +1498,9 @@ function DocumentMap({
                     <i className="ri-close-fill"></i>
                     <span>Info venster sluiten</span>
                   </Button>
-                  <Heading level={3}>Hoe werkt het?</Heading>
+                  <Heading level={3} id="modal-title">
+                    Hoe werkt het?
+                  </Heading>
                   <Spacer size={1} />
                   <Paragraph>{infoPopupContent}</Paragraph>
                 </div>
@@ -1402,6 +1530,7 @@ function DocumentMap({
                 <Likes
                   {...props}
                   resourceId={resourceId || ''}
+                  titleHeadingLevel={hSection}
                   title={props.likeWidget?.title}
                   yesLabel={props.likeWidget?.yesLabel}
                   noLabel={props.likeWidget?.noLabel}
@@ -1442,19 +1571,19 @@ function DocumentMap({
           <section className="content-intro desktoponly">
             {displayResourceTitle === 'yes' && resource.title ? (
               <>
-                <Heading level={1} appearance="utrecht-heading-2">
+                <Heading level={hTitle} appearance="utrecht-heading-2">
                   {resource.title}
                 </Heading>
                 <Spacer size={1} />
               </>
             ) : null}
             {displayResourceSummary === 'yes' && resource.summary ? (
-              <Heading
-                level={2}
-                appearance="utrecht-heading-4"
+              <Paragraph
+                className="osc-summary"
                 dangerouslySetInnerHTML={{
                   __html: sanitizeHtml(resource.summary),
-                }}></Heading>
+                }}
+              />
             ) : null}
             {displayResourceDescription === 'yes' && resource.description ? (
               <Paragraph
@@ -1547,15 +1676,15 @@ function DocumentMap({
         <div className="resource-info-full">
           <section className="content-intro">
             {displayResourceTitle === 'yes' && resource.title ? (
-              <Heading level={1}>{resource.title}</Heading>
+              <Heading level={hTitle}>{resource.title}</Heading>
             ) : null}
             {displayResourceSummary === 'yes' && resource.summary ? (
-              <Heading
-                level={2}
-                appearance="utrecht-heading-4"
+              <Paragraph
+                className="osc-summary"
                 dangerouslySetInnerHTML={{
                   __html: sanitizeHtml(resource.summary),
-                }}></Heading>
+                }}
+              />
             ) : null}
             {displayResourceDescription === 'yes' && resource.description ? (
               <Paragraph
@@ -1570,8 +1699,9 @@ function DocumentMap({
 
       <button
         className={`back-to-top ${showButton ? 'show' : ''}`}
-        onClick={scrollToTop}>
-        <i className="ri-arrow-up-line"></i>
+        onClick={scrollToTop}
+        aria-label="Terug naar boven">
+        <i className="ri-arrow-up-line" aria-hidden="true"></i>
       </button>
 
       <NotificationProvider />

@@ -61,6 +61,7 @@ export type Item = {
   infoBlockShareButton?: boolean;
   infoBlockExtraButton?: string;
   infoBlockExtraButtonTitle?: string;
+  headingLevel?: number;
   fieldRequired?: boolean;
   enableAddressSearch?: boolean;
   maxChoices?: string;

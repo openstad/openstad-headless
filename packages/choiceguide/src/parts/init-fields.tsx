@@ -43,6 +43,7 @@ export const InitializeFormFields = (
         showMoreInfo: item.showMoreInfo || false,
         moreInfoButton: item.moreInfoButton || '',
         moreInfoContent: item.moreInfoContent || '',
+        headingLevel: item.headingLevel || 3,
         titleA: item.labelA || '',
         titleB: item.labelB || '',
         descriptionA: item.sliderTitleUnderA || '',

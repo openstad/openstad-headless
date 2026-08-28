@@ -636,6 +636,7 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['createImageSlider'] = item?.createImageSlider || false;
           fieldData['imageClickable'] = item?.imageClickable || false;
           fieldData['images'] = item?.images || [];
+          fieldData['headingLevel'] = item?.headingLevel || 3;
           break;
         case 'swipe':
           fieldData['type'] = 'swipe';

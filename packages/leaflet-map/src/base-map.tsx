@@ -634,6 +634,10 @@ const BaseMap = ({
     }
   }, []);
 
+  // ponytail: elke kaart krijgt een skiplink — de markers zijn allemaal tabbaar,
+  // dus zonder deze link tab je door honderden pins voor je verder komt (2.4.1)
+  const skipTargetRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     const el = containerWrapperRef.current;
     if (!el) return;
@@ -678,6 +682,41 @@ const BaseMap = ({
   }, []);
 
   const mapContainerRef = useRef<any>(null);
+
+  // ponytail: react-leaflet ruimt de Leaflet-instance niet op bij StrictMode/remount ->
+  // "Map container is already initialized"; verwijder 'm expliciet bij unmount.
+  useEffect(() => {
+    return () => {
+      try {
+        mapContainerRef.current?.remove?.();
+      } catch (e) {
+        /* al opgeruimd */
+      }
+      mapContainerRef.current = null;
+    };
+  }, []);
+
+  // ponytail: toetsenbord/single-pointer alternatief voor slepen + plaatsen (WCAG 2.1.1, 2.5.7)
+  const PAN_STEP_PX = 100;
+  const panMapBy = (x: number, y: number) => {
+    mapContainerRef.current?.panBy([x, y], { animate: true });
+  };
+  const canPlaceViaKeyboard = typeof onClick === 'function';
+  const [placeMessage, setPlaceMessage] = useState('');
+  const placeAtCenter = () => {
+    const map = mapContainerRef.current;
+    if (!map || typeof onClick !== 'function') return;
+    const center = map.getCenter();
+    const areaLatLngs = normalizeAreaLocations(area || []);
+    const isInArea =
+      !(area && area.length) || isPointInArea(areaLatLngs, center);
+    onClick({ latlng: center, isInArea } as any, map);
+    setPlaceMessage(
+      isInArea
+        ? 'Marker geplaatst op het midden van de kaart.'
+        : 'Hier kun je geen marker plaatsen. Verschuif de kaart tot het kruisje binnen het gemarkeerde gebied valt.'
+    );
+  };
 
   return (
     <>
@@ -740,7 +779,17 @@ const BaseMap = ({
             ))}
         </ul>
       )}
-      <div className="map-container osc-map" ref={containerWrapperRef}>
+      <button
+        type="button"
+        className="osc-map-skip-link"
+        onClick={() => skipTargetRef.current?.focus()}>
+        Sla kaart over
+      </button>
+      <div
+        className="map-container osc-map"
+        role="application"
+        aria-label="Interactieve kaart"
+        ref={containerWrapperRef}>
         {containerReady && (
           <MapContainer
             ref={mapContainerRef}
@@ -929,7 +978,69 @@ const BaseMap = ({
             )}
           </MapContainer>
         )}
+
+        {/* ponytail: kruisje toont waar "Marker plaatsen" landt (2.1.1) */}
+        {canPlaceViaKeyboard && (
+          <div className="osc-map-crosshair" aria-hidden="true">
+            <span />
+          </div>
+        )}
+
+        {/* ponytail: single-pointer/keyboard pan-knoppen (2.5.7) + plaats-knop (2.1.1) */}
+        <div
+          className="osc-map-controls"
+          role="group"
+          aria-label="Kaartbediening">
+          <div className="osc-map-compass">
+            <button
+              type="button"
+              className="osc-map-pan osc-map-pan--up"
+              aria-label="Kaart naar boven verplaatsen"
+              onClick={() => panMapBy(0, -PAN_STEP_PX)}>
+              <span aria-hidden="true">↑</span>
+            </button>
+            <button
+              type="button"
+              className="osc-map-pan osc-map-pan--left"
+              aria-label="Kaart naar links verplaatsen"
+              onClick={() => panMapBy(-PAN_STEP_PX, 0)}>
+              <span aria-hidden="true">←</span>
+            </button>
+            <button
+              type="button"
+              className="osc-map-pan osc-map-pan--right"
+              aria-label="Kaart naar rechts verplaatsen"
+              onClick={() => panMapBy(PAN_STEP_PX, 0)}>
+              <span aria-hidden="true">→</span>
+            </button>
+            <button
+              type="button"
+              className="osc-map-pan osc-map-pan--down"
+              aria-label="Kaart naar onderen verplaatsen"
+              onClick={() => panMapBy(0, PAN_STEP_PX)}>
+              <span aria-hidden="true">↓</span>
+            </button>
+          </div>
+          {canPlaceViaKeyboard && (
+            <button
+              type="button"
+              className="osc-map-place-comment"
+              onClick={placeAtCenter}>
+              Marker plaatsen
+              {/* ponytail: zichtbare tekst zegt wát er gebeurt, de sr-only
+                  aanvulling wáár — het kruisje is voor AT niet zichtbaar. De
+                  toegankelijke naam bevat de zichtbare tekst, dus 2.5.3 blijft goed. */}
+              <span className="sr-only"> op het midden van de kaart</span>
+            </button>
+          )}
+        </div>
       </div>
+      {/* ponytail: buiten .osc-map — die heeft een vaste hoogte/aspect-ratio,
+          een melding erbinnen zou de kaart wegduwen of geclipt worden */}
+      <div aria-live="polite" role="status" className="osc-map-status">
+        {placeMessage}
+      </div>
+      <div ref={skipTargetRef} tabIndex={-1} className="osc-map-skip-target" />
     </>
   );
 };

@@ -9,6 +9,7 @@ import {
   Spacer,
   Stepper,
   fireConfetti,
+  headingLevels,
 } from '@openstad-headless/ui/src';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import '@utrecht/component-library-css';
@@ -83,6 +84,7 @@ export type StemBegrootWidgetProps = BaseProps &
     onlyIncludeTagIds: string;
     onlyIncludeStatusIds?: string;
     resourceListColumns?: number;
+    headingLevel?: number;
     showInfoMenu?: boolean;
     isSimpleView?: boolean;
     step1Title: string;
@@ -129,6 +131,7 @@ function StemBegroot({
   onlyIncludeTagIds = '',
   onlyIncludeStatusIds = '',
   resourceListColumns = 3,
+  headingLevel = 2,
   step1Tab = '',
   step2Tab = '',
   step3Tab = '',
@@ -147,6 +150,10 @@ function StemBegroot({
   displayModBreak = false,
   ...props
 }: StemBegrootWidgetProps) {
+  // ponytail: widget staat onder de <h1> van de CMS-pagina → nooit zelf een h1;
+  // sub-secties volgen de titel zodat er geen niveau wordt overgeslagen (1.3.1)
+  const [hTitle, hSection] = headingLevels(headingLevel);
+
   // Initialize storage instances with project ID
   const votePendingStorage = React.useMemo(
     () => createVotePendingStorage(props.projectId),
@@ -1096,6 +1103,31 @@ function StemBegroot({
     }
   }, [currentStep]);
 
+  const isInitialStepRef = useRef(true);
+  useEffect(() => {
+    if (isInitialStepRef.current) {
+      isInitialStepRef.current = false;
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      if (step1ContainerRef.current) {
+        const heading = step1ContainerRef.current.querySelector(
+          'h1, h2, h3, h4, h5, h6, [role="heading"]'
+        );
+        if (heading) {
+          (heading as HTMLElement).setAttribute('tabindex', '-1');
+          (heading as HTMLElement).focus();
+        } else {
+          step1ContainerRef.current.setAttribute('tabindex', '-1');
+          step1ContainerRef.current.focus();
+        }
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [currentStep]);
+
   // Keep previous totalPages while loading to prevent UI flicker
   const totalPagesRef = useRef(1);
   if (!isLoading && resources?.metadata?.pageCount) {
@@ -1151,10 +1183,6 @@ function StemBegroot({
       prev.includes(activeTagTab) ? prev : [...prev, activeTagTab]
     );
   }, [activeTagTab]);
-
-  useEffect(() => {
-    console.log('Curr step', currentStep);
-  }, [currentStep]);
 
   return (
     <>
@@ -1286,6 +1314,7 @@ function StemBegroot({
                 budgetChosenTitle={props.budgetChosenTitle}
                 budgetRemainingTitle={props.budgetRemainingTitle}
                 step1Title={props.step1Title}
+                headingLevel={hSection}
                 resourceCardTitle={props.resourceCardTitle}
                 introText={props.step1}
                 showInfoMenu={props.showInfoMenu}
@@ -1366,6 +1395,7 @@ function StemBegroot({
             <>
               <Spacer size={1.5} />
               <BegrotenSelectedOverview
+                headingLevel={hSection}
                 panelTitle={props.panelTitle}
                 budgetChosenTitle={props.budgetChosenTitle}
                 budgetRemainingTitle={props.budgetRemainingTitle}
@@ -1619,7 +1649,7 @@ function StemBegroot({
             <StemBegrootResourceList
               header={
                 <>
-                  <Heading level={1} appearance="utrecht-heading-3">
+                  <Heading level={hTitle} appearance="utrecht-heading-3">
                     {overviewTitle || 'Plannen'}
                   </Heading>
                   <Spacer size={1} />

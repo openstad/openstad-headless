@@ -47,48 +47,55 @@ const Paginator = ({
 
   return (
     <nav className="osc-paginator" aria-label="Paginering">
-      <IconButton
-        icon="ri-arrow-left-s-line"
-        className="secondary round"
-        onClick={() => onPageChange(page - 1)}
-        disabled={page === 0}
-        aria-label={`Vorige pagina${page === 0 ? ' (Niet beschikbaar)' : ''}`}
-        iconOnly={true}
-        test-id={'previous-page-button'}
-      />
-
-      {visible.map((item, idx) =>
-        item === '...' ? (
-          <span key={`ellipsis-${idx}`} className="osc-paginator-ellipsis">
-            ...
-          </span>
-        ) : (
+      <ul className="osc-paginator-list">
+        <li>
           <IconButton
-            key={`page-${item}`}
+            icon="ri-arrow-left-s-line"
             className="secondary round"
-            onClick={() => onPageChange(item as number)}
-            disabled={item === page}
-            test-id={`page-button-${item}`}
-            aria-label={`Pagina ${(item as number) + 1}${
-              item === page ? ' (Huidige pagina)' : ''
-            }`}
-            aria-current={item === page ? 'page' : undefined}>
-            {(item as number) + 1}
-          </IconButton>
-        )
-      )}
+            onClick={() => onPageChange(page - 1)}
+            disabled={page === 0}
+            aria-label={`Vorige pagina${page === 0 ? ' (Niet beschikbaar)' : ''}`}
+            iconOnly={true}
+            test-id={'previous-page-button'}
+          />
+        </li>
 
-      <IconButton
-        icon="ri-arrow-right-s-line"
-        className="secondary round"
-        onClick={() => onPageChange(page + 1)}
-        disabled={page >= totalPages - 1}
-        aria-label={`Volgende pagina${
-          page >= totalPages - 1 ? ' (Niet beschikbaar)' : ''
-        }`}
-        iconOnly={true}
-        test-id={'next-page-button'}
-      />
+        {visible.map((item, idx) =>
+          item === '...' ? (
+            <li key={`ellipsis-${idx}`} aria-hidden="true">
+              <span className="osc-paginator-ellipsis">...</span>
+            </li>
+          ) : (
+            <li key={`page-${item}`}>
+              <IconButton
+                className="secondary round"
+                onClick={() => onPageChange(item as number)}
+                disabled={item === page}
+                test-id={`page-button-${item}`}
+                aria-label={`Pagina ${(item as number) + 1}${
+                  item === page ? ' (Huidige pagina)' : ''
+                }`}
+                aria-current={item === page ? 'page' : undefined}>
+                {(item as number) + 1}
+              </IconButton>
+            </li>
+          )
+        )}
+
+        <li>
+          <IconButton
+            icon="ri-arrow-right-s-line"
+            className="secondary round"
+            onClick={() => onPageChange(page + 1)}
+            disabled={page >= totalPages - 1}
+            aria-label={`Volgende pagina${
+              page >= totalPages - 1 ? ' (Niet beschikbaar)' : ''
+            }`}
+            iconOnly={true}
+            test-id={'next-page-button'}
+          />
+        </li>
+      </ul>
     </nav>
   );
 };

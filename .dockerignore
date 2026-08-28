@@ -2,4 +2,5 @@
 .DS_Store
 nginx.config.example
 packages/**/dist/
+apps/api-server/dist/
 **/node_modules

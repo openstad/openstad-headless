@@ -12,7 +12,7 @@ interface Item {
 
 function AlertBox({ content }: Item) {
   return (
-    <Alert className="alert-box">
+    <Alert className="alert-box" role="note">
       <div className="icon"></div>
       <Paragraph>{content}</Paragraph>
     </Alert>

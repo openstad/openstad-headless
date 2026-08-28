@@ -58,6 +58,7 @@ const shareItems: ShareItem[] = shareOptions.map((value) => ({
 }));
 
 const formSchema = z.object({
+  headingLevel: z.coerce.number().optional(),
   displayImage: z.boolean(),
   displayImageDescription: z.boolean(),
   displayTitle: z.boolean(),
@@ -118,6 +119,7 @@ export default function WidgetResourceDetailDisplay(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
+      headingLevel: props?.headingLevel || 2,
       displayImage: undefinedToTrueOrProp(props?.displayImage),
       displayImageDescription: undefinedToTrueOrProp(
         props?.displayImageDescription
@@ -173,6 +175,39 @@ export default function WidgetResourceDetailDisplay(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="headingLevel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Kopniveau van de titel</FormLabel>
+                <Select
+                  value={String(field.value ?? 2)}
+                  onValueChange={(e) => field.onChange(Number(e))}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Kies kopniveau" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="1">Kop 1 (h1)</SelectItem>
+                    <SelectItem value="2">Kop 2 (h2)</SelectItem>
+                    <SelectItem value="3">Kop 3 (h3)</SelectItem>
+                    <SelectItem value="4">Kop 4 (h4)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Kies zo dat de titel aansluit op de koppen eromheen. Kop 1
+                  alleen als deze widget de hoofdinhoud van de pagina is — dat
+                  is bijvoorbeeld het geval als &quot;Inzending titel gebruiken
+                  als paginatitel&quot; aanstaat. Er mag maar één h1 per pagina
+                  zijn, dus niet doen als de pagina zelf al een titelkop heeft
+                  of als er meerdere van deze widgets op één pagina staan.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="displayImage"

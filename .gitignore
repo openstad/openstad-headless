@@ -1,5 +1,4 @@
 .env
-local/
 node_modules/
 .DS_Store
 nginx.config.example
@@ -18,4 +17,13 @@ docker-compose.override.yml
 # Package lock files per app should not be committed, we use a monorepo approach with a package-lock.json at the root
 apps/*/package-lock.json
 /packages/ui/dist
-.worktrees
+
+# Typedeclaraties van testbestanden: leeg (`export {}`) en niet elders gebruikt.
+# De echte .d.ts in packages/*/types worden wel gecommit.
+*.test.d.ts
+
+# Git worktrees
+.worktrees/
+
+# Lokale Claude-werkmap (analyse + worktrees, honderden MB's)
+.claude/

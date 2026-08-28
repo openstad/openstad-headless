@@ -510,7 +510,9 @@ const defaultItemRenderer = (
             {displayOverviewTagGroups && resourceFilteredTags.length > 0 && (
               <>
                 <Spacer size={0.5} />
-                <div className="pill-grid">
+                {/* ponytail: zonder rol/naam leest AT de tags als losse woorden
+                    zonder context (WCAG 1.3.1) */}
+                <div className="pill-grid" role="list" aria-label="Categorieën">
                   {(
                     resourceFilteredTags as Array<{
                       type: string;
@@ -519,7 +521,11 @@ const defaultItemRenderer = (
                   )
                     ?.filter((t) => t.type !== 'status')
                     ?.map((t) => (
-                      <Pill text={t.name} />
+                      <Pill
+                        key={`${t.type}-${t.name}`}
+                        role="listitem"
+                        text={t.name}
+                      />
                     ))}
                 </div>
               </>
@@ -662,7 +668,9 @@ const defaultItemRenderer = (
             {displayOverviewTagGroups && resourceFilteredTags.length > 0 && (
               <>
                 <Spacer size={0.5} />
-                <div className="pill-grid">
+                {/* ponytail: zonder rol/naam leest AT de tags als losse woorden
+                    zonder context (WCAG 1.3.1) */}
+                <div className="pill-grid" role="list" aria-label="Categorieën">
                   {(
                     resourceFilteredTags as Array<{
                       type: string;
@@ -671,7 +679,11 @@ const defaultItemRenderer = (
                   )
                     ?.filter((t) => t.type !== 'status')
                     ?.map((t) => (
-                      <Pill text={t.name} />
+                      <Pill
+                        key={`${t.type}-${t.name}`}
+                        role="listitem"
+                        text={t.name}
+                      />
                     ))}
                 </div>
               </>
@@ -709,6 +721,7 @@ const defaultItemRenderer = (
                     icon="ri-thumb-up-line"
                     variant="big"
                     text={showVoteCount ? resource.yes : undefined}
+                    description="Stemmen voor"
                     className={selectedOpinion === 'yes' ? 'selected' : ''}
                   />
                   {props.likeWidget?.displayDislike && (
@@ -716,6 +729,7 @@ const defaultItemRenderer = (
                       icon="ri-thumb-down-line"
                       variant="big"
                       text={showVoteCount ? resource.no : undefined}
+                      description="Stemmen tegen"
                       className={selectedOpinion === 'no' ? 'selected' : ''}
                     />
                   )}
@@ -732,6 +746,7 @@ const defaultItemRenderer = (
                         : 'ri-triangle-line'
                     } micro-score-triangle`}
                     variant="big"
+                    description="Stemmen voor"
                     className={`micro-score-vote micro-score-vote--yes ${
                       selectedOpinion === 'yes' ? 'selected' : ''
                     }`}
@@ -749,6 +764,7 @@ const defaultItemRenderer = (
                           : 'ri-triangle-line'
                       } micro-score-triangle micro-score-triangle-down`}
                       variant="big"
+                      description="Stemmen tegen"
                       className={`micro-score-vote micro-score-vote--no ${
                         selectedOpinion === 'no' ? 'selected' : ''
                       }`}
@@ -762,6 +778,7 @@ const defaultItemRenderer = (
                 icon="ri-message-line"
                 variant="big"
                 text={resource.commentCount}
+                description="Aantal reacties"
               />
             ) : null}
           </div>
@@ -1449,6 +1466,7 @@ function ResourceOverviewInner({
       <Dialog
         open={open}
         onOpenChange={setOpen}
+        aria-label="Details van inzending"
         children={
           <Carousel
             startIndex={resourceDetailIndex}
@@ -1578,11 +1596,11 @@ function ResourceOverviewInner({
             <div className="osc-resource-overview-tabs-container">
               <TabsList>
                 <TabsTrigger value="list">
-                  <Icon icon="ri-list-unordered" />
+                  <Icon icon="ri-list-unordered" iconOnly />
                   {listTabTitle}
                 </TabsTrigger>
                 <TabsTrigger value="map">
-                  <Icon icon="ri-map-pin-line" />
+                  <Icon icon="ri-map-pin-line" iconOnly />
                   {mapTabTitle}
                 </TabsTrigger>
               </TabsList>

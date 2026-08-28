@@ -40,6 +40,7 @@ type booleanProps = {
 };
 
 export type ResourceDetailWidgetProps = {
+  headingLevel?: number;
   documentsTitle?: string;
   documentsDesc?: string;
   descriptionHeadingLevel?: string;

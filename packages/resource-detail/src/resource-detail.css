@@ -202,6 +202,16 @@
 .resource-detail-content .utrecht-paragraph {
   white-space-collapse: preserve;
 }
+
+/* De samenvatting was een <h2> en is nu terecht een paragraaf (het is geen kop).
+   Daarbij stond utrecht-heading-4 als klasse, maar utrecht-paragraph wint en die
+   klasse deed dus niets. Dit geeft de samenvatting weer eigen nadruk, zonder
+   kop-semantiek. */
+.resource-detail-content .osc-summary {
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
 .resource-detail-content {
   display: flex;
   flex-direction: column;
@@ -358,7 +368,7 @@
   background-color: #ec673e;
 }
 .bgColor-7DB47B {
-  background-color: #7db47b;
+  background-color: #3e7a3c;
 }
 .bgColor-98BFE6 {
   background-color: #98bfe6;

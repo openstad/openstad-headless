@@ -51,6 +51,11 @@
 
   .news-card {
     position: relative;
+
+    &:has(a:focus-visible) {
+      outline: 2px solid var(--utrecht-link-color, #1b4c92);
+      outline-offset: 2px;
+    }
   }
 
   .static-grid {
@@ -72,7 +77,8 @@
   &.carousel-enabled {
     .carousel-container {
       position: relative;
-      overflow: hidden;
+      overflow-x: clip;
+      overflow-y: visible;
       padding: 0 1px;
     }
 
@@ -88,19 +94,35 @@
     .carousel-dots {
       display: flex;
       justify-content: end;
-      gap: 8px;
+      gap: 0;
       margin: 16px 0;
     }
     .carousel-dot {
       width: 12px;
       height: 12px;
+      box-sizing: content-box;
+      padding: 0;
       background: #e7e7e7;
-      border: none;
+      background-clip: content-box;
+      border: 6px solid transparent;
       cursor: pointer;
       transition: background 0.2s;
     }
     .carousel-dot.active {
-      background: var(--_utrecht-button-background-color, #228540);
+      background: var(
+        --utrecht-button-primary-action-background-color,
+        currentColor
+      );
+      background-clip: content-box;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .carousel-track {
+        transition: none;
+      }
+      .carousel-dot {
+        transition: none;
+      }
     }
 
     .carousel-track {

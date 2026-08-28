@@ -17,6 +17,8 @@ import React, {
   createContext,
   useCallback,
   useEffect,
+  useId,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -118,6 +120,9 @@ function CommentsInner({
   variant = 'medium',
   ...props
 }: CommentsWidgetProps) {
+  const instanceId = useId();
+  const loginDescriptionId = `${instanceId}-login-description`;
+
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -462,11 +467,11 @@ function CommentsInner({
               </>
             )}
             <Banner className="big" role="complementary">
-              <p id="login-description">{loginText}</p>
+              <p id={loginDescriptionId}>{loginText}</p>
               <Spacer size={1} />
               <Button
                 appearance="primary-action-button"
-                aria-describedby="login-description"
+                aria-describedby={loginDescriptionId}
                 onClick={() => {
                   // login
                   if (args.login?.url) {

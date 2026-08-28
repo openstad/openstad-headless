@@ -1,0 +1,298 @@
+
+======================================================================
+[non-text-content]
+Op pagina https://audit.draad.dev/interactieve-kaart staan bij 'Voorbeeld 2: Maximale versie' een icoon met een duim omhoog en een icoon met een tekstwolkje. Deze iconen hebben geen alternatieve tekst. Voorleessoftware leest nu alleen de getallen voor. De alternatieve tekst ontbreekt bij alle widgets waar je op een duimpje omhoog, omlaag, of een tekstwolkje kunt inzetten. 
+
+Op pagina https://audit.draad.dev/inzendingen-overzicht staat een zoekbalk met daarin een zoek-icoon. Het tekstalternatief voor dit icoon is 'Filters toepassen'. Dat is geen juist tekstalternatief voor dit icoon.
+
+Hetzelfde probleem doet zich ook voor op pagina's:
+- https://audit.draad.dev/reacties
+- https://audit.draad.dev/projectenoverzicht 
+
+Op pagina https://audit.draad.dev/interactieve-kaart staan onder kop 'Voorbeeld 2: Maximale versie (pop-up weergave) een aantal plannen. Na klikken op een van deze plannen verschijnt een pop-up. In deze pop-up staat een afbeelding die gekenmerkt is als decoratief. De afbeelding dient ook als link om een grotere weergave van de afbeelding te kunnen bekijken. Op het moment dat een afbeelding dient als link wordt deze informatief en moet een goed tekstalternatief krijgen. 
+
+Op pagina https://audit.draad.dev/contentwidgets  staan accordeon-elementen die visueel opgemaakt zijn met een chevron die naar beneden wijst als de accordeon gesloten is en een chevron die naar boven wijst als de accordeon geopend is. Dat is prima. De chevron is een svg-element dat voor hulpsoftware als decoratief aangemerkt kan worden omdat er een tekstueel alternatief naast de knop staat. Nu worden al deze chevrons voorgelezen als 'afbeelding'. 
+
+Op alle pagina's staat bovenaan het logo van OpenStad. Het logo heeft een alternatieve tekst waarin niet alle zichtbare tekst terugkomt. Aanpassen naar alt="OpenStad.org (logo)". Het logo is op iedere pagina ook te zien in de footer.
+
+======================================================================
+[info-and-relationships]
+Op pagina https://audit.draad.dev/aftelbalk staat de h2-kop 'Hoe maak je de widget op maat?'. Deze wordt gevolgd door de H3-kop 'Voorbeeld 1: Minimale versie'. De kop 'Voorbeeld 1: Minimale versie' lijkt hierdoor een sub-kop van de h2-kop 'Hoe maak je de widget op maat?'. Hierarisch is dat niet juist.
+
+Voor mensen die afhankelijk zijn van hulpsoftware is de opzet van de pagina nu niet duidelijk omdat de koppen-structuur in de HTML-code niet overeen komt met de visuele koppen-structuur op de pagina.
+
+Dit probleem dat kopstijlen niet de juiste hierarchie hebben doet zich op bijna alle pagina's voor. Zorg ervoor dat kopstijlen altijd aangepast kunnen worden door de redacteur en geef in de demo-omgeving het goede voorbeeld.
+
+Op pagina https://audit.draad.dev/interactieve-afbeelding staat 3x een h1-kop, 'Interactieve afbeelding', 'Lorem ipsum dolor sit amet' en 'Lorem ipsum dolor sit amet'. Een pagina hoort één h1-kop te bevatten. Nu is het onduidelijk voor mensen die afhankelijk zijn van voorleessoftware.
+
+Hetzelfde probleem doet zich ook voor op pagina's:
+- https://audit.draad.dev/inzending-detailpagina
+- https://audit.draad.dev/begrootmodule
+- https://audit.draad.dev/stemmodule 
+
+Op pagina https://audit.draad.dev/enquete staat de kop "Jouw buurt, jouw toekomst". Deze koptekst is vetgedrukt gemaakt met een strong-element. Het strong-element is bedoeld om nadruk te leggen op delen tekst. Het is niet bedoeld om kopjes te maken. 
+
+Koppen moeten opgemaakt worden als een echte kop (`<h1>` t/m `<h6>`). Dit helpt bezoekers die afhankelijk zijn van de code, bijvoorbeeld omdat ze een schermlezer gebruiken, om de structuur van de pagina eenvoudig te kunnen herkennen. 
+
+Met behulp van software of een browser-extensie kan bijvoorbeeld een overzicht opgehaald worden van alle koppen op de pagina. Plaats de kop met een kop-element (`<h1>` t/m `<h6>`) en verwijder het strong-element. In dit geval is een hXXX-element nodig om de kop op te maken. Zo is de kopvolgorde op de pagina correct.
+
+Op pagina https://audit.draad.dev/contentwidgets staat onder de kop 'Share links' een lijst met social media-iconen. In de html-code is dit geen lijst met lijstitems. Zorg dat deze lijst in een ul-element wordt geplaatst met lijstitems (li-element). Dit maakt het voor hulpsoftware eenvoudiger de semantiek te begrijpen; zij krijgen dan ook het aantal lijstitems voorgelezen.
+
+Dit probleem doet zich op meerdere pagina's voor. 
+
+Op pagina https://audit.draad.dev/agenda staat onder de kop 'Minimale versie', fase 4 staat de link 'Bekijk agenda'. Deze link staat binnen een lijst-element. Een lijst is past een lijst als het meerdere onderdelen heeft. Zorg ervoor dat links niet standaard binnen een lijst-element komen te staan.
+
+Op pagina https://audit.draad.dev/teller staat de tekst '56 ideeën ingestuurd' en '0 deelnemers'. De tekst 'ideeën ingestuurd' wordt niet voorgelezen door voorleessoftware. 
+
+Op pagina https://audit.draad.dev/enquete staan drie stukken tekst als label met het attribuut 'for' die geen verbinding hebben met een 'id' van bijvoorbeeld een inputveld. Het gaat om de labels: 
+'Wat is jouw favoriete plek in de buurt', 'Deel een afbeelding', 'Deel een document'. 
+
+Op pagina https://audit.draad.dev/enquete staat onder de kop 'Wat vind je van de volgende stellingen?' een tabel. Deze tabel heeft in de eerste tabelcel een lege tabelheader. Hierdoor kunnen mensen die afhankelijk zijn van voorleessoftware de tabel niet goed begrijpen.
+
+Complimenten voor de weergave van de tabel op mobiel. Hier doet het probleem met de lege tabelcel zich niet voor. 
+
+Op pagina https://audit.draad.dev/interactieve-afbeelding staat 2x de h2-kop 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.' Deze tekst is onterecht opgemaakt als h2-kop. Dit is geen kop, maar gewoon grote tekst. 
+
+Op pagina https://audit.draad.dev/reacties staat een overzicht van reacties met daaronder links om naar andere pagina's te gaan. Deze set aan links is een opsomming, maar niet in de code als lijst herkenbaar. Dit is van belang voor bezoekers die afhankelijk zijn van een schermlezer. Zorg dat alle links in een ongeordende lijst geplaatst worden. 
+
+_Best practice_{lang=en} is dat deze paginering ook in een zogenaamd _"landmark"_{lang=en} wordt geplaatst. Voor de ziende bezoeker is vanuit de locatie op de pagina en het ontwerp direct duidelijk dat deze set aan links bedoeld is voor paginering. Deze zelfde informatie is niet direct duidelijk voor bezoekers die afhankelijk zijn van een schermlezer.
+
+Bijvoorbeeld:
+```HTML
+<nav aria-label="Meer artikelen" aria-roledescription="pagination">
+	<ul>
+		<li>
+			<span>vorige </span><span class="sr-only"> pagina</span>
+		</li>
+		<li>
+			<span class="sr-only">Pagina </span> <span>1</span>
+		</li>
+		<li>
+			<a href="#"><span class="sr-only">Pagina </span> 2</a>
+		</li>
+		<li>
+			<a href="#"><span class="sr-only">Pagina </span> 3</a>
+		</li>
+		<li>
+			<a href="#">Volgende <span class="sr-only"> pagina</span></a>
+		</li>
+	</ul>
+</nav>
+```
+Zie voor meer informatie over goede paginatie het voorbeeld [_"Accessible pagination"_{lang=en} op Codepen.io](https://codepen.io/cardan-a11y/pen/azoRJNj).
+
+Op pagina https://audit.draad.dev/reacties staat de kop “Voorbeeld 2: Maximale versie”, deze is van niveau h2. Direct na deze kop staat de kop “6 reacties oneens”. Deze is van hetzelfde niveau. Hierdoor heeft de eerste kop geen inhoud. Een kop moet altijd inhoud hebben. Zorg dat de eerste kop “Voorbeeld 2: Maximale versie” inhoud krijgt, bijvoorbeeld door hieronder tekst toe te voegen, of door de tweede kop “6 reacties oneens” te veranderen naar een lager niveau, bijvoorbeeld h3.
+
+Op pagina https://audit.draad.dev/inzending-detailpagina staan in twee kolommen zoekvelden. Deze zijn goed gekoppeld aan het label, maar mogen niet hetzelfde zijn. (id="search" wordt twee keer gebruikt). Het gekoppelde ID moet altijd uniek zijn. Pas op met het kopiëren van elementen op een pagina!
+
+Op pagina https://audit.draad.dev/keuzewijzer staat bij het tweede voorbeeld (Score versie) aan de rechterkant het blok 'Details verbergen' waarin een scorelijn te zien is. Deze wordt niet opgepakt door voorleessoftware. Daardoor lijkt het dat de kop 'Prachtige gemeente' geen inhoud heeft. Maak hier ook voor hulpsoftware zichtbaar wat de score is op het onderdeel 'Prachtige gemeente' en 'Avontuurlijke gemeente'.
+
+Op pagina https://audit.draad.dev/stemmodule staan onder de kop 'Voorbeeld: Minimale versie' de volgende stappen 'Kies', 'Stemcode' en 'Stem. De stappen worden voorgelezen, maar er wordt niet duidelijk welke stap de huidige stap is. Deze is met kleur aangegeven, en via testen met voiceover op iPhone komt deze kleurmelding ook mee, maar het is niet duidleijk dat het om een huidige stap gaat. 
+
+Op pagina https://audit.draad.dev/contentwidgets staat onder de kop 'Agenda' een tijdlijn waarin visueel wordt wordt aangegeven dat het tweede item de huidige fase is. Dit item heeft geen `aria-current="true"`. Deze is hier op zijn plaats vanwege de afwijkende lijn met een bolletje dat wordt getoond. Mensen die hulpsoftware gebruiken missen deze informatie. 
+
+Op pagina https://audit.draad.dev/agenda is dit wel goed ingericht. Het wordt ook voorgelezen via NVDA op de desktop. VoiceOver op iPhone geeft niet aan wat de huidige stap/datum is. 
+
+Op alle pagina's staat bovenaan het uitklap-item 'Alle widgets'. Wanneer dit item wordt uitgeklapt verschijnt er een lijst met links die in de code niet als lijst is opgemaakt. Hierdoor kan hulpsoftware bijvoorbeeld niet presenteren dat dit een lijst is of uit hoeveel items deze bestaat. Dit helpt bij het begrip van de tekst.
+
+======================================================================
+[meaningful-sequence]
+Op pagina https://audit.draad.dev/teller wordt door voorleessoftware informatie overgeslagen. Bij 'Voorbeeld 1: Minimale versie leest NVDA de cijfers 5 en 6 los van elkaar voor. De tekst 'ideeën ingestuurd' wordt niet voorgelezen door een `aria-hidden="true"`. 
+Ditzelfde speelt ook in 'Voorbeeld 2: Maximale versie. Dit is op te lossen door bij ieder voorbeeld in de code een aria-label te verwerken die het juiste cijfer inclusief de tekst die heeft.
+
+======================================================================
+[identify-input-purpose]
+Op pagina https://audit.draad.dev/accountgegevens staan invulvelden voor persoonlijke gegevens. Voor een aantal van deze invoervelden is een autocomplete-attribuut nodig bij de input-elementen. Dit zorgt ervoor dat browsers, maar ook hulpsoftware, ondersteuning kunnen geven bij het invullen van deze invoervelden. Dit kan door bijvoorbeeld de invoervelden al automatisch in te vullen of een icoontje te tonen. Het autocomplete-attribuut ontbreekt op dit moment bij deze invoervelden.
+
+Op pagina https://audit.draad.dev/inzendingen-overzicht gaat dit ook fout bij het postcode-veld. Gebruik de volgende waarden:
+- Naam `autocomplete="name"`
+- Postcode `autocomplete="postal-code"`
+- Gebruikersnaam `autocomplete="username"`
+
+Op de volgende pagina is meer informatie te vinden over de toepassing van dit attribuut en welke waardes verplicht zijn om te gebruiken. Zie: https://www.w3.org/Translations/WCAG22-nl/#input-purposes.
+
+Op pagina https://audit.draad.dev/inzending-formulier staat een formulier. Hierin moet persoonlijke informatie worden ingevuld. Bij het veld 'Telefoonnummer (niet verplicht)' is een autocomplete attribuut aanwezig. Een autocomplete attribuut met de juiste waarde kan gebruikers van hulpsoftware helpen. In dit geval is de waarde "on" hier niet correct omdat dit geen geldige waarde is voor autocomplete. Velden hebben vaste, verplichte waarden voor autocomplete. In dit geval is de waarde "tel" of "tel-national" verplicht.
+
+======================================================================
+[use-of-color]
+Op pagina https://audit.draad.dev/keuzewijzer staat bij de kop 'Voorbeeld 2: Score versie' een kader met daarin 2 scorebalken voor 'Prachtige gemeente' en 'Avontuurlijke gemeente'. De score in deze scorebalk word alleen overgebracht middels kleur. Mensen die kleurenblind of slechtziend zijn kunnen op deze manier de score mogelijk niet goed waarnemen. Het is belangrijk om bij het overdragen van informatie niet alleen kleur te gebruiken om de informatie over te brengen. Voeg in dit geval bijvoorbeeld tekst toe om de informatie over te brengen.
+
+Op pagina https://audit.draad.dev/stemmodule wordt met een gekleurd bolletje aangegeven welke stap van het proces actief is. Als je geen kleuren kunt onderscheiden, heb je niet in de gaten wat de actieve stap in het proces is. Zorg ervoor dat de actieve stap nog een extra visuele afwijking heeft ten opzichte van de niet actieve stappen.
+
+Op pagina https://audit.draad.dev/beeldkiezer krijg je in de laatste stap een overzicht van de gegeven antwoorden. Hier wordt met kleur aangegeven welke keuze je hebt gemaakt en dit is de enige manier waaruit blijkt wat jouw antwoorden zijn wat niet voldoende is voor dit succescriterium.
+
+======================================================================
+[audio-control]
+Op de pagina https://audit.draad.dev/enquete bevindt zich een video die automatisch afgespeeld wordt en langer dan drie seconden duurt. Hiervoor is een mechanisme aanwezig om de video te stoppen of  pauzeren. Maar deze optie wordt niet helemaal aan het begin van de pagina gepresenteerd en kan daardoor niet direct gevonden worden door iemand die afhankelijk is van hulpsoftware. Hierdoor wordt de presentatie van hulpsoftware zoals een schermlezer verstoord. Het advies is om video's of geluidsopnames niet automatisch af te laten spelen op een webpagina. Dit kan namelijk erg storend zijn voor veel mensen. Als het automatisch afspelen van de geluidsopname essentieel is moet er een optie zijn om deze stop te zetten. Deze optie moet dan helemaal aan het begin van de pagina gepresenteerd worden zodat die direct gevonden kan worden door iemand die afhankelijk is van hulpsoftware.
+
+======================================================================
+[contrast-minimum]
+Op pagina https://audit.draad.dev/enquete kun je documenten en afbeeldingen toevoegen. De geuploade documenten/afbeeldingen worden getoond op een groene achtergrond. De tekst die aangeeft hoe groot het bestand is en de tekst 'klik om ongedaan te maken' is slecht leesbaar vanwege een te laag contrast (3,6:1) van de witte tekst (`#ffffff`) op de groene achtergrond (`#369763`). Dit moet tenminste 4,5:1 zijn. Ook de tekst met de documentnaam en de tekst 'Document geladen hebben te weinig contrast. 
+
+Op pagina https://audit.draad.dev/contentwidgets staat in het eerste blok onder het onderwerp 'Agenda' een hyperlink. Omdat in dit blok een grijze achtergrond gebruikt wordt, heeft de tekst van de hyperlink een te laag contrast; 4,1:1 waar dit 4,5:1 moet zijn.
+
+======================================================================
+[resize-text]
+Wanneer pagina https://audit.draad.dev/teller wordt bekeken bij een resolutie van1280 x 1024 pixels met 200% zoom is de tekst in de blauwe vlakken zoals 'ideeën ingestuurd' en 'deelnemers' niet meer volledig leesbaar. 
+
+Op pagina https://audit.draad.dev/reacties staat onder de laaste reactie een paginering. Wanneer deze pagina bekeken wordt bij een resolutie van 1280 x 1024 pixel met 200% zoom staat de paginering niet volledig in beeld. Er moet horizontaal gescrold worden. 
+
+Op pagina https://audit.draad.dev/keuzewijzer staat rechts van de kop 'Voorbeeld 1: Matrix versie' een kader met daarin de kop 'Details verbergen' en 4 afbeeldingen. Wanneer de pagina bekeken wordt bij een resolutie van 1280 x 1024 pixels en 200% zoom valt dit kader volledig over het scherm heen. Het is niet mogelijk het kader te sluiten of verbergen waardoor de inhoud van de rest van de pagina niet bekeken kan worden. 
+
+Op pagina https://audit.draad.dev/accountgegevens staan invulvelden voor een e-mailadres. Deze invulvelden zijn niet aanpasbaar. Binnen het invulveld wordt wel het opgegeven e-mailadres getoond. Bij een resolutie van 1280 x 1024 pixel en 200% ingezoomd is niet het volledige e-mailadres leesbaar.
+
+======================================================================
+[reflow]
+Op pagina https://audit.draad.dev/enquete staat onder kop 'Voorbeeld 2: Enquête in standaard weergave' een enquête met verschillende vragen. Een aantal vragen zoals 'Wat is voour jou het belangrijkst in jouw buurt', 'Welke woord past het best bij jouw buurt' en 'Wat vind je van de volgende stellingen? worden niet juist afgebroken en zijn hierdoor niet (volledig) leesbaar. Dit geldt voor meer teksten binnen de enquête op deze pagina. Horizontaal scrollen is hierbij nodig om de zinnen helemaal te lezen. Zorg ervoor dat het woord niet breder is dan het scherm en dat het te lezen is zonder te scrollen in de horizontale richting.
+
+Het gaat op de enquête pagina ook mis bij:
+- Inputvelden
+- Opties met checkboxen
+- Opties om te slepen met antwoorden
+- Scorelijn
+- Smiley lijn
+- Tekst en grote afbeelding onder 'Deel meer' 
+- Tekst onder en video onder 'Bekijk de video'
+- De interactieve kaart
+- tekst en uploadfuncties onder 'Deel een afbeelding / bestand' 
+- tekst en tekst van de radiobuttons onder 'terugkoppeling'
+
+Dit probleem doet zich ook voor op pagina https://audit.draad.dev/interactieve-kaart 
+
+Op pagina https://audit.draad.dev/begrootmodule staat onder de kop 'Voorbeeld: Minimale versie' een tijdlijn met stappen voorzien van een rondje met daarin het nummer van de stap en daarachter de naam van de stap. Deze tijdlijn wordt niet juist afgebroken en is hierdoor niet (volledig) leesbaar. Horizontaal scrollen is hierbij nodig. Zorg ervoor dat de tijdlijn niet breder is dan het scherm en dat het te lezen is zonder te scrollen in horizontale richting.
+
+Hetzelfde probleem doet zich ook voor op pagina https://audit.draad.dev/stemmodule 
+
+Wanneer pagina https://audit.draad.dev/ wordt bekeken bij een resolutie van 1280 x 1024 pixels met 400% zoom verplaatst het menu achter een hamburger-icoon. Bij openen van het menu wordt een sluit-icoon zichtbaar. Dit icoon staat voor het grootste deel achter de banner 'De OpenStad audit 2026'. 
+
+Bij succescriterium 1.4.4 is beschreven dat er verlies van content en/of functionaliteit is bij het inzoomen met 200% en een breedte van 1280 pixels op pagina https://audit.draad.dev/keuzewijzer. Dezelfde problemen treden ook op bij dit succescriterium, waarbij is getest bij een breedte van 320 pixels (of 1280 pixels en 400% ingezoomd). Deze problemen zijn hier niet nogmaals beschreven, zie voor de beschrijving succescriterium 1.4.4. Bij het oplossen van deze problemen moet er dus op gelet worden dat dit ook gaat voldoen voor dit succescriterium. 
+
+Bij succescriterium 1.4.4 is beschreven dat er op pagina https://audit.draad.dev/accountgegevens verlies van content en/of functionaliteit is bij het inzoomen met 200% en een breedte van 1280 pixels. Dezelfde problemen treden ook op bij dit succescriterium, waarbij is getest bij een breedte van 320 pixels (of 1280 pixels en 400% ingezoomd). Deze problemen zijn hier niet nogmaals beschreven, zie voor de beschrijving succescriterium 1.4.4. Bij het oplossen van deze problemen moet er dus op gelet worden dat dit ook gaat voldoen voor dit succescriterium.
+
+======================================================================
+[non-text-contrast]
+Op pagina https://audit.draad.dev/enquete staat onder de vraag 'Wat is jouw favoriete plek in de buurt?' een kaart. In deze kaart staan iconen voor inzoomen (plus-icoon) en uitzoomen (min-icoon). Het min-icoon voor uitzoomen (`#BBBBBB`) heeft een contrast van 1,8:1 ten opzichte van de achtergrondkleur (`#F4F4F4`). Dit moet tenminste 3,0:1 zijn. 
+
+Op pagina https://audit.draad.dev/enquete staat onder de kop 'Voorbeeld 1: Enquête in visuele weergave (volledig scherm)' een afbeelding met daarin visueel weergegeven hoeveel vragen er in de equête zitten. De actieve vraag heeft de kleur `#112944`. Deze kleur heeft een contrast van 2.0:1 ten opzichte van de achtergrondkleur (`#24578F`). De niet actieve vragen (`#225388`) hebben een contrast van 1,1:1 ten opzichte van de achtergrondkleur. In beide gevallen moet het contrast ten minste 3,0:1 zijn. Omdat het contrast niet voldoende is kunnen mensen met een visuele beperking de hoeveelheid aan vragen niet goed waarnemen 
+
+Op pagina https://audit.draad.dev/enquete bij vraag 2 van de visuele enquête wordt ook visueel weergegeven hoeveel vragen er in de enquête zitten. De niet actieve vragen hebben de kleur `#F2F2F2`. Deze kleur heeft een contrast van 1,1:1 ten opzichte van de achtergrondkleur (`#FFFFFF`). Dit moet ten minste 3,0:1 zijn. 
+
+Op pagina https://audit.draad.dev/enquete staan onder de vragen 'Hoe tevreden ben je met jouw buurt?  en 'Hoe tevreden  ben je met jouw woning? scorebalken waarbij een score opgegeven kan worden middels een cijfer of een smiley. De grijze kleur (`#A9B2BA`) van deze scorebalken hebben een contrast van 2,2:1 ten opzichte van de witte achtergrond. Dit moet ten minste 3,0:1 zijn.
+
+======================================================================
+[text-spacing]
+Op pagina https://audit.draad.dev/begrootmodule staat onder de kop 'Voorbeeld: Minimale versie' een tijdlijn met stappen voorzien van een rondje met daarin het nummer van de stap. Op het moment dat mensen de teksteigenschappen van de website aanpassen om de tekst voor hen beter leesbaar te maken komen de nummers van de stappen buiten het rondje te staan. Nummer 1 is dan niet meer leesbaar.
+
+Hetzelfde probleem doet zich ook voor op pagina https://audit.draad.dev/stemmodule
+
+======================================================================
+[content-on-hover-or-focus]
+Op alle pagina's staat bovenaan het menu-item 'Alle widgets'. Als er over menu-item wordt gegaan met de muisaanwijzer, klapt het menu-item uit. Deze content die onder hover verschijnt, moet volgens dit succescriterium aan drie voorwaarden voldoen. Het voldoet nu alleen aan de voorwaarden 'Aanwijsbaar' en 'Aanhouden'. De content voldoet niet aan de voorwaarde 'Sluiten', want er is geen manier om deze extra content te verbergen zonder de muisaanwijzer verplaatsen. De extra content verbergen zonder de muisaanwijzer of toetsenbordfocus te verplaatsen zou bijvoorbeeld kunnen met de Escape-toets.
+
+======================================================================
+[keyboard]
+Op pagina https://audit.draad.dev/interactieve-afbeelding staat onder de kop 'Voorbeeld 2: Minimale versie' een interactieve afbeelding. Door met de muis ergens op de afbeelding te klikken verschijn er een pop-up voor het achterlaten van een reactie. Het is niet mogelijk om via het toetsenbord een reactie achter te laten op de afbeelding.
+
+Hetzelfde probleem doet zich ook voor bij de afbeelding van de kaart op pagina https://audit.draad.dev/inzending-formulier en https://audit.draad.dev/enquete
+
+======================================================================
+[pause-stop-hide]
+Op pagina https://audit.draad.dev/enquete staat onder de kop 'Voorbeeld 1: Enquête in visuele weergave (volledig scherm)' een afbeelding met daarin een pijltje dat automatisch van rechts naar links beweegt. Dit is bewegende content en moet daarom gepauzeerd, gestopt of verborgen kunnen worden. Dit is nu niet het geval, wat hinderlijk kan zijn voor mensen met een cognitieve beperking. Zij kunnen moeite hebben met het lezen van de andere content op de pagina als er bewegend beeld is.
+
+Hetzelfde probleem doet zich op meerdere pagina's voor
+
+======================================================================
+[page-titled]
+De pagina https://audit.draad.dev/inzending-detailpagina heeft als paginatitel "Lorem ipsum dolor sit amet". Dit is onvoldoende beschrijvend. Hierdoor kan het voor bepaalde gebruikers verwarrend zijn om wat voor pagina het gaat.
+
+======================================================================
+[focus-order]
+Op pagina https://audit.draad.dev/enquete staat een visuele weergave van de enquête. Wanneer je in het eerste scherm van de enquête op het volgende icoon klikt komt de focus in het tweede scherm ook meteen op het volgend icoon terecht in plaats van op de vraag. Mensen met een visuele beperking die gebruik maken van het toetsenbord kunnen de vraag zo missen waardoor de enquête niet volledig wordt ingevuld. Dit probleem doet zich voor in alle schermen van de visuele enquête. 
+
+Op pagina https://audit.draad.dev/projectenoverzicht staat een zoekbalk met daarnaast een filter-icoon. Wanneer op het filter-icoon wordt geklikt komt een sidebar in beeld. Zolang deze sitebar open staat, moet de toetsenbordfocus in dit venster blijven. Dat is hier niet het geval.
+
+Dit probleem doet zich ook voor op pagina https://audit.draad.dev/inzendingen-overzicht Beperk de toetsenbordfocus tot de openstaande sitebar.
+
+Op pagina https://audit.draad.dev/enquete staat onder de kop 'Bekijk de video' een video met daarin een pauze-knop. Deze knop is pas te bereiken wanneer je met de tab-toets naar de vraag 'Welk toekomstbeeld van de buurt past bij jou?' gaat en dan met shift-tab terug gaat. Zorg dat de pauze-knop direct nadat de focus op de video komt bereikbaar is.
+
+Op pagina https://audit.draad.dev/interactieve-afbeelding staat onder de knop 'Voorbeeld 2: Minimale versie' een afbeelding met daarin een pop-up. Wanneer de toetsenbordfocus op de afbeelding komt verplaatst deze daarna naar het plus- en min-icoon, dan naar het i-tje en daarna pas naar de pop-up. Nadat de toetsenbordfocus op de afbeelding komt moet deze vervolgens naar de pop-up gaan, omdat dit daarna het actieve element binnen de afbeelding is.
+
+======================================================================
+[link-purpose-in-context]
+Op alle pagina's onder https://audit.draad.dev/ staat bovenaan het logo van OpenStad.org. Het logo dient tevens als link naar de homepage. Voor de link ontbreekt een title-attribuut om daarmee het linkdoel duidelijk te maken. 
+
+Op pagina https://audit.draad.dev/interactieve-kaart staan onder kop 'Voorbeeld 2: Maximale versie (pop-up weergave) een aantal plannen. Na klikken op een van deze plannen verschijnt een pop-up. In deze pop-up staat een afbeelding die tevens dient als link om een grotere weergave te bekijken. Het linkdoel is hier niet duidelijk 
+
+Op alle pagina's staat de link 'Alle widgets'. Deze link gaat gaat naar dezelfde pagina een heeft geen meerwaarde. Dit zorgt voor verwarring bij gebruikers die afhankelijk zijn van navigeren via het toetsenbord. Door op deze link te klikken verwachten ze het menu te openen. In plaats daarvan wordt de pagina ververst. De juiste actie zit onder de chevron-knop. Daar kom je pas na de volgende tab. Voeg deze twee elementen samen zodat het één interactief element van de gebruikers interface wordt.
+
+======================================================================
+[multiple-ways]
+Volgens dit succescriterium moet er meer dan één manier zijn om alle webpagina's te kunnen vinden. Op dit moment is het volgen van links de enige manier waarop alle pagina's te vinden zijn. Voor dit probleem zijn verschillende oplossingen mogelijk, zoals het toevoegen van een zoekfunctie en/of een sitemap.
+
+======================================================================
+[headings-and-labels]
+Op pagina https://audit.draad.dev/inzendingen-overzicht staat een zoekbalk met daarin een zoek-icoon. Het tekstalternatief voor dit icoon is 'Filters toepassen'. Dit voldoet niet aan de vereisten.
+
+Hetzelfde probleem doet zich ook voor op pagina's:
+- https://audit.draad.dev/reacties
+- https://audit.draad.dev/projectenoverzicht Wijzig het tekstalternatief naar "Zoek" of "Zoeken".
+
+Op pagina https://auth.audit.draad.dev/auth/url/login?clientId=2bb80f0dbfe66d6cf72f6c9368949ae8&redirect_uri=https%3A%2F%2Fapi.audit.draad.dev%2Fauth%2Fproject%2F2%2Fdigest-login%3FuseAuth%3Dopenstad%26returnTo%3Dhttps%3A%2F%2Faudit.draad.dev%3Fopenstadlogintoken%3D%5B%5Bjwt%5D%5D staat de link 'Neem contact met ons op'. Na klikken op de link wordt een mailprogramma opgestart. Dit is iets anders dan contact opnemen. Pas de tekst aan naar 'Stuur ons een e-mail'.
+
+======================================================================
+[focus-not-obscured-minimum]
+Op pagina https://audit.draad.dev/reacties staat een zoekbalk met daarachter een filtericoon. Wanneer de pagina wordt bekeken bij een resolutie van 1280 x 1024 pixels met 200% zoom en er op het filter-icoon wordt geklikt komt een pop-up in beeld. De focus blijft niet binnen de pop-up, maar gaat door naar de andere interactieve componenten op de pagina. De focus is dan niet zichtbaar omdat de pop-up in beeld blijft staan.
+
+Hetzelfde probleem doet zich ook voor op pagina https://audit.draad.dev/inzendingen-overzicht en op pagina https://audit.draad.dev/keuzewijzer
+
+======================================================================
+[label-in-name]
+Op  pagina https://auth.audit.draad.dev/auth/url/login?clientId=2bb80f0dbfe66d6cf72f6c9368949ae8&redirect_uri=https%3A%2F%2Fapi.audit.draad.dev%2Fauth%2Fproject%2F2%2Fdigest-login%3FuseAuth%3Dopenstad%26returnTo%3Dhttps%3A%2F%2Faudit.draad.dev%3Fopenstadlogintoken%3D%5B%5Bjwt%5D%5D verschijnt een melding naar welk e-mailadres een e-mail is verstuurd. Je kunt deze melding wegklikken met het kruisje. Voor screenreaders is hiervoor aria-label="close-message" toegevoegd. Omdat de taal van de pagina in het Nederlands is, moet deze tekst aangepast worden naar aria-label="sluit melding".
+
+Engelse taal wordt ook gebruikt op pagina https://audit.draad.dev/enquete waar bij toegevoegde documenten een kruisje staat om het document weer te verwijderen. Als zich hier een andere situatie voordoet, staan er teksten in het engels klaar zoals 'retry', 'abort'. 
+
+Op pagina https://audit.draad.dev/inzending-detailpagina onder 'Voorbeeld 2: Maximale versie' staat een afbeelding met de linktekst 'Reageer op deze inzending. Het aria-label van deze hyperlink vertelt iets anders: `aria-label="Bekijk afbeelding (opent in een nieuw tabblad)"`. Omdat deze teksten niet overeenkomen en het aria-label de linktekst overschrijft is dit een probleem voor mensen die hulpsoftware gebruiken. Bovendien kun je hier niet reageren op een inzending, je vergroot alleen het document. 
+
+Op pagina https://audit.draad.dev/inzendingen-overzicht heeft het zoekicoontje onder 'Voorbeeld 2: Maximale versie' als tekstalternatief 'Filters toepassen'. Omdat het label en ook de placeholdertekst 'Zoeken' is, moet de tekst voor hulpsoftware ook 'Zoeken' zijn, zodat deze goed gebruikt kan worden met spraaksoftware.
+
+======================================================================
+[dragging-movements]
+Op pagina https://audit.draad.dev/interactieve-kaart staat een interactieve kaart. Het is mogelijk om de kaart te positioneren door met de muis te slepen. Het is ook mogelijk om de kaart te verplaatsen met het toetsenbord. Het is niet mogelijk om dit op een andere manier met een muisaanwijzer (single pointer device) te doen. Een goede oplossing zou zijn op een soort van 'kompasje' in de kaart te zetten. Door te klikken op de pijltjes omhoog, omlaag, links en rechts kan de kaart ook verplaatst worden.
+
+======================================================================
+[target-size-minimum]
+Op pagina https://audit.draad.dev/ staat bovenaan de link 'Alle widgets' met daarnaast een chevron-knop. De chevron-knop heeft een grote van 20 x 20 pixels met daar omheen een padding van 10 pixels. Aan de linkerkant is echter een marging ingezet van -20 pixels waardoor de chevron-knop dichter op de link 'Alle widgets' komt te staan. De pixelgrootte tussen de link en de knop is daardoor 20 pixels. Voor dit succescriterium moet dat minimaal 24 pixels zijn.
+
+======================================================================
+[error-identification]
+Op pagina https://auth.audit.draad.dev/auth/url/login?clientId=2bb80f0dbfe66d6cf72f6c9368949ae8&redirect_uri=https%3A%2F%2Fapi.audit.draad.dev%2Fauth%2Fproject%2F2%2Fdigest-login%3FuseAuth%3Dopenstad%26returnTo%3Dhttps%3A%2F%2Faudit.draad.dev%3Fopenstadlogintoken%3D%5B%5Bjwt%5D%5D krijg je een melding als je in het invulveld geen @ hebt ingevuld. Huidige tekst 'Controleer of het e-mailadres het volgende format heeft: naam@domein.nl' voldoet niet aan deze eis voor een foutmelding omdat een foutmelding geen instructie mag zijn en altijd een ontkenning in de zin heeft.
+
+Dit probleem doet zich ook voor op pagina https://audit.draad.dev/inzending-formulier
+
+======================================================================
+[labels-or-instructions]
+Op pagina https://audit.draad.dev/enquete kunnen mensen met behulp van een slider aangeven of ze ergens tevreden over zijn. Dit kan met cijfers en met sliders. Onder de kop 'Hoe tevreden ben je met jouw buurt?' staat de tekst 'Geef een score waarbij 1 staat voor zeer ontevreden en 5 voor zeer tevreden'. Voorleessoftware geeft aan bij welk punt de slider staat, maar leest iets anders voor:
+1 -> heel slecht
+2 -> slecht
+3 -> neutraal
+4-> goed
+5 -> heel goed.
+Bij de variant met de smileys worden dezelfde teksten voorgelezen.
+
+De instructie komt niet overeen met de tekst die wordt voorgelezen. 
+
+Op pagina https://audit.draad.dev/reacties staan twee invoervelden. Deze velden hebben geen kop of label. Daardoor is voor bezoekers niet duidelijk wat er ingevuld moet worden.
+
+======================================================================
+[name-role-value]
+Wanneer pagina https://audit.draad.dev/interactieve-afbeelding wordt bekeken bij een resolutie van 1280 x 1024 pixels met 200% zoom wordt een 'back to top'-knop zichtbaar. Deze brengt je naar de eerste reactie. De button krijgt focus, maar er is geen informatie voor voorleessoftware wat de functie is van deze knop. 
+
+Op pagina https://audit.draad.dev/contentwidgets wordt een carrousel getoond. De knop om naar de volgende slide te gaan heeft geen toegankelijke naam. Er is wel een text-attribuut, maar dit attribuut is niet geldig als alternatieve tekst. In de code is een extra div-element met de tekst 'Volgende slide' maar deze heeft het attibuut aria-hidden="true".  Voorstel tot verbetering: een aria-label="Vorige afbeelding" en aria-label="Volgende afbeelding" voor de knoppen. Voorstel tot verbetering: een aria-label="Vorige afbeelding" en aria-label="Volgende afbeelding" voor de knoppen.
+
+======================================================================
+[status-messages]
+De melding die verschijnt na het overschrijden van een budget op pagina https://audit.draad.dev/verdeelmodule wordt niet direct voorgelezen door voorleessoftware. Dit geldt ook voor het voorbeeld 'Punten verdelen' op dezelfde pagina. Er komt een melding in beeld, maar deze wordt niet opgepakt door voorleessoftware. Dit kan bijvoorbeeld door aria-live=polite" of role="status" toe te voegen aan het html-element dat de foutmelding bevat. Let op: het element met dit attribuut moet al aanwezig zijn op het moment dat de website wordt geladen. Hulpsoftware kan dan aan een gebruiker met een visuele beperking meedelen dat deze extra content is verschenen.
+
+Een andere oplossing is om de focus verplaatsen naar het eerste invoerveld met een foutmelding en de foutmelding programmatisch te koppelen aan dat invoerveld. Zo wordt de tekstuele foutmelding gepresenteerd als de toetsenbordfocus op het invoerveld met een fout landt.
+
+Op pagina https://audit.draad.dev/emoji-slider kunnen een aantal vragen beantwoord worden met onderaan een verzend-knop. Na verzenden komt kort de melding in beeld 'Enquete ingediend'. Er is geen aria-element aan de melding gekoppeld waardoor mensen via voorleessoftware niet de terugkoppeling krijgen dat de enquête ook daadwerkelijk is verstuurd.

@@ -175,6 +175,7 @@ const formSchema = z.object({
   infoBlockShareButton: z.boolean().optional(),
   infoBlockExtraButton: z.string().optional(),
   infoBlockExtraButtonTitle: z.string().optional(),
+  headingLevel: z.coerce.number().optional(),
   infoField: z.string().optional(),
   infofieldExplanation: z.boolean().optional(),
   videoUrl: z.string().optional(),
@@ -426,6 +427,7 @@ export default function WidgetEnqueteItems(
             imageDescription: values.imageDescription || '',
             imageAlt: values.imageAlt || '',
             image: values.image || '',
+            headingLevel: values.headingLevel || 3,
           },
         ];
       });
@@ -586,6 +588,7 @@ export default function WidgetEnqueteItems(
     infoBlockShareButton: false,
     infoBlockExtraButton: '',
     infoBlockExtraButtonTitle: '',
+    headingLevel: 3,
     fieldRequired: false,
     enableAddressSearch: false,
     createImageSlider: false,
@@ -661,6 +664,7 @@ export default function WidgetEnqueteItems(
       fieldKey: item.fieldKey || '',
       description: item.description || '',
       questionType: item.questionType || '',
+      headingLevel: item.headingLevel || 3,
       feedbackMode:
         item.feedbackMode === 'correctIncorrect'
           ? 'none'
@@ -2272,6 +2276,36 @@ export default function WidgetEnqueteItems(
 
                     {form.watch('questionType') === 'none' && (
                       <>
+                        <FormField
+                          control={form.control}
+                          name="headingLevel"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Kopniveau van de titel</FormLabel>
+                              <Select
+                                value={String(field.value ?? 3)}
+                                onValueChange={(e) =>
+                                  field.onChange(Number(e))
+                                }>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies kopniveau" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="2">Kop 2 (h2)</SelectItem>
+                                  <SelectItem value="3">Kop 3 (h3)</SelectItem>
+                                  <SelectItem value="4">Kop 4 (h4)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                Kies zo dat de koppenhiërarchie op de pagina
+                                klopt (geen niveaus overslaan).
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                         <ImageUploader
                           form={form}
                           project={project as string}

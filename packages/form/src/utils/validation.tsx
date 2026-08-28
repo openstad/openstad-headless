@@ -43,8 +43,14 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
         const requiredWarning =
           field.requiredWarning || 'Het veld' + fieldTitle + 'is verplicht';
 
+        // ponytail: 3.3.1 wil dat de melding benoemt wát er mis is. "Vul een
+        // geldig e-mailadres in" is een opdracht — na het invullen leest dat
+        // als "je hebt niks ingevuld". Zelfde tekst als de auth-server al
+        // gebruikt (jquery.validate.nl.js), zodat het formulier en de login
+        // hetzelfde zeggen.
         const emailWarning =
-          (field as any)?.emailError || 'Vul een geldig e-mailadres in';
+          (field as any)?.emailError ||
+          'Dit is geen geldig e-mailadres. Gebruik het formaat naam@domein.nl.';
 
         const max = toMaxInt((field as any)?.maxCharacters);
         let maxWarning =

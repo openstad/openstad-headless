@@ -1,0 +1,60 @@
+import { FormValue } from '@openstad-headless/form/src/form';
+import { FC } from 'react';
+export type CheckboxFieldProps = {
+    title: string;
+    overrideDefaultValue?: FormValue;
+    description?: string;
+    choices?: {
+        value: string;
+        label: string;
+        isOtherOption?: boolean;
+        defaultValue?: boolean;
+        trigger?: string;
+        isCorrect?: boolean;
+        feedbackText?: string;
+    }[];
+    fieldRequired?: boolean;
+    requiredWarning?: string;
+    fieldKey: string;
+    disabled?: boolean;
+    type?: string;
+    onChange?: (e: {
+        name: string;
+        value: FormValue;
+        isInitial?: boolean;
+    }, triggerSetLastKey?: boolean) => void;
+    showMoreInfo?: boolean;
+    moreInfoButton?: string;
+    moreInfoContent?: string;
+    infoImage?: string;
+    maxChoices?: string;
+    maxChoicesMessage?: string;
+    minChoices?: string;
+    minChoicesMessage?: string;
+    randomId?: string;
+    fieldInvalid?: boolean;
+    defaultValue?: string | string[];
+    prevPageText?: string;
+    nextPageText?: string;
+    fieldOptions?: {
+        value: string;
+        label: string;
+    }[];
+    images?: Array<{
+        url: string;
+        name?: string;
+        imageAlt?: string;
+        imageDescription?: string;
+    }>;
+    createImageSlider?: boolean;
+    imageClickable?: boolean;
+    randomizeItems?: boolean;
+    value?: FormValue;
+    selectAll?: boolean;
+    selectAllLabel?: string;
+    confirmed?: boolean;
+    instantFeedback?: boolean;
+    optionFeedback?: Record<string, 'correct' | 'incorrect' | 'missed'>;
+};
+declare const CheckboxField: FC<CheckboxFieldProps>;
+export default CheckboxField;

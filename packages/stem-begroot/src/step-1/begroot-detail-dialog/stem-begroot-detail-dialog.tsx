@@ -129,11 +129,14 @@ export const StemBegrootResourceDetailDialog = ({
     }
   };
 
+  const dialogTitleId = 'begrootmodule-dialog-title';
+
   return (
     <Dialog
       open={openDetailDialog}
       onOpenChange={setOpenDetailDialog}
       className="begrootmodule-dialog"
+      aria-labelledby={dialogTitleId}
       children={
         <Carousel
           startIndex={resourceDetailIndex}
@@ -240,7 +243,7 @@ export const StemBegrootResourceDetailDialog = ({
                         <Spacer size={1} />
                         <Heading4>Tags</Heading4>
                         <Spacer size={0.5} />
-                        <div className="pill-grid">
+                        <div className="pill-grid" role="list">
                           {(
                             resource?.tags as Array<{
                               type: string;
@@ -262,7 +265,11 @@ export const StemBegrootResourceDetailDialog = ({
                               }
                             )
                             ?.map((t) => (
-                              <Pill text={t.name || 'Geen thema'} />
+                              <Pill
+                                key={`${t.type}-${t.name}`}
+                                role="listitem"
+                                text={t.name || 'Geen thema'}
+                              />
                             ))}
                         </div>
                         {showOriginalResource && originalUrl ? (
@@ -286,6 +293,7 @@ export const StemBegrootResourceDetailDialog = ({
                         <div>
                           {displayTitle ? (
                             <Heading1
+                              id={dialogTitleId}
                               dangerouslySetInnerHTML={{
                                 __html: sanitizeHtml(resource?.title),
                               }}
@@ -345,11 +353,13 @@ export const StemBegrootResourceDetailDialog = ({
                           <>
                             <Icon
                               icon="ri-thumb-up-line"
+                              description="Stemmen voor"
                               variant="regular"
                               text={resource?.yes}
                             />
                             <Icon
                               icon="ri-thumb-down-line"
+                              description="Stemmen tegen"
                               variant="regular"
                               text={resource?.no}
                             />
@@ -359,6 +369,7 @@ export const StemBegrootResourceDetailDialog = ({
                         {displayRanking && resource?.extraData?.ranking ? (
                           <Icon
                             icon="ri-trophy-line"
+                            description="Positie in de ranglijst"
                             variant="regular"
                             text={resource?.extraData?.ranking}
                           />

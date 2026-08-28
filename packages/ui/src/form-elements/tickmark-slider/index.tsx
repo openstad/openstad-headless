@@ -20,6 +20,7 @@ export type TickmarkSliderProps = {
     value: string;
     label: string | React.JSX.Element;
     image?: { url: string; alt: string };
+    ariaValueText?: string;
   }[];
   clickableSteps?: boolean;
   images?: Array<{
@@ -87,6 +88,13 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
     ? (overrideDefaultValue as string)
     : defaultValue;
 
+  // ponytail: schaal-uitleg afleiden uit dezelfde labels die de schermlezer voorleest
+  // (WCAG 3.3.2), zodat zichtbare instructie en aria-valuetext nooit uiteenlopen.
+  const scaleHint = fieldOptions
+    .filter((opt) => opt.ariaValueText)
+    .map((opt) => `${opt.value} = ${opt.ariaValueText}`)
+    .join(', ');
+
   const [value, setValue] = useState<string>(initialValue);
 
   const maxCharacters =
@@ -131,6 +139,14 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
           </FormFieldDescription>
           <Spacer size={0.5} />
         </>
+      )}
+
+      {scaleHint && (
+        // ponytail: schaal-uitleg alleen voor schermlezers (WCAG 3.3.2) — de smileys/cijfers
+        // zijn de zichtbare schaal, dus geen dubbele tekst in beeld.
+        <span id={`${randomId}_scalehint`} className="sr-only">
+          {scaleHint}
+        </span>
       )}
 
       {showMoreInfo && (
@@ -186,7 +202,23 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
         }}
         disabled={disabled || confirmed}
         aria-invalid={checkInvalid}
-        aria-describedby={`${randomId}_error`}
+        aria-describedby={
+          [
+            scaleHint ? `${randomId}_scalehint` : '',
+            // ponytail: fieldInvalid komt uit form.tsx en is alleen waar als
+            // het foutelement daadwerkelijk gerenderd is. checkInvalid staat al
+            // op waar bij "verplicht en nog leeg", dus dat wees naar niets.
+            fieldInvalid ? `${randomId}_error` : '',
+          ]
+            .filter(Boolean)
+            .join(' ') || undefined
+        }
+        aria-valuetext={(() => {
+          const opt = fieldOptions.find((opt) => opt.value === value);
+          if (!opt) return value;
+          if (opt.ariaValueText) return opt.ariaValueText;
+          return typeof opt.label === 'string' ? opt.label : value;
+        })()}
       />
       <div
         className={`range-slider-labels${showSmileys ? ' smiley-scale' : ''}${

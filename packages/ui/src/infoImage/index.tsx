@@ -55,7 +55,7 @@ const InfoImage = ({
       <ClickableImage clickable={imageClickable} src={image} alt={imageAlt}>
         <img
           src={image}
-          alt={imageAlt}
+          alt={imageAlt || ''}
           className={imageClickable ? 'clickable-image' : undefined}
         />
       </ClickableImage>

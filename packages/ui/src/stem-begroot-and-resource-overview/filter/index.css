@@ -110,12 +110,12 @@
   }
 }
 
-.osc.--compact #stem-begroot-filter .active-tags ul {
+.osc.--compact .osc-filter-section .active-tags ul {
   flex-direction: row;
 }
 
 /* Collapsible filter styles */
-#stem-begroot-filter:has(.toggle-filters-button)
+.osc-filter-section:has(.toggle-filters-button)
   .osc-resources-filter.osc-flex-columned {
   flex-direction: row;
 }

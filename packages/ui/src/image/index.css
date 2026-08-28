@@ -16,7 +16,8 @@
   aspect-ratio: 16/9;
 }
 
-.osc .image-container > .osc-image-frame > img {
+.osc .image-container > .osc-image-frame > img,
+.osc .image-container > .osc-image-frame > a > img {
   width: 100%;
   height: 100%;
   object-fit: cover;

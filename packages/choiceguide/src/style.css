@@ -76,12 +76,17 @@
   top: 270px;
 }
 
+/* ponytail: fallback in elke var() — de :root-defaults hieronder overleven de
+   widget-build niet (die scopet alles onder .openstad, :root sneuvelt daarbij).
+   Zonder fallback wordt width/height ongeldig en dus `auto`: het keuzevlak groeit
+   dan van 180px naar de natuurlijke beeldgrootte en het paneel bedekt het hele
+   scherm bij 200% zoom (1.4.4, bevinding GTT-33.F10). */
 #choice-plane {
   position: relative;
-  height: var(--choiceguide-base-size);
-  width: var(--choiceguide-base-size);
+  height: var(--choiceguide-base-size, 180px);
+  width: var(--choiceguide-base-size, 180px);
   display: grid;
-  grid-template-columns: repeat(2, var(--choiceguide-half-base-size));
+  grid-template-columns: repeat(2, var(--choiceguide-half-base-size, 90px));
   margin: 0 auto;
 }
 
@@ -96,8 +101,8 @@
 
 #choice-plane .osc-choice-plane {
   position: relative;
-  width: var(--choiceguide-half-base-size);
-  height: var(--choiceguide-half-base-size);
+  width: var(--choiceguide-half-base-size, 90px);
+  height: var(--choiceguide-half-base-size, 90px);
   float: left;
   display: inline-block;
 }
@@ -105,8 +110,8 @@
 #choice-plane .osc-choice-plane-background-image {
   position: relative;
   object-fit: cover;
-  width: var(--choiceguide-half-base-size);
-  height: var(--choiceguide-half-base-size);
+  width: var(--choiceguide-half-base-size, 90px);
+  height: var(--choiceguide-half-base-size, 90px);
 }
 
 .osc-choiceguide-container {
@@ -247,6 +252,13 @@
   color: black;
 }
 
+/* ponytail: clearfix zodat de gefloate balk + percentage de li niet laten inklappen */
+.osc-choice-default::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
 .osc .osc-choiceguide-container .question-type-range + .question-type-range {
   margin-top: 2rem;
 }
@@ -330,6 +342,10 @@ ul.osc-choices {
     right: 10px;
     top: unset;
     width: revert;
+    /* ponytail: cap op viewport + interne scroll, anders groeit het paneel bij 200% zoom
+       voorbij de schermrand en verdwijnt de collapse-knop erboven -> niet sluitbaar (1.4.4) */
+    max-height: calc(100vh - 20px);
+    overflow-y: auto;
   }
 }
 
@@ -372,8 +388,11 @@ ul.osc-choices {
   transition: grid-template-rows 0.2s linear;
 }
 
+/* ponytail: was grid-template-rows: 0fr. Die truc klapte hier niets in — live
+   gemeten bleef de rij op 610px staan, ook met !important. display:none werkt
+   wel, en houdt de verborgen knoppen meteen buiten de tabvolgorde. */
 .expand-container[aria-hidden='true'] {
-  grid-template-rows: 0fr;
+  display: none;
 }
 .expand-container[aria-hidden='false'] {
   grid-template-rows: 1fr;

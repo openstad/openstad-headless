@@ -4,19 +4,34 @@
   align-items: center;
 }
 
-.step-container {
+.stepper-list {
+  display: flex;
+  align-items: center;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  gap: 0;
+}
+
+.stepper-list > .step-container {
   display: inline-flex;
   flex-direction: row;
   align-items: center;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .step-container > .step-icon {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  width: var(--nlds-stepper-icon-width, 0.5rem);
-  height: var(--nlds-stepper-icon-height, 0.5rem);
+  /* ponytail: min- + aspect-ratio i.p.v. vaste maat zodat het cijfer bij text-spacing
+     (WCAG 1.4.12) niet buiten het rondje valt maar het rondje rond mee-groeit */
+  min-width: var(--nlds-stepper-icon-width, 0.5rem);
+  min-height: var(--nlds-stepper-icon-height, 0.5rem);
+  aspect-ratio: 1 / 1;
+  box-sizing: content-box;
   padding: var(--nlds-stepper-icon-padding, 0.5rem);
   margin-right: var(--nlds-stepper-icon-margin-right, 0.5rem);
   border-width: var(--nlds-stepper-icon-border-width, 1px);
@@ -28,6 +43,16 @@
   border-radius: var(--nlds-stepper-icon-border-radius, 50%);
 }
 
+/* Divider lines between steps using a separator li */
+.stepper-list > .step-divider {
+  height: var(--nlds-stepper-divider-height, 1px);
+  flex: 1;
+  margin-left: var(--nlds-stepper-divider-margin-left, 1rem);
+  margin-right: var(--nlds-stepper-divider-margin-right, 1rem);
+  background-color: var(--nlds-stepper-divider-color, #a9b2ba);
+}
+
+/* Legacy support for non-list dividers */
 .stepper > .step-divider {
   height: var(--nlds-stepper-divider-height, 1px);
   width: 100%;
@@ -41,6 +66,18 @@
     --nlds-stepper-icon-color,
     var(--utrecht-button-primary-action-background-color)
   );
+  /* ponytail: geen block-margins/line-height die het cijfer uit het rondje duwen (1.4.12) */
+  margin: 0;
+  line-height: 1;
+}
+
+.step-icon > .step-check {
+  line-height: 1;
+  font-size: 0.875em;
+  color: var(
+    --nlds-stepper-icon-active-color,
+    var(--utrecht-button-secondary-action-color)
+  );
 }
 
 .step-icon.active {
@@ -50,14 +87,20 @@
   );
 }
 
+/* De afgeronde stap houdt het rondje. De randkleur stond eerder gelijk aan de
+   achtergrondkleur, en die is in de nlds-default wit — op een witte pagina
+   verdween de cirkel daarmee helemaal en zweefde het vinkje los. Nu: dezelfde
+   rand als de andere stappen, met een lichte vulling zodat "afgerond" ook zonder
+   kleur te zien is (het vinkje) én er duidelijk anders uitziet dan een stap die
+   nog moet komen (die is doorzichtig). */
 .step-icon.done {
   background-color: var(
     --nlds-stepper-icon-done-background-color,
-    var(--utrecht-button-secondary-action-background-color)
+    var(--utrecht-button-secondary-action-hover-background-color, #e6edf5)
   );
   border-color: var(
     --nlds-stepper-icon-done-border-color,
-    var(--utrecht-button-secondary-action-background-color)
+    var(--utrecht-button-primary-action-background-color)
   );
 }
 
@@ -72,4 +115,20 @@
     --nlds-stepper-icon-active-color,
     var(--utrecht-button-secondary-action-color)
   );
+}
+
+/* ponytail: reflow (WCAG 1.4.10). De items zitten in .stepper-list (de <ol>), niet in
+   .stepper (<nav>) — dáár moet de wrap staan. Op smalle viewport/zoom stapelen de stappen
+   verticaal en vervallen de decoratieve dividers, zodat er geen horizontale scroll ontstaat. */
+@media (max-width: 480px) {
+  .stepper-list {
+    flex-wrap: wrap;
+    row-gap: 0.5rem;
+  }
+  .stepper-list > .step-container {
+    flex-basis: 100%;
+  }
+  .stepper-list > .step-divider {
+    display: none;
+  }
 }

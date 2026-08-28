@@ -3,7 +3,7 @@
   top: 36px;
   right: 24px;
   font-style: italic;
-  opacity: 0.5;
+  color: #595f5e;
 }
 
 .swipe-back-button {
@@ -377,6 +377,9 @@
       color: #000;
       text-align: center;
       padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
 
       svg {
         margin-left: 5px;
@@ -529,7 +532,9 @@
     width: 100%;
     margin: 24px 0;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    // ponytail: min(250px, 100%) zodat de kolom onder 250px mag krimpen op smalle
+    // schermen — anders forceert minmax(250px,...) horizontale overflow (WCAG 1.4.10)
+    grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
     gap: 16px;
   }
 
@@ -555,12 +560,14 @@
   }
 
   .swipe-summary-explanation {
-    background: #f0f0f0;
-    padding: 16px;
+    // ponytail: schoon tekstveld binnen de witte kaart i.p.v. grijze band met los wit vlak
+    background: #fff;
+    padding: 0 16px 16px;
 
     textarea {
       width: 100%;
-      border: none;
+      box-sizing: border-box;
+      border: 1px solid #e0e0e0;
       background: #fff;
       font-family: inherit;
       font-size: 16px;
@@ -668,6 +675,8 @@
     border-radius: 8px;
     max-width: 400px;
     width: 95%;
+    // ponytail: padding meetellen in width, anders 95%+40px > viewport op 320px (WCAG 1.4.10)
+    box-sizing: border-box;
     top: 100px;
     left: 0;
     right: 0;
@@ -678,6 +687,7 @@
 
     textarea {
       width: 100%;
+      box-sizing: border-box;
       margin: 20px 0;
       padding: 20px;
       border: 1px solid #e0e0e0;

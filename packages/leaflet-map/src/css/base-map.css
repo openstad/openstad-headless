@@ -9,6 +9,158 @@
   max-width: 100%;
   height: var(--basemap-map-height);
   aspect-ratio: var(--basemap-map-aspect-ratio);
+  position: relative;
+}
+
+/* ponytail: kaartbediening — kompas (pannen zonder slepen, 2.5.7) + plaats-knop (keyboard, 2.1.1) */
+.osc-map .osc-map-controls {
+  position: absolute;
+  /* ponytail: 800 is de laag van Leaflets eigen bediening (leaflet-control),
+     boven de tegels, markers en kaartpopups. Dit stond op 1000 — gelijk aan de
+     dialog uit packages/ui — en dan wint de laatste in de DOM: de pijltjes
+     kwamen over de detailpopup heen te liggen. */
+  z-index: 800;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+/* ponytail: compact gehouden zodat de bediening de kaart niet domineert. Niet
+   wegstoppen achter hover/focus: deze knoppen zijn er juist voor touch- en
+   single-pointergebruikers die niet kunnen slepen (2.5.7). Randkleur #767676
+   geeft 4,5:1 op wit, ruim boven de 3:1 die 1.4.11 vraagt, en de vlakken
+   blijven 32px — boven het minimum van 24px uit 2.5.8. */
+.osc-map .osc-map-compass {
+  display: grid;
+  grid-template-columns: repeat(3, 32px);
+  grid-template-rows: repeat(3, 32px);
+  gap: 1px;
+}
+
+.osc-map .osc-map-pan {
+  grid-column: 2;
+  grid-row: 2;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  border: 1px solid #767676;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 92%);
+  color: #1a1a1a;
+  padding: 0;
+}
+
+.osc-map .osc-map-pan:hover {
+  background: #f0f0f0;
+}
+
+.osc-map .osc-map-pan:focus-visible {
+  outline: 2px solid #1471ef;
+  outline-offset: 2px;
+}
+
+.osc-map .osc-map-pan--up {
+  grid-column: 2;
+  grid-row: 1;
+}
+.osc-map .osc-map-pan--left {
+  grid-column: 1;
+  grid-row: 2;
+}
+.osc-map .osc-map-pan--right {
+  grid-column: 3;
+  grid-row: 2;
+}
+.osc-map .osc-map-pan--down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+.osc-map .osc-map-place-comment {
+  cursor: pointer;
+  border: 1px solid #767676;
+  border-radius: 4px;
+  background: rgb(255 255 255 / 92%);
+  color: #1a1a1a;
+  padding: 0 10px;
+  font-size: 13px;
+  line-height: 1.2;
+  min-height: 32px;
+  white-space: nowrap;
+}
+
+.osc-map .osc-map-place-comment:hover {
+  background: #f0f0f0;
+}
+
+.osc-map .osc-map-place-comment:focus-visible {
+  outline: 2px solid #1471ef;
+  outline-offset: 2px;
+}
+
+/* centraal kruisje: toont waar "Marker plaatsen" landt */
+.osc-map .osc-map-crosshair {
+  position: absolute;
+  z-index: 999;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  width: 28px;
+  height: 28px;
+}
+
+.osc-map .osc-map-crosshair::before,
+.osc-map .osc-map-crosshair::after {
+  content: '';
+  position: absolute;
+  background: #1a1a1a;
+  box-shadow: 0 0 0 1px #fff;
+}
+
+.osc-map .osc-map-crosshair::before {
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  transform: translateX(-50%);
+}
+
+.osc-map .osc-map-crosshair::after {
+  top: 50%;
+  left: 0;
+  height: 2px;
+  width: 100%;
+  transform: translateY(-50%);
+}
+
+/* Terugkoppeling bij "Marker plaatsen". Was sr-only, waardoor een ziende
+   toetsenbordgebruiker niets zag gebeuren als het midden buiten het toegestane
+   gebied lag — de actie faalde stil (WCAG 3.3.1). Nu zichtbaar voor iedereen;
+   het element blijft altijd in de DOM staan zodat aria-live blijft werken. */
+.osc-map-status {
+  margin-block-start: 0.5rem;
+  padding: 8px 12px;
+  border: 1px solid #767676;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a1a1a;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.osc-map-status:empty {
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
 .osc-base-map-widget-container {
@@ -31,6 +183,12 @@
   display: inline-block;
   font-size: 18px;
   color: var(--utrecht-button-primary-action-background-color);
+}
+
+/* ponytail: Leaflet-default voor uitgeschakelde zoomknop is #bbb (1,8:1 op #f4f4f4).
+   Donkerder grijs voor ≥3:1 (WCAG 1.4.11). */
+.leaflet-container a.leaflet-disabled {
+  color: #6b6b6b;
 }
 .leaflet-bottom.leaflet-right {
   display: none;
@@ -187,4 +345,70 @@
 .leaflet-overlay-pane .leaflet-interactive {
   pointer-events: none;
   transition: fill-opacity 0.2s ease;
+}
+
+/* ── Kaart-toegankelijkheid ────────────────────────────────────────────────
+   Skiplink: standaard onzichtbaar, maar wél zichtbaar zodra hij focus krijgt.
+   Onzichtbaar-bij-focus is een eigen faalpunt: toetsenbordgebruikers zonder
+   voorleessoftware zien dan niet waar de focus staat (WCAG 2.4.7). */
+.osc-map-skip-link {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.osc-map-skip-link:focus,
+.osc-map-skip-link:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0 0 0.5rem;
+  padding: 8px 12px;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  white-space: normal;
+  cursor: pointer;
+  border: 1px solid #767676;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a1a1a;
+  font-size: 15px;
+  outline: 3px solid #1471ef;
+  outline-offset: 2px;
+}
+
+.osc-map-skip-target {
+  outline: none;
+}
+
+/* Zoomknoppen van Leaflet hadden helemaal geen focusindicator; op de uitzoomknop
+   was niets te zien en op de inzoomknop alleen een streepje (WCAG 2.4.7). */
+.osc-map .leaflet-control-zoom a:focus,
+.osc-map .leaflet-control-zoom a:focus-visible {
+  outline: 3px solid #1471ef;
+  outline-offset: 2px;
+  /* boven de aangrenzende knop en de kaarttegels, anders knipt de rand weg */
+  position: relative;
+  z-index: 1000;
+}
+
+/* Markerfocus haalde 2:1 tot 2,8:1 tegen de kaartachtergrond. Dubbele rand:
+   een donkere kern met een witte halo, zodat het contrast klopt op zowel
+   lichte als donkere kaartdelen (WCAG 1.4.11). */
+.osc-map .leaflet-marker-icon:focus,
+.osc-map .leaflet-marker-icon:focus-visible {
+  outline: 3px solid #1a1a1a;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 6px #fff;
+  border-radius: 4px;
+  position: relative;
+  z-index: 1000;
 }

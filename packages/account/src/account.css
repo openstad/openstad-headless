@@ -59,3 +59,15 @@
     var(--utrecht-checkbox-border-color)
   );
 }
+
+/* ponytail: e-mail is leestekst i.p.v. readonly input — moet bij 200% zoom
+   volledig leesbaar blijven en mag afbreken (WCAG 1.4.4 / 1.4.10) */
+.account-readonly-field__label {
+  font-weight: 600;
+  margin-block-end: 0.25rem;
+}
+
+.account-readonly-field__value {
+  overflow-wrap: anywhere;
+  margin-block: 0;
+}
