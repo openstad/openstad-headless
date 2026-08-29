@@ -19,8 +19,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import useAdminProjectId from '@/hooks/use-admin-project-id';
 import useUser from '@/hooks/use-user';
 import { zodResolver } from '@hookform/resolvers/zod';
+import * as Switch from '@radix-ui/react-switch';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
@@ -56,6 +58,35 @@ export default function CreateUserGeneral() {
 
   let user = data;
   if (Array.isArray(data)) user = data[0];
+
+  const rows = Array.isArray(data) ? data : data ? [data] : [];
+  const adminProjectId = useAdminProjectId();
+  const adminProjectUser = rows.find(
+    (u: any) => u?.projectId === adminProjectId
+  );
+  const canAutoAddToNewProjects =
+    !!adminProjectUser && ['admin', 'editor'].includes(adminProjectUser.role);
+  const [autoAddToNewProjects, setAutoAddToNewProjects] = useState(false);
+
+  useEffect(() => {
+    setAutoAddToNewProjects(!!adminProjectUser?.autoAddToNewProjects);
+  }, [adminProjectUser?.autoAddToNewProjects]);
+
+  async function handleAutoAddChange(checked: boolean) {
+    setAutoAddToNewProjects(checked);
+    try {
+      await updateUser({
+        id: adminProjectUser.id,
+        projectId: adminProjectUser.projectId,
+        autoAddToNewProjects: checked,
+      });
+      await mutate();
+      toast.success('Instelling opgeslagen');
+    } catch (err: unknown) {
+      setAutoAddToNewProjects(!checked);
+      toast.error('Instelling kon niet worden opgeslagen');
+    }
+  }
 
   const defaults = useCallback(
     () => ({
@@ -309,6 +340,32 @@ export default function CreateUserGeneral() {
           </Button>
         </form>
       </Form>
+
+      {canAutoAddToNewProjects && (
+        <>
+          <Separator className="my-4" />
+          <div>
+            <Heading size="lg">Nieuwe projecten</Heading>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Voeg deze gebruiker bij het aanmaken of dupliceren van een project
+              automatisch toe als beheerder. De rechten kunnen daarna per
+              project worden aangepast of ingetrokken.
+            </p>
+            <label
+              htmlFor="auto-add-to-new-projects"
+              className="mt-4 block text-sm font-medium leading-none">
+              Automatisch toevoegen aan nieuwe projecten
+            </label>
+            <Switch.Root
+              id="auto-add-to-new-projects"
+              className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
+              checked={autoAddToNewProjects}
+              onCheckedChange={handleAutoAddChange}>
+              <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+            </Switch.Root>
+          </div>
+        </>
+      )}
 
       <Separator className="my-4" />
 

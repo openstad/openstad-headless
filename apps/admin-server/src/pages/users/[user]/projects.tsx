@@ -5,6 +5,7 @@ import { Form } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Heading, ListHeading, Paragraph } from '@/components/ui/typography';
 import UserRoleDropdownList from '@/components/user-role-dropdown-list';
+import useAdminProjectId from '@/hooks/use-admin-project-id';
 import projectListSwr from '@/hooks/use-project-list';
 import useUser from '@/hooks/use-user';
 import useUsers from '@/hooks/use-users';
@@ -36,6 +37,7 @@ export default function CreateUserProjects() {
   const { data: projects } = projectListSwr();
   const { data: users, updateUser } = useUser();
   const { createUser } = useUsers();
+  const adminProjectId = useAdminProjectId();
   const [projectRoles, setProjectRoles] = useState<Array<ProjectRole>>([]);
   const [emailNotificationConsents, setEmailNotificationConsents] = useState<
     Array<EmailNotificationConsent>
@@ -161,7 +163,9 @@ export default function CreateUserProjects() {
   });
 
   const hasEditorRole = mergedRoles.some((item: any) => item.role === 'editor');
-  const adminProject = mergedRoles.find((item: any) => item.projectId == 1);
+  const adminProject = mergedRoles.find(
+    (item: any) => item.projectId == adminProjectId
+  );
   const isAdminOrEditorInAdminProject =
     adminProject &&
     (adminProject.role === 'admin' || adminProject.role === 'editor');
