@@ -44,6 +44,7 @@ import {
 import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
 import NotificationService from '../../lib/NotificationProvider/notification-service';
 import hasRole from '../../lib/has-role';
+import { getCommentPage } from './comment-page';
 import './document-map.css';
 import './gesture';
 
@@ -536,10 +537,6 @@ function DocumentMap({
           tags: allTags,
         });
 
-        if (goToLastPage && displayPagination) {
-          goToLastPage();
-        }
-
         const addNewCommentToComments = [...filteredComments, newComment];
         const newIndex = newComment?.id;
 
@@ -552,7 +549,7 @@ function DocumentMap({
         setSelectedMarkerIndex(newIndex);
 
         setRefreshComments((prev) => !prev);
-        scrollToComment(newIndex);
+        revealComment(newIndex, addNewCommentToComments);
 
         notifySuccess();
       } catch (error) {
@@ -633,78 +630,17 @@ function DocumentMap({
     undefined
   );
 
-  const isScrollable = function (ele: HTMLElement) {
-    const hasScrollableContent = ele.scrollHeight > ele.clientHeight;
-    const overflowYStyle = window.getComputedStyle(ele).overflowY;
-    const isOverflowHidden = overflowYStyle.indexOf('hidden') !== -1;
+  const revealComment = (commentId: number, comments?: any[]) => {
+    if (!displayPagination) return;
 
-    return hasScrollableContent && !isOverflowHidden;
-  };
-
-  const scrollToComment = (index: number) => {
-    let attempts = 0;
-    const maxAttempts = 10;
-    const interval = 100;
-
-    const tryScrollToComment = () => {
-      const getAllComments = Array.from(
-        document.getElementsByClassName('comment-item')
-      );
-      getAllComments.forEach((comment, i) => {
-        if (i !== index) {
-          comment.classList.remove('selected');
-        }
-      });
-
-      if (displayPagination) {
-        const currentComment = filteredComments?.findIndex(
-          (comment: any) => parseInt(comment.id) === index
-        );
-        if (typeof currentComment === 'number' && currentComment >= 0) {
-          const commentPage = Math.floor(currentComment / itemsPerPage);
-          setoverridePage(commentPage);
-        }
-      }
-
-      const commentElement = document.getElementById(`comment-${index}`);
-      if (commentElement) {
-        const containerElement = document.querySelector(
-          '.document-map-info-container'
-        );
-
-        const commentEl = commentElement as HTMLElement;
-        const containerEl = containerElement as HTMLElement;
-
-        if (commentElement && containerElement) {
-          const commentRect = commentEl.getBoundingClientRect();
-          const scrollTop =
-            window.pageYOffset || document.documentElement.scrollTop;
-          const commentTop = commentRect.top + scrollTop;
-
-          const canScrollCommentContainer = isScrollable(containerEl);
-
-          if (canScrollCommentContainer) {
-            containerEl.scrollTo({
-              top: commentEl.offsetTop - containerEl.offsetTop,
-              behavior: 'smooth',
-            });
-          } else {
-            window.scrollTo({
-              top: commentTop,
-              behavior: 'smooth',
-            });
-          }
-
-          commentEl.classList.add('selected');
-          clearInterval(intervalId);
-        } else if (attempts < maxAttempts) {
-          attempts++;
-        } else {
-          clearInterval(intervalId);
-        }
-      }
-    };
-    const intervalId = setInterval(tryScrollToComment, interval);
+    const commentPage = getCommentPage(
+      comments ?? filteredComments,
+      commentId,
+      itemsPerPage
+    );
+    if (typeof commentPage === 'number') {
+      setoverridePage(commentPage);
+    }
   };
 
   const MarkerWithId: React.FC<ExtendedMarkerProps> = ({
@@ -751,7 +687,7 @@ function DocumentMap({
               setSelectedMarkerIndex(index);
               setSelectedCommentIndex(index);
               if (!isPopupMarkerBehavior) {
-                scrollToComment(index);
+                revealComment(index);
               }
             }
           },
@@ -768,7 +704,7 @@ function DocumentMap({
                 setSelectedMarkerIndex(index);
                 setSelectedCommentIndex(index);
                 if (!isPopupMarkerBehavior) {
-                  scrollToComment(index);
+                  revealComment(index);
                 }
               }
             }
@@ -1018,7 +954,6 @@ function DocumentMap({
   const votingEnabled = configVotingEnabled && args.canComment;
 
   // const [goToPage, setGoToPage] = useState<((page:number) => void) | null>(null);
-  const [goToLastPage, setGoToLastPage] = useState<(() => void) | null>(null);
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
@@ -1617,7 +1552,6 @@ function DocumentMap({
               closedText={closedText}
               itemsPerPage={itemsPerPage}
               displayPagination={displayPagination}
-              onGoToLastPage={setGoToLastPage}
               overridePage={overridePage}
               overrideSort={sort}
               searchTerm={search}

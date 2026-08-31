@@ -22,6 +22,7 @@ import React, {
   useEffect,
   useId,
   useMemo,
+  useRef,
   useState,
 } from 'react';
 
@@ -105,7 +106,7 @@ function CommentsInner({
   displayPagination = false,
   displaySearchBar = false,
   extraReplyButton = false,
-  overridePage = 0,
+  overridePage,
   setRefreshComments: parentSetRefreshComments = () => {}, // parent setter as fallback
   defaultTags,
   includeOrExclude = 'include',
@@ -209,7 +210,7 @@ function CommentsInner({
   }, [onGoToLastPage]);
 
   useEffect(() => {
-    if (overridePage !== page) {
+    if (typeof overridePage === 'number' && overridePage !== page) {
       setPage(overridePage);
     }
   }, [overridePage]);
@@ -418,6 +419,24 @@ function CommentsInner({
   }, [comments, pageSize]);
 
   const randomId = Math.random().toString(36).replace('0.', 'container_');
+  const sectionRef = useRef<HTMLElement>(null);
+  const scrolledToCommentRef = useRef<Number>();
+
+  useEffect(() => {
+    if (selectedComment === undefined || Number(selectedComment) < 0) {
+      scrolledToCommentRef.current = undefined;
+      return;
+    }
+    if (scrolledToCommentRef.current === selectedComment) return;
+
+    const commentElement = sectionRef.current?.querySelector(
+      `#comment-${selectedComment}`
+    );
+    if (commentElement) {
+      commentElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      scrolledToCommentRef.current = selectedComment;
+    }
+  }, [selectedComment, page, comments]);
 
   const scrollToTop = () => {
     const divElement = document.getElementById(randomId);
@@ -433,7 +452,7 @@ function CommentsInner({
         ...args,
         setRefreshComments: refreshComments || defaultSetRefreshComments,
       }}>
-      <section className="osc" id={randomId}>
+      <section className="osc" id={randomId} ref={sectionRef}>
         <Heading3 className="comments-title">
           {comments && title?.replace(/\[\[nr\]\]/, commentCount.toString())}
           {!comments && title}
