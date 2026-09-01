@@ -97,6 +97,7 @@
       span:has(.ri-draggable) {
         touch-action: none;
         transition: background 0.2s ease-in-out;
+        flex-shrink: 0;
       }
 
       span:has(.ri-draggable:hover) {
@@ -109,7 +110,9 @@
 
       .sortable-item-title {
         flex-grow: 1;
-        line-height: 1;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        line-height: normal;
       }
 
       div.sortable-item-actions {

@@ -1,6 +1,6 @@
 import { FormValue } from '@openstad-headless/form/src/form';
 import { FC } from 'react';
-import './sort.css';
+import './sort.scss';
 type OptionTitle = {
     key: string;
 };
