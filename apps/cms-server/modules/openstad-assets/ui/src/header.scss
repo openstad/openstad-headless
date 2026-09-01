@@ -369,6 +369,9 @@ header:has(.header_navbar-container.--show) {
 
   .close-button {
     grid-row: 1;
+    position: relative;
+    z-index: 1;
+    background-color: #fff;
 
     &:before {
       transform: translate(-50%, -50%) rotate(45deg);
