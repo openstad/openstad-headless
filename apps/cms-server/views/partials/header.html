@@ -53,17 +53,21 @@
         {% if data.global.siteLogo === 'amsterdam' %}
         <a
           href="{{data.baseUrlWithPrefix}}{{logoLink}}/"
-          class="logo-container">
-          <img src="/modules/openstad-assets/img/andreas.svg" alt="logo" />
+          class="logo-container"
+          title="{{ data.global.logoLinkTitle or 'Terug naar homepage' }}">
+          <img
+            src="/modules/openstad-assets/img/andreas.svg"
+            alt="{{ (data.global.logoAltText or ('Logo ' ~ (data.global.siteTitle or ''))) | trim }}" />
           <div id="amsterdam">Gemeente<br />Amsterdam</div>
         </a>
         {% elif data.global.siteLogo %}
         <a
           href="{{data.baseUrlWithPrefix}}{{logoLink}}/"
-          class="logo-uploaded logo-main-container">
+          class="logo-uploaded logo-main-container"
+          title="{{ data.global.logoLinkTitle or 'Terug naar homepage' }}">
           <img
             src="{{apos.attachment.url(data.global.siteLogo)}}"
-            alt="{{data.global.logoAltText}}"
+            alt="{{ (data.global.logoAltText or ('Logo ' ~ (data.global.siteTitle or ''))) | trim }}"
             id="logo-image" />
           {% if not data.global.hideSiteTitle %} {% if
           data.global.siteTitle.length > 0%}
@@ -73,11 +77,12 @@
         {% else %}
         <a
           href="{{data.baseUrlWithPrefix}}{{logoLink}}/"
-          class="logo-default logo-main-container">
+          class="logo-default logo-main-container"
+          title="{{ data.global.logoLinkTitle or 'Terug naar homepage' }}">
           <img
             class="default"
             src="/images/logo.png"
-            alt="{{data.global.logoAltText}}"
+            alt="{{ (data.global.logoAltText or ('Logo ' ~ (data.global.siteTitle or ''))) | trim }}"
             id="logo-image" />
         </a>
         {% endif %}
