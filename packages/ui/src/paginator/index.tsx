@@ -46,7 +46,7 @@ const Paginator = ({
   const visible = getVisiblePages();
 
   return (
-    <nav className="osc-paginator" aria-label="Paginering">
+    <nav className="osc-paginator" aria-label="Meer pagina's">
       <ul className="osc-paginator-list">
         <li>
           <IconButton
