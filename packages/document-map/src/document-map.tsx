@@ -44,7 +44,6 @@ import {
 import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
 import NotificationService from '../../lib/NotificationProvider/notification-service';
 import hasRole from '../../lib/has-role';
-import { getCommentPage } from './comment-page';
 import './document-map.css';
 import './gesture';
 
@@ -549,7 +548,6 @@ function DocumentMap({
         setSelectedMarkerIndex(newIndex);
 
         setRefreshComments((prev) => !prev);
-        revealComment(newIndex, addNewCommentToComments);
 
         notifySuccess();
       } catch (error) {
@@ -626,23 +624,6 @@ function DocumentMap({
     label?: string;
   }
 
-  const [overridePage, setoverridePage] = useState<number | undefined>(
-    undefined
-  );
-
-  const revealComment = (commentId: number, comments?: any[]) => {
-    if (!displayPagination) return;
-
-    const commentPage = getCommentPage(
-      comments ?? filteredComments,
-      commentId,
-      itemsPerPage
-    );
-    if (typeof commentPage === 'number') {
-      setoverridePage(commentPage);
-    }
-  };
-
   const MarkerWithId: React.FC<ExtendedMarkerProps> = ({
     id,
     index,
@@ -686,9 +667,6 @@ function DocumentMap({
               }
               setSelectedMarkerIndex(index);
               setSelectedCommentIndex(index);
-              if (!isPopupMarkerBehavior) {
-                revealComment(index);
-              }
             }
           },
           keydown: (e: L.LeafletKeyboardEvent) => {
@@ -703,9 +681,6 @@ function DocumentMap({
                 }
                 setSelectedMarkerIndex(index);
                 setSelectedCommentIndex(index);
-                if (!isPopupMarkerBehavior) {
-                  revealComment(index);
-                }
               }
             }
           },
@@ -1552,7 +1527,6 @@ function DocumentMap({
               closedText={closedText}
               itemsPerPage={itemsPerPage}
               displayPagination={displayPagination}
-              overridePage={overridePage}
               overrideSort={sort}
               searchTerm={search}
             />

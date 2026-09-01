@@ -29,6 +29,7 @@ import React, {
 import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
 import NotificationService from '../../lib/NotificationProvider/notification-service';
 import hasRole from '../../lib/has-role';
+import { getCommentPage } from './comment-page';
 import './index.css';
 import CommentForm from './parts/comment-form.js';
 import Comment from './parts/comment.js';
@@ -418,6 +419,47 @@ function CommentsInner({
     }
   }, [comments, pageSize]);
 
+  const sortedComments = useMemo(() => {
+    return [...(comments || [])].sort((a: any, b: any) => {
+      const sortMethod = overrideSort || sort;
+
+      if (sortMethod === 'createdAt_desc') {
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      }
+      if (sortMethod === 'createdAt_asc') {
+        return (
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+      }
+      if (sortMethod === 'title_asc' && a.description && b.description) {
+        return a.description.localeCompare(b.description);
+      }
+      if (sortMethod === 'title_desc' && a.description && b.description) {
+        return b.description.localeCompare(a.description);
+      }
+      if (sortMethod === 'votes_desc') {
+        return b.yes - a.yes;
+      }
+      if (sortMethod === 'votes_asc') {
+        return a.yes - b.yes;
+      }
+      if (sortMethod === 'random') {
+        return deterministicRandomSort(a, b, randomSortSeed, (comment: any) =>
+          String(
+            comment?.id || comment?.createdAt || comment?.description || ''
+          )
+        );
+      }
+      if (sortMethod === 'score') {
+        return (b.score || 0) - (a.score || 0);
+      }
+
+      return 0;
+    });
+  }, [comments, overrideSort, sort, randomSortSeed]);
+
   const randomId = Math.random().toString(36).replace('0.', 'container_');
   const sectionRef = useRef<HTMLElement>(null);
   const scrolledToCommentRef = useRef<Number>();
@@ -429,6 +471,18 @@ function CommentsInner({
     }
     if (scrolledToCommentRef.current === selectedComment) return;
 
+    if (displayPagination) {
+      const targetPage = getCommentPage(
+        sortedComments,
+        Number(selectedComment),
+        pageSize
+      );
+      if (typeof targetPage === 'number' && targetPage !== page) {
+        setPage(targetPage);
+        return;
+      }
+    }
+
     const commentElement = sectionRef.current?.querySelector(
       `#comment-${selectedComment}`
     );
@@ -436,7 +490,7 @@ function CommentsInner({
       commentElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       scrolledToCommentRef.current = selectedComment;
     }
-  }, [selectedComment, page, comments]);
+  }, [selectedComment, page, sortedComments]);
 
   const scrollToTop = () => {
     const divElement = document.getElementById(randomId);
@@ -567,54 +621,7 @@ function CommentsInner({
             </Paragraph>
           ))}
 
-        {(comments || [])
-          ?.sort((a: any, b: any) => {
-            const sortMethod = overrideSort || sort;
-
-            if (sortMethod === 'createdAt_desc') {
-              return (
-                new Date(b.createdAt).getTime() -
-                new Date(a.createdAt).getTime()
-              );
-            }
-            if (sortMethod === 'createdAt_asc') {
-              return (
-                new Date(a.createdAt).getTime() -
-                new Date(b.createdAt).getTime()
-              );
-            }
-            if (sortMethod === 'title_asc' && a.description && b.description) {
-              return a.description.localeCompare(b.description);
-            }
-            if (sortMethod === 'title_desc' && a.description && b.description) {
-              return b.description.localeCompare(a.description);
-            }
-            if (sortMethod === 'votes_desc') {
-              return b.yes - a.yes;
-            }
-            if (sortMethod === 'votes_asc') {
-              return a.yes - b.yes;
-            }
-            if (sortMethod === 'random') {
-              return deterministicRandomSort(
-                a,
-                b,
-                randomSortSeed,
-                (comment: any) =>
-                  String(
-                    comment?.id ||
-                      comment?.createdAt ||
-                      comment?.description ||
-                      ''
-                  )
-              );
-            }
-            if (sortMethod === 'score') {
-              return (b.score || 0) - (a.score || 0);
-            }
-
-            return 0;
-          })
+        {sortedComments
           .slice(page * pageSize, (page + 1) * pageSize)
           ?.map((comment: any, index: number) => {
             let attributes = {
