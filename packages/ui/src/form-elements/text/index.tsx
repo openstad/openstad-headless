@@ -362,7 +362,7 @@ const TextInput: FC<TextInputProps> = ({
     if (has('postcode', 'postal')) return 'postal-code';
     if (has('woonplaats', 'plaats', 'stad', 'city')) return 'address-level2';
     if (has('land', 'country')) return 'country';
-    return 'on';
+    return undefined;
   };
 
   const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
