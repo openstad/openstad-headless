@@ -363,6 +363,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
                           className={`dilemma-summary-btn ${
                             answer === 'a' ? 'active' : ''
                           }`}
+                          aria-pressed={answer === 'a'}
                           onClick={(e) => (
                             e.preventDefault(),
                             handleAnswerChange(dilemma.id, 'a')
@@ -386,6 +387,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
                           className={`dilemma-summary-btn ${
                             answer === 'b' ? 'active' : ''
                           }`}
+                          aria-pressed={answer === 'b'}
                           onClick={(e) => (
                             e.preventDefault(),
                             handleAnswerChange(dilemma.id, 'b')

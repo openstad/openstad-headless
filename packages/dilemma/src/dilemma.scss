@@ -323,6 +323,17 @@
           .utrecht-paragraph {
             color: #fff;
           }
+
+          .dilemma-option-content::before {
+            content: '✓ Gekozen';
+            align-self: start;
+            padding: 0.1rem 0.4rem;
+            border-radius: 4px;
+            background: #fff;
+            color: #1a1a1a;
+            font-size: 0.85em;
+            font-weight: 700;
+          }
         }
 
         .dilemma-summary-btn {
