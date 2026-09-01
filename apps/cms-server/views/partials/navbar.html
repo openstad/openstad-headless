@@ -4,7 +4,8 @@
 <div
   id="navbar"
   data-content="{{ mainMenu | jsonAttribute }}"
-  data-prefix="{{ data.prefix }}"></div>
+  data-prefix="{{ data.prefix }}"
+  data-parent-behavior="{{ data.global.mainMenuParentBehavior }}"></div>
 {% else %} {% if not data.global.compactMenu %} {% set menuData =
 data.home._children %} {% if not data.home.orphan %} {% set homeData = [{"_url":
 data.home._url, "title": data.home.title}] %} {% endif %}
@@ -21,5 +22,6 @@ data.home._url, "title": data.home.title}] %} {% endif %}
   endif
   %}
   data-content="{{ menuData | jsonAttribute }}"
-  data-prefix="{{ data.prefix }}"></div>
+  data-prefix="{{ data.prefix }}"
+  data-parent-behavior="{{ data.global.mainMenuParentBehavior }}"></div>
 {% endif %} {% endif %}

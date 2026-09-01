@@ -9,9 +9,17 @@ interface Item {
   prefix?: string;
   open: boolean;
   setOpenIndex: (index: any) => void;
+  parentBehavior?: string;
 }
 
-function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
+function MenuItem({
+  item,
+  index,
+  prefix = '',
+  open,
+  setOpenIndex,
+  parentBehavior,
+}: Item) {
   const ref = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const openRef = useRef(open);
@@ -63,35 +71,54 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
       : undefined;
   };
 
+  const hasChildren = item._children.length > 0;
+  const asButton = parentBehavior === 'button' && hasChildren;
+
   return (
     <div
       key={index}
       className="item-container"
       onMouseEnter={() => setOpenIndex(index)}>
-      <Link
-        className="level-1"
-        href={`${prefix}${item.slug}`}
-        aria-current={getCurrentPage(item.title)}>
-        {item.title}
-      </Link>
-      {item._children.length > 0 && (
+      {asButton ? (
+        <button
+          ref={buttonRef}
+          className="level-1 parent-button"
+          onClick={() => {
+            setOpenIndex(open ? null : index);
+          }}
+          aria-expanded={open}
+          aria-controls={`submenu-${index}`}>
+          {item.title}
+          <i className="ri-arrow-down-s-line"></i>
+        </button>
+      ) : (
+        <Link
+          className="level-1"
+          href={`${prefix}${item.slug}`}
+          aria-current={getCurrentPage(item.title)}>
+          {item.title}
+        </Link>
+      )}
+      {hasChildren && (
         <>
-          <button
-            ref={buttonRef}
-            className="toggle-submenu"
-            // ponytail: togglen (openen én sluiten), niet alleen openen (WCAG 2.4.4)
-            onClick={() => {
-              setOpenIndex(open ? null : index);
-            }}
-            aria-expanded={open}
-            aria-controls={`submenu-${index}`}>
-            <i className="ri-arrow-down-s-line"></i>
-            <span className="sr-only">
-              {open
-                ? "Verberg onderliggende pagina's"
-                : "Toon onderliggende pagina's"}
-            </span>
-          </button>
+          {!asButton && (
+            <button
+              ref={buttonRef}
+              className="toggle-submenu"
+              // ponytail: togglen (openen én sluiten), niet alleen openen (WCAG 2.4.4)
+              onClick={() => {
+                setOpenIndex(open ? null : index);
+              }}
+              aria-expanded={open}
+              aria-controls={`submenu-${index}`}>
+              <i className="ri-arrow-down-s-line"></i>
+              <span className="sr-only">
+                {open
+                  ? "Verberg onderliggende pagina's"
+                  : "Toon onderliggende pagina's"}
+              </span>
+            </button>
+          )}
           <div
             className="submenu"
             id={`submenu-${index}`}
@@ -102,6 +129,16 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
             ref={ref}>
             {/* ponytail: echte lijst zodat hulpsoftware het aantal items voorleest (WCAG 1.3.1) */}
             <ul className="submenu-list">
+              {asButton && (
+                <li>
+                  <Link
+                    className="level-2"
+                    href={`${prefix}${item.slug}`}
+                    aria-current={getCurrentPage(item.title)}>
+                    {item.title}
+                  </Link>
+                </li>
+              )}
               {item._children &&
                 item._children.map((child: any, childIndex: number) => (
                   <li key={`${index}-${childIndex}`}>
