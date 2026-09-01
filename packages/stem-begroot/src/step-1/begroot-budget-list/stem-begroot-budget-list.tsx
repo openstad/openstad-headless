@@ -93,6 +93,7 @@ export const StemBegrootBudgetList = ({
           )}
           {showInfoMenu && (
             <BudgetStatusPanel
+              headingLevel={headingLevel}
               typeIsBudgeting={typeIsBudgeting}
               maxNrOfResources={maxNrOfResources}
               nrOfResourcesSelected={filteredResources.length}

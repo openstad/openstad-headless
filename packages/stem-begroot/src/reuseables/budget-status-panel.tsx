@@ -1,6 +1,6 @@
 import { Spacer } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
-import { Heading4, Paragraph, Strong } from '@utrecht/component-library-react';
+import { Heading, Paragraph, Strong } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
 import React from 'react';
 
@@ -14,6 +14,7 @@ export const BudgetStatusPanel = ({
   title,
   budgetChosenTitle,
   budgetRemainingTitle,
+  headingLevel = 4,
 }: {
   typeIsBudgeting: boolean;
   nrOfResourcesSelected: number;
@@ -24,6 +25,7 @@ export const BudgetStatusPanel = ({
   title?: string;
   budgetChosenTitle?: string;
   budgetRemainingTitle?: string;
+  headingLevel?: number;
 }): React.JSX.Element => {
   return (
     <>
@@ -33,7 +35,9 @@ export const BudgetStatusPanel = ({
           role="status">
           {typeIsBudgeting ? (
             <>
-              <Heading4>{title || 'Totaal budget'}</Heading4>
+              <Heading level={headingLevel} appearance="utrecht-heading-4">
+                {title || 'Totaal budget'}
+              </Heading>
               <ul>
                 <li>
                   <Paragraph className="info-budget-label">
@@ -62,7 +66,11 @@ export const BudgetStatusPanel = ({
             </>
           ) : (
             <>
-              {title && <Heading4>{title}</Heading4>}
+              {title && (
+                <Heading level={headingLevel} appearance="utrecht-heading-4">
+                  {title}
+                </Heading>
+              )}
               <ul>
                 <li>
                   <Paragraph className="info-budget-label">

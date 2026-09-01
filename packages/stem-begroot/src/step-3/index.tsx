@@ -1,13 +1,14 @@
 import { Spacer } from '@openstad-headless/ui/src';
 import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
 import '@utrecht/component-library-css';
-import { Button, Heading3 } from '@utrecht/component-library-react';
+import { Button, Heading } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
 import React from 'react';
 
 import { createVotePendingStorage } from '../utils/vote-pending-storage';
 
 type Props = {
+  headingLevel?: number;
   loginUrl: string;
   step3: string;
   stemCodeTitle: string;
@@ -17,6 +18,7 @@ type Props = {
   apiUrl: string;
 };
 export const Step3 = ({
+  headingLevel = 3,
   step3,
   stemCodeTitle,
   step3Title,
@@ -32,7 +34,9 @@ export const Step3 = ({
 
   return (
     <>
-      <Heading3>{step3Title}</Heading3>
+      <Heading level={headingLevel} appearance="utrecht-heading-3">
+        {step3Title}
+      </Heading>
       <div
         className="rte"
         dangerouslySetInnerHTML={{ __html: RenderContent(step3) }}
