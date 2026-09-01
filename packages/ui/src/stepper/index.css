@@ -30,9 +30,8 @@
      (WCAG 1.4.12) niet buiten het rondje valt maar het rondje rond mee-groeit */
   min-width: var(--nlds-stepper-icon-width, 0.5rem);
   min-height: var(--nlds-stepper-icon-height, 0.5rem);
-  aspect-ratio: 1 / 1;
   box-sizing: content-box;
-  padding: var(--nlds-stepper-icon-padding, 0.5rem);
+  padding: var(--nlds-stepper-icon-padding, 0.75rem);
   margin-right: var(--nlds-stepper-icon-margin-right, 0.5rem);
   border-width: var(--nlds-stepper-icon-border-width, 1px);
   border-style: solid;
@@ -66,9 +65,12 @@
     --nlds-stepper-icon-color,
     var(--utrecht-button-primary-action-background-color)
   );
-  /* ponytail: geen block-margins/line-height die het cijfer uit het rondje duwen (1.4.12) */
   margin: 0;
+  margin-bottom: 0 !important;
   line-height: 1;
+  min-width: 1lh;
+  min-height: 1lh;
+  text-align: center;
 }
 
 .step-icon > .step-check {
