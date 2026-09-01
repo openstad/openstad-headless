@@ -12,7 +12,7 @@ import {
   FormFieldDescription,
   Paragraph,
 } from '@utrecht/component-library-react';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useEffect, useId, useMemo, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
@@ -93,9 +93,7 @@ const MapField: FC<MapProps> = ({
   imageClickable = false,
   ...props
 }) => {
-  const randomID =
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15);
+  const randomID = useId();
 
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
@@ -216,7 +214,7 @@ const MapField: FC<MapProps> = ({
       )}
 
       {description && (
-        <FormFieldDescription>
+        <FormFieldDescription id={`${randomID}-description`}>
           <RteContent content={description} unwrapSingleRootDiv={true} />
         </FormFieldDescription>
       )}
@@ -255,7 +253,12 @@ const MapField: FC<MapProps> = ({
         </div>
       )}
 
-      <div className="form-field-map-container" id={`map`}>
+      <div
+        className="form-field-map-container"
+        id={`map`}
+        role="group"
+        aria-labelledby={title ? randomID : undefined}
+        aria-describedby={description ? `${randomID}-description` : undefined}>
         {((allowedPolygonIds.length > 0 && polygon.length) ||
           (areaId && polygon.length) ||
           (!Number(areaId) && allowedPolygonIds.length === 0)) && (
