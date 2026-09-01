@@ -758,12 +758,11 @@ function DocumentMap({
   };
 
   const modalRef = useRef<HTMLDivElement | null>(null);
+  const infoTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [manualFocus, setManualFocus] = useState(false);
 
   const setModalOpen = (state: boolean) => {
     setIsModalOpen(state);
-    setManualFocus(state);
   };
 
   const trapFocus = (event: KeyboardEvent) => {
@@ -874,17 +873,20 @@ function DocumentMap({
     };
   }, [isModalOpen]);
 
-  // Focus management when modal opens
+  const modalWasOpenRef = useRef(false);
   useEffect(() => {
-    if (isModalOpen && modalRef.current && manualFocus) {
+    if (isModalOpen && modalRef.current) {
       modalRef.current.focus();
     }
+    if (!isModalOpen && modalWasOpenRef.current) {
+      infoTriggerRef.current?.focus();
+    }
+    modalWasOpenRef.current = isModalOpen;
   }, [isModalOpen]);
 
   useEffect(() => {
     if (openInfoPopupOnInit === 'yes') {
       setIsModalOpen(true);
-      setManualFocus(false);
     }
   }, []);
 
@@ -1338,6 +1340,7 @@ function DocumentMap({
           {!!args.canComment && (
             <>
               <Button
+                ref={infoTriggerRef}
                 className={`info-trigger ${
                   infoPopupButtonText ? 'button-has-text' : ''
                 }`}
