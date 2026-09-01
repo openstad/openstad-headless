@@ -34,8 +34,7 @@ router
 
 router
   .route('/widgets/:widgetId(\\d+)/count')
-  .get(auth.can('Submission', 'list'))
-  .get(function (req, res, next) {
+  .get(rateLimiter(), function (req, res, next) {
     const widgetId = parseInt(req.params.widgetId);
     if (!widgetId) return next(createError(404, 'Widget not found'));
 
