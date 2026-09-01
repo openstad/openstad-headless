@@ -55,7 +55,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
         const max = toMaxInt((field as any)?.maxCharacters);
         let maxWarning =
           field.maxCharactersError ||
-          'Tekst moet maximaal {maxCharacters} karakters bevatten';
+          'De tekst mag niet langer zijn dan {maxCharacters} tekens';
         maxWarning = maxWarning.replace('{maxCharacters}', String(max));
 
         if (field.fieldRequired) {
@@ -90,7 +90,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
 
       let minWarning =
         field.minCharactersError ||
-        'Tekst moet minimaal {minCharacters} karakters bevatten';
+        'De tekst mag niet korter zijn dan {minCharacters} tekens';
 
       if (field.fieldRequired && min == 0) {
         min = 1;
@@ -102,7 +102,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
 
       let maxWarning =
         field.maxCharactersError ||
-        'Tekst moet maximaal {maxCharacters} karakters bevatten';
+        'De tekst mag niet langer zijn dan {maxCharacters} tekens';
       maxWarning = maxWarning.replace('{maxCharacters}', String(max));
 
       if (field.fieldRequired) {

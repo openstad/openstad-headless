@@ -57,10 +57,10 @@ export const InitializeFormFields = (items, data, showForm = true) => {
           'Nog minimaal {minCharacters} tekens',
         minCharactersError:
           data?.choiceGuide?.minCharactersError ||
-          'Tekst moet minimaal {minCharacters} karakters bevatten',
+          'De tekst mag niet korter zijn dan {minCharacters} tekens',
         maxCharactersError:
           data?.choiceGuide?.maxCharactersError ||
-          'Tekst moet maximaal {maxCharacters} karakters bevatten',
+          'De tekst mag niet langer zijn dan {maxCharacters} tekens',
         maxCharactersOverWarning:
           data?.choiceGuide?.maxCharactersOverWarning ||
           'Je hebt {overCharacters} tekens teveel',

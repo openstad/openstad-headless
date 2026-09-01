@@ -267,10 +267,10 @@ function CommentsInner({
       'Je hebt nog {maxCharacters} tekens over',
     minCharactersError:
       props?.comments?.minCharactersError ||
-      'Tekst moet minimaal {minCharacters} karakters bevatten',
+      'De tekst mag niet korter zijn dan {minCharacters} tekens',
     maxCharactersError:
       props?.comments?.maxCharactersError ||
-      'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      'De tekst mag niet langer zijn dan {maxCharacters} tekens',
     adminLabel: props.comments?.adminLabel || 'admin',
     editorLabel: props.comments?.editorLabel,
     variant: variant || 'medium',

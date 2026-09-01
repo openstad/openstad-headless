@@ -54,11 +54,11 @@ const formSchema = z.object({
   minCharactersError: z
     .string()
     .optional()
-    .default('Tekst moet minimaal {minCharacters} karakters bevatten'),
+    .default('De tekst mag niet korter zijn dan {minCharacters} tekens'),
   maxCharactersError: z
     .string()
     .optional()
-    .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
+    .default('De tekst mag niet langer zijn dan {maxCharacters} tekens'),
   displayResourceTitle: z.string().optional(),
   displayResourceSummary: z.string().optional(),
 });
@@ -106,10 +106,10 @@ export default function DocumentContent(
         'Je hebt {maxCharacters} karakters teveel',
       minCharactersError:
         props?.minCharactersError ||
-        'Tekst moet minimaal {minCharacters} karakters bevatten',
+        'De tekst mag niet korter zijn dan {minCharacters} tekens',
       maxCharactersError:
         props?.maxCharactersError ||
-        'Tekst moet maximaal {maxCharacters} karakters bevatten',
+        'De tekst mag niet langer zijn dan {maxCharacters} tekens',
       displayResourceTitle: props?.displayResourceTitle || 'yes',
       displayResourceSummary: props?.displayResourceSummary || 'yes',
     },
