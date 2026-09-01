@@ -9,6 +9,7 @@ module.exports = {
     '@apostrophecms/global': {},
     asset: {},
     'default-page': {},
+    'sitemap-page': {},
     '@apostrophecms/blog': {},
     '@apostrophecms/blog-page': {},
     '@apostrophecms/import-export': {},
