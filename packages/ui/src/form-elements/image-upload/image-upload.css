@@ -24,3 +24,10 @@ html [data-filepond-item-state*='processing-complete'] .filepond--item-panel,
 html [data-filepond-item-state*='load-complete'] .filepond--item-panel {
   background-color: #2b7d4f !important;
 }
+
+/* ponytail: bij een afbeeldingsupload ligt de preview-overlay over het paneel
+   en tekent die zijn gradient met currentColor, standaard weer #369763. Zonder
+   deze regel staat de witte bestandsnaam dus alsnog op 3,6:1 (WCAG 1.4.3). */
+html .filepond--image-preview-overlay-success {
+  color: #2b7d4f;
+}
