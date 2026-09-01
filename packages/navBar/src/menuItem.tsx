@@ -34,17 +34,26 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const handleDocumentEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setOpenIndex(null);
+      if (ref.current?.contains(document.activeElement)) {
+        buttonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleDocumentEscape);
+    return () => {
+      document.removeEventListener('keydown', handleDocumentEscape);
+    };
+  }, [open]);
+
   const handleBlur = (event: React.FocusEvent<HTMLDivElement>) => {
     if (!ref.current?.contains(event.relatedTarget as Node)) {
       setOpenIndex(null);
-    }
-  };
-
-  // ponytail: Escape sluit het submenu en zet focus terug op de chevron-knop (WCAG 1.4.13)
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Escape' && openRef.current) {
-      setOpenIndex(null);
-      buttonRef.current?.focus();
     }
   };
 
@@ -58,8 +67,7 @@ function MenuItem({ item, index, prefix = '', open, setOpenIndex }: Item) {
     <div
       key={index}
       className="item-container"
-      onMouseEnter={() => setOpenIndex(index)}
-      onKeyDown={handleKeyDown}>
+      onMouseEnter={() => setOpenIndex(index)}>
       <Link
         className="level-1"
         href={`${prefix}${item.slug}`}
