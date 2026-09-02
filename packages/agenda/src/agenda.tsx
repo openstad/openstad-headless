@@ -144,7 +144,12 @@ function Agenda({
               <a
                 className="osc-agenda-single-link"
                 href={item.links[0].url}
-                target={item.links[0].openInNewWindow ? '_blank' : '_self'}>
+                target={item.links[0].openInNewWindow ? '_blank' : '_self'}
+                rel={
+                  item.links[0].openInNewWindow
+                    ? 'noopener noreferrer'
+                    : undefined
+                }>
                 {item.links[0].title}
                 {item.links[0].openInNewWindow && (
                   <span className="sr-only"> (opent in nieuw tabblad)</span>
