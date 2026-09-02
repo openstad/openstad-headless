@@ -462,7 +462,7 @@ function CommentsInner({
 
   const randomId = Math.random().toString(36).replace('0.', 'container_');
   const sectionRef = useRef<HTMLElement>(null);
-  const scrolledToCommentRef = useRef<Number>();
+  const scrolledToCommentRef = useRef<Number | undefined>(undefined);
 
   useEffect(() => {
     if (selectedComment === undefined || Number(selectedComment) < 0) {
