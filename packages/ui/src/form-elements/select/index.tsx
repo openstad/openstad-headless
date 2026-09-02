@@ -288,7 +288,7 @@ const SelectField: FC<SelectFieldProps> = ({
           </Select>
         )}
         {!multiple && selectedChoice?.isOtherOption && (
-          <div className="marginTop10 marginBottom15">
+          <div className="select-other-option">
             <TextInput
               type="text"
               // @ts-ignore
@@ -298,7 +298,8 @@ const SelectField: FC<SelectFieldProps> = ({
               fieldKey={`${fieldKey}_${
                 selectedChoice.trigger || selectedChoiceIndex
               }_other`}
-              title=""
+              title={selectedChoice.label || 'Anders, namelijk'}
+              placeholder="Vul hier uw antwoord in"
               fieldInvalid={false}
               randomId={`${fieldKey}_${
                 selectedChoice.trigger || selectedChoiceIndex
