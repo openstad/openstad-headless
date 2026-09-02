@@ -31,7 +31,7 @@ import '@utrecht/design-tokens/dist/root.css';
 import { CRS, Icon, LatLngBoundsLiteral } from 'leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import {
   ImageOverlay,
   MapContainer,
@@ -179,6 +179,8 @@ function DocumentMap({
   // ponytail: de widget staat ingebed onder de <h1> van de CMS-pagina, dus nooit
   // zelf een h1 (WCAG 1.3.1). Redacteur kan het niveau in de admin zetten.
   const [hTitle, hSection] = headingLevels(headingLevel);
+
+  const instanceId = useId();
 
   const [sort, setSort] = useState<string | undefined>(
     defaultSorting || 'createdAt_asc'
@@ -1346,7 +1348,7 @@ function DocumentMap({
                 }`}
                 appearance="primary-action-button"
                 aria-expanded={isModalOpen}
-                aria-controls="info-panel-id"
+                aria-controls={`${instanceId}-info-panel`}
                 onClick={() => setModalOpen(true)}>
                 <i className="ri-information-line"></i>
                 {infoPopupButtonText && (
@@ -1361,11 +1363,11 @@ function DocumentMap({
                 className="modal-overlay"
                 aria-hidden={isModalOpen ? 'false' : 'true'}>
                 <div
-                  id="info-panel-id"
+                  id={`${instanceId}-info-panel`}
                   ref={modalRef}
                   className="modal"
                   role="dialog"
-                  aria-labelledby="modal-title"
+                  aria-labelledby={`${instanceId}-modal-title`}
                   aria-modal="true"
                   tabIndex={-1}>
                   <Button
@@ -1375,7 +1377,7 @@ function DocumentMap({
                     <i className="ri-close-fill"></i>
                     <span>Info venster sluiten</span>
                   </Button>
-                  <Heading level={3} id="modal-title">
+                  <Heading level={3} id={`${instanceId}-modal-title`}>
                     Hoe werkt het?
                   </Heading>
                   <Spacer size={1} />
