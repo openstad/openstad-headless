@@ -120,6 +120,8 @@ export const ImageCropDialog: React.FC<{
   }, [cropSize, mediaSize]);
 
   const hasLoadError = loadStatus === 'error';
+  const maxZoom = Math.max(3, minZoom * 3);
+  const zoomStep = 0.25;
 
   return (
     <Dialog
@@ -153,7 +155,7 @@ export const ImageCropDialog: React.FC<{
                 aspect={aspect}
                 cropSize={cropSize}
                 minZoom={minZoom}
-                maxZoom={Math.max(3, minZoom * 3)}
+                maxZoom={maxZoom}
                 initialCroppedAreaPercentages={initialCrop || undefined}
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
@@ -170,6 +172,38 @@ export const ImageCropDialog: React.FC<{
             )
           )}
         </div>
+        {!hasLoadError && loadStatus === 'ready' && cropSize && (
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              aria-label="Uitzoomen"
+              disabled={zoom <= minZoom}
+              onClick={() => setZoom(Math.max(minZoom, zoom - zoomStep))}>
+              -
+            </Button>
+            <input
+              type="range"
+              className="flex-1"
+              aria-label="Zoomniveau"
+              min={minZoom}
+              max={maxZoom}
+              step={0.01}
+              value={zoom}
+              onChange={(event) => setZoom(Number(event.target.value))}
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              aria-label="Inzoomen"
+              disabled={zoom >= maxZoom}
+              onClick={() => setZoom(Math.min(maxZoom, zoom + zoomStep))}>
+              +
+            </Button>
+          </div>
+        )}
         <div className="flex items-end gap-2">
           <label className="flex flex-col gap-1 text-sm">
             Verhouding breedte

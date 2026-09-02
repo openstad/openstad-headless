@@ -99,6 +99,8 @@ const ImageCropDialog: FC<ImageCropDialogProps> = ({
   }, [cropSize, mediaSize]);
 
   const hasLoadError = loadStatus === 'error';
+  const maxZoom = Math.max(3, minZoom * 3);
+  const zoomStep = 0.25;
 
   return (
     <div className="image-crop-dialog-overlay">
@@ -154,7 +156,7 @@ const ImageCropDialog: FC<ImageCropDialogProps> = ({
                 aspect={aspect}
                 cropSize={cropSize}
                 minZoom={minZoom}
-                maxZoom={Math.max(3, minZoom * 3)}
+                maxZoom={maxZoom}
                 initialCroppedAreaPercentages={initialCrop || undefined}
                 onCropChange={setCrop}
                 onZoomChange={setZoom}
@@ -171,6 +173,33 @@ const ImageCropDialog: FC<ImageCropDialogProps> = ({
             )
           )}
         </div>
+        {!hasLoadError && loadStatus === 'ready' && cropSize && (
+          <div className="image-crop-dialog-zoom">
+            <SecondaryButton
+              type="button"
+              aria-label="Uitzoomen"
+              disabled={zoom <= minZoom}
+              onClick={() => setZoom(Math.max(minZoom, zoom - zoomStep))}>
+              -
+            </SecondaryButton>
+            <input
+              type="range"
+              aria-label="Zoomniveau"
+              min={minZoom}
+              max={maxZoom}
+              step={0.01}
+              value={zoom}
+              onChange={(event) => setZoom(Number(event.target.value))}
+            />
+            <SecondaryButton
+              type="button"
+              aria-label="Inzoomen"
+              disabled={zoom >= maxZoom}
+              onClick={() => setZoom(Math.min(maxZoom, zoom + zoomStep))}>
+              +
+            </SecondaryButton>
+          </div>
+        )}
         <div className="image-crop-dialog-actions">
           {hasLoadError ? (
             <Button type="button" onClick={onLoadError}>
