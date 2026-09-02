@@ -518,12 +518,6 @@ const documentMulterConfig = {
       return cb(null, false, new Error('goes wrong on the mimetype'));
     }
 
-    const forbiddenChars = /[\\/:]/;
-    if (forbiddenChars.test(file.originalname)) {
-      req.fileValidationError = 'Forbidden characters in filename';
-      return cb(null, false, new Error('Forbidden characters in filename'));
-    }
-
     cb(null, true);
   },
 };

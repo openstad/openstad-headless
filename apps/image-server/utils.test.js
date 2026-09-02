@@ -22,6 +22,20 @@ test('createFilename keeps long file names within the filesystem limit', () => {
   expect(result.endsWith('.pdf')).toBe(true);
 });
 
+test('createFilename sanitizes forbidden characters in the base name and extension', () => {
+  const withColon = createFilename('12:06 verslag.pdf');
+  expect(withColon).toMatch(/^12_06_verslag-[0-9a-f-]{36}\.pdf$/);
+
+  const withSlashInExtension = createFilename('rapport.p/df');
+  expect(withSlashInExtension).toMatch(/^rapport-[0-9a-f-]{36}\.p_df$/);
+
+  const withBackslash = createFilename('map\\bestand.docx');
+  expect(withBackslash).toMatch(/^map_bestand-[0-9a-f-]{36}\.docx$/);
+
+  const specialChars = createFilename('een *?"<>| naam.pdf');
+  expect(specialChars).toMatch(/^een_naam-[0-9a-f-]{36}\.pdf$/);
+});
+
 test('the allowed image extensions do not include heic or heif', () => {
   expect(ALLOWED_IMAGE_EXTENSIONS).not.toContain('heic');
   expect(ALLOWED_IMAGE_EXTENSIONS).not.toContain('heif');

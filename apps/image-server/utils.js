@@ -62,7 +62,7 @@ const sanitizeFileName = (fileName) => {
 const MAX_FILENAME_LENGTH = 255;
 
 const createFilename = (originalFileName) => {
-  const fileExtension = originalFileName.split('.').pop();
+  const fileExtension = sanitizeFileName(originalFileName.split('.').pop());
   const fileNameWithoutExtension =
     originalFileName.substring(0, originalFileName.lastIndexOf('.')) ||
     originalFileName;
