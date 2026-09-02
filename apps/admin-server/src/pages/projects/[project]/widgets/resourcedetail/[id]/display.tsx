@@ -29,7 +29,12 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 type ShareOption =
-  'facebook' | 'x' | 'mail' | 'whatsapp' | 'linkedin' | 'copylink';
+  | 'facebook'
+  | 'x'
+  | 'mail'
+  | 'whatsapp'
+  | 'linkedin'
+  | 'copylink';
 const shareOptions: [ShareOption, ...ShareOption[]] = [
   'facebook',
   'x',

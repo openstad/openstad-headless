@@ -41,31 +41,29 @@ import { buildPageTitle } from './page-title';
 import './resource-detail.css';
 
 type booleanProps = {
-  [
-    K in
-      | 'displayImage'
-      | 'displayImageDescription'
-      | 'displayTitle'
-      | 'displayModBreak'
-      | 'displaySummary'
-      | 'displayDescription'
-      | 'displayDescriptionExpandable'
-      | 'displayUser'
-      | 'displayDate'
-      | 'displayBudget'
-      | 'displayLocation'
-      | 'displayBudgetDocuments'
-      | 'displayLikes'
-      | 'displayTags'
-      | 'displayStatus'
-      | 'displayDocuments'
-      | 'clickableImage'
-      | 'displayStatusBar'
-      | 'displayEditResourceButton'
-      | 'displayDeleteButton'
-      | 'displayDeleteEditButtonOnTop'
-      | 'displaySocials'
-  ]: boolean | undefined;
+  [K in
+    | 'displayImage'
+    | 'displayImageDescription'
+    | 'displayTitle'
+    | 'displayModBreak'
+    | 'displaySummary'
+    | 'displayDescription'
+    | 'displayDescriptionExpandable'
+    | 'displayUser'
+    | 'displayDate'
+    | 'displayBudget'
+    | 'displayLocation'
+    | 'displayBudgetDocuments'
+    | 'displayLikes'
+    | 'displayTags'
+    | 'displayStatus'
+    | 'displayDocuments'
+    | 'clickableImage'
+    | 'displayStatusBar'
+    | 'displayEditResourceButton'
+    | 'displayDeleteButton'
+    | 'displayDeleteEditButtonOnTop'
+    | 'displaySocials']: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = {

@@ -27,3 +27,4 @@ apps/cms-server/public/apos-frontend
 apps/auth-server/views/
 apps/cms-server/views/partials/oud/
 apps/cms-server/modules/openstad-section-widget/views/
+apps/cms-server/modules/@apostrophecms/blog-page/views/
