@@ -788,8 +788,10 @@ const config: EnqueteWidgetProps = {
   afterSubmitUrl: '',
   formVisibility: 'always',
   displayDescription: false,
-  maxCharactersError: 'De tekst mag niet langer zijn dan {maxCharacters} tekens',
-  minCharactersError: 'De tekst mag niet korter zijn dan {minCharacters} tekens',
+  maxCharactersError:
+    'De tekst mag niet langer zijn dan {maxCharacters} tekens',
+  minCharactersError:
+    'De tekst mag niet korter zijn dan {minCharacters} tekens',
   infoBlockShareButton: true,
   maxCharactersWarning: 'Je hebt nog {maxCharacters} tekens over',
   minCharactersWarning: 'Nog minimaal {minCharacters} tekens',
