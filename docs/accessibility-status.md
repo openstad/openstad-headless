@@ -412,8 +412,8 @@ vereisen een échte 320-viewport.
 **Deploy naar de demo (31490) — twee mechanismen:**
 
 1. **api-server-widgets** (enquête, form, swipe, resource-_, stem-begroot, …): de api-server (poort 31410) leest `packages/_/dist` **per request van disk** (`apps/api-server/.../widget.js`,
-`fs.readFileSync`). Dus `npm run build`van het package volstaat → automatisch live op de demo
-(hooguit browser hard-refresh ⌘⇧R). Mapping:`apps/api-server/src/routes/widget/widget-settings.js`.
+   `fs.readFileSync`). Dus `npm run build`van het package volstaat → automatisch live op de demo
+   (hooguit browser hard-refresh ⌘⇧R). Mapping:`apps/api-server/src/routes/widget/widget-settings.js`.
    - ⚠️ **VALKUIL — gedeelde componenten worden per widget mee-gebundeld.** Wijzig je iets in
      `packages/ui/src` (bv. `Filters`, `Paginator`) of in `packages/comments`, dan moet je **élke widget
      die het bundelt** herbouwen — niet alleen het "eigen" package. Bv. het reactieformulier op een

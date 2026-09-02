@@ -47,13 +47,12 @@
       </div>
     </div>
   </div>
-  {% set logoIsHome = data.page and data.home and data.page._id ==
-  data.home._id %}
+  {% set logoIsHome = data.page and data.home and data.page._id == data.home._id
+  %}
   <div class="container relative main-header-container">
     <div class="row">
       <div class="col-xs-12">
-        {% if data.global.siteLogo === 'amsterdam' %}
-        {% if logoIsHome %}
+        {% if data.global.siteLogo === 'amsterdam' %} {% if logoIsHome %}
         <span class="logo-container">
           <img
             src="/modules/openstad-assets/img/andreas.svg"
@@ -70,9 +69,7 @@
             alt="{{ (data.global.logoAltText or ('Logo ' ~ (data.global.siteTitle or ''))) | trim }}" />
           <div id="amsterdam">Gemeente<br />Amsterdam</div>
         </a>
-        {% endif %}
-        {% elif data.global.siteLogo %}
-        {% if logoIsHome %}
+        {% endif %} {% elif data.global.siteLogo %} {% if logoIsHome %}
         <span class="logo-uploaded logo-main-container">
           <img
             src="{{apos.attachment.url(data.global.siteLogo)}}"
@@ -97,9 +94,7 @@
           <h2 class="header-subtitle">{{data.global.siteTitle}}</h2>
           {% endif %} {% endif %}
         </a>
-        {% endif %}
-        {% else %}
-        {% if logoIsHome %}
+        {% endif %} {% else %} {% if logoIsHome %}
         <span class="logo-default logo-main-container">
           <img
             class="default"
@@ -118,8 +113,7 @@
             alt="{{ (data.global.logoAltText or ('Logo ' ~ (data.global.siteTitle or ''))) | trim }}"
             id="logo-image" />
         </a>
-        {% endif %}
-        {% endif %}
+        {% endif %} {% endif %}
         <div
           class="header-side-container {{ 'without-site-title' if data.global.hideSiteTitle}}">
           <div class="row">
