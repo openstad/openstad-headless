@@ -41,21 +41,31 @@ export function processXlsData(data) {
 }
 
 export function processXlsRow(row) {
+  const result = {};
+  const dottedKeys = [];
+
   Object.keys(row).forEach((key) => {
-    let match = key.match(/^(\w+)\.(\w+)$/);
-    if (match) {
-      let value = row[key];
-
-      if (!row[match[1]]) row[match[1]] = {};
-      row[match[1]][match[2]] = processXlsValue(value);
-
-      delete row[key];
+    if (key.match(/^(\w+)\.(\w+)$/)) {
+      dottedKeys.push(key);
     } else {
-      row[key] = processXlsValue(row[key]);
+      result[key] = processXlsValue(row[key]);
     }
   });
 
-  return row;
+  dottedKeys.forEach((key) => {
+    const [, parent, child] = key.match(/^(\w+)\.(\w+)$/);
+
+    if (
+      typeof result[parent] !== 'object' ||
+      result[parent] === null ||
+      Array.isArray(result[parent])
+    ) {
+      result[parent] = {};
+    }
+    result[parent][child] = processXlsValue(row[key]);
+  });
+
+  return result;
 }
 
 export function processXlsValue(value) {
