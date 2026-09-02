@@ -435,7 +435,7 @@ function ResourceDetail({
             displayStatusBar &&
             resource.statuses &&
             resource.statuses.length > 0 && (
-              <div>
+              <div onClick={(e) => e.stopPropagation()}>
                 <Paragraph
                   className={`osc-resource-detail-content-item-status ${statusClasses}`}>
                   {resource.statuses
@@ -462,7 +462,11 @@ function ResourceDetail({
         />
 
         {displayImageDescription && imageDescription && (
-          <p className="carousel-image-description">{imageDescription}</p>
+          <p
+            className="carousel-image-description"
+            onClick={(e) => e.stopPropagation()}>
+            {imageDescription}
+          </p>
         )}
       </>
     );

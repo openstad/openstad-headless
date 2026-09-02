@@ -287,6 +287,11 @@
   opacity: 1;
 }
 
+.osc-clickable-image--wrapper .osc-image-footer,
+.osc-clickable-image--wrapper .carousel-image-description {
+  cursor: default;
+}
+
 .osc-resource-detail-widget-container > .utrecht-button-group {
   padding: 1rem;
 }
