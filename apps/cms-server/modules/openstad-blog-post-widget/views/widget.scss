@@ -49,6 +49,11 @@
     grid-row: 2;
   }
 
+  .related-posts-empty {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
   .news-card {
     position: relative;
 
