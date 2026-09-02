@@ -1041,6 +1041,8 @@ function DocumentMap({
 
   // const [goToPage, setGoToPage] = useState<((page:number) => void) | null>(null);
 
+  const [goToLastPage, setGoToLastPage] = useState<(() => void) | null>(null);
+
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   useEffect(() => {
