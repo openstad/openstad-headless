@@ -7,7 +7,7 @@ import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Carousel, Image } from '@openstad-headless/ui/src';
+import { Carousel, Image, headingLevels } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
 import { Heading, Paragraph } from '@utrecht/component-library-react';
 import { Button, ButtonLink } from '@utrecht/component-library-react';
@@ -86,8 +86,10 @@ function ResourceDetailWithMap({
   countButton = undefined,
   ctaButton = undefined,
   backUrl = '/',
+  headingLevel = undefined,
   ...props
 }: ResourceDetailWidgetProps) {
+  const [hTitle, hSection] = headingLevels(headingLevel);
   let resourceId: string | undefined = String(
     getResourceId({
       resourceId: parseInt(props.resourceId || ''),
@@ -228,7 +230,7 @@ function ResourceDetailWithMap({
 
             {displayTitle && resource.title && (
               <Heading
-                level={1}
+                level={hTitle}
                 appearance="utrecht-heading-2"
                 dangerouslySetInnerHTML={{ __html: resource.title }}
               />
@@ -237,7 +239,7 @@ function ResourceDetailWithMap({
               {displayUser && resource?.user?.displayName && (
                 <div>
                   <Heading
-                    level={2}
+                    level={hSection}
                     appearance="utrecht-heading-6"
                     className="osc-resource-detail-content-item-title">
                     Ingediend door
@@ -250,7 +252,7 @@ function ResourceDetailWithMap({
               {displayDate && resource.startDateHumanized && (
                 <div>
                   <Heading
-                    level={2}
+                    level={hSection}
                     appearance="utrecht-heading-6"
                     className="osc-resource-detail-content-item-title">
                     Datum
@@ -263,7 +265,7 @@ function ResourceDetailWithMap({
               {displayBudget && resource.budget && (
                 <div>
                   <Heading
-                    level={2}
+                    level={hSection}
                     appearance="utrecht-heading-6"
                     className="osc-resource-detail-content-item-title">
                     Budget
@@ -277,7 +279,7 @@ function ResourceDetailWithMap({
             <div className="resource-detail-content">
               {displaySummary && (
                 <Heading
-                  level={2}
+                  level={hSection}
                   appearance="utrecht-heading-4"
                   dangerouslySetInnerHTML={{ __html: resource.summary }}
                 />
