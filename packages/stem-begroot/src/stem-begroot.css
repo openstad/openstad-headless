@@ -216,7 +216,7 @@ article.stem-begroot--container .stembegroot--infolabels {
     flex-wrap: wrap;
   }
 
-  .stepper {
+  .stepper-list {
     flex-wrap: wrap;
     grid-gap: 5px;
   }
