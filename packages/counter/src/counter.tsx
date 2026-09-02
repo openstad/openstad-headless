@@ -186,7 +186,8 @@ function Counter({
     const fullText = `${amountDisplayed || 0} ${label || ''}`.trim();
     return (
       <Paragraph role="status" aria-live="polite" aria-atomic="true">
-        <span className="amount" aria-label={fullText} aria-hidden="false">
+        <span className="sr-only">{fullText}</span>
+        <span className="amount" aria-hidden="true">
           {renderAmount(amountDisplayed || 0)}
         </span>
         {label ? (

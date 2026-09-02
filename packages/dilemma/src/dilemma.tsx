@@ -7,6 +7,7 @@ import React, {
   FC,
   useCallback,
   useEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -77,6 +78,8 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   overrideDefaultValue,
   ...props
 }) => {
+  const instanceId = useId();
+
   const dilemmaCards = useMemo(
     () => (dilemmas.length > 0 ? dilemmas : []),
     [dilemmas]
@@ -420,6 +423,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
                           className={`dilemma-summary-btn ${
                             answer === 'a' ? 'active' : ''
                           }`}
+                          aria-pressed={answer === 'a'}
                           onClick={(e) => (
                             e.preventDefault(),
                             handleAnswerChange(dilemma.id, 'a')
@@ -443,6 +447,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
                           className={`dilemma-summary-btn ${
                             answer === 'b' ? 'active' : ''
                           }`}
+                          aria-pressed={answer === 'b'}
                           onClick={(e) => (
                             e.preventDefault(),
                             handleAnswerChange(dilemma.id, 'b')
@@ -493,7 +498,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       <div className="dilemma-intro">
         <Heading
           level={2}
-          id={`dilemma-titel-${currentDilemma.id}`}
+          id={`${instanceId}-dilemma-titel-${currentDilemma.id}`}
           dangerouslySetInnerHTML={{ __html: sanitizeHtml(title || '') }}
         />
         <div
@@ -513,7 +518,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       <div
         className="dilemma-options"
         role="radiogroup"
-        aria-labelledby={`dilemma-titel-${currentDilemma.id}`}>
+        aria-labelledby={`${instanceId}-dilemma-titel-${currentDilemma.id}`}>
         <span className="dilemma-label" aria-hidden="true">
           <span>OF</span>
         </span>
@@ -656,7 +661,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           type="button"
           disabled={!currentDilemma?.infoField}
           aria-expanded={infoDialog}
-          aria-controls="dilemma-info-panel"
+          aria-controls={`${instanceId}-dilemma-info-panel`}
           aria-label="Meer informatie over deze vraag">
           <span aria-hidden="true">Info</span>
         </button>
@@ -692,9 +697,9 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           className="explanation-dialog"
           role="dialog"
           aria-modal="true"
-          aria-labelledby="explanation-dialog-title">
+          aria-labelledby={`${instanceId}-explanation-dialog-title`}>
           <div className="explanation-dialog-content">
-            <Heading level={3} id="explanation-dialog-title">
+            <Heading level={3} id={`${instanceId}-explanation-dialog-title`}>
               Korte uitleg
             </Heading>
             <Paragraph>Zodat we beter begrijpen wat belangrijk is.</Paragraph>
@@ -725,7 +730,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       )}
 
       <div
-        id="dilemma-info-panel"
+        id={`${instanceId}-dilemma-info-panel`}
         className="info-card dilemma-info-field"
         aria-hidden={!infoDialog ? 'true' : undefined}
         {...(!infoDialog ? { inert: 'true' as any } : {})}>

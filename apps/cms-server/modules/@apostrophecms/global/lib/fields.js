@@ -467,6 +467,22 @@ module.exports = resultObject([
     ],
   },
   {
+    name: 'mainMenuParentBehavior',
+    type: 'select',
+    label: 'How does a menu item with subpages behave?',
+    def: 'linkWithToggle',
+    choices: [
+      {
+        value: 'linkWithToggle',
+        label: 'Link with a separate expand button',
+      },
+      {
+        value: 'button',
+        label: 'One button; the page itself becomes the first submenu item',
+      },
+    ],
+  },
+  {
     name: 'mainMenuItems',
     type: 'array',
     label: 'Menu items',

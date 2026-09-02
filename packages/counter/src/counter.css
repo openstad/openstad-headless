@@ -24,10 +24,29 @@
 
 .osc.counter-container p {
   display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
   gap: var(--nlds-counter-gap, 0.25rem);
   justify-content: var(--nlds-counter-justify-content, left);
   align-items: var(--nlds-counter-align-items, center);
   color: inherit;
+}
+
+.osc.counter-container .label {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+.osc.counter-container .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .osc.counter-container {

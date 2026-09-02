@@ -384,6 +384,13 @@ label.utrecht-form-label {
     var(--utrecht-button-primary-action-hover-background-color, #f8d62d)
   );
   --setEnqueteBorderWidth: 1px;
+
+  .form-container:has(.--youth-intro),
+  .form-container:has(.--youth-outro) {
+    --nlds-form-fieldcounter-track-color: rgba(255, 255, 255, 0.55);
+    --nlds-form-fieldcounter-done-color: rgba(255, 255, 255, 0.8);
+    --nlds-form-fieldcounter-active-color: #ffffff;
+  }
 }
 
 .osc-enquete-item-content {

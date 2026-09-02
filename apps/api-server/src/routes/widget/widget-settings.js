@@ -65,9 +65,9 @@ let moduleDefinitions = {
       formVisibility: 'always',
       displayDescription: false,
       maxCharactersError:
-        'Tekst moet maximaal {maxCharacters} karakters bevatten',
+        'De tekst mag niet langer zijn dan {maxCharacters} tekens',
       minCharactersError:
-        'Tekst moet minimaal {minCharacters} karakters bevatten',
+        'De tekst mag niet korter zijn dan {minCharacters} tekens',
       maxCharactersWarning: 'Je hebt nog {maxCharacters} tekens over',
       minCharactersWarning: 'Nog minimaal {minCharacters} tekens',
     },
@@ -590,9 +590,9 @@ let moduleDefinitions = {
       displayPagination: false,
       submitCommentText: 'Versturen',
       maxCharactersError:
-        'Tekst moet maximaal {maxCharacters} karakters bevatten',
+        'De tekst mag niet langer zijn dan {maxCharacters} tekens',
       minCharactersError:
-        'Tekst moet minimaal {minCharacters} karakters bevatten',
+        'De tekst mag niet korter zijn dan {minCharacters} tekens',
       displayResourceInfo: 'left',
       infoPopupButtonText: '',
       openInfoPopupOnInit: 'no',

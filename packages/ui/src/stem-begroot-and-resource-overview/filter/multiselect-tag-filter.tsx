@@ -1,4 +1,5 @@
 import DataStore from '@openstad-headless/data-store/src';
+import { MultiSelect } from '@openstad-headless/ui/src';
 import { FormLabel } from '@utrecht/component-library-react';
 import React, { useEffect, useId, useState } from 'react';
 
@@ -118,28 +119,20 @@ const MultiSelectTagFilter = ({
     tags.length > 0 && (
       <div className="form-element">
         <FormLabel id={groupId}>{groupLabel}</FormLabel>
-        <div
-          className={`multiselect-options${inlineOptions ? ' multiselect-options--inline' : ''}`}
-          role="group"
-          aria-labelledby={groupId}>
-          {(tags as TagDefinition[]).map((tag) => {
-            const checkboxId = `${groupId}-tag-${tag.id}`;
-            return (
-              <div key={tag.id} className="multiselect-option">
-                <input
-                  type="checkbox"
-                  id={checkboxId}
-                  checked={combinedSelects.includes(tag.id)}
-                  onChange={() => {
-                    setStopUsingDefaultValue(true);
-                    onUpdateFilter && onUpdateFilter(tag.id, tag.name);
-                  }}
-                />
-                <label htmlFor={checkboxId}>{tag.name}</label>
-              </div>
-            );
-          })}
-        </div>
+        <MultiSelect
+          id={groupId}
+          onItemSelected={(value, label) => {
+            setStopUsingDefaultValue(true);
+            onUpdateFilter && onUpdateFilter(value, label);
+          }}
+          options={(tags || []).map((tag: TagDefinition) => ({
+            value: tag.id,
+            label: tag.name,
+            checked: combinedSelects.includes(tag.id),
+          }))}
+          inlineOptions={inlineOptions}
+          defaultOpen={inlineOptions}
+        />
       </div>
     )
   );

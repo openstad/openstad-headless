@@ -207,7 +207,7 @@ function CommentsInner({
   }, [onGoToLastPage, goToLastPage]);
 
   useEffect(() => {
-    if (overridePage != null && overridePage !== page) {
+    if (typeof overridePage === 'number' && overridePage !== page) {
       setPage(overridePage);
       if (onOverridePageConsumed) {
         onOverridePageConsumed();
@@ -266,10 +266,10 @@ function CommentsInner({
       'Je hebt nog {maxCharacters} tekens over',
     minCharactersError:
       props?.comments?.minCharactersError ||
-      'Tekst moet minimaal {minCharacters} karakters bevatten',
+      'De tekst mag niet korter zijn dan {minCharacters} tekens',
     maxCharactersError:
       props?.comments?.maxCharactersError ||
-      'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      'De tekst mag niet langer zijn dan {maxCharacters} tekens',
     adminLabel: props.comments?.adminLabel || 'admin',
     editorLabel: props.comments?.editorLabel,
     variant: variant || 'medium',
@@ -422,6 +422,24 @@ function CommentsInner({
     Math.random().toString(36).replace('0.', 'container_')
   );
   const randomId = randomIdRef.current;
+  const sectionRef = useRef<HTMLElement>(null);
+  const scrolledToCommentRef = useRef<Number | undefined>(undefined);
+
+  useEffect(() => {
+    if (selectedComment === undefined || Number(selectedComment) < 0) {
+      scrolledToCommentRef.current = undefined;
+      return;
+    }
+    if (scrolledToCommentRef.current === selectedComment) return;
+
+    const commentElement = sectionRef.current?.querySelector(
+      `#comment-${selectedComment}`
+    );
+    if (commentElement) {
+      commentElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      scrolledToCommentRef.current = selectedComment;
+    }
+  }, [selectedComment, page, comments]);
 
   const scrollToTop = () => {
     const divElement = document.getElementById(randomId);
@@ -437,7 +455,7 @@ function CommentsInner({
         ...args,
         setRefreshComments: refreshComments || defaultSetRefreshComments,
       }}>
-      <section className="osc" id={randomId}>
+      <section className="osc" id={randomId} ref={sectionRef}>
         <Heading3 className="comments-title">
           {comments && title?.replace(/\[\[nr\]\]/, commentCount.toString())}
           {!comments && title}

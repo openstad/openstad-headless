@@ -1,3 +1,7 @@
+.osc-paginator {
+  display: flex;
+}
+
 .osc-paginator-list {
   display: flex;
   flex-wrap: wrap; /* reflow bij 200% zoom / smalle viewport (WCAG 1.4.4) */

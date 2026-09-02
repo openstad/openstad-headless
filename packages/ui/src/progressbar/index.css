@@ -6,7 +6,30 @@
 }
 
 .osc .progressbar-tracker {
+  appearance: none;
+  -webkit-appearance: none;
   height: 100%;
+  width: 100%;
+  display: block;
+  background-color: transparent;
+  border: none;
+  border-radius: inherit;
+}
+
+.osc .progressbar-tracker::-webkit-progress-bar {
+  background-color: transparent;
+  border-radius: inherit;
+}
+
+.osc .progressbar-tracker::-webkit-progress-value {
+  background-color: var(
+    --nlds-progressbar-fill-background-color,
+    var(--utrecht-button-primary-action-background-color)
+  );
+  border-radius: inherit;
+}
+
+.osc .progressbar-tracker::-moz-progress-bar {
   background-color: var(
     --nlds-progressbar-fill-background-color,
     var(--utrecht-button-primary-action-background-color)

@@ -32,7 +32,7 @@ import '@utrecht/design-tokens/dist/root.css';
 import { CRS, Icon, LatLngBoundsLiteral } from 'leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import {
   ImageOverlay,
   MapContainer,
@@ -180,6 +180,8 @@ function DocumentMap({
   // ponytail: de widget staat ingebed onder de <h1> van de CMS-pagina, dus nooit
   // zelf een h1 (WCAG 1.3.1). Redacteur kan het niveau in de admin zetten.
   const [hTitle, hSection] = headingLevels(headingLevel);
+
+  const instanceId = useId();
 
   const [sort, setSort] = useState<string | undefined>(
     defaultSorting || 'createdAt_asc'
@@ -551,10 +553,6 @@ function DocumentMap({
           embeddedUrl: window.location.href,
         });
 
-        if (goToLastPage && displayPagination) {
-          goToLastPage();
-        }
-
         const addNewCommentToComments = [...filteredComments, newComment];
         const newIndex = newComment?.id;
 
@@ -778,9 +776,6 @@ function DocumentMap({
               }
               setSelectedMarkerIndex(index);
               setSelectedCommentIndex(index);
-              if (!isPopupMarkerBehavior) {
-                scrollToComment(index);
-              }
             }
           },
           keydown: (e: L.LeafletKeyboardEvent) => {
@@ -795,9 +790,6 @@ function DocumentMap({
                 }
                 setSelectedMarkerIndex(index);
                 setSelectedCommentIndex(index);
-                if (!isPopupMarkerBehavior) {
-                  scrollToComment(index);
-                }
               }
             }
           },
@@ -875,12 +867,11 @@ function DocumentMap({
   };
 
   const modalRef = useRef<HTMLDivElement | null>(null);
+  const infoTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [manualFocus, setManualFocus] = useState(false);
 
   const setModalOpen = (state: boolean) => {
     setIsModalOpen(state);
-    setManualFocus(state);
   };
 
   const trapFocus = (event: KeyboardEvent) => {
@@ -991,17 +982,20 @@ function DocumentMap({
     };
   }, [isModalOpen]);
 
-  // Focus management when modal opens
+  const modalWasOpenRef = useRef(false);
   useEffect(() => {
-    if (isModalOpen && modalRef.current && manualFocus) {
+    if (isModalOpen && modalRef.current) {
       modalRef.current.focus();
     }
+    if (!isModalOpen && modalWasOpenRef.current) {
+      infoTriggerRef.current?.focus();
+    }
+    modalWasOpenRef.current = isModalOpen;
   }, [isModalOpen]);
 
   useEffect(() => {
     if (openInfoPopupOnInit === 'yes') {
       setIsModalOpen(true);
-      setManualFocus(false);
     }
   }, []);
 
@@ -1046,7 +1040,6 @@ function DocumentMap({
   const votingEnabled = configVotingEnabled && args.canComment;
 
   // const [goToPage, setGoToPage] = useState<((page:number) => void) | null>(null);
-  const [goToLastPage, setGoToLastPage] = useState<(() => void) | null>(null);
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
@@ -1464,12 +1457,13 @@ function DocumentMap({
           {!!args.canComment && (
             <>
               <Button
+                ref={infoTriggerRef}
                 className={`info-trigger ${
                   infoPopupButtonText ? 'button-has-text' : ''
                 }`}
                 appearance="primary-action-button"
                 aria-expanded={isModalOpen}
-                aria-controls="info-panel-id"
+                aria-controls={`${instanceId}-info-panel`}
                 onClick={() => setModalOpen(true)}>
                 <i className="ri-information-line"></i>
                 {infoPopupButtonText && (
@@ -1484,11 +1478,11 @@ function DocumentMap({
                 className="modal-overlay"
                 aria-hidden={isModalOpen ? 'false' : 'true'}>
                 <div
-                  id="info-panel-id"
+                  id={`${instanceId}-info-panel`}
                   ref={modalRef}
                   className="modal"
                   role="dialog"
-                  aria-labelledby="modal-title"
+                  aria-labelledby={`${instanceId}-modal-title`}
                   aria-modal="true"
                   tabIndex={-1}>
                   <Button
@@ -1498,7 +1492,7 @@ function DocumentMap({
                     <i className="ri-close-fill"></i>
                     <span>Info venster sluiten</span>
                   </Button>
-                  <Heading level={3} id="modal-title">
+                  <Heading level={3} id={`${instanceId}-modal-title`}>
                     Hoe werkt het?
                   </Heading>
                   <Spacer size={1} />

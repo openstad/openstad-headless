@@ -8,7 +8,7 @@ import {
   Paragraph,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { useState } from 'react';
 
 import hasRole from '../../../lib/has-role';
@@ -58,6 +58,7 @@ function Comment({
 
   const datastore = new DataStore(args);
   const { data: currentUser } = datastore.useCurrentUser({ ...args });
+  const articleRef = useRef<HTMLElement>(null);
   const [isReplyFormActive, setIsReplyFormActive] = useState<boolean>(false);
   const [editMode, setEditMode] = useState<boolean>(false);
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -123,14 +124,19 @@ function Comment({
   }
 
   const findLocation = (index: number) => () => {
+    const scope: ParentNode =
+      articleRef.current?.closest('.openstad') ?? document;
+
     const markerIcons = Array.from(
-      document.getElementsByClassName('leaflet-marker-icon')
+      scope.querySelectorAll('.leaflet-marker-icon')
     );
-    const comments = Array.from(
-      document.getElementsByClassName('comment-item')
+    const comments = Array.from(scope.querySelectorAll('.comment-item'));
+    const markersForComment = markerIcons.filter((markerIcon) =>
+      markerIcon.classList.contains(`id-${index}`)
     );
-    const isAlreadySelected =
-      markerIcons[index]?.classList.contains('--highlightedIcon');
+    const isAlreadySelected = markersForComment.some((markerIcon) =>
+      markerIcon.classList.contains('--highlightedIcon')
+    );
 
     markerIcons.forEach((markerIcon) =>
       markerIcon.classList.remove('--highlightedIcon')
@@ -138,12 +144,10 @@ function Comment({
     comments.forEach((comment) => comment.classList.remove('selected'));
 
     if (!isAlreadySelected) {
-      markerIcons.forEach((markerIcon) => {
-        if (markerIcon.classList.contains(`id-${index}`)) {
-          markerIcon.classList.add('--highlightedIcon');
-        }
-      });
-      document.getElementById(`comment-${index}`)?.classList.toggle('selected');
+      markersForComment.forEach((markerIcon) =>
+        markerIcon.classList.add('--highlightedIcon')
+      );
+      scope.querySelector(`#comment-${index}`)?.classList.toggle('selected');
     }
   };
 
@@ -171,6 +175,7 @@ function Comment({
 
   return (
     <article
+      ref={articleRef}
       className={`comment-item ${selected ? 'selected' : ''}`}
       id={`comment-${comment?.id}`}
       onClick={

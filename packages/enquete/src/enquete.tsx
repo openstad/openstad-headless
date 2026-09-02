@@ -360,10 +360,10 @@ function Enquete(props: EnqueteWidgetProps) {
             'Nog minimaal {minCharacters} tekens';
           fieldData['maxCharactersError'] =
             props?.maxCharactersError ||
-            'Tekst moet maximaal {maxCharacters} karakters bevatten';
+            'De tekst mag niet langer zijn dan {maxCharacters} tekens';
           fieldData['minCharactersError'] =
             props?.minCharactersError ||
-            'Tekst moet minimaal {minCharacters} karakters bevatten';
+            'De tekst mag niet korter zijn dan {minCharacters} tekens';
           fieldData['showMinMaxAfterBlur'] =
             props?.showMinMaxAfterBlur || false;
           fieldData['maxCharactersOverWarning'] =

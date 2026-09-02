@@ -135,6 +135,7 @@ export const BegrotenSelectedOverview = ({
                 <div className="tag-panel-container">
                   {showInfoMenu && (
                     <BudgetStatusPanel
+                      headingLevel={headingLevel}
                       typeIsBudgeting={typeIsBudgeting}
                       maxNrOfResources={tagData.max}
                       nrOfResourcesSelected={tagData.current}
@@ -159,6 +160,7 @@ export const BegrotenSelectedOverview = ({
           />
           {showInfoMenu ? (
             <BudgetStatusPanel
+              headingLevel={headingLevel}
               typeIsBudgeting={typeIsBudgeting}
               maxNrOfResources={maxNrOfResources}
               nrOfResourcesSelected={resourcesToShow.length}
@@ -173,7 +175,12 @@ export const BegrotenSelectedOverview = ({
             <Spacer size={1.5} />
           )}
 
-          <Heading3 className="step2Title">{step2Title}</Heading3>
+          <Heading
+            level={headingLevel}
+            appearance="utrecht-heading-3"
+            className="step2Title">
+            {step2Title}
+          </Heading>
 
           {resourcesToShow.map((resource) => {
             let defaultImage = '';

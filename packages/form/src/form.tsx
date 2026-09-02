@@ -27,7 +27,7 @@ import {
 import '@utrecht/design-tokens/dist/root.css';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import './form.css';
+import './form.scss';
 import type {
   CombinedFieldPropsWithType,
   ComponentFieldProps,
@@ -620,6 +620,7 @@ function Form({
                 <li
                   key={index}
                   className={`${currentPage === index ? '--active' : ''}`}
+                  aria-current={currentPage === index ? 'step' : undefined}
                   aria-label={`Pagina ${index + 1}`}></li>
               ))}
             </ul>

@@ -41,6 +41,7 @@ import React, { useEffect, useId, useState } from 'react';
 
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 import { canLikeResource, hasRole } from '../../lib';
+import { buildPageTitle } from './page-title';
 import './resource-detail.css';
 import { formatDocumentLabel } from './utils';
 
@@ -488,13 +489,14 @@ function ResourceDetail({
     }
   };
 
+  const originalDocumentTitleRef = React.useRef(document.title);
+
   useEffect(() => {
     if (props.pageTitle === true && resource.title !== undefined) {
-      const current =
-        document.title.includes(' - ') && document.title.split(' - ')[0].length
-          ? ' - ' + document.title.split(' - ')[0]
-          : '';
-      document.title = resource.title + current;
+      document.title = buildPageTitle(
+        resource.title,
+        originalDocumentTitleRef.current
+      );
     }
   }, [resource]);
 

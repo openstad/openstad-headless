@@ -30,3 +30,4 @@ apps/auth-server/views/
 apps/cms-server/views/partials/oud/
 apps/cms-server/modules/openstad-section-widget/views/
 apps/cms-server/modules/openstad-iframe-widget/views/widget.html
+apps/cms-server/modules/@apostrophecms/blog-page/views/

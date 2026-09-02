@@ -23,7 +23,7 @@ import React, { FC, ReactNode, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
-import './sort.css';
+import './sort.scss';
 
 type OptionTitle = {
   key: string;

@@ -1187,6 +1187,7 @@ function StemBegroot({
   return (
     <>
       <StemBegrootResourceDetailDialog
+        headingLevel={hSection}
         areaId={props.map.areaId}
         displayPriceLabel={props.displayPriceLabel}
         displayRanking={props.displayRanking}
@@ -1421,6 +1422,7 @@ function StemBegroot({
 
           {currentStep === 2 ? (
             <Step3
+              headingLevel={hSection}
               loginUrl={`${props?.login?.url}`}
               step3={props.step3 || ''}
               stemCodeTitle={props.stemCodeTitle}
@@ -1432,13 +1434,17 @@ function StemBegroot({
           ) : null}
 
           {currentStep === 3 ? (
-            <Step3Success step3success={props.step3success || ''} />
+            <Step3Success
+              headingLevel={hSection}
+              step3success={props.step3success || ''}
+            />
           ) : null}
 
           <Spacer size={1} />
 
           {currentStep === 4 ? (
             <Step4
+              headingLevel={hSection}
               loginUrl={`${props?.login?.url}`}
               thankMessage={props.thankMessage || ''}
               voteMessage={props.voteMessage || ''}

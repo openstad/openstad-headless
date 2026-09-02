@@ -17,8 +17,6 @@ import '@utrecht/component-library-css';
 import {
   Button,
   Heading,
-  Heading1,
-  Heading4,
   Heading5,
   Link,
   Paragraph,
@@ -30,6 +28,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './stem-begroot-detail-dialog.css';
 
 export const StemBegrootResourceDetailDialog = ({
+  headingLevel = 2,
   openDetailDialog,
   setOpenDetailDialog,
   resourceDetailIndex,
@@ -58,6 +57,7 @@ export const StemBegrootResourceDetailDialog = ({
   displayDescription = true,
   clickableImage = false,
 }: {
+  headingLevel?: number;
   openDetailDialog: boolean;
   setOpenDetailDialog: (condition: boolean) => void;
   resources: Array<any>;
@@ -232,7 +232,11 @@ export const StemBegrootResourceDetailDialog = ({
                   </div> */}
                     {isSimpleView === false && (
                       <div className="osc-gridder-resource-detail-budget-theme-bar">
-                        <Heading4>Budget</Heading4>
+                        <Heading
+                          level={headingLevel + 1}
+                          appearance="utrecht-heading-4">
+                          Budget
+                        </Heading>
                         <Paragraph>
                           {`€ ${
                             resource?.budget > 0
@@ -241,7 +245,11 @@ export const StemBegrootResourceDetailDialog = ({
                           }`}
                         </Paragraph>
                         <Spacer size={1} />
-                        <Heading4>Tags</Heading4>
+                        <Heading
+                          level={headingLevel + 1}
+                          appearance="utrecht-heading-4">
+                          Tags
+                        </Heading>
                         <Spacer size={0.5} />
                         <div className="pill-grid" role="list">
                           {(
@@ -292,7 +300,9 @@ export const StemBegrootResourceDetailDialog = ({
                       <div>
                         <div>
                           {displayTitle ? (
-                            <Heading1
+                            <Heading
+                              level={headingLevel}
+                              appearance="utrecht-heading-1"
                               id={dialogTitleId}
                               dangerouslySetInnerHTML={{
                                 __html: sanitizeHtml(resource?.title),
