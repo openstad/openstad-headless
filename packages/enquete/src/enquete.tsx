@@ -443,6 +443,7 @@ function Enquete(props: EnqueteWidgetProps) {
         }
         case 'dropdown': {
           fieldData['type'] = 'select';
+          fieldData['randomizeItems'] = item.randomizeItems || false;
 
           const configuredDefault: string[] = [];
           if (item.options && item.options.length > 0) {

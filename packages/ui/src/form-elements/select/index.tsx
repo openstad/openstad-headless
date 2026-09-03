@@ -17,6 +17,15 @@ import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
 import TextInput from '../text';
 
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
+
 export type SelectFieldProps = {
   overrideDefaultValue?: FormValue;
   title?: string;
@@ -32,6 +41,7 @@ export type SelectFieldProps = {
           trigger?: string;
         },
       ];
+  randomizeItems?: boolean;
   fieldRequired?: boolean;
   requiredWarning?: string;
   fieldKey: string;
@@ -67,6 +77,7 @@ const SelectField: FC<SelectFieldProps> = ({
   title,
   description,
   choices = [],
+  randomizeItems = false,
   fieldKey,
   defaultOption = 'Selecteer een optie',
   fieldRequired = false,
@@ -104,9 +115,28 @@ const SelectField: FC<SelectFieldProps> = ({
     [choices]
   );
 
+  const [displayChoices, setDisplayChoices] =
+    useState<NormalizedChoice[]>(normalizedChoices);
   const [otherOptionValues, setOtherOptionValues] = useState<{
     [key: string]: string;
   }>({});
+
+  useEffect(() => {
+    if (multiple || !randomizeItems) {
+      setDisplayChoices(normalizedChoices);
+      return;
+    }
+
+    const storageKey = `randomizedChoices_${fieldKey}`;
+    const stored = sessionStorage.getItem(storageKey);
+    if (stored) {
+      setDisplayChoices(JSON.parse(stored));
+    } else {
+      const shuffled = shuffleArray(normalizedChoices);
+      setDisplayChoices(shuffled);
+      sessionStorage.setItem(storageKey, JSON.stringify(shuffled));
+    }
+  }, [normalizedChoices, fieldKey, multiple, randomizeItems]);
 
   useEffect(() => {
     const initialOtherOptionValues: { [key: string]: string } = {};
@@ -138,13 +168,11 @@ const SelectField: FC<SelectFieldProps> = ({
 
   const [selected, setSelected] = useState<string | string[]>(initialValue);
 
-  const selectedChoiceIndex = normalizedChoices.findIndex(
+  const selectedChoiceIndex = displayChoices.findIndex(
     (choice) => choice.value === selected
   );
   const selectedChoice =
-    selectedChoiceIndex > -1
-      ? normalizedChoices[selectedChoiceIndex]
-      : undefined;
+    selectedChoiceIndex > -1 ? displayChoices[selectedChoiceIndex] : undefined;
 
   const handleOtherOptionChange = (e: { name: string; value: string }) => {
     setOtherOptionValues({
@@ -211,7 +239,7 @@ const SelectField: FC<SelectFieldProps> = ({
           <MultiSelect
             label={defaultOption}
             id={fieldKey}
-            options={normalizedChoices.map((choice) => ({
+            options={displayChoices.map((choice) => ({
               value: choice.value,
               label: choice.label,
               checked: Array.isArray(selected)
@@ -249,12 +277,12 @@ const SelectField: FC<SelectFieldProps> = ({
                 });
               }
 
-              const newChoiceIndex = normalizedChoices.findIndex(
+              const newChoiceIndex = displayChoices.findIndex(
                 (choice) => choice.value === e.target.value
               );
               const newChoice =
                 newChoiceIndex > -1
-                  ? normalizedChoices[newChoiceIndex]
+                  ? displayChoices[newChoiceIndex]
                   : undefined;
               const newTrigger = newChoice?.trigger || `${newChoiceIndex}`;
 
@@ -280,7 +308,7 @@ const SelectField: FC<SelectFieldProps> = ({
             aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}
             value={selected}>
             <SelectOption value="">{defaultOption}</SelectOption>
-            {normalizedChoices?.map((value, index) => (
+            {displayChoices?.map((value, index) => (
               <SelectOption key={index} value={value && value.value}>
                 {value && value.label}
               </SelectOption>
