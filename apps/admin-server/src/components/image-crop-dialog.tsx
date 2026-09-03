@@ -115,8 +115,9 @@ export const ImageCropDialog: React.FC<{
       cropSize.height / mediaSize.height
     );
     const nextMinZoom = Math.max(1, coverZoom);
+    const nextMaxZoom = Math.max(3, nextMinZoom * 3);
     setMinZoom(nextMinZoom);
-    setZoom((prev) => (prev < nextMinZoom ? nextMinZoom : prev));
+    setZoom((prev) => Math.min(Math.max(prev, nextMinZoom), nextMaxZoom));
   }, [cropSize, mediaSize]);
 
   const hasLoadError = loadStatus === 'error';

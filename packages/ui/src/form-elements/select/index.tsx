@@ -140,14 +140,14 @@ const SelectField: FC<SelectFieldProps> = ({
 
   useEffect(() => {
     const initialOtherOptionValues: { [key: string]: string } = {};
-    normalizedChoices?.forEach((choice, index) => {
+    displayChoices?.forEach((choice, index) => {
       if (choice?.isOtherOption) {
         const id = choice.trigger || `${index}`;
         initialOtherOptionValues[`${fieldKey}_${id}_other`] = '';
       }
     });
     setOtherOptionValues(initialOtherOptionValues);
-  }, [normalizedChoices, fieldKey]);
+  }, [displayChoices, fieldKey]);
 
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
