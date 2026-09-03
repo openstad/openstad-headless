@@ -13,6 +13,7 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
+import { FieldVariant, purposeAttributes } from '../field-purpose';
 import { parseEditorHtml, stripTrailingBreaks } from './strip-trailing-breaks';
 import './style.css';
 
@@ -62,7 +63,7 @@ export type TextInputProps = {
   fieldRequired?: boolean;
   requiredWarning?: string;
   fieldKey: string;
-  variant?: 'text input' | 'textarea' | 'richtext' | 'email';
+  variant?: FieldVariant;
   placeholder?: string;
   defaultValue?: string;
   disabled?: boolean;
@@ -371,8 +372,16 @@ const TextInput: FC<TextInputProps> = ({
     textarea: Textarea,
     richtext: TrixEditor,
     email: Textbox,
+    name: Textbox,
+    'given-name': Textbox,
+    'family-name': Textbox,
+    tel: Textbox,
+    'postal-code': Textbox,
+    'street-address': Textbox,
+    'address-level2': Textbox,
   };
   const InputComponent = variantMap[variant] || Textbox;
+  const purpose = purposeAttributes(variant);
 
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
@@ -412,19 +421,6 @@ const TextInput: FC<TextInputProps> = ({
   useEffect(() => {
     value && setCheckInvalid(false);
   }, []);
-
-  const getType = (fieldKey: string) => {
-    switch (fieldKey) {
-      case 'email':
-        return 'email';
-      case 'tel':
-        return 'tel';
-      case 'password':
-        return 'password';
-      default:
-        return 'text';
-    }
-  };
 
   useEffect(() => {
     if (reset) {
@@ -468,28 +464,6 @@ const TextInput: FC<TextInputProps> = ({
   useEffect(() => {
     value && setCheckInvalid(false);
   }, []);
-
-  const getAutocomplete = (fieldKey: string) => {
-    // ponytail: geldige autocomplete-tokens per herkend veld (WCAG 1.3.5).
-    // Substring-match zodat 'telefoonnummer', 'e-mailadres' enz. ook matchen.
-    const key = (fieldKey || '').toLocaleLowerCase();
-    const has = (...needles: string[]) => needles.some((n) => key.includes(n));
-
-    if (has('email', 'e-mail', 'mail')) return 'email';
-    if (has('telefoon', 'phone', 'tel')) return 'tel';
-    if (has('password', 'wachtwoord')) return 'current-password';
-    if (has('gebruikersnaam', 'username')) return 'username';
-    if (has('voornaam', 'given-name')) return 'given-name';
-    if (has('achternaam', 'family-name')) return 'family-name';
-    if (key === 'naam' || has('volledige naam', 'fullname', 'full-name'))
-      return 'name';
-    if (has('straatnaam', 'straat', 'adres', 'address'))
-      return 'street-address';
-    if (has('postcode', 'postal')) return 'postal-code';
-    if (has('woonplaats', 'plaats', 'stad', 'city')) return 'address-level2';
-    if (has('land', 'country')) return 'country';
-    return undefined;
-  };
 
   const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
   const isOverCharacterLimit = !!maxCharacters && value.length > maxCharacters;
@@ -586,7 +560,7 @@ const TextInput: FC<TextInputProps> = ({
           id={randomId}
           name={fieldKey}
           required={fieldRequired}
-          type={variant === 'email' ? 'email' : getType(fieldKey)}
+          type={purpose.type}
           placeholder={placeholder}
           value={value}
           onChange={(
@@ -608,9 +582,7 @@ const TextInput: FC<TextInputProps> = ({
             setIsFocused(false);
             setHasBlurred(true);
           }}
-          autoComplete={
-            variant === 'email' ? 'email' : getAutocomplete(fieldKey)
-          }
+          autoComplete={purpose.autoComplete}
           aria-describedby={
             [
               // ponytail: fieldInvalid komt uit form.tsx en is alleen waar als

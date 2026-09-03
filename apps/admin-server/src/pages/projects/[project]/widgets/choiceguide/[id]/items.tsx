@@ -2168,10 +2168,13 @@ export default function WidgetChoiceGuideItems(
                                 name="variant"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>
-                                      Is het veld qua grootte 1 regel of een
-                                      tekstvak?
-                                    </FormLabel>
+                                    <FormLabel>Type open vraag</FormLabel>
+                                    <FormDescription>
+                                      Kies hier het type van jouw open vraag.
+                                      Bij een specifiek doel (zoals naam of
+                                      telefoonnummer) kan de browser het veld
+                                      automatisch invullen.
+                                    </FormDescription>
                                     <Select
                                       value={field.value || 'text input'}
                                       onValueChange={field.onChange}>
@@ -2186,6 +2189,27 @@ export default function WidgetChoiceGuideItems(
                                         </SelectItem>
                                         <SelectItem value="textarea">
                                           Tekstvak
+                                        </SelectItem>
+                                        <SelectItem value="name">
+                                          Naam
+                                        </SelectItem>
+                                        <SelectItem value="given-name">
+                                          Voornaam
+                                        </SelectItem>
+                                        <SelectItem value="family-name">
+                                          Achternaam
+                                        </SelectItem>
+                                        <SelectItem value="tel">
+                                          Telefoonnummer
+                                        </SelectItem>
+                                        <SelectItem value="postal-code">
+                                          Postcode
+                                        </SelectItem>
+                                        <SelectItem value="street-address">
+                                          Adres
+                                        </SelectItem>
+                                        <SelectItem value="address-level2">
+                                          Woonplaats
                                         </SelectItem>
                                       </SelectContent>
                                     </Select>

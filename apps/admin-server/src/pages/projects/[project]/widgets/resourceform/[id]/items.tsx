@@ -1685,6 +1685,11 @@ export default function WidgetResourceFormItems(
                               <FormLabel>
                                 Welke opmaak krijgt het tekstveld?
                               </FormLabel>
+                              <FormDescription>
+                                Bij een specifiek doel (zoals naam of
+                                telefoonnummer) kan de browser het veld
+                                automatisch invullen.
+                              </FormDescription>
                               <Select
                                 value={field.value || 'text input'}
                                 onValueChange={field.onChange}>
@@ -1702,6 +1707,28 @@ export default function WidgetResourceFormItems(
                                   </SelectItem>
                                   <SelectItem value="richtext">
                                     Tekstvak met opmaak
+                                  </SelectItem>
+                                  <SelectItem value="email">
+                                    E-mail (validatie)
+                                  </SelectItem>
+                                  <SelectItem value="name">Naam</SelectItem>
+                                  <SelectItem value="given-name">
+                                    Voornaam
+                                  </SelectItem>
+                                  <SelectItem value="family-name">
+                                    Achternaam
+                                  </SelectItem>
+                                  <SelectItem value="tel">
+                                    Telefoonnummer
+                                  </SelectItem>
+                                  <SelectItem value="postal-code">
+                                    Postcode
+                                  </SelectItem>
+                                  <SelectItem value="street-address">
+                                    Adres
+                                  </SelectItem>
+                                  <SelectItem value="address-level2">
+                                    Woonplaats
                                   </SelectItem>
                                 </SelectContent>
                               </Select>

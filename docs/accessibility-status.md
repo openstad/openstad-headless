@@ -161,6 +161,16 @@ Losse audit-punten over kleinere widgets, allemaal via het api-server-pad (build
 ⚠️ **Postcode-autocomplete-caveat:** het postcode-veld is een custom combobox (`role="combobox"`); browser-autofill kan
 met de suggestielijst botsen — functioneel testen. **Teller 1.3.1/1.3.2 bleek al gefixt** (aria-label stond er al).
 
+**Update (03-09-2026): veldnaam-herkenning vervangen door instelbaar doel.** De automatische
+substring-herkenning op de veldnaam (`getAutocomplete()`/`getType()` in `ui/src/form-elements/text/`)
+is verwijderd; de redacteur kiest het doel nu expliciet in de select "Type open vraag" (enquete,
+keuzewijzer) resp. "Welke opmaak krijgt het tekstveld?" (inzendformulier). Opties: Naam, Voornaam,
+Achternaam, Telefoonnummer, Postcode, Adres, Woonplaats naast de bestaande 1 regel/Tekstvak/E-mail.
+De keuze stuurt centraal `autocomplete` en het input-type aan (`ui/src/form-elements/field-purpose.ts`).
+**Redacteursactie:** bij bestaande open velden die naam/telefoon/postcode/adres uitvragen de optie
+zetten; zonder keuze heeft zo'n veld geen autocomplete meer. De hardcoded autocompletes op
+accountgegevens en het postcodefilter blijven ongewijzigd werken.
+
 ### CMS-contentwidgets — commit `f7001b462`
 
 CMS/apostrophe-pad (build → kopie naar `apps/cms-server/public/widget-assets/` → `docker restart cms-server`;

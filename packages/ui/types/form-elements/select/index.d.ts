@@ -13,6 +13,7 @@ export type SelectFieldProps = {
             trigger?: string;
         }
     ];
+    randomizeItems?: boolean;
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;

@@ -2154,9 +2154,9 @@ export default function WidgetEnqueteItems(
                             <FormItem>
                               <FormLabel>Type open vraag</FormLabel>
                               <FormDescription>
-                                Kies hier het type van jouw open vraag,
-                                bijvoorbeeld grootte van het tekstvak op 1 regel
-                                of groter, e-mail validatie etc.
+                                Kies hier het type van jouw open vraag. Bij een
+                                specifiek doel (zoals naam of telefoonnummer)
+                                kan de browser het veld automatisch invullen.
                               </FormDescription>
                               <Select
                                 value={field.value || 'text input'}
@@ -2175,6 +2175,25 @@ export default function WidgetEnqueteItems(
                                   </SelectItem>
                                   <SelectItem value="textarea">
                                     Tekstvak
+                                  </SelectItem>
+                                  <SelectItem value="name">Naam</SelectItem>
+                                  <SelectItem value="given-name">
+                                    Voornaam
+                                  </SelectItem>
+                                  <SelectItem value="family-name">
+                                    Achternaam
+                                  </SelectItem>
+                                  <SelectItem value="tel">
+                                    Telefoonnummer
+                                  </SelectItem>
+                                  <SelectItem value="postal-code">
+                                    Postcode
+                                  </SelectItem>
+                                  <SelectItem value="street-address">
+                                    Adres
+                                  </SelectItem>
+                                  <SelectItem value="address-level2">
+                                    Woonplaats
                                   </SelectItem>
                                 </SelectContent>
                               </Select>

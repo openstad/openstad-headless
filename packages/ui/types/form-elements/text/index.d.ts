@@ -1,5 +1,6 @@
 import { FormValue } from '@openstad-headless/form/src/form';
 import React, { FC } from 'react';
+import { FieldVariant } from '../field-purpose';
 import './style.css';
 declare module 'react' {
     namespace JSX {
@@ -30,7 +31,7 @@ export type TextInputProps = {
     fieldRequired?: boolean;
     requiredWarning?: string;
     fieldKey: string;
-    variant?: 'text input' | 'textarea' | 'richtext' | 'email';
+    variant?: FieldVariant;
     placeholder?: string;
     defaultValue?: string;
     disabled?: boolean;
