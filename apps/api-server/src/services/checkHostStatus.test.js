@@ -140,6 +140,16 @@ describe('buildIngressConfig', () => {
     expect(annotations['cert-manager.io/cluster-issuer']).toBeUndefined();
   });
 
+  test('default snippet sends origin to cross-origin embeds like YouTube', () => {
+    const { annotations } = buildIngressConfig(false, false);
+    const snippet =
+      annotations['nginx.ingress.kubernetes.io/configuration-snippet'];
+    expect(snippet).toContain(
+      'Referrer-Policy: strict-origin-when-cross-origin'
+    );
+    expect(snippet).not.toContain('Referrer-Policy: same-origin');
+  });
+
   test('does not add cluster-issuer when already in custom annotations', () => {
     setEnv(
       'KUBERNETES_INGRESS_DEFAULT_ANNOTATIONS',

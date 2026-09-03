@@ -28,7 +28,7 @@ const buildIngressConfig = (useClusterIssuer, useExternalCerts) => {
         'nginx.ingress.kubernetes.io/configuration-snippet': `more_set_headers "X-Content-Type-Options: nosniff";
         more_set_headers "X-Frame-Options: SAMEORIGIN";
         more_set_headers "X-Xss-Protection: 1";
-        more_set_headers "Referrer-Policy: same-origin";`,
+        more_set_headers "Referrer-Policy: strict-origin-when-cross-origin";`,
       };
 
   if (useExternalCerts) {
