@@ -2190,6 +2190,9 @@ export default function WidgetChoiceGuideItems(
                                         <SelectItem value="textarea">
                                           Tekstvak
                                         </SelectItem>
+                                        <SelectItem value="email">
+                                          E-mail (validatie)
+                                        </SelectItem>
                                         <SelectItem value="name">
                                           Naam
                                         </SelectItem>
