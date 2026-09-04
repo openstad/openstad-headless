@@ -417,6 +417,16 @@ function Form({
         top: elementPosition,
         behavior: 'smooth',
       });
+
+      const scrollRoot = formWidget.closest('.osc') ?? formWidget;
+      scrollRoot.querySelectorAll<HTMLElement>('*').forEach((element) => {
+        if (element.scrollTop > 0) {
+          const overflowY = window.getComputedStyle(element).overflowY;
+          if (overflowY === 'auto' || overflowY === 'scroll') {
+            element.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }
+      });
     }
   };
 
