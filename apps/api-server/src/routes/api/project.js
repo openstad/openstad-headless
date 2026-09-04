@@ -1581,7 +1581,15 @@ router
       if (req.params.willOrDo == 'do') {
         result.message = 'Ok';
 
-        req.project.doAnonymizeAllUsers([...result.users], req.query.useAuth);
+        req.project
+          .doAnonymizeAllUsers(
+            [...result.users],
+            [...result.externalUserIds],
+            req.query.useAuth
+          )
+          .catch((err) => {
+            console.error('error in doAnonymizeAllUsers', err);
+          });
       }
       next();
     } catch (err) {
