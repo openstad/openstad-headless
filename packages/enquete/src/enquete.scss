@@ -998,7 +998,8 @@ label.utrecht-form-label {
 
     .question-type-video {
       padding: 0;
-      aspect-ratio: 9 / 16;
+      min-height: 100svh !important;
+      flex-shrink: 0;
       width: 100%;
 
       &:before {

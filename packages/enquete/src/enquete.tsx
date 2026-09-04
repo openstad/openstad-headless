@@ -607,6 +607,7 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['videoUrl'] = item?.videoUrl || '';
           fieldData['videoSubtitle'] = item?.videoSubtitle;
           fieldData['videoLang'] = item?.videoLang;
+          fieldData['videoLoop'] = item?.videoLoop !== false;
           break;
         case 'matrix':
           fieldData['type'] = 'matrix';

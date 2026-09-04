@@ -79,6 +79,7 @@ export type Item = {
   videoUrl?: string;
   videoSubtitle?: boolean;
   videoLang?: string;
+  videoLoop?: boolean;
   images?: Array<{
     url: string;
     name?: string;

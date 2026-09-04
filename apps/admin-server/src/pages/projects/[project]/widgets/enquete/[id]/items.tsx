@@ -154,6 +154,7 @@ const formSchema = z.object({
   videoUrl: z.string().optional(),
   videoSubtitle: z.boolean().optional(),
   videoLang: z.string().optional(),
+  videoLoop: z.boolean().optional(),
   numberingStyle: z.string().optional(),
   images: z
     .array(
@@ -330,6 +331,10 @@ export default function WidgetEnqueteItems(
             infoField: values.infoField || '',
             infofieldExplanation: values.infofieldExplanation || false,
             numberingStyle: values.numberingStyle || 'none',
+            videoUrl: values.videoUrl || '',
+            videoSubtitle: values.videoSubtitle || false,
+            videoLang: values.videoLang || '',
+            videoLoop: values.videoLoop !== false,
             images: values?.images || [],
             // Keeping these for backwards compatibility
             image1: values.image1 || '',
@@ -514,6 +519,7 @@ export default function WidgetEnqueteItems(
     videoUrl: '',
     videoSubtitle: false,
     videoLang: '',
+    videoLoop: true,
     images: [],
 
     // Keeping these for backwards compatibility
@@ -609,6 +615,7 @@ export default function WidgetEnqueteItems(
       videoUrl: item.videoUrl || '',
       videoSubtitle: item.videoSubtitle || false,
       videoLang: item.videoLang || '',
+      videoLoop: item.videoLoop !== false,
       images,
 
       // Keeping these for backwards compatibility
@@ -2288,6 +2295,25 @@ export default function WidgetEnqueteItems(
                             )}
                           />
                         )}
+                        <FormField
+                          control={form.control}
+                          name="videoLoop"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Automatisch opnieuw afspelen
+                              </FormLabel>
+                              <FormDescription>
+                                Als je deze optie aanzet, begint de video na
+                                afloop automatisch opnieuw. Staat de optie uit,
+                                dan stopt de video na afloop en kan de bezoeker
+                                hem met de afspeelknop opnieuw starten.
+                              </FormDescription>
+                              {YesNoSelect(field, props)}
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </>
                     )}
 

@@ -3,6 +3,16 @@ import React, { FC, useEffect, useId, useRef, useState } from 'react';
 
 import './video.scss';
 
+function ensureEmbedReferrerPolicy() {
+  if (typeof document === 'undefined') return;
+  if (document.querySelector('meta[data-openstad-video-referrer]')) return;
+  const meta = document.createElement('meta');
+  meta.name = 'referrer';
+  meta.content = 'strict-origin-when-cross-origin';
+  meta.setAttribute('data-openstad-video-referrer', '');
+  document.head.appendChild(meta);
+}
+
 export type VideoFieldProps = BaseProps &
   VideoProps & {
     resourceId?: string;
@@ -14,12 +24,14 @@ export type VideoProps = {
   videoUrl?: string;
   videoLang?: string;
   videoSubtitle?: boolean;
+  videoLoop?: boolean;
 };
 
 const VideoField: FC<VideoFieldProps> = ({
   videoUrl,
   videoLang,
   videoSubtitle,
+  videoLoop,
   ...props
 }) => {
   const id = useId();
@@ -57,6 +69,7 @@ const VideoField: FC<VideoFieldProps> = ({
   }, [props.currentPage]);
 
   useEffect(() => {
+    ensureEmbedReferrerPolicy();
     if ((window as any).YT && (window as any).YT.Player) {
       createPlayer();
     } else {
@@ -68,6 +81,7 @@ const VideoField: FC<VideoFieldProps> = ({
 
     function createPlayer() {
       if (playerRef.current) {
+        const shouldLoop = videoLoop !== false;
         const ytPlayer = new (window as any).YT.Player(playerRef.current, {
           host: 'https://www.youtube-nocookie.com',
           videoId: videoId,
@@ -75,8 +89,8 @@ const VideoField: FC<VideoFieldProps> = ({
             autoplay: 1,
             controls: 0,
             mute: muted ? 1 : 0,
-            loop: 1,
-            playlist: videoId,
+            loop: shouldLoop ? 1 : 0,
+            ...(shouldLoop ? { playlist: videoId } : {}),
             cc_lang_pref: videoLang,
             cc_load_policy: videoSubtitle ? 1 : 0,
             rel: 0,
@@ -93,6 +107,11 @@ const VideoField: FC<VideoFieldProps> = ({
                 event.target.unMute();
               }
               event.target.playVideo();
+            },
+            onStateChange: (event: any) => {
+              if (event.data === (window as any).YT.PlayerState.ENDED) {
+                setPlaying(false);
+              }
             },
           },
         });
