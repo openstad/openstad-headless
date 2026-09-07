@@ -926,6 +926,32 @@ function DocumentMap({
     const map = mapRef.current;
     if (map) setPopupPosition(map.getCenter());
   };
+  const [controlsOpen, setControlsOpen] = useState(false);
+  const controlsPanelId = `${instanceId}-map-controls`;
+  const controlsToggleRef = useRef<HTMLButtonElement>(null);
+  const controlsToggleName =
+    !!args.canComment && !isDefinitive
+      ? 'Afbeelding verschuiven of reactie plaatsen'
+      : 'Afbeelding verschuiven';
+  const mapInstructionsId = `${instanceId}-map-instructions`;
+  const controlsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!controlsOpen) return;
+
+    const handleDocumentEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setControlsOpen(false);
+      if (controlsRef.current?.contains(document.activeElement)) {
+        controlsToggleRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleDocumentEscape);
+    return () => {
+      document.removeEventListener('keydown', handleDocumentEscape);
+    };
+  }, [controlsOpen]);
 
   // ponytail: focus de reactie-textarea zodra de popup opent, zodat de keyboard-flow doorloopt (2.1.1).
   // Wie niet is ingelogd krijgt geen textarea maar een inlogtekst met knop; dan
@@ -1181,7 +1207,13 @@ function DocumentMap({
         <div
           className="document-container"
           role="application"
-          aria-label="Interactieve afbeelding">
+          aria-label="Interactieve afbeelding"
+          aria-describedby={mapInstructionsId}>
+          <p id={mapInstructionsId} className="sr-only">
+            Verschuif de afbeelding met de pijltjestoetsen wanneer de afbeelding
+            focus heeft. Gebruik de knop {controlsToggleName} om de afbeelding
+            met losse knoppen te bedienen.
+          </p>
           <MapContainer
             ref={mapRef}
             center={[0, 0]}
@@ -1399,58 +1431,80 @@ function DocumentMap({
           </MapContainer>
 
           {/* ponytail: kruisje toont waar "Reactie plaatsen" landt (2.1.1) */}
-          {!popupPosition && !!args.canComment && !isDefinitive && (
-            <div className="osc-map-crosshair" aria-hidden="true">
-              <span />
-            </div>
-          )}
+          {controlsOpen &&
+            !popupPosition &&
+            !!args.canComment &&
+            !isDefinitive && (
+              <div className="osc-map-crosshair" aria-hidden="true">
+                <span />
+              </div>
+            )}
 
           {/* ponytail: single-pointer/keyboard pan-knoppen (2.5.7) + reactie-plaats-knop (2.1.1) */}
           <div
             className="osc-map-controls"
             role="group"
-            aria-label="Kaartbediening">
-            <div className="osc-map-compass">
-              <button
-                type="button"
-                className="osc-map-pan osc-map-pan--up"
-                aria-label="Kaart naar boven verplaatsen"
-                onClick={() => panMapBy(0, -PAN_STEP_PX)}>
-                <span aria-hidden="true">↑</span>
-              </button>
-              <button
-                type="button"
-                className="osc-map-pan osc-map-pan--left"
-                aria-label="Kaart naar links verplaatsen"
-                onClick={() => panMapBy(-PAN_STEP_PX, 0)}>
-                <span aria-hidden="true">←</span>
-              </button>
-              <button
-                type="button"
-                className="osc-map-pan osc-map-pan--right"
-                aria-label="Kaart naar rechts verplaatsen"
-                onClick={() => panMapBy(PAN_STEP_PX, 0)}>
-                <span aria-hidden="true">→</span>
-              </button>
-              <button
-                type="button"
-                className="osc-map-pan osc-map-pan--down"
-                aria-label="Kaart naar onderen verplaatsen"
-                onClick={() => panMapBy(0, PAN_STEP_PX)}>
-                <span aria-hidden="true">↓</span>
-              </button>
-            </div>
-            {!popupPosition && !!args.canComment && !isDefinitive && (
-              <button
-                type="button"
-                className="osc-map-place-comment"
-                onClick={placeCommentAtCenter}>
-                Reactie plaatsen
-                <span className="sr-only">
-                  {' '}
-                  op het midden van de afbeelding
-                </span>
-              </button>
+            aria-label="Kaartbediening"
+            ref={controlsRef}>
+            <button
+              type="button"
+              ref={controlsToggleRef}
+              className="osc-map-controls-toggle"
+              aria-expanded={controlsOpen}
+              aria-controls={controlsPanelId}
+              aria-label={controlsToggleName}
+              onClick={() => setControlsOpen((open) => !open)}>
+              <i
+                className={
+                  controlsOpen ? 'ri-close-line' : 'ri-drag-move-2-line'
+                }
+                aria-hidden="true"></i>
+            </button>
+            {controlsOpen && (
+              <div id={controlsPanelId} className="osc-map-controls-panel">
+                <div className="osc-map-compass">
+                  <button
+                    type="button"
+                    className="osc-map-pan osc-map-pan--up"
+                    aria-label="Kaart naar boven verplaatsen"
+                    onClick={() => panMapBy(0, -PAN_STEP_PX)}>
+                    <span aria-hidden="true">↑</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="osc-map-pan osc-map-pan--left"
+                    aria-label="Kaart naar links verplaatsen"
+                    onClick={() => panMapBy(-PAN_STEP_PX, 0)}>
+                    <span aria-hidden="true">←</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="osc-map-pan osc-map-pan--right"
+                    aria-label="Kaart naar rechts verplaatsen"
+                    onClick={() => panMapBy(PAN_STEP_PX, 0)}>
+                    <span aria-hidden="true">→</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="osc-map-pan osc-map-pan--down"
+                    aria-label="Kaart naar onderen verplaatsen"
+                    onClick={() => panMapBy(0, PAN_STEP_PX)}>
+                    <span aria-hidden="true">↓</span>
+                  </button>
+                </div>
+                {!popupPosition && !!args.canComment && !isDefinitive && (
+                  <button
+                    type="button"
+                    className="osc-map-place-comment"
+                    onClick={placeCommentAtCenter}>
+                    Reactie plaatsen
+                    <span className="sr-only">
+                      {' '}
+                      op het midden van de afbeelding
+                    </span>
+                  </button>
+                )}
+              </div>
             )}
           </div>
 
@@ -1509,11 +1563,11 @@ function DocumentMap({
             {!hideToggleMarkers && (
               <div className="toggleMarkers">
                 <Checkbox
-                  id="toggleMarkers"
+                  id={`${instanceId}-toggleMarkers`}
                   defaultChecked
                   onChange={() => setToggleMarker(!toggleMarker)}
                 />
-                <FormLabel htmlFor="toggleMarkers">
+                <FormLabel htmlFor={`${instanceId}-toggleMarkers`}>
                   {' '}
                   <Paragraph>{addMarkerText}</Paragraph>{' '}
                 </FormLabel>

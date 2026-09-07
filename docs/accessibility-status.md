@@ -105,7 +105,23 @@ Kanttekening: `choiceguide-results/src/style.css` is een **gedupliceerde kopie**
 
 Twee losse kaart-implementaties, beide voorzien van een **kompas** (↑↓←→ pan-knoppen, single-pointer, geen slepen)
 en een **"Plaats … in het midden"-knop** (keyboard) met een centraal **kruisje** dat toont waar het landt.
-Knoppen zijn focusbaar met zichtbare focus-outline en ≥40px targets.
+Knoppen zijn focusbaar met zichtbare focus-outline en 32px targets (boven het
+2.5.8-minimum van 24px; eerder stond hier ten onrechte 40px).
+
+**Update (07-09-2026): kompas compacter en inklapbaar.** De pan-knoppen staan nu als
+omgekeerde-T-cluster (omhoog boven, links/omlaag/rechts eronder) met de plaats-knop als
+brede balk direct daaronder, en het geheel zit ingeklapt achter een disclosure-toggle
+linksboven direct onder de Leaflet-zoomknoppen. De toggle heet "Kaartbediening" en heeft
+`aria-expanded` en `aria-controls` (id per widget-instantie); Escape in het paneel sluit
+en zet de focus terug op de toggle. Het richtkruisje rendert alleen bij een open paneel,
+zodat er nooit een los kruisje zonder zichtbare plaats-knop op de kaart staat. Geldt voor
+beide kaarten (`leaflet-map/src/base-map.tsx` en `document-map/src/document-map.tsx`).
+De kleuren van toggle, pijltjes en plaats-knop lopen via `--nlds-map-controls-*`-tokens
+met `--utrecht-button-primary-action-*`-fallback, zodat ze het sitethema volgen. De
+toggle heet naar zijn functie ("Kaart verschuiven of marker plaatsen" resp. "Afbeelding
+verschuiven of reactie plaatsen") en de kaartcontainer heeft een `aria-describedby`
+sr-only instructie die beide routes benoemt: de native pijltjestoetsen op de gefocuste
+kaart en de bedieningsknop voor wie niet kan slepen.
 
 | Onderdeel                                      | Component                                           | 2.5.7 kompas                | 2.1.1 plaatsen                                                                                                                                                                           |
 | ---------------------------------------------- | --------------------------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
