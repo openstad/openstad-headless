@@ -292,20 +292,75 @@ a + .url-list:before {
 .documentMap--container .document-container .osc-map-controls {
   position: absolute;
   z-index: 2;
-  right: 10px;
-  bottom: 10px;
+  left: 10px;
+  top: 72px;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.documentMap--container .leaflet-control-zoom {
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+.documentMap--container .leaflet-control-zoom a {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  font-size: 18px;
+  color: #000;
+  background: #fff;
+  border-radius: 0;
+}
+
+.documentMap--container .leaflet-control-zoom-in {
+  border-bottom: 1px solid #ccc;
+}
+
+.documentMap--container .osc-map-controls-toggle {
+  width: 34px;
+  height: 33px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top: 1px solid #ccc;
+  border-radius: 0 0 4px 4px;
+  background: #fff;
+  background-clip: padding-box;
+  color: #000;
+  padding: 0;
+}
+
+.documentMap--container .osc-map-controls-toggle:hover {
+  background: var(--nlds-map-controls-hover-background-color, #f4f4f4);
+}
+
+.documentMap--container .osc-map-controls-toggle:focus-visible {
+  outline: 2px solid var(--utrecht-focus-outline-color, #1471ef);
+  outline-offset: 2px;
+}
+
+.documentMap--container .osc-map-controls-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 /* ponytail: zelfde compacte maatvoering als de geografische kaart */
 .documentMap--container .osc-map-compass {
   display: grid;
   grid-template-columns: repeat(3, 32px);
-  grid-template-rows: repeat(3, 32px);
-  gap: 1px;
+  grid-template-rows: repeat(2, 32px);
+  gap: 2px;
 }
 
 .documentMap--container .osc-map-pan {
@@ -319,19 +374,26 @@ a + .url-list:before {
   font-size: 15px;
   line-height: 1;
   cursor: pointer;
-  border: 1px solid #767676;
+  border: 1px solid
+    var(
+      --nlds-map-controls-border-color,
+      var(--utrecht-button-primary-action-background-color, #767676)
+    );
   border-radius: 4px;
-  background: rgb(255 255 255 / 92%);
-  color: #1a1a1a;
+  background: var(--nlds-map-controls-background-color, rgb(255 255 255 / 92%));
+  color: var(
+    --nlds-map-controls-color,
+    var(--utrecht-button-primary-action-background-color, #1a1a1a)
+  );
   padding: 0;
 }
 
 .documentMap--container .osc-map-pan:hover {
-  background: #f0f0f0;
+  background: var(--nlds-map-controls-hover-background-color, #f0f0f0);
 }
 
 .documentMap--container .osc-map-pan:focus-visible {
-  outline: 2px solid #1471ef;
+  outline: 2px solid var(--utrecht-focus-outline-color, #1471ef);
   outline-offset: 2px;
 }
 
@@ -349,28 +411,36 @@ a + .url-list:before {
 }
 .documentMap--container .osc-map-pan--down {
   grid-column: 2;
-  grid-row: 3;
+  grid-row: 2;
 }
 
 .documentMap--container .osc-map-place-comment {
   cursor: pointer;
-  border: 1px solid #767676;
+  border: 1px solid
+    var(
+      --nlds-map-controls-border-color,
+      var(--utrecht-button-primary-action-background-color, #767676)
+    );
   border-radius: 4px;
-  background: rgb(255 255 255 / 92%);
-  color: #1a1a1a;
-  padding: 0 10px;
+  background: var(--nlds-map-controls-background-color, rgb(255 255 255 / 92%));
+  color: var(
+    --nlds-map-controls-color,
+    var(--utrecht-button-primary-action-background-color, #1a1a1a)
+  );
+  width: 100px;
+  padding: 4px 6px;
   font-size: 13px;
   line-height: 1.2;
   min-height: 32px;
-  white-space: nowrap;
+  text-align: center;
 }
 
 .documentMap--container .osc-map-place-comment:hover {
-  background: #f0f0f0;
+  background: var(--nlds-map-controls-hover-background-color, #f0f0f0);
 }
 
 .documentMap--container .osc-map-place-comment:focus-visible {
-  outline: 2px solid #1471ef;
+  outline: 2px solid var(--utrecht-focus-outline-color, #1471ef);
   outline-offset: 2px;
 }
 
