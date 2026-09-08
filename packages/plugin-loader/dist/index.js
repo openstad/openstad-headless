@@ -7,6 +7,17 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const validate_1 = require("./validate");
 let instance = null;
+// Root that plugins.json must live inside. Derived from the loader's own
+// location instead of process.cwd(), because at runtime the cwd is the app
+// directory (e.g. /opt/openstad-headless/apps/api), not the project root.
+const PROJECT_ROOT = path_1.default.resolve(__dirname, '../../..');
+/**
+ * True when a fully resolved path is the project root or sits inside it.
+ */
+function isInsideProjectRoot(resolvedPath) {
+    return (resolvedPath === PROJECT_ROOT ||
+        resolvedPath.startsWith(PROJECT_ROOT + path_1.default.sep));
+}
 /**
  * Manifest-driven plugin loader for OpenStad Headless.
  *
@@ -74,21 +85,37 @@ class PluginLoader {
         }
         if (!filePath) {
             let dir = __dirname;
-            while (dir !== path_1.default.dirname(dir)) {
+            // Walk up, but never above the project root.
+            for (;;) {
                 const candidate = path_1.default.join(dir, 'plugins.json');
-                if (fs_1.default.existsSync(candidate)) {
+                // A directory named plugins.json is not a candidate.
+                if (fs_1.default.statSync(candidate, { throwIfNoEntry: false })?.isFile()) {
                     filePath = candidate;
                     break;
                 }
+                if (dir === PROJECT_ROOT)
+                    break;
                 dir = path_1.default.dirname(dir);
             }
             if (!filePath) {
                 filePath = path_1.default.resolve(__dirname, '../../plugins.json');
             }
         }
+        // Only ever read a file literally named plugins.json from inside the
+        // project, regardless of how the path was derived, so an unexpected path
+        // can't turn into an arbitrary file read.
+        const resolvedPath = path_1.default.resolve(filePath);
+        if (path_1.default.basename(resolvedPath) !== 'plugins.json') {
+            console.error(`[plugin-loader] Refusing to read non-plugins.json file: ${resolvedPath}`);
+            return;
+        }
+        if (!isInsideProjectRoot(resolvedPath)) {
+            console.error(`[plugin-loader] Refusing to read plugins.json outside the project root: ${resolvedPath}`);
+            return;
+        }
         let pluginsConfig;
         try {
-            const raw = fs_1.default.readFileSync(filePath, 'utf-8');
+            const raw = fs_1.default.readFileSync(resolvedPath, 'utf-8');
             pluginsConfig = JSON.parse(raw);
         }
         catch (err) {

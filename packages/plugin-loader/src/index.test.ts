@@ -28,16 +28,25 @@ const originalResolve = Module._resolveFilename;
 /** Set of package names registered as fake modules. */
 let fakeModules = new Set<string>();
 
+/** Package directory, used as the parent for temp fixtures. */
+const packageDir = path.resolve(
+  path.dirname(new URL(import.meta.url).pathname),
+  '..'
+);
+
+/** Temp directory holding the plugins.json fixture. */
+let tmpDir: string;
+
 /** Temp file path for plugins.json */
 let tmpFile: string;
 
 beforeEach(() => {
   PluginLoader.reset();
   fakeModules = new Set();
-  tmpFile = path.join(
-    os.tmpdir(),
-    `plugins-${Date.now()}-${Math.random()}.json`
-  );
+  // The loader only reads plugins.json from inside the project root, so
+  // fixtures live in the package instead of os.tmpdir().
+  tmpDir = fs.mkdtempSync(path.join(packageDir, '.tmp-test-'));
+  tmpFile = path.join(tmpDir, 'plugins.json');
 
   // Patch Module._resolveFilename to intercept our fake plugin packages
   Module._resolveFilename = function (
@@ -64,12 +73,8 @@ afterEach(() => {
   // Clean up env var
   delete process.env.PLUGIN_JSON_OVERRIDE;
 
-  // Clean up temp file
-  try {
-    fs.unlinkSync(tmpFile);
-  } catch {
-    // ignore if file doesn't exist
-  }
+  // Clean up temp fixtures
+  fs.rmSync(tmpDir, { recursive: true, force: true });
 });
 
 /**
@@ -275,7 +280,7 @@ describe('PluginLoader', () => {
         .mockImplementation(() => {});
 
       const loader = PluginLoader.getInstance();
-      loader.load('/nonexistent/path/plugins.json');
+      loader.load(path.join(tmpDir, 'nonexistent', 'plugins.json'));
 
       expect(loader.getLoadedPlugins()).toEqual([]);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -284,6 +289,82 @@ describe('PluginLoader', () => {
       );
 
       consoleSpy.mockRestore();
+    });
+
+    it('refuses a plugins.json outside the project root', () => {
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      const manifest = validManifest({ name: 'outside-plugin' });
+      registerFakeModule('outside-plugin', { manifest });
+
+      const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), 'plugins-'));
+      const outsideFile = path.join(outsideDir, 'plugins.json');
+      fs.writeFileSync(
+        outsideFile,
+        JSON.stringify({
+          plugins: [{ packageName: 'outside-plugin', enabled: true }],
+        })
+      );
+
+      const loader = PluginLoader.getInstance();
+      loader.load(outsideFile);
+
+      expect(loader.getLoadedPlugins()).toEqual([]);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('outside the project root')
+      );
+
+      fs.rmSync(outsideDir, { recursive: true, force: true });
+      consoleSpy.mockRestore();
+    });
+
+    it('refuses a file that is not named plugins.json', () => {
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      const otherFile = path.join(tmpDir, 'secrets.json');
+      fs.writeFileSync(otherFile, JSON.stringify({ plugins: [] }));
+
+      const loader = PluginLoader.getInstance();
+      loader.load(otherFile);
+
+      expect(loader.getLoadedPlugins()).toEqual([]);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Refusing to read non-plugins.json file')
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('skips a directory named plugins.json while walking up', () => {
+      const manifest = validManifest({ name: 'walk-plugin' });
+      registerFakeModule('walk-plugin', { manifest });
+
+      // A directory named plugins.json next to the loader source must not be
+      // picked; the walk has to continue to the real file one level up.
+      const dirCandidate = path.join(packageDir, 'src', 'plugins.json');
+      const fileCandidate = path.join(packageDir, 'plugins.json');
+      fs.mkdirSync(dirCandidate, { recursive: true });
+      fs.writeFileSync(
+        fileCandidate,
+        JSON.stringify({
+          plugins: [{ packageName: 'walk-plugin', enabled: true }],
+        })
+      );
+
+      try {
+        const loader = PluginLoader.getInstance();
+        loader.load();
+
+        expect(loader.getLoadedPlugins()).toHaveLength(1);
+        expect(loader.getLoadedPlugins()[0].name).toBe('walk-plugin');
+      } finally {
+        fs.rmSync(dirCandidate, { recursive: true, force: true });
+        fs.rmSync(fileCandidate, { force: true });
+      }
     });
 
     it('defaults config to empty object when entry has no config', () => {
