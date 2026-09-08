@@ -556,7 +556,7 @@ export default function WidgetResourceOverviewDisplay(
               name="headingLevel"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Heading Level</FormLabel>
+                  <FormLabel>Kopniveau van de titel</FormLabel>
                   <Select
                     onValueChange={(value) => {
                       field.onChange(value);
@@ -565,16 +565,22 @@ export default function WidgetResourceOverviewDisplay(
                     value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecteer een optie" />
+                        <SelectValue placeholder="Kies kopniveau" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value={'2'}>Heading 2 (H2)</SelectItem>
-                      <SelectItem value={'3'}>Heading 3 (H3)</SelectItem>
-                      <SelectItem value={'4'}>Heading 4 (H4)</SelectItem>
-                      <SelectItem value={'5'}>Heading 5 (H5)</SelectItem>
+                      <SelectItem value={'2'}>Kop 2 (h2)</SelectItem>
+                      <SelectItem value={'3'}>Kop 3 (h3)</SelectItem>
+                      <SelectItem value={'4'}>Kop 4 (h4)</SelectItem>
+                      <SelectItem value={'5'}>Kop 5 (h5)</SelectItem>
                     </SelectContent>
                   </Select>
+                  <FormDescription>
+                    Voor toegankelijkheid moeten koppen op elkaar aansluiten
+                    zonder een niveau over te slaan. Kies het niveau dat volgt
+                    op de kop boven deze widget. De koppen van de kaarten komen
+                    automatisch een niveau dieper.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

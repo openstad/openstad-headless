@@ -18,7 +18,13 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Carousel, Icon, Paginator, Pill } from '@openstad-headless/ui/src';
+import {
+  Carousel,
+  Icon,
+  Paginator,
+  Pill,
+  headingLevels,
+} from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import { Image } from '@openstad-headless/ui/src';
 import { Dialog } from '@openstad-headless/ui/src';
@@ -226,7 +232,7 @@ const defaultHeaderRenderer = (
       {displayHeader && (
         <section className="osc-resource-overview-title-container">
           <Heading
-            level={Number(headingLevel) || 4}
+            level={headingLevels(headingLevel)[0]}
             appearance="utrecht-heading-4">
             {title}
           </Heading>
@@ -492,7 +498,7 @@ const defaultItemRenderer = (
             <Spacer size={1} />
             {props.displayTitle ? (
               <Heading
-                level={Number(props.headingLevel) || 4}
+                level={headingLevels(props.headingLevel)[1]}
                 appearance="utrecht-heading-4">
                 <a
                   href={getUrl()}
@@ -651,7 +657,7 @@ const defaultItemRenderer = (
             <Spacer size={1} />
             {props.displayTitle ? (
               <Heading
-                level={Number(props.headingLevel) || 4}
+                level={headingLevels(props.headingLevel)[1]}
                 appearance="utrecht-heading-4">
                 <button
                   className="resource-card--link_trigger"
@@ -1523,7 +1529,7 @@ function ResourceOverviewInner({
               displayMap && !displayAsTabs,
               selectedProjects,
               location,
-              props.headingLevel || '4'
+              props.headingLevel
             )
           : null}
 
@@ -1614,7 +1620,7 @@ function ResourceOverviewInner({
                   true,
                   selectedProjects,
                   location,
-                  props.headingLevel || '4'
+                  props.headingLevel
                 )}
               </TabsContent>
             </div>
