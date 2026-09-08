@@ -76,6 +76,36 @@ function isInsideProjectRoot(resolvedPath: string): boolean {
   );
 }
 
+// npm package name rules: optional @scope/ prefix, lowercase charset, and no
+// leading "." or "_". A value that is not a bare specifier (absolute path,
+// "../…", any extra separator) cannot match, so require() can never be
+// pointed at an arbitrary file on disk.
+const PACKAGE_NAME_PATTERN =
+  /^(@[a-z0-9-~][a-z0-9-._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/;
+
+const NODE_MODULES_SEGMENT = `${path.sep}node_modules${path.sep}`;
+
+/**
+ * Resolves a manifest-supplied relative path against a plugin's own directory.
+ *
+ * @returns The resolved absolute path, or `null` when `relPath` is absolute or
+ *   escapes `pluginDir`.
+ */
+export function resolvePluginFile(
+  pluginDir: string,
+  relPath: string
+): string | null {
+  if (typeof relPath !== 'string' || !relPath || path.isAbsolute(relPath)) {
+    return null;
+  }
+  const root = path.resolve(pluginDir);
+  const resolved = path.resolve(root, relPath);
+  if (resolved === root || resolved.startsWith(root + path.sep)) {
+    return resolved;
+  }
+  return null;
+}
+
 /**
  * Manifest-driven plugin loader for OpenStad Headless.
  *
@@ -210,8 +240,30 @@ class PluginLoader {
     for (const entry of enabledEntries) {
       const packageName = entry.packageName || entry.package;
 
+      if (
+        typeof packageName !== 'string' ||
+        !PACKAGE_NAME_PATTERN.test(packageName)
+      ) {
+        console.error(
+          `[plugin-loader] Refusing to load plugin: "${String(
+            packageName
+          )}" is not a valid npm package name`
+        );
+        continue;
+      }
+
       try {
-        const pluginModule = require(packageName as string);
+        // Plugins are installed as npm packages; anything resolving elsewhere
+        // is not a plugin and must not be executed.
+        const resolvedModule = require.resolve(packageName);
+        if (!resolvedModule.includes(NODE_MODULES_SEGMENT)) {
+          console.error(
+            `[plugin-loader] Refusing to load plugin "${packageName}": resolved outside node_modules (${resolvedModule})`
+          );
+          continue;
+        }
+
+        const pluginModule = require(packageName);
         const manifest: PluginManifest = pluginModule.manifest || pluginModule;
 
         const validation = validateManifest(
@@ -241,7 +293,7 @@ class PluginLoader {
 
         this._plugins.push({
           ...manifest,
-          packageName: packageName as string,
+          packageName,
           config: entry.config || {},
         });
       } catch (err: unknown) {
@@ -416,4 +468,5 @@ module.exports = PluginLoader;
 module.exports.getInstance = PluginLoader.getInstance;
 module.exports.reset = PluginLoader.reset;
 module.exports.getPluginMigrationGlobs = getPluginMigrationGlobs;
+module.exports.resolvePluginFile = resolvePluginFile;
 module.exports.PluginLoader = PluginLoader;
