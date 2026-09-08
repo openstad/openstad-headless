@@ -202,6 +202,16 @@
 .resource-detail-content .utrecht-paragraph {
   white-space-collapse: preserve;
 }
+
+/* De samenvatting was een <h2> en is nu terecht een paragraaf (het is geen kop).
+   Daarbij stond utrecht-heading-4 als klasse, maar utrecht-paragraph wint en die
+   klasse deed dus niets. Dit geeft de samenvatting weer eigen nadruk, zonder
+   kop-semantiek. */
+.resource-detail-content .osc-summary {
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
 .resource-detail-content {
   display: flex;
   flex-direction: column;
@@ -256,6 +266,30 @@
   background-color: white;
   line-height: 1.1;
   max-width: calc(100% - 10px);
+}
+
+.osc-resource-detail-image-zoom-badge {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  justify-content: center;
+  background-color: var(--utrecht-button-primary-action-background-color);
+  color: var(--utrecht-button-primary-action-color);
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.osc-image-frame:hover .osc-resource-detail-image-zoom-badge {
+  opacity: 1;
+}
+
+.osc-clickable-image--wrapper .osc-image-footer,
+.osc-clickable-image--wrapper .carousel-image-description {
+  cursor: default;
 }
 
 .osc-resource-detail-widget-container > .utrecht-button-group {
@@ -339,7 +373,7 @@
   background-color: #ec673e;
 }
 .bgColor-7DB47B {
-  background-color: #7db47b;
+  background-color: #3e7a3c;
 }
 .bgColor-98BFE6 {
   background-color: #98bfe6;

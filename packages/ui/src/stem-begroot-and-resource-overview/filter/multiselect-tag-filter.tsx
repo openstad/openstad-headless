@@ -1,7 +1,7 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { MultiSelect } from '@openstad-headless/ui/src';
 import { FormLabel } from '@utrecht/component-library-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useId, useState } from 'react';
 
 //Todo correctly type resources. Will be possible when the datastore is correctly typed
 
@@ -69,17 +69,18 @@ const MultiSelectTagFilter = ({
     }
   });
 
-  const randomId = Math.random().toString(36).substring(7);
+  // ponytail: instance-prefix, zie select-tag-filter (1.3.1)
+  const instanceId = useId();
 
   function getRandomId(placeholder: string | undefined) {
     if (placeholder && placeholder.length >= 1) {
-      return placeholder
+      const slug = placeholder
         .toLowerCase()
         .replace(/[^a-z0-9\s]/g, '')
         .replace(/\s+/g, '-');
-    } else {
-      return randomId;
+      return `${instanceId}-${slug}`;
     }
+    return instanceId;
   }
 
   useEffect(() => {
@@ -111,14 +112,15 @@ const MultiSelectTagFilter = ({
     ? selected
     : Array.from(new Set([...selected, ...prefilterTagsSelected]));
 
+  const groupId = getRandomId(props.placeholder);
+  const groupLabel = props.placeholder || `Selecteer ${tagType.toLowerCase()}`;
+
   return (
     tags.length > 0 && (
       <div className="form-element">
-        <FormLabel id={getRandomId(props.placeholder)}>
-          {props.placeholder || `Selecteer ${tagType.toLowerCase()}`}
-        </FormLabel>
+        <FormLabel id={groupId}>{groupLabel}</FormLabel>
         <MultiSelect
-          id={getRandomId(props.placeholder)}
+          id={groupId}
           onItemSelected={(value, label) => {
             setStopUsingDefaultValue(true);
             onUpdateFilter && onUpdateFilter(value, label);

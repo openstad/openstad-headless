@@ -300,6 +300,9 @@ async function setupEnvVars() {
   process.env.MAIL_MS_CLIENT_SECRET = process.env.MAIL_MS_CLIENT_SECRET || '';
   process.env.MAIL_MS_TENANT_ID = process.env.MAIL_MS_TENANT_ID || '';
   process.env.WHITELISTED_EMAILS = process.env.WHITELISTED_EMAILS || '';
+
+  // debugging
+  process.env.VERBOSE_LOGGING = process.env.VERBOSE_LOGGING || false;
 }
 
 async function writeEnvFile() {
@@ -345,6 +348,8 @@ FORCE_HTTP=${process.env.FORCE_HTTP}
 MYSQL_USER=${process.env.DB_USERNAME}
 MYSQL_PASSWORD=${process.env.DB_PASSWORD}
 MYSQL_ROOT_PASSWORD=${process.env.DB_PASSWORD}
+
+VERBOSE_LOGGING=${process.env.VERBOSE_LOGGING}
 
 #api server
 API_URL=${process.env.API_URL}

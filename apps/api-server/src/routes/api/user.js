@@ -133,6 +133,10 @@ router
       const projectId = user.projectId;
       const userIdSalt = process.env.USER_ID_SALT;
 
+      // Without a salt the hash is derived from public values alone
+      if (!userIdSalt)
+        return next(new Error('Users: unsubscribe is not configured'));
+
       const hash = crypto.createHash('md5');
       hash.update(`${userIdSalt}.${userId}.${projectId}`);
       const hashedUserId = hash.digest('hex');
@@ -219,6 +223,8 @@ router
       req.query.uniqueByIdpUser !== '0' &&
       !hasByIdpUserFilter;
     const shouldExcludeAnonymous = req.query.excludeAnonymous === '1';
+    const shouldHideMembersWithoutEmail =
+      req.query.hideMembersWithoutEmail === '1';
 
     dbQuery.where = {
       ...req.queryConditions,
@@ -227,6 +233,14 @@ router
     if (req.params.projectId) dbQuery.where.projectId = req.params.projectId;
     if (shouldExcludeAnonymous) {
       dbQuery.where.role = { [Op.not]: 'anonymous' };
+    }
+    if (shouldHideMembersWithoutEmail) {
+      const isNotMemberOrHasEmail = {
+        [Op.or]: [{ role: { [Op.ne]: 'member' } }, { email: { [Op.ne]: '' } }],
+      };
+      dbQuery.where[Op.and] = (dbQuery.where[Op.and] || []).concat(
+        isNotMemberOrHasEmail
+      );
     }
 
     if (shouldDedupeByIdpUser) {
@@ -437,7 +451,7 @@ router
       });
   })
   .post(function (req, res, next) {
-    return res.json(req.results);
+    return res.json(req.results.toJSON(req.user));
   });
 
 // two-factor status and reset
@@ -736,8 +750,7 @@ router
     Object.keys(req.results).forEach((which) => {
       req.results[which] &&
         req.results[which].forEach((result) => {
-          result.auth = result.auth || {};
-          result.auth.user = req.user;
+          result.auth = { ...result.auth, user: req.user };
         });
     });
     return next();

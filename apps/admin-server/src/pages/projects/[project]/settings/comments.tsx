@@ -44,11 +44,11 @@ const formSchema = z.object({
   minCharactersError: z
     .string()
     .optional()
-    .default('Tekst moet minimaal {minCharacters} karakters bevatten'),
+    .default('De tekst mag niet korter zijn dan {minCharacters} tekens'),
   maxCharactersError: z
     .string()
     .optional()
-    .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
+    .default('De tekst mag niet langer zijn dan {maxCharacters} tekens'),
   editorLabel: z.string().optional(),
 });
 
@@ -77,10 +77,10 @@ export default function ProjectSettingsComments() {
         'Je hebt nog {maxCharacters} tekens over',
       minCharactersError:
         data?.config?.minCharactersError ||
-        'Tekst moet minimaal {minCharacters} karakters bevatten',
+        'De tekst mag niet korter zijn dan {minCharacters} tekens',
       maxCharactersError:
         data?.config?.maxCharactersError ||
-        'Tekst moet maximaal {maxCharacters} karakters bevatten',
+        'De tekst mag niet langer zijn dan {maxCharacters} tekens',
       editorLabel: data?.config?.comments?.editorLabel,
     }),
     [data]

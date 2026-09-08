@@ -9,11 +9,12 @@ import {
   Textarea,
   Textbox,
 } from '@utrecht/component-library-react';
-import DOMPurify from 'dompurify';
 import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
+import { FieldVariant, purposeAttributes } from '../field-purpose';
+import { parseEditorHtml, stripTrailingBreaks } from './strip-trailing-breaks';
 import './style.css';
 
 declare module 'react' {
@@ -39,17 +40,6 @@ declare global {
   }
 }
 
-// Parse editor HTML into an inert, sanitized document body. DOMPurify breaks
-// the untrusted-text -> HTML flow before it reaches the parser; target/rel are
-// kept so existing "open in new tab" links survive a round-trip.
-function parseEditorHtml(html: string): HTMLElement | null {
-  if (typeof document === 'undefined') return null;
-  const clean = DOMPurify.sanitize(html || '', {
-    ADD_ATTR: ['target', 'rel'],
-  });
-  return new DOMParser().parseFromString(clean, 'text/html').body;
-}
-
 function getTargetBlankHrefs(html: string): Set<string> {
   const hrefs = new Set<string>();
   if (!html || !html.includes('target')) return hrefs;
@@ -73,7 +63,7 @@ export type TextInputProps = {
   fieldRequired?: boolean;
   requiredWarning?: string;
   fieldKey: string;
-  variant?: 'text input' | 'textarea' | 'richtext' | 'email';
+  variant?: FieldVariant;
   placeholder?: string;
   defaultValue?: string;
   disabled?: boolean;
@@ -274,6 +264,11 @@ const TrixEditor: React.FC<{
         }
       }
 
+      html = stripTrailingBreaks(html);
+      if (html === stripTrailingBreaks(valueRef.current || '')) {
+        return;
+      }
+
       const syntheticEvent = {
         target: { value: html },
       } as React.ChangeEvent<HTMLInputElement>;
@@ -377,8 +372,16 @@ const TextInput: FC<TextInputProps> = ({
     textarea: Textarea,
     richtext: TrixEditor,
     email: Textbox,
+    name: Textbox,
+    'given-name': Textbox,
+    'family-name': Textbox,
+    tel: Textbox,
+    'postal-code': Textbox,
+    'street-address': Textbox,
+    'address-level2': Textbox,
   };
   const InputComponent = variantMap[variant] || Textbox;
+  const purpose = purposeAttributes(variant);
 
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
@@ -418,19 +421,6 @@ const TextInput: FC<TextInputProps> = ({
   useEffect(() => {
     value && setCheckInvalid(false);
   }, []);
-
-  const getType = (fieldKey: string) => {
-    switch (fieldKey) {
-      case 'email':
-        return 'email';
-      case 'tel':
-        return 'tel';
-      case 'password':
-        return 'password';
-      default:
-        return 'text';
-    }
-  };
 
   useEffect(() => {
     if (reset) {
@@ -474,32 +464,6 @@ const TextInput: FC<TextInputProps> = ({
   useEffect(() => {
     value && setCheckInvalid(false);
   }, []);
-
-  const getAutocomplete = (fieldKey: string) => {
-    switch (fieldKey?.toLocaleLowerCase()) {
-      case 'email':
-      case 'mail':
-        return 'email';
-      case 'tel':
-        return 'tel';
-      case 'password':
-        return 'current-password';
-      case 'voornaam':
-        return 'given-name';
-      case 'achternaam':
-        return 'family-name';
-      case 'straatnaam':
-        return 'street-address';
-      case 'postcode':
-        return 'postal-code';
-      case 'woonplaats':
-        return 'address-level2';
-      case 'land':
-        return 'country';
-      default:
-        return 'on';
-    }
-  };
 
   const fieldHasMaxOrMinCharacterRules = !!minCharacters || !!maxCharacters;
   const isOverCharacterLimit = !!maxCharacters && value.length > maxCharacters;
@@ -596,7 +560,7 @@ const TextInput: FC<TextInputProps> = ({
           id={randomId}
           name={fieldKey}
           required={fieldRequired}
-          type={variant === 'email' ? 'email' : getType(fieldKey)}
+          type={purpose.type}
           placeholder={placeholder}
           value={value}
           onChange={(
@@ -618,14 +582,20 @@ const TextInput: FC<TextInputProps> = ({
             setIsFocused(false);
             setHasBlurred(true);
           }}
-          autoComplete={
-            variant === 'email' ? 'email' : getAutocomplete(fieldKey)
+          autoComplete={purpose.autoComplete}
+          aria-describedby={
+            [
+              // ponytail: fieldInvalid komt uit form.tsx en is alleen waar als
+              // het foutelement daadwerkelijk gerenderd is. checkInvalid staat al
+              // op waar bij "verplicht en nog leeg", dus dat wees naar niets.
+              fieldInvalid ? `${randomId}_error` : '',
+              (isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText
+                ? helpTextId
+                : '',
+            ]
+              .filter(Boolean)
+              .join(' ') || undefined
           }
-          aria-describedby={`${randomId}_error${
-            (isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText
-              ? ` ${helpTextId}`
-              : ''
-          }`}
           aria-invalid={checkInvalid}
         />
         {(isFocused || (showMinMaxAfterBlur && hasBlurred)) && helpText && (

@@ -48,7 +48,8 @@
   position: relative;
 }
 
-.form-element.postcode-autofill .input-wrapper #locationField {
+/* ponytail: id is nu een useId() per instance — selecteer op het veld zelf */
+.form-element.postcode-autofill .input-wrapper input[type='text'] {
   padding-right: 27px;
 }
 

@@ -62,6 +62,24 @@ describe('getSchemaForField: text/email variant', () => {
     }
   });
 
+  test('zonder emailError benoemt de standaardmelding de fout, niet de opdracht', () => {
+    const field: any = {
+      type: 'text',
+      title: 'Email',
+      fieldKey: 'contactEmail',
+      variant: 'email',
+      fieldRequired: true,
+    };
+    const schema = getSchemaForField(field);
+
+    try {
+      schema!.parse('not-an-email');
+      throw new Error('Expected parse to throw');
+    } catch (e) {
+      expect(firstZodIssueMessage(e)).toMatch(/geen geldig e-mailadres/i);
+    }
+  });
+
   test('optional: empty string allowed, invalid still rejected', () => {
     const field: any = {
       type: 'text',

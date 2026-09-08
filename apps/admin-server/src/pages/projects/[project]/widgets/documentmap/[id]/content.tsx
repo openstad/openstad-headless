@@ -26,6 +26,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
+  headingLevel: z.coerce.number().optional(),
   addCommentText: z.string().optional(),
   addMarkerText: z.string().optional(),
   submitCommentText: z.string().optional(),
@@ -53,11 +54,11 @@ const formSchema = z.object({
   minCharactersError: z
     .string()
     .optional()
-    .default('Tekst moet minimaal {minCharacters} karakters bevatten'),
+    .default('De tekst mag niet korter zijn dan {minCharacters} tekens'),
   maxCharactersError: z
     .string()
     .optional()
-    .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
+    .default('De tekst mag niet langer zijn dan {maxCharacters} tekens'),
   displayResourceTitle: z.string().optional(),
   displayResourceSummary: z.string().optional(),
 });
@@ -74,6 +75,7 @@ export default function DocumentContent(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
+      headingLevel: props?.headingLevel || 2,
       addCommentText: props?.addCommentText || 'Voeg een opmerking toe',
       addMarkerText: props?.addMarkerText || 'Toon markers',
       submitCommentText: props?.submitCommentText || 'Versturen',
@@ -104,10 +106,10 @@ export default function DocumentContent(
         'Je hebt {maxCharacters} karakters teveel',
       minCharactersError:
         props?.minCharactersError ||
-        'Tekst moet minimaal {minCharacters} karakters bevatten',
+        'De tekst mag niet korter zijn dan {minCharacters} tekens',
       maxCharactersError:
         props?.maxCharactersError ||
-        'Tekst moet maximaal {maxCharacters} karakters bevatten',
+        'De tekst mag niet langer zijn dan {maxCharacters} tekens',
       displayResourceTitle: props?.displayResourceTitle || 'yes',
       displayResourceSummary: props?.displayResourceSummary || 'yes',
     },
@@ -124,6 +126,34 @@ export default function DocumentContent(
           <Heading size="lg" className="mt-4 mb-2">
             Reactie Gerelateerd
           </Heading>
+          <FormField
+            control={form.control}
+            name="headingLevel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Kopniveau van de titel</FormLabel>
+                <Select
+                  value={String(field.value ?? 2)}
+                  onValueChange={(e) => field.onChange(Number(e))}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Kies kopniveau" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="2">Kop 2 (h2)</SelectItem>
+                    <SelectItem value="3">Kop 3 (h3)</SelectItem>
+                    <SelectItem value="4">Kop 4 (h4)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Kies zo dat de titel aansluit op de koppen eromheen. De widget
+                  produceert nooit een h1; die hoort bij de pagina zelf.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}

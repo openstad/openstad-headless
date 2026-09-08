@@ -2,14 +2,22 @@ const express = require('express');
 const createError = require('http-errors');
 const { v4: uuidv4 } = require('uuid');
 const db = require('../../db');
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
 const router = express.Router({ mergeParams: true });
 
+// A real selection is a handful of resource ids; the global body limit is 10mb
+const MAX_PAYLOAD_BYTES = 64 * 1024;
+
 // Create or update a pending budget vote selection
-router.post('/', async function (req, res, next) {
+router.post('/', rateLimiter(), async function (req, res, next) {
   try {
     if (!req.body || typeof req.body !== 'object') {
       return next(createError(400, 'Invalid payload'));
+    }
+
+    if (Buffer.byteLength(JSON.stringify(req.body)) > MAX_PAYLOAD_BYTES) {
+      return next(createError(413, 'Payload too large'));
     }
 
     const id = uuidv4();

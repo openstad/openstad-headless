@@ -19,7 +19,7 @@ export default () => {
           });
         })
         .catch((err) => {
-          console.error('Failed to load share-link widget:', err);
+          console.error('Failed to load share-links widget:', err);
         });
     },
   };

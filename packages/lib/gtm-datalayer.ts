@@ -103,6 +103,7 @@ export function detectEnvironment(override?: string): GtmEnvironment {
 const questionTypeMap: Record<string, QuestionType> = {
   open: 'textbox',
   multiplechoice: 'select_single',
+  dropdown: 'select_single',
   multiple: 'select_multiple',
   swipe: 'keuzeswipe',
   images: 'beeldkiezer',

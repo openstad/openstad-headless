@@ -780,7 +780,11 @@ router
       }
 
       // now find the corresponding projects
-      let result = await db.Project.scope(req.scope).findAndCountAll({
+      const listScope = req.scope.includes('getBasicInformation')
+        ? req.scope.filter((scopeName) => scopeName !== 'excludeConfig')
+        : req.scope;
+
+      let result = await db.Project.scope(listScope).findAndCountAll({
         offset: req.dbQuery.offset,
         limit: req.dbQuery.limit,
         where,
@@ -795,7 +799,7 @@ router
           return {
             id: p.id,
             createdAt: p.createdAt,
-            tags: p?.config?.project?.tags || '',
+            tags: p?.safeConfig?.project?.tags || '',
           };
         });
       }
@@ -1380,7 +1384,7 @@ router
   })
   .put(async function (req, res, next) {
     const project = await db.Project.findOne({ where: { id: req.results.id } });
-    if (!(project && project.can && project.can('update')))
+    if (!(project && project.can && project.can('update', req.user)))
       return next(new Error('You cannot update this project'));
 
     req.pendingMessages = [
@@ -1417,7 +1421,7 @@ router
     }
 
     project
-      .authorizeData(req.body, 'update')
+      .authorizeData(req.body, 'update', req.user)
       .update(updateBody)
       .then(async (result) => {
         req.results = result;
@@ -1524,7 +1528,8 @@ router
 // -------------------
 router
   .route('/:projectId(\\d+)/export')
-  .all(auth.can('Project', 'view'))
+  // 'view' is viewableBy:'all'; this export carries vote ip and userId
+  .all(auth.can('Project', 'update'))
   .all(async function (req, res, next) {
     await getProject(req, res, next, [
       {
@@ -1544,7 +1549,7 @@ router
     ]);
   })
 
-  .get(auth.can('Project', 'view'))
+  .get(auth.can('Project', 'update'))
   .get(auth.useReqUser)
   .get(function (req, res, next) {
     res.json(req.results);
@@ -1576,7 +1581,15 @@ router
       if (req.params.willOrDo == 'do') {
         result.message = 'Ok';
 
-        req.project.doAnonymizeAllUsers([...result.users], req.query.useAuth);
+        req.project
+          .doAnonymizeAllUsers(
+            [...result.users],
+            [...result.externalUserIds],
+            req.query.useAuth
+          )
+          .catch((err) => {
+            console.error('error in doAnonymizeAllUsers', err);
+          });
       }
       next();
     } catch (err) {
@@ -1591,8 +1604,7 @@ router
         req.results[which].forEach &&
         req.results[which].forEach((result) => {
           if (typeof result == 'object') {
-            result.auth = result.auth || {};
-            result.auth.user = req.user;
+            result.auth = { ...result.auth, user: req.user };
           }
         });
     });

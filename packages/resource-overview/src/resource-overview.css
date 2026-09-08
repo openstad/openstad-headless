@@ -62,7 +62,7 @@
     .osc-resource-overview-resource-collection {
     grid-template-columns: 1fr !important;
   }
-  #stem-begroot-filter {
+  .osc-filter-section {
     grid-column: 1 / -1;
   }
 }
@@ -81,10 +81,10 @@
     .osc-resource-overview-resource-collection {
     grid-template-columns: 1fr 1fr;
   }
-  #stem-begroot-filter {
+  .osc-filter-section {
     grid-column: 1 / -1;
   }
-  #stem-begroot-filter .osc-resources-filter.osc-flex-columned {
+  .osc-filter-section .osc-resources-filter.osc-flex-columned {
     flex-direction: row;
   }
 }
@@ -187,13 +187,13 @@ p.osc-searchtext {
 }
 
 .osc.--compact
-  #stem-begroot-filter
+  .osc-filter-section
   .osc-resources-filter.osc-flex-columned:not(:has(.--collapsable)) {
   display: grid;
   grid-template-columns: repeat(auto-fit, 208px);
 }
 .osc.--compact
-  #stem-begroot-filter
+  .osc-filter-section
   .osc-resources-filter.osc-flex-columned
   .button-group {
   grid-column: span 2 / -1;
@@ -201,14 +201,14 @@ p.osc-searchtext {
 }
 
 .osc.--compact
-  #stem-begroot-filter
+  .osc-filter-section
   .osc-resources-filter.osc-flex-columned
   .button-group
   > * {
   max-width: 50%;
 }
 
-.osc.--compact #stem-begroot-filter {
+.osc.--compact .osc-filter-section {
   grid-column: 1 / -1;
 }
 .osc.--compact
@@ -448,10 +448,10 @@ p.osc-searchtext {
   background-color: #ec673e;
 }
 .bgColor-7DB47B {
-  background-color: #7db47b;
+  background-color: #3e7a3c;
 }
 .bgColor-98BFE6 {
-  background-color: #98bfe6;
+  background-color: #2e5d99;
 }
 .bgColor-FAE065 {
   background-color: #fae065;

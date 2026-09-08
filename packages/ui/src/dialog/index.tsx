@@ -20,10 +20,14 @@ export const Dialog = ({
   open,
   onOpenChange,
   className,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledBy,
   ...props
 }: PropsWithChildren<
   RadixDialog.DialogProps & {
     className?: string;
+    'aria-label'?: string;
+    'aria-labelledby'?: string;
   }
 >) => {
   useEffect(() => {
@@ -37,7 +41,10 @@ export const Dialog = ({
       <RadixDialog.Portal>
         <div className="openstad">
           <RadixDialog.Overlay className="osc-DialogOverlay" />
-          <RadixDialog.Content className={`osc osc-DialogContent ${className}`}>
+          <RadixDialog.Content
+            className={`osc osc-DialogContent ${className}`}
+            aria-label={ariaLabelledBy ? undefined : ariaLabel}
+            aria-labelledby={ariaLabelledBy}>
             <div>
               <RadixDialog.Close asChild>
                 <IconButton

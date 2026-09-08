@@ -27,7 +27,7 @@ const types = [
       'Vul hieronder je unieke code in om een OpenStad account aan te maken. Deze code heb je thuis gestuurd gekregen van ons.',
     label: 'Mijn stemcode',
     helpText:
-      'Let op, de unieke code is hoofdlettergevoelig! Werkt deze nog steeds niet? <a href="mailto:{{clientEmail}}">Neem contact met ons op.</a>',
+      'Let op, de unieke code is hoofdlettergevoelig! Werkt deze nog steeds niet? <a href="mailto:{{clientEmail}}">stuur ons een e-mail.</a>',
     errorMessage:
       'Vul een geldige stemcode in. Heb je een typefout gemaakt? Stemcodes zijn hoofdlettergevoelig.',
     displaySidebar: false,
@@ -67,7 +67,7 @@ const types = [
     smsCodeLabel: 'Mijn sms-stemcode:',
     smsCodeButtonText: 'Controleer de sms-code',
     smsCodeHelpText:
-      'Het kan enkele minuten duren voordat u de sms-code ontvangt. Een sms-code is 60 minuten geldig. Geen sms gekregen na het invoeren van uw telefoonnummer?<br/><a href="javascript:history.back()">Vraag nog een sms-code aan</a> of <a href="mailto:{{clientEmail}}">neem contact met ons op.</a>',
+      'Het kan enkele minuten duren voordat u de sms-code ontvangt. Een sms-code is 60 minuten geldig. Geen sms gekregen na het invoeren van uw telefoonnummer?<br/><a href="javascript:history.back()">Vraag nog een sms-code aan</a> of <a href="mailto:{{clientEmail}}">stuur ons een e-mail.</a>',
     smsCodeErrorMessage:
       'Dat is niet de stemcode die u toegestuurd hebt gekregen. Vraag een een nieuwe code aan. Vul hieronder nogmaals uw telefoonnummer in.',
     smsCodeUrl: formatSMSCodeUrl('phonenumber'),
@@ -88,7 +88,7 @@ const types = [
     label: 'E-mailadres:',
     buttonText: 'Verstuur e-mail',
     helpText:
-      'Geen e-mail gekregen na het versturen van de link? Kijk dan in je ongewenste e-mails of <a href="mailto:{{clientEmail}}">neem contact met ons op.</a>',
+      'Geen e-mail gekregen na het versturen van de link? Kijk dan in je ongewenste e-mails of <a href="mailto:{{clientEmail}}">stuur ons een e-mail.</a>',
     displayBackbutton: true,
     displaySidebar: true,
     displayAccountLink: false,

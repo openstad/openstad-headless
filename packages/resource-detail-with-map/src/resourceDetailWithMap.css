@@ -69,6 +69,10 @@
   grid-template-columns: 1fr 1fr;
   grid-template-rows: auto calc(100vh - 252px);
 }
+/* ponytail: grid-kinderen mogen krimpen zodat lange inhoud niet horizontaal overloopt op 320px (1.4.10) */
+.osc-resource-detail-grid > * {
+  min-width: 0;
+}
 .osc-resource-detail-grid .osc-resource-detail-content-items {
   overflow: auto;
   justify-content: start;
@@ -238,7 +242,7 @@
   background-color: #ec673e;
 }
 .bgColor-7DB47B {
-  background-color: #7db47b;
+  background-color: #3e7a3c;
 }
 .bgColor-98BFE6 {
   background-color: #98bfe6;

@@ -112,7 +112,7 @@ router
         })
           .findByPk(result.id)
           .then(function (poll) {
-            poll.auth.user = req.user;
+            poll.auth = { ...poll.auth, user: req.user };
             res.json(poll);
           });
       })
@@ -232,7 +232,7 @@ router
         };
 
         if (pollVote) {
-          pollVote.auth.user = req.user;
+          pollVote.auth = { ...pollVote.auth, user: req.user };
           pollVote
             .authorizeData(data, 'update')
             .update(data)
@@ -263,7 +263,7 @@ router
     db.PollVote.scope('defaultScope')
       .findByPk(req.pollVoteId)
       .then(function (poll) {
-        poll.auth.user = req.user;
+        poll.auth = { ...poll.auth, user: req.user };
         res.json(poll);
       });
   });

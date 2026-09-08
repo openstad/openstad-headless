@@ -4,20 +4,21 @@ import { isPointInArea } from '@openstad-headless/leaflet-map/src/area';
 import { EditorMap } from '@openstad-headless/leaflet-map/src/editor-map';
 import type { AreaProps } from '@openstad-headless/leaflet-map/src/types/area-props';
 import { DataLayer } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
+import { defaultAddressSearchTexts } from '@openstad-headless/lib/address-search-texts';
 import { BaseProps } from '@openstad-headless/types/base-props.js';
 import { ProjectSettingProps } from '@openstad-headless/types/project-setting-props.js';
 import {
   AccordionProvider,
   FormField,
   FormFieldDescription,
-  FormLabel,
   Paragraph,
 } from '@utrecht/component-library-react';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useEffect, useId, useMemo, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
 import { Spacer } from '../../spacer';
+import AddressSearch, { AddressSearchResult } from './address-search';
 import './map.css';
 import { resolvePolygonTags } from './utils/polygon-tags';
 import { getTargetAreaIds, resolveMapPolygons } from './utils/polygons';
@@ -58,6 +59,8 @@ export type MapProps = BaseProps &
     imageClickable?: boolean;
     enablePolygonTags?: boolean;
     showHiddenPolygonsForAdmin?: boolean;
+    enableAddressSearch?: boolean;
+    zipCodeApiUrl?: string;
   };
 
 type Point = {
@@ -94,9 +97,7 @@ const MapField: FC<MapProps> = ({
   imageClickable = false,
   ...props
 }) => {
-  const randomID =
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15);
+  const randomID = useId();
 
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
@@ -197,6 +198,37 @@ const MapField: FC<MapProps> = ({
       isPointInArea,
     });
 
+  const [searchLocation, setSearchLocation] = useState<
+    { lat: number; lng: number } | undefined
+  >(undefined);
+  const [addressOutsideArea, setAddressOutsideArea] = useState(false);
+
+  const handleAddressResult = (result: AddressSearchResult | null) => {
+    setAddressOutsideArea(false);
+    if (!result) {
+      return;
+    }
+
+    const point = {
+      lat: parseFloat(result.latitude),
+      lng: parseFloat(result.longitude),
+    };
+    if (Number.isNaN(point.lat) || Number.isNaN(point.lng)) {
+      return;
+    }
+
+    if (
+      polygon &&
+      polygon.length > 0 &&
+      !isPointInArea(polygon, point as any)
+    ) {
+      setAddressOutsideArea(true);
+      return;
+    }
+
+    setSearchLocation(point);
+  };
+
   const handleMapChange = (event: { name: string; value: FormValue }) => {
     if (onChange) {
       onChange(event);
@@ -213,19 +245,19 @@ const MapField: FC<MapProps> = ({
   return (
     <FormField type="text">
       {title && (
-        <Paragraph className="utrecht-form-field__label">
-          <FormLabel htmlFor={randomID}>
-            <RteContent
-              content={title}
-              unwrapSingleRootDiv={true}
-              forceInline={true}
-            />
-          </FormLabel>
+        // ponytail: geen <label for> naar een verborgen input die niet bestaat
+        // (WCAG 1.3.1). De kaart is geen labelbaar formulierveld; titel als tekst met id.
+        <Paragraph className="utrecht-form-field__label" id={randomID}>
+          <RteContent
+            content={title}
+            unwrapSingleRootDiv={true}
+            forceInline={true}
+          />
         </Paragraph>
       )}
 
       {description && (
-        <FormFieldDescription>
+        <FormFieldDescription id={`${randomID}-description`}>
           <RteContent content={description} unwrapSingleRootDiv={true} />
         </FormFieldDescription>
       )}
@@ -264,7 +296,33 @@ const MapField: FC<MapProps> = ({
         </div>
       )}
 
-      <div className="form-field-map-container" id={`map`}>
+      {!!props.enableAddressSearch && !!props.zipCodeApiUrl && (
+        <>
+          <AddressSearch
+            zipCodeApiUrl={props.zipCodeApiUrl}
+            fieldKey={fieldKey}
+            onResult={handleAddressResult}
+            foundText={props.map?.addressSearchFoundText}
+            notFoundText={props.map?.addressSearchNotFoundText}
+            errorText={props.map?.addressSearchErrorText}
+          />
+          <div className="address-search-feedback" aria-live="polite">
+            {addressOutsideArea && (
+              <Paragraph>
+                {props.map?.addressSearchOutsideAreaText ||
+                  defaultAddressSearchTexts.outsideAreaText}
+              </Paragraph>
+            )}
+          </div>
+        </>
+      )}
+
+      <div
+        className="form-field-map-container"
+        id={`map`}
+        role="group"
+        aria-labelledby={title ? randomID : undefined}
+        aria-describedby={description ? `${randomID}-description` : undefined}>
         {((allowedPolygonIds.length > 0 && polygon.length) ||
           (areaId && polygon.length) ||
           (!Number(areaId) && allowedPolygonIds.length === 0)) && (
@@ -277,6 +335,7 @@ const MapField: FC<MapProps> = ({
             markerIcon={undefined}
             centerOnEditorMarker={false}
             autoZoomAndCenter={props?.map?.autoZoomAndCenter || 'area'}
+            searchLocation={searchLocation}
             area={polygon}
             renderArea={renderPolygon}
             areaRenderMode={

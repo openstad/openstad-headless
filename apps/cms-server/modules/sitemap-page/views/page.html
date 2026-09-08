@@ -1,0 +1,17 @@
+{% extends "layout.html" %} {% macro branch(nodes) %}
+<ul>
+  {% for node in nodes %}
+  <li>
+    <a href="{{ node.url }}">{{ node.title }}</a>
+    {% if node.children.length %} {{ branch(node.children) }} {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endmacro %} {% block main %}
+<section class="page sitemap-page">
+  <div class="container">
+    <h1>{{ data.page.title }}</h1>
+    <nav aria-label="Sitemap">{{ branch(data.sitemapTree) }}</nav>
+  </div>
+</section>
+{% endblock %}

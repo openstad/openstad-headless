@@ -42,6 +42,10 @@ describe('gtm-datalayer', () => {
       expect(mapQuestionType('multiplechoice')).toBe('select_single');
     });
 
+    it('maps dropdown to select_single', () => {
+      expect(mapQuestionType('dropdown')).toBe('select_single');
+    });
+
     it('maps multiple to select_multiple', () => {
       expect(mapQuestionType('multiple')).toBe('select_multiple');
     });

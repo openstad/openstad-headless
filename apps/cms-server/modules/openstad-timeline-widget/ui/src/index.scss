@@ -7,6 +7,12 @@
   background: #f3f3f3;
 }
 
+/* ponytail: linkkleur met voldoende contrast op het grijze tijdlijn-vlak (#f3f3f3 -> >=4,5:1) (1.4.3) */
+.timeline-period a,
+.timeline-day a {
+  color: #0b5394;
+}
+
 .timeline-period ul,
 .timeline-day ul {
   padding: 0px 15px;

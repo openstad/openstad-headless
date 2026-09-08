@@ -1,9 +1,10 @@
 import { FormLabel } from '@utrecht/component-library-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 
 import { Select } from '../select';
 import { PostcodeAutoFillLocation } from '../stem-begroot-and-resource-overview/filter';
 import './index.css';
+import { sanitizeZipInput } from './sanitize-zip';
 
 const proximityOptions = [
   { label: '100 meter', value: '0.1' },
@@ -21,6 +22,10 @@ type Props = {
   zipCodeApiUrl?: string;
   proximityOptions?: { label: string; value: string }[];
   proximityDefault?: string;
+  locationLabel?: string;
+  displayLocationHint?: boolean;
+  locationHint?: string;
+  locationPlaceholder?: string;
 };
 
 type Suggestion = {
@@ -42,6 +47,11 @@ export default function PostcodeAutoFill({
   locationDefault,
   ...props
 }: Props) {
+  // ponytail: unieke id's — dit blok staat vaak twee keer op één pagina (1.3.1)
+  const locationFieldId = useId();
+  const suggestionListId = useId();
+  const proximityFieldId = useId();
+
   const options = props.proximityOptions || proximityOptions;
   const defaultProximity =
     props.proximityDefault ||
@@ -58,7 +68,6 @@ export default function PostcodeAutoFill({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const sanitizeZipInput = (value: string) => value.replace(/\s+/g, '');
 
   useEffect(() => {
     if (!locationDefault && input !== '') {
@@ -68,7 +77,11 @@ export default function PostcodeAutoFill({
   }, [locationDefault, defaultProximity]);
 
   useEffect(() => {
-    if (input.length < 3) {
+    // Normalize to a space-free value so the external API keeps receiving the
+    // working format, while the visible input may still contain a space.
+    const normalizedInput = sanitizeZipInput(input);
+
+    if (normalizedInput.length < 3) {
       setSuggestions([]);
       return;
     }
@@ -77,7 +90,7 @@ export default function PostcodeAutoFill({
     const timeout = setTimeout(() => {
       setLoading(true);
 
-      fetch(`${props?.zipCodeAutofillApiUrl || ''}${input}`, {
+      fetch(`${props?.zipCodeAutofillApiUrl || ''}${normalizedInput}`, {
         signal: controller.signal,
       })
         .then((res) => res.json())
@@ -163,33 +176,42 @@ export default function PostcodeAutoFill({
   return (
     <>
       <div className="form-element postcode-autofill" ref={wrapperRef}>
-        <FormLabel htmlFor={'locationField'}>Selecteer postcode</FormLabel>
+        <FormLabel htmlFor={locationFieldId}>
+          {props.locationLabel || 'Vul een postcode in'}
+        </FormLabel>
+        {props.displayLocationHint && props.locationHint ? (
+          <p id={`${locationFieldId}-hint`} className="form-element-hint">
+            {props.locationHint}
+          </p>
+        ) : null}
         <div className="input-wrapper">
           <input
             type="text"
             ref={inputRef}
             value={input}
+            placeholder={props.locationPlaceholder || ''}
+            aria-describedby={
+              props.displayLocationHint && props.locationHint
+                ? 'locationField-hint'
+                : undefined
+            }
             onChange={(e) => {
-              const nextValue = sanitizeZipInput(e.target.value);
-              setInput(nextValue);
+              // Keep the raw value so the user can type a space (e.g. "1234 AA");
+              // normalization for the API happens in the suggestions effect.
+              setInput(e.target.value);
               setSelected(null);
               setShowDropdown(true);
             }}
-            onKeyDown={(e) => {
-              if (e.key === ' ' || e.key === 'Spacebar') {
-                e.preventDefault();
-              }
-            }}
             disabled={!!selected}
             className="utrecht-textbox utrecht-textbox--html-input"
-            id="locationField"
-            autoComplete="off"
+            id={locationFieldId}
+            autoComplete="postal-code"
             aria-autocomplete="list"
-            aria-controls="suggestion-list"
+            aria-controls={suggestionListId}
             aria-expanded={showDropdown}
             aria-activedescendant={
               showDropdown && suggestions.length > 0
-                ? `suggestion-${highlightedIndex}`
+                ? `${suggestionListId}-${highlightedIndex}`
                 : undefined
             }
             role="combobox"
@@ -214,7 +236,7 @@ export default function PostcodeAutoFill({
         {!loading && showDropdown && suggestions.length > 0 && (
           <ul
             className="suggestion-list"
-            id="suggestion-list"
+            id={suggestionListId}
             role="listbox"
             onKeyDown={(e) => {
               if (showDropdown && suggestions.length > 0) {
@@ -239,7 +261,7 @@ export default function PostcodeAutoFill({
                 key={index}
                 onClick={() => handleSelect(s)}
                 role="option"
-                id={`suggestion-${index}`}
+                id={`${suggestionListId}-${index}`}
                 aria-selected={highlightedIndex === index}
                 tabIndex={-1}>
                 <strong>{s.postcode}</strong> {s.straat}, {s.woonplaats}
@@ -250,11 +272,11 @@ export default function PostcodeAutoFill({
       </div>
 
       <div className="form-element">
-        <FormLabel htmlFor={'proximityField'}>Selecteer straal</FormLabel>
+        <FormLabel htmlFor={proximityFieldId}>Selecteer straal</FormLabel>
         <Select
           onValueChange={(value) => setProximity(value)}
           options={options}
-          id="proximityField"
+          id={proximityFieldId}
           value={proximity}
           disableDefaultOption={true}
         />

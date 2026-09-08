@@ -1,6 +1,7 @@
 import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import '@utrecht/component-library-css';
 import {
+  Heading,
   Heading1,
   Heading2,
   Heading3,
@@ -135,7 +136,10 @@ function convertTextDivsToParagraphs(content) {
 }
 
 export default function RenderContent(content, options = {}) {
-  const { unwrapSingleRootDiv: shouldUnwrapSingleRootDiv = false } = options;
+  const {
+    unwrapSingleRootDiv: shouldUnwrapSingleRootDiv = false,
+    headingBaseLevel,
+  } = options;
   // Sanitize vóór het parsen, zodat processDefaultNode nooit onveilige
   // nodes of attributen doorkrijgt.
   const htmlInput = `<div>${sanitizeHtml(content)}</div>`;
@@ -149,34 +153,22 @@ export default function RenderContent(content, options = {}) {
   const processingInstructions = [
     {
       shouldProcessNode: function (node) {
-        return node && node.name && node.name === 'h1';
+        return node && node.name && /^h[1-4]$/.test(node.name);
       },
       processNode: function (node, children, index) {
-        return <Heading1 key={index}>{children}</Heading1>;
-      },
-    },
-    {
-      shouldProcessNode: function (node) {
-        return node && node.name && node.name === 'h2';
-      },
-      processNode: function (node, children, index) {
-        return <Heading2 key={index}>{children}</Heading2>;
-      },
-    },
-    {
-      shouldProcessNode: function (node) {
-        return node && node.name && node.name === 'h3';
-      },
-      processNode: function (node, children, index) {
-        return <Heading3 key={index}>{children}</Heading3>;
-      },
-    },
-    {
-      shouldProcessNode: function (node) {
-        return node && node.name && node.name === 'h4';
-      },
-      processNode: function (node, children, index) {
-        return <Heading4 key={index}>{children}</Heading4>;
+        const sourceLevel = Number(node.name.slice(1));
+        if (headingBaseLevel) {
+          const level = Math.min(headingBaseLevel + sourceLevel - 1, 6);
+          return (
+            <Heading key={index} level={level}>
+              {children}
+            </Heading>
+          );
+        }
+        const HeadingComponent = [Heading1, Heading2, Heading3, Heading4][
+          sourceLevel - 1
+        ];
+        return <HeadingComponent key={index}>{children}</HeadingComponent>;
       },
     },
     {

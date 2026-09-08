@@ -180,6 +180,13 @@ figure.info-image-container {
   color: black;
 }
 
+/* ponytail: clearfix zodat de gefloate balk + percentage de li niet laten inklappen */
+.osc-choice-default::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
 .osc .osc-choiceguide-container .question-type-range + .question-type-range {
   margin-top: 2rem;
 }

@@ -12,12 +12,11 @@ import {
 } from '@openstad-headless/ui/src';
 import { Carousel } from '@openstad-headless/ui/src';
 import { Dialog } from '@openstad-headless/ui/src';
+import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
 import '@utrecht/component-library-css';
 import {
   Button,
   Heading,
-  Heading1,
-  Heading4,
   Heading5,
   Link,
   Paragraph,
@@ -29,6 +28,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './stem-begroot-detail-dialog.css';
 
 export const StemBegrootResourceDetailDialog = ({
+  headingLevel = 2,
   openDetailDialog,
   setOpenDetailDialog,
   resourceDetailIndex,
@@ -57,6 +57,7 @@ export const StemBegrootResourceDetailDialog = ({
   displayDescription = true,
   clickableImage = false,
 }: {
+  headingLevel?: number;
   openDetailDialog: boolean;
   setOpenDetailDialog: (condition: boolean) => void;
   resources: Array<any>;
@@ -128,11 +129,14 @@ export const StemBegrootResourceDetailDialog = ({
     }
   };
 
+  const dialogTitleId = 'begrootmodule-dialog-title';
+
   return (
     <Dialog
       open={openDetailDialog}
       onOpenChange={setOpenDetailDialog}
       className="begrootmodule-dialog"
+      aria-labelledby={dialogTitleId}
       children={
         <Carousel
           startIndex={resourceDetailIndex}
@@ -228,7 +232,11 @@ export const StemBegrootResourceDetailDialog = ({
                   </div> */}
                     {isSimpleView === false && (
                       <div className="osc-gridder-resource-detail-budget-theme-bar">
-                        <Heading4>Budget</Heading4>
+                        <Heading
+                          level={headingLevel + 1}
+                          appearance="utrecht-heading-4">
+                          Budget
+                        </Heading>
                         <Paragraph>
                           {`€ ${
                             resource?.budget > 0
@@ -237,9 +245,13 @@ export const StemBegrootResourceDetailDialog = ({
                           }`}
                         </Paragraph>
                         <Spacer size={1} />
-                        <Heading4>Tags</Heading4>
+                        <Heading
+                          level={headingLevel + 1}
+                          appearance="utrecht-heading-4">
+                          Tags
+                        </Heading>
                         <Spacer size={0.5} />
-                        <div className="pill-grid">
+                        <div className="pill-grid" role="list">
                           {(
                             resource?.tags as Array<{
                               type: string;
@@ -261,7 +273,11 @@ export const StemBegrootResourceDetailDialog = ({
                               }
                             )
                             ?.map((t) => (
-                              <Pill text={t.name || 'Geen thema'} />
+                              <Pill
+                                key={`${t.type}-${t.name}`}
+                                role="listitem"
+                                text={t.name || 'Geen thema'}
+                              />
                             ))}
                         </div>
                         {showOriginalResource && originalUrl ? (
@@ -284,7 +300,10 @@ export const StemBegrootResourceDetailDialog = ({
                       <div>
                         <div>
                           {displayTitle ? (
-                            <Heading1
+                            <Heading
+                              level={headingLevel}
+                              appearance="utrecht-heading-1"
+                              id={dialogTitleId}
                               dangerouslySetInnerHTML={{
                                 __html: sanitizeHtml(resource?.title),
                               }}
@@ -301,7 +320,9 @@ export const StemBegrootResourceDetailDialog = ({
                           {displayDescription ? (
                             <Paragraph
                               dangerouslySetInnerHTML={{
-                                __html: sanitizeHtml(resource?.description),
+                                __html: RenderContent(resource?.description, {
+                                  headingBaseLevel: 3,
+                                }),
                               }}
                             />
                           ) : null}
@@ -342,11 +363,13 @@ export const StemBegrootResourceDetailDialog = ({
                           <>
                             <Icon
                               icon="ri-thumb-up-line"
+                              description="Stemmen voor"
                               variant="regular"
                               text={resource?.yes}
                             />
                             <Icon
                               icon="ri-thumb-down-line"
+                              description="Stemmen tegen"
                               variant="regular"
                               text={resource?.no}
                             />
@@ -356,6 +379,7 @@ export const StemBegrootResourceDetailDialog = ({
                         {displayRanking && resource?.extraData?.ranking ? (
                           <Icon
                             icon="ri-trophy-line"
+                            description="Positie in de ranglijst"
                             variant="regular"
                             text={resource?.extraData?.ranking}
                           />

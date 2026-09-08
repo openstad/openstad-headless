@@ -48,13 +48,23 @@ function MultiProjectResourceOverview({
     if (props.selectedProjects && props.selectedProjects.length > 0) {
       const updateSelectedProjects = async (selectedProjects: any = []) => {
         const url = `${props?.api?.url}/api/project?includeConfig=1&getBasicInformation=1`;
-        const data = await fetchResource(url);
 
-        const updatedProjects = selectedProjects?.map(
-          (selectedProject: any) => {
-            const project =
-              Array.isArray(data) &&
-              data.find((p: any) => p.id === selectedProject.id);
+        let data;
+        try {
+          data = await fetchResource(url);
+        } catch (error) {
+          console.error('De projectlijst kon niet worden opgehaald: ', error);
+          return;
+        }
+
+        if (!Array.isArray(data)) {
+          console.error('De projectlijst is geen array: ', data);
+          return;
+        }
+
+        const updatedProjects = selectedProjects
+          .map((selectedProject: any) => {
+            const project = data.find((p: any) => p.id === selectedProject.id);
             if (project) {
               return {
                 ...selectedProject,
@@ -62,9 +72,9 @@ function MultiProjectResourceOverview({
                 createdAt: project?.createdAt,
               };
             }
-            return selectedProject;
-          }
-        );
+            return null;
+          })
+          .filter((selectedProject: any) => selectedProject !== null);
 
         setSelectedProjectsState(updatedProjects);
       };

@@ -23,6 +23,7 @@ import {
   Image,
   Pill,
   Spacer,
+  headingLevels,
 } from '@openstad-headless/ui/src';
 import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
 import '@utrecht/component-library-css';
@@ -40,6 +41,7 @@ import React, { useEffect, useId, useState } from 'react';
 
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 import { canLikeResource, hasRole } from '../../lib';
+import { buildPageTitle } from './page-title';
 import './resource-detail.css';
 import { formatDocumentLabel } from './utils';
 
@@ -78,6 +80,7 @@ export type ResourceDetailWidgetProps = {
   displayDescriptionExpandable_expandBeforeText?: string;
   displayDescriptionExpandable_expandAfterText?: string;
   displayDescriptionExpandable_visibleLines?: string;
+  descriptionHeadingLevel?: string;
   selectedSocialShareOptions?: Array<
     'facebook' | 'x' | 'mail' | 'whatsapp' | 'linkedin' | 'copylink'
   >;
@@ -93,6 +96,7 @@ export type ResourceDetailWidgetProps = {
     displayDeleteButton?: boolean;
     collapseTagType?: string;
     collapseTagLabel?: string;
+    headingLevel?: number;
   } & MapPropsType &
   booleanProps & {
     likeWidget?: Omit<
@@ -137,7 +141,7 @@ function CollapsibleTagGroup({
   const panelId = useId();
 
   return (
-    <div className="osc-collapsible-tags">
+    <div className="osc-collapsible-tags" role="listitem">
       <button
         type="button"
         className={`osc-pill osc-tag-toggle ${open ? 'is-open' : ''}`}
@@ -179,6 +183,7 @@ function ResourceDetail({
   displayDescriptionExpandable_expandBeforeText = 'Lees meer',
   displayDescriptionExpandable_expandAfterText = 'Lees minder',
   displayDescriptionExpandable_visibleLines = '4',
+  descriptionHeadingLevel = '3',
   displayUser = true,
   displayDate = true,
   displayBudget = true,
@@ -203,6 +208,7 @@ function ResourceDetail({
   displayTimeline = false,
   collapseTagType = '',
   collapseTagLabel = '',
+  headingLevel = 2,
   selectedSocialShareOptions = [
     'facebook',
     'x',
@@ -213,6 +219,10 @@ function ResourceDetail({
   ],
   ...props
 }: ResourceDetailWidgetProps) {
+  // ponytail: widget staat onder de <h1> van de CMS-pagina → nooit zelf een h1,
+  // en subkoppen volgen de titel zodat er geen niveau wordt overgeslagen (1.3.1)
+  const [hTitle, hSection, hSub] = headingLevels(headingLevel);
+
   const [refreshComments, setRefreshComments] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showAccordion, setShowAccordion] = useState(false);
@@ -425,7 +435,7 @@ function ResourceDetail({
             displayStatusBar &&
             resource.statuses &&
             resource.statuses.length > 0 && (
-              <div>
+              <div onClick={(e) => e.stopPropagation()}>
                 <Paragraph
                   className={`osc-resource-detail-content-item-status ${statusClasses}`}>
                   {resource.statuses
@@ -440,10 +450,23 @@ function ResourceDetail({
               </div>
             )
           }
+          cornerBadge={
+            clickableImage && (
+              <Icon
+                icon="ri-zoom-in-line"
+                iconOnly
+                className="osc-resource-detail-image-zoom-badge"
+              />
+            )
+          }
         />
 
         {displayImageDescription && imageDescription && (
-          <p className="carousel-image-description">{imageDescription}</p>
+          <p
+            className="carousel-image-description"
+            onClick={(e) => e.stopPropagation()}>
+            {imageDescription}
+          </p>
         )}
       </>
     );
@@ -470,13 +493,14 @@ function ResourceDetail({
     }
   };
 
+  const originalDocumentTitleRef = React.useRef(document.title);
+
   useEffect(() => {
     if (props.pageTitle === true && resource.title !== undefined) {
-      const current =
-        document.title.includes(' - ') && document.title.split(' - ')[0].length
-          ? ' - ' + document.title.split(' - ')[0]
-          : '';
-      document.title = resource.title + current;
+      document.title = buildPageTitle(
+        resource.title,
+        originalDocumentTitleRef.current
+      );
     }
   }, [resource]);
 
@@ -575,7 +599,7 @@ function ResourceDetail({
 
               {displayTitle && resource.title && (
                 <Heading
-                  level={1}
+                  level={hTitle}
                   appearance="utrecht-heading-2"
                   dangerouslySetInnerHTML={{
                     __html: sanitizeHtml(resource.title),
@@ -586,10 +610,10 @@ function ResourceDetail({
                 resource.modBreaks?.map((mb: any) => (
                   <div key={mb.id} className="resource-detail-modbreak-banner">
                     <section>
-                      <Heading level={2} appearance="utrecht-heading-6">
+                      <Heading level={hSection} appearance="utrecht-heading-6">
                         {mb.authorName || props.resources.modbreakTitle}
                       </Heading>
-                      <Heading level={2} appearance="utrecht-heading-6">
+                      <Heading level={hSection} appearance="utrecht-heading-6">
                         {mb.modBreakDate && humanizeDate(mb.modBreakDate)}
                       </Heading>
                     </section>
@@ -606,7 +630,7 @@ function ResourceDetail({
                 {displayUser && resource?.user?.displayName && (
                   <div>
                     <Heading
-                      level={2}
+                      level={hSection}
                       appearance="utrecht-heading-6"
                       className="osc-resource-detail-content-item-title">
                       Ingediend door
@@ -619,7 +643,7 @@ function ResourceDetail({
                 {displayDate && resource.startDateHumanized && (
                   <div>
                     <Heading
-                      level={2}
+                      level={hSection}
                       appearance="utrecht-heading-6"
                       className="osc-resource-detail-content-item-title">
                       Datum
@@ -632,7 +656,7 @@ function ResourceDetail({
                 {displayBudget && resource.budget && (
                   <div>
                     <Heading
-                      level={2}
+                      level={hSection}
                       appearance="utrecht-heading-6"
                       className="osc-resource-detail-content-item-title">
                       Budget
@@ -645,19 +669,22 @@ function ResourceDetail({
               </div>
               <div className="resource-detail-content">
                 {displaySummary && (
-                  <Heading
-                    level={2}
-                    appearance="utrecht-heading-4"
+                  <Paragraph
+                    className="osc-summary"
                     dangerouslySetInnerHTML={{
                       __html: sanitizeHtml(resource.summary),
-                    }}></Heading>
+                    }}
+                  />
                 )}
                 {displayDescription &&
                   (!displayDescriptionExpandable ? (
                     <div className="resource-detail-description">
                       <Paragraph
                         dangerouslySetInnerHTML={{
-                          __html: RenderContent(resource.description),
+                          __html: RenderContent(resource.description, {
+                            headingBaseLevel:
+                              Number(descriptionHeadingLevel) || 3,
+                          }),
                         }}></Paragraph>
                     </div>
                   ) : showAccordion ? (
@@ -678,7 +705,10 @@ function ResourceDetail({
                               ref={descriptionRef}>
                               <Paragraph
                                 dangerouslySetInnerHTML={{
-                                  __html: RenderContent(resource.description),
+                                  __html: RenderContent(resource.description, {
+                                    headingBaseLevel:
+                                      Number(descriptionHeadingLevel) || 3,
+                                  }),
                                 }}></Paragraph>
                             </div>
                           </div>
@@ -704,7 +734,10 @@ function ResourceDetail({
                       <div ref={descriptionRef}>
                         <Paragraph
                           dangerouslySetInnerHTML={{
-                            __html: RenderContent(resource.description),
+                            __html: RenderContent(resource.description, {
+                              headingBaseLevel:
+                                Number(descriptionHeadingLevel) || 3,
+                            }),
                           }}></Paragraph>
                       </div>
                     </div>
@@ -723,7 +756,7 @@ function ResourceDetail({
                 resource.location?.lat &&
                 resource.location?.lng && (
                   <>
-                    <Heading level={2} appearance="utrecht-heading-2">
+                    <Heading level={hSection} appearance="utrecht-heading-2">
                       Plaats
                     </Heading>
                     <ResourceDetailMap
@@ -750,7 +783,12 @@ function ResourceDetail({
             <div className="aside--content">
               {displayLikes ? (
                 <>
-                  <Likes {...props} {...props.likeWidget} disabled={!canLike} />
+                  <Likes
+                    {...props}
+                    {...props.likeWidget}
+                    disabled={!canLike}
+                    titleHeadingLevel={hSub}
+                  />
                   <Spacer size={1} />
                 </>
               ) : null}
@@ -758,13 +796,18 @@ function ResourceDetail({
               {displayStatus ? (
                 <div className="resource-detail-side-section">
                   <Spacer size={1} />
-                  <Heading level={3} appearance="utrecht-heading-4">
+                  <Heading level={hSub} appearance="utrecht-heading-4">
                     Status
                   </Heading>
                   <Spacer size={0.5} />
-                  <div className="resource-detail-pil-list-content">
+                  <div className="resource-detail-pil-list-content" role="list">
                     {statuses?.map((s: { name: string }) => (
-                      <Pill light rounded text={s.name}></Pill>
+                      <Pill
+                        key={s.name}
+                        role="listitem"
+                        light
+                        rounded
+                        text={s.name}></Pill>
                     ))}
                   </div>
 
@@ -774,12 +817,12 @@ function ResourceDetail({
 
               {displayTags ? (
                 <div className="resource-detail-side-section">
-                  <Heading level={3} appearance="utrecht-heading-4">
+                  <Heading level={hSub} appearance="utrecht-heading-4">
                     Tags
                   </Heading>
 
                   <Spacer size={0.5} />
-                  <div className="resource-detail-pil-list-content">
+                  <div className="resource-detail-pil-list-content" role="list">
                     {(() => {
                       type TagItem = {
                         type: string;
@@ -824,7 +867,11 @@ function ResourceDetail({
                               tags={collapsed}
                             />
                             {remaining.map((t, index) => (
-                              <Pill key={`${t.name}-${index}`} text={t.name} />
+                              <Pill
+                                key={`${t.name}-${index}`}
+                                role="listitem"
+                                text={t.name}
+                              />
                             ))}
                           </>
                         );
@@ -833,7 +880,11 @@ function ResourceDetail({
                       return visibleTags
                         .sort(sortBySeqnr)
                         .map((t, index) => (
-                          <Pill key={`${t.name}-${index}`} text={t.name} />
+                          <Pill
+                            key={`${t.name}-${index}`}
+                            role="listitem"
+                            text={t.name}
+                          />
                         ));
                     })()}
                   </div>
@@ -858,7 +909,7 @@ function ResourceDetail({
                   <Spacer size={2} />
                   <div className="document-download-container">
                     {!!documentsTitle && (
-                      <Heading level={2} appearance="utrecht-heading-4">
+                      <Heading level={hSection} appearance="utrecht-heading-4">
                         {documentsTitle}
                       </Heading>
                     )}

@@ -72,9 +72,11 @@ const NumberInput: FC<NumberInputProps> = ({
       ? (overrideDefaultValue as string)
       : defaultValue;
 
-  const randomID =
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15);
+  const [randomID] = useState(
+    () =>
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15)
+  );
   const [value, setValue] = useState(initialValue);
   const MAX_VALUE = 1_000_000_000_000;
 
@@ -133,7 +135,7 @@ const NumberInput: FC<NumberInputProps> = ({
       )}
       {description && (
         <>
-          <FormFieldDescription>
+          <FormFieldDescription id={`${randomID}_desc`}>
             <RteContent content={description} unwrapSingleRootDiv={true} />
           </FormFieldDescription>
           <Spacer size={0.5} />
@@ -150,7 +152,9 @@ const NumberInput: FC<NumberInputProps> = ({
 
       <div className={`utrecht-form-field__input`}>
         {prepend && (
-          <span className="utrecht-form-field__prepend">{prepend}</span>
+          <span className="utrecht-form-field__prepend" aria-hidden="true">
+            {prepend}
+          </span>
         )}
         <Textbox
           id={randomID}
@@ -193,7 +197,14 @@ const NumberInput: FC<NumberInputProps> = ({
           autoComplete="off"
           placeholder={placeholder}
           aria-invalid={fieldInvalid}
-          aria-describedby={`${randomId}_error`}
+          aria-describedby={
+            [
+              description ? `${randomID}_desc` : '',
+              fieldInvalid ? `${randomId}_error` : '',
+            ]
+              .filter(Boolean)
+              .join(' ') || undefined
+          }
         />
         {append && <span className="utrecht-form-field__append">{append}</span>}
       </div>

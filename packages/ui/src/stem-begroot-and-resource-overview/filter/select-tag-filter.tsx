@@ -1,6 +1,6 @@
 import { Select } from '@openstad-headless/ui/src';
 import { FormLabel, SubtleButton } from '@utrecht/component-library-react';
-import React, { forwardRef, useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useId, useState } from 'react';
 
 import RadioboxField from '../../form-elements/radio';
 
@@ -74,6 +74,10 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
 
     const { data: tags } = dataStore.useTags(useTagsConfig);
 
+    // ponytail: instance-prefix, anders krijgen twee filters met dezelfde
+    // placeholder hetzelfde id en koppelt label/for aan de verkeerde select (1.3.1)
+    const instanceId = useId();
+
     const [defaultValue, setDefaultValue] = useState<string | undefined>(
       undefined
     );
@@ -88,17 +92,15 @@ const SelectTagFilter = forwardRef<HTMLSelectElement, Props>(
     if (!dataStore || !dataStore.useTags) {
       return <p>Cannot render tagfilter, missing data source</p>;
     }
-    const randomId = Math.random().toString(36).substring(7);
-
     function getRandomId(placeholder: string | undefined) {
       if (placeholder && placeholder.length >= 1) {
-        return placeholder
+        const slug = placeholder
           .toLowerCase()
           .replace(/[^a-z0-9\s]/g, '')
           .replace(/\s+/g, '-');
-      } else {
-        return randomId;
+        return `${instanceId}-${slug}`;
       }
+      return instanceId;
     }
 
     useEffect(() => {

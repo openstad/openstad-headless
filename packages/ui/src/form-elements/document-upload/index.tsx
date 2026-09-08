@@ -6,7 +6,6 @@ import {
   AccordionProvider,
   FormField,
   FormFieldDescription,
-  FormLabel,
   Paragraph,
 } from '@utrecht/component-library-react';
 import {
@@ -55,11 +54,11 @@ const filePondSettings = {
   labelTapToRetry: 'tik om opnieuw te proberen',
   labelTapToUndo: 'tik om ongedaan te maken',
   labelButtonRemoveItem: 'Verwijderen',
-  labelButtonAbortItemLoad: 'Abort',
-  labelButtonRetryItemLoad: 'Retry',
+  labelButtonAbortItemLoad: 'Afbreken',
+  labelButtonRetryItemLoad: 'Opnieuw proberen',
   labelButtonAbortItemProcessing: 'Verwijder',
-  labelButtonUndoItemProcessing: 'Undo',
-  labelButtonRetryItemProcessing: 'Retry',
+  labelButtonUndoItemProcessing: 'Ongedaan maken',
+  labelButtonRetryItemProcessing: 'Opnieuw proberen',
   labelButtonProcessItem: 'Upload',
   labelFileTypeNotAllowed: 'Bestandstype is niet toegestaan',
   name: 'document',
@@ -177,9 +176,12 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
   const [documents, setDocuments] = useState<FilePondFile[]>([]);
   const [mockDocuments, setMockDocuments] =
     useState<MockDocFile[]>(initialValue);
-  const [uploadedDocuments, setUploadedDocuments] = useState<
-    { name: string; url: string }[]
-  >([]);
+  const [completedUploads, setCompletedUploads] = useState<
+    Record<
+      string,
+      { name: string; url: string; size?: number; mimeType?: string }
+    >
+  >({});
 
   const acceptAttribute = allowedTypes ? allowedTypes : '';
 
@@ -192,38 +194,21 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
 
   const didInitRef = useRef(false);
   useEffect(() => {
-    const allDocuments = [];
+    const allDocuments: { name: string; url: string }[] = [];
 
-    if (documents.length > 0 && uploadedDocuments.length > 0) {
-      for (let i = 0; i < documents.length; i++) {
-        const file = documents[i].file;
-        if (file && file.name) {
-          let sanitizedFileName = file.name.replace(/\./g, '_'); // Replace all dots with underscores
-          sanitizedFileName = sanitizedFileName.replace(/ /g, '_'); // Replace spaces with underscores
-          sanitizedFileName = sanitizedFileName.replace(
-            /[^a-zA-Z0-9_\-]/g,
-            '_'
-          ); // Replace special characters with underscores
-          sanitizedFileName = sanitizedFileName.replace(/_+/g, '_'); // Replace multiple underscores with a single underscore
-
-          let fileInUploadedDocuments = uploadedDocuments.find(
-            (o) => o.name === sanitizedFileName
-          );
-
-          if (fileInUploadedDocuments) {
-            allDocuments.push(fileInUploadedDocuments);
-          }
-        }
+    documents.forEach((doc) => {
+      const uploadedDocument = completedUploads[doc.id];
+      if (uploadedDocument) {
+        allDocuments.push(uploadedDocument);
       }
-    }
+    });
 
-    for (let i = 0; i < mockDocuments.length; i++) {
-      const mockDoc = mockDocuments[i];
+    mockDocuments.forEach((mockDoc) => {
       allDocuments.push({
         name: mockDoc.options.file.name,
         url: mockDoc.source,
       });
-    }
+    });
 
     if (onChange) {
       onChange({
@@ -234,13 +219,7 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
       });
     }
     didInitRef.current = true;
-  }, [
-    uploadedDocuments.length,
-    mockDocuments.length,
-    documents.length,
-    setUploadedDocuments,
-    setDocuments,
-  ]);
+  }, [documents, mockDocuments, completedUploads]);
 
   function waitForElm(selector: any) {
     return new Promise((resolve) => {
@@ -284,14 +263,16 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
   return (
     <FormField type="text">
       {title && (
-        <Paragraph className="utrecht-form-field__label">
-          <FormLabel htmlFor={randomId}>
-            <RteContent
-              content={title}
-              unwrapSingleRootDiv={true}
-              forceInline={true}
-            />
-          </FormLabel>
+        // ponytail: FilePond-wrapper is geen labelbaar input; <label for> wees nergens heen
+        // (WCAG 1.3.1). Titel als tekst met id; FilePond levert zelf zijn instructielabel.
+        <Paragraph
+          className="utrecht-form-field__label"
+          id={`${randomId}_label`}>
+          <RteContent
+            content={title}
+            unwrapSingleRootDiv={true}
+            forceInline={true}
+          />
         </Paragraph>
       )}
 
@@ -343,6 +324,20 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
 
             setDocuments(documentsExceptMockedDocuments);
           }}
+          onprocessfile={(
+            error: FilePondErrorDescription | null,
+            file: FilePondFile
+          ) => {
+            if (error || !file.serverId) return;
+
+            try {
+              const uploadedDocument = JSON.parse(file.serverId);
+              setCompletedUploads((prev) => ({
+                ...prev,
+                [file.id]: uploadedDocument,
+              }));
+            } catch (e) {}
+          }}
           allowMultiple={multiple}
           server={{
             process: {
@@ -352,18 +347,14 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
                 Authorization: 'Bearer ' + datastore.api?.currentUserJWT,
               },
               onload: (response: any) => {
-                const currentDocuments = [...uploadedDocuments];
-                currentDocuments.push(JSON.parse(response)[0]);
-
-                setUploadedDocuments(currentDocuments);
-
-                return JSON.stringify(currentDocuments); // Dit heeft echt geen nut, maar het lost wel de TS problemen op
+                return JSON.stringify(JSON.parse(response)[0]);
               },
             },
             fetch: props?.imageUrl + '/documents',
             revert: null,
           }}
           id={randomId}
+          aria-labelledby={title ? `${randomId}_label` : undefined}
           required={fieldRequired}
           disabled={disabled}
           acceptedFileTypes={
@@ -373,23 +364,10 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
           }
           beforeAddFile={(fileItem) => {
             return new Promise<boolean>((resolve, reject) => {
-              const forbiddenCharsRegex = /[\\/:\*\?"<>\|]/;
-              const fileName = fileItem.file.name;
-              const forbiddenChar = fileName.match(forbiddenCharsRegex);
-
               if (fileItem.file.size > maxBytes) {
                 reject(
                   `Het bestand is te groot. De maximale bestandsgrootte is ${maxMB} MB.`
                 );
-              } else if (forbiddenChar) {
-                const forbiddenCharName = forbiddenChar[0];
-                const forbiddenCharIndex =
-                  fileName.indexOf(forbiddenCharName) + 1;
-
-                // We don't use forbiddenCharName, because the character might not be rendered correctly in the notification
-                // For example: '//' will be rendered as ':', which is confusing for the user
-                const errorMessage = `Bestandsnaam mag het teken op positie ${forbiddenCharIndex} niet bevatten.`;
-                reject(errorMessage);
               } else {
                 resolve(true);
               }
@@ -399,43 +377,31 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
             });
           }}
           aria-invalid={fieldInvalid}
-          aria-describedby={`${randomId}_error`}
+          aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}
           onremovefile={(
             error: FilePondErrorDescription | null,
             file: FilePondFile
           ) => {
             const fileName = file?.file?.name;
+            if (!fileName) return;
 
-            if (!!fileName) {
-              const uploadDocumentFileName = fileName.replace(/\./g, '_');
-              const fileIsInUploadedDocuments = uploadedDocuments.find(
-                (item) => item.name === uploadDocumentFileName
+            const fileIsInMockDocuments = mockDocuments.find(
+              (item) => item.options.file.name === fileName
+            );
+
+            if (fileIsInMockDocuments) {
+              const updatedMockDocuments = mockDocuments.filter(
+                (item) => item.options.file.name !== fileName
               );
-
-              const fileIsInMockDocuments = mockDocuments.find(
-                (item) => item.options.file.name === fileName
-              );
-
-              if (fileIsInMockDocuments) {
-                const updatedMockDocuments = mockDocuments.filter(
-                  (item) => item.options.file.name !== fileName
-                );
-                setMockDocuments(updatedMockDocuments);
-                return;
-              }
-
-              if (!fileIsInUploadedDocuments) return;
-
-              const updatedDocuments = uploadedDocuments.filter(
-                (item) => item.name !== uploadDocumentFileName
-              );
-              setUploadedDocuments(updatedDocuments);
-
-              const updatedFiles = documents.filter(
-                (item) => item.file.name !== fileName
-              );
-              setDocuments(updatedFiles);
+              setMockDocuments(updatedMockDocuments);
+              return;
             }
+
+            setCompletedUploads((prev) => {
+              const updated = { ...prev };
+              delete updated[file.id];
+              return updated;
+            });
           }}
           {...filePondSettings}
         />

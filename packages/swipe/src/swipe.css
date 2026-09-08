@@ -333,6 +333,9 @@
   color: #000;
   text-align: center;
   padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .swipe-widget .swipe-middle-actions .swipe-info-btn svg,
 .swipe-widget .swipe-middle-actions .swipe-skip-btn svg {
@@ -582,6 +585,8 @@
   border-radius: 8px;
   max-width: 400px;
   width: 95%;
+  /* ponytail: padding meetellen in width, anders 95%+40px > viewport op 320px (WCAG 1.4.10) */
+  box-sizing: border-box;
   top: 100px;
   left: 0;
   right: 0;
@@ -592,6 +597,7 @@
 }
 .explanation-dialog .explanation-dialog-content textarea {
   width: 100%;
+  box-sizing: border-box;
   margin: 20px 0;
   padding: 20px;
   border: 1px solid #e0e0e0;

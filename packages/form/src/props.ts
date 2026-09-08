@@ -122,6 +122,7 @@ type FieldWithOptionalFields = CombinedFieldProps & {
   feedbackCorrect?: string;
   feedbackIncorrect?: string;
   scaleFeedback?: string[];
+  instantFeedback?: boolean;
   minChoices?: string;
   minChoicesMessage?: string;
 };

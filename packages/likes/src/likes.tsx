@@ -7,13 +7,16 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { LocalStorage } from '@openstad-headless/lib/local-storage';
 import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { ProgressBar, fireConfetti } from '@openstad-headless/ui/src';
+import {
+  ProgressBar,
+  fireConfetti,
+  headingLevels,
+} from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
 import {
   Button,
-  Heading4,
+  Heading,
   Heading5,
-  Heading6,
   Paragraph,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
@@ -42,6 +45,7 @@ export type LikeProps = {
   hideCounters?: boolean;
   showProgressBar?: boolean;
   progressBarDescription?: string;
+  titleHeadingLevel?: number | string;
   disabled?: boolean;
   showConfetti?: boolean;
   refreshResourceLikes?: () => void;
@@ -56,10 +60,14 @@ function Likes({
   displayDislike = false,
   showProgressBar = true,
   showConfetti: showConfettiOnLike = false,
+  titleHeadingLevel = 4,
   disabled = false,
   refreshResourceLikes,
   ...props
 }: LikeWidgetProps) {
+  // ponytail: niveau komt uit de admin of van de omringende widget; clamp naar 2-6
+  const [hTitle] = headingLevels(titleHeadingLevel);
+
   let resourceId = String(
     getResourceId({
       resourceId: parseInt(props.resourceId || ''),
@@ -91,9 +99,20 @@ function Likes({
     type: 'yes' | 'no';
     label: string;
     icon: 'ri-thumb-up-line' | 'ri-thumb-down-line';
+    filledIcon: 'ri-thumb-up-fill' | 'ri-thumb-down-fill';
   }> = [
-    { type: 'yes', label: yesLabel, icon: 'ri-thumb-up-line' },
-    { type: 'no', label: noLabel, icon: 'ri-thumb-down-line' },
+    {
+      type: 'yes',
+      label: yesLabel,
+      icon: 'ri-thumb-up-line',
+      filledIcon: 'ri-thumb-up-fill',
+    },
+    {
+      type: 'no',
+      label: noLabel,
+      icon: 'ri-thumb-down-line',
+      filledIcon: 'ri-thumb-down-fill',
+    },
   ];
 
   if (!displayDislike) {
@@ -179,7 +198,9 @@ function Likes({
       {variant !== 'micro-score' ? (
         <div className={`like-widget-container ${variant}`}>
           {title ? (
-            <Heading4 className="like-widget-title">{title}</Heading4>
+            <Heading level={hTitle} className="like-widget-title">
+              {title}
+            </Heading>
           ) : null}
 
           <div className={`like-option-container`}>
@@ -192,31 +213,46 @@ function Likes({
                   resource?.userVote?.opinion === likeVariant.type
                     ? 'selected'
                     : ''
-                } like-option--${likeVariant.type} ${
-                  hideCounters ? 'osc-no-counter' : ''
-                }`}
-                disabled={disabled}>
+                } like-option--${likeVariant.type} ${hideCounters ? 'osc-no-counter' : ''}`}
+                disabled={disabled}
+                aria-pressed={resource?.userVote?.opinion === likeVariant.type}>
                 <section className="like-kind">
-                  <i className={likeVariant.icon}></i>
-                  {variant === 'small' ? null : likeVariant.label}
+                  <i
+                    className={
+                      resource?.userVote?.opinion === likeVariant.type
+                        ? likeVariant.filledIcon
+                        : likeVariant.icon
+                    }
+                    aria-hidden="true"></i>
+                  {variant === 'small' ? (
+                    <span className="sr-only">{likeVariant.label}</span>
+                  ) : (
+                    likeVariant.label
+                  )}
                 </section>
 
-                {!hideCounters ? (
+                {!hideCounters && props.votes?.isViewable ? (
                   <section className="like-counter">
                     {resource[likeVariant.type] &&
                     resource[likeVariant.type] < 10
                       ? resource[likeVariant.type].toString().padStart(2, '0')
                       : resource[likeVariant.type] ||
                         (0).toString().padStart(2, '0')}
+                    <span className="sr-only"> stemmen</span>
                   </section>
                 ) : null}
               </Button>
             ))}
           </div>
 
-          {props?.resources?.minimumYesVotes && showProgressBar ? (
+          {props?.resources?.minimumYesVotes &&
+          showProgressBar &&
+          props.votes?.isViewable ? (
             <div className="progressbar-container">
-              <ProgressBar progress={(resource.yes / necessaryVotes) * 100} />
+              <ProgressBar
+                progress={(resource.yes / necessaryVotes) * 100}
+                aria-label="Likes nodig voor dit voorstel"
+              />
               <Paragraph className="progressbar-counter">
                 {resource.yes || 0} /{necessaryVotes}
               </Paragraph>
@@ -227,7 +263,8 @@ function Likes({
             {props?.resources?.minimumYesVotes &&
               showProgressBar &&
               props.progressBarDescription && (
-                <Heading6
+                <Paragraph
+                  className="utrecht-heading-6"
                   dangerouslySetInnerHTML={{
                     __html: sanitizeHtml(props.progressBarDescription),
                   }}
@@ -238,7 +275,9 @@ function Likes({
       ) : (
         <div className={`like-widget-container ${variant}`}>
           {title ? (
-            <Heading4 className="like-widget-title">{title}</Heading4>
+            <Heading level={hTitle} className="like-widget-title">
+              {title}
+            </Heading>
           ) : null}
 
           <div className={`like-option-container`}>
@@ -251,12 +290,14 @@ function Likes({
                     resource?.userVote?.opinion === likeVariant.type
                       ? 'selected'
                       : ''
-                  } like-option--${likeVariant.type} ${
-                    hideCounters ? 'osc-no-counter' : ''
-                  }`}
-                  disabled={disabled}>
+                  } like-option--${likeVariant.type} ${hideCounters ? 'osc-no-counter' : ''}`}
+                  disabled={disabled}
+                  aria-pressed={
+                    resource?.userVote?.opinion === likeVariant.type
+                  }>
                   <section className="like-kind">
                     <i
+                      aria-hidden="true"
                       className={`${
                         resource?.userVote?.opinion === likeVariant.type
                           ? 'ri-triangle-fill'
@@ -269,7 +310,7 @@ function Likes({
                     <span className="sr-only">{likeVariant.label}</span>
                   </section>
                 </Button>
-                {!hideCounters && index === 0 ? (
+                {!hideCounters && props.votes?.isViewable && index === 0 ? (
                   <section className="like-counter">
                     <span className="sr-only">Score</span>{' '}
                     {resource['netVotes'] ? resource['netVotes'] : '0'}
@@ -283,6 +324,7 @@ function Likes({
             <div className="progressbar-container">
               <ProgressBar
                 progress={(resource.netVotes / necessaryVotes) * 100}
+                aria-label="Likes nodig voor dit voorstel"
               />
               <Paragraph className="progressbar-counter">
                 {resource.netVotes || 0} /{necessaryVotes}
@@ -294,7 +336,8 @@ function Likes({
             {props?.resources?.minimumYesVotes &&
               showProgressBar &&
               props.progressBarDescription && (
-                <Heading6
+                <Paragraph
+                  className="utrecht-heading-6"
                   dangerouslySetInnerHTML={{
                     __html: sanitizeHtml(props.progressBarDescription),
                   }}

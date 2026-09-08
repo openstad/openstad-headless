@@ -113,4 +113,122 @@ describe('<Form />', () => {
     cy.get('input[type="radio"]').should('be.disabled');
     cy.get('.question-feedback').should('contain.text', 'Goed zo');
   });
+
+  it('requires confirmation for a graded radio without instantFeedback', () => {
+    const fields = [
+      {
+        type: 'radiobox',
+        fieldKey: 'quiz1',
+        title: 'Quizvraag',
+        fieldRequired: false,
+        feedbackMode: 'correctIncorrect',
+        feedbackCorrect: 'Goed zo',
+        choices: [
+          { value: 'a', label: 'A', isCorrect: true },
+          { value: 'b', label: 'B' },
+        ],
+      },
+    ];
+
+    cy.mount(<Form {...({ fields, submitHandler: () => {} } as any)} />);
+
+    cy.get('#quiz1_0').check({ force: true });
+
+    cy.get('.osc-confirm-answer-button').should('exist');
+    cy.get('.question-feedback').should('not.exist');
+    cy.get('input[type="radio"]').should('not.be.disabled');
+  });
+
+  it('reveals feedback immediately for a graded radio with instantFeedback', () => {
+    const fields = [
+      {
+        type: 'radiobox',
+        fieldKey: 'quiz1',
+        title: 'Quizvraag',
+        fieldRequired: false,
+        instantFeedback: true,
+        feedbackMode: 'correctIncorrect',
+        feedbackCorrect: 'Goed zo',
+        choices: [
+          { value: 'a', label: 'A', isCorrect: true },
+          { value: 'b', label: 'B' },
+        ],
+      },
+    ];
+
+    cy.mount(<Form {...({ fields, submitHandler: () => {} } as any)} />);
+
+    cy.get('.osc-confirm-answer-button').should('not.exist');
+
+    cy.get('#quiz1_0').check({ force: true });
+
+    cy.get('.question-feedback').should('contain.text', 'Goed zo');
+    cy.get('input[type="radio"]').should('be.disabled');
+    cy.get('.osc-confirm-answer-button').should('not.exist');
+    cy.get('.question').should('have.class', '--answer-correct');
+  });
+
+  it('locks each ticked option and reveals the score at maxChoices for an instant checkbox', () => {
+    const fields = [
+      {
+        type: 'checkbox',
+        fieldKey: 'quizc',
+        title: 'Meerkeuze quiz',
+        fieldRequired: false,
+        instantFeedback: true,
+        maxChoices: '2',
+        feedbackMode: 'correctIncorrect',
+        feedbackCorrect: 'Helemaal goed',
+        feedbackIncorrect: 'Niet helemaal',
+        choices: [
+          { value: 'a', label: 'A', isCorrect: true },
+          { value: 'b', label: 'B', isCorrect: true },
+          { value: 'c', label: 'C' },
+        ],
+      },
+    ];
+
+    cy.mount(<Form {...({ fields, submitHandler: () => {} } as any)} />);
+
+    cy.get('.osc-confirm-answer-button').should('not.exist');
+
+    cy.get('#quizc_0').check({ force: true });
+    cy.get('#quizc_0').should('be.disabled');
+    cy.get('#quizc_1').should('not.be.disabled');
+    cy.get('.question-feedback').should('not.exist');
+
+    cy.get('#quizc_1').check({ force: true });
+    cy.get('.question-feedback').should('contain.text', 'Helemaal goed');
+    cy.get('#quizc_1').should('be.disabled');
+  });
+
+  it('reveals per-option feedback but never a score for an instant checkbox without maxChoices', () => {
+    const submit = cy.stub().as('submit');
+    const fields = [
+      {
+        type: 'checkbox',
+        fieldKey: 'quizc',
+        title: 'Meerkeuze quiz',
+        fieldRequired: false,
+        instantFeedback: true,
+        feedbackMode: 'correctIncorrect',
+        feedbackCorrect: 'Helemaal goed',
+        choices: [
+          { value: 'a', label: 'A', isCorrect: true },
+          { value: 'b', label: 'B' },
+        ],
+      },
+    ];
+
+    cy.mount(<Form {...({ fields, submitHandler: submit } as any)} />);
+
+    cy.get('#quizc_0').check({ force: true });
+    cy.get('#quizc_0').should('be.disabled');
+    cy.get('.osc-confirm-answer-button').should('not.exist');
+    cy.get('.question-feedback').should('not.exist');
+
+    cy.get('button[type="submit"]').click();
+    cy.contains('Bevestig eerst').should('not.exist');
+    cy.get('@submit').should('have.been.called');
+  });
 });

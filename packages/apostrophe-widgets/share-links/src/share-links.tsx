@@ -1,5 +1,5 @@
 import '@utrecht/component-library-css';
-import { Heading4, LinkSocial } from '@utrecht/component-library-react';
+import { Heading, LinkSocial } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
@@ -8,6 +8,7 @@ import './share-links.css';
 
 interface Item {
   title: string;
+  headingLevel?: 1 | 2 | 3 | 4 | 5 | 6;
   selectedSocialShareOptions?: Array<
     'facebook' | 'x' | 'mail' | 'whatsapp' | 'linkedin' | 'copylink'
   >;
@@ -15,6 +16,7 @@ interface Item {
 
 function ShareLinks({
   title,
+  headingLevel = 2,
   selectedSocialShareOptions = [
     'facebook',
     'x',
@@ -26,110 +28,125 @@ function ShareLinks({
 }: Item) {
   return (
     <div className="share-links">
-      <Heading4>{title}</Heading4>
-      <div className="link-container">
+      <Heading level={headingLevel} appearance="utrecht-heading-4">
+        {title}
+      </Heading>
+      {/* ponytail: share-links als echte lijst zodat hulpsoftware aantal/semantiek krijgt (1.3.1) */}
+      <ul className="link-container">
         {selectedSocialShareOptions.length ? (
-          selectedSocialShareOptions.map((option) => {
-            switch (option) {
-              case 'facebook':
-                return (
-                  <LinkSocial
-                    external
-                    href={
-                      'http://www.facebook.com/share.php?u=' +
-                      encodeURIComponent(location.href)
-                    }
-                    target="_blank"
-                    title={'Facebook'}>
-                    <i className="icon --facebook"></i>
-                    <span className="sr-only">Facebook</span>
-                  </LinkSocial>
-                );
-              case 'x':
-                return (
-                  <LinkSocial
-                    external
-                    href={
-                      'https://x.com/intent/post?text=' +
-                      encodeURIComponent(location.href)
-                    }
-                    target="_blank"
-                    title={'X'}>
-                    <i className="icon --twitter"></i>
-                    <span className="sr-only">X</span>
-                  </LinkSocial>
-                );
-              case 'mail':
-                return (
-                  <LinkSocial
-                    external
-                    href={
-                      'mailto:?subject=' +
-                      document.title +
-                      '&body=' +
-                      encodeURIComponent(location.href)
-                    }
-                    title={'Mail'}>
-                    <i className="icon --mail"></i>
-                    <span className="sr-only">Mail</span>
-                  </LinkSocial>
-                );
-              case 'whatsapp':
-                return (
-                  <LinkSocial
-                    external
-                    href={
-                      'https://api.whatsapp.com/send?phone=&text=' +
-                      encodeURIComponent(location.href) +
-                      '&source=&data='
-                    }
-                    target="_blank"
-                    title={'Whatsapp'}>
-                    <i className="icon --whatsapp"></i>
-                    <span className="sr-only">Whatsapp</span>
-                  </LinkSocial>
-                );
-              case 'linkedin':
-                return (
-                  <LinkSocial
-                    external
-                    href={
-                      'https://www.linkedin.com/sharing/share-offsite/?url=' +
-                      encodeURIComponent(location.href)
-                    }
-                    target="_blank"
-                    title={'LinkedIn'}>
-                    <i className="icon --linkedin"></i>
-                    <span className="sr-only">LinkedIn</span>
-                  </LinkSocial>
-                );
-              case 'copylink':
-                return (
-                  <LinkSocial
-                    external
-                    title={'Kopieer link'}
-                    href={location.href}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      navigator.clipboard.writeText(location.href);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        navigator.clipboard.writeText(location.href);
-                      }
-                    }}
-                    className="copy-link">
-                    <i className="icon --url"></i>
-                    <span className="sr-only">Kopieer link</span>
-                  </LinkSocial>
-                );
-            }
-          })
+          selectedSocialShareOptions.map((option) => (
+            <li key={option}>
+              {(() => {
+                switch (option) {
+                  case 'facebook':
+                    return (
+                      <LinkSocial
+                        external
+                        href={
+                          'http://www.facebook.com/share.php?u=' +
+                          encodeURIComponent(location.href)
+                        }
+                        target="_blank"
+                        title={'Facebook'}>
+                        <i className="icon --facebook"></i>
+                        <span className="sr-only">
+                          Facebook (opent in nieuw tabblad)
+                        </span>
+                      </LinkSocial>
+                    );
+                  case 'x':
+                    return (
+                      <LinkSocial
+                        external
+                        href={
+                          'https://x.com/intent/post?text=' +
+                          encodeURIComponent(location.href)
+                        }
+                        target="_blank"
+                        title={'X'}>
+                        <i className="icon --twitter"></i>
+                        <span className="sr-only">
+                          X (opent in nieuw tabblad)
+                        </span>
+                      </LinkSocial>
+                    );
+                  case 'mail':
+                    return (
+                      <LinkSocial
+                        external
+                        href={
+                          'mailto:?subject=' +
+                          document.title +
+                          '&body=' +
+                          encodeURIComponent(location.href)
+                        }
+                        title={'Mail'}>
+                        <i className="icon --mail"></i>
+                        <span className="sr-only">Mail</span>
+                      </LinkSocial>
+                    );
+                  case 'whatsapp':
+                    return (
+                      <LinkSocial
+                        external
+                        href={
+                          'https://api.whatsapp.com/send?phone=&text=' +
+                          encodeURIComponent(location.href) +
+                          '&source=&data='
+                        }
+                        target="_blank"
+                        title={'Whatsapp'}>
+                        <i className="icon --whatsapp"></i>
+                        <span className="sr-only">
+                          Whatsapp (opent in nieuw tabblad)
+                        </span>
+                      </LinkSocial>
+                    );
+                  case 'linkedin':
+                    return (
+                      <LinkSocial
+                        external
+                        href={
+                          'https://www.linkedin.com/sharing/share-offsite/?url=' +
+                          encodeURIComponent(location.href)
+                        }
+                        target="_blank"
+                        title={'LinkedIn'}>
+                        <i className="icon --linkedin"></i>
+                        <span className="sr-only">
+                          LinkedIn (opent in nieuw tabblad)
+                        </span>
+                      </LinkSocial>
+                    );
+                  case 'copylink':
+                    return (
+                      <LinkSocial
+                        external
+                        title={'Kopieer link'}
+                        href={location.href}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigator.clipboard.writeText(location.href);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            navigator.clipboard.writeText(location.href);
+                          }
+                        }}
+                        className="copy-link">
+                        <i className="icon --url"></i>
+                        <span className="sr-only">Kopieer link</span>
+                      </LinkSocial>
+                    );
+                }
+              })()}
+            </li>
+          ))
         ) : (
           <></>
         )}
-      </div>
+      </ul>
     </div>
   );
 }

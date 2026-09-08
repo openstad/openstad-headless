@@ -11,6 +11,9 @@ telemetryManager.initialize();
 setupGracefulShutdown(telemetryManager);
 
 const apostrophe = require('apostrophe');
+const dayjs = require('dayjs');
+require('dayjs/locale/nl');
+dayjs.locale('nl');
 const express = require('express');
 const app = express();
 const _ = require('lodash');

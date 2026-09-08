@@ -100,11 +100,16 @@ export type Item = {
   fieldKey?: string;
   fieldRequired?: boolean;
   onlyForModerator?: boolean;
+  enableAddressSearch?: boolean;
   minCharacters?: string;
   maxCharacters?: string;
   variant?: string;
   multiple?: boolean;
   maxUploadSizeMB?: number;
+  imageCropEnabled?: boolean;
+  imageCropRequired?: boolean;
+  imageCropRatioWidth?: number;
+  imageCropRatioHeight?: number;
   options?: Array<Option>;
   sliderTitleUnderA?: string;
   sliderTitleUnderB?: string;
@@ -114,6 +119,7 @@ export type Item = {
   showMoreInfo: boolean;
   moreInfoButton?: string;
   moreInfoContent?: string;
+  headingLevel?: number;
   labelA?: string;
   labelB?: string;
   imageA?: string;

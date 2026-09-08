@@ -19,6 +19,7 @@ const {
   removeSpamMetaFields,
 } = require('../../services/spam-detector');
 const { stripVisibilityScope } = require('../../lib/resource-create-scope');
+const { normalizeContributedUrl } = require('../../util/normalize-url');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -42,6 +43,15 @@ function getResourceFormExtraDataConfig(widgetConfig) {
     fieldKeys: Array.from(uniqueFieldKeys),
     moderatorOnlyFieldKeys: Array.from(moderatorOnlyFieldKeys),
   };
+}
+
+function stripHiddenVoteScore(resources, canIncludeVoteCount) {
+  if (canIncludeVoteCount) return;
+
+  const records = Array.isArray(resources) ? resources : [resources];
+  records.filter(Boolean).forEach((resource) => {
+    resource.score = undefined;
+  });
 }
 
 async function attachModeratorOnlyExtraDataKeys(resources) {
@@ -145,15 +155,7 @@ router.all('*', function (req, res, next) {
       });
     }
 
-    if (
-      req.query.includeUserVote &&
-      req.project &&
-      req.project.config &&
-      req.project.config.votes &&
-      req.project.config.votes.isViewable &&
-      req.user &&
-      req.user.id
-    ) {
+    if (req.query.includeUserVote && req.user && req.user.id) {
       // ik denk dat je daar niet het hele object wilt?
       req.scope.push({ method: ['includeUserVote', req.user.id] });
     }
@@ -316,6 +318,48 @@ router
   });
 
 router
+  .route('/:resourceId(\\d+)/share')
+  .get(rateLimiter())
+  .all(function (req, res, next) {
+    let resourceId = parseInt(req.params.resourceId) || 0;
+
+    db.Resource.scope(...req.scope)
+      .findOne({
+        where: { id: resourceId, projectId: req.params.projectId },
+      })
+      .then((found) => {
+        if (!found) {
+          return next(createError(404, 'Resource not found'));
+        }
+        found.project = req.project;
+        if (!found.can || !found.can('view', req.user)) {
+          return next(createError(404, 'Resource not found'));
+        }
+        req.resource = found;
+        req.results = found;
+        next();
+      })
+      .catch(next);
+  })
+  .get(auth.can('Resource', 'view'))
+  .get(function (req, res, next) {
+    const resource = req.results;
+    const images = Array.isArray(resource.images) ? resource.images : [];
+    const imageUrls = images
+      .map((image) => (image && image.url ? image.url : null))
+      .filter(Boolean);
+
+    res.json({
+      id: resource.id,
+      title: resource.title,
+      summary: resource.summary,
+      image: imageUrls[0] || null,
+      images: imageUrls,
+      url: (req.project && req.project.url) || null,
+    });
+  });
+
+router
   .route('/')
 
   // list resources
@@ -361,6 +405,7 @@ router
           if (req.query.includePoll && resource.poll)
             resource.poll.countVotes(!req.query.includeVotes);
         });
+        stripHiddenVoteScore(result.rows, req.canIncludeVoteCount);
         await attachModeratorOnlyExtraDataKeys(result.rows);
         const { rows } = result;
         req.results = rows;
@@ -485,6 +530,19 @@ router
           return next(createError(400, 'Invalid image url'));
         }
       });
+    }
+
+    if (data.extraData && typeof data.extraData.url !== 'undefined') {
+      const urlResult = normalizeContributedUrl(data.extraData.url);
+      if (!urlResult.ok) {
+        return next(
+          createError(
+            400,
+            'De ingevulde URL is ongeldig. Controleer of de link correct is en begin met https://'
+          )
+        );
+      }
+      data.extraData.url = urlResult.value;
     }
 
     let responseData;
@@ -700,6 +758,7 @@ router
           return next(createError(404, 'Resource not found'));
         }
         found.project = req.project;
+        stripHiddenVoteScore(found, req.canIncludeVoteCount);
         await attachModeratorOnlyExtraDataKeys(found);
         if (req.query.includePoll) {
           // TODO: naar poll hooks
@@ -786,6 +845,19 @@ router
       delete data.modBreaks;
     }
 
+    if (data.extraData && typeof data.extraData.url !== 'undefined') {
+      const urlResult = normalizeContributedUrl(data.extraData.url);
+      if (!urlResult.ok) {
+        return next(
+          createError(
+            400,
+            'De ingevulde URL is ongeldig. Controleer of de link correct is en begin met https://'
+          )
+        );
+      }
+      data.extraData.url = urlResult.value;
+    }
+
     resource
       .authorizeData(data, 'update')
       .update(data)
@@ -829,6 +901,7 @@ router
             if (found.poll) found.poll.countVotes(!req.query.includeVotes);
           }
           found.project = req.project;
+          stripHiddenVoteScore(found, req.canIncludeVoteCount);
           await attachModeratorOnlyExtraDataKeys(found);
           req.results = found;
           next();
@@ -878,6 +951,7 @@ router
             if (found.poll) found.poll.countVotes(!req.query.includeVotes);
           }
           found.project = req.project;
+          stripHiddenVoteScore(found, req.canIncludeVoteCount);
           await attachModeratorOnlyExtraDataKeys(found);
           req.results = found;
           next();
@@ -951,7 +1025,7 @@ router
 
     try {
       const resources = await db.Resource.scope(...req.scope).findAll({
-        where: { id: ids },
+        where: { id: ids, projectId: req.params.projectId },
       });
 
       if (resources.length === 0) {
@@ -961,15 +1035,18 @@ router
       }
 
       for (const resource of resources) {
-        if (!resource.can || !resource.can('delete')) {
+        if (!resource.can || !resource.can('delete', req.user)) {
           return next(
-            new Error(`You cannot delete resource with ID ${resource.id}`)
+            createError(
+              403,
+              `You cannot delete resource with ID ${resource.id}`
+            )
           );
         }
       }
 
       await db.Resource.destroy({
-        where: { id: ids },
+        where: { id: resources.map((resource) => resource.id) },
       });
 
       res.json({ message: 'Resources deleted successfully' });
@@ -981,6 +1058,8 @@ router
 // Duplicate multiple resources
 router
   .route('/duplicate')
+  // createableBy is 'all', so a per-record can('create') is no guard here
+  .post(auth.can('Resource', 'update'))
   .post(auth.useReqUser)
   .post(rateLimiter(), async function (req, res, next) {
     let ids = req.body.ids;
@@ -998,7 +1077,7 @@ router
     try {
       req.scope.push('includeTags', 'includeStatuses');
       const resources = await db.Resource.scope(...req.scope).findAll({
-        where: { id: ids },
+        where: { id: ids, projectId: req.params.projectId },
       });
 
       if (resources.length === 0) {
@@ -1008,9 +1087,12 @@ router
       }
 
       for (const resource of resources) {
-        if (!resource.can || !resource.can('create')) {
+        if (!resource.can || !resource.can('create', req.user)) {
           return next(
-            new Error(`You cannot duplicate resource with ID ${resource.id}`)
+            createError(
+              403,
+              `You cannot duplicate resource with ID ${resource.id}`
+            )
           );
         }
       }
@@ -1055,7 +1137,9 @@ router
         })
       );
 
-      res.json(duplicatedResources);
+      res.json(
+        duplicatedResources.map((resource) => resource.toJSON(req.user))
+      );
     } catch (error) {
       next(error);
     }

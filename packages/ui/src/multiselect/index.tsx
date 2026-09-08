@@ -49,6 +49,29 @@ export function MultiSelect({
     };
   }, []);
 
+  // ponytail: sluiten met muis was er al, met toetsenbord niet. Het menu bleef
+  // openstaan als de focus doorliep naar het volgende menu en overlapte dat dan
+  // bij 400% zoom — en was zelf niet te sluiten (WCAG 1.4.10 / 2.1.1).
+  const closeOnFocusLeave = (event: React.FocusEvent<HTMLDivElement>) => {
+    if (inlineOptions) return;
+    const next = event.relatedTarget as Node | null;
+    // Geen relatedTarget = focus ging nergens heen, bv. een klik op een optie
+    // (die is zelf niet focusbaar). Dan niet sluiten — buiten klikken wordt al
+    // door de mousedown-listener hierboven afgevangen.
+    if (!next) return;
+    if (containerRef.current?.contains(next)) return;
+    setOpen(false);
+  };
+
+  const closeOnEscape = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (inlineOptions || event.key !== 'Escape' || !isOpen) return;
+    event.stopPropagation();
+    setOpen(false);
+    containerRef.current
+      ?.querySelector<HTMLElement>('[test-id="multi-select-button"]')
+      ?.focus();
+  };
+
   const checkedOptions = options?.filter((option) => option.checked) || [];
   let openButtonLabel = label;
   if (checkedOptions.length > 1) {
@@ -64,7 +87,9 @@ export function MultiSelect({
       className={`multi-select ${
         inlineOptions ? 'multiselect-container--inline' : ''
       }`}
-      ref={containerRef}>
+      ref={containerRef}
+      onBlur={closeOnFocusLeave}
+      onKeyDown={closeOnEscape}>
       {!inlineOptions && (
         <Button
           appearance="default-button"
@@ -73,26 +98,21 @@ export function MultiSelect({
           }}
           test-id="multi-select-button"
           aria-labelledby={id}
-          aria-expanded={isOpen}
-          role="combobox"
-          aria-haspopup="listbox">
+          aria-expanded={isOpen}>
           {openButtonLabel}
           <Icon icon={isOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'} />
         </Button>
       )}
 
       {isOpen && (
-        <section
-          className={`multiselect-container ${
-            inlineOptions ? 'multiselect-container--inline' : ''
-          }`}
-          role="listbox"
-          aria-multiselectable="true">
+        <fieldset
+          className={`multiselect-container ${inlineOptions ? 'multiselect-container--inline' : ''}`}
+          role="group"
+          aria-label={label}>
           {options?.map((option, index) => {
+            const checkboxId = `${id}-option-${index}`;
             return (
               <div
-                role="option"
-                aria-selected={option.checked}
                 onClick={() => {
                   const value = option.value;
                   const label = option.label;
@@ -103,15 +123,19 @@ export function MultiSelect({
                   <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
                     <Checkbox
                       className="utrecht-form-field__input"
+                      id={checkboxId}
                       checked={option.checked}
+                      aria-label={option.label}
                     />
-                    <FormLabel type="checkbox">{option.label}</FormLabel>
+                    <FormLabel type="checkbox" htmlFor={checkboxId}>
+                      {option.label}
+                    </FormLabel>
                   </Paragraph>
                 </FormField>
               </div>
             );
           })}
-        </section>
+        </fieldset>
       )}
     </div>
   );

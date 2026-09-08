@@ -298,6 +298,11 @@ export function Area({
                       target={item.openInNewTab ? '_blank' : '_self'}
                       rel={
                         item.openInNewTab ? 'noopener noreferrer' : undefined
+                      }
+                      aria-label={
+                        item.title
+                          ? `Lees verder over ${item.title}`
+                          : undefined
                       }>
                       {item.buttonText || 'Lees verder'}
                     </a>

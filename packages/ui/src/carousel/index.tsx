@@ -97,7 +97,10 @@ export function Carousel({
               autoplayPaused.current = false;
             }
           : undefined
-      }>
+      }
+      role="region"
+      aria-label={props['aria-label'] || 'Carrousel'}
+      aria-roledescription="carrousel">
       {items.length > 1 && (
         <div className="carousel-button-container">
           <div className="osc-carousel-navigation-button-wrapper osc-carousel-previous">
@@ -106,6 +109,7 @@ export function Carousel({
               icon="ri-arrow-left-s-line"
               disabled={index === 0}
               text={buttonText?.previous || 'Vorige slide'}
+              aria-label={buttonText?.previous || 'Vorige afbeelding'}
               iconOnly={true}
               onClick={() => handleIndexChange(index - 1)}
             />
@@ -116,6 +120,7 @@ export function Carousel({
               icon="ri-arrow-right-s-line"
               disabled={index === items.length - 1}
               text={buttonText?.next || 'Volgende slide'}
+              aria-label={buttonText?.next || 'Volgende afbeelding'}
               iconOnly={true}
               onClick={() => handleIndexChange(index + 1)}
             />
@@ -137,6 +142,10 @@ export function Carousel({
             {itemRenderer(items.at(leavingIndex))}
           </div>
         )}
+      </div>
+
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {`Slide ${index + 1} van ${items.length}`}
       </div>
 
       {pager && items.length > 1 && (

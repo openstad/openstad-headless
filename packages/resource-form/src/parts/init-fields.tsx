@@ -77,10 +77,10 @@ export const InitializeFormFields = (items, data) => {
           'Nog minimaal {minCharacters} tekens',
         minCharactersError:
           data?.general?.minCharactersError ||
-          'Tekst moet minimaal {minCharacters} karakters bevatten',
+          'De tekst mag niet korter zijn dan {minCharacters} tekens',
         maxCharactersError:
           data?.general?.maxCharactersError ||
-          'Tekst moet maximaal {maxCharacters} karakters bevatten',
+          'De tekst mag niet langer zijn dan {maxCharacters} tekens',
         routingInitiallyHide: item?.routingInitiallyHide || false,
         routingSelectedQuestion: item?.routingSelectedQuestion || '',
         routingSelectedAnswer: item?.routingSelectedAnswer || '',
@@ -136,9 +136,18 @@ export const InitializeFormFields = (items, data) => {
             fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
           }
           break;
+        case 'images':
         case 'imageUpload':
           fieldData['allowedTypes'] = item.allowedTypes || ['image/*'];
           fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
+          fieldData['imageCropEnabled'] = item.imageCropEnabled || false;
+          fieldData['imageCropRequired'] = item.imageCropRequired || false;
+          fieldData['imageCropRatioWidth'] =
+            item.imageCropRatioWidth || data.project?.imageCropRatioWidth || 16;
+          fieldData['imageCropRatioHeight'] =
+            item.imageCropRatioHeight ||
+            data.project?.imageCropRatioHeight ||
+            9;
           break;
         case 'documentUpload':
           fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
@@ -187,6 +196,7 @@ export const InitializeFormFields = (items, data) => {
             fieldData['allowedPolygons'] = data.allowedPolygons;
           }
 
+          fieldData['enableAddressSearch'] = !!item.enableAddressSearch;
           fieldData['enablePolygonTags'] = true;
 
           break;

@@ -27,7 +27,7 @@ import {
 import '@utrecht/design-tokens/dist/root.css';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import './form.css';
+import './form.scss';
 import type {
   CombinedFieldPropsWithType,
   ComponentFieldProps,
@@ -96,9 +96,14 @@ function Form({
         field.type === 'map' ? {} : initialFormValues[fieldKey];
 
       if (field.type === 'tickmark-slider') {
-        initialFormValues[fieldKey] = Math.ceil(
-          (field?.fieldOptions?.length || 2) / 2
-        ).toString();
+        const stepCount = field?.fieldOptions?.length || 2;
+        const configuredDefault = Number(field.defaultValue);
+        initialFormValues[fieldKey] =
+          Number.isInteger(configuredDefault) &&
+          configuredDefault >= 1 &&
+          configuredDefault <= stepCount
+            ? String(configuredDefault)
+            : Math.ceil(stepCount / 2).toString();
       }
     }
 
@@ -256,6 +261,7 @@ function Form({
       const hidden = routingKey && routingHiddenFields.includes(routingKey);
       return (
         needsConfirm(f) &&
+        !isInstant(f) &&
         f.fieldKey &&
         !hidden &&
         isFieldAnswered(f) &&
@@ -352,6 +358,38 @@ function Form({
       setTouchedFields((prev) =>
         prev[name] ? prev : { ...prev, [name]: true }
       );
+
+      const changedField = fields.find((f: any) => f.fieldKey === name);
+      if (changedField && isInstant(changedField)) {
+        const confirmInstant = () =>
+          setConfirmedFields((prev) =>
+            prev[name] ? prev : { ...prev, [name]: true }
+          );
+
+        if (changedField.type === 'checkbox') {
+          const maxChoicesNum = parseInt(
+            String((changedField as any).maxChoices ?? ''),
+            10
+          );
+          let selectedCount = 0;
+          try {
+            const parsed =
+              typeof value === 'string' ? JSON.parse(value) : value;
+            selectedCount = Array.isArray(parsed) ? parsed.length : 0;
+          } catch {
+            selectedCount = 0;
+          }
+          if (
+            Number.isFinite(maxChoicesNum) &&
+            maxChoicesNum > 0 &&
+            selectedCount >= maxChoicesNum
+          ) {
+            confirmInstant();
+          }
+        } else if (value !== undefined && value !== null && value !== '') {
+          confirmInstant();
+        }
+      }
     }
 
     if (triggerSetLastKey !== false) {
@@ -430,6 +468,32 @@ function Form({
     }
   };
 
+  // ponytail: bij paginawissel focus naar de eerste vraag van de nieuwe pagina i.p.v.
+  // op de 'volgende'-knop laten staan (WCAG 2.4.3). Eerste render overslaan.
+  const didMountRef = useRef(false);
+  useEffect(() => {
+    if (!didMountRef.current) {
+      didMountRef.current = true;
+      return;
+    }
+    if (typeof currentPage !== 'number' || !formRef.current) return;
+
+    const firstQuestion = formRef.current.querySelector(
+      '.question'
+    ) as HTMLElement | null;
+    if (!firstQuestion) return;
+
+    const focusTarget =
+      (firstQuestion.querySelector(
+        'h1, h2, h3, h4, h5, h6, legend'
+      ) as HTMLElement | null) || firstQuestion;
+
+    if (!focusTarget.hasAttribute('tabindex')) {
+      focusTarget.setAttribute('tabindex', '-1');
+    }
+    focusTarget.focus({ preventScroll: true });
+  }, [currentPage]);
+
   const componentMap: {
     [key: string]: React.ComponentType<ComponentFieldProps>;
   } = {
@@ -475,6 +539,11 @@ function Form({
     isGraded(field) || (!!field.feedbackMode && field.feedbackMode !== 'none');
 
   const needsConfirm = (field: any): boolean => isGraded(field);
+
+  const isInstant = (field: any): boolean =>
+    isGraded(field) &&
+    !!field.instantFeedback &&
+    (field?.type === 'radiobox' || field?.type === 'checkbox');
 
   const meetsMinChoices = (field: any): boolean => {
     const min = parseInt(String(field.minChoices ?? ''), 10);
@@ -561,6 +630,7 @@ function Form({
                 <li
                   key={index}
                   className={`${currentPage === index ? '--active' : ''}`}
+                  aria-current={currentPage === index ? 'step' : undefined}
                   aria-label={`Pagina ${index + 1}`}></li>
               ))}
             </ul>
@@ -639,30 +709,33 @@ function Form({
                     </span>
                   )}
                 </FormFieldErrorMessage>
-                {needsConfirm(field) && field.fieldKey && !confirmed && (
-                  <div className="question-confirm">
-                    <Button
-                      type="button"
-                      appearance="secondary-action-button"
-                      className="osc-confirm-answer-button"
-                      disabled={
-                        !isFieldAnswered(field) || !meetsMinChoices(field)
-                      }
-                      onClick={() => {
-                        setConfirmedFields((prev) => ({
-                          ...prev,
-                          [field.fieldKey as string]: true,
-                        }));
-                        setFormErrors((prev) => {
-                          const next = { ...prev };
-                          delete next[field.fieldKey as string];
-                          return next;
-                        });
-                      }}>
-                      Bevestig antwoord
-                    </Button>
-                  </div>
-                )}
+                {needsConfirm(field) &&
+                  !isInstant(field) &&
+                  field.fieldKey &&
+                  !confirmed && (
+                    <div className="question-confirm">
+                      <Button
+                        type="button"
+                        appearance="secondary-action-button"
+                        className="osc-confirm-answer-button"
+                        disabled={
+                          !isFieldAnswered(field) || !meetsMinChoices(field)
+                        }
+                        onClick={() => {
+                          setConfirmedFields((prev) => ({
+                            ...prev,
+                            [field.fieldKey as string]: true,
+                          }));
+                          setFormErrors((prev) => {
+                            const next = { ...prev };
+                            delete next[field.fieldKey as string];
+                            return next;
+                          });
+                        }}>
+                        Bevestig antwoord
+                      </Button>
+                    </div>
+                  )}
                 {hasFeedback(field) &&
                   field.fieldKey &&
                   (needsConfirm(field)
@@ -740,7 +813,8 @@ function Form({
             <Button
               appearance="primary-action-button"
               onClick={() => secondaryHandler(formValues)}
-              type="button">
+              type="button"
+              aria-label={secondaryLabel}>
               <span>{secondaryLabel}</span>
             </Button>
           )}
@@ -750,6 +824,7 @@ function Form({
                 appearance="secondary-action-button"
                 type="button"
                 className="osc-prev-button"
+                aria-label={prevPageText || 'vorige'}
                 onClick={() => {
                   setCurrentPage && setCurrentPage(currentPage - 1);
                   scrollTop();
@@ -762,6 +837,7 @@ function Form({
               type="submit"
               disabled={submitDisabled}
               data-label="Overslaan"
+              aria-label={submitText}
               onClick={() => {
                 scrollTop();
               }}>

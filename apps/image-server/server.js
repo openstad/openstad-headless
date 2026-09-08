@@ -21,7 +21,23 @@ const s3 = require('./s3');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const mime = require('mime-types');
 
-const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff'];
+const {
+  ALLOWED_IMAGE_EXTENSIONS,
+  isAllowedImageUpload,
+  createFilename,
+  sanitizeFileName,
+  getFileUrl,
+} = require('./utils');
+const {
+  HEIC_EXTENSIONS,
+  HEIC_TOO_MANY_PIXELS,
+  convertHeicToJpeg,
+  looksLikeHeicUpload,
+  replaceExtension,
+} = require('./heic');
+const { Readable } = require('node:stream');
+
+const ALLOWED_EXTENSIONS = ALLOWED_IMAGE_EXTENSIONS;
 
 /**
  * Detect image MIME type from a fetch Response.
@@ -59,8 +75,8 @@ async function detectImageMimeType(response, extension) {
   const ct = response.headers.get('content-type');
   return ct && ct.startsWith('image/') ? ct : 'application/octet-stream';
 }
-const { createFilename, sanitizeFileName, getFileUrl } = require('./utils');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('path');
 
 console.log('S3 enabled:', s3.isEnabled());
@@ -72,6 +88,31 @@ console.log('S3 enabled:', s3.isEnabled());
 const maxFileUploadBytes =
   (Number(process.env.MAX_FILE_UPLOAD_SIZE_MB) || 25) * 1024 * 1024;
 
+const getPublicS3BaseUrl = () =>
+  process.env.S3_ENDPOINT.replace(
+    'https://',
+    `https://${process.env.S3_BUCKET}.`
+  );
+
+const UNSUPPORTED_IMAGE_TYPE = 'UNSUPPORTED_IMAGE_TYPE';
+
+const unsupportedImageTypeError = (message) => {
+  const error = new Error(
+    message ||
+      `Unsupported image type. Allowed extensions: ${[...ALLOWED_IMAGE_EXTENSIONS, ...HEIC_EXTENSIONS].join(', ')}.`
+  );
+  error.code = UNSUPPORTED_IMAGE_TYPE;
+  error.status = 415;
+  return error;
+};
+
+const heicConversionFailedError = (cause) =>
+  unsupportedImageTypeError(
+    cause && cause.code === HEIC_TOO_MANY_PIXELS
+      ? `${cause.message} The image was not stored.`
+      : 'This file could not be read as a HEIC image and was not stored.'
+  );
+
 const swapLastDotUnderscore = (name) => {
   if (!name) return null;
   const match = name.match(/^(.*)([._])([a-z0-9]+)$/i);
@@ -80,6 +121,63 @@ const swapLastDotUnderscore = (name) => {
   return `${match[1]}${sep}${match[3]}`;
 };
 
+/**
+ * Name the file is stored under. For a converted HEIC that is the JPEG name, so
+ * the stored object carries an extension the image read route allows.
+ * file.originalname is deliberately left untouched: the widget matches its local
+ * FilePond entry against the name returned in the upload response.
+ */
+const storedFileName = (file) => file.convertedName || file.originalname;
+
+const readStreamToBuffer = (stream) =>
+  new Promise((resolve, reject) => {
+    const chunks = [];
+    let truncated = false;
+    stream.on('limit', () => {
+      truncated = true;
+    });
+    stream.on('data', (chunk) => chunks.push(chunk));
+    stream.on('error', reject);
+    stream.on('end', () =>
+      truncated
+        ? reject(heicConversionFailedError())
+        : resolve(Buffer.concat(chunks))
+    );
+  });
+
+/**
+ * Storage engine that converts HEIC uploads to JPEG and passes everything else
+ * straight through. Only HEIC is buffered in memory; the other formats keep
+ * streaming, which matters because the multi upload route accepts 30 files.
+ */
+const createImageStorage = (baseStorage) => ({
+  _handleFile: function (req, file, cb) {
+    if (!looksLikeHeicUpload(file.originalname, file.mimetype)) {
+      return baseStorage._handleFile(req, file, cb);
+    }
+
+    readStreamToBuffer(file.stream)
+      .then((buffer) => convertHeicToJpeg(buffer))
+      .then((jpeg) => {
+        file.convertedName = replaceExtension(file.originalname, 'jpg');
+        file.mimetype = 'image/jpeg';
+        Object.defineProperty(file, 'stream', {
+          configurable: true,
+          enumerable: false,
+          value: Readable.from(jpeg),
+        });
+        baseStorage._handleFile(req, file, cb);
+      })
+      .catch((error) => {
+        console.error('HEIC conversion failed', error);
+        cb(heicConversionFailedError(error));
+      });
+  },
+  _removeFile: function (req, file, cb) {
+    baseStorage._removeFile(req, file, cb);
+  },
+});
+
 const imageMulterConfig = {
   limits: { fileSize: maxFileUploadBytes },
   onError: function (err, next) {
@@ -87,9 +185,11 @@ const imageMulterConfig = {
     next(err);
   },
   fileFilter: function (req, file, cb) {
-    if (file.mimetype && !file.mimetype.startsWith('image/')) {
-      req.fileValidationError = 'goes wrong on the mimetype';
-      return cb(null, false, new Error('goes wrong on the mimetype'));
+    if (
+      !isAllowedImageUpload(file.originalname, file.mimetype) &&
+      !looksLikeHeicUpload(file.originalname, file.mimetype)
+    ) {
+      return cb(unsupportedImageTypeError());
     }
 
     cb(null, true);
@@ -98,25 +198,38 @@ const imageMulterConfig = {
 
 if (s3.isEnabled()) {
   try {
-    imageMulterConfig.storage = multerS3({
-      s3: s3.getClient(),
-      bucket: process.env.S3_BUCKET,
-      acl: 'public-read',
-      metadata: function (req, file, cb) {
-        cb(null, {
-          fieldName: file.fieldname,
-        });
-      },
-      destination: function (req, file, cb) {
-        cb(null, 'images/');
-      },
-      key: function (req, file, cb) {
-        cb(null, 'images/' + createFilename(file.originalname));
-      },
-    });
+    imageMulterConfig.storage = createImageStorage(
+      multerS3({
+        s3: s3.getClient(),
+        bucket: process.env.S3_BUCKET,
+        acl: 'public-read',
+        metadata: function (req, file, cb) {
+          cb(null, {
+            fieldName: file.fieldname,
+          });
+        },
+        destination: function (req, file, cb) {
+          cb(null, 'images/');
+        },
+        key: function (req, file, cb) {
+          cb(null, 'images/' + createFilename(storedFileName(file)));
+        },
+      })
+    );
   } catch (error) {
     throw new Error(`S3 Multer storage error: ${error.message}`);
   }
+} else {
+  imageMulterConfig.storage = createImageStorage(
+    multer.diskStorage({
+      destination: function (req, file, cb) {
+        cb(null, process.env.IMAGES_DIR || 'images/');
+      },
+      filename: function (req, file, cb) {
+        cb(null, createFilename(storedFileName(file)));
+      },
+    })
+  );
 }
 
 const disableWebpSupport = process.env.DISABLE_WEBP_CONVERSION === 'true';
@@ -166,11 +279,13 @@ const imageSteamConfig = {
 
 if (s3.isEnabled()) {
   imageSteamConfig.storage.defaults = {
-    driverPath: 'image-steam-s3',
-    endpoint: process.env.S3_ENDPOINT,
-    bucket: process.env.S3_BUCKET,
-    accessKey: process.env.S3_KEY,
-    secretKey: process.env.S3_SECRET,
+    driver: 'http',
+    endpoint: getPublicS3BaseUrl(),
+    bucket: '',
+  };
+  imageSteamConfig.storage.cache = {
+    driver: 'fs',
+    path: path.join(os.tmpdir(), 'image-steam-cache'),
   };
 }
 
@@ -243,6 +358,24 @@ app.get('/image/*', rateLimiter(), async function (req, res, next) {
 
     // SSRF mitigation: Validate and sanitize image path
     const safeImageNamePattern = /^[a-zA-Z0-9_\-\.]+$/;
+
+    const stepsIndex = req.url.indexOf('/:/');
+    if (stepsIndex !== -1) {
+      const fileNameBeforeSteps = req.url.slice(0, stepsIndex);
+      const hasExtension = fileNameBeforeSteps.includes('.');
+      const extension = hasExtension
+        ? fileNameBeforeSteps.split('.').pop().toLowerCase()
+        : null;
+      if (
+        !safeImageNamePattern.test(fileNameBeforeSteps) ||
+        (hasExtension && !ALLOWED_EXTENSIONS.includes(extension))
+      ) {
+        return res.status(400).send('Invalid image filename or path');
+      }
+      req.url = '/images/' + req.url;
+      return imageHandler(req, res);
+    }
+
     const unsafePath = req.url;
 
     // Prevent directory traversal or illegal characters
@@ -259,10 +392,7 @@ app.get('/image/*', rateLimiter(), async function (req, res, next) {
       return res.status(400).send('Invalid image filename or path');
     }
 
-    const endpoint = process.env.S3_ENDPOINT.replace(
-      'https://',
-      `https://${process.env.S3_BUCKET}.`
-    );
+    const endpoint = getPublicS3BaseUrl();
 
     const { pipeline, Readable } = require('stream');
     const { promisify } = require('util');
@@ -335,16 +465,20 @@ app.get('/image/*', rateLimiter(), async function (req, res, next) {
     req.url = req.url.replace('/image', '');
 
     const unsafePath = req.url.replace(/^\//, '');
-    const baseName = path.basename(unsafePath);
-    if (baseName === unsafePath) {
+    const stepsIndex = unsafePath.indexOf('/:/');
+    const fileNamePart =
+      stepsIndex === -1 ? unsafePath : unsafePath.slice(0, stepsIndex);
+    const steps = stepsIndex === -1 ? '' : unsafePath.slice(stepsIndex);
+
+    if (path.basename(fileNamePart) === fileNamePart) {
       const imagesDir = process.env.IMAGES_DIR || 'images/';
-      const resolvedPath = path.resolve(imagesDir, baseName);
+      const resolvedPath = path.resolve(imagesDir, fileNamePart);
       if (!fs.existsSync(resolvedPath)) {
-        const altName = swapLastDotUnderscore(baseName);
+        const altName = swapLastDotUnderscore(fileNamePart);
         if (altName) {
           const altPath = path.resolve(imagesDir, altName);
           if (fs.existsSync(altPath)) {
-            req.url = `/${altName}`;
+            req.url = `/${altName}${steps}`;
           }
         }
       }
@@ -382,12 +516,6 @@ const documentMulterConfig = {
     ) {
       req.fileValidationError = 'goes wrong on the mimetype';
       return cb(null, false, new Error('goes wrong on the mimetype'));
-    }
-
-    const forbiddenChars = /[\\/:]/;
-    if (forbiddenChars.test(file.originalname)) {
-      req.fileValidationError = 'Forbidden characters in filename';
-      return cb(null, false, new Error('Forbidden characters in filename'));
     }
 
     cb(null, true);
@@ -464,10 +592,7 @@ app.get('/document/*', rateLimiter(), async function (req, res, next) {
     // get mime type for extension
     const mimeType = mime.lookup(extension);
 
-    const endpoint = process.env.S3_ENDPOINT.replace(
-      'https://',
-      `https://${process.env.S3_BUCKET}.`
-    );
+    const endpoint = getPublicS3BaseUrl();
 
     const { pipeline, Readable } = require('stream');
     const { promisify } = require('util');
@@ -679,6 +804,10 @@ app.use(function (err, req, res, next) {
     return res.status(413).json({
       error: `File too large. The maximum upload size is ${maxMB} MB.`,
     });
+  }
+
+  if (err && err.code === UNSUPPORTED_IMAGE_TYPE) {
+    return res.status(415).json({ error: err.message });
   }
 
   const status = err.status ? err.status : 500;

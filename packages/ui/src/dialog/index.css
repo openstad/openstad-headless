@@ -8,7 +8,7 @@
   position: fixed;
   inset: 0;
   animation: overlayShow 150ms cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 1000;
+  z-index: var(--osc-z-modal, 2147483647);
 }
 
 .osc-DialogContent {
@@ -28,7 +28,7 @@
   max-width: 82.5rem;
   overflow: auto;
   box-sizing: border-box;
-  z-index: 1000;
+  z-index: var(--osc-z-modal, 2147483647);
 }
 
 .osc-DialogContent > div {

@@ -32,6 +32,7 @@ import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
+import { getScaleStepCount } from '@openstad-headless/enquete/src/scale-steps';
 import {
   Item,
   Matrix,
@@ -43,7 +44,8 @@ import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { Path, useFieldArray, useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 const TrixEditor = dynamic(
@@ -70,6 +72,7 @@ const formSchema = z.object({
   feedbackCorrect: z.string().optional(),
   feedbackIncorrect: z.string().optional(),
   scaleFeedback: z.array(z.string()).optional(),
+  instantFeedback: z.boolean().optional(),
   fieldKey: z.string(),
   minCharacters: z.string().optional(),
   maxCharacters: z.string().optional(),
@@ -127,10 +130,22 @@ const formSchema = z.object({
     (val) => (val === '' || val === null ? undefined : val),
     z.coerce.number().positive().optional()
   ),
+  imageCropEnabled: z.boolean().optional(),
+  imageCropRequired: z.boolean().optional(),
+  imageCropRatioWidth: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number().int().positive().optional()
+  ),
+  imageCropRatioHeight: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number().int().positive().optional()
+  ),
   randomizeItems: z.boolean().optional(),
+  randomizeQuestions: z.boolean().optional(),
   image: z.string().optional(),
   imageUpload: z.string().optional(),
   fieldRequired: z.boolean().optional(),
+  enableAddressSearch: z.boolean().optional(),
   createImageSlider: z.boolean().optional(),
   imageClickable: z.boolean().optional(),
   maxChoices: z.string().optional(),
@@ -138,6 +153,17 @@ const formSchema = z.object({
   minChoices: z.string().optional(),
   minChoicesMessage: z.string().optional(),
   showSmileys: z.boolean().optional(),
+  scaleDisplay: z.enum(['numbers', 'smileys', 'custom']).optional(),
+  scaleSteps: z
+    .array(
+      z.object({
+        label: z.string().optional(),
+        imageUrl: z.string().optional(),
+        imageAlt: z.string().optional(),
+      })
+    )
+    .optional()
+    .default([]),
   placeholder: z.string().optional(),
   defaultValue: z.string().optional(),
   imageOptionUpload: z.string().optional(),
@@ -149,6 +175,7 @@ const formSchema = z.object({
   infoBlockShareButton: z.boolean().optional(),
   infoBlockExtraButton: z.string().optional(),
   infoBlockExtraButtonTitle: z.string().optional(),
+  headingLevel: z.coerce.number().optional(),
   infoField: z.string().optional(),
   infofieldExplanation: z.boolean().optional(),
   videoUrl: z.string().optional(),
@@ -225,6 +252,7 @@ export default function WidgetEnqueteItems(
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
   const panelRef = usePanelSwitchFocus(settingOptions);
+  const [settingScaleSteps, setSettingScaleSteps] = useState<boolean>(false);
   const [file, setFile] = useState<File>();
   const [isFieldKeyUnique, setIsFieldKeyUnique] = useState(true);
   const [imageIndexOpen, setImageIndexOpen] = useState<number | null>(null);
@@ -238,7 +266,54 @@ export default function WidgetEnqueteItems(
   const { project } = router.query;
 
   // adds item to items array if no item is selected, otherwise updates the selected item
+  function hasInvalidScaleSteps(values: FormData): boolean {
+    if (values.questionType !== 'scale' || values.scaleDisplay !== 'custom') {
+      return false;
+    }
+
+    form.clearErrors('scaleSteps');
+    const steps = values.scaleSteps || [];
+    let hasScaleStepError = false;
+
+    if (steps.length < 2) {
+      form.setError('scaleSteps', {
+        type: 'custom',
+        message: 'Voeg minimaal twee stappen toe.',
+      });
+      hasScaleStepError = true;
+    }
+
+    steps.forEach((step, index) => {
+      if (!step.label && !step.imageUrl) {
+        form.setError(`scaleSteps.${index}.label` as Path<FormData>, {
+          type: 'custom',
+          message: 'Vul een tekst in of upload een afbeelding.',
+        });
+        hasScaleStepError = true;
+      }
+      if (step.imageUrl && !step.imageAlt) {
+        form.setError(`scaleSteps.${index}.imageAlt` as Path<FormData>, {
+          type: 'custom',
+          message: 'Vul een alternatieve tekst in voor de afbeelding.',
+        });
+        hasScaleStepError = true;
+      }
+    });
+
+    if (hasScaleStepError) {
+      toast.error(
+        'De stappen zijn niet compleet: elke stap heeft een tekst of een afbeelding nodig, en bij een afbeelding is een alternatieve tekst verplicht.'
+      );
+    }
+
+    return hasScaleStepError;
+  }
+
   async function onSubmit(values: FormData) {
+    if (hasInvalidScaleSteps(values)) {
+      return;
+    }
+
     if (values?.options) {
       values.options = options;
     }
@@ -300,6 +375,7 @@ export default function WidgetEnqueteItems(
             feedbackCorrect: values.feedbackCorrect || '',
             feedbackIncorrect: values.feedbackIncorrect || '',
             scaleFeedback: values.scaleFeedback || [],
+            instantFeedback: values.instantFeedback || false,
             minCharacters: values.minCharacters,
             maxCharacters: values.maxCharacters,
             nextPageText: values.nextPageText || '',
@@ -309,18 +385,28 @@ export default function WidgetEnqueteItems(
             options: values.options || [],
             multiple: values.multiple || false,
             maxUploadSizeMB: values.maxUploadSizeMB || 25,
+            imageCropEnabled: values.imageCropEnabled || false,
+            imageCropRequired: values.imageCropRequired || false,
+            imageCropRatioWidth: values.imageCropRatioWidth,
+            imageCropRatioHeight: values.imageCropRatioHeight,
             randomizeItems: values.randomizeItems || false,
+            randomizeQuestions: values.randomizeQuestions || false,
             image_b: values.image_b || '',
             description_b: values.description_b || '',
             key_b: values.key_b || '',
             fieldRequired: values.fieldRequired || false,
+            enableAddressSearch: values.enableAddressSearch || false,
             createImageSlider: values.createImageSlider || false,
             imageClickable: values.imageClickable || false,
             maxChoices: values.maxChoices || '',
             maxChoicesMessage: values.maxChoicesMessage || '',
             minChoices: values.minChoices || '',
             minChoicesMessage: values.minChoicesMessage || '',
-            showSmileys: values.showSmileys || false,
+            showSmileys: values.scaleDisplay
+              ? values.scaleDisplay === 'smileys'
+              : values.showSmileys || false,
+            scaleDisplay: values.scaleDisplay || undefined,
+            scaleSteps: values.scaleSteps || [],
             defaultValue: values.defaultValue || '',
             placeholder: values.placeholder || '',
             matrix: values.matrix || matrixDefault,
@@ -346,6 +432,7 @@ export default function WidgetEnqueteItems(
             imageDescription: values.imageDescription || '',
             imageAlt: values.imageAlt || '',
             image: values.image || '',
+            headingLevel: values.headingLevel || 3,
           },
         ];
       });
@@ -354,6 +441,7 @@ export default function WidgetEnqueteItems(
     form.reset(defaults);
     setOptions([]);
     setMatrixOptions(matrixDefault);
+    setSettingScaleSteps(false);
   }
 
   // adds link to options array if no option is selected, otherwise updates the selected option
@@ -484,6 +572,7 @@ export default function WidgetEnqueteItems(
     feedbackCorrect: '',
     feedbackIncorrect: '',
     scaleFeedback: [],
+    instantFeedback: false,
     fieldKey: '',
     minCharacters: '',
     maxCharacters: '',
@@ -494,12 +583,19 @@ export default function WidgetEnqueteItems(
     options: [],
     multiple: false,
     maxUploadSizeMB: 25,
+    imageCropEnabled: false,
+    imageCropRequired: false,
+    imageCropRatioWidth: undefined,
+    imageCropRatioHeight: undefined,
     randomizeItems: false,
+    randomizeQuestions: false,
     infoBlockStyle: 'default',
     infoBlockShareButton: false,
     infoBlockExtraButton: '',
     infoBlockExtraButtonTitle: '',
+    headingLevel: 3,
     fieldRequired: false,
+    enableAddressSearch: false,
     createImageSlider: false,
     imageClickable: false,
     maxChoices: '',
@@ -507,6 +603,8 @@ export default function WidgetEnqueteItems(
     minChoices: '',
     minChoicesMessage: '',
     showSmileys: false,
+    scaleDisplay: undefined,
+    scaleSteps: [],
     defaultValue: '',
     placeholder: '',
     matrix: matrixDefault,
@@ -572,6 +670,7 @@ export default function WidgetEnqueteItems(
       fieldKey: item.fieldKey || '',
       description: item.description || '',
       questionType: item.questionType || '',
+      headingLevel: item.headingLevel || 3,
       feedbackMode:
         item.feedbackMode === 'correctIncorrect'
           ? 'none'
@@ -580,6 +679,7 @@ export default function WidgetEnqueteItems(
       feedbackCorrect: item.feedbackCorrect || '',
       feedbackIncorrect: item.feedbackIncorrect || '',
       scaleFeedback: item.scaleFeedback || [],
+      instantFeedback: item.instantFeedback || false,
       minCharacters: item.minCharacters || '',
       maxCharacters: item.maxCharacters || '',
       nextPageText: item.nextPageText || '',
@@ -589,12 +689,18 @@ export default function WidgetEnqueteItems(
       options: item.options || [],
       multiple: item.multiple || false,
       maxUploadSizeMB: item.maxUploadSizeMB || 25,
+      imageCropEnabled: item.imageCropEnabled || false,
+      imageCropRequired: item.imageCropRequired || false,
+      imageCropRatioWidth: item.imageCropRatioWidth,
+      imageCropRatioHeight: item.imageCropRatioHeight,
       randomizeItems: item.randomizeItems || false,
+      randomizeQuestions: item.randomizeQuestions || false,
       infoBlockStyle: item.infoBlockStyle || 'default',
       infoBlockShareButton: item.infoBlockShareButton || false,
       infoBlockExtraButton: item.infoBlockExtraButton || '',
       infoBlockExtraButtonTitle: item.infoBlockExtraButtonTitle || '',
       fieldRequired: item.fieldRequired || false,
+      enableAddressSearch: item.enableAddressSearch || false,
       createImageSlider: item.createImageSlider || false,
       imageClickable: item.imageClickable || false,
       maxChoices: item.maxChoices || '',
@@ -602,6 +708,9 @@ export default function WidgetEnqueteItems(
       minChoices: item.minChoices || '',
       minChoicesMessage: item.minChoicesMessage || '',
       showSmileys: item.showSmileys || false,
+      scaleDisplay:
+        item.scaleDisplay || (item.showSmileys ? 'smileys' : 'numbers'),
+      scaleSteps: item.scaleSteps || [],
       defaultValue: item.defaultValue || '',
       placeholder: item.placeholder || '',
       matrix: item.matrix || matrixDefault,
@@ -772,6 +881,10 @@ export default function WidgetEnqueteItems(
   function handleSaveItems() {
     let itemsToSave = [...items];
 
+    if (selectedItem && hasInvalidScaleSteps(form.getValues())) {
+      return;
+    }
+
     if (selectedItem) {
       const values = form.getValues();
       const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
@@ -803,11 +916,13 @@ export default function WidgetEnqueteItems(
     form.reset(defaults());
     setOptions([]);
     setMatrixOptions(matrixDefault);
+    setSettingScaleSteps(false);
   }
 
   const hasOptions = () => {
     switch (form.watch('questionType')) {
       case 'multiplechoice':
+      case 'dropdown':
       case 'swipe':
       case 'dilemma':
       case 'multiple':
@@ -823,6 +938,7 @@ export default function WidgetEnqueteItems(
   const hasList = () => {
     switch (form.watch('questionType')) {
       case 'multiplechoice':
+      case 'dropdown':
       case 'multiple':
       case 'swipe':
       case 'dilemma':
@@ -839,6 +955,7 @@ export default function WidgetEnqueteItems(
     setOptions([]);
     setMatrixOptions(matrixDefault);
     setSelectedItemId(null);
+    setSettingScaleSteps(false);
   }
 
   function handleSaveOptions() {
@@ -892,6 +1009,30 @@ export default function WidgetEnqueteItems(
     const reordered = swapArrayElements(images, index, index + 1);
     form.setValue('images', reordered);
   };
+
+  const {
+    fields: scaleStepFields,
+    append: appendScaleStep,
+    remove: removeScaleStep,
+  } = useFieldArray({
+    control: form.control,
+    name: 'scaleSteps',
+  });
+
+  const moveScaleStep = (index: number, direction: -1 | 1) => {
+    const steps = form.getValues('scaleSteps') || [];
+    const target = index + direction;
+    if (target < 0 || target >= steps.length) return;
+    form.setValue('scaleSteps', swapArrayElements(steps, index, target));
+  };
+
+  const watchedScaleDisplay =
+    form.watch('scaleDisplay') ||
+    (form.watch('showSmileys') ? 'smileys' : 'numbers');
+  const watchedScaleStepCount = getScaleStepCount({
+    scaleDisplay: watchedScaleDisplay,
+    scaleSteps: form.watch('scaleSteps'),
+  });
 
   return (
     <div>
@@ -953,6 +1094,7 @@ export default function WidgetEnqueteItems(
                                   ).map(withId),
                                 });
                                 setSettingOptions(false);
+                                setSettingScaleSteps(false);
                                 setOption(null);
                               }}
                               dangerouslySetInnerHTML={{
@@ -990,7 +1132,138 @@ export default function WidgetEnqueteItems(
               </div>
             </div>
 
-            {settingOptions ? (
+            {settingScaleSteps ? (
+              <div className="p-6 bg-white rounded-md col-span-2">
+                <div className="flex flex-col gap-y-2">
+                  <Heading size="xl">Stappen</Heading>
+                  <FormDescription>
+                    Elke stap heeft een tekst en/of een afbeelding. Bij een
+                    afbeelding is een alternatieve tekst verplicht.
+                  </FormDescription>
+                  <Separator className="mt-2" />
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {scaleStepFields.map((stepField, index) => (
+                      <div
+                        key={stepField.id}
+                        className="border border-secondary rounded-lg p-4 bg-white shadow-sm space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="flex items-center gap-2 font-medium">
+                            <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-secondary text-xs font-semibold">
+                              {index + 1}
+                            </span>
+                            Stap {index + 1}
+                          </span>
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              disabled={index === 0}
+                              onClick={() => moveScaleStep(index, -1)}>
+                              <ArrowUp className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              disabled={index === scaleStepFields.length - 1}
+                              onClick={() => moveScaleStep(index, 1)}>
+                              <ArrowDown className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => removeScaleStep(index)}>
+                              <X className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <FormField
+                          control={form.control}
+                          name={`scaleSteps.${index}.label`}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Tekst</FormLabel>
+                              <Input {...field} value={field.value || ''} />
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        {form.watch(`scaleSteps.${index}.imageUrl`) ? (
+                          <>
+                            <div className="flex items-center gap-4">
+                              <img
+                                src={form.watch(`scaleSteps.${index}.imageUrl`)}
+                                alt=""
+                                className="w-16 h-16 object-contain rounded-md border border-secondary bg-gray-50 p-1"
+                              />
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={() => {
+                                  form.setValue(
+                                    `scaleSteps.${index}.imageUrl`,
+                                    ''
+                                  );
+                                  form.setValue(
+                                    `scaleSteps.${index}.imageAlt`,
+                                    ''
+                                  );
+                                }}>
+                                Afbeelding verwijderen
+                              </Button>
+                            </div>
+                            <FormField
+                              control={form.control}
+                              name={`scaleSteps.${index}.imageAlt`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Alternatieve tekst</FormLabel>
+                                  <FormDescription>
+                                    Beschrijving van de afbeelding voor
+                                    schermlezers.
+                                  </FormDescription>
+                                  <Input {...field} value={field.value || ''} />
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          </>
+                        ) : (
+                          <ImageUploader
+                            form={form}
+                            project={project as string}
+                            fieldName={`scaleSteps.${index}.imageUrl`}
+                            imageLabel="Afbeelding"
+                            allowedTypes={['image/' + '*']}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        appendScaleStep({
+                          label: '',
+                          imageUrl: '',
+                          imageAlt: '',
+                        })
+                      }>
+                      Stap toevoegen
+                    </Button>
+                    <Button
+                      className="w-fit bg-secondary text-black hover:text-white"
+                      type="button"
+                      onClick={() => setSettingScaleSteps(false)}>
+                      Terug naar de vraag
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : settingOptions ? (
               <div
                 ref={panelRef}
                 tabIndex={-1}
@@ -1792,6 +2065,7 @@ export default function WidgetEnqueteItems(
                             onValueChange={(value) => {
                               field.onChange(value);
                               form.setValue('feedbackMode', 'none');
+                              form.setValue('defaultValue', '');
                             }}>
                             <FormControl>
                               <SelectTrigger>
@@ -1807,6 +2081,9 @@ export default function WidgetEnqueteItems(
                               </SelectItem>
                               <SelectItem value="multiplechoice">
                                 Enkele keuze
+                              </SelectItem>
+                              <SelectItem value="dropdown">
+                                Enkele keuze (uitklapbaar)
                               </SelectItem>
                               <SelectItem value="open">Open vraag</SelectItem>
                               <SelectItem value="multiple">
@@ -1838,6 +2115,43 @@ export default function WidgetEnqueteItems(
                         </FormItem>
                       )}
                     />
+                    {form.watch('questionType') === 'map' && (
+                      <FormField
+                        control={form.control}
+                        name="enableAddressSearch"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Kan de gebruiker de locatie zoeken met postcode en
+                              huisnummer?
+                            </FormLabel>
+                            <FormDescription>
+                              <em className="text-xs">
+                                Toont invulvelden voor postcode en huisnummer
+                                boven de kaart. Bij een match wordt de pin op
+                                het gevonden adres gezet.
+                              </em>
+                            </FormDescription>
+                            <Select
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
+                              value={field.value ? 'true' : 'false'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="true">Ja</SelectItem>
+                                <SelectItem value="false">Nee</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                     {form.watch('questionType') === 'open' && (
                       <>
                         <FormField
@@ -1847,9 +2161,9 @@ export default function WidgetEnqueteItems(
                             <FormItem>
                               <FormLabel>Type open vraag</FormLabel>
                               <FormDescription>
-                                Kies hier het type van jouw open vraag,
-                                bijvoorbeeld grootte van het tekstvak op 1 regel
-                                of groter, e-mail validatie etc.
+                                Kies hier het type van jouw open vraag. Bij een
+                                specifiek doel (zoals naam of telefoonnummer)
+                                kan de browser het veld automatisch invullen.
                               </FormDescription>
                               <Select
                                 value={field.value || 'text input'}
@@ -1868,6 +2182,25 @@ export default function WidgetEnqueteItems(
                                   </SelectItem>
                                   <SelectItem value="textarea">
                                     Tekstvak
+                                  </SelectItem>
+                                  <SelectItem value="name">Naam</SelectItem>
+                                  <SelectItem value="given-name">
+                                    Voornaam
+                                  </SelectItem>
+                                  <SelectItem value="family-name">
+                                    Achternaam
+                                  </SelectItem>
+                                  <SelectItem value="tel">
+                                    Telefoonnummer
+                                  </SelectItem>
+                                  <SelectItem value="postal-code">
+                                    Postcode
+                                  </SelectItem>
+                                  <SelectItem value="street-address">
+                                    Adres
+                                  </SelectItem>
+                                  <SelectItem value="address-level2">
+                                    Woonplaats
                                   </SelectItem>
                                 </SelectContent>
                               </Select>
@@ -1940,11 +2273,65 @@ export default function WidgetEnqueteItems(
                             </FormItem>
                           )}
                         />
+                        <FormField
+                          control={form.control}
+                          name="randomizeQuestions"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Vragen op deze pagina in willekeurige volgorde
+                                tonen
+                              </FormLabel>
+                              <FormDescription>
+                                <em className="text-xs">
+                                  Geldt voor de vragen na dit item, tot de
+                                  volgende &quot;Nieuwe pagina&quot;. Vragen
+                                  blijven altijd op hun eigen pagina. Tekst- en
+                                  informatieblokken en video&apos;s blijven op
+                                  hun plek staan. Let op: een vraag met routing
+                                  kan voor zijn triggervraag terechtkomen.
+                                </em>
+                              </FormDescription>
+                              {YesNoSelect(field, props)}
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </>
                     )}
 
                     {form.watch('questionType') === 'none' && (
                       <>
+                        <FormField
+                          control={form.control}
+                          name="headingLevel"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Kopniveau van de titel</FormLabel>
+                              <Select
+                                value={String(field.value ?? 3)}
+                                onValueChange={(e) =>
+                                  field.onChange(Number(e))
+                                }>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies kopniveau" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="2">Kop 2 (h2)</SelectItem>
+                                  <SelectItem value="3">Kop 3 (h3)</SelectItem>
+                                  <SelectItem value="4">Kop 4 (h4)</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                Kies zo dat de koppenhiërarchie op de pagina
+                                klopt (geen niveaus overslaan).
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                         <ImageUploader
                           form={form}
                           project={project as string}
@@ -2418,6 +2805,65 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
+                    {form.watch('questionType') === 'imageUpload' && (
+                      <FormField
+                        control={form.control}
+                        name="imageCropEnabled"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Mag de gebruiker de afbeelding bijsnijden?
+                            </FormLabel>
+                            <Select
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
+                              value={field.value ? 'true' : 'false'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="true">Ja</SelectItem>
+                                <SelectItem value="false">Nee</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {form.watch('questionType') === 'imageUpload' &&
+                      form.watch('imageCropEnabled') && (
+                        <FormField
+                          control={form.control}
+                          name="imageCropRequired"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Is bijsnijden verplicht?</FormLabel>
+                              <Select
+                                onValueChange={(e: string) =>
+                                  field.onChange(e === 'true')
+                                }
+                                value={field.value ? 'true' : 'false'}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+
                     {![
                       'pagination',
                       'sort',
@@ -2495,30 +2941,143 @@ export default function WidgetEnqueteItems(
                     {form.watch('questionType') === 'scale' && (
                       <FormField
                         control={form.control}
-                        name="showSmileys"
+                        name="scaleDisplay"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>
-                              Wil je smileys tonen in plaats van een schaal?
+                              Hoe wil je de stappen van de schaal tonen?
                             </FormLabel>
                             <FormDescription>
-                              De schaal toont normaal gesproken een getal van 1
-                              tot 5. Als je smileys wilt tonen, kies dan voor
-                              ja.
+                              Vaste waardes toont een schaal van 1 tot 5. Bij
+                              vrij invulbaar bepaal je zelf het aantal stappen
+                              en geef je elke stap een tekst en/of afbeelding.
                             </FormDescription>
                             <Select
-                              onValueChange={(e: string) =>
-                                field.onChange(e === 'true')
+                              onValueChange={(value: string) =>
+                                field.onChange(
+                                  value === 'custom'
+                                    ? 'custom'
+                                    : form.watch('showSmileys')
+                                      ? 'smileys'
+                                      : 'numbers'
+                                )
                               }
-                              value={field.value ? 'true' : 'false'}>
+                              value={
+                                field.value === 'custom' ? 'custom' : 'fixed'
+                              }>
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Kies een optie" />
+                                  <SelectValue placeholder="Kies een weergave" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                <SelectItem value="false">Nee</SelectItem>
-                                <SelectItem value="true">Ja</SelectItem>
+                                <SelectItem value="fixed">
+                                  Vaste waardes
+                                </SelectItem>
+                                <SelectItem value="custom">
+                                  Vrij invulbaar
+                                </SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {form.watch('questionType') === 'scale' &&
+                      watchedScaleDisplay !== 'custom' && (
+                        <FormField
+                          control={form.control}
+                          name="showSmileys"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Wil je smileys tonen in plaats van een schaal?
+                              </FormLabel>
+                              <FormDescription>
+                                De schaal toont normaal gesproken een getal van
+                                1 tot 5. Als je smileys wilt tonen, kies dan
+                                voor ja.
+                              </FormDescription>
+                              <Select
+                                onValueChange={(e: string) => {
+                                  field.onChange(e === 'true');
+                                  form.setValue(
+                                    'scaleDisplay',
+                                    e === 'true' ? 'smileys' : 'numbers'
+                                  );
+                                }}
+                                value={field.value ? 'true' : 'false'}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+
+                    {form.watch('questionType') === 'scale' &&
+                      watchedScaleDisplay === 'custom' && (
+                        <FormField
+                          control={form.control}
+                          name="scaleSteps"
+                          render={() => (
+                            <FormItem>
+                              <Button
+                                className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                                type="button"
+                                onClick={() => setSettingScaleSteps(true)}>
+                                Stappen ({scaleStepFields.length}) aanpassen
+                              </Button>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
+
+                    {form.watch('questionType') === 'scale' && (
+                      <FormField
+                        control={form.control}
+                        name="defaultValue"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Standaardstap</FormLabel>
+                            <FormDescription>
+                              De stap waarop de schuif start.
+                            </FormDescription>
+                            <Select
+                              onValueChange={(value: string) =>
+                                field.onChange(value === 'middle' ? '' : value)
+                              }
+                              value={field.value || 'middle'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een stap" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="middle">
+                                  Middelste stap
+                                </SelectItem>
+                                {Array.from(
+                                  { length: watchedScaleStepCount },
+                                  (_, stepIndex) => (
+                                    <SelectItem
+                                      key={stepIndex + 1}
+                                      value={String(stepIndex + 1)}>
+                                      Stap {stepIndex + 1}
+                                    </SelectItem>
+                                  )
+                                )}
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -2672,7 +3231,10 @@ export default function WidgetEnqueteItems(
                     {props.isQuiz &&
                       form.watch('feedbackMode') === 'perAnswer' &&
                       form.watch('questionType') === 'scale' &&
-                      [0, 1, 2, 3, 4].map((n) => (
+                      Array.from(
+                        { length: watchedScaleStepCount },
+                        (_, n) => n
+                      ).map((n) => (
                         <FormField
                           key={n}
                           control={form.control}
@@ -2868,7 +3430,8 @@ export default function WidgetEnqueteItems(
                     )}
 
                     {(form.watch('questionType') === 'multiplechoice' ||
-                      form.watch('questionType') === 'multiple') && (
+                      form.watch('questionType') === 'multiple' ||
+                      form.watch('questionType') === 'dropdown') && (
                       <FormField
                         control={form.control}
                         // @ts-ignore
@@ -2895,6 +3458,40 @@ export default function WidgetEnqueteItems(
                       />
                     )}
 
+                    {props.isQuiz &&
+                      ['multiplechoice', 'multiple'].includes(
+                        form.watch('questionType') || ''
+                      ) && (
+                        <FormField
+                          control={form.control}
+                          name="instantFeedback"
+                          render={({ field }) => (
+                            <>
+                              <FormItem
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'flex-start',
+                                  flexDirection: 'row',
+                                  marginTop: '10px',
+                                }}>
+                                {YesNoSelect(field, props)}
+                                <FormLabel
+                                  style={{ marginTop: 0, marginLeft: '6px' }}>
+                                  Antwoord direct tonen (zonder bevestigen)
+                                </FormLabel>
+                                <FormMessage />
+                              </FormItem>
+                              <FormDescription>
+                                Wanneer aan, ziet de bezoeker meteen bij het
+                                aanklikken van een antwoord wat goed en fout
+                                was, zonder eerst te hoeven bevestigen.
+                              </FormDescription>
+                            </>
+                          )}
+                        />
+                      )}
+
                     {form.watch('routingInitiallyHide') && (
                       <>
                         <FormField
@@ -2908,6 +3505,7 @@ export default function WidgetEnqueteItems(
                                   f.questionType === 'multiple' ||
                                   f.questionType === 'images' ||
                                   f.questionType === 'select' ||
+                                  f.questionType === 'dropdown' ||
                                   f.questionType === 'scale') &&
                                 f.trigger !== form.watch('trigger')
                             );
@@ -2984,10 +3582,16 @@ export default function WidgetEnqueteItems(
                               const isScale =
                                 selectedQuestion?.questionType === 'scale';
                               const options = isScale
-                                ? [1, 2, 3, 4, 5].map((n) => ({
-                                    trigger: `scale-${n}`,
-                                    titles: [{ key: `${n}` }],
-                                  }))
+                                ? Array.from(
+                                    {
+                                      length:
+                                        getScaleStepCount(selectedQuestion),
+                                    },
+                                    (_, stepIndex) => ({
+                                      trigger: `scale-${stepIndex + 1}`,
+                                      titles: [{ key: `${stepIndex + 1}` }],
+                                    })
+                                  )
                                 : selectedQuestion?.options || [];
 
                               const optionTriggers = options.map(

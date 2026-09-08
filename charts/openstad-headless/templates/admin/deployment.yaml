@@ -80,6 +80,11 @@ spec:
               secretKeyRef:
                 key: rateWindowMs
                 name: {{ template "openstad.ratelimit.secret.fullname" . }}
+          - name: ZIPCODE_API_URL
+            valueFrom:
+              secretKeyRef:
+                key: zipCodeApiUrl
+                name: {{ template "openstad.cdn.secret.fullname" . }}
           - name: NEXT_PUBLIC_SPAM_FILTER_ENABLED
             value: "{{ .Values.api.spamFilterEnabled }}"
           - name: EXTERNAL_CERTIFICATES_ENABLED

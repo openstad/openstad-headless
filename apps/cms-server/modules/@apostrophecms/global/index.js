@@ -162,7 +162,14 @@ module.exports = {
       logoAltText: {
         type: 'string',
         label: 'Logo alt text',
-        default: 'Afbeelding van het logo, link naar de homepage',
+        help: 'Beschrijf wat er op het logo staat, bijvoorbeeld de naam van de gemeente. Leeg laten gebruikt automatisch de sitenaam.',
+      },
+
+      logoLinkTitle: {
+        type: 'string',
+        label: 'Logo link titel',
+        help: 'Vertelt bezoekers waar de logolink naartoe gaat.',
+        default: 'Terug naar homepage',
       },
 
       logoLink: {
@@ -462,6 +469,7 @@ module.exports = {
           'siteLogo',
           'logoAltText',
           'logoLink',
+          'logoLinkTitle',
           'bannerStatus',
           'bannerStatusText',
         ],

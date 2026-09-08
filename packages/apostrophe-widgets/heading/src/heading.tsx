@@ -25,6 +25,7 @@ function Heading({ mode, title, customClass }: Item) {
   } else if (mode === 'h4') {
     return <Heading4 className={customClass}>{title}</Heading4>;
   }
+  return <Heading2 className={customClass}>{title}</Heading2>;
 }
 
 Heading.loadWidgetOnElement = function (

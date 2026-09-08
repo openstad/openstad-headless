@@ -94,7 +94,7 @@ router
       return next(new Error('You cannot update this datalayer'));
 
     datalayer
-      .authorizeData(datalayer, 'update')
+      .authorizeData(req.body, 'update')
       .update({
         ...req.body,
       })

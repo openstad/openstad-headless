@@ -25,6 +25,7 @@ import React, { useState } from 'react';
 import { canLikeResource, hasRole } from '../../lib';
 import { sanitizeHtml } from '../../lib/sanitize';
 import { Icon } from '../../ui/src/icon';
+import RenderContent from '../../ui/src/rte-formatting/rte-formatting';
 import './gridder-resource-detail.css';
 
 export type GridderResourceDetailProps = BaseProps &
@@ -41,6 +42,7 @@ export type GridderResourceDetailProps = BaseProps &
     displayTags?: boolean;
     displayBudget?: boolean;
     dialogTagGroups?: string[];
+    refreshResourceLikes?: () => void;
     likeWidget?: Omit<
       LikeWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
@@ -193,7 +195,7 @@ export const GridderResourceDetail = ({
               <>
                 <Heading4>Tags</Heading4>
                 <Spacer size={0.5} />
-                <div className="pill-grid">
+                <div className="pill-grid" role="list">
                   {(
                     resourceFilteredTags as Array<{
                       type: string;
@@ -202,7 +204,11 @@ export const GridderResourceDetail = ({
                   )
                     ?.filter((t) => t.type !== 'status')
                     ?.map((t) => (
-                      <Pill text={t.name} />
+                      <Pill
+                        key={`${t.type}-${t.name}`}
+                        role="listitem"
+                        text={t.name}
+                      />
                     ))}
                 </div>
               </>
@@ -224,7 +230,9 @@ export const GridderResourceDetail = ({
                 }}></Paragraph>
               <Paragraph
                 dangerouslySetInnerHTML={{
-                  __html: sanitizeHtml(resource.description),
+                  __html: RenderContent(resource.description, {
+                    headingBaseLevel: 3,
+                  }),
                 }}></Paragraph>
             </div>
           </div>

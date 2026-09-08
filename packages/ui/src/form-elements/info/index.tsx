@@ -1,8 +1,10 @@
 import { FormValue } from '@openstad-headless/form/src/form';
 import {
   AccordionProvider,
+  Heading2,
+  Heading3,
+  Heading4,
   Paragraph,
-  Strong,
 } from '@utrecht/component-library-react';
 import React, { FC } from 'react';
 
@@ -30,6 +32,7 @@ export type InfoFieldProps = {
   moreInfoButton?: string;
   moreInfoContent?: string;
   infoImage?: string;
+  headingLevel?: 2 | 3 | 4;
   defaultValue?: string;
   prevPageText?: string;
   nextPageText?: string;
@@ -57,6 +60,7 @@ const InfoField: FC<InfoFieldProps> = ({
   images = [],
   createImageSlider = false,
   imageClickable = false,
+  headingLevel = 3,
 }) => {
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
@@ -65,17 +69,21 @@ const InfoField: FC<InfoFieldProps> = ({
     }
   }
 
+  // ponytail: titel is een echte kop, niet <strong> (WCAG 1.3.1). Niveau instelbaar
+  // zodat de redacteur de koppenhiërarchie kloppend kan houden.
+  const HeadingComponent =
+    headingLevel === 2 ? Heading2 : headingLevel === 4 ? Heading4 : Heading3;
+
   return (
     <div className="info-field-container">
       {title && (
-        <Paragraph className="info-field-title">
+        <HeadingComponent className="info-field-title">
           <RteContent
             content={title}
-            inlineComponent={Strong}
             unwrapSingleRootDiv={true}
             forceInline={true}
           />
-        </Paragraph>
+        </HeadingComponent>
       )}
       {description &&
         (hasBlockLevelContent(unwrapSingleRootDiv(description)) ? (
