@@ -537,7 +537,7 @@ function Enquete(props: EnqueteWidgetProps) {
           const scaleDisplay = getScaleDisplay(item);
           const stepCount = getScaleStepCount(item);
           fieldData['showSmileys'] = scaleDisplay === 'smileys';
-          fieldData['clickableSteps'] = scaleDisplay === 'custom';
+          fieldData['clickableSteps'] = true;
 
           if (scaleDisplay === 'smileys') {
             const labelOptions = [
