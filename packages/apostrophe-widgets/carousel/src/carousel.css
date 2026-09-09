@@ -18,8 +18,13 @@
   --carousel-image-object-fit: contain;
 }
 
-.carousel .osc .image-container > img {
+.carousel .osc .image-container > img,
+.carousel .osc .image-container > .osc-image-frame > img {
   object-fit: var(--carousel-image-object-fit, cover);
+  max-height: var(--carousel-image-max-height, unset);
+}
+
+.carousel .osc .image-container > .osc-image-frame {
   max-height: var(--carousel-image-max-height, unset);
 }
 

@@ -363,6 +363,15 @@ p.osc-searchtext {
 .osc-resource-overview-content
   .resource-card--link_tagicon
   .image-container
+  > .osc-image-frame,
+.osc-resource-overview-content
+  .resource-card--link_tagicon
+  .image-container
+  > .osc-image-frame
+  > img,
+.osc-resource-overview-content
+  .resource-card--link_tagicon
+  .image-container
   > img {
   aspect-ratio: 3 / 4;
 }
