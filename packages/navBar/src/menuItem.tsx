@@ -72,7 +72,8 @@ function MenuItem({
   };
 
   const hasChildren = item._children.length > 0;
-  const asButton = parentBehavior === 'button' && hasChildren;
+  const asButton =
+    hasChildren && (parentBehavior === 'button' || item.hideMenuLink);
 
   return (
     <div
@@ -82,7 +83,7 @@ function MenuItem({
       {asButton ? (
         <button
           ref={buttonRef}
-          className="level-1 parent-button"
+          className="utrecht-link utrecht-link--html-a level-1 parent-button"
           onClick={() => {
             setOpenIndex(open ? null : index);
           }}
@@ -129,7 +130,7 @@ function MenuItem({
             ref={ref}>
             {/* ponytail: echte lijst zodat hulpsoftware het aantal items voorleest (WCAG 1.3.1) */}
             <ul className="submenu-list">
-              {asButton && (
+              {asButton && !item.hideMenuLink && (
                 <li>
                   <Link
                     className="level-2"
