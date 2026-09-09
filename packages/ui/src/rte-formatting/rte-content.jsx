@@ -44,6 +44,16 @@ function flattenToInlineHtml(html) {
   return template.innerHTML;
 }
 
+export function InlineParagraph(props) {
+  return (
+    <span
+      className="utrecht-paragraph"
+      style={{ display: 'inline-block' }}
+      {...props}
+    />
+  );
+}
+
 export default function RteContent({
   content,
   inlineComponent: InlineComponent,

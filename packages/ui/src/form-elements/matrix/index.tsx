@@ -21,7 +21,7 @@ import {
 import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
-import RteContent from '../../rte-formatting/rte-content';
+import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
 import './matrix.css';
 
 export type MatrixFieldProps = {
@@ -156,6 +156,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
               content={title}
               unwrapSingleRootDiv={true}
               forceInline={true}
+              inlineComponent={InlineParagraph}
             />
           </FieldsetLegend>
         )}
