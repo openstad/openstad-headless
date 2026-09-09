@@ -143,9 +143,9 @@ export const calculateScoreForItem = (
               if (isNaN(number)) return;
 
               const singleScore =
-                choicesType === 'default' || choicesType === 'plane'
-                  ? number
-                  : 100 - Math.abs(number - 50);
+                choicesType === 'minus-to-plus-100'
+                  ? 100 - Math.abs(number - 50)
+                  : number;
 
               totalScores[thirdDimension] += singleScore;
             });
@@ -198,9 +198,9 @@ export const calculateScoreForItem = (
               const finalNumber = rangeCalc === '' ? number : rangeCalc;
 
               const singleScore =
-                choicesType === 'default' || choicesType === 'plane'
-                  ? finalNumber
-                  : 100 - Math.abs(finalNumber - 50);
+                choicesType === 'minus-to-plus-100'
+                  ? 100 - Math.abs(finalNumber - 50)
+                  : finalNumber;
 
               totalScores[fifthDimension] =
                 totalScores[fifthDimension] + singleScore;
