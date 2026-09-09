@@ -143,7 +143,17 @@ try {
         try {
           var pluginPkg = require.resolve(plugin.packageName);
           var pluginDir = path.dirname(pluginPkg);
-          var modelFactory = require(path.join(pluginDir, modelDef.path));
+          var modelFile = PluginLoader.resolvePluginFile(
+            pluginDir,
+            modelDef.path
+          );
+          if (!modelFile) {
+            console.error(
+              `[plugin-loader] Skipping model "${modelDef.name}" from plugin "${plugin.name}": path escapes the plugin directory (${modelDef.path})`
+            );
+            continue;
+          }
+          var modelFactory = require(modelFile);
           var model = modelFactory(db, sequelize, Sequelize.DataTypes);
           if (model && model.name) {
             models[model.name] = model;

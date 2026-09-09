@@ -6,6 +6,17 @@ export interface ValidationResult {
 }
 
 /**
+ * True when a manifest-supplied file path is absolute or contains a `..`
+ * segment, i.e. could point outside the plugin's own directory.
+ */
+function isUnsafeFilePath(value: unknown): boolean {
+  if (typeof value !== 'string') return false;
+  if (value.startsWith('/') || value.startsWith('\\')) return true;
+  if (/^[a-zA-Z]:[\\/]/.test(value)) return true;
+  return value.split(/[\\/]/).includes('..');
+}
+
+/**
  * Validates a plugin manifest object.
  *
  * Checks required top-level fields and validates nested sections
@@ -43,6 +54,10 @@ export function validateManifest(
         }
         if (!model.path) {
           errors.push(`api.models[${i}]: missing required field "path"`);
+        } else if (isUnsafeFilePath(model.path)) {
+          errors.push(
+            `api.models[${i}]: "path" must be a relative path inside the plugin (got "${model.path}")`
+          );
         }
       });
     }
@@ -57,6 +72,10 @@ export function validateManifest(
         }
         if (!route.handler) {
           errors.push(`api.routes[${i}]: missing required field "handler"`);
+        } else if (isUnsafeFilePath(route.handler)) {
+          errors.push(
+            `api.routes[${i}]: "handler" must be a relative path inside the plugin (got "${route.handler}")`
+          );
         }
       });
     }
@@ -65,6 +84,10 @@ export function validateManifest(
       (api.middleware as Array<Record<string, unknown>>).forEach((mw, i) => {
         if (!mw.path) {
           errors.push(`api.middleware[${i}]: missing required field "path"`);
+        } else if (isUnsafeFilePath(mw.path)) {
+          errors.push(
+            `api.middleware[${i}]: "path" must be a relative path inside the plugin (got "${mw.path}")`
+          );
         }
       });
     }
