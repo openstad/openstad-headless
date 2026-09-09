@@ -290,7 +290,10 @@
       opacity: 0.9;
       line-height: 1.4;
       color: #fff;
-      font-family: var(--setSwipeFontFamily--3, inherit);
+      font-family: var(
+        --setSwipeFontFamily--3,
+        var(--utrecht-document-font-family, inherit)
+      );
       font-weight: 530;
     }
   }

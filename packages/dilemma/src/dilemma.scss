@@ -205,7 +205,10 @@
     z-index: 99;
     cursor: pointer;
     color: rgba(75, 75, 75, 1);
-    font-family: var(--setSwipeFontFamily--2, inherit);
+    font-family: var(
+      --setSwipeFontFamily--2,
+      var(--utrecht-document-font-family, inherit)
+    );
     font-weight: 500;
     font-size: 20px;
     line-height: 130%;
