@@ -149,6 +149,8 @@
   .resourceOverviewWithMap-container .resource-card--link {
     display: block;
   }
+  .osc .image-container > .osc-image-frame,
+  .osc .image-container > .osc-image-frame > img,
   .osc .image-container > img {
     aspect-ratio: 16/5;
   }

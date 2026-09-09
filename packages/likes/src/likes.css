@@ -96,7 +96,8 @@
   text-align: center;
 }
 
-.osc .like-widget-container div h6 {
+.osc .like-widget-container div h6,
+.osc .like-widget-container .like-widget-title {
   text-align: start;
 }
 

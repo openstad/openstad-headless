@@ -108,7 +108,12 @@ fieldset.utrecht-form-fieldset__fieldset table.utrecht-table td {
     table.utrecht-table
     .utrecht-table__body
     > .utrecht-table__row
-    td:first-child {
+    td:first-child,
+  .form-container
+    table.utrecht-table
+    .utrecht-table__body
+    > .utrecht-table__row
+    th:first-child {
     padding-top: 10px;
   }
 
