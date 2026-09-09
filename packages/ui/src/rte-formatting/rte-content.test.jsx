@@ -3,7 +3,7 @@ import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import { describe, expect, test } from 'vitest';
 
-import RteContent from './rte-content';
+import RteContent, { InlineParagraph } from './rte-content';
 
 function renderMarkup(props) {
   return ReactDOMServer.renderToStaticMarkup(<RteContent {...props} />);
@@ -31,6 +31,18 @@ describe('RteContent forceInline', () => {
     expect(markup.startsWith('<strong')).toBe(true);
     expect(markup).not.toContain('<p');
     expect(markup).toContain('mij');
+  });
+
+  test('renders InlineParagraph as a span with the utrecht-paragraph class', () => {
+    const markup = renderMarkup({
+      content: '<p>Welke sfeer <em>past</em>?</p>',
+      forceInline: true,
+      inlineComponent: InlineParagraph,
+    });
+
+    expect(markup.startsWith('<span class="utrecht-paragraph"')).toBe(true);
+    expect(markup).not.toContain('<p');
+    expect(markup).toContain('<em>past</em>');
   });
 
   test('keeps block content intact without forceInline', () => {

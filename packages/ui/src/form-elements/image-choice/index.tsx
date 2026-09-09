@@ -16,7 +16,7 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { ClickableImage } from '../../clickable-image';
 import { InfoImage } from '../../infoImage';
-import RteContent from '../../rte-formatting/rte-content';
+import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
 import { Spacer } from '../../spacer';
 
 export type ImageChoiceFieldProps = {
@@ -166,6 +166,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
               content={title}
               unwrapSingleRootDiv={true}
               forceInline={true}
+              inlineComponent={InlineParagraph}
             />
           </FieldsetLegend>
         )}

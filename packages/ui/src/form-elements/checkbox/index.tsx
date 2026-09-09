@@ -13,7 +13,7 @@ import {
 import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
-import RteContent from '../../rte-formatting/rte-content';
+import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
 import TextInput from '../text';
 
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -266,6 +266,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
               content={title}
               unwrapSingleRootDiv={true}
               forceInline={true}
+              inlineComponent={InlineParagraph}
             />
           </FieldsetLegend>
         )}

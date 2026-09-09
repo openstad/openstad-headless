@@ -14,7 +14,7 @@ import { FC } from 'react';
 import { useEffect, useMemo } from 'react';
 
 import { InfoImage } from '../../infoImage';
-import RteContent from '../../rte-formatting/rte-content';
+import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
 import TextInput from '../text';
 
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -198,6 +198,7 @@ const SelectField: FC<SelectFieldProps> = ({
             content={title}
             unwrapSingleRootDiv={true}
             forceInline={true}
+            inlineComponent={InlineParagraph}
           />
         </FormLabel>
       )}

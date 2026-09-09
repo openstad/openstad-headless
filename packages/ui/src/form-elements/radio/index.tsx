@@ -14,7 +14,7 @@ import React, { FC, useState } from 'react';
 import { useEffect } from 'react';
 
 import { InfoImage } from '../../infoImage';
-import RteContent from '../../rte-formatting/rte-content';
+import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
 import TextInput from '../text';
 
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -214,6 +214,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
               content={title}
               unwrapSingleRootDiv={true}
               forceInline={true}
+              inlineComponent={InlineParagraph}
             />
           </FieldsetLegend>
         )}
