@@ -142,6 +142,7 @@ const formSchema = z.object({
   ),
   randomizeItems: z.boolean().optional(),
   randomizeQuestions: z.boolean().optional(),
+  excludeFromRandomize: z.boolean().optional(),
   image: z.string().optional(),
   imageUpload: z.string().optional(),
   fieldRequired: z.boolean().optional(),
@@ -390,6 +391,7 @@ export default function WidgetEnqueteItems(
             imageCropRatioHeight: values.imageCropRatioHeight,
             randomizeItems: values.randomizeItems || false,
             randomizeQuestions: values.randomizeQuestions || false,
+            excludeFromRandomize: values.excludeFromRandomize || false,
             image_b: values.image_b || '',
             description_b: values.description_b || '',
             key_b: values.key_b || '',
@@ -584,6 +586,7 @@ export default function WidgetEnqueteItems(
     imageCropRatioHeight: undefined,
     randomizeItems: false,
     randomizeQuestions: false,
+    excludeFromRandomize: false,
     infoBlockStyle: 'default',
     infoBlockShareButton: false,
     infoBlockExtraButton: '',
@@ -689,6 +692,7 @@ export default function WidgetEnqueteItems(
       imageCropRatioHeight: item.imageCropRatioHeight,
       randomizeItems: item.randomizeItems || false,
       randomizeQuestions: item.randomizeQuestions || false,
+      excludeFromRandomize: item.excludeFromRandomize || false,
       infoBlockStyle: item.infoBlockStyle || 'default',
       infoBlockShareButton: item.infoBlockShareButton || false,
       infoBlockExtraButton: item.infoBlockExtraButton || '',
@@ -2325,6 +2329,13 @@ export default function WidgetEnqueteItems(
                             </FormItem>
                           )}
                         />
+                      </>
+                    )}
+
+                    {['none', 'scale'].includes(
+                      form.watch('questionType') || ''
+                    ) && (
+                      <>
                         <ImageUploader
                           form={form}
                           project={project as string}
@@ -2520,7 +2531,11 @@ export default function WidgetEnqueteItems(
                             </FormItem>
                           )}
                         />
+                      </>
+                    )}
 
+                    {form.watch('questionType') === 'none' && (
+                      <>
                         {props.formStyle === 'youth' && (
                           <FormField
                             control={form.control}
@@ -3428,6 +3443,33 @@ export default function WidgetEnqueteItems(
                               <FormMessage />
                             </FormItem>
                           </>
+                        )}
+                      />
+                    )}
+
+                    {!['pagination', 'none', 'video'].includes(
+                      form.watch('questionType') || ''
+                    ) && (
+                      <FormField
+                        control={form.control}
+                        name="excludeFromRandomize"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Deze vraag op zijn plek laten staan
+                            </FormLabel>
+                            <FormDescription>
+                              <em className="text-xs">
+                                Werkt alleen op een pagina waar &quot;Vragen op
+                                deze pagina in willekeurige volgorde tonen&quot;
+                                aanstaat. Gebruik dit voor een afsluitende vraag
+                                die onder de andere vragen hoort te blijven,
+                                zoals een toelichting.
+                              </em>
+                            </FormDescription>
+                            {YesNoSelect(field, props)}
+                            <FormMessage />
+                          </FormItem>
                         )}
                       />
                     )}
