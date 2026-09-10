@@ -32,9 +32,7 @@ module.exports = {
         }
 
         const childCount = await self.apos.doc.db.countDocuments({
-          path: new RegExp(
-            '^' + self.apos.util.regExpQuote(doc.path + '/')
-          ),
+          path: new RegExp('^' + self.apos.util.regExpQuote(doc.path + '/')),
           aposLocale: doc.aposLocale,
           level: doc.level + 1,
           archived: { $ne: true },
