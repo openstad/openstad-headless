@@ -36,6 +36,7 @@ export const FIELD_LABELS: Record<string, string> = {
   matrix: 'Matrix (rijen/kolommen)',
   questionType: 'Type antwoorden',
   randomizeQuestions: 'Vragen op deze pagina willekeurig',
+  excludeFromRandomize: 'Vraag blijft op zijn plek bij willekeurige volgorde',
   scaleDisplay: 'Weergave schaalvraag',
   scaleSteps: 'Stappen schaalvraag',
   type: 'Type',

@@ -54,6 +54,7 @@ export type Item = {
   imageCropRatioHeight?: number;
   randomizeItems?: boolean;
   randomizeQuestions?: boolean;
+  excludeFromRandomize?: boolean;
   image?: string;
   imageAlt?: string;
   imageDescription?: string;

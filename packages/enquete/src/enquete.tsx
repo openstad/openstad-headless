@@ -337,6 +337,7 @@ function Enquete(props: EnqueteWidgetProps) {
         routingSelectedQuestion: item.routingSelectedQuestion || '',
         routingSelectedAnswer: item.routingSelectedAnswer || '',
         trigger: item.trigger || '',
+        excludeFromRandomize: item.excludeFromRandomize || false,
       };
       const draftValue =
         item.fieldKey && savedDraft && savedDraft[item.fieldKey] !== undefined
@@ -585,6 +586,13 @@ function Enquete(props: EnqueteWidgetProps) {
           ) {
             fieldData['overrideDefaultValue'] = String(draftValue);
           }
+
+          fieldData['infoImage'] = item?.image || '';
+          fieldData['imageAlt'] = item?.imageAlt || '';
+          fieldData['imageDescription'] = item?.imageDescription || '';
+          fieldData['images'] = item?.images || [];
+          fieldData['createImageSlider'] = item?.createImageSlider || false;
+          fieldData['imageClickable'] = item?.imageClickable || false;
 
           if (props.isQuiz) {
             fieldData['feedbackMode'] = item.feedbackMode;

@@ -3,7 +3,9 @@
 // Randomising happens inside a single page: the fields between two pagination
 // fields are permuted among themselves, so no question ever moves to another
 // page. Content blocks keep their configured position, otherwise an intro text
-// or an outro block would end up in the middle of the questions.
+// or an outro block would end up in the middle of the questions. A question can
+// also be held in place on its own with excludeFromRandomize, for a closing
+// remark field that has to stay below the questions it refers to.
 // Every page derives its own order from the same session seed.
 
 export const PINNED_FIELD_TYPES = ['pagination', 'none', 'video'];
@@ -12,6 +14,7 @@ const ORDER_SEED_PREFIX = 'enquete-order-seed';
 
 type FieldWithType = {
   type?: string;
+  excludeFromRandomize?: boolean;
 };
 
 export function getOrderStorageKey(
@@ -107,7 +110,10 @@ export function randomizeFieldsPerPage<T extends FieldWithType>({
 
     const positions: number[] = [];
     for (let index = start; index < end; index++) {
-      if (!PINNED_FIELD_TYPES.includes(fields[index]?.type || '')) {
+      if (
+        !PINNED_FIELD_TYPES.includes(fields[index]?.type || '') &&
+        !fields[index]?.excludeFromRandomize
+      ) {
         positions.push(index);
       }
     }
