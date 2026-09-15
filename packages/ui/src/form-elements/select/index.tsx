@@ -1,5 +1,6 @@
 import { FormValue } from '@openstad-headless/form/src/form';
 import { stripHtmlTags } from '@openstad-headless/lib/strip-html-tags';
+import { toHtmlId } from '@openstad-headless/lib/to-html-id';
 import { MultiSelect, Spacer } from '@openstad-headless/ui/src';
 import {
   AccordionProvider,
@@ -97,6 +98,8 @@ const SelectField: FC<SelectFieldProps> = ({
   createImageSlider = false,
   imageClickable = false,
 }) => {
+  const idKey = toHtmlId(fieldKey);
+
   const multiSelectId = useId();
 
   type NormalizedChoice = {
@@ -196,8 +199,7 @@ const SelectField: FC<SelectFieldProps> = ({
   return (
     <FormField type="select">
       {title && (
-        <FormLabel
-          {...(multiple ? { id: multiSelectId } : { htmlFor: fieldKey })}>
+        <FormLabel {...(multiple ? { id: multiSelectId } : { htmlFor: idKey })}>
           <RteContent
             content={title}
             unwrapSingleRootDiv={true}
@@ -272,7 +274,7 @@ const SelectField: FC<SelectFieldProps> = ({
           <Select
             className="form-item"
             name={fieldKey}
-            id={fieldKey}
+            id={idKey}
             required={fieldRequired}
             onChange={(e) => {
               setSelected(e.target.value);
@@ -335,7 +337,7 @@ const SelectField: FC<SelectFieldProps> = ({
               title={selectedChoice.label || 'Anders, namelijk'}
               placeholder="Vul hier uw antwoord in"
               fieldInvalid={false}
-              randomId={`${fieldKey}_${
+              randomId={`${idKey}_${
                 selectedChoice.trigger || selectedChoiceIndex
               }`}
             />

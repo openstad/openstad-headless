@@ -38,7 +38,18 @@ describe('aria-describedby naar het foutelement', () => {
     const markup = renderToStaticMarkup(
       <RadioboxField {...props} fieldRequired={true} />
     );
-    expect(markup).toContain('aria-invalid="true"');
     expect(markup).not.toContain('abc_error');
+  });
+
+  it('noemt een leeg verplicht veld pas ongeldig zodra form.tsx een fout meldt', () => {
+    const zonderFout = renderToStaticMarkup(
+      <RadioboxField {...props} fieldRequired={true} />
+    );
+    expect(zonderFout).not.toContain('aria-invalid="true"');
+
+    const metFout = renderToStaticMarkup(
+      <RadioboxField {...props} fieldRequired={true} fieldInvalid={true} />
+    );
+    expect(metFout).toContain('aria-invalid="true"');
   });
 });

@@ -1,5 +1,6 @@
 import { Matrix } from '@openstad-headless/enquete/src/types/enquete-props';
 import { FormValue } from '@openstad-headless/form/src/form';
+import { toHtmlId } from '@openstad-headless/lib/to-html-id';
 import { Spacer } from '@openstad-headless/ui/src';
 import {
   AccordionProvider,
@@ -93,6 +94,8 @@ const MatrixField: FC<MatrixFieldProps> = ({
   const initialValue = Array.isArray(overrideDefaultValue)
     ? (overrideDefaultValue as string[])
     : [];
+  const idKey = toHtmlId(fieldKey);
+
   const [selectedChoices, setSelectedChoices] =
     useState<string[]>(initialValue);
 
@@ -148,7 +151,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
     <div className="question">
       <Fieldset
         role="group"
-        aria-invalid={fieldInvalid}
+        invalid={fieldInvalid}
         aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}>
         {title && (
           <FieldsetLegend>
@@ -207,7 +210,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
               {matrix?.columns?.map((column, index) => (
                 <TableHeaderCell
                   key={`column-${index}`}
-                  id={`${fieldKey}-col-${index}`}
+                  id={`${idKey}-col-${index}`}
                   scope="col">
                   <span className="column-text">{column?.text || ''}</span>
                 </TableHeaderCell>
@@ -219,7 +222,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
               <TableRow>
                 <TableHeaderCell
                   key={`row-${ri}`}
-                  id={`${fieldKey}-row-${ri}`}
+                  id={`${idKey}-row-${ri}`}
                   scope="row">
                   <span className="row-text">{row?.text || ''}</span>
                 </TableHeaderCell>
@@ -238,14 +241,14 @@ const MatrixField: FC<MatrixFieldProps> = ({
                         <Paragraph
                           className={`utrecht-form-field__label utrecht-form-field__label--${type}`}>
                           <FormLabel
-                            htmlFor={`${fieldKey}_${cellIndex}`}
+                            htmlFor={`${idKey}_${cellIndex}`}
                             type={type}
                             className="--label-grid">
                             {matrixMultiple ? (
                               <>
                                 <Checkbox
                                   className="utrecht-form-field__input"
-                                  id={`${fieldKey}_${cellIndex}`}
+                                  id={`${idKey}_${cellIndex}`}
                                   name={`${fieldKey}_${rowIndex}`}
                                   value={cellIndex}
                                   required={fieldRequired}
@@ -258,7 +261,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
                                     (maxReached &&
                                       !selectedChoices.includes(cellIndex))
                                   }
-                                  aria-labelledby={`${fieldKey}-row-${ri} ${fieldKey}-col-${ci}`}
+                                  aria-labelledby={`${idKey}-row-${ri} ${idKey}-col-${ci}`}
                                 />
                                 <span className="cell-text" aria-hidden="true">
                                   {column?.text || ''}
@@ -268,7 +271,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
                               <>
                                 <RadioButton
                                   className="utrecht-form-field__input"
-                                  id={`${fieldKey}_${cellIndex}`}
+                                  id={`${idKey}_${cellIndex}`}
                                   name={`${fieldKey}_${rowIndex}`}
                                   value={cellIndex}
                                   required={fieldRequired}
@@ -277,7 +280,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
                                   }
                                   disabled={disabled}
                                   checked={selectedChoices.includes(cellIndex)}
-                                  aria-labelledby={`${fieldKey}-row-${ri} ${fieldKey}-col-${ci}`}
+                                  aria-labelledby={`${idKey}-row-${ri} ${idKey}-col-${ci}`}
                                 />
                                 <span className="cell-text" aria-hidden="true">
                                   {column?.text || ''}
