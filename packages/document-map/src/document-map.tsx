@@ -1326,13 +1326,17 @@ function DocumentMap({
                         ) => {
                           return (
                             <div key={group.type}>
-                              <FormLabel htmlFor={group.type}>
+                              <FormLabel
+                                {...(group && group.multiple
+                                  ? { id: group.type }
+                                  : { htmlFor: group.type })}>
                                 {group.label}
                               </FormLabel>
 
                               {group && group.multiple ? (
                                 <MultiSelect
                                   id={group.type}
+                                  legend={group.label || ''}
                                   label={'Selecteer een optie'}
                                   onItemSelected={(optionValue: string) => {
                                     const value = parseInt(optionValue, 10);
