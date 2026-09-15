@@ -121,6 +121,7 @@ const MultiSelectTagFilter = ({
         <FormLabel id={groupId}>{groupLabel}</FormLabel>
         <MultiSelect
           id={groupId}
+          legend={groupLabel}
           onItemSelected={(value, label) => {
             setStopUsingDefaultValue(true);
             onUpdateFilter && onUpdateFilter(value, label);
