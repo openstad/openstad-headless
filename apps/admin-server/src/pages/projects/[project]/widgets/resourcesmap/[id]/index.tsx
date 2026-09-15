@@ -7,6 +7,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import type { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { BaseProps } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
@@ -69,20 +70,12 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Inzendingen kaart',
-            url: `/projects/${projectId}/widgets/resourcesmap/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Inzendingen kaart',
+          `/projects/${projectId}/widgets/resourcesmap/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="map">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">

@@ -9,6 +9,7 @@ import {
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import { extractConfig } from '@/lib/sub-widget-helper';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import ArgumentsConfirmation from '@/pages/projects/[project]/widgets/comments/[id]/confirmation';
 import ArgumentsExtraFields from '@/pages/projects/[project]/widgets/comments/[id]/extraFields';
 import ArgumentsInclude from '@/pages/projects/[project]/widgets/comments/[id]/include';
@@ -82,20 +83,12 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Inzending detailpagina',
-            url: `/projects/${projectId}/widgets/resourcedetail/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Inzending detailpagina',
+          `/projects/${projectId}/widgets/resourcedetail/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">

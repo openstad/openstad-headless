@@ -7,6 +7,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import BegrootmoduleDisplay from '@/pages/projects/[project]/widgets/begrootmodule/[id]/display';
 import WidgetStemBegrootInclude from '@/pages/projects/[project]/widgets/begrootmodule/[id]/include';
 import BegrootmoduleText from '@/pages/projects/[project]/widgets/begrootmodule/[id]/text';
@@ -61,20 +62,12 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Stemmodule',
-            url: `/projects/${projectId}/widgets/simple-voting/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Stemmodule',
+          `/projects/${projectId}/widgets/simple-voting/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="display">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">

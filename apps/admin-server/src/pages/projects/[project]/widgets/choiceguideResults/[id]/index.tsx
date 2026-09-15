@@ -6,6 +6,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import { ChoiceGuideResultsProps } from '@openstad-headless/choiceguide-results/src/props';
 import { useRouter } from 'next/router';
 import React from 'react';
@@ -36,20 +37,12 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Keuzewijzer resultaat',
-            url: `/projects/${projectId}/widgets/keuzewijzer/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Keuzewijzer resultaat',
+          `/projects/${projectId}/widgets/keuzewijzer/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="settings">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">

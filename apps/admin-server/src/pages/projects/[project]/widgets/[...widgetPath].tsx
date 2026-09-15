@@ -10,6 +10,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -79,14 +80,12 @@ export default function PluginWidgetPage({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          { name: 'Projecten', url: '/projects' },
-          { name: 'Widgets', url: `/projects/${projectId}/widgets` },
-          {
-            name: widgetDisplayName,
-            url: `/projects/${projectId}/widgets/${segments[0]}/${segments[1]}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          widgetDisplayName,
+          `/projects/${projectId}/widgets/${segments[0]}/${segments[1]}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="settings">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
