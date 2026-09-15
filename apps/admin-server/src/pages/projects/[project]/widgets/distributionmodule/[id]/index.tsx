@@ -7,6 +7,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import WidgetDistributionModuleDistribute from '@/pages/projects/[project]/widgets/distributionmodule/[id]/distribute';
 import { DistributionModuleProps } from '@openstad-headless/distribution-module/src/distribution-module';
 import { useRouter } from 'next/router';
@@ -38,20 +39,12 @@ export default function WidgetDistributionModule({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Verdeelmodule',
-            url: `/projects/${projectId}/widgets/distributionmodule/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Verdeelmodule',
+          `/projects/${projectId}/widgets/distributionmodule/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">

@@ -9,6 +9,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
@@ -39,20 +40,12 @@ export default function WidgetLikes({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Likes',
-            url: `/projects/${projectId}/widgets/likes/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Likes',
+          `/projects/${projectId}/widgets/likes/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="display">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">

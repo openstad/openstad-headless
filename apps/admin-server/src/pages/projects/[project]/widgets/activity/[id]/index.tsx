@@ -7,6 +7,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import { ActivityWidgetProps } from '@openstad-headless/activity/src/activity';
 import { useRouter } from 'next/router';
 import React from 'react';
@@ -36,20 +37,12 @@ export default function WidgetActivity({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Gebruikersactiviteit',
-            url: `/projects/${projectId}/widgets/activity/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Gebruikersactiviteit',
+          `/projects/${projectId}/widgets/activity/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="display">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">

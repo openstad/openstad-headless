@@ -6,6 +6,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import type { EditorMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/editormap-widget-props';
 import { useRouter } from 'next/router';
 import React from 'react';
@@ -35,20 +36,12 @@ export default function WidgetEditorMap({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Editor Map',
-            url: `/projects/${projectId}/widgets/editormap/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Editor Map',
+          `/projects/${projectId}/widgets/editormap/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="publish">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
