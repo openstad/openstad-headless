@@ -160,7 +160,9 @@ export default function ProjectSettings() {
           projectHasEnded: value,
         },
       });
-      if (project) {
+      if (project?.error) {
+        toast.error(project.error);
+      } else if (project) {
         toast.success('Project aangepast!');
       } else {
         toast.error('Er is helaas iets mis gegaan.');

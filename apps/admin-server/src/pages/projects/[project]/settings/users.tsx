@@ -164,9 +164,24 @@ export default function ProjectSettingsUsers(
       await anonymizeUsersOfProject();
       toast.success('Alle gebruikers zijn geanonimiseerd!');
     } catch (error) {
-      toast.error(
-        'Het project moet eerst zijn beëindigd voordat gebruikers geanonimiseerd kunnen worden.'
-      );
+      const errorMessage =
+        error instanceof Error ? error.message?.trim() : undefined;
+
+      if (errorMessage?.includes('project-has-ended parameter')) {
+        toast.error(
+          'Het project moet eerst zijn beëindigd voordat gebruikers geanonimiseerd kunnen worden.'
+        );
+        return;
+      }
+
+      if (errorMessage?.includes('You cannot anonymizeAllUsers this Project')) {
+        toast.error(
+          'Je hebt geen rechten om gebruikers van dit project te anonimiseren.'
+        );
+        return;
+      }
+
+      toast.error(errorMessage || 'Er is helaas iets mis gegaan.');
     }
   }
 

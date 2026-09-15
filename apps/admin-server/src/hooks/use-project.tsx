@@ -131,7 +131,20 @@ export function useProject(scopes?: Array<string>) {
     );
 
     if (!res.ok) {
-      throw new Error('Could not anonymize users of the project');
+      let errorMessage = 'Could not anonymize users of the project';
+      try {
+        const errorBody = await res.json();
+        if (
+          typeof errorBody?.message === 'string' &&
+          errorBody.message.trim().length > 0
+        ) {
+          errorMessage = errorBody.message.trim();
+        }
+      } catch (err) {
+        // Ignore JSON parsing failures and fall back to generic message.
+      }
+
+      throw new Error(errorMessage);
     }
   }
 
