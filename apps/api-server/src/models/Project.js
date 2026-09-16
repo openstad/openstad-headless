@@ -192,11 +192,13 @@ module.exports = function (db, sequelize, DataTypes) {
 
         beforeDestroy: async function (instance, options) {
           // project has ended
-          if (!(
-            instance &&
-            instance.config &&
-            instance.config.project.projectHasEnded
-          ))
+          if (
+            !(
+              instance &&
+              instance.config &&
+              instance.config.project.projectHasEnded
+            )
+          )
             throw Error(
               'Cannot delete an active project - first set the project-has-ended parameter'
             );
@@ -378,7 +380,10 @@ module.exports = function (db, sequelize, DataTypes) {
         await new Promise((resolve, reject) => {
           setTimeout(async function () {
             try {
-              providers[user.idpUser?.identifier] = user.idpUser?.provider;
+              const externalIdentifier = user?.idpUser?.identifier;
+              if (externalIdentifier) {
+                providers[externalIdentifier] = user.idpUser.provider;
+              }
               user.project = self;
               await user.doAnonymize();
               user.project = null;
@@ -393,6 +398,8 @@ module.exports = function (db, sequelize, DataTypes) {
             throw err;
           });
       }
+
+      const externalUserIds = Object.keys(providers);
 
       for (let externalUserId of externalUserIds) {
         let users = await db.User.findAll({
