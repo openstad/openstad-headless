@@ -378,7 +378,10 @@ module.exports = function (db, sequelize, DataTypes) {
         await new Promise((resolve, reject) => {
           setTimeout(async function () {
             try {
-              providers[user.idpUser?.identifier] = user.idpUser?.provider;
+              const externalIdentifier = user?.idpUser?.identifier;
+              if (externalIdentifier) {
+                providers[externalIdentifier] = user.idpUser.provider;
+              }
               user.project = self;
               await user.doAnonymize();
               user.project = null;
@@ -393,6 +396,8 @@ module.exports = function (db, sequelize, DataTypes) {
             throw err;
           });
       }
+
+      const externalUserIds = Object.keys(providers);
 
       for (let externalUserId of externalUserIds) {
         let users = await db.User.findAll({
