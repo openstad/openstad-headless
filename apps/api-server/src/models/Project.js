@@ -192,13 +192,11 @@ module.exports = function (db, sequelize, DataTypes) {
 
         beforeDestroy: async function (instance, options) {
           // project has ended
-          if (
-            !(
-              instance &&
-              instance.config &&
-              instance.config.project.projectHasEnded
-            )
-          )
+          if (!(
+            instance &&
+            instance.config &&
+            instance.config.project.projectHasEnded
+          ))
             throw Error(
               'Cannot delete an active project - first set the project-has-ended parameter'
             );
