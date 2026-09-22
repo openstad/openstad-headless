@@ -14,6 +14,21 @@ import RteContent from '../../ui/src/rte-formatting/rte-content';
 import { InitializeFormFields } from './parts/init-fields.js';
 import type { ResourceFormWidgetProps } from './props.js';
 
+const parseAllowedDomains = (value?: string): string[] =>
+  (value || '')
+    .split(',')
+    .map((d) => d.trim().toLowerCase().replace(/^@/, ''))
+    .filter(Boolean);
+
+const emailMatchesDomains = (
+  email: string | undefined,
+  domains: string[]
+): boolean => {
+  const parts = (email || '').trim().toLowerCase().split('@');
+  const domain = parts.length > 1 ? parts[parts.length - 1] : '';
+  return !!domain && domains.includes(domain);
+};
+
 const getExistingValue = (fieldKey, resource, multiple) => {
   if (!!resource) {
     const field = resource[fieldKey] || null;
@@ -51,8 +66,14 @@ const getExistingValue = (fieldKey, resource, multiple) => {
 function ResourceFormWidget(props: ResourceFormWidgetProps) {
   const { submitButton, saveConceptButton, defaultAddedTags } =
     props.submit || {}; //TODO add saveButton variable. Unused variables cause errors in the admin
-  const { loginText, loginButtonText, allowAnonymousSubmissions } =
-    props.info || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
+  const {
+    loginText,
+    loginButtonText,
+    allowAnonymousSubmissions,
+    allowedEmailDomains,
+    domainRestrictionMessage,
+  } = props.info || {}; //TODO add nameInHeader variable. Unused variables cause errors in the admin
+
   const { confirmationUser, confirmationAdmin } = props.confirmation || {};
   const [disableSubmit, setDisableSubmit] = useState(false);
   const formStartTimeRef = useRef<number>(Date.now());
@@ -393,8 +414,15 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     }
   }, [currentPage, totalPages]);
 
-  const formOnlyVisibleForUsers = !allowAnonymousSubmissions;
+  const allowedDomains = parseAllowedDomains(allowedEmailDomains);
+  const formOnlyVisibleForUsers =
+    !allowAnonymousSubmissions || allowedDomains.length > 0;
 
+  const blockedByDomain =
+    allowedDomains.length > 0 &&
+    hasRole(currentUser, 'member') &&
+    !hasRole(currentUser, 'moderator') &&
+    !emailMatchesDomains(currentUser?.email, allowedDomains);
   return isLoading || !fillDefaults ? null : (
     <div className="osc">
       <div className="osc-resource-form-item-content">
@@ -429,6 +457,16 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
                 }}>
                 {loginButtonText || 'Inloggen'}
               </Button>
+            </Banner>
+            <Spacer size={2} />
+          </>
+        ) : blockedByDomain ? (
+          <>
+            <Banner className="big">
+              <Heading level={4} appearance="utrecht-heading-6">
+                {domainRestrictionMessage ||
+                  'U heeft geen toegang tot dit formulier.'}
+              </Heading>
             </Banner>
             <Spacer size={2} />
           </>

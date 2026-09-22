@@ -402,6 +402,61 @@ router
     }
     return next();
   })
+  .post(async function (req, res, next) {
+    try {
+      const parseDomains = (value) =>
+        String(value || '')
+          .split(',')
+          .map((d) => d.trim().toLowerCase().replace(/^@/, ''))
+          .filter(Boolean);
+
+      const widgetId = Number(req.body.widgetId);
+      let widget = null;
+      if (Number.isInteger(widgetId) && widgetId > 0) {
+        widget = await db.Widget.findOne({
+          where: { id: widgetId, projectId: req.params.projectId },
+        });
+      }
+
+      if (!widget) {
+        // No or unknown widgetId: reject when the project has a restricted resource form
+        const projectWidgets = await db.Widget.findAll({
+          where: { projectId: req.params.projectId, type: 'resourceform' },
+        });
+        const anyRestricted = projectWidgets.some(
+          (w) => parseDomains(w.config?.info?.allowedEmailDomains).length > 0
+        );
+        if (anyRestricted) {
+          return next(createError(403, 'Ongeldige widget voor deze inzending'));
+        }
+        return next();
+      }
+
+      const allowedDomains = parseDomains(
+        widget.config?.info?.allowedEmailDomains
+      );
+      if (!allowedDomains.length) return next();
+      if (hasRole(req.user, 'moderator')) return next();
+
+      const email = String(req.user?.email || '')
+        .trim()
+        .toLowerCase();
+      const domain = email.includes('@') ? email.split('@').pop() : '';
+
+      if (!domain || !allowedDomains.includes(domain)) {
+        return next(
+          createError(
+            403,
+            'Inzenden is alleen mogelijk met een toegestaan e-mailadres'
+          )
+        );
+      }
+
+      return next();
+    } catch (err) {
+      return next(err);
+    }
+  })
   .post(rateLimiter(), function (req, res, next) {
     try {
       req.body.location = req.body.location

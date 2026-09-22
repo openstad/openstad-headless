@@ -49,6 +49,8 @@ export type Info = {
   loginText?: string;
   loginButtonText?: string;
   nameInHeader?: boolean;
+  allowedEmailDomains?: string;
+  domainRestrictionMessage?: string;
 };
 
 export type Item = {
