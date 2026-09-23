@@ -1,4 +1,11 @@
 import { UploadDocument } from '@/hooks/upload-document';
+import {
+  GENERIC_UPLOAD_ERROR_MESSAGE,
+  MAX_UPLOAD_SIZE_MB,
+  UploadError,
+  assertUploadableSize,
+  performUpload,
+} from '@/lib/upload-limits';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import {
   buildImagePreviewUrl,
@@ -57,7 +64,7 @@ export const ImageUploader: React.FC<{
     return formData;
   }
 
-  async function uploadImage(data: any) {
+  async function uploadImage(data: File) {
     let response;
 
     if (
@@ -68,19 +75,15 @@ export const ImageUploader: React.FC<{
     ) {
       response = await UploadDocument(data, project);
     } else {
-      let image = prepareFile(data);
+      assertUploadableSize(data);
 
+      const image = prepareFile(data);
       const projectNumber: number | undefined = validateProjectNumber(project);
 
-      const uploadCall = await fetch(
+      response = await performUpload(
         `/api/openstad/api/project/${projectNumber}/upload/image`,
-        {
-          method: 'POST',
-          body: image,
-        }
+        image
       );
-
-      response = await uploadCall.json();
     }
 
     if (response && response.url) {
@@ -106,6 +109,9 @@ export const ImageUploader: React.FC<{
         <FormItem>
           <FormLabel>{imageLabel}</FormLabel>
           {description && <FormDescription>{description}</FormDescription>}
+          <FormDescription>
+            Maximale bestandsgrootte: {MAX_UPLOAD_SIZE_MB} MB
+          </FormDescription>
           <FormControl>
             <Input
               type="file"
@@ -116,10 +122,19 @@ export const ImageUploader: React.FC<{
               onBlur={field.onBlur}
               onChange={async (e) => {
                 const files = e.target.files;
-                if (files && files.length > 0) {
+                if (!files || files.length === 0) return;
+
+                form.clearErrors(fieldName);
+                try {
                   for (const file of Array.from(files)) {
                     await uploadImage(file);
                   }
+                } catch (error) {
+                  const message =
+                    error instanceof UploadError
+                      ? error.message
+                      : GENERIC_UPLOAD_ERROR_MESSAGE;
+                  form.setError(fieldName, { type: 'manual', message });
                 }
               }}
             />

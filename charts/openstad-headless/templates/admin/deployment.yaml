@@ -89,6 +89,8 @@ spec:
             value: "{{ .Values.api.spamFilterEnabled }}"
           - name: EXTERNAL_CERTIFICATES_ENABLED
             value: "{{ .Values.api.externalCertificates.enabled }}"
+          - name: MAX_FILE_UPLOAD_SIZE_MB
+            value: "{{ .Values.image.maxFileUploadSizeMB | default 25 }}"
           - name: OTEL_SERVICE_NAME
             value: {{ .Values.admin.otelServiceName | quote }}
           - name: OTEL_EXPORTER_OTLP_ENDPOINT

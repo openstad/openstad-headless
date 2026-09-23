@@ -117,6 +117,7 @@ IMAGE_THROTTLE = true
 IMAGE_THROTTLE_CC_PROCESSORS = 4
 IMAGE_THROTTLE_CC_PREFETCHER = 20
 IMAGE_THROTTLE_CC_REQUESTS = 100
+MAX_FILE_UPLOAD_SIZE_MB = 25
 
 ```
 
@@ -127,3 +128,15 @@ Preferably this should be a string of at least 32 characters. You can generate i
 The salt should be kept secret and not shared with anyone, to ensure the security of the phone number hashing process.
 
 This `AUTH_PHONE_HASH_SALT` variable is generated automatically during the setup process, but you can also set it manually in your `.env` file if needed.
+
+## Maximum upload size (`MAX_FILE_UPLOAD_SIZE_MB`) (2026-09-22)
+
+Caps the size of an uploaded file, in MB. Default `25`. It is read by both the image server
+(the hard multer limit on `/upload/image` and `/upload/document`) and the admin-server's Next.js
+proxy (sized above the cap so an oversized upload reaches the image server and gets a clean
+"file too large" error, instead of being silently cut off by the proxy itself).
+
+The admin UI's own client-side size check is a separate constant
+(`apps/admin-server/src/lib/upload-limits.ts`) and does **not** read this env var -- it is
+inlined into the browser bundle at build time, so raising `MAX_FILE_UPLOAD_SIZE_MB` on a
+deployment does not raise the UI's limit; update both if you change the cap.

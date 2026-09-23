@@ -59,6 +59,8 @@ spec:
             value: "{{ .Values.image.hqOriginalMaxPixels | default 160000 }}"
           - name: DISABLE_WEBP_CONVERSION
             value: "{{ .Values.image.disableWebpConversion | default false }}"
+          - name: MAX_FILE_UPLOAD_SIZE_MB
+            value: "{{ .Values.image.maxFileUploadSizeMB | default 25 }}"
           - name: IMAGE_VERIFICATION_TOKEN
             valueFrom:
               secretKeyRef:

@@ -402,6 +402,9 @@ image:
     ccRequests: 100
   hqOriginalMaxPixels: 160000
   disableWebpConversion: false
+  # Maximum upload size in MB. Also sizes the admin-server's proxy body limit
+  # (see admin.deployment env below) -- both deployments read this same key.
+  maxFileUploadSizeMB: 25
   # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
   otelServiceName: openstad-image-server
   otelExporterOtlpEndpoint: http://openstad-otel-collector:4317

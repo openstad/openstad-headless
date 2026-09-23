@@ -1,6 +1,7 @@
+import { assertUploadableSize, performUpload } from '@/lib/upload-limits';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 
-function prepareDocument(document: any) {
+function prepareDocument(document: File) {
   const formData = new FormData();
   formData.append('document', document);
   formData.append('documentname', 'testName');
@@ -9,18 +10,14 @@ function prepareDocument(document: any) {
   return formData;
 }
 
-export async function UploadDocument(data: any, project?: string) {
-  let document = prepareDocument(data);
+export async function UploadDocument(data: File, project?: string) {
+  assertUploadableSize(data);
 
+  const document = prepareDocument(data);
   const projectNumber: number | undefined = validateProjectNumber(project);
 
-  const response = await fetch(
+  return performUpload(
     `/api/openstad/api/project/${projectNumber}/upload/document`,
-    {
-      method: 'POST',
-      body: document,
-    }
+    document
   );
-
-  return await response.json();
 }
