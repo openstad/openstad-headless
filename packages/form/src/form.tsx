@@ -9,6 +9,7 @@ import ImageUploadField from '@openstad-headless/ui/src/form-elements/image-uplo
 import InfoField from '@openstad-headless/ui/src/form-elements/info';
 import MapField from '@openstad-headless/ui/src/form-elements/map';
 import MatrixField from '@openstad-headless/ui/src/form-elements/matrix';
+import ModbreakField from '@openstad-headless/ui/src/form-elements/modbreak';
 import NumberInput from '@openstad-headless/ui/src/form-elements/number';
 import RadioboxField from '@openstad-headless/ui/src/form-elements/radio';
 import ResourceLinkField from '@openstad-headless/ui/src/form-elements/resource-link';
@@ -522,6 +523,7 @@ function Form({
     video: VideoField as React.ComponentType<ComponentFieldProps>,
     timeline: TimelineField as React.ComponentType<ComponentFieldProps>,
     resourceLink: ResourceLinkField as React.ComponentType<ComponentFieldProps>,
+    modbreak: ModbreakField as React.ComponentType<ComponentFieldProps>,
   };
 
   const isFieldAnswered = (field: any): boolean => {

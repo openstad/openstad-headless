@@ -161,6 +161,18 @@ const TrixEditor: React.FC<{
     const inputEl = inputRef.current;
     if (!editorEl || !inputEl) return;
 
+    // In React Strict Mode (dev), this effect mounts/cleans up/mounts again,
+    // but the underlying <trix-editor> custom element is a real DOM node that
+    // only ever fires 'trix-initialize' once. On the second mount that event
+    // never refires, so grab an already-upgraded editor synchronously here —
+    // otherwise editorInstance.current stays null forever and the value-sync
+    // effect below can never load the real content.
+    if ((editorEl as any).editor) {
+      editorInstance.current = (editorEl as any).editor;
+      targetBlankHrefsRef.current = getTargetBlankHrefs(valueRef.current || '');
+      editorInstance.current.loadHTML(valueRef.current || '');
+    }
+
     const handleTrixInitialize = () => {
       editorInstance.current = (editorEl as any).editor;
 
