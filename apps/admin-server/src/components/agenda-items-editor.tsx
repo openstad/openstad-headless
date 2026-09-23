@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { UploadDocument } from '@/hooks/upload-document';
+import { MAX_UPLOAD_SIZE_MB, UploadError } from '@/lib/upload-limits';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { formatDutchDate } from '@openstad-headless/lib/timeline-dates';
@@ -422,6 +423,9 @@ export function AgendaItemsEditor({
                   'document' ? (
                     <FormItem>
                       <FormLabel>Document</FormLabel>
+                      <FormDescription>
+                        Maximale bestandsgrootte: {MAX_UPLOAD_SIZE_MB} MB
+                      </FormDescription>
                       <Input
                         type="file"
                         accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
@@ -453,9 +457,11 @@ export function AgendaItemsEditor({
                                   : undefined
                               );
                             }
-                          } catch {
+                          } catch (error) {
                             toast.error(
-                              'Document uploaden mislukt. Probeer het opnieuw.'
+                              error instanceof UploadError
+                                ? error.message
+                                : 'Document uploaden mislukt. Probeer het opnieuw.'
                             );
                           }
                         }}
