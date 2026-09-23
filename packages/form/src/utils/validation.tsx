@@ -281,6 +281,9 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
       }
       return undefined;
 
+    case 'modbreak':
+      return undefined;
+
     default:
       return undefined;
   }

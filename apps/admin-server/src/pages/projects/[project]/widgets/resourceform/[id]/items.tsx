@@ -181,6 +181,7 @@ export default function WidgetResourceFormItems(
   const panelRef = usePanelSwitchFocus(settingOptions);
   const [file, setFile] = useState<File>();
   const [isFieldKeyUnique, setIsFieldKeyUnique] = useState(true);
+  const [isModbreakTypeUnique, setIsModbreakTypeUnique] = useState(true);
   const [matrixOptions, setMatrixOptions] = useState<Matrix>(matrixDefault);
   const [matrixOption, setMatrixOption] = useState<
     (MatrixOption & { type: 'rows' | 'columns' }) | null
@@ -739,6 +740,13 @@ export default function WidgetResourceFormItems(
         form.setValue('fieldKey', 'timeline');
       }
       form.setValue('fieldType', 'timeline');
+    } else if (form.watch('type') === 'modbreak') {
+      if (form.watch('fieldKey') === '') {
+        form.setValue('fieldKey', 'modBreaks');
+      }
+      form.setValue('fieldType', 'modbreak');
+      form.setValue('fieldRequired', false);
+      form.setValue('onlyForModerator', false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.watch('type')]);
@@ -761,6 +769,17 @@ export default function WidgetResourceFormItems(
       setIsFieldKeyUnique(isUnique);
     } else {
       setIsFieldKeyUnique(false);
+    }
+
+    if (type === 'modbreak') {
+      const isTypeUnique = items.every(
+        (item) =>
+          (selectedItem && item.id === selectedItem.id) ||
+          item.type !== 'modbreak'
+      );
+      setIsModbreakTypeUnique(isTypeUnique);
+    } else {
+      setIsModbreakTypeUnique(true);
     }
   }, [form.watch('fieldKey'), form.watch('type'), selectedItem]);
 
@@ -1288,6 +1307,16 @@ export default function WidgetResourceFormItems(
                               <SelectItem value="timeline">
                                 Inzending: Tijdlijn
                               </SelectItem>
+                              <SelectItem
+                                value="modbreak"
+                                disabled={items.some(
+                                  (item) =>
+                                    item.type === 'modbreak' &&
+                                    (!selectedItem ||
+                                      item.id !== selectedItem.id)
+                                )}>
+                                Inzending: Modbreak
+                              </SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -1390,6 +1419,7 @@ export default function WidgetResourceFormItems(
                               'select',
                               'matrix',
                               'timeline',
+                              'modbreak',
                             ];
                             const type = form.watch('type');
                             const fieldKey = !nonStaticType.includes(type || '')
@@ -1404,12 +1434,19 @@ export default function WidgetResourceFormItems(
                                   ‘samenvatting’
                                 </em>
 
-                                <Input {...field} disabled={!!fieldKey} />
-                                {(!field.value || !isFieldKeyUnique) && (
+                                <Input
+                                  {...field}
+                                  disabled={!!fieldKey || type === 'modbreak'}
+                                />
+                                {(!field.value ||
+                                  !isFieldKeyUnique ||
+                                  !isModbreakTypeUnique) && (
                                   <FormMessage>
                                     {!field.value
                                       ? 'Key is verplicht'
-                                      : 'Key moet uniek zijn'}
+                                      : !isModbreakTypeUnique
+                                        ? 'Er kan maar één Modbreak-veld per formulier zijn'
+                                        : 'Key moet uniek zijn'}
                                   </FormMessage>
                                 )}
                               </FormItem>
@@ -1601,6 +1638,7 @@ export default function WidgetResourceFormItems(
                       'a-b-slider',
                       'sort',
                       'scale',
+                      'modbreak',
                     ].includes(form.watch('type') || '') && (
                       <FormField
                         control={form.control}
@@ -2006,43 +2044,44 @@ export default function WidgetResourceFormItems(
                         />
                       )}
 
-                    {form.watch('type') !== 'pagination' && (
-                      <FormField
-                        control={form.control}
-                        name="onlyForModerator"
-                        render={({ field }) => {
-                          const type = form.watch('type');
+                    {form.watch('type') !== 'pagination' &&
+                      form.watch('type') !== 'modbreak' && (
+                        <FormField
+                          control={form.control}
+                          name="onlyForModerator"
+                          render={({ field }) => {
+                            const type = form.watch('type');
 
-                          return (
-                            <FormItem>
-                              <FormLabel>
-                                Wie mag de ingevulde waarde van dit veld zien?
-                              </FormLabel>
-                              <Select
-                                onValueChange={(e: string) =>
-                                  field.onChange(e === 'true')
-                                }
-                                value={field.value ? 'true' : 'false'}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Kies een optie" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="false">
-                                    Iedereen
-                                  </SelectItem>
-                                  <SelectItem value="true">
-                                    Alleen admin gebruikers
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    )}
+                            return (
+                              <FormItem>
+                                <FormLabel>
+                                  Wie mag de ingevulde waarde van dit veld zien?
+                                </FormLabel>
+                                <Select
+                                  onValueChange={(e: string) =>
+                                    field.onChange(e === 'true')
+                                  }
+                                  value={field.value ? 'true' : 'false'}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Kies een optie" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="false">
+                                      Iedereen
+                                    </SelectItem>
+                                    <SelectItem value="true">
+                                      Alleen admin gebruikers
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            );
+                          }}
+                        />
+                      )}
 
                     {[
                       'text',
@@ -2308,6 +2347,27 @@ export default function WidgetResourceFormItems(
                       </div>
                     )}
 
+                    {form.watch('type') === 'modbreak' && (
+                      <div
+                        style={{
+                          padding: '11px',
+                          borderLeft: '4px solid #3b82f6',
+                          backgroundColor: '#eff6ff',
+                          borderTopRightRadius: '5px',
+                          borderBottomRightRadius: '5px',
+                          fontSize: '14px',
+                        }}>
+                        <strong>
+                          Modbreaks worden beheerd door beheerders (editor of
+                          moderator).
+                        </strong>
+                        <br />
+                        Alleen beheerders (editor of moderator) kunnen bij het
+                        bewerken van een inzending modbreaks toevoegen, bewerken
+                        en verwijderen. Andere gebruikers zien dit veld niet.
+                      </div>
+                    )}
+
                     {hasOptions() && (
                       <FormItem>
                         <Button
@@ -2363,6 +2423,7 @@ export default function WidgetResourceFormItems(
                       disabled={
                         (form.watch('type') === 'tags' &&
                           allTags.length === 0) ||
+                        !isModbreakTypeUnique ||
                         ((!form.watch('fieldKey') || !isFieldKeyUnique) &&
                           !['none', 'pagination'].includes(
                             form.watch('type') || ''
@@ -2373,6 +2434,11 @@ export default function WidgetResourceFormItems(
                         : 'Voeg item toe aan lijst'}
                     </Button>
                   </div>
+                  {!isModbreakTypeUnique && (
+                    <FormMessage>
+                      Er kan maar één Modbreak-veld per formulier zijn
+                    </FormMessage>
+                  )}
                   {(!form.watch('fieldKey') || !isFieldKeyUnique) &&
                     !['none', 'pagination'].includes(
                       form.watch('type') || ''

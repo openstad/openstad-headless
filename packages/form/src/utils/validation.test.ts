@@ -126,6 +126,18 @@ describe('getSchemaForField: text/email variant', () => {
   });
 });
 
+describe('getSchemaForField: modbreak', () => {
+  test('modbreak never yields a schema (the field can never be required)', () => {
+    const field: any = {
+      type: 'modbreak',
+      title: 'Modbreak',
+      fieldKey: 'modBreaks',
+      fieldRequired: true,
+    };
+    expect(getSchemaForField(field)).toBeUndefined();
+  });
+});
+
 describe('getSchemaForField: text numeric coercion', () => {
   test('accepts string min/max without throwing', () => {
     const field: any = {

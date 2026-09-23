@@ -213,6 +213,12 @@ export const InitializeFormFields = (items, data) => {
             fieldData['defaultValue'] = [];
           }
           break;
+        case 'modbreak':
+          fieldData['type'] = 'modbreak';
+          if (!fieldData['defaultValue']) {
+            fieldData['defaultValue'] = [];
+          }
+          break;
       }
 
       formFields.push(fieldData);

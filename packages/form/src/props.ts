@@ -8,6 +8,7 @@ import type { ImageUploadProps } from '@openstad-headless/ui/src/form-elements/i
 import type { InfoFieldProps } from '@openstad-headless/ui/src/form-elements/info';
 import type { MapProps } from '@openstad-headless/ui/src/form-elements/map';
 import { MatrixFieldProps } from '@openstad-headless/ui/src/form-elements/matrix';
+import type { ModbreakFieldProps } from '@openstad-headless/ui/src/form-elements/modbreak';
 import type { NumberInputProps } from '@openstad-headless/ui/src/form-elements/number';
 import type { RadioboxFieldProps } from '@openstad-headless/ui/src/form-elements/radio';
 import type { SelectFieldProps } from '@openstad-headless/ui/src/form-elements/select';
@@ -79,7 +80,8 @@ type CombinedFieldPropsWithType =
   | ({ type?: 'pagination' } & PaginationFieldProps)
   | ({ type?: 'sort' } & SortFieldProps)
   | ({ type?: 'none' } & InfoFieldProps)
-  | ({ type?: 'timeline' } & TimelineFieldProps);
+  | ({ type?: 'timeline' } & TimelineFieldProps)
+  | ({ type?: 'modbreak' } & ModbreakFieldProps);
 
 type ComponentFieldProps = {
   index?: number;
@@ -104,6 +106,7 @@ type CombinedFieldProps =
   | MatrixFieldProps
   | InfoFieldProps
   | TimelineFieldProps
+  | ModbreakFieldProps
   | (SortFieldProps & {
       infoBlockStyle?: string;
       infoBlockExtraButtonTitle?: string;
@@ -137,3 +140,7 @@ export type {
   TimelineItem,
   TimelineFieldProps,
 } from '@openstad-headless/ui/src/form-elements/timeline';
+export type {
+  ModbreakItem,
+  ModbreakFieldProps,
+} from '@openstad-headless/ui/src/form-elements/modbreak';
