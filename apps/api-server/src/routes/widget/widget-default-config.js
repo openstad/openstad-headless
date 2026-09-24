@@ -29,6 +29,7 @@ function getDefaultConfig(project, widgetType, apiConfig) {
     logout: {
       url: logoutUrl,
     },
+    multiProjectLogin: process.env.MULTI_PROJECT_LOGIN === 'true',
     projectId: project.id,
     imageUrl: apiConfig.url + `/api/project/${project.id}/upload`,
     zipCodeApiUrl: zipCodeApiUrl || '',

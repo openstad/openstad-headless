@@ -49,6 +49,19 @@ describe('getDefaultConfig login urls', () => {
     expect(result.gtmEnvironment).toBe('prod');
   });
 
+  it('tells widgets when multi-project login is enabled', () => {
+    process.env.MULTI_PROJECT_LOGIN = 'true';
+    expect(
+      getDefaultConfig({ id: 2, config: {} }, 'likes', apiConfig)
+        .multiProjectLogin
+    ).toBe(true);
+    delete process.env.MULTI_PROJECT_LOGIN;
+    expect(
+      getDefaultConfig({ id: 2, config: {} }, 'likes', apiConfig)
+        .multiProjectLogin
+    ).toBe(false);
+  });
+
   it('keeps the logout url unchanged', () => {
     const result = getDefaultConfig({ id: 2, config: {} }, 'likes', apiConfig);
 

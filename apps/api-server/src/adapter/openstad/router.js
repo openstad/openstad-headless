@@ -10,7 +10,12 @@ const isRedirectAllowed = require('../../services/isRedirectAllowed');
 const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
 const sessionDuration = require('../../util/session-duration');
 const { setQueryParam } = require('./return-to');
-const { upsertProjectUser, mintJwt } = require('./inline-login');
+const {
+  applyClientConsents,
+  upsertProjectUser,
+  mintJwt,
+} = require('./inline-login');
+const inlineLoginRoutes = require('./inline-login-routes');
 let router = express.Router({ mergeParams: true });
 
 // Todo: dit is 'openstad', dus veel configuratie mag hier hardcoded en uit de config gehaald
@@ -85,6 +90,16 @@ router
       return next(err);
     }
   });
+
+if (process.env.MULTI_PROJECT_LOGIN === 'true') {
+  router.route('/project/:projectId/exchange').post(inlineLoginRoutes.exchange);
+  router
+    .route('/project/:projectId/uniquecode-login')
+    .post(inlineLoginRoutes.uniqueCodeLogin);
+  router
+    .route('/project/:projectId/complete-fields')
+    .post(inlineLoginRoutes.completeFields);
+}
 
 // ----------------------------------------------------------------------------------------------------
 // login
@@ -285,36 +300,8 @@ router
   })
   .get(async function (req, res, next) {
     req.userData.projectId = req.project.id; // todo: ik weet nog niet waar dit moet
+    req.userData = applyClientConsents(req.userData);
     let data = req.userData;
-
-    if (!!data && !!data.emailNotificationConsent && !!data.clientId) {
-      const clientId = String(data?.clientId);
-      const currentValue =
-        typeof data.emailNotificationConsent === 'object'
-          ? data.emailNotificationConsent
-          : {};
-      const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
-
-      if (clientConsentIsSet) {
-        data.emailNotificationConsent = currentValue[clientId];
-      } else {
-        // clientConsent is not set (correctly); remove it to prevent overwriting existing consent
-        delete data.emailNotificationConsent;
-      }
-    }
-
-    if (!!data && !!data.privacyConsentAt && !!data.clientId) {
-      const clientId = String(data?.clientId);
-      const currentValue =
-        typeof data.privacyConsentAt === 'object' ? data.privacyConsentAt : {};
-      const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
-
-      if (clientConsentIsSet) {
-        data.privacyConsentAt = currentValue[clientId];
-      } else {
-        delete data.privacyConsentAt;
-      }
-    }
 
     try {
       req.userData.id = await upsertProjectUser({

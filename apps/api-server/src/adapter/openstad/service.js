@@ -589,6 +589,85 @@ service.resetUniqueCode = async function ({ authConfig, uniqueCodeId }) {
   }
 };
 
+const basicAuthHeader = (authConfig) =>
+  `Basic ${Buffer.from(
+    `${authConfig.clientId}:${authConfig.clientSecret}`
+  ).toString('base64')}`;
+
+service.loginWithUniqueCode = async function ({ authConfig, code, ip }) {
+  if (!authConfig.clientId) {
+    throw new Error('OpenStad.service.loginWithUniqueCode: clientId not found');
+  }
+
+  let response;
+  try {
+    response = await fetch(
+      `${authConfig.serverUrlInternal}/api/admin/unique-code-login`,
+      {
+        method: 'post',
+        headers: {
+          Authorization: basicAuthHeader(authConfig),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ code, ip }),
+      }
+    );
+  } catch (err) {
+    throw new Error('Cannot connect to auth server');
+  }
+
+  return { status: response.status, data: await response.json() };
+};
+
+service.fetchUniqueCodesForUser = async function ({ authConfig, userId }) {
+  if (!authConfig.clientId) {
+    throw new Error(
+      'OpenStad.service.fetchUniqueCodesForUser: clientId not found'
+    );
+  }
+
+  let response;
+  try {
+    response = await fetch(
+      `${authConfig.serverUrlInternal}/api/admin/unique-codes?clientId=${encodeURIComponent(authConfig.clientId)}&userId=${encodeURIComponent(userId)}&limit=1`,
+      { headers: { Authorization: basicAuthHeader(authConfig) } }
+    );
+  } catch (err) {
+    throw new Error('Cannot connect to auth server');
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      `OpenStad.service.fetchUniqueCodesForUser: request failed with status ${response.status}`
+    );
+  }
+  return response.json();
+};
+
+service.validateAccessCode = async function ({ authConfig, code }) {
+  let response;
+  try {
+    response = await fetch(
+      `${authConfig.serverUrlInternal}/api/validation/code/`,
+      {
+        method: 'post',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ codeId: code }),
+      }
+    );
+  } catch (err) {
+    throw new Error('Cannot connect to auth server');
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      `OpenStad.service.validateAccessCode: request failed with status ${response.status}`
+    );
+  }
+  const result = await response.json();
+  return !!result.data;
+};
+
 service.fetchAccessCode = async function ({ authConfig }) {
   let clientId = authConfig.clientId;
   if (!clientId) {
