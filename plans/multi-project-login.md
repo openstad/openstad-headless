@@ -25,16 +25,16 @@
 
 **Betrokken apps/packages:**
 
-| App/package                               | Rol in dit plan                                                                          |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------- |
+| App/package                               | Rol in dit plan                                                                                     |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `apps/auth-server`                        | Nieuw admin-API endpoint (uniquecode-login), lockout-migratie, sessie-hardening, per-project logout |
-| `apps/api-server`                         | Nieuwe AJAX-auth-endpoints, project-scoped token handoff, JWT-hardening                  |
-| `apps/cms-server`                         | `projectId` meegeven aan `globalOpenStadUser`                                            |
-| `packages/lib`                            | Auth-broker (cross-project identity-index)                                               |
-| `packages/data-store`                     | Nieuwe API-calls, project-scoped token pickup, login-flow hook, seed-namespacing         |
-| `packages/ui`                             | `LoginDialog` component (WCAG)                                                           |
-| `packages/likes`, `packages/stem-begroot` | Eerste integraties (rest volgt)                                                          |
-| `apps/admin-server`                       | Verificatie widget-preview; optioneel `projectId` op `globalOpenStadUser`                |
+| `apps/api-server`                         | Nieuwe AJAX-auth-endpoints, project-scoped token handoff, JWT-hardening                             |
+| `apps/cms-server`                         | `projectId` meegeven aan `globalOpenStadUser`                                                       |
+| `packages/lib`                            | Auth-broker (cross-project identity-index)                                                          |
+| `packages/data-store`                     | Nieuwe API-calls, project-scoped token pickup, login-flow hook, seed-namespacing                    |
+| `packages/ui`                             | `LoginDialog` component (WCAG)                                                                      |
+| `packages/likes`, `packages/stem-begroot` | Eerste integraties (rest volgt)                                                                     |
+| `apps/admin-server`                       | Verificatie widget-preview; optioneel `projectId` op `globalOpenStadUser`                           |
 
 ---
 
@@ -152,7 +152,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 | `apps/auth-server/controllers/admin/api/uniqueCodeLogin.js`      | Admin-API: code → user (logica gespiegeld van de passport-strategy)                                                |
 | `apps/auth-server/controllers/admin/api/uniqueCodeLogin.test.js` | Unit tests (jest)                                                                                                  |
 | `apps/auth-server/migrations/010-add-login-attempts.js`          | Additieve migratie: teller-tabel voor uniquecode-lockout                                                           |
-| `packages/lib/auth-broker.ts`                                    | Cross-project identity-index + change-events                                                                      |
+| `packages/lib/auth-broker.ts`                                    | Cross-project identity-index + change-events                                                                       |
 | `packages/lib/auth-broker.test.ts`                               | Unit tests (vitest)                                                                                                |
 | `packages/data-store/src/hooks/use-login-flow.js`                | Orchestratie: exchange → dialogstappen → state-update                                                              |
 | `packages/data-store/src/hooks/use-login-flow.test.js`           | Unit tests (vitest)                                                                                                |
@@ -176,7 +176,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 | `apps/auth-server/controllers/auth/local.js:186-200`                  | Per-project logout i.p.v. `session.destroy()`                                                                                |
 | Auth-server login-succespaden (o.a. `controllers/auth/*.js`)          | `req.session.regenerate()` rond login (session fixation)                                                                     |
 | `apps/cms-server/modules/openstad-auth/index.js:102`                  | `projectId` meegeven op `globalOpenStadUser`                                                                                 |
-| `apps/cms-server/app.js:495-498`                                      | `forceNewLogin` in CMS-login-URL configureerbaar (Taak 15b, cross-site logout)                                              |
+| `apps/cms-server/app.js:495-498`                                      | `forceNewLogin` in CMS-login-URL configureerbaar (Taak 15b, cross-site logout)                                               |
 | `apps/admin-server/src/components/widget-preview.tsx:25`              | Idem (optioneel; zie Taak 1 stap 4)                                                                                          |
 | `packages/lib/index.ts` (of bestaande export-barrel)                  | Export `auth-broker`                                                                                                         |
 | `packages/data-store/src/api/user.js`                                 | `exchangeLogin`, `loginWithUniqueCode`, `completeFields` API-calls                                                           |
@@ -342,6 +342,15 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
 #### Taak 5: auth-server endpoint `POST /api/admin/unique-code-login` + `userId`-filter + lockout
 
+> **Status 2026-09-24: uitgevoerd, met afwijkingen.**
+>
+> - Lockout per (client, IP) in plaats van per client: 20 mislukte pogingen per (client, IP) per 15 minuten, plus een plafond van 200 per client per 15 minuten. De api-server stuurt het IP van de eindgebruiker mee als `ip` in de body (taak 7); zonder `ip` geldt alleen het plafond. Tabel `login_attempts` (`clientId`, `ip`, timestamps) via model `model/login-attempt.js` én migratie `010`, omdat verse installaties het schema via `sequelize.sync()` krijgen. Logica in `utils/uniqueCodeLockout.js`.
+> - De client komt uit de Basic-auth-identiteit (`req.user`), geen `clientMw.withOne` met meegegeven `clientId`.
+> - Audit logging: `login` en `login_failed` via `logAuthEvent` met method `uniqueCodeInline`, met de ingelogde user (niet de client) als `user`.
+> - Gekoppelde code waarvan de user niet meer bestaat: 404 `invalid_code`, zonder mislukte poging te registreren.
+> - Route alleen geregistreerd als `MULTI_PROJECT_LOGIN === 'true'`.
+> - Tests zijn vitest (laden `db` via `createRequire`) en draaien met `npm run test:unit:auth` vanaf de root.
+
 **Files:**
 
 - Create: `apps/auth-server/controllers/admin/api/uniqueCodeLogin.js` (+ jest-test)
@@ -349,7 +358,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 - Modify: `apps/auth-server/routes/adminApi.js` (registreren naast de bestaande unique-code-routes, `:112-141`)
 - Modify: `apps/auth-server/middleware/code.js:34-40` (`userId`-filter in `withAll`)
 
-- [ ] **Stap 1: `userId`-filter toevoegen aan `codeMw.withAll`** (nodig voor de exchange-gate, P2)
+- [x] **Stap 1: `userId`-filter toevoegen aan `codeMw.withAll`** (nodig voor de exchange-gate, P2)
 
   In `middleware/code.js`, na de bestaande `where`-opbouw (`:34-40`):
 
@@ -359,11 +368,11 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
   }
   ```
 
-- [ ] **Stap 2: lockout-migratie + teller**
+- [x] **Stap 2: lockout-migratie + teller**
 
   Additieve migratie: tabel `login_attempts` (`clientId`, `createdAt`, evt. doorgegeven `ip`). Het endpoint registreert elke mislukte codepoging en weigert met `429 { error: 'too_many_attempts' }` zodra het aantal mislukte pogingen per client binnen het venster (bijv. 20 / 15 min) overschreden is. Dit zit bewust op de auth-server: die ziet álle pogingen van álle api-server-instances (de IP-limiter uit Taak 7 is per instance en per IP, en dus alleen een eerste linie — zie P7).
 
-- [ ] **Stap 3: controller — spiegel de passport-strategy én de rol-toekenning**
+- [x] **Stap 3: controller — spiegel de passport-strategy én de rol-toekenning**
 
   Codelogica volgt de `uniqueCode` TokenStrategy (`apps/auth-server/auth.js:87-144`): zoek code op `code` + `clientId` (client komt uit de Basic-auth-context), laad gekoppelde user óf maak lege user aan en koppel (`uniqueCode.userId = user.id`). De `isUsed`-check uit de strategy is dode code en wordt bewust **niet** overgenomen (P7: codes zijn herbruikbare credentials). Rol-toekenning identiek aan de interactieve flow (`controllers/auth/code.js:111-136`): als er nog geen `UserRole`-rij voor deze client is, maak er één met `req.client.config.defaultRoleId`, fallback naar de authType-config (P6). Response: `{ user: { id, ...velden }, role, isNew }`. Bij onbekende code: `404 { error: 'invalid_code' }` + poging registreren (stap 2).
 
@@ -407,7 +416,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
   (Response-shaping — welke uservelden terug — afstemmen op `controllers/admin/api/user.js:10-24`.)
 
-- [ ] **Stap 4: route registreren** in `routes/adminApi.js`, zelfde middleware-keten als `POST /api/admin/unique-code` (`:128-131`), dus achter `passport.authenticate(['basic', 'oauth2-client-password'])` (`:25`). Alleen registreren als `process.env.MULTI_PROJECT_LOGIN` truthy is (opt-in, zie §1):
+- [x] **Stap 4: route registreren** in `routes/adminApi.js`, zelfde middleware-keten als `POST /api/admin/unique-code` (`:128-131`), dus achter `passport.authenticate(['basic', 'oauth2-client-password'])` (`:25`). Alleen registreren als `process.env.MULTI_PROJECT_LOGIN` truthy is (opt-in, zie §1):
 
   ```js
   app.post(
@@ -417,11 +426,18 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
   );
   ```
 
-- [ ] **Stap 5: unit tests** (jest) — geldige code (nieuw + al gekoppeld), her-login met al gekoppelde code logt in als gekoppelde user, code van andere client (404), lockout na N mislukte pogingen (429), rol-rij aangemaakt met `defaultRoleId`, `withAll` met `userId`-filter.
+- [x] **Stap 5: unit tests** (jest) — geldige code (nieuw + al gekoppeld), her-login met al gekoppelde code logt in als gekoppelde user, code van andere client (404), lockout na N mislukte pogingen (429), rol-rij aangemaakt met `defaultRoleId`, `withAll` met `userId`-filter.
 
 - [ ] **Stap 6: verifieer** — `cd apps/auth-server && npm test` groen (let op: het root-script `test:unit:auth` is vitest en struikelt over de jest-testfiles; gebruik het app-lokale script); curl met Basic-auth tegen lokale auth-server (`http://localhost:31430`).
 
 #### Taak 6: api-server — gedeelde helpers (`inline-login.js`): gate-check + user-upsert
+
+> **Status 2026-09-24: uitgevoerd, met afwijkingen.**
+>
+> - `checkClientGates` is `evaluateClientGates({ client, user, role, projectId, hasUniqueCode })` geworden: puur, haalt zelf niets op. Het ophalen van de client en de codes van de user hoort bij taak 7.
+> - Vijf gates in plaats van vier, in deze volgorde: `environment_forbidden` (admin-omgeving, `projectId === 1`, gespiegeld van digest-login), `two_factor_required`, `phonenumber_required`, `uniquecode_required`, `fields_required`. Alle gates gebruiken de client-rol.
+> - De service-calls (stap 2) zijn verplaatst naar taak 7, waar ze gebruikt en end-to-end geverifieerd worden.
+> - `upsertProjectUser({ User, project, userData })` krijgt het model als argument. Digest-login gebruikt nu `upsertProjectUser` en `mintJwt`, zodat er één plek is waar JWT's getekend worden.
 
 **Precondities:** geen — P1, P2, P6 en P7 zijn beslist (zie §6); Taak 5 (auth-server endpoint + `userId`-filter) moet af zijn.
 
@@ -431,7 +447,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 - Modify: `apps/api-server/src/adapter/openstad/router.js:274-372` (upsert extraheren)
 - Modify: `apps/api-server/src/adapter/openstad/service.js` (nieuwe server-to-server calls)
 
-- [ ] **Stap 1: extraheer de user-upsert uit digest-login**
+- [x] **Stap 1: extraheer de user-upsert uit digest-login**
 
   Verplaats de find-or-create-logica (`router.js:274-372`, keyed op `projectId` + `idpUser.identifier` + `provider`, incl. `canCreateNewUsers`-check) naar `upsertProjectUser({ authConfig, project, userData })` in `inline-login.js`; laat digest-login deze helper aanroepen (gedrag ongewijzigd).
 
@@ -446,7 +462,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
   (Zelfde http-helper/stijl als `fetchUserData` in `service.js:30-106`.)
 
-- [ ] **Stap 3: gate-check helper — alle vier de gates**
+- [x] **Stap 3: gate-check helper — alle vier de gates**
 
   `checkClientGates({ authConfig, userData })` → haalt de client op (`service.fetchClient`) en geeft terug:
 
@@ -463,13 +479,15 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
   Veldenlijst en per-client-specials spiegelen van `apps/auth-server/middleware/client.js:277-323` en `config/user.js:1-48`; phonenumber-gate van `client.js:195-221`; 2FA-rolbepaling van `client.js:226-263`. Zonder de laatste twee gates zou de exchange een privilege-escalatie over projecten heen zijn (gebruiker met alleen e-mail-login krijgt stil een token voor een 2FA-plichtig project).
 
-- [ ] **Stap 4: `mintJwt({ authConfig, userId, role, projectId, pending })`** — wrapper om de bestaande sign-logica (`router.js:403-429`) incl. `sessionDuration.getJwtExpiresInForRole`; bij `pending: true` een korte expiry (15 min) en claim `pending: true`.
+- [x] **Stap 4: `mintJwt({ authConfig, userId, role, projectId, pending })`** — wrapper om de bestaande sign-logica (`router.js:403-429`) incl. `sessionDuration.getJwtExpiresInForRole`; bij `pending: true` een korte expiry (15 min) en claim `pending: true`.
 
-- [ ] **Stap 5: unit tests** (jest) voor `checkClientGates` (alle vijf de uitkomsten) en `upsertProjectUser` (bestaand/nieuw/`canCreateNewUsers=false`).
+- [x] **Stap 5: unit tests** (jest) voor `checkClientGates` (alle vijf de uitkomsten) en `upsertProjectUser` (bestaand/nieuw/`canCreateNewUsers=false`).
 
 - [ ] **Stap 6: verifieer** — `cd apps/api-server && npm test` groen; digest-login regressietest (bestaande login-flow in de browser blijft werken).
 
 #### Taak 7: api-server routes `exchange`, `uniquecode-login`, `complete-fields`
+
+> **Aanvulling 2026-09-24 (uit taak 5 en 6):** de routes sturen het IP van de eindgebruiker als `ip` mee naar `POST /api/admin/unique-code-login`; hier komen ook de service-calls `loginWithUniqueCode` en `fetchUniqueCodesForUser` bij (uit taak 6 stap 2); en de routes halen client en codes op en roepen daarna `evaluateClientGates` aan.
 
 **Files:**
 
@@ -872,16 +890,16 @@ _Raming: 1-2 uur incl. verificatie._
 
 Uit de feedbackronde met het kernteam. Alleen de punten met impact op de implementatie; commerciële/product-vragen (kosten, "sturen op één project") staan in het kernteam-document `plans/multi-project-login-kernteam.md` en raken de code niet.
 
-| Vraag (kernteam) | Besluit | Weerslag in dit plan |
-| --- | --- | --- |
-| Kost aan/uitzetten geld of maatwerk? | Nee, puur de env-flag. | §1 (opt-in), §9 (rollback) |
-| SSO koppelen/samenvoegen? | Externe SSO-users blijven per project aparte users; samenvoegen is werk voor de latere SSO-plugin, buiten dit plan. | §1 buiten scope |
-| "Projecten" = admin-projecten? | Ja. | n.v.t. (terminologie) |
-| CMS of Apostroph als host? | Maakt niet uit; site moet in `allowedDomains` staan (geldt al). | P4 |
-| Verrijkt dit een profiel cross-project? | Ja; ontbrekende velden vullen de globale auth-server-user aan en worden hergebruikt. | §4 (exchange/`fields_required`), P1 |
-| Beheerder maar 1x inloggen? | Adminpanel ongewijzigd; dit gaat over de site-kant (widgets/preview). | Taak 15 (scope-noot) |
-| Bescherming tegen stemcode-raden nodig? | Ja, volgt rechtstreeks uit het nieuwe AJAX-endpoint. | Taak 5 (lockout), Taak 7 stap 4 (rate limit), P7, §10 |
-| Uit Apostroph gegooid bij meerdere sites? | Zelfde oorzaak (gedeelde SSO-sessie + `forceNewLogin`); eerst deze feature, dan resterend CMS-werk (±1-2u). | Taak 15b |
-| Word je in project A zichtbaar door alleen in B in te loggen? | Nee; user-rij ontstaat pas bij deelname, niet bij passief ingelogd zijn. Te bewaken invariant. | §10 (AVG-invariant) |
-| Popup optimaliseerbaar over devices/widgets? | Ja; één gedeeld, responsive + toegankelijk component; browservenster alleen als fallback. | Taak 11, Taak 14 |
-| Werkt de popup-blocked fallback on the fly? | Ja, automatisch per poging (terug naar redirect); losstaand van de env-flag. | Taak 12 stap 3, Taak 14 stap 2 |
+| Vraag (kernteam)                                              | Besluit                                                                                                             | Weerslag in dit plan                                  |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Kost aan/uitzetten geld of maatwerk?                          | Nee, puur de env-flag.                                                                                              | §1 (opt-in), §9 (rollback)                            |
+| SSO koppelen/samenvoegen?                                     | Externe SSO-users blijven per project aparte users; samenvoegen is werk voor de latere SSO-plugin, buiten dit plan. | §1 buiten scope                                       |
+| "Projecten" = admin-projecten?                                | Ja.                                                                                                                 | n.v.t. (terminologie)                                 |
+| CMS of Apostroph als host?                                    | Maakt niet uit; site moet in `allowedDomains` staan (geldt al).                                                     | P4                                                    |
+| Verrijkt dit een profiel cross-project?                       | Ja; ontbrekende velden vullen de globale auth-server-user aan en worden hergebruikt.                                | §4 (exchange/`fields_required`), P1                   |
+| Beheerder maar 1x inloggen?                                   | Adminpanel ongewijzigd; dit gaat over de site-kant (widgets/preview).                                               | Taak 15 (scope-noot)                                  |
+| Bescherming tegen stemcode-raden nodig?                       | Ja, volgt rechtstreeks uit het nieuwe AJAX-endpoint.                                                                | Taak 5 (lockout), Taak 7 stap 4 (rate limit), P7, §10 |
+| Uit Apostroph gegooid bij meerdere sites?                     | Zelfde oorzaak (gedeelde SSO-sessie + `forceNewLogin`); eerst deze feature, dan resterend CMS-werk (±1-2u).         | Taak 15b                                              |
+| Word je in project A zichtbaar door alleen in B in te loggen? | Nee; user-rij ontstaat pas bij deelname, niet bij passief ingelogd zijn. Te bewaken invariant.                      | §10 (AVG-invariant)                                   |
+| Popup optimaliseerbaar over devices/widgets?                  | Ja; één gedeeld, responsive + toegankelijk component; browservenster alleen als fallback.                           | Taak 11, Taak 14                                      |
+| Werkt de popup-blocked fallback on the fly?                   | Ja, automatisch per poging (terug naar redirect); losstaand van de env-flag.                                        | Taak 12 stap 3, Taak 14 stap 2                        |
