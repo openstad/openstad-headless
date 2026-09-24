@@ -1,0 +1,13 @@
+.osc-DialogContent.osc-login-dialog-content {
+  max-width: 36rem;
+}
+
+.osc-login-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--utrecht-space-block-md, 1rem);
+}
+
+.osc-login-dialog-error {
+  color: var(--utrecht-form-field-invalid-color, #d52b1e);
+}
