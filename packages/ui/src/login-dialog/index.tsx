@@ -8,7 +8,7 @@ import {
   Paragraph,
   Textbox,
 } from '@utrecht/component-library-react';
-import React, { FormEvent, useId } from 'react';
+import React, { FormEvent, useEffect, useId, useRef } from 'react';
 
 import { Dialog } from '../dialog';
 import {
@@ -116,6 +116,7 @@ export function LoginDialogContent({
             id={codeId}
             name="code"
             autoComplete="off"
+            autoFocus
             required
             inputRequired
             invalid={!!error}
@@ -146,8 +147,9 @@ export function LoginDialogContent({
       </Heading>
       <Paragraph>{texts.fieldsIntro}</Paragraph>
       {errorMessage}
-      {missingFields.map((key) => {
+      {missingFields.map((key, index) => {
         const id = `${baseId}-${key}`;
+        const autoFocus = index === 0;
         const label = fieldLabelFor(key, labels);
         const required = isFieldRequired(key);
 
@@ -159,6 +161,7 @@ export function LoginDialogContent({
               <Checkbox
                 id={id}
                 name={key}
+                autoFocus={autoFocus}
                 required={required}
                 aria-required={required ? 'true' : undefined}
                 aria-describedby={describedBy}
@@ -191,6 +194,7 @@ export function LoginDialogContent({
             <Textbox
               id={id}
               name={key}
+              autoFocus={autoFocus}
               required={required}
               inputRequired={required}
               invalid={error === 'invalid_access_code' && key === 'accessCode'}
@@ -217,6 +221,23 @@ export function LoginDialog({
   ...content
 }: LoginDialogProps) {
   const titleId = useId();
+  const wasOpen = useRef(false);
+  const returnFocusTo = useRef<HTMLElement | null>(null);
+
+  if (open && !wasOpen.current && typeof document !== 'undefined') {
+    returnFocusTo.current = document.activeElement as HTMLElement | null;
+  }
+  wasOpen.current = open;
+
+  useEffect(() => {
+    if (open) return;
+    const target = returnFocusTo.current;
+    returnFocusTo.current = null;
+    if (target && target.isConnected) {
+      requestAnimationFrame(() => target.focus());
+    }
+  }, [open]);
+
   return (
     <Dialog
       open={open}
