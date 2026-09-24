@@ -10,6 +10,7 @@ const isRedirectAllowed = require('../../services/isRedirectAllowed');
 const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
 const sessionDuration = require('../../util/session-duration');
 const { setQueryParam } = require('./return-to');
+const { upsertProjectUser, mintJwt } = require('./inline-login');
 let router = express.Router({ mergeParams: true });
 
 // Todo: dit is 'openstad', dus veel configuratie mag hier hardcoded en uit de config gehaald
@@ -282,7 +283,7 @@ router
     }
     return next();
   })
-  .get(function (req, res, next) {
+  .get(async function (req, res, next) {
     req.userData.projectId = req.project.id; // todo: ik weet nog niet waar dit moet
     let data = req.userData;
 
@@ -315,71 +316,16 @@ router
       }
     }
 
-    // if user has same projectId and userId
-    // rows are duplicate for a user
-    let where = {
-      where: Sequelize.and(
-        {
-          idpUser: {
-            identifier: data.idpUser.identifier,
-            provider: data.idpUser.provider,
-          },
-        },
-        { projectId: data.projectId }
-      ),
-    };
-
-    db.User.findAll(where)
-      .then((result) => {
-        if (result && result.length > 1)
-          return next(createError(403, 'Meerdere users gevonden'));
-        if (result && result.length == 1) {
-          let user = result[0];
-
-          user
-            .update(data)
-            .then(() => {
-              req.userData.id = user.id;
-              console.log(
-                `[${new Date().toISOString()}][digest-login] user found and updated: userId=${user.id} projectId=${req.project?.id}`
-              );
-              return next();
-            })
-            .catch((e) => {
-              console.log(
-                `[${new Date().toISOString()}][digest-login] user update failed: userId=${user.id} projectId=${req.project?.id} error=${e?.message}`
-              );
-              req.userData.id = user.id;
-              return next();
-            });
-        } else {
-          if (!req.project.config.users.canCreateNewUsers)
-            return next(
-              createError(
-                403,
-                'Users mogen niet aangemaakt worden op deze project'
-              )
-            );
-
-          data.complete = true;
-
-          db.User.create(data)
-            .then((result) => {
-              req.userData.id = result.id;
-              console.log(
-                `[${new Date().toISOString()}][digest-login] user created: userId=${result.id} projectId=${req.project?.id} role=${result.role}`
-              );
-              return next();
-            })
-            .catch((err) => {
-              console.log(
-                `[${new Date().toISOString()}][digest-login] user create failed: projectId=${req.project?.id} error=${err?.message}`
-              );
-              next(err);
-            });
-        }
-      })
-      .catch(next);
+    try {
+      req.userData.id = await upsertProjectUser({
+        User: db.User,
+        project: req.project,
+        userData: data,
+      });
+      return next();
+    } catch (err) {
+      return next(err);
+    }
   })
   .get(function (req, res, next) {
     if (
@@ -411,36 +357,31 @@ router
 
     return next();
   })
-  .get(function (req, res, next) {
+  .get(async function (req, res, next) {
     if (!req.redirectUrl.match('[[jwt]]')) return next();
-    jwt.sign(
-      {
+    let token;
+    try {
+      token = await mintJwt({
+        authConfig: req.authConfig,
         userId: req.userData.id,
-        authProvider: req.authConfig.provider,
+        role: req.userData.role,
         projectId: parseInt(req.params.projectId, 10),
-      },
-      req.authConfig.jwtSecret,
-      {
-        expiresIn: sessionDuration.getJwtExpiresInForRole(req.userData.role),
-      },
-      (err, token) => {
-        if (err) {
-          console.log(
-            `[${new Date().toISOString()}][digest-login] JWT sign error: userId=${req.userData?.id} projectId=${req.project?.id} error=${err?.message}`
-          );
-          return next(err);
-        }
-        req.redirectUrl = req.redirectUrl.replace('[[jwt]]', token);
-        if (sessionDuration.shouldExpireOnClose(req.userData.role)) {
-          req.redirectUrl +=
-            (req.redirectUrl.includes('?') ? '&' : '?') + 'expireOnClose=1';
-        }
-        console.log(
-          `[${new Date().toISOString()}][digest-login] complete: userId=${req.userData?.id} projectId=${req.project?.id} role=${req.userData?.role} redirect=${req.redirectUrl?.substring(0, 80)}`
-        );
-        return next();
-      }
+      });
+    } catch (err) {
+      console.log(
+        `[${new Date().toISOString()}][digest-login] JWT sign error: userId=${req.userData?.id} projectId=${req.project?.id} error=${err?.message}`
+      );
+      return next(err);
+    }
+    req.redirectUrl = req.redirectUrl.replace('[[jwt]]', token);
+    if (sessionDuration.shouldExpireOnClose(req.userData.role)) {
+      req.redirectUrl +=
+        (req.redirectUrl.includes('?') ? '&' : '?') + 'expireOnClose=1';
+    }
+    console.log(
+      `[${new Date().toISOString()}][digest-login] complete: userId=${req.userData?.id} projectId=${req.project?.id} role=${req.userData?.role} redirect=${req.redirectUrl?.substring(0, 80)}`
     );
+    return next();
   })
   .get(function (req, res, next) {
     res.redirect(req.redirectUrl);
