@@ -176,11 +176,40 @@ const pickAllowedFields = ({ fields, missingFields }) =>
     return allowed;
   }, {});
 
+const fieldLabelsFor = (client) => {
+  const labels = client.config?.requiredFields?.requiredUserFieldsLabels || {};
+  return Object.fromEntries(
+    Object.entries(labels).filter(
+      ([, label]) => typeof label === 'string' && label.trim()
+    )
+  );
+};
+
+const privacyLinkFor = (client) => {
+  let url;
+  try {
+    url = new URL(
+      client.clientDisclaimerUrl || client.config?.clientDisclaimerUrl || ''
+    );
+  } catch (err) {
+    return null;
+  }
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
+
+  const text =
+    client.clientDisclaimerText ||
+    client.config?.clientDisclaimerText ||
+    'privacyverklaring';
+  return { url: url.href, text: text.charAt(0).toLowerCase() + text.slice(1) };
+};
+
 module.exports = {
   applyClientConsents,
   evaluateClientGates,
+  fieldLabelsFor,
   mintJwt,
   pickAllowedFields,
+  privacyLinkFor,
   resolveTargetRole,
   upsertProjectUser,
 };

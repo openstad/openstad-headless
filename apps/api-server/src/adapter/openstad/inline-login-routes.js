@@ -8,8 +8,10 @@ const service = require('./service');
 const {
   applyClientConsents,
   evaluateClientGates,
+  fieldLabelsFor,
   mintJwt,
   pickAllowedFields,
+  privacyLinkFor,
   resolveTargetRole,
   upsertProjectUser,
 } = require('./inline-login');
@@ -108,6 +110,8 @@ const respondWithGates = async ({
       status: gates.status,
       missingFields: gates.missingFields,
       pendingJwt,
+      labels: fieldLabelsFor(client),
+      privacy: privacyLinkFor(client),
     });
   }
 
