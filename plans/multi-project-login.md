@@ -567,9 +567,16 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
 #### Taak 9: `packages/lib/auth-broker.ts`
 
+> **Status 2026-09-24: uitgevoerd (fase 3 plak 3a), met afwijkingen.**
+>
+> - Tokens krijgen hun api-url mee (`openStadUser: { jwt, apiUrl, ... }`). `getKnownIdentities({ apiUrl, excludeProjectId })` gebruikt alleen tokens van dezelfde installatie. Tokens van vóór deze wijziging hebben geen api-url en doen niet mee tot de volgende login.
+> - De broker slaat ook verlopen tokens over, en tokens van projecten met `expireOnClose` zodra de sessie-cookie `openstad_active` weg is. Anders zou een login die bij het sluiten van de browser had moeten vervallen, gebruikt worden om bij een ander project in te loggen.
+> - `hasActiveSessionCookie` staat nu in de broker; `use-current-user.js` gebruikt die (één definitie van de cookie-check).
+> - Nieuw onderdeel van fase 3, niet in het oorspronkelijke plan: de API-client in `packages/data-store/src/api/index.js` was een window-globale singleton, waardoor widgets van verschillende projecten op één pagina één `currentUserJWT` konden delen (de laatste won; de api-server zoekt de user op `id` + `projectId`, dus de andere widget was dan uitgelogd). Nu één instantie per `apiUrl` + `projectId` (`window.OpenStadAPIs`), stabiel over renders heen. Eerst gereproduceerd met een falende test, daarna opgelost.
+
 **Files:** Create `packages/lib/auth-broker.ts` (+ test), modify export-barrel van `packages/lib`.
 
-- [ ] **Stap 1: implementatie**
+- [x] **Stap 1: implementatie**
 
   ```ts
   const KEY = 'openstad';
@@ -614,11 +621,18 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
   (`storage`-event dekt andere tabs; het CustomEvent dekt widgets op dezelfde pagina.)
 
-- [ ] **Stap 2: unit tests** — identities lezen incl. exclude, corrupte JSON → `[]`, event-subscribe/unsubscribe.
+- [x] **Stap 2: unit tests** — identities lezen incl. exclude, corrupte JSON → `[]`, event-subscribe/unsubscribe.
 
-- [ ] **Stap 3: verifieer** — `cd packages/lib && npx vitest run auth-broker.test.ts`.
+- [x] **Stap 3: verifieer** — `cd packages/lib && npx vitest run auth-broker.test.ts`.
 
 #### Taak 10: data-store — API-calls + auth-state live bijwerken + seed-namespacing
+
+> **Status 2026-09-24: stap 1, 2 en 4 uitgevoerd (fase 3 plak 3a); stap 3 uitgesteld.**
+>
+> - `doFetch` en de nieuwe `fetchWithStatus` delen één interne `request`; `fetchWithStatus` geeft opgegeven statussen terug als `{ status, data }` zonder `osc-error`. De user-calls `exchangeLogin`, `loginWithUniqueCode` en `completeFields` staan achter `useAuth=default`; een 5xx blijft een echte fout.
+> - `applyJwt({ storage, api, projectId, jwt })` in `use-current-user.js` (en `datastore.applyJwt(jwt)`) slaat de JWT met api-url op, zet hem op de API-instantie, revalideert de current-user-key expliciet met `mutate` (`self.refresh()` raakt die key niet) en roept `notifyAuthChange()` aan. `useCurrentUser` luistert via `onAuthChange`; elke widget-bundel heeft een eigen SWR-cache, dus de melding loopt via een window-event.
+> - Stap 3 (seed per project) is uitgesteld: `resolveRandomSortSeed` wordt ook door `resource-overview.tsx` aangeroepen (husselknop), dat package heeft een bestaande build-fout, en de seed heeft niets met inloggen te maken.
+> - Lokale valkuil gevonden bij het testen: `scripts/claude-dev/rebuild-widget.sh` zet de admin-server-bron met `docker cp` in de api-server-container (nodig voor `resource-overview`). Na `docker compose up --force-recreate` is die kopie weg; verandert er dan iets in een gedeeld package, dan faalt de opstart-build bij elke start en herstart de container in een lus. Oplossing: `scripts/claude-dev/rebuild-widget.sh resource-overview`.
 
 **Files:**
 
@@ -626,7 +640,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 - Modify: `packages/data-store/src/hooks/use-current-user.js`
 - Modify: `packages/data-store/src/api/resources.js:2-3,15-19`
 
-- [ ] **Stap 1: API-calls toevoegen** in `api/user.js` (naast `fetchMe`/`connectUser`/`logout`):
+- [x] **Stap 1: API-calls toevoegen** in `api/user.js` (naast `fetchMe`/`connectUser`/`logout`):
 
   ```js
   exchangeLogin: async function ({ projectId }, sourceJwt) {
@@ -639,7 +653,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
   Let op: `doFetch` (`api/fetch.js:63-141`) gooit bij non-2xx. Voeg een `fetchRaw`-variant toe (of optie `allowStatuses: [401, 409, 429]`) die de JSON-body van 401/409/429 teruggeeft in plaats van een `OpenStadRequestError` te dispatchen — de 409's zijn hier normale flow, geen fout.
 
-- [ ] **Stap 2: state-update helper in `use-current-user.js`**
+- [x] **Stap 2: state-update helper in `use-current-user.js`**
 
   ```js
   function applyJwt(jwt) {
@@ -656,9 +670,9 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
   `api/resources.js:2-3,15-19` gebruikt globale localStorage-keys (`pseudoRandomSortSeed`, `pseudoRandomSortSeedTimestamp`) buiten de `LocalStorage`-class om; twee random-gesorteerde overzichten van verschillende projecten delen zo één seed/rotatie. Maak de keys project-scoped (bijv. `pseudoRandomSortSeed:${projectId}`).
 
-- [ ] **Stap 4: unit tests** — `applyJwt` zet storage + JWT + triggert `self.refresh`; 409-responses komen als data terug, niet als exception; seed-keys per project gescheiden.
+- [x] **Stap 4: unit tests** — `applyJwt` zet storage + JWT + triggert `self.refresh`; 409-responses komen als data terug, niet als exception; seed-keys per project gescheiden.
 
-- [ ] **Stap 5: verifieer** — `cd packages/data-store && npx vitest run`.
+- [x] **Stap 5: verifieer** — `cd packages/data-store && npx vitest run`.
 
 #### Taak 11: `packages/ui` — `LoginDialog`
 
