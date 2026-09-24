@@ -13,6 +13,7 @@ import useComments from './hooks/use-comments.js';
 import useCurrentUser, { applyJwt } from './hooks/use-current-user.js';
 import useDatalayer from './hooks/use-datalayer.js';
 import useEnqueteResultCount from './hooks/use-enquete-result-count';
+import useLoginFlow from './hooks/use-login-flow';
 import useMarkers from './hooks/use-markers.js';
 import useProjectVotedUsersCount from './hooks/use-project-voted-users-count';
 import useResource from './hooks/use-resource.js';
@@ -47,6 +48,7 @@ function DataStore(props = {}) {
   self.useStatuses = useStatuses.bind(self);
   self.useTags = useTags.bind(self);
   self.useCurrentUser = useCurrentUser.bind(self);
+  self.useLoginFlow = useLoginFlow.bind(self);
   self.useUserVote = useUserVote.bind(self);
   self.useSubmissions = useSubmissions.bind(self);
   self.useCommentsByProject = useCommentsByProject.bind(self);
