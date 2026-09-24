@@ -8,9 +8,11 @@ import { LocalStorage } from '@openstad-headless/lib/local-storage';
 import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import {
+  LoginDialog,
   ProgressBar,
   fireConfetti,
   headingLevels,
+  loginDialogTexts,
 } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
 import {
@@ -88,6 +90,7 @@ function Likes({
   const storage = new LocalStorage({ projectId: props.projectId });
 
   const { data: currentUser } = datastore.useCurrentUser(props);
+  const { requireLogin, dialogProps } = datastore.useLoginFlow(props);
   const { data: resource } = datastore.useResource({
     projectId: props.projectId,
     resourceId,
@@ -143,17 +146,30 @@ function Likes({
     }
 
     if (!hasRole(currentUser, props.votes.requiredUserRole)) {
-      let loginUrl = props.login?.url || '';
-      if (props.votes.requiredUserRole == 'anonymous') {
-        loginUrl = props.login?.anonymous?.url || '';
-      }
+      const anonymous = props.votes.requiredUserRole == 'anonymous';
+      const loginUrl =
+        (anonymous ? props.login?.anonymous?.url : props.login?.url) || '';
       if (!loginUrl) {
         console.log('Config error: no login url defined');
         return;
       }
-      // login
-      storage.set('osc-resource-vote-pending', { [resource.id]: value });
-      return (document.location.href = loginUrl);
+
+      const stashPendingVote = () =>
+        storage.set('osc-resource-vote-pending', { [resource.id]: value });
+
+      if (anonymous) {
+        stashPendingVote();
+        return (document.location.href = loginUrl);
+      }
+
+      const loggedIn = await requireLogin({
+        loginUrl,
+        onBeforeRedirect: stashPendingVote,
+      });
+      if (!loggedIn) {
+        setIsBusy(false);
+        return;
+      }
     }
 
     let change: { [key: string]: any } = {};
@@ -188,6 +204,7 @@ function Likes({
       <>
         {props.children((value: string) => doVote(null, value), resource)}
         <NotificationProvider />
+        <LoginDialog {...dialogProps} texts={loginDialogTexts} />
       </>
     );
   }
@@ -195,6 +212,7 @@ function Likes({
   return (
     <div className="osc">
       <NotificationProvider />
+      <LoginDialog {...dialogProps} texts={loginDialogTexts} />
       {variant !== 'micro-score' ? (
         <div className={`like-widget-container ${variant}`}>
           {title ? (
