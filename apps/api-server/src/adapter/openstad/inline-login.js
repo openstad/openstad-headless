@@ -132,4 +132,55 @@ const upsertProjectUser = async ({ User, project, userData }) => {
   }
 };
 
-module.exports = { evaluateClientGates, mintJwt, upsertProjectUser };
+const clientConsentFields = ['emailNotificationConsent', 'privacyConsentAt'];
+
+const applyClientConsents = (userData) => {
+  const result = { ...userData };
+  if (!result.clientId) return result;
+
+  const clientKey = String(result.clientId);
+  clientConsentFields.forEach((field) => {
+    if (!result[field]) return;
+    const current = typeof result[field] === 'object' ? result[field] : {};
+    if (Object.prototype.hasOwnProperty.call(current, clientKey)) {
+      result[field] = current[clientKey];
+    } else {
+      delete result[field];
+    }
+  });
+  return result;
+};
+
+const resolveTargetRole = ({ rawUser, clientId }) => {
+  const hasRoleForClient = (rawUser.roles || []).some(
+    (userRole) => String(userRole.clientId) === String(clientId)
+  );
+  return hasRoleForClient ? rawUser.role : defaultRole;
+};
+
+const pickAllowedFields = ({ fields, missingFields }) =>
+  missingFields.reduce((allowed, field) => {
+    if (!Object.prototype.hasOwnProperty.call(fields, field)) return allowed;
+    if (field === 'privacyConsent') {
+      if (fields.privacyConsent === true) allowed.privacyConsent = true;
+      return allowed;
+    }
+    if (field === 'emailNotificationConsent') {
+      allowed.emailNotificationConsent =
+        fields.emailNotificationConsent === true;
+      return allowed;
+    }
+    if (typeof fields[field] === 'string' && fields[field].trim()) {
+      allowed[field] = fields[field].trim();
+    }
+    return allowed;
+  }, {});
+
+module.exports = {
+  applyClientConsents,
+  evaluateClientGates,
+  mintJwt,
+  pickAllowedFields,
+  resolveTargetRole,
+  upsertProjectUser,
+};

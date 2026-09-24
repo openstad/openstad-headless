@@ -2,8 +2,11 @@ import jwt from 'jsonwebtoken';
 import { describe, expect, it, vi } from 'vitest';
 
 import {
+  applyClientConsents,
   evaluateClientGates,
   mintJwt,
+  pickAllowedFields,
+  resolveTargetRole,
   upsertProjectUser,
 } from './inline-login.js';
 
@@ -205,5 +208,90 @@ describe('upsertProjectUser', () => {
       upsertProjectUser({ User, project: project(false), userData })
     ).rejects.toMatchObject({ status: 403 });
     expect(User.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('applyClientConsents', () => {
+  it('picks the consent values for the given client', () => {
+    expect(
+      applyClientConsents({
+        clientId: 7,
+        emailNotificationConsent: { 7: true, 8: false },
+        privacyConsentAt: { 7: '2026-09-01' },
+      })
+    ).toEqual({
+      clientId: 7,
+      emailNotificationConsent: true,
+      privacyConsentAt: '2026-09-01',
+    });
+  });
+
+  it('drops consent fields that have no value for the client', () => {
+    expect(
+      applyClientConsents({
+        clientId: 7,
+        emailNotificationConsent: { 8: true },
+      })
+    ).toEqual({ clientId: 7 });
+  });
+
+  it('leaves the data alone without a clientId', () => {
+    const data = { emailNotificationConsent: { 7: true } };
+    expect(applyClientConsents(data)).toEqual(data);
+  });
+});
+
+describe('resolveTargetRole', () => {
+  it('uses the role when the user has a role row for the target client', () => {
+    expect(
+      resolveTargetRole({
+        rawUser: { role: 'editor', roles: [{ clientId: 'target', roleId: 4 }] },
+        clientId: 'target',
+      })
+    ).toBe('editor');
+  });
+
+  it('never takes over a role that belongs to another client', () => {
+    expect(
+      resolveTargetRole({
+        rawUser: { role: 'admin', roles: [{ clientId: 'other', roleId: 1 }] },
+        clientId: 'target',
+      })
+    ).toBe('member');
+  });
+});
+
+describe('pickAllowedFields', () => {
+  it('keeps only missing fields and drops everything else', () => {
+    expect(
+      pickAllowedFields({
+        fields: {
+          name: ' Jan ',
+          role: 'admin',
+          password: 'x',
+          postcode: '1234AB',
+        },
+        missingFields: ['name'],
+      })
+    ).toEqual({ name: 'Jan' });
+  });
+
+  it('accepts privacy consent only as true', () => {
+    const missingFields = ['privacyConsent'];
+    expect(
+      pickAllowedFields({ fields: { privacyConsent: true }, missingFields })
+    ).toEqual({ privacyConsent: true });
+    expect(
+      pickAllowedFields({ fields: { privacyConsent: 'on' }, missingFields })
+    ).toEqual({});
+  });
+
+  it('stores email notification consent as a boolean', () => {
+    expect(
+      pickAllowedFields({
+        fields: { emailNotificationConsent: 'yes' },
+        missingFields: ['emailNotificationConsent'],
+      })
+    ).toEqual({ emailNotificationConsent: false });
   });
 });
