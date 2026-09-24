@@ -16,6 +16,12 @@ const {
   mintJwt,
 } = require('./inline-login');
 const inlineLoginRoutes = require('./inline-login-routes');
+const { popupLoginPage } = require('./popup-login-page');
+
+const isPopupLogin = (req) =>
+  process.env.MULTI_PROJECT_LOGIN === 'true' && req.query.popup === '1';
+const popupParam = (req) => (isPopupLogin(req) ? '&popup=1' : '');
+
 let router = express.Router({ mergeParams: true });
 
 // Todo: dit is 'openstad', dus veel configuratie mag hier hardcoded en uit de config gehaald
@@ -123,6 +129,7 @@ router
         req.project.id +
         '/login?useAuth=' +
         req.authConfig.provider +
+        popupParam(req) +
         '&redirectUri=' +
         encodeURIComponent(req.query.redirectUri);
       backToHereUrl = encodeURIComponent(backToHereUrl);
@@ -152,6 +159,7 @@ router
           req.project.id +
           '/digest-login?useAuth=' +
           req.authConfig.provider +
+          popupParam(req) +
           '&returnTo=' +
           req.query.redirectUri
       );
@@ -360,6 +368,7 @@ router
       );
       return next(err);
     }
+    req.loginJwt = token;
     req.redirectUrl = req.redirectUrl.replace('[[jwt]]', token);
     if (sessionDuration.shouldExpireOnClose(req.userData.role)) {
       req.redirectUrl +=
@@ -371,7 +380,18 @@ router
     return next();
   })
   .get(function (req, res, next) {
-    res.redirect(req.redirectUrl);
+    if (!isPopupLogin(req) || !req.loginJwt) {
+      return res.redirect(req.redirectUrl);
+    }
+    res.set('Cache-Control', 'no-store');
+    res.type('html').send(
+      popupLoginPage({
+        origin: new URL(req.redirectUrl).origin,
+        projectId: req.project.id,
+        jwt: req.loginJwt,
+        fallbackUrl: req.redirectUrl,
+      })
+    );
   });
 
 // ----------------------------------------------------------------------------------------------------
