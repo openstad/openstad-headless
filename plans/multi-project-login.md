@@ -837,6 +837,12 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
 #### Taak 15: admin overal ingelogd — verificatie + kleine gaten
 
+> **Status 2026-09-24: geverifieerd (fase 4 plak 4b), geen codewijziging.**
+>
+> - Stap 1 en 2 (API en preview): de admin-JWT (user 6, project 1) krijgt via `/auth/project/204/me` en `/auth/project/2/me` de rol `superuser`. In de widget-preview van het admin-panel (likes-widget 9547) registreert "Ja" een like als user 6, zonder popup, dialog of navigatie.
+> - Stap 3 (embed-site): met de auth-server-sessie van de admin geeft één klik in likes-widget 9547 op een kale pagina een popup die zonder prompt flitst en sluit. De like staat geregistreerd, zonder reload. Let op: de admin wordt daar een eigen project-user (1077, zelfde auth-server-identiteit) met de rol die de auth-server voor die client geeft, hier `member`, en dus niet `superuser`. Op de site-kant is de admin daarmee wel ingelogd, maar zonder beheerrechten. Superuser-rechten op de site-kant horen alleen bij de admin-JWT van project 1 (preview, `globalOpenStadUser`).
+> - Stap 4 (beperking): volledig automatisch inloggen (nul klikken) op een extern domein kan niet betrouwbaar, omdat browsers third-party-cookies blokkeren. Eén klik (popup, taak 14) is het maximum. Dit hoort in de docs van taak 17.
+
 **Files:** geen wijziging voorzien; alleen verificatie en zo nodig follow-up.
 
 **Scope (kernteam-Q&A):** dit gaat over de **site-kant** — widgets die een beheerder gebruikt/test op een gewone pagina of in de preview. De login op het adminpanel zelf verandert niet; daar log je één keer in en heb je overal toegang (superuser-elevatie).
@@ -847,6 +853,12 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 - [ ] **Stap 4: documenteer beperking** — volledig automatisch (nul kliks) inloggen op een extern domein kan niet betrouwbaar door third-party-cookie-blokkering; één klik (popup) is het maximum. Vastleggen in de docs van Taak 17.
 
 #### Taak 15b: CMS-login-URL onder de `forceNewLogin`-flag (Apostroph cross-site logout)
+
+> **Status 2026-09-24: lokaal niet te reproduceren (fase 4 plak 4b); stap 2 niet uitgevoerd.**
+>
+> - Regulier pad (`/login`, met `forceNewLogin=1`): ingelogd op site 198 (`/demo-test`), daarna ingelogd op site 202 (`/demo-gooisemeren`). De logout van de `forceNewLogin`-lus vernietigt de SSO-sessie, dus bij 202 moet je opnieuw je e-mailadres invullen. Site 198 blijft wel ingelogd (CMS-log `user authenticated ... projectId=198` na de login op 202). Dat klopt met de code: de auth-server-logout verwijdert alleen de access tokens van (user, client B) (`apps/auth-server/controllers/auth/local.js:186-198`), en de CMS-sessies zijn per site gescheiden.
+> - Admin-pad (`/admin/login`, `loginPriviliged`, zonder `forceNewLogin`): dit pad vraagt altijd opnieuw om een inlogmethode, ook met een SSO-sessie, en laat alleen gebruikers met een beheerdersrol toe. Met de lokale admin-identiteit (token rechtstreeks in `login_tokens`, zoals `scripts/claude-dev/admin-login.sh`) blijft site 198 ingelogd na inloggen op 202.
+> - Grens: lokaal heeft de admin op 198 en 202 alleen de rol `member`. Een echte Apostrophe-editorsessie (rol admin of editor op het project) is dus niet getest. Treedt de klacht in acceptatie of productie nog op, dan eerst daar de logs van de CMS (`[cms-auth]`, `invalid user data`) en de api (`auth-sync`) bekijken voordat stap 2 wordt uitgevoerd.
 
 **Aanleiding:** een beheerder die aan meerdere CMS-sites (cms-server, Apostroph) werkt raakt cross-site uitgelogd. De Apostroph-sessie is al per site geïsoleerd (eigen cookie `openstad-<projectId>.sid`, eigen secret, eigen MongoDB) en veroorzaakt dit dus niet. De enige gedeelde laag is de auth-server SSO-sessie, die door `forceNewLogin=1` volledig vernietigd wordt. De CMS-login-URL hardcodeert die flag op het reguliere pad (`apps/cms-server/app.js:495-498`), terwijl Taak 2 alleen de widget-login-URL configureerbaar maakte. Het `/admin/login`-pad (`loginPriviliged`) zet de flag al níet, dus een zuivere admin-login zou de SSO-sessie vandaag al niet moeten slopen.
 
