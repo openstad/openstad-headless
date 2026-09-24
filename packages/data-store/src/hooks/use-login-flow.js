@@ -5,6 +5,8 @@ import {
   exchangeKnownIdentities,
   outcomeFromCodeResult,
   outcomeFromFieldsResult,
+  popupLoginUrl,
+  waitForPopupLogin,
 } from '../login-flow';
 
 export default function useLoginFlow(props) {
@@ -22,11 +24,31 @@ export default function useLoginFlow(props) {
   const redirect = async () => {
     const current = close();
     if (!current) return;
-    if (current.onBeforeRedirect) current.onBeforeRedirect();
-    document.location.href =
+    const loginUrl =
       typeof current.loginUrl === 'function'
         ? await current.loginUrl()
         : current.loginUrl;
+
+    const popup = props.multiProjectLogin
+      ? window.open(
+          popupLoginUrl(loginUrl),
+          'osc-login',
+          'width=480,height=640'
+        )
+      : null;
+    if (popup) {
+      const jwt = await waitForPopupLogin({
+        popup,
+        apiOrigin: new URL(self.api.apiUrl).origin,
+        projectId: self.projectId,
+      });
+      if (jwt) self.applyJwt(jwt);
+      current.resolve(!!jwt);
+      return;
+    }
+
+    if (current.onBeforeRedirect) current.onBeforeRedirect();
+    document.location.href = loginUrl;
   };
 
   const failAndRedirect = (err) => {
