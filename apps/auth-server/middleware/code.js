@@ -39,6 +39,10 @@ exports.withAll = (req, res, next) => {
     where.code = { [db.Sequelize.Op.like]: '%' + search + '%' };
   }
 
+  if (req.query.userId) {
+    where.userId = parseInt(req.query.userId, 10);
+  }
+
   db.UniqueCode.findAll({
     where,
     limit,

@@ -5,6 +5,7 @@ const adminApiClientController = require('../controllers/admin/api/client');
 const adminApiRoleController = require('../controllers/admin/api/role');
 const adminApiUniqueCodeController = require('../controllers/admin/api/uniqueCode');
 const adminApiAccessCodeController = require('../controllers/admin/api/accessCode');
+const adminApiUniqueCodeLoginController = require('../controllers/admin/api/uniqueCodeLogin');
 
 //MIDDLEWARE
 const adminMiddleware = require('../middleware/admin');
@@ -141,6 +142,13 @@ module.exports = (app) => {
     codeMw.reset,
     adminApiUniqueCodeController.reset
   );
+
+  if (process.env.MULTI_PROJECT_LOGIN === 'true') {
+    app.post(
+      '/api/admin/unique-code-login',
+      adminApiUniqueCodeLoginController.post
+    );
+  }
 
   app.get(
     '/api/admin/access-code',
