@@ -1,0 +1,209 @@
+import jwt from 'jsonwebtoken';
+import { describe, expect, it, vi } from 'vitest';
+
+import {
+  evaluateClientGates,
+  mintJwt,
+  upsertProjectUser,
+} from './inline-login.js';
+
+const client = (overrides = {}) => ({
+  id: 7,
+  authTypes: ['Url'],
+  requiredUserFields: [],
+  twoFactorRoles: null,
+  ...overrides,
+});
+
+const gates = (overrides = {}) =>
+  evaluateClientGates({
+    client: client(),
+    user: {},
+    role: 'member',
+    projectId: 5,
+    hasUniqueCode: false,
+    ...overrides,
+  });
+
+describe('evaluateClientGates', () => {
+  it('passes a plain member on a plain project', () => {
+    expect(gates()).toEqual({ ok: true });
+  });
+
+  it('forbids non-privileged users on the admin environment', () => {
+    expect(gates({ projectId: 1 })).toEqual({
+      ok: false,
+      status: 'environment_forbidden',
+    });
+    expect(gates({ projectId: 1, role: 'editor' })).toEqual({ ok: true });
+  });
+
+  it('requires 2FA for roles under twoFactorRoles, before anything else the dialog could solve', () => {
+    const result = gates({
+      client: client({
+        twoFactorRoles: ['member'],
+        requiredUserFields: ['name'],
+      }),
+    });
+    expect(result).toEqual({ ok: false, status: 'two_factor_required' });
+  });
+
+  it('uses the default member role for 2FA when no role is known', () => {
+    const result = gates({
+      client: client({ twoFactorRoles: ['member'] }),
+      role: undefined,
+    });
+    expect(result.status).toBe('two_factor_required');
+  });
+
+  it('requires a confirmed phone number for Phonenumber clients unless privileged', () => {
+    const phone = client({ authTypes: ['Phonenumber'] });
+    expect(gates({ client: phone }).status).toBe('phonenumber_required');
+    expect(
+      gates({ client: phone, user: { phoneNumberConfirmed: true } })
+    ).toEqual({ ok: true });
+    expect(gates({ client: phone, role: 'admin' })).toEqual({ ok: true });
+  });
+
+  it('requires a unique code only when UniqueCode is the only auth type', () => {
+    const onlyCode = client({ authTypes: ['UniqueCode'] });
+    expect(gates({ client: onlyCode }).status).toBe('uniquecode_required');
+    expect(gates({ client: onlyCode, hasUniqueCode: true })).toEqual({
+      ok: true,
+    });
+    expect(gates({ client: onlyCode, role: 'moderator' })).toEqual({
+      ok: true,
+    });
+    expect(
+      gates({ client: client({ authTypes: ['UniqueCode', 'Url'] }) })
+    ).toEqual({ ok: true });
+  });
+
+  it('lists missing fields including per-client consent', () => {
+    const result = gates({
+      client: client({
+        requiredUserFields: [
+          'name',
+          'emailNotificationConsent',
+          'privacyConsent',
+        ],
+      }),
+      user: {
+        name: 'Jan',
+        emailNotificationConsent: { 8: true },
+        privacyConsentAt: { 7: '2026-09-01' },
+      },
+    });
+    expect(result).toEqual({
+      ok: false,
+      status: 'fields_required',
+      missingFields: ['emailNotificationConsent'],
+    });
+  });
+});
+
+describe('mintJwt', () => {
+  const authConfig = { provider: 'openstad', jwtSecret: 'test-secret' };
+
+  it('signs the same claims as digest-login with the role based expiry', async () => {
+    const token = await mintJwt({
+      authConfig,
+      userId: 3,
+      role: 'member',
+      projectId: 5,
+    });
+    const claims = jwt.verify(token, 'test-secret');
+
+    expect(claims).toMatchObject({
+      userId: 3,
+      authProvider: 'openstad',
+      projectId: 5,
+    });
+    expect(claims.pending).toBeUndefined();
+    expect(claims.exp - claims.iat).toBe(7 * 24 * 60 * 60);
+  });
+
+  it('marks pending tokens and gives them a 15 minute expiry', async () => {
+    const token = await mintJwt({
+      authConfig,
+      userId: 3,
+      role: 'admin',
+      projectId: 5,
+      pending: true,
+    });
+    const claims = jwt.verify(token, 'test-secret');
+
+    expect(claims.pending).toBe(true);
+    expect(claims.exp - claims.iat).toBe(15 * 60);
+  });
+});
+
+const userData = {
+  idpUser: { identifier: 'abc', provider: 'openstad' },
+  projectId: 5,
+};
+const project = (canCreateNewUsers = true) => ({
+  id: 5,
+  config: { users: { canCreateNewUsers } },
+});
+const userModel = ({ found = [], created = { id: 99 } } = {}) => ({
+  findAll: vi.fn().mockResolvedValue(found),
+  create: vi.fn().mockResolvedValue(created),
+});
+
+describe('upsertProjectUser', () => {
+  it('updates and returns the single matching user', async () => {
+    const existing = { id: 4, update: vi.fn().mockResolvedValue({}) };
+    const User = userModel({ found: [existing] });
+
+    expect(
+      await upsertProjectUser({ User, project: project(), userData })
+    ).toBe(4);
+    expect(existing.update).toHaveBeenCalledWith(userData);
+    expect(User.create).not.toHaveBeenCalled();
+  });
+
+  it('still returns the user when the update fails, like digest-login did', async () => {
+    const existing = {
+      id: 4,
+      update: vi.fn().mockRejectedValue(new Error('nope')),
+    };
+
+    expect(
+      await upsertProjectUser({
+        User: userModel({ found: [existing] }),
+        project: project(),
+        userData,
+      })
+    ).toBe(4);
+  });
+
+  it('refuses when more than one user matches', async () => {
+    const User = userModel({ found: [{ id: 1 }, { id: 2 }] });
+
+    await expect(
+      upsertProjectUser({ User, project: project(), userData })
+    ).rejects.toMatchObject({
+      status: 403,
+      message: 'Meerdere users gevonden',
+    });
+  });
+
+  it('creates a complete user when none exists and creation is allowed', async () => {
+    const User = userModel();
+
+    expect(
+      await upsertProjectUser({ User, project: project(), userData })
+    ).toBe(99);
+    expect(User.create).toHaveBeenCalledWith({ ...userData, complete: true });
+  });
+
+  it('refuses to create a user when the project does not allow it', async () => {
+    const User = userModel();
+
+    await expect(
+      upsertProjectUser({ User, project: project(false), userData })
+    ).rejects.toMatchObject({ status: 403 });
+    expect(User.create).not.toHaveBeenCalled();
+  });
+});
