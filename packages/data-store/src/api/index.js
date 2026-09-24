@@ -24,10 +24,14 @@ import widgets from './widgets';
 
 const windowGlobal = typeof window !== 'undefined' ? window : {};
 
-windowGlobal.OpenStadAPI = null;
+windowGlobal.OpenStadAPIs = windowGlobal.OpenStadAPIs || {};
+
 export default function singelton(props = { config: {} }) {
-  return (windowGlobal.OpenStadAPI =
-    windowGlobal.OpenStadAPI || new API(props));
+  const apiUrl = props.apiUrl || props.api?.url || null;
+  const key = `${apiUrl}|${props.projectId || 0}`;
+  windowGlobal.OpenStadAPIs[key] =
+    windowGlobal.OpenStadAPIs[key] || new API(props);
+  return windowGlobal.OpenStadAPIs[key];
 }
 
 export function getApiFetchMethodNames() {
