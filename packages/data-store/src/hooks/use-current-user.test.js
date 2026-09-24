@@ -1,11 +1,15 @@
-import { afterEach, beforeEach, describe, expect, test } from 'vitest';
+import { mutate } from 'swr';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { LocalStorage } from '../../../lib/local-storage';
 import {
+  applyJwt,
   consumeLoginToken,
   consumeLoginTokenFromUrl,
   pickInitialUser,
 } from './use-current-user';
+
+vi.mock('swr', () => ({ default: vi.fn(), mutate: vi.fn() }));
 
 describe('consumeLoginTokenFromUrl', () => {
   test('consumes the token when openstadprojectid matches the widget project', () => {
@@ -189,5 +193,52 @@ describe('project-scoped token pickup with namespaced storage', () => {
     });
 
     expect(replaced).toEqual(['/page?foo=bar#section']);
+  });
+});
+
+describe('applyJwt', () => {
+  let originalWindow;
+  let stored;
+
+  beforeEach(() => {
+    originalWindow = global.window;
+    stored = {};
+    global.window = Object.assign(new EventTarget(), {
+      localStorage: {
+        getItem: (key) => (key in stored ? stored[key] : null),
+        setItem: (key, value) => {
+          stored[key] = String(value);
+        },
+        removeItem: (key) => {
+          delete stored[key];
+        },
+      },
+    });
+  });
+
+  afterEach(() => {
+    global.window = originalWindow;
+    vi.clearAllMocks();
+  });
+
+  test('stores the jwt with its api url, uses it for requests and announces the change', () => {
+    const api = { apiUrl: 'http://api.local' };
+    const announced = vi.fn();
+    window.addEventListener('osc-auth-changed', announced);
+
+    applyJwt({
+      storage: new LocalStorage({ projectId: 3 }),
+      api,
+      projectId: 3,
+      jwt: 'jwt-3',
+    });
+
+    expect(JSON.parse(stored.openstad)['3'].openStadUser).toEqual({
+      jwt: 'jwt-3',
+      apiUrl: 'http://api.local',
+    });
+    expect(api.currentUserJWT).toBe('jwt-3');
+    expect(mutate).toHaveBeenCalledWith({ type: 'current-user', projectId: 3 });
+    expect(announced).toHaveBeenCalledTimes(1);
   });
 });

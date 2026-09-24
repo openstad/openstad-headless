@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import doFetch from './fetch';
+import doFetch, { fetchWithStatus } from './fetch';
 
 function createLocalStorage() {
   const items = {};
@@ -133,6 +133,43 @@ describe('data-store fetch error enrichment', () => {
       clientErrorId: 'client-id-123',
       referenceId: 'client-id-123',
     });
+  });
+  test('fetchWithStatus returns an allowed error status as data without an osc-error', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 409,
+      json: async () => ({
+        status: 'fields_required',
+        missingFields: ['name'],
+      }),
+    });
+
+    const result = await fetchWithStatus.call(
+      { apiUrl: 'https://api.test' },
+      '/auth/project/2/exchange',
+      { method: 'POST' },
+      [409]
+    );
+
+    expect(result).toEqual({
+      status: 409,
+      data: { status: 'fields_required', missingFields: ['name'] },
+    });
+    expect(global.document.dispatchEvent).not.toHaveBeenCalled();
+  });
+
+  test('fetchWithStatus still throws and reports statuses that are not allowed', async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      statusText: 'Internal Server Error',
+      text: async () => '{}',
+    });
+
+    await expect(
+      fetchWithStatus.call({ apiUrl: 'https://api.test' }, '/x', {}, [409])
+    ).rejects.toMatchObject({ status: 500 });
+    expect(global.document.dispatchEvent).toHaveBeenCalledTimes(1);
   });
 });
 

@@ -1,6 +1,7 @@
 import { useSWRConfig } from 'swr';
 import useSWR from 'swr';
 
+import { LocalStorage } from '../../lib/local-storage';
 import API from './api';
 import useArea from './hooks/use-area.js';
 import useAreas from './hooks/use-areas.js';
@@ -9,7 +10,7 @@ import useChoiceGuideResults from './hooks/use-choiceguide-results';
 import useChoicesguide from './hooks/use-choicesguide';
 import useCommentsByProject from './hooks/use-comments-by-project';
 import useComments from './hooks/use-comments.js';
-import useCurrentUser from './hooks/use-current-user.js';
+import useCurrentUser, { applyJwt } from './hooks/use-current-user.js';
 import useDatalayer from './hooks/use-datalayer.js';
 import useEnqueteResultCount from './hooks/use-enquete-result-count';
 import useMarkers from './hooks/use-markers.js';
@@ -65,6 +66,14 @@ function DataStore(props = {}) {
   } = self.useCurrentUser({ ...props, projectId: self.projectId });
 
   self.currentUser = currentUser;
+
+  self.applyJwt = (jwt) =>
+    applyJwt({
+      storage: new LocalStorage({ projectId: self.projectId }),
+      api: self.api,
+      projectId: self.projectId,
+      jwt,
+    });
 
   // swr
   self.createKey = function (props, fetcherAsString) {
