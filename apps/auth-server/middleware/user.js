@@ -209,20 +209,32 @@ exports.update = async (req, res, next) => {
   });
 
   const clientId = req?.body?.clientId || null;
+  const hasEmailConsent = req.body.hasOwnProperty('emailNotificationConsent');
+  const hasPrivacyConsent = req.body.privacyConsent === true;
 
-  if (clientId && req.body.hasOwnProperty('emailNotificationConsent')) {
-    let projectId = null;
-
+  if (clientId && (hasEmailConsent || hasPrivacyConsent)) {
     await db.Client.findOne({ where: { clientId: clientId } })
       .then((client) => {
         if (client) {
-          projectId = String(client.id);
+          const projectId = String(client.id);
 
-          const currentConsent = {
-            ...(req.userObject.emailNotificationConsent || {}),
-          };
-          currentConsent[projectId] = req.body.emailNotificationConsent;
-          data.emailNotificationConsent = currentConsent;
+          if (hasEmailConsent) {
+            const currentConsent = {
+              ...(req.userObject.emailNotificationConsent || {}),
+            };
+            currentConsent[projectId] = req.body.emailNotificationConsent;
+            data.emailNotificationConsent = currentConsent;
+          }
+
+          if (hasPrivacyConsent) {
+            const currentPrivacyConsent = {
+              ...(req.userObject.privacyConsentAt || {}),
+            };
+            if (!currentPrivacyConsent.hasOwnProperty(projectId)) {
+              currentPrivacyConsent[projectId] = new Date().toISOString();
+            }
+            data.privacyConsentAt = currentPrivacyConsent;
+          }
 
           req.userObject
             .update(data)
