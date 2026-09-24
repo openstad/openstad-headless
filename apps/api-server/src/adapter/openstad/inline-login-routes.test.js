@@ -182,6 +182,32 @@ describe('exchange', () => {
     expect(jwt.verify(body.pendingJwt, secret).pending).toBe(true);
   });
 
+  it('sends the project labels and privacy link with fields_required', async () => {
+    service.fetchClient.mockResolvedValue(
+      targetClient({
+        requiredUserFields: ['privacyConsent'],
+        config: {
+          clientDisclaimerUrl: 'https://example.com/privacy',
+          requiredFields: {
+            requiredUserFieldsLabels: {
+              privacyConsent: 'Ik ga akkoord met de {link}',
+            },
+          },
+        },
+      })
+    );
+
+    const { body } = await call(routes.exchange, { sourceJwt: sourceJwt() });
+
+    expect(body.labels).toEqual({
+      privacyConsent: 'Ik ga akkoord met de {link}',
+    });
+    expect(body.privacy).toEqual({
+      url: 'https://example.com/privacy',
+      text: 'privacyverklaring',
+    });
+  });
+
   it('forbids the admin environment for non-privileged users', async () => {
     const { status } = await call(
       routes.exchange,

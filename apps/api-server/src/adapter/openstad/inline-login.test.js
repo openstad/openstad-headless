@@ -4,8 +4,10 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   applyClientConsents,
   evaluateClientGates,
+  fieldLabelsFor,
   mintJwt,
   pickAllowedFields,
+  privacyLinkFor,
   resolveTargetRole,
   upsertProjectUser,
 } from './inline-login.js';
@@ -293,5 +295,43 @@ describe('pickAllowedFields', () => {
         missingFields: ['emailNotificationConsent'],
       })
     ).toEqual({ emailNotificationConsent: false });
+  });
+});
+
+describe('fieldLabelsFor', () => {
+  it('returns only non-empty label overrides of the client', () => {
+    expect(
+      fieldLabelsFor({
+        config: {
+          requiredFields: {
+            requiredUserFieldsLabels: { name: 'Je naam', postcode: '' },
+          },
+        },
+      })
+    ).toEqual({ name: 'Je naam' });
+    expect(fieldLabelsFor({})).toEqual({});
+  });
+});
+
+describe('privacyLinkFor', () => {
+  it('returns the disclaimer link with a lower-case text', () => {
+    expect(
+      privacyLinkFor({
+        config: {
+          clientDisclaimerUrl: 'https://example.com/privacy',
+          clientDisclaimerText: 'Privacyverklaring',
+        },
+      })
+    ).toEqual({
+      url: 'https://example.com/privacy',
+      text: 'privacyverklaring',
+    });
+  });
+
+  it('refuses anything that is not an http(s) url', () => {
+    expect(
+      privacyLinkFor({ clientDisclaimerUrl: 'javascript:alert(1)' })
+    ).toBeNull();
+    expect(privacyLinkFor({})).toBeNull();
   });
 });
