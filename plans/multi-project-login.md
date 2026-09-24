@@ -18,7 +18,7 @@
 
 **Opt-in via env-flag:** de hele uitbreiding staat standaard **uit** en wordt geactiveerd met `MULTI_PROJECT_LOGIN=1` (env-var, te zetten op api-server én auth-server):
 
-- **api-server**: de nieuwe routes (`exchange`, `uniquecode-login`, `complete-fields`, `popup-callback`) worden alleen geregistreerd als de flag aan staat, en de flag wordt meegegeven in de widget-config zodat `useLoginFlow` zonder flag direct het bestaande redirect-pad kiest (geen kansloze AJAX-calls).
+- **api-server**: de nieuwe routes (`exchange`, `uniquecode-login`, `complete-fields`) worden alleen geregistreerd als de flag aan staat, de popup-modus van digest-login (`popup=1`) werkt alleen met de flag aan, en de flag wordt meegegeven in de widget-config zodat `useLoginFlow` zonder flag direct het bestaande redirect-pad kiest (geen kansloze AJAX-calls).
 - **auth-server**: het nieuwe admin-endpoint (Taak 5) en de per-project logout (Taak 8) staan alleen aan mét de flag; zonder flag blijft logout `session.destroy()` (huidig gedrag).
 - **Buiten de flag** (altijd actief, ook zonder flag): de pure security-fixes — JWT-hardening (Taak 3), sessie-hardening (Taak 4) en de project-scoped token-pickup (Taak 1, BC-veilig). Dat zijn gedragsneutrale verbeteringen voor legitieme flows, geen featuregedrag.
 - Zonder flag is het functionele gedrag gelijk aan vandaag; uitzetten van de flag = functionele rollback zonder deploy van code.
@@ -158,7 +158,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 | `packages/data-store/src/hooks/use-login-flow.test.js`           | Unit tests (vitest)                                                                                                |
 | `packages/ui/src/login-dialog/index.tsx` (+ `index.css`)         | Toegankelijke dialog met stappen: stemcode / velden / accesscode                                                   |
 | `packages/ui/src/login-dialog/login-dialog.test.tsx`             | Unit tests (vitest)                                                                                                |
-| `apps/api-server/src/adapter/openstad/popup-callback.js`         | Popup-callback (postMessage-handoff)                                                                               |
+| `apps/api-server/src/adapter/openstad/popup-login-page.js`       | Popup-pagina van digest-login bij `popup=1` (postMessage-handoff, terugval zonder opener)                          |
 | `cypress/e2e/multi-project-login.cy.js`                          | E2E-spec (root-level Cypress-setup; `apps/admin-server/cypress/` bestaat niet)                                     |
 
 **Gewijzigd:**
@@ -787,9 +787,23 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
 #### Taak 14: popup-login voor initiële login (geen identiteit bekend) en 2FA/telefoon-flows
 
+> **Status 2026-09-24: uitgevoerd (fase 4 plak 4a), met afwijkingen. 2FA-pad niet in de browser getest.**
+>
+> - Geen aparte `popup-callback`-route. Digest-login heeft een popup-modus: bij `popup=1` (alleen met `MULTI_PROJECT_LOGIN=true`) is de laatste stap geen redirect maar een kale HTML-pagina (`popup-login-page.js`). Met `window.opener` stuurt die `postMessage({ type: 'openstad-login', projectId, jwt })` naar de origin van de al gevalideerde `returnTo` en sluit zichzelf. Zonder opener doet hij `location.replace` naar de gewone redirect-URL. Zo blijft de validatie van `returnTo` op één plek en hoeft er geen extra URL in de allowlists. De login-route geeft `popup=1` door vóór `returnTo` (dat onge-encodeerd wordt aangeplakt), ook in de `forceNewLogin`-lus via logout.
+> - Frontend: in `useLoginFlow` opent de redirect-uitkomst met de vlag aan een popup (`window.open`). Het bericht telt alleen bij de juiste `source` (het popupvenster), `origin` (api), `type` en `projectId`. Bij succes volgen `applyJwt` en `resolve(true)`. Popup dicht zonder bericht: `resolve(false)`. Popup geblokkeerd: de bestaande redirect, met `onBeforeRedirect`. De helpers `popupLoginUrl` en `waitForPopupLogin` staan in `login-flow.js`.
+> - `expireOnClose` gaat niet mee in het bericht. Na `applyJwt` haalt `getCurrentUser` `/me` op, en dat geeft `expireOnClose` terug. Dat geldt ook voor de inline logins uit fase 3; in de browser bevestigd (`expireOnClose` in de storage, `openstad_active`-sessiecookie gezet).
+> - Magic link (Url): de link uit de mail opent meestal in een nieuw tabblad zonder opener. Dat tabblad valt terug op de gewone redirect en logt in, en het oorspronkelijke tabblad volgt via het `storage`-event (`onAuthChange`). Het popupvenster blijft dan op "E-mail verstuurd" staan tot de gebruiker hem sluit, en de oorspronkelijke actie (like) wordt niet vanzelf uitgevoerd. Op een CMS-pagina pakt de CMS het token uit de URL af voor zijn eigen sessie (`apps/cms-server/modules/openstad-auth/index.js`). Dat is bestaand gedrag bij elke redirect-login naar een CMS-pagina.
+> - Risico's: popup-blockers (`window.open` gebeurt pas na de async `exchange`; valt terug op de redirect), en een `Cross-Origin-Opener-Policy` op auth- of api-server in productie (verbreekt `window.opener`; de popup valt dan terug op de redirect in het venster zelf). Lokaal zijn er geen COOP-headers; op acceptatie controleren.
+> - Browsertest (lokaal testproject 204 "Multi-login popup test", Url-login, `votes.requiredUserRole: member`, resource 47878, likes-widget 9547; `allowedDomains` bevat ook `localhost:31410` voor de test buiten de CMS):
+>   - Uitgelogd, klik op "Ja": er opent een popup met het loginscherm van de auth-server, zonder navigatie van de pagina. Na de magic link in de popup sluit die zichzelf, en de like staat geregistreerd (0 naar 1 in de database, `aria-pressed`) zonder reload.
+>   - Popup sluiten zonder login: geen like, geen redirect, en de knop werkt opnieuw.
+>   - Magic link in een nieuw tabblad: zie hierboven.
+>   - Het 2FA-pad (`two_factor_required` → popup) is niet getest: een TOTP-code genereren kan niet in de testomgeving.
+> - Werkomgeving: de nodemon-watcher van de api-container kijkt naar de hele monorepo. Door `typecheck.sh` gegenereerde `packages/ui/types/*.d.ts` veroorzaken een reeks volledige `build-packages`-runs. Een `docker restart openstad-api-server` lost dat op.
+
 **Files:**
 
-- Create: `apps/api-server/src/adapter/openstad/popup-callback.js` (mini-HTML-response), route in `router.js`
+- Create: `apps/api-server/src/adapter/openstad/popup-login-page.js` (mini-HTML-response), popup-modus in digest-login in `router.js` (zie status)
 - Modify: `packages/data-store/src/hooks/use-login-flow.js` (fallback-stap 3)
 
 - [ ] **Stap 1: callback-route `GET /auth/project/:projectId/popup-callback`**
