@@ -676,9 +676,16 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
 #### Taak 11: `packages/ui` — `LoginDialog`
 
+> **Status 2026-09-24: uitgevoerd (fase 3 plak 3b), met afwijkingen.**
+>
+> - `packages/ui/src/login-dialog`: `LoginDialog` (Radix-`Dialog` met `aria-labelledby` op de kop) en een los `LoginDialogContent`, gebouwd met `@utrecht/component-library-react` en een stabiele `useId`. Let op: de `@utrecht`-`Textbox` zet bij `required` alleen `aria-required`; het echte `required`-attribuut komt van `inputRequired`, en `aria-invalid` komt uitsluitend van de `invalid`-prop.
+> - Labels: de api-server stuurt bij `fields_required` de per-client-labels (`labels`) en de privacy-link (`privacy: { url, text }`) mee; de frontend kent de standaardlabels uit `apps/auth-server/config/user.js`. Het privacy-label krijgt alleen een link als het de plaatshouder `{link}` bevat, net als het huidige inlogscherm. `emailNotificationConsent` is niet verplicht (ook "nee" is een geldige keuze), `privacyConsent` wel.
+> - Teksten staan in `loginDialogTexts`; foutcodes uit de flow (`code_required`, `invalid_code`, `too_many_attempts`, `invalid_access_code`) worden daar vertaald.
+> - Tests zonder nieuwe dependencies: `renderToStaticMarkup` op `LoginDialogContent` (labels, `role="alert"`, `aria-describedby`, `required`), plus de veldhelpers. Klikken, focus en Enter volgen in de browsertest van taak 13.
+
 **Files:** Create `packages/ui/src/login-dialog/index.tsx` + `index.css` (+ test), modify `packages/ui/src/index.tsx`.
 
-- [ ] **Stap 1: component op basis van bestaande `Dialog`** (`packages/ui/src/dialog/index.tsx`)
+- [x] **Stap 1: component op basis van bestaande `Dialog`** (`packages/ui/src/dialog/index.tsx`)
 
   Props:
 
@@ -702,17 +709,23 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
   WCAG-eisen (checklist in de test): elk input met `<label htmlFor>`, fout via `role="alert"` + `aria-describedby`, focus in dialog (Radix regelt trap/restore), submit met Enter, verplichte velden `aria-required`, zichtbare focus-stijl, teksten via props (vertaalbaar).
 
-- [ ] **Stap 2: veldtypes** — `accessCode`/tekstvelden als text-input; `privacyConsent`/`emailNotificationConsent` als checkbox met linkbare label-copy (zelfde injectie als `controllers/auth/required.js:4-93` doet met de privacy-URL).
+- [x] **Stap 2: veldtypes** — `accessCode`/tekstvelden als text-input; `privacyConsent`/`emailNotificationConsent` als checkbox met linkbare label-copy (zelfde injectie als `controllers/auth/required.js:4-93` doet met de privacy-URL).
 
-- [ ] **Stap 3: unit tests** (vitest + testing-library): rendert stemcode-stap, submit callback, foutmelding met `role="alert"`, velden-stap rendert `missingFields`.
+- [x] **Stap 3: unit tests** (vitest + testing-library): rendert stemcode-stap, submit callback, foutmelding met `role="alert"`, velden-stap rendert `missingFields`.
 
-- [ ] **Stap 4: verifieer** — `cd packages/ui && npx vitest run src/login-dialog`.
+- [x] **Stap 4: verifieer** — `cd packages/ui && npx vitest run src/login-dialog`.
 
 #### Taak 12: `useLoginFlow` hook (data-store)
 
+> **Status 2026-09-24: uitgevoerd (fase 3 plak 3b), met afwijkingen.**
+>
+> - De beslislogica staat in `packages/data-store/src/login-flow.js` als pure functies (`exchangeKnownIdentities`, `outcomeFromCodeResult`, `outcomeFromFieldsResult`) en is unit-getest. De hook (`hooks/use-login-flow.js`, `datastore.useLoginFlow(props)`) koppelt die aan React-state en heeft zelf geen unit test; het samenspel wordt in taak 13 in de browser gecontroleerd.
+> - `requireLogin({ loginUrl, onBeforeRedirect })` resolvet `true` (ingelogd, JWT via `applyJwt`) of `false` (dialog gesloten). Zonder `multiProjectLogin` in de widget-config, zonder bruikbare identiteit, bij `two_factor_required`/`phonenumber_required`, of bij een netwerkfout (gelogd) volgt de bestaande redirect naar `loginUrl`, na `onBeforeRedirect` (voor de pending-vote-stash).
+> - `exchange` met `401`/`403` probeert de volgende identiteit.
+
 **Files:** Create `packages/data-store/src/hooks/use-login-flow.js` (+ test), modify `packages/data-store/src/index.js` (binden zoals `useCurrentUser` op `index.js:47`).
 
-- [ ] **Stap 1: implementatie**
+- [x] **Stap 1: implementatie**
 
   De hook levert `{ requireLogin, dialogProps }`. `requireLogin()` retourneert een Promise die resolvet met de ingelogde user of `null` (geannuleerd):
   1. Al ingelogd (`currentUser.id`)? → resolve.
@@ -725,9 +738,9 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
   3. Geen identiteiten (of alleen niet-inline-oplosbare statussen) → fallback: `props.login.url` redirect (huidig gedrag; popup-variant komt in Taak 14).
   4. Dialog gesloten door gebruiker → resolve `null`.
 
-- [ ] **Stap 2: unit tests** — mock API: direct-exchange-pad, stemcode-pad, velden-pad, stemcode→velden-keten, `two_factor_required` → fallback (geen dialog, geen jwt), annuleren, geen identiteiten → geen dialog.
+- [x] **Stap 2: unit tests** — mock API: direct-exchange-pad, stemcode-pad, velden-pad, stemcode→velden-keten, `two_factor_required` → fallback (geen dialog, geen jwt), annuleren, geen identiteiten → geen dialog.
 
-- [ ] **Stap 3: verifieer** — `cd packages/data-store && npx vitest run src/hooks/use-login-flow.test.js`.
+- [x] **Stap 3: verifieer** — `cd packages/data-store && npx vitest run src/hooks/use-login-flow.test.js`.
 
 #### Taak 13: integratie in `likes` en `stem-begroot`
 
