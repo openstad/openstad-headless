@@ -1,9 +1,11 @@
-import { describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import {
   exchangeKnownIdentities,
   outcomeFromCodeResult,
   outcomeFromFieldsResult,
+  popupLoginUrl,
+  waitForPopupLogin,
 } from './login-flow';
 
 const apiReturning = (...results) => ({
@@ -136,5 +138,91 @@ describe('unique code and field results', () => {
     expect(outcomeFromFieldsResult({ status: 401, data: {} })).toEqual({
       type: 'redirect',
     });
+  });
+});
+
+describe('popupLoginUrl', () => {
+  test('adds popup=1 and keeps the encoded redirect uri', () => {
+    const url = popupLoginUrl(
+      'https://api.example.com/auth/project/2/login?useAuth=default&redirectUri=https%3A%2F%2Fsite%2Fpage%3Fa%3D1%26b%3D2'
+    );
+
+    const params = new URL(url).searchParams;
+    expect(params.get('popup')).toBe('1');
+    expect(params.get('useAuth')).toBe('default');
+    expect(params.get('redirectUri')).toBe('https://site/page?a=1&b=2');
+  });
+});
+
+describe('waitForPopupLogin', () => {
+  const apiOrigin = 'https://api.example.com';
+  let listeners;
+  let win;
+  let popup;
+
+  const send = (event) => listeners.forEach((listener) => listener(event));
+  const message = (overrides = {}) => ({
+    source: popup,
+    origin: apiOrigin,
+    data: { type: 'openstad-login', projectId: 2, jwt: 'jwt-2' },
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    listeners = new Set();
+    popup = { closed: false };
+    win = {
+      addEventListener: (type, listener) => listeners.add(listener),
+      removeEventListener: (type, listener) => listeners.delete(listener),
+      setInterval: (callback, ms) => setInterval(callback, ms),
+      clearInterval: (id) => clearInterval(id),
+    };
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const wait = () =>
+    waitForPopupLogin({ popup, apiOrigin, projectId: '2', win });
+
+  test('resolves with the jwt from the popup', async () => {
+    const result = wait();
+    send(message());
+
+    expect(await result).toBe('jwt-2');
+    expect(listeners.size).toBe(0);
+  });
+
+  test.each([
+    ['another origin', { origin: 'https://evil.example.com' }],
+    ['another window', { source: {} }],
+    [
+      'another project',
+      { data: { type: 'openstad-login', projectId: 3, jwt: 'jwt-3' } },
+    ],
+    ['another type', { data: { type: 'other', projectId: 2, jwt: 'jwt-2' } }],
+    [
+      'a jwt that is not a string',
+      { data: { type: 'openstad-login', projectId: 2, jwt: { a: 1 } } },
+    ],
+    ['a message without data', { data: null }],
+  ])('ignores a message from %s', async (label, overrides) => {
+    const result = wait();
+    send(message(overrides));
+    popup.closed = true;
+    vi.advanceTimersByTime(500);
+
+    expect(await result).toBe(null);
+  });
+
+  test('resolves with null when the popup is closed', async () => {
+    const result = wait();
+    popup.closed = true;
+    vi.advanceTimersByTime(500);
+
+    expect(await result).toBe(null);
+    expect(listeners.size).toBe(0);
   });
 });

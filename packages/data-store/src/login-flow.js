@@ -44,3 +44,36 @@ export function outcomeFromFieldsResult(result) {
   }
   return outcomeFromGateResult(result);
 }
+
+export function popupLoginUrl(url) {
+  const popupUrl = new URL(url);
+  popupUrl.searchParams.set('popup', '1');
+  return popupUrl.toString();
+}
+
+export function waitForPopupLogin({
+  popup,
+  apiOrigin,
+  projectId,
+  win = window,
+}) {
+  return new Promise((resolve) => {
+    const finish = (jwt) => {
+      win.removeEventListener('message', onMessage);
+      win.clearInterval(timer);
+      resolve(jwt);
+    };
+    const onMessage = (event) => {
+      const data = event.data || {};
+      if (event.source !== popup || event.origin !== apiOrigin) return;
+      if (data.type !== 'openstad-login') return;
+      if (String(data.projectId) !== String(projectId)) return;
+      if (typeof data.jwt !== 'string') return;
+      finish(data.jwt);
+    };
+    const timer = win.setInterval(() => {
+      if (popup.closed) finish(null);
+    }, 500);
+    win.addEventListener('message', onMessage);
+  });
+}
