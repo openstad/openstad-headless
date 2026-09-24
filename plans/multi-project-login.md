@@ -549,7 +549,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
 #### Taak 8: per-project logout
 
-> **Status 2026-09-24: uitgesteld tot na fase 3.** `authMw.check` (`apps/auth-server/middleware/auth.js`) laat een geldige SSO-sessie door naar `/dialog/authorize`, ook zonder `clientAuth` voor die client; alleen de admin-client eist opnieuw inloggen. Alleen `clearClientAuth` zou dus betekenen dat je na uitloggen bij project A met één klik, zonder inloggegevens, weer binnen bent. Op een gedeelde computer is dat een risico. Tot er een oplossing is die opnieuw inloggen per client afdwingt, blijft de volledige logout, ook met de vlag aan.
+> **Status 2026-09-24: uitgesteld tot na fase 3.** Let op: de huidige logout wist in de browser de logins van **alle** projecten (`currentUser.logout()` doet `storage.destroy()` in `packages/data-store/src/hooks/use-current-user.js`), en stem-begroot logt na elke geslaagde stem uit (`moveToStep4AndLogout`). Stap 3 hieronder ("de widget wist alleen zijn eigen storage-namespace (bestaand gedrag)") klopt dus niet met het huidige gedrag. `authMw.check` (`apps/auth-server/middleware/auth.js`) laat een geldige SSO-sessie door naar `/dialog/authorize`, ook zonder `clientAuth` voor die client; alleen de admin-client eist opnieuw inloggen. Alleen `clearClientAuth` zou dus betekenen dat je na uitloggen bij project A met één klik, zonder inloggegevens, weer binnen bent. Op een gedeelde computer is dat een risico. Tot er een oplossing is die opnieuw inloggen per client afdwingt, blijft de volledige logout, ook met de vlag aan.
 
 **Files:**
 
@@ -744,12 +744,20 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
 #### Taak 13: integratie in `likes` en `stem-begroot`
 
+> **Status 2026-09-24: uitgevoerd (fase 3 plak 3c) en end-to-end in de browser getest.**
+>
+> - likes: `doVote` gebruikt `requireLogin({ loginUrl, onBeforeRedirect })`; de pending-vote-stash gebeurt alleen nog vlak voor een redirect. Bij `false` (dialog gesloten) gaat `isBusy` terug. stem-begroot: de stemcode-knop in `Step3` gebruikt `requireLogin` met een async `loginUrl` (de pending stem wordt pas bij een echte redirect op de server opgeslagen); na een inline login doet het bestaande effect de rest (bevestigingsstap of automatisch indienen). De herlogin-knop op stap 3 blijft een redirect.
+> - Bij `requiredUserRole: 'anonymous'` blijft de redirect: anders zou een login van een ander project worden ingewisseld en hing de stem aan een echt account.
+> - `useLoginFlow` accepteert een async `loginUrl`. `LoginDialog` zet bij openen de focus in het eerste veld en na sluiten terug op het element van waaruit hij werd geopend (de `Dialog` heeft geen Radix-`Trigger`).
+> - Browsertest (lokaal, testdata tijdelijk aangepast en teruggezet: client `uniquecode` alleen `UniqueCode`, project 2 `votes.requiredUserRole` op `member`): met een bestaande login van project 198 op een pagina met likes en een begrootmodule van project 2 opent klikken een stemcode-dialog zonder redirect of reload; een foute code geeft een aangekondigde fout; Escape sluit zonder redirect; een goede code leidt naar de velden-stap met de projectlabels en de privacy-link; daarna is de like geregistreerd (teller 3 naar 4, in de database bevestigd) en zijn project 2 en 198 tegelijk ingelogd. In de begrootmodule hetzelfde tot en met twee ingediende stemmen (in de database bevestigd), gevolgd door de bekende logout (zie taak 8).
+> - Testvaliditeit: een door Playwright geserveerde pagina mag in Chrome geen scripts van `localhost` laden (Local Network Access); de test gebruikt daarom een echte CMS-pagina met via de DOM toegevoegde widget-scripts.
+
 **Files:**
 
 - Modify: `packages/likes/src/likes.tsx:125-136`
 - Modify: `packages/stem-begroot/src/stem-begroot.tsx:1354-1355` en `packages/stem-begroot/src/step-3/index.tsx:41-96`
 
-- [ ] **Stap 1: likes** — vervang in de `!hasRole(...)`-branch de redirect:
+- [x] **Stap 1: likes** — vervang in de `!hasRole(...)`-branch de redirect:
 
   ```tsx
   const { requireLogin, dialogProps } = datastore.useLoginFlow({ ...props });
@@ -767,11 +775,11 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
   Let op `isBusy`: `doVote` zet `isBusy=true` (`likes.tsx:118-119`) vóór de rol-check en de huidige redirect-branch reset dat nooit (de pagina navigeerde weg). Met een awaited `requireLogin()` die bij annuleren `null` resolvet, blijft de widget anders in busy-state hangen — vandaar de try/finally. De bestaande pending-vote-stash (`storage.set('osc-resource-vote-pending', ...)`, `likes.tsx:135`) blijft nodig voor de redirect-fallback, maar bij een geslaagde inline login wordt de stem direct uitgevoerd — geen reload, dus geen stash.
 
-- [ ] **Stap 2: stem-begroot** — zelfde patroon op de submit-gate (`stem-begroot.tsx:1354-1355`) en in `step-3/index.tsx:44,95`; controleer daar hetzelfde busy-state-patroon en reset via try/finally. De post-login resume-flow (`stem-begroot.tsx:1438`) blijft intact voor de redirect-fallback.
+- [x] **Stap 2: stem-begroot** — zelfde patroon op de submit-gate (`stem-begroot.tsx:1354-1355`) en in `step-3/index.tsx:44,95`; controleer daar hetzelfde busy-state-patroon en reset via try/finally. De post-login resume-flow (`stem-begroot.tsx:1438`) blijft intact voor de redirect-fallback.
 
-- [ ] **Stap 3: `npm run build`** in beide packages (vereist voor admin-preview, zie CLAUDE.md).
+- [x] **Stap 3: `npm run build`** in beide packages (vereist voor admin-preview, zie CLAUDE.md).
 
-- [ ] **Stap 4: verifieer (browser)** — testpagina met likes-widget van project 1 en stem-begroot-widget van project 2 (UniqueCode actief): log in via project 1; klik stem in project 2 → dialog vraagt stemcode → invullen → stem geregistreerd zonder page refresh; beide widgets tonen ingelogde staat. Annuleren van de dialog → widget niet in busy-state.
+- [x] **Stap 4: verifieer (browser)** — testpagina met likes-widget van project 1 en stem-begroot-widget van project 2 (UniqueCode actief): log in via project 1; klik stem in project 2 → dialog vraagt stemcode → invullen → stem geregistreerd zonder page refresh; beide widgets tonen ingelogde staat. Annuleren van de dialog → widget niet in busy-state.
 
 - [ ] **Stap 5 (vervolg, apart in te plannen):** zelfde integratie voor `enquete`, `resource-form`, `comments`, `choiceguide`, `document-map`, `distribution-module`, `account`, `simple-voting`. Elk: `hasRole`-branch → `requireLogin` + `<LoginDialog>`.
 
