@@ -487,6 +487,18 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
 #### Taak 7: api-server routes `exchange`, `uniquecode-login`, `complete-fields`
 
+> **Status 2026-09-24: uitgevoerd, met afwijkingen.**
+>
+> - Handlers in `apps/api-server/src/adapter/openstad/inline-login-routes.js`, met één gedeelde afronding (`respondWithGates`). Routes alleen geregistreerd als `MULTI_PROJECT_LOGIN === 'true'`; de widget-config krijgt `multiProjectLogin`. `docker-compose.yml` geeft de vlag door aan api- en auth-server (standaard `false`).
+> - Contract: `200 { jwt, expireOnClose? }` (zoals `connect-user`), `409 { status }` voor `two_factor_required`, `phonenumber_required` en `uniquecode_required`, `409 { status: 'fields_required', missingFields, pendingJwt }`, `403 { status: 'environment_forbidden' }`, `401 { status: 'invalid_token' | 'not_allowed' | 'invalid_code' }`, `429 { status: 'too_many_attempts' }`, `422 { status: 'invalid_fields', invalidFields }`.
+> - De rol voor het doelproject wordt zelf bepaald (`resolveTargetRole`): de rol-rij voor de doel-client, anders `member`. De standaard-`userMapping` kan via het admin-pad terugvallen op `user.roles[0]`, de rol van een ander project.
+> - Bron-check bij `exchange`: niet `anonymous`, en de bron-`authConfig` gebruikt de `openstad`-adapter met dezelfde `serverUrlInternal` als het doel. Providernamen (`openstad`, `default`) zijn `useAuth`-namen en zeggen niets over de auth-server.
+> - Gates draaien op de ruwe auth-server-user; de upsert krijgt de gemapte. De per-client-consentherschrijving uit digest-login is `applyClientConsents` geworden en wordt door alle paden gebruikt.
+> - `complete-fields` stuurt alleen een whitelist van ontbrekende velden plus `id` naar de auth-server, nooit een rol. `privacyConsent: true` wordt door `userMw.update` op de auth-server als `privacyConsentAt[client.id]` opgeslagen (nieuw; bestaande tijdstempels blijven).
+> - Geen extra rate limiter per route: `Server.js` past `rateLimiter()` al op alle routes toe. De lockout op de auth-server (taak 5) blijft de echte rem. Let op: `trust proxy: true` maakt `req.ip` vervalsbaar via `X-Forwarded-For`, dus de per-IP-lockout is te omzeilen; het plafond per client niet.
+> - `missingFields` bevat alleen veldnamen; labels regelt fase 3 (taak 11).
+> - Tests zijn vitest (`inline-login-routes.test.js`, `service.test.js`, `inline-login.test.js`, auth-server `middleware/user.test.js`). End-to-end lokaal geverifieerd: stemcode fout en goed, `fields_required` via `complete-fields` naar een definitieve JWT, en `exchange` van project 2 naar 17. De `422` bij een foute `accessCode` is alleen unit-getest.
+
 > **Aanvulling 2026-09-24 (uit taak 5 en 6):** de routes sturen het IP van de eindgebruiker als `ip` mee naar `POST /api/admin/unique-code-login`; hier komen ook de service-calls `loginWithUniqueCode` en `fetchUniqueCodesForUser` bij (uit taak 6 stap 2); en de routes halen client en codes op en roepen daarna `evaluateClientGates` aan.
 
 **Files:**
@@ -494,7 +506,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 - Modify: `apps/api-server/src/adapter/openstad/router.js` (routes registreren)
 - Modify: `apps/api-server/src/adapter/openstad/inline-login.js` (handlers)
 
-- [ ] **Stap 1: `POST /auth/project/:projectId/exchange`**
+- [x] **Stap 1: `POST /auth/project/:projectId/exchange`**
 
   Body: `{ sourceJwt }`. Handler:
   1. `jwt.verify(sourceJwt, config.auth['jwtSecret'])` — het **globale** secret, net als `parseJwt` (P3) → weiger `pending`-claims → laad bron-userrow (`db.User.findByPk(claims.userId)`).
@@ -505,11 +517,11 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
      - `fields_required` → upsert user (zodat er iets is om aan te vullen), mint `pendingJwt`, → `409 { status, missingFields, labels, pendingJwt }`.
      - `ok` → `upsertProjectUser`, mint JWT → `200 { jwt }`.
 
-- [ ] **Stap 2: `POST /auth/project/:projectId/uniquecode-login`**
+- [x] **Stap 2: `POST /auth/project/:projectId/uniquecode-login`**
 
   Body: `{ code }`. Handler: `service.loginWithUniqueCode` → bij `invalid_code` `401`, bij `too_many_attempts` `429` doorgeven; anders userdata → `checkClientGates` (UniqueCode-gate is nu per definitie vervuld; de overige drie gelden nog) → bij `fields_required` pendingJwt-pad, bij `phonenumber_required`/`two_factor_required` `409`, anders `200 { jwt }`.
 
-- [ ] **Stap 3: `POST /auth/project/:projectId/complete-fields`**
+- [x] **Stap 3: `POST /auth/project/:projectId/complete-fields`**
 
   Body: `{ pendingJwt, fields }`. Handler:
   1. Verifieer `pendingJwt` (globale secret) en eis claim `pending: true`.
@@ -522,11 +534,11 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
   Strengere limiter op `uniquecode-login` en `complete-fields`, naar het patroon van `@openstad-headless/lib/rateLimiter` zoals gebruikt in `apps/api-server/src/routes/notification/*.js` — bijv. 10 requests / 15 min / IP. Bekende beperkingen (P7): in-memory per instance, IP-key, private IPs uitgezonderd — daarom is de échte bescherming de server-side lockout op de auth-server (Taak 5 stap 2), die alle instances en NAT-scenario's dekt.
 
-- [ ] **Stap 5: routes registreren** in `router.js`, zelfde plek als `connect-user` (`:18`), zodat `useAuth`-provider-resolutie (`src/routes/auth/index.js:16-49`) gewoon werkt. **Alleen registreren als `process.env.MULTI_PROJECT_LOGIN` truthy is** (opt-in, zie §1); geef de flag ook mee in de widget-config (naast de login-URL's in `src/routes/widget/widget.js`) zodat `useLoginFlow` zonder flag direct het redirect-pad kiest.
+- [x] **Stap 5: routes registreren** in `router.js`, zelfde plek als `connect-user` (`:18`), zodat `useAuth`-provider-resolutie (`src/routes/auth/index.js:16-49`) gewoon werkt. **Alleen registreren als `process.env.MULTI_PROJECT_LOGIN` truthy is** (opt-in, zie §1); geef de flag ook mee in de widget-config (naast de login-URL's in `src/routes/widget/widget.js`) zodat `useLoginFlow` zonder flag direct het redirect-pad kiest.
 
-- [ ] **Stap 6: unit tests** (jest) per route: happy path, `uniquecode_required`, `fields_required` → complete-fields → jwt, `phonenumber_required`, `two_factor_required` (rol onder `twoFactorRoles` → nooit 200), invalid code, 429-doorgifte, pendingJwt als Bearer op reguliere API → anoniem/401, anonymous-bron geweigerd.
+- [x] **Stap 6: unit tests** (jest) per route: happy path, `uniquecode_required`, `fields_required` → complete-fields → jwt, `phonenumber_required`, `two_factor_required` (rol onder `twoFactorRoles` → nooit 200), invalid code, 429-doorgifte, pendingJwt als Bearer op reguliere API → anoniem/401, anonymous-bron geweigerd.
 
-- [ ] **Stap 7: verifieer** — `cd apps/api-server && npm test` groen + curl-scenario tegen lokale stack:
+- [x] **Stap 7: verifieer** — `cd apps/api-server && npm test` groen + curl-scenario tegen lokale stack:
 
   ```bash
   # gegeven een geldig project-1 jwt:
@@ -536,6 +548,8 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
   ```
 
 #### Taak 8: per-project logout
+
+> **Status 2026-09-24: uitgesteld tot na fase 3.** `authMw.check` (`apps/auth-server/middleware/auth.js`) laat een geldige SSO-sessie door naar `/dialog/authorize`, ook zonder `clientAuth` voor die client; alleen de admin-client eist opnieuw inloggen. Alleen `clearClientAuth` zou dus betekenen dat je na uitloggen bij project A met één klik, zonder inloggegevens, weer binnen bent. Op een gedeelde computer is dat een risico. Tot er een oplossing is die opnieuw inloggen per client afdwingt, blijft de volledige logout, ook met de vlag aan.
 
 **Files:**
 
