@@ -19,11 +19,14 @@ export default function useLoginFlow(props) {
     return current;
   };
 
-  const redirect = () => {
+  const redirect = async () => {
     const current = close();
     if (!current) return;
     if (current.onBeforeRedirect) current.onBeforeRedirect();
-    document.location.href = current.loginUrl;
+    document.location.href =
+      typeof current.loginUrl === 'function'
+        ? await current.loginUrl()
+        : current.loginUrl;
   };
 
   const failAndRedirect = (err) => {
