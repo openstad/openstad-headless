@@ -10,6 +10,7 @@ type Props = {
     preFilterTags?: Array<number>;
     parentStopUsingDefaultValue?: boolean;
     inlineOptions?: boolean;
+    selectedParentTagIds?: number[];
 };
-declare const MultiSelectTagFilter: ({ dataStore, tagType, onUpdateFilter, selected, onlyIncludeIds, preFilterTags, parentStopUsingDefaultValue, inlineOptions, ...props }: Props) => false | React.JSX.Element;
+declare const MultiSelectTagFilter: ({ dataStore, tagType, onUpdateFilter, selected, onlyIncludeIds, preFilterTags, parentStopUsingDefaultValue, inlineOptions, selectedParentTagIds, ...props }: Props) => false | React.JSX.Element;
 export { MultiSelectTagFilter };
