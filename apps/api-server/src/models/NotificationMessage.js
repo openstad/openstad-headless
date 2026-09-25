@@ -13,16 +13,28 @@ const nunjucksEnvReady = (async () => {
   return nunjucksEnv;
 })();
 
+async function readTemplateFile(templatePath) {
+  try {
+    return await fs.readFile(templatePath);
+  } catch (err) {
+    return null;
+  }
+}
+
 async function loadDefaultTemplate(type) {
-  const templatePath = path.join(
+  const coreTemplatePath = path.join(
     __dirname,
     '../notifications/default-templates',
     path.basename(type || '')
   );
-  let file;
-  try {
-    file = await fs.readFile(templatePath);
-  } catch (err) {
+  let file = await readTemplateFile(coreTemplatePath);
+  if (!file) {
+    const pluginType = require('../services/plugin-extensions')
+      .get()
+      .getNotificationType(type);
+    file = pluginType ? await readTemplateFile(pluginType.templatePath) : null;
+  }
+  if (!file) {
     return null;
   }
   file = file.toString();

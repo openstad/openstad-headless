@@ -24,6 +24,15 @@ export interface PluginApiSection {
   middleware?: Array<{ path: string; position?: string; priority?: number }>;
   migrations?: { directory: string };
   envVars?: string[];
+  linkRequestHandler?: { handler: string };
+  contactHandlers?: Array<{ key: string; label: string; handler: string }>;
+  sources?: Array<{ key: string; label: string; handler: string }>;
+  notifications?: Array<{
+    type: string;
+    label: string;
+    template: string;
+    immediate?: boolean;
+  }>;
 }
 
 export interface PluginAdminSection {
