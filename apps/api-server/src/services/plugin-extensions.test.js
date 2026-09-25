@@ -53,8 +53,8 @@ describe('plugin extensions', () => {
     expect(
       await extensions
         .getLinkRequestHandler()
-        .submit({ selection: [], mode: 'create' })
-    ).toEqual({ received: 0, mode: 'create' });
+        .submit({ selection: [], removed: [], mode: 'create' })
+    ).toEqual({ received: 0, removed: 0, mode: 'create' });
     expect(await extensions.getContactHandler('link-request').handle()).toEqual(
       { handled: true }
     );

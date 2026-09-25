@@ -48,21 +48,43 @@ function parseSelection(links) {
   });
 }
 
-function assertHandlerAvailable(selection) {
-  if (selection && !pluginExtensions.get().getLinkRequestHandler()) {
+function parseRemoved(removedLinks) {
+  const parsed = parseSelection(removedLinks);
+  return parsed ? parsed.map(({ source, id }) => ({ source, id })) : null;
+}
+
+function assertHandlerAvailable(selection, removed) {
+  if (
+    (selection || removed) &&
+    !pluginExtensions.get().getLinkRequestHandler()
+  ) {
     throw createError(422, 'Link requests are not available');
   }
 }
 
-async function submitSelection({ project, resource, selection, user, mode }) {
+async function submitSelection({
+  project,
+  resource,
+  selection,
+  removed,
+  user,
+  mode,
+}) {
   const handler = pluginExtensions.get().getLinkRequestHandler();
-  if (!selection) return null;
+  if (!selection && !removed) return null;
   if (!handler) {
     throw createError(422, 'Link requests are not available');
   }
 
   try {
-    return await handler.submit({ project, resource, selection, user, mode });
+    return await handler.submit({
+      project,
+      resource,
+      selection: selection || [],
+      removed: removed || [],
+      user,
+      mode,
+    });
   } catch (err) {
     console.error(
       `[resource-link-requests] ${handler.pluginName} failed to handle ${mode} link requests for resource ${resource.id}:`,
@@ -72,4 +94,9 @@ async function submitSelection({ project, resource, selection, user, mode }) {
   }
 }
 
-module.exports = { parseSelection, assertHandlerAvailable, submitSelection };
+module.exports = {
+  parseSelection,
+  parseRemoved,
+  assertHandlerAvailable,
+  submitSelection,
+};
