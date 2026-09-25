@@ -30,6 +30,10 @@ router.use(
 );
 
 // resources
+router.use(
+  '/project/:projectId(\\d+)/resource/:resourceId(\\d+)/links',
+  require('./resource-links')
+);
 router.use('/project/:projectId(\\d+)/resource', require('./resource'));
 //router.use( '/project/:projectId(\\d+)/resource', require('./resource.old') );
 
