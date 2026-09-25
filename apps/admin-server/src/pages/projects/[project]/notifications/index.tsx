@@ -25,6 +25,7 @@ export default function ProjectNotifications() {
     { type: 'notification comment reply - user', label: '' },
     { type: 'new comment - admin', label: '' },
     { type: 'contact message - user', label: '' },
+    { type: 'new modbreak - user feedback', label: '' },
   ];
 
   const { capabilities } = usePluginCapabilities();
@@ -162,6 +163,29 @@ export default function ProjectNotifications() {
                           -modBreaks
                           <br />
                           -publishDateHumanized
+                        </p>
+                        <br />
+                        <p>
+                          newModBreaks (lijst met nieuw geplaatste modbreaks, te
+                          gebruiken met &#123;% for mb in newModBreaks %&#125;):
+                          <br />
+                          -description
+                          <br />
+                          -authorName
+                          <br />
+                          -modBreakDate
+                        </p>
+                        <br />
+                        <p>
+                          changedModBreaks (lijst met aangepaste modbreaks, te
+                          gebruiken met &#123;% for mb in changedModBreaks
+                          %&#125;):
+                          <br />
+                          -description
+                          <br />
+                          -authorName
+                          <br />
+                          -modBreakDate
                         </p>
                         <br />
                         <p>

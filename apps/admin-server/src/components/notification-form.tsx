@@ -384,6 +384,71 @@ const initialDataAccountExpiry = `<mjml>
         </mj-body>
     </mjml>`;
 
+const initialDataModBreakNotification = `<mjml>
+  <mj-body>
+    <mj-raw>
+      <!-- Company Header -->
+    </mj-raw>
+    <mj-section>
+      <mj-column width="200px">
+        <mj-image src="{{ imagePath }}/logo-openstad.png"> </mj-image>
+      </mj-column>
+    </mj-section>
+    <mj-raw>
+      <!-- Image Header -->
+    </mj-raw>
+    <mj-section>
+      <mj-column width="600px">
+        <mj-image src="{{ imagePath }}/mail-header.jpg"></mj-image>
+      </mj-column>
+    </mj-section>
+    <mj-raw>
+      <!-- Mail context -->
+    </mj-raw>
+    <mj-section>
+      <mj-column width="500px">
+        <mj-text font-size="20px" font-family="Helvetica Neue">{% if newModBreaks and newModBreaks.length %}Er is een modbreak geplaatst.{% else %}Een modbreak is aangepast.{% endif %}</mj-text>
+        <mj-text>Beste {{ user.name }},</mj-text>
+        {% if newModBreaks and newModBreaks.length %}
+        <mj-text color="#525252">De redactie heeft een bericht geplaatst bij uw inzending "{{ resource.title }}":</mj-text>
+        {% for mb in newModBreaks %}
+        <mj-text color="#525252" font-style="italic">{{ mb.description | safe }} &mdash; {{ mb.authorName }}</mj-text>
+        {% endfor %}
+        {% endif %}
+        {% if changedModBreaks and changedModBreaks.length %}
+        <mj-text color="#525252">De redactie heeft een bericht bij uw inzending "{{ resource.title }}" aangepast:</mj-text>
+        {% for mb in changedModBreaks %}
+        <mj-text color="#525252" font-style="italic">{{ mb.description | safe }} &mdash; {{ mb.authorName }}</mj-text>
+        {% endfor %}
+        {% endif %}
+        {% if redirectUrl %}
+        <mj-button background-color="#12B886" href="{{ redirectUrl }}">Weergeven</mj-button>
+        {% endif %}
+      </mj-column>
+    </mj-section>
+    {% if redirectUrl %}
+    <mj-raw>
+      <!-- ALternate link -->
+    </mj-raw>
+    <mj-section>
+      <mj-column width="400px">
+        <mj-text>Of gebruik deze link in je browser:</mj-text>
+      </mj-column>
+      <mj-column>
+        <mj-text>{{ redirectUrl }}</mj-text>
+      </mj-column>
+    </mj-section>
+    {% endif %}
+    {% if unsubscribeUrl %}
+    <mj-section>
+      <mj-column>
+        <mj-text font-size="12px" color="#999999">Wilt u geen e-mails meer ontvangen? <a href="{{ unsubscribeUrl }}">Uitschrijven</a></mj-text>
+      </mj-column>
+    </mj-section>
+    {% endif %}
+  </mj-body>
+</mjml>`;
+
 type Props = {
   type:
     | 'login email'
@@ -398,6 +463,7 @@ type Props = {
     | 'notification comment reply - user'
     | 'new comment - admin'
     | 'contact message - user'
+    | 'new modbreak - user feedback'
     | (string & {});
   typeLabel?: string;
   engine?: 'email' | 'sms';
@@ -428,6 +494,8 @@ const notificationTypes: Record<string, string> = {
     'Nieuwe reactie op een reactie - Notificatie naar de gebruiker',
   'new comment - admin': 'Nieuwe reactie - Notificatie naar de admin',
   'contact message - user': 'Contactbericht - Notificatie naar de indiener',
+  'new modbreak - user feedback':
+    'Modbreak geplaatst - Notificatie naar de gebruiker',
 };
 
 const formSchema = z.object({
@@ -531,7 +599,10 @@ export function NotificationForm({
     (type === 'new comment - admin'
       ? initialDataCommentAdminNotification
       : '') ||
-    (type === 'user account about to expire' ? initialDataAccountExpiry : '');
+    (type === 'user account about to expire' ? initialDataAccountExpiry : '') ||
+    (type === 'new modbreak - user feedback'
+      ? initialDataModBreakNotification
+      : '');
 
   const defaults = React.useCallback(
     () => ({

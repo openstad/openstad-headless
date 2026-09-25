@@ -46,6 +46,7 @@ const formSchema = z.object({
   fromName: z.string().optional(),
   sendUpdatedResourceAdminEmail: z.boolean().optional(),
   sendCommentAdminEmail: z.boolean().optional(),
+  sendModBreakNotification: z.boolean().optional(),
   pdfAttachmentEnabled: z.boolean().optional(),
   pdfAttachmentAdminEnabled: z.boolean().optional(),
   pdfTitle: z.string().optional(),
@@ -70,6 +71,8 @@ export default function ProjectSettingsNotifications({
         data?.emailConfig?.[category]?.sendUpdatedResourceAdminEmail || false,
       sendCommentAdminEmail:
         data?.emailConfig?.[category]?.sendCommentAdminEmail || false,
+      sendModBreakNotification:
+        data?.emailConfig?.[category]?.sendModBreakNotification || false,
       pdfAttachmentEnabled:
         data?.emailConfig?.[category]?.pdfAttachmentEnabled || false,
       pdfAttachmentAdminEnabled:
@@ -99,6 +102,7 @@ export default function ProjectSettingsNotifications({
           sendUpdatedResourceAdminEmail:
             values.sendUpdatedResourceAdminEmail || false,
           sendCommentAdminEmail: values.sendCommentAdminEmail || false,
+          sendModBreakNotification: values.sendModBreakNotification || false,
           pdfAttachmentEnabled: values.pdfAttachmentEnabled || false,
           pdfAttachmentAdminEnabled: values.pdfAttachmentAdminEnabled || false,
           pdfTitle: values.pdfTitle || '',
@@ -245,6 +249,38 @@ export default function ProjectSettingsNotifications({
                         />
                         <Label htmlFor={field.name} className="cursor-pointer">
                           E-mail sturen naar beheerder bij een nieuwe reactie
+                        </Label>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="sendModBreakNotification"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Notificatie bij het plaatsen of aanpassen van een modbreak
+                    </FormLabel>
+                    <FormDescription>
+                      Standaard uitgeschakeld. De indiener van de inzending
+                      ontvangt een e-mail zodra de redactie een modbreak plaatst
+                      of de tekst van een bestaande modbreak aanpast.
+                    </FormDescription>
+                    <FormControl>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={field.name}
+                          checked={field.value}
+                          onCheckedChange={(checked) =>
+                            field.onChange(Boolean(checked))
+                          }
+                        />
+                        <Label htmlFor={field.name} className="cursor-pointer">
+                          E-mail sturen naar de indiener als er een modbreak is
+                          geplaatst of aangepast
                         </Label>
                       </div>
                     </FormControl>
