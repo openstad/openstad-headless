@@ -491,11 +491,18 @@ router
 
     try {
       req.linkSelection = resourceLinkRequests.parseSelection(req.body.links);
-      resourceLinkRequests.assertHandlerAvailable(req.linkSelection);
+      req.removedLinks = resourceLinkRequests.parseRemoved(
+        req.body.removedLinks
+      );
+      resourceLinkRequests.assertHandlerAvailable(
+        req.linkSelection,
+        req.removedLinks
+      );
     } catch (err) {
       return next(err);
     }
     delete req.body.links;
+    delete req.body.removedLinks;
 
     const data = {
       ...req.body,
@@ -672,6 +679,7 @@ router
         project: req.project,
         resource: req.results,
         selection: req.linkSelection,
+        removed: req.removedLinks,
         user: req.user,
         mode: 'create',
       });
@@ -854,11 +862,18 @@ router
 
     try {
       req.linkSelection = resourceLinkRequests.parseSelection(req.body.links);
-      resourceLinkRequests.assertHandlerAvailable(req.linkSelection);
+      req.removedLinks = resourceLinkRequests.parseRemoved(
+        req.body.removedLinks
+      );
+      resourceLinkRequests.assertHandlerAvailable(
+        req.linkSelection,
+        req.removedLinks
+      );
     } catch (err) {
       return next(err);
     }
     delete req.body.links;
+    delete req.body.removedLinks;
 
     if (req.body.location) {
       try {
@@ -1030,6 +1045,7 @@ router
         project: req.project,
         resource: req.results,
         selection: req.linkSelection,
+        removed: req.removedLinks,
         user: req.user,
         mode: 'update',
       });
