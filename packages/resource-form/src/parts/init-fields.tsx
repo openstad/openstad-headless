@@ -213,6 +213,12 @@ export const InitializeFormFields = (items, data) => {
             fieldData['defaultValue'] = [];
           }
           break;
+        case 'resourceLink':
+          fieldData['type'] = 'resourceLink';
+          fieldData['linkSource'] = item.linkSource;
+          fieldData['linkTags'] = item.linkTags;
+          fieldData['defaultValue'] = [];
+          break;
       }
 
       formFields.push(fieldData);

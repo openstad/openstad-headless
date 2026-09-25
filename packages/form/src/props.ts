@@ -10,6 +10,7 @@ import type { MapProps } from '@openstad-headless/ui/src/form-elements/map';
 import { MatrixFieldProps } from '@openstad-headless/ui/src/form-elements/matrix';
 import type { NumberInputProps } from '@openstad-headless/ui/src/form-elements/number';
 import type { RadioboxFieldProps } from '@openstad-headless/ui/src/form-elements/radio';
+import type { ResourceLinkFieldProps } from '@openstad-headless/ui/src/form-elements/resource-link';
 import type { SelectFieldProps } from '@openstad-headless/ui/src/form-elements/select';
 import type { SortFieldProps } from '@openstad-headless/ui/src/form-elements/sort';
 import type { TextInputProps } from '@openstad-headless/ui/src/form-elements/text';
@@ -82,7 +83,8 @@ type CombinedFieldPropsWithType =
   | ({ type?: 'pagination' } & PaginationFieldProps)
   | ({ type?: 'sort' } & SortFieldProps)
   | ({ type?: 'none' } & InfoFieldProps)
-  | ({ type?: 'timeline' } & TimelineFieldProps);
+  | ({ type?: 'timeline' } & TimelineFieldProps)
+  | ({ type?: 'resourceLink' } & ResourceLinkFieldProps);
 
 type ComponentFieldProps = {
   index?: number;
@@ -107,6 +109,7 @@ type CombinedFieldProps =
   | MatrixFieldProps
   | InfoFieldProps
   | TimelineFieldProps
+  | ResourceLinkFieldProps
   | (SortFieldProps & {
       infoBlockStyle?: string;
       infoBlockExtraButtonTitle?: string;

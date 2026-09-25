@@ -281,6 +281,19 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
       }
       return undefined;
 
+    case 'resourceLink':
+      if (typeof field.fieldRequired !== 'undefined' && field.fieldRequired) {
+        return z
+          .array(z.object({ source: z.string(), id: z.string() }).passthrough())
+          .min(
+            1,
+            'requiredWarning' in field && field.requiredWarning
+              ? field.requiredWarning
+              : 'Het veld' + fieldTitle + 'is verplicht'
+          );
+      }
+      return undefined;
+
     default:
       return undefined;
   }

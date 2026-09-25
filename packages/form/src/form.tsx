@@ -11,6 +11,7 @@ import MapField from '@openstad-headless/ui/src/form-elements/map';
 import MatrixField from '@openstad-headless/ui/src/form-elements/matrix';
 import NumberInput from '@openstad-headless/ui/src/form-elements/number';
 import RadioboxField from '@openstad-headless/ui/src/form-elements/radio';
+import ResourceLinkField from '@openstad-headless/ui/src/form-elements/resource-link';
 import SelectField from '@openstad-headless/ui/src/form-elements/select';
 import SortField from '@openstad-headless/ui/src/form-elements/sort';
 import TextInput from '@openstad-headless/ui/src/form-elements/text';
@@ -520,6 +521,7 @@ function Form({
     dilemma: DilemmaField as React.ComponentType<ComponentFieldProps>,
     video: VideoField as React.ComponentType<ComponentFieldProps>,
     timeline: TimelineField as React.ComponentType<ComponentFieldProps>,
+    resourceLink: ResourceLinkField as React.ComponentType<ComponentFieldProps>,
   };
 
   const isFieldAnswered = (field: any): boolean => {
