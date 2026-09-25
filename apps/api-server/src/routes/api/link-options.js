@@ -37,11 +37,17 @@ function toOption(resource) {
     id: String(resource.id),
     label: resource.title,
     ...(images[0] && images[0].url ? { image: images[0].url } : {}),
+    ...(Array.isArray(resource.tags)
+      ? { tagIds: resource.tags.map((tag) => String(tag.id)) }
+      : {}),
   };
 }
 
-function visibleResources(req, tagIds) {
-  const scopes = [{ method: ['onlyVisible', req.user.id, req.user.role] }];
+function visibleResources(req, tagIds, extraScopes = []) {
+  const scopes = [
+    { method: ['onlyVisible', req.user.id, req.user.role] },
+    ...extraScopes,
+  ];
   if (tagIds.length) scopes.push({ method: ['selectTags', tagIds] });
   return db.Resource.scope(...scopes);
 }
@@ -119,7 +125,7 @@ router.get('/:source/items', rateLimiter(), async function (req, res, next) {
     const resourceIds = ids
       .map((id) => parseInt(id, 10))
       .filter(Number.isFinite);
-    const resources = await visibleResources(req, []).findAll({
+    const resources = await visibleResources(req, [], ['includeTags']).findAll({
       where: {
         projectId: parseInt(req.params.projectId, 10),
         id: resourceIds,

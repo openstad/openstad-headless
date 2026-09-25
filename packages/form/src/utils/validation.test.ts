@@ -143,3 +143,34 @@ describe('getSchemaForField: text numeric coercion', () => {
     expect(() => schema!.parse('abcdef')).toThrow();
   });
 });
+
+describe('resourceLink validation', () => {
+  const field = {
+    type: 'resourceLink',
+    fieldKey: 'links',
+    title: 'Koppel stadmaker(s)',
+  } as any;
+
+  test('is optional unless required', () => {
+    expect(getSchemaForField(field)).toBeUndefined();
+  });
+
+  test('requires at least one selected item when required', () => {
+    const schema = getSchemaForField({
+      ...field,
+      fieldRequired: true,
+      requiredWarning: 'Kies minimaal een stadmaker',
+    });
+
+    let message: string | null = null;
+    try {
+      schema!.parse([]);
+    } catch (e) {
+      message = firstZodIssueMessage(e);
+    }
+    expect(message).toBe('Kies minimaal een stadmaker');
+    expect(() =>
+      schema!.parse([{ source: 'openstad', id: '2', label: 'Arno' }])
+    ).not.toThrow();
+  });
+});

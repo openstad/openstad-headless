@@ -26,7 +26,12 @@ db.Resource.scope = (...args) => {
     findAll: async (query) => {
       queries.push(query);
       return [
-        { id: 2, title: 'Stadmaker', images: [{ url: 'https://img/2' }] },
+        {
+          id: 2,
+          title: 'Stadmaker',
+          images: [{ url: 'https://img/2' }],
+          ...(args.includes('includeTags') ? { tags: [{ id: 8 }] } : {}),
+        },
         { id: 3, title: 'Zonder foto', images: [] },
       ];
     },
@@ -140,6 +145,8 @@ describe('link options', () => {
     );
     expect(res.status).toBe(200);
     expect(queries[0].where).toMatchObject({ projectId: 1, id: [2, 3] });
+    expect(scopes).toContain('includeTags');
+    expect(res.body[0].tagIds).toEqual(['8']);
   });
 
   it('rejects more than 50 ids', async () => {

@@ -21,6 +21,13 @@ export type ResourceFormWidget = {
   datalayer?: DataLayer[];
   enableOnOffSwitching?: boolean;
   allowedPolygons?: Array<{ id: number; name: string }>;
+  linkRequests?: LinkRequests;
+};
+
+export type LinkRequests = {
+  confirmEnabled?: boolean;
+  confirmTitle?: string;
+  confirmDescription?: string;
 };
 
 export type General = {
@@ -91,6 +98,8 @@ export type Item = {
   selectAll?: boolean;
   selectAllLabel?: string;
   allowedTypes?: string[];
+  linkSource?: string;
+  linkTags?: string;
 };
 
 export type Option = {

@@ -1,0 +1,84 @@
+.osc-combobox-input-wrapper {
+  position: relative;
+}
+
+.osc-combobox-listbox {
+  position: absolute;
+  z-index: 10;
+  top: 100%;
+  left: 0;
+  right: 0;
+  max-height: 16rem;
+  overflow-y: auto;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  background: var(--nlds-default-background-color, #fff);
+  border: 1px solid var(--utrecht-textbox-border-color, #333);
+}
+
+.osc-combobox-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+}
+
+.osc-combobox-option.--active,
+.osc-combobox-option:hover {
+  background: var(
+    --nlds-budget-resources-filter-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
+  outline: 2px solid var(--utrecht-focus-outline-color, currentColor);
+  outline-offset: -2px;
+}
+
+.osc-combobox-option-image {
+  width: 2rem;
+  height: 2rem;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.osc-combobox-option-group {
+  margin-left: auto;
+  font-size: 0.875em;
+}
+
+.osc-combobox-status {
+  margin: 0.25rem 0 0;
+  font-size: 0.875em;
+}
+
+.osc-combobox-status:empty {
+  display: none;
+}
+
+.osc-combobox-chips {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.osc-combobox-chip {
+  background: var(
+    --nlds-budget-resources-filter-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0 0 1rem;
+}
+
+.osc-combobox-chip button:not(:disabled) {
+  padding: 0;
+  min-height: revert;
+  height: 30px;
+  width: 30px;
+}
