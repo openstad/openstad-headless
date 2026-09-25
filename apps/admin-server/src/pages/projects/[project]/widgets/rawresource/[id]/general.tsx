@@ -162,6 +162,7 @@ export default function WidgetRawGeneral(
                     <li className="ml-4">{`{{images}} -> Bijvoorbeeld {{images[nummer].url}}`}</li>
                     <li className="ml-4">{`{{budget}}`}</li>
                     <li className="ml-4">{`{{extraData}}`}</li>
+                    <li className="ml-4">{`{{extraData.partnerLogo}} -> Het logo van de externe partner. Leeg als er geen logo is ingesteld, zodat je met {% if %} kunt terugvallen op een standaardlogo.`}</li>
                     <li className="ml-4">{`{{location}}`}</li>
                     <li className="ml-4">{`{{modBreaksHtml}} -> Gerenderde HTML van alle modbreaks`}</li>
                     <li className="ml-4">{`{{modBreaks}}`}</li>
