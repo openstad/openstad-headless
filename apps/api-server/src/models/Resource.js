@@ -1202,6 +1202,11 @@ module.exports = function (db, sequelize, DataTypes) {
       constraints: false,
       onDelete: 'CASCADE',
     });
+    this.hasMany(models.ResourceLink, {
+      as: 'outgoingLinks',
+      foreignKey: 'resourceId',
+      constraints: false,
+    });
   };
 
   let canMutate = function (user, self) {
@@ -1305,6 +1310,10 @@ module.exports = function (db, sequelize, DataTypes) {
 
       // er is ook al een createDateHumanized veld; waarom is dit er dan ook nog?
       data.createdAtText = moment(data.createdAt).format('LLL');
+
+      if (Array.isArray(self.links)) {
+        data.links = self.links;
+      }
 
       // if user is not allowed to edit resource then remove phone key, otherwise publically available
       // needs to move to definition per key

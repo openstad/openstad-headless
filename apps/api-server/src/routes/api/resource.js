@@ -20,6 +20,7 @@ const {
 } = require('../../services/spam-detector');
 const { stripVisibilityScope } = require('../../lib/resource-create-scope');
 const { normalizeContributedUrl } = require('../../util/normalize-url');
+const resourceLinks = require('../../services/resource-links');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -771,6 +772,13 @@ router
         found.project = req.project;
         stripHiddenVoteScore(found, req.canIncludeVoteCount);
         await attachModeratorOnlyExtraDataKeys(found);
+        if (req.query.includeLinks) {
+          found.links = await resourceLinks.listLinks({
+            projectId: found.projectId,
+            resourceId: found.id,
+            user: req.user,
+          });
+        }
         if (req.query.includePoll) {
           // TODO: naar poll hooks
           if (found.poll) found.poll.countVotes(!req.query.includeVotes);
