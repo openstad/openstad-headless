@@ -171,6 +171,7 @@ module.exports = (db, sequelize, DataTypes) => {
               'notification comment - user',
               'notification comment reply - user',
               'new comment - admin',
+              'new modbreak - user feedback',
               'login email',
               'login sms',
               'user account about to expire',

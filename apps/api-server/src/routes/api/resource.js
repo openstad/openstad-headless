@@ -23,6 +23,13 @@ const { normalizeContributedUrl } = require('../../util/normalize-url');
 const {
   restrictModeratorOnlyBody,
 } = require('../../lib/restrict-moderator-only-body');
+const {
+  snapshotModBreakIds,
+  snapshotModBreakDescriptions,
+  findNewModBreaks,
+  findChangedModBreaks,
+  sendModBreakNotifications,
+} = require('../../lib/modbreak-notifications');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -552,6 +559,10 @@ router
     db.Resource.authorizeData(data, 'create', req.user, null, req.project)
       .create(data)
       .then((resourceInstance) => {
+        // Kept for the modbreak notification at the end of this chain: the
+        // final refetch there uses onlyVisible, so req.results is null for a
+        // concept resource.
+        req.createdResource = resourceInstance;
         // Re-fetch without onlyVisible so the creator gets their own resource
         // back, even when it is still pending (publishDate is null).
         const createScope = stripVisibilityScope(req.scope);
@@ -740,6 +751,24 @@ router
         });
       }
     }
+
+    // A modbreak placed while creating the resource (the admin form allows
+    // this) is new by definition. The creator is excluded as a recipient, so
+    // this only mails when an admin creates the resource on behalf of
+    // another user.
+    if (!req.query.nomail && req.createdResource) {
+      const newModBreaks = findNewModBreaks(
+        new Set(),
+        req.createdResource.modBreaks
+      );
+      await sendModBreakNotifications({
+        db,
+        req,
+        resource: req.createdResource,
+        newModBreaks,
+        changedModBreaks: [],
+      });
+    }
   });
 
 // one resource
@@ -815,6 +844,17 @@ router
     const wasConcept = currentResource && !currentResource.publishDate;
     const willNowBePublished = req.body['publishDate'];
     req.changedToPublished = wasConcept && willNowBePublished;
+    next();
+  })
+  .put(function (req, res, next) {
+    // Snapshot the modBreak ids and descriptions BEFORE the update, so we can
+    // tell afterwards which ones are genuinely new and which ones were only
+    // edited (same id, different text). Taking this after resource.update()
+    // would lose the old state.
+    req.previousModBreakIds = snapshotModBreakIds(req.results.modBreaks);
+    req.previousModBreakDescriptions = snapshotModBreakDescriptions(
+      req.results.modBreaks
+    );
     next();
   })
   .put(rateLimiter(), function (req, res, next) {
@@ -984,6 +1024,32 @@ router
         },
       });
     }
+
+    // A modbreak save also triggers the 'updated resource - admin update'
+    // mail above when sendUpdatedResourceAdminEmail is on. That is existing
+    // behavior, not something introduced by the modbreak notification below.
+
+    // Diff against the SAVED modBreaks (req.results), not req.body: an
+    // unauthorized modBreaks change is already stripped further up for
+    // non-editors, so diffing the saved array means that stripped change can
+    // never trigger a mail. Both a brand-new modbreak and an edit to an
+    // existing one's text (e.g. via the admin resource form) notify -- only
+    // reordering or deleting a modbreak stays silent.
+    const newModBreaks = findNewModBreaks(
+      req.previousModBreakIds,
+      req.results?.modBreaks
+    );
+    const changedModBreaks = findChangedModBreaks(
+      req.previousModBreakDescriptions,
+      req.results?.modBreaks
+    );
+
+    await sendModBreakNotifications({
+      db,
+      req,
+      newModBreaks,
+      changedModBreaks,
+    });
 
     next();
   })
