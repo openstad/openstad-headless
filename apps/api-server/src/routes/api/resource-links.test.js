@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import request from 'supertest';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 process.env.NODE_CONFIG_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -14,12 +14,17 @@ process.env.SUPPRESS_NO_CONFIG_WARNING = '1';
 const require = createRequire(import.meta.url);
 const db = require('../../db');
 const resourceLinks = require('../../services/resource-links');
+const pluginExtensions = require('../../services/plugin-extensions');
 const resourceLinksRouter = require('./resource-links');
 
 let calls = [];
 
+const OWNER_ID = 9;
+
 db.Resource.findOne = async ({ where }) =>
-  where.id === 5 && where.projectId === 1 ? { id: 5, projectId: 1 } : null;
+  where.id === 5 && where.projectId === 1
+    ? db.Resource.build({ id: 5, projectId: 1, userId: OWNER_ID })
+    : null;
 resourceLinks.listLinks = async (args) => {
   calls.push(['list', args]);
   return [];
@@ -111,5 +116,48 @@ describe('resource links routes', () => {
     expect(calls).toEqual([
       ['remove', { projectId: 1, resourceId: 5, linkId: 7 }],
     ]);
+  });
+
+  describe('GET /selection', () => {
+    const selectionUrl = `${url}/selection`;
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('forbids members who cannot edit the resource', async () => {
+      const res = await request(createApp(member)).get(selectionUrl);
+      expect(res.status).toBe(403);
+    });
+
+    it('returns links and pending requests to the owner', async () => {
+      const getPendingSelection = vi.fn(async () => [
+        { source: 'openstad', id: '2', status: 'pending' },
+      ]);
+      vi.spyOn(pluginExtensions, 'get').mockReturnValue({
+        getLinkRequestHandler: () => ({ getPendingSelection }),
+      });
+
+      const owner = { role: 'member', id: OWNER_ID };
+      const res = await request(createApp(owner)).get(selectionUrl);
+
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({
+        links: [],
+        pending: [{ source: 'openstad', id: '2', status: 'pending' }],
+      });
+      expect(getPendingSelection).toHaveBeenCalledWith(
+        expect.objectContaining({ user: owner })
+      );
+    });
+
+    it('returns no pending requests without a link request plugin', async () => {
+      vi.spyOn(pluginExtensions, 'get').mockReturnValue({
+        getLinkRequestHandler: () => null,
+      });
+
+      const res = await request(createApp(editor)).get(selectionUrl);
+      expect(res.body).toEqual({ links: [], pending: [] });
+    });
   });
 });

@@ -1,0 +1,25 @@
+<!-- template: contact message - user -->
+<subject>Je hebt een bericht ontvangen</subject>
+<body>
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text>
+          <h1>Je hebt een bericht ontvangen</h1>
+          Beste {{user.name}},<br/>
+          <br/>
+          Je hebt een bericht ontvangen van {{senderName}} over jouw inzending "{{resource.title}}". Hieronder zie je het bericht.<br/>
+        </mj-text>
+        <mj-text>
+          <strong>{{senderName}}</strong><br/>
+          "{{message}}"
+        </mj-text>
+        <mj-text>
+          Je kunt reageren door een e-mail te sturen naar <a href="mailto:{{senderEmail}}">{{senderEmail}}</a>.
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
+</body>

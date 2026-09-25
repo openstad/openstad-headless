@@ -12,12 +12,13 @@ process.env.SUPPRESS_NO_CONFIG_WARNING = '1';
 const require = createRequire(import.meta.url);
 const db = require('../db');
 
-const serialize = (links) => {
+const serialize = (links, linkRequests) => {
   const self = db.Resource.build({ id: 42, projectId: 1, title: 'Titel' });
   self.hasResourceFormConfig = false;
   self.resourceFormFieldKeys = [];
   self.moderatorOnlyExtraDataKeys = [];
   if (links) self.links = links;
+  if (linkRequests) self.linkRequests = linkRequests;
 
   return db.Resource.prototype.auth.toAuthorizedJSON(
     { role: 'anonymous', id: null },
@@ -34,5 +35,15 @@ describe('Resource links serialization', () => {
 
   it('adds no links key when none were attached', () => {
     expect(serialize()).not.toHaveProperty('links');
+  });
+
+  it('adds the link request result of the plugin', () => {
+    expect(serialize(undefined, { received: 1 }).linkRequests).toEqual({
+      received: 1,
+    });
+  });
+
+  it('adds no linkRequests key without a plugin result', () => {
+    expect(serialize()).not.toHaveProperty('linkRequests');
   });
 });

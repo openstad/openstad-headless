@@ -178,6 +178,7 @@ module.exports = (db, sequelize, DataTypes) => {
               'system issues warning',
               'action',
               'message by carrier pigeon',
+              'contact message - user',
             ];
 
             const pluginNotificationType =

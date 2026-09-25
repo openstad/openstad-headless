@@ -21,6 +21,7 @@ const {
 const { stripVisibilityScope } = require('../../lib/resource-create-scope');
 const { normalizeContributedUrl } = require('../../util/normalize-url');
 const resourceLinks = require('../../services/resource-links');
+const resourceLinkRequests = require('../../services/resource-link-requests');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -488,6 +489,14 @@ router
       req.body.publishDate = null;
     }
 
+    try {
+      req.linkSelection = resourceLinkRequests.parseSelection(req.body.links);
+      resourceLinkRequests.assertHandlerAvailable(req.linkSelection);
+    } catch (err) {
+      return next(err);
+    }
+    delete req.body.links;
+
     const data = {
       ...req.body,
       projectId: req.params.projectId,
@@ -656,6 +665,22 @@ router
   })
 
   // TODO: Add notifications
+  .post(async function (req, res, next) {
+    if (req.isSpamSubmission) return next();
+    try {
+      const linkRequests = await resourceLinkRequests.submitSelection({
+        project: req.project,
+        resource: req.results,
+        selection: req.linkSelection,
+        user: req.user,
+        mode: 'create',
+      });
+      if (linkRequests) req.results.linkRequests = linkRequests;
+      next();
+    } catch (err) {
+      next(err);
+    }
+  })
   .post(auth.useReqUser)
   .post(async function (req, res, next) {
     const sendConfirmationToUser =
@@ -827,6 +852,14 @@ router
     if (!(resource && resource.can && resource.can('update')))
       return next(new Error('You cannot update this Resource'));
 
+    try {
+      req.linkSelection = resourceLinkRequests.parseSelection(req.body.links);
+      resourceLinkRequests.assertHandlerAvailable(req.linkSelection);
+    } catch (err) {
+      return next(err);
+    }
+    delete req.body.links;
+
     if (req.body.location) {
       try {
         req.body.location = JSON.parse(req.body.location || null);
@@ -990,6 +1023,21 @@ router
     }
 
     next();
+  })
+  .put(async function (req, res, next) {
+    try {
+      const linkRequests = await resourceLinkRequests.submitSelection({
+        project: req.project,
+        resource: req.results,
+        selection: req.linkSelection,
+        user: req.user,
+        mode: 'update',
+      });
+      if (linkRequests) req.results.linkRequests = linkRequests;
+      next();
+    } catch (err) {
+      next(err);
+    }
   })
   .put(auth.useReqUser)
   .put(function (req, res, next) {
