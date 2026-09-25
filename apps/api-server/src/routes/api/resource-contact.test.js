@@ -88,6 +88,10 @@ describe('POST contact', () => {
     ['with an empty message', { message: '   ', consent: true }],
     ['with a too long message', { message: 'x'.repeat(2001), consent: true }],
     ['with an unknown handler', { ...validBody, handler: 'unknown' }],
+    [
+      'with a too long message to a plugin handler',
+      { message: 'x'.repeat(2001), handler: 'link-request' },
+    ],
   ])('rejects a message %s', async (_label, body) => {
     vi.spyOn(pluginExtensions, 'get').mockReturnValue({
       getContactHandler: () => null,
@@ -155,5 +159,21 @@ describe('POST contact', () => {
       })
     );
     expect(notifications).toEqual([]);
+  });
+
+  it('lets a plugin handler decide about message and consent', async () => {
+    const handle = vi.fn(async () => ({ requestId: 13 }));
+    vi.spyOn(pluginExtensions, 'get').mockReturnValue({
+      getContactHandler: (key) => (key === 'link-request' ? { handle } : null),
+    });
+
+    const res = await request(createApp(sender))
+      .post(url)
+      .send({ handler: 'link-request', fields: { resourceId: 9 } });
+
+    expect(res.status).toBe(200);
+    expect(handle).toHaveBeenCalledWith(
+      expect.objectContaining({ message: '', consent: false })
+    );
   });
 });

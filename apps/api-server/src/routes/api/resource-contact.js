@@ -11,17 +11,11 @@ const CONTACT_NOTIFICATION_TYPE = 'contact message - user';
 
 function parseContactRequest(body) {
   const message = typeof body.message === 'string' ? body.message.trim() : '';
-  if (!message) {
-    throw createError(422, 'message is required');
-  }
   if (message.length > MAX_MESSAGE_LENGTH) {
     throw createError(
       422,
       `message can contain at most ${MAX_MESSAGE_LENGTH} characters`
     );
-  }
-  if (body.consent !== true) {
-    throw createError(422, 'consent to share your email address is required');
   }
   const fields =
     body.fields &&
@@ -29,7 +23,21 @@ function parseContactRequest(body) {
     !Array.isArray(body.fields)
       ? body.fields
       : {};
-  return { message, handlerKey: body.handler, fields };
+  return {
+    message,
+    consent: body.consent === true,
+    handlerKey: body.handler,
+    fields,
+  };
+}
+
+function assertDefaultContactRequest({ message, consent }) {
+  if (!message) {
+    throw createError(422, 'message is required');
+  }
+  if (!consent) {
+    throw createError(422, 'consent to share your email address is required');
+  }
 }
 
 router.post('/', rateLimiter(), async function (req, res, next) {
@@ -48,7 +56,9 @@ router.post('/', rateLimiter(), async function (req, res, next) {
       throw createError(404, 'Resource not found');
     }
 
-    const { message, handlerKey, fields } = parseContactRequest(req.body || {});
+    const { message, consent, handlerKey, fields } = parseContactRequest(
+      req.body || {}
+    );
 
     if (handlerKey !== undefined && handlerKey !== null) {
       const contactHandler = pluginExtensions
@@ -61,11 +71,14 @@ router.post('/', rateLimiter(), async function (req, res, next) {
         project: req.project,
         resource,
         message,
+        consent,
         user: req.user,
         fields,
       });
       return res.json({ handled: true, result });
     }
+
+    assertDefaultContactRequest({ message, consent });
 
     if (!req.user.email) {
       throw createError(422, 'Your account has no email address');

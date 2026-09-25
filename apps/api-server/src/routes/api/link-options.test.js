@@ -156,4 +156,28 @@ describe('link options', () => {
     );
     expect(res.status).toBe(422);
   });
+
+  it('lists the own submissions of a logged in user without search', async () => {
+    const res = await request(createApp({ role: 'member', id: 10 })).get(
+      '/project/1/link-options/openstad?mine=1&tags=3'
+    );
+
+    expect(res.status).toBe(200);
+    expect(queries[0].where.userId).toBe(10);
+    expect(scopes[1]).toEqual({ method: ['selectTags', ['3']] });
+  });
+
+  it('requires login for own submissions', async () => {
+    const res = await request(createApp()).get(
+      '/project/1/link-options/openstad?mine=1'
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it('does not filter on owner without mine', async () => {
+    await request(createApp({ role: 'member', id: 10 })).get(
+      '/project/1/link-options/openstad?search=stad'
+    );
+    expect(queries[0].where).not.toHaveProperty('userId');
+  });
 });
