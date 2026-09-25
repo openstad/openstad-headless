@@ -26,6 +26,9 @@ module.exports = async function sendMessage({ message }) {
           user: process.env.MAIL_TRANSPORT_SMTP_AUTH_USER,
           pass: process.env.MAIL_TRANSPORT_SMTP_AUTH_PASS,
         },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 10000,
       });
     }
 

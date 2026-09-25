@@ -279,7 +279,18 @@ module.exports = (db, sequelize, DataTypes) => {
               await instance.update({ status: 'queued' });
             }
           } catch (err) {
-            console.error(err);
+            console.error(
+              `Notification ${instance.id} (type: ${instance.type}, projectId: ${instance.projectId}) failed to send:`,
+              err
+            );
+            try {
+              await instance.update({ status: 'failed' });
+            } catch (updateErr) {
+              console.error(
+                `Notification ${instance.id} (type: ${instance.type}, projectId: ${instance.projectId}) could not be marked as failed:`,
+                updateErr
+              );
+            }
           }
         },
       },
