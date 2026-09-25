@@ -148,6 +148,10 @@ export const InitializeFormFields = (items, data) => {
             item.imageCropRatioHeight ||
             data.project?.imageCropRatioHeight ||
             9;
+          fieldData['allowImageDescription'] =
+            item.allowImageDescription ?? false;
+          fieldData['imageDescriptionLabel'] =
+            item.imageDescriptionLabel || 'Opmerking bij deze afbeelding';
           break;
         case 'documentUpload':
           fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
