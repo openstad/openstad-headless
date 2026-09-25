@@ -103,6 +103,8 @@ export type Item = {
   allowedTypes?: string[];
   linkSource?: string;
   linkTags?: string;
+  allowImageDescription?: boolean;
+  imageDescriptionLabel?: string;
 };
 
 export type Option = {

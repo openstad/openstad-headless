@@ -55,6 +55,8 @@ export const FIELD_LABELS: Record<string, string> = {
   imageCropRequired: 'Bijsnijden verplicht',
   imageCropRatioWidth: 'Verhouding breedte',
   imageCropRatioHeight: 'Verhouding hoogte',
+  allowImageDescription: 'Opmerking bij afbeelding toestaan',
+  imageDescriptionLabel: 'Label van het opmerkingveld',
   maxChoices: 'Maximaal te selecteren opties',
   maxChoicesMessage: 'Maximaal aantal bereikt melding',
   showSmileys: 'Smileys tonen',
