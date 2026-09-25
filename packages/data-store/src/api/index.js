@@ -162,6 +162,8 @@ function API(props = {}) {
     fetchOptions: links.fetchOptions.bind(self),
     fetchItems: links.fetchItems.bind(self),
     fetchSelection: links.fetchSelection.bind(self),
+    fetchLinks: links.fetchLinks.bind(self),
+    sendContact: links.sendContact.bind(self),
   };
 
   self.userActivity = {
