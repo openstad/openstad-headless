@@ -62,7 +62,12 @@ router.get('/:source', rateLimiter(), async function (req, res, next) {
   try {
     const search =
       typeof req.query.search === 'string' ? req.query.search.trim() : '';
-    if (search.length < MIN_SEARCH_LENGTH) {
+    const onlyMine =
+      req.query.mine === '1' && req.params.source === OPENSTAD_SOURCE;
+    if (onlyMine && !req.user.id) {
+      throw createError(401, 'You must be logged in to list your submissions');
+    }
+    if (!onlyMine && search.length < MIN_SEARCH_LENGTH) {
       throw createError(
         422,
         `search must contain at least ${MIN_SEARCH_LENGTH} characters`
@@ -91,6 +96,7 @@ router.get('/:source', rateLimiter(), async function (req, res, next) {
       where: {
         projectId,
         publishDate: { [Op.ne]: null },
+        ...(onlyMine ? { userId: req.user.id } : {}),
         [Op.and]: [
           ...words.map((word) => ({
             title: { [Op.like]: `%${escapeLike(word)}%` },
