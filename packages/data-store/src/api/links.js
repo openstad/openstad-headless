@@ -6,8 +6,10 @@ export default {
     tags,
     exclude,
     limit,
+    mine,
   }) {
-    const params = new URLSearchParams({ search });
+    const params = new URLSearchParams(search ? { search } : {});
+    if (mine) params.append('mine', '1');
     if (tags) params.append('tags', tags);
     if (exclude) params.append('exclude', exclude);
     if (limit) params.append('limit', String(limit));
@@ -29,5 +31,19 @@ export default {
   fetchSelection: async function ({ projectId, resourceId }) {
     const url = `/api/project/${projectId}/resource/${resourceId}/links/selection`;
     return this.fetch(url);
+  },
+
+  fetchLinks: async function ({ projectId, resourceId }) {
+    const url = `/api/project/${projectId}/resource/${resourceId}/links`;
+    return this.fetch(url);
+  },
+
+  sendContact: async function ({ projectId, resourceId }, data) {
+    const url = `/api/project/${projectId}/resource/${resourceId}/contact`;
+    return this.fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
   },
 };

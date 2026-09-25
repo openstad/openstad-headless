@@ -1,0 +1,48 @@
+.osc-related-resources {
+  margin-block: 2rem;
+}
+
+.osc-related-resources-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+  gap: 1.5rem;
+}
+
+.osc-related-resources-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.osc-related-resources-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+}
+
+.osc-related-resources-title,
+.osc-related-resources-summary {
+  margin: 0;
+}
+
+.osc-related-resources.--compact .osc-related-resources-list {
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.osc-related-resources.--compact .osc-related-resources-item {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.osc-related-resources.--compact .osc-related-resources-image {
+  width: 3rem;
+  height: 3rem;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  flex-shrink: 0;
+}

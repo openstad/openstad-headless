@@ -1,0 +1,45 @@
+.osc-contact-block {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-block: 2rem;
+  padding: 1.5rem;
+  background: var(
+    --nlds-resource-detail-cta-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
+}
+
+.osc-contact-block-content {
+  flex: 1 1 20rem;
+}
+
+.osc-contact-block-status {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.osc-contact-block-status:empty {
+  display: none;
+}
+
+.osc-DialogContent > .osc-contact-block-dialog-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 1rem;
+  padding: 0;
+}
+
+.osc-contact-block-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.osc-contact-block-error {
+  margin: 0;
+  color: var(--utrecht-form-field-invalid-color, #d52b1e);
+}

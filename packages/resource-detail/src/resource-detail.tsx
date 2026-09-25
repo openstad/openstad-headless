@@ -42,6 +42,11 @@ import React, { useEffect, useId, useState } from 'react';
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 import { canLikeResource, hasRole } from '../../lib';
 import { buildPageTitle } from './page-title';
+import { ContactBlock, type ContactBlockProps } from './parts/contact-block';
+import {
+  RelatedResources,
+  type RelatedResourcesProps,
+} from './parts/related-resources';
 import './resource-detail.css';
 import { formatDocumentLabel } from './utils';
 
@@ -119,6 +124,8 @@ export type ResourceDetailWidgetProps = {
       ResourceDetailMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
+    relatedResources?: RelatedResourcesProps;
+    contactBlock?: ContactBlockProps;
   };
 
 type DocumentType = {
@@ -941,6 +948,29 @@ function ResourceDetail({
       </div>
 
       {!displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit />}
+
+      {props.relatedResources?.display ? (
+        <RelatedResources
+          {...props.relatedResources}
+          projectId={props.projectId}
+          resourceId={resourceId}
+          api={props.api}
+          headingLevel={hSection}
+          itemHeadingLevel={hSub}
+        />
+      ) : null}
+
+      {props.contactBlock?.display ? (
+        <ContactBlock
+          {...props.contactBlock}
+          projectId={props.projectId}
+          resourceId={resourceId}
+          api={props.api}
+          login={props.login}
+          headingLevel={hSection}
+          currentUserProps={props}
+        />
+      ) : null}
 
       <Spacer size={2} />
 
