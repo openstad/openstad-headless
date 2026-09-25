@@ -1,11 +1,11 @@
 module.exports.createHandler = function (ctx) {
   return {
     ctx,
-    async submit() {
-      return { requests: [] };
+    async submit({ selection, mode }) {
+      return { received: selection.length, mode };
     },
     async getPendingSelection() {
-      return [];
+      return [{ source: 'openstad', id: '2', status: 'pending' }];
     },
   };
 };

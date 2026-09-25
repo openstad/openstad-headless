@@ -1315,6 +1315,10 @@ module.exports = function (db, sequelize, DataTypes) {
         data.links = self.links;
       }
 
+      if (self.linkRequests) {
+        data.linkRequests = self.linkRequests;
+      }
+
       // if user is not allowed to edit resource then remove phone key, otherwise publically available
       // needs to move to definition per key
       if (!canMutate(user, self) && data.extraData && data.extraData.phone) {

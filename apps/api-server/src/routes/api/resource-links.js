@@ -4,6 +4,7 @@ const db = require('../../db');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const resourceLinks = require('../../services/resource-links');
+const pluginExtensions = require('../../services/plugin-extensions');
 
 const router = express.Router({ mergeParams: true });
 
@@ -18,6 +19,7 @@ router.use(async function (req, res, next) {
       return next(createError(404, 'Resource not found'));
     }
     req.linkContext = { projectId, resourceId };
+    req.linkResource = resource;
     next();
   } catch (err) {
     next(err);
@@ -38,6 +40,28 @@ router.get('/', async function (req, res, next) {
       user: req.user,
     });
     res.json(links);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/selection', async function (req, res, next) {
+  try {
+    if (!req.linkResource.can('update', req.user)) {
+      throw createError(403, 'You cannot view the link selection');
+    }
+    const handler = pluginExtensions.get().getLinkRequestHandler();
+    const [links, pending] = await Promise.all([
+      resourceLinks.listLinks({ ...req.linkContext, user: req.user }),
+      handler
+        ? handler.getPendingSelection({
+            project: req.project,
+            resource: req.linkResource,
+            user: req.user,
+          })
+        : [],
+    ]);
+    res.json({ links, pending });
   } catch (err) {
     next(err);
   }

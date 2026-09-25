@@ -50,9 +50,11 @@ describe('plugin extensions', () => {
         { type: 'link invitation - user', label: 'Uitnodiging ontvangen' },
       ],
     });
-    expect(await extensions.getLinkRequestHandler().submit()).toEqual({
-      requests: [],
-    });
+    expect(
+      await extensions
+        .getLinkRequestHandler()
+        .submit({ selection: [], mode: 'create' })
+    ).toEqual({ received: 0, mode: 'create' });
     expect(await extensions.getContactHandler('link-request').handle()).toEqual(
       { handled: true }
     );
