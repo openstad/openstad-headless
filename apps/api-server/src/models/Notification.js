@@ -180,7 +180,15 @@ module.exports = (db, sequelize, DataTypes) => {
               'message by carrier pigeon',
             ];
 
-            if (immediateTypes.find((type) => type == instance.type)) {
+            const pluginNotificationType =
+              require('../services/plugin-extensions')
+                .get()
+                .getNotificationType(instance.type);
+
+            if (
+              immediateTypes.find((type) => type == instance.type) ||
+              pluginNotificationType?.immediate
+            ) {
               const derivedTemplateData =
                 deriveNotificationTemplateData(instance);
 

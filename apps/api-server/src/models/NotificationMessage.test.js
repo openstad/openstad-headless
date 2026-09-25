@@ -1,8 +1,27 @@
-import { describe, expect, it } from 'vitest';
+import { createRequire } from 'node:module';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { describe, expect, it, vi } from 'vitest';
 
 import notificationMessageModel from './NotificationMessage.js';
 
+const require = createRequire(import.meta.url);
+const pluginExtensions = require('../services/plugin-extensions');
+const { buildExtensions } = pluginExtensions;
+const { resolvePluginFile } = require('@openstad-headless/plugin-loader');
+
 const { renderTemplate, loadDefaultTemplate } = notificationMessageModel;
+
+const fixtureDir = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../services/test-fixtures/links-plugin'
+);
+const fixturePlugin = {
+  name: 'links-fixture',
+  config: {},
+  dir: fixtureDir,
+  api: require('../services/test-fixtures/links-plugin').manifest.api,
+};
 
 const validTemplate = {
   subject: 'Hallo {{user.name}}',
@@ -58,5 +77,27 @@ describe('renderTemplate', () => {
 describe('loadDefaultTemplate', () => {
   it('is exported for use in the render fallback', () => {
     expect(typeof loadDefaultTemplate).toBe('function');
+  });
+
+  it('loads a core default template', async () => {
+    const template = await loadDefaultTemplate('login email');
+    expect(template.subject).toBeTruthy();
+    expect(template.body).toContain('<mjml');
+  });
+
+  it('returns null for an unknown type', async () => {
+    expect(await loadDefaultTemplate('does not exist')).toBeNull();
+  });
+
+  it('loads the template of a plugin notification type', async () => {
+    const getSpy = vi
+      .spyOn(pluginExtensions, 'get')
+      .mockReturnValue(buildExtensions([fixturePlugin], {}, resolvePluginFile));
+
+    const template = await loadDefaultTemplate('link invitation - user');
+    getSpy.mockRestore();
+
+    expect(template.subject).toBe('Fixture uitnodiging ontvangen');
+    expect(template.body).toContain('Fixture template voor een uitnodiging.');
   });
 });

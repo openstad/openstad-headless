@@ -344,4 +344,104 @@ describe('validateManifest', () => {
       )
     );
   });
+  describe('extension points', () => {
+    const withApi = (api: Record<string, unknown>) =>
+      validateManifest({ name: 'links-plugin', version: '1.0.0', api });
+
+    const validApi = {
+      linkRequestHandler: { handler: './link-requests.js' },
+      contactHandlers: [
+        {
+          key: 'link-request',
+          label: 'Koppelverzoek',
+          handler: './contact.js',
+        },
+      ],
+      sources: [{ key: 'metkoos', label: 'Met Koos', handler: './source.js' }],
+      notifications: [
+        {
+          type: 'link invitation - user',
+          label: 'Uitnodiging ontvangen',
+          template: './templates/link invitation - user',
+          immediate: true,
+        },
+      ],
+    };
+
+    it('accepts all extension points', () => {
+      expect(withApi(validApi)).toEqual({ valid: true });
+    });
+
+    it('rejects a link request handler without handler', () => {
+      expect(withApi({ linkRequestHandler: {} }).errors).toContain(
+        'api.linkRequestHandler: missing required field "handler"'
+      );
+    });
+
+    it('rejects a link request handler outside the plugin', () => {
+      expect(
+        withApi({ linkRequestHandler: { handler: '../outside.js' } }).valid
+      ).toBe(false);
+    });
+
+    it('rejects an invalid contact handler key', () => {
+      const result = withApi({
+        contactHandlers: [{ key: 'Not Valid', label: 'x', handler: './c.js' }],
+      });
+      expect(result.valid).toBe(false);
+      expect(result.errors?.[0]).toMatch(/^api\.contactHandlers\[0\]: "key"/);
+    });
+
+    it('rejects a contact handler without label', () => {
+      expect(
+        withApi({ contactHandlers: [{ key: 'contact', handler: './c.js' }] })
+          .errors
+      ).toContain('api.contactHandlers[0]: missing required field "label"');
+    });
+
+    it('rejects a source without handler', () => {
+      expect(
+        withApi({ sources: [{ key: 'metkoos', label: 'Met Koos' }] }).errors
+      ).toContain('api.sources[0]: missing required field "handler"');
+    });
+
+    it('rejects the reserved openstad source key', () => {
+      expect(
+        withApi({
+          sources: [{ key: 'openstad', label: 'x', handler: './s.js' }],
+        }).errors
+      ).toContain('api.sources[0]: key "openstad" is reserved');
+    });
+
+    it('rejects a notification without type, label and template', () => {
+      const errors = withApi({ notifications: [{}] }).errors;
+      expect(errors).toContain(
+        'api.notifications[0]: missing required field "type"'
+      );
+      expect(errors).toContain(
+        'api.notifications[0]: missing required field "label"'
+      );
+      expect(errors).toContain(
+        'api.notifications[0]: missing required field "template"'
+      );
+    });
+
+    it('rejects a notification template outside the plugin', () => {
+      expect(
+        withApi({
+          notifications: [{ type: 't', label: 'l', template: '/etc/passwd' }],
+        }).valid
+      ).toBe(false);
+    });
+
+    it('rejects a non-boolean immediate flag', () => {
+      expect(
+        withApi({
+          notifications: [
+            { type: 't', label: 'l', template: './t', immediate: 'yes' },
+          ],
+        }).errors
+      ).toContain('api.notifications[0]: "immediate" must be a boolean');
+    });
+  });
 });

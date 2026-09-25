@@ -55,7 +55,11 @@ function initPluginLoader() {
       }
       // Collect routes
       if (plugin.api.routes) {
-        var pluginContext = { config: plugin.config, pluginName: plugin.name };
+        var pluginContext = {
+          config: plugin.config,
+          pluginName: plugin.name,
+          services: { resourceLinks: require('./resource-links') },
+        };
 
         for (var route of plugin.api.routes) {
           var handlerFile = resolvePluginFile(pluginDir, route.handler);
