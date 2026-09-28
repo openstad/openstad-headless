@@ -19,6 +19,7 @@ let resources = [];
 let visibleResourceIds = [];
 let created = null;
 let destroyed = null;
+let transactions = [];
 
 function matches(row, where) {
   return Object.entries(where).every(([key, value]) => {
@@ -43,22 +44,32 @@ function findLinks(where) {
 }
 
 function linkRow(data) {
-  return { ...data, destroy: async () => (destroyed = data.id) };
+  return {
+    ...data,
+    destroy: async (options) => {
+      transactions.push(['destroy', options?.transaction]);
+      destroyed = data.id;
+    },
+  };
 }
 
 db.ResourceLink.findAll = async ({ where }) => findLinks(where).map(linkRow);
-db.ResourceLink.findOne = async ({ where }) => {
+db.ResourceLink.findOne = async ({ where, transaction }) => {
+  transactions.push(['ResourceLink.findOne', transaction]);
   const found = findLinks(where)[0];
   return found ? linkRow(found) : null;
 };
 let createError = null;
-db.ResourceLink.create = async (data) => {
+db.ResourceLink.create = async (data, options) => {
+  transactions.push(['create', options?.transaction]);
   if (createError) throw createError;
   created = data;
   return { id: 99, ...data };
 };
-db.Resource.findOne = async ({ where }) =>
-  resources.find((resource) => matches(resource, where)) || null;
+db.Resource.findOne = async ({ where, transaction }) => {
+  transactions.push(['Resource.findOne', transaction]);
+  return resources.find((resource) => matches(resource, where)) || null;
+};
 db.Resource.scope = () => ({
   findAll: async ({ where }) =>
     resources.filter(
@@ -85,6 +96,7 @@ describe('resource-links service', () => {
     links = [];
     created = null;
     destroyed = null;
+    transactions = [];
     createError = null;
   });
 
@@ -180,6 +192,22 @@ describe('resource-links service', () => {
       });
       expect(created.targetSource).toBe('metkoos');
       expect(created.targetId).toBe('abc-123');
+    });
+
+    it('runs every query in the given transaction', async () => {
+      const transaction = { id: 'trx' };
+      await resourceLinks.createLink({
+        projectId: PROJECT_ID,
+        resourceId: 10,
+        targetSource: 'openstad',
+        targetId: 20,
+        transaction,
+      });
+      expect(transactions).toEqual([
+        ['Resource.findOne', transaction],
+        ['ResourceLink.findOne', transaction],
+        ['create', transaction],
+      ]);
     });
   });
 
@@ -288,6 +316,29 @@ describe('resource-links service', () => {
         })
       ).rejects.toMatchObject({ status: 404 });
       expect(destroyed).toBeNull();
+    });
+
+    it('runs the lookup and the removal in the given transaction', async () => {
+      links = [
+        {
+          id: 1,
+          projectId: PROJECT_ID,
+          resourceId: 10,
+          targetSource: 'openstad',
+          targetId: '20',
+        },
+      ];
+      const transaction = { id: 'trx' };
+      await resourceLinks.removeLink({
+        projectId: PROJECT_ID,
+        resourceId: 10,
+        linkId: 1,
+        transaction,
+      });
+      expect(transactions).toEqual([
+        ['ResourceLink.findOne', transaction],
+        ['destroy', transaction],
+      ]);
     });
   });
 });
