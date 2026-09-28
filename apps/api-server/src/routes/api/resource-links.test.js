@@ -21,10 +21,26 @@ let calls = [];
 
 const OWNER_ID = 9;
 
-db.Resource.findOne = async ({ where }) =>
-  where.id === 5 && where.projectId === 1
-    ? db.Resource.build({ id: 5, projectId: 1, userId: OWNER_ID })
-    : null;
+const HIDDEN_RESOURCE_ID = 8;
+let lastScopes = [];
+
+db.Resource.scope = (...scopes) => {
+  lastScopes = scopes;
+  const [, visibility] = scopes;
+  const [, , role] = visibility.method;
+  return {
+    findOne: async ({ where }) => {
+      if (where.projectId !== 1) return null;
+      if (where.id === 5) {
+        return db.Resource.build({ id: 5, projectId: 1, userId: OWNER_ID });
+      }
+      if (where.id === HIDDEN_RESOURCE_ID && role === 'editor') {
+        return db.Resource.build({ id: 8, projectId: 1, userId: OWNER_ID });
+      }
+      return null;
+    },
+  };
+};
 resourceLinks.listLinks = async (args) => {
   calls.push(['list', args]);
   return [];
@@ -70,6 +86,28 @@ describe('resource links routes', () => {
     expect(calls).toEqual([
       ['list', { projectId: 1, resourceId: 5, user: anonymous }],
     ]);
+  });
+
+  it('loads the resource with the visibility scope of the user', async () => {
+    await request(createApp(anonymous)).get(url);
+    expect(lastScopes).toEqual([
+      'defaultScope',
+      { method: ['onlyVisible', null, 'anonymous'] },
+    ]);
+  });
+
+  it('returns 404 for a resource the user may not see', async () => {
+    const res = await request(createApp(anonymous)).get(
+      `/project/1/resource/${HIDDEN_RESOURCE_ID}/links`
+    );
+    expect(res.status).toBe(404);
+  });
+
+  it('lets editors see links of a hidden resource', async () => {
+    const res = await request(createApp(editor)).get(
+      `/project/1/resource/${HIDDEN_RESOURCE_ID}/links`
+    );
+    expect(res.status).toBe(200);
   });
 
   it('returns 404 for an unknown resource', async () => {

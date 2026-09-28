@@ -12,7 +12,9 @@ router.use(async function (req, res, next) {
   try {
     const resourceId = parseInt(req.params.resourceId, 10);
     const projectId = parseInt(req.params.projectId, 10);
-    const resource = await db.Resource.findOne({
+    const resource = await db.Resource.scope('defaultScope', {
+      method: ['onlyVisible', req.user.id, req.user.role],
+    }).findOne({
       where: { id: resourceId, projectId },
     });
     if (!resource) {

@@ -147,12 +147,19 @@ async function createLink({ projectId, resourceId, targetSource, targetId }) {
     throw createError(409, 'Link already exists');
   }
 
-  return db.ResourceLink.create({
-    projectId,
-    resourceId,
-    targetSource: source,
-    targetId: target,
-  });
+  try {
+    return await db.ResourceLink.create({
+      projectId,
+      resourceId,
+      targetSource: source,
+      targetId: target,
+    });
+  } catch (err) {
+    if (err.name === 'SequelizeUniqueConstraintError') {
+      throw createError(409, 'Link already exists');
+    }
+    throw err;
+  }
 }
 
 async function removeLink({ projectId, resourceId, linkId }) {

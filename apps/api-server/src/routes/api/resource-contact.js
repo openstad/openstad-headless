@@ -46,7 +46,9 @@ router.post('/', rateLimiter(), async function (req, res, next) {
       throw createError(401, 'You must be logged in to send a message');
     }
 
-    const resource = await db.Resource.findOne({
+    const resource = await db.Resource.scope('defaultScope', {
+      method: ['onlyVisible', req.user.id, req.user.role],
+    }).findOne({
       where: {
         id: parseInt(req.params.resourceId, 10),
         projectId: parseInt(req.params.projectId, 10),

@@ -174,6 +174,57 @@ describe('plugin extensions', () => {
     expect(extensions.getNotificationType('login email')).toBeNull();
   });
 
+  it('skips a handler that fails to load and keeps the others', () => {
+    const extensions = build([
+      plugin({
+        api: {
+          contactHandlers: [
+            { key: 'broken', label: 'Kapot', handler: './throws.js' },
+            {
+              key: 'link-request',
+              label: 'Koppelverzoek',
+              handler: './contact.js',
+            },
+          ],
+          sources: [
+            {
+              key: 'fixture-source',
+              label: 'Fixture bron',
+              handler: './source.js',
+            },
+          ],
+        },
+      }),
+    ]);
+
+    expect(extensions.getContactHandler('broken')).toBeNull();
+    expect(extensions.getContactHandler('link-request')).not.toBeNull();
+    expect(extensions.getSource('fixture-source')).not.toBeNull();
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('handler failed to load')
+    );
+  });
+
+  it('keeps other extensions of a plugin whose link request handler fails', () => {
+    const extensions = build([
+      plugin({
+        api: {
+          linkRequestHandler: { handler: './throws.js' },
+          contactHandlers: [
+            {
+              key: 'link-request',
+              label: 'Koppelverzoek',
+              handler: './contact.js',
+            },
+          ],
+        },
+      }),
+    ]);
+
+    expect(extensions.getLinkRequestHandler()).toBeNull();
+    expect(extensions.getContactHandler('link-request')).not.toBeNull();
+  });
+
   it('returns an empty registry without plugins', () => {
     expect(build([]).getCapabilities()).toEqual({
       linkRequests: false,

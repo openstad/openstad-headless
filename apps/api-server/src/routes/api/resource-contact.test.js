@@ -21,10 +21,16 @@ let resourceOwnerId = OWNER.id;
 let ownerRecord = OWNER;
 let notifications = [];
 
-db.Resource.findOne = async ({ where }) =>
-  where.id === 5 && where.projectId === 1
-    ? { id: 5, projectId: 1, userId: resourceOwnerId }
-    : null;
+let lastScopes = [];
+db.Resource.scope = (...scopes) => {
+  lastScopes = scopes;
+  return {
+    findOne: async ({ where }) =>
+      where.id === 5 && where.projectId === 1
+        ? { id: 5, projectId: 1, userId: resourceOwnerId }
+        : null,
+  };
+};
 db.User.findByPk = async (id) => (id === OWNER.id ? ownerRecord : null);
 db.Notification.create = async (data) => {
   notifications.push(data);
@@ -74,6 +80,14 @@ describe('POST contact', () => {
       .post(url)
       .send(validBody);
     expect(res.status).toBe(401);
+  });
+
+  it('only contacts resources the sender may see', async () => {
+    await request(createApp(sender)).post(url).send(validBody);
+    expect(lastScopes).toEqual([
+      'defaultScope',
+      { method: ['onlyVisible', sender.id, sender.role] },
+    ]);
   });
 
   it('returns 404 for an unknown resource', async () => {

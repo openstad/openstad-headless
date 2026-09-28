@@ -27,13 +27,21 @@ function hasFunctions(implementation, names) {
   );
 }
 
-function loadImplementation(plugin, relPath, context, resolvePluginFile) {
+function loadImplementation(plugin, what, relPath, context, resolvePluginFile) {
   const file = resolvePluginFile(plugin.dir, relPath);
-  if (!file) return null;
-  const handlerModule = require(file);
-  return typeof handlerModule.createHandler === 'function'
-    ? handlerModule.createHandler(context)
-    : handlerModule;
+  if (!file) {
+    logSkip(plugin.name, what, 'handler escapes the plugin directory');
+    return null;
+  }
+  try {
+    const handlerModule = require(file);
+    return typeof handlerModule.createHandler === 'function'
+      ? handlerModule.createHandler(context)
+      : handlerModule;
+  } catch (err) {
+    logSkip(plugin.name, what, 'handler failed to load: ' + err.message);
+    return null;
+  }
 }
 
 function coreTemplateExists(type) {
@@ -55,8 +63,8 @@ function buildExtensions(plugins, services, resolvePluginFile) {
       pluginName: plugin.name,
       services,
     };
-    const load = (relPath) =>
-      loadImplementation(plugin, relPath, context, resolvePluginFile);
+    const load = (what, relPath) =>
+      loadImplementation(plugin, what, relPath, context, resolvePluginFile);
 
     if (api.linkRequestHandler && linkRequestHandler) {
       logSkip(
@@ -65,14 +73,12 @@ function buildExtensions(plugins, services, resolvePluginFile) {
         'another plugin already provides one'
       );
     } else if (api.linkRequestHandler) {
-      const implementation = load(api.linkRequestHandler.handler);
-      if (!implementation) {
-        logSkip(
-          plugin.name,
-          'link request handler',
-          'handler escapes the plugin directory'
-        );
-      } else if (
+      const implementation = load(
+        'link request handler',
+        api.linkRequestHandler.handler
+      );
+      if (
+        implementation &&
         !hasFunctions(implementation, ['submit', 'getPendingSelection'])
       ) {
         logSkip(
@@ -80,7 +86,7 @@ function buildExtensions(plugins, services, resolvePluginFile) {
           'link request handler',
           'submit and getPendingSelection are required'
         );
-      } else {
+      } else if (implementation) {
         linkRequestHandler = {
           pluginName: plugin.name,
           ...pick(implementation, ['submit', 'getPendingSelection']),
@@ -94,9 +100,9 @@ function buildExtensions(plugins, services, resolvePluginFile) {
         logSkip(plugin.name, what, 'key already registered');
         continue;
       }
-      const implementation = load(entry.handler);
+      const implementation = load(what, entry.handler);
       if (!implementation) {
-        logSkip(plugin.name, what, 'handler escapes the plugin directory');
+        continue;
       } else if (!hasFunctions(implementation, ['handle'])) {
         logSkip(plugin.name, what, 'handle is required');
       } else {
@@ -119,9 +125,9 @@ function buildExtensions(plugins, services, resolvePluginFile) {
         logSkip(plugin.name, what, 'key already registered');
         continue;
       }
-      const implementation = load(entry.handler);
+      const implementation = load(what, entry.handler);
       if (!implementation) {
-        logSkip(plugin.name, what, 'handler escapes the plugin directory');
+        continue;
       } else if (!hasFunctions(implementation, ['search', 'get'])) {
         logSkip(plugin.name, what, 'search and get are required');
       } else {
