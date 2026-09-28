@@ -130,6 +130,7 @@ const formSchema = z.object({
   image: z.string().optional(),
   imageUpload: z.string().optional(),
   fieldRequired: z.boolean().optional(),
+  enableAddressSearch: z.boolean().optional(),
   createImageSlider: z.boolean().optional(),
   imageClickable: z.boolean().optional(),
   maxChoices: z.string().optional(),
@@ -311,6 +312,7 @@ export default function WidgetEnqueteItems(
             description_b: values.description_b || '',
             key_b: values.key_b || '',
             fieldRequired: values.fieldRequired || false,
+            enableAddressSearch: values.enableAddressSearch || false,
             createImageSlider: values.createImageSlider || false,
             imageClickable: values.imageClickable || false,
             maxChoices: values.maxChoices || '',
@@ -493,6 +495,7 @@ export default function WidgetEnqueteItems(
     infoBlockExtraButton: '',
     infoBlockExtraButtonTitle: '',
     fieldRequired: false,
+    enableAddressSearch: false,
     createImageSlider: false,
     imageClickable: false,
     maxChoices: '',
@@ -584,6 +587,7 @@ export default function WidgetEnqueteItems(
       infoBlockExtraButton: item.infoBlockExtraButton || '',
       infoBlockExtraButtonTitle: item.infoBlockExtraButtonTitle || '',
       fieldRequired: item.fieldRequired || false,
+      enableAddressSearch: item.enableAddressSearch || false,
       createImageSlider: item.createImageSlider || false,
       imageClickable: item.imageClickable || false,
       maxChoices: item.maxChoices || '',
@@ -1817,6 +1821,43 @@ export default function WidgetEnqueteItems(
                         </FormItem>
                       )}
                     />
+                    {form.watch('questionType') === 'map' && (
+                      <FormField
+                        control={form.control}
+                        name="enableAddressSearch"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Kan de gebruiker de locatie zoeken met postcode en
+                              huisnummer?
+                            </FormLabel>
+                            <FormDescription>
+                              <em className="text-xs">
+                                Toont invulvelden voor postcode en huisnummer
+                                boven de kaart. Bij een match wordt de pin op
+                                het gevonden adres gezet.
+                              </em>
+                            </FormDescription>
+                            <Select
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
+                              value={field.value ? 'true' : 'false'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="true">Ja</SelectItem>
+                                <SelectItem value="false">Nee</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                     {form.watch('questionType') === 'open' && (
                       <>
                         <FormField

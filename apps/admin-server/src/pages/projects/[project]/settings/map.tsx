@@ -23,6 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useArea from '@/hooks/use-areas';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { defaultAddressSearchTexts } from '@openstad-headless/lib/address-search-texts';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
@@ -39,6 +40,10 @@ const formSchema = z.object({
   tilesVariant: z.string().optional(),
   customUrl: z.string().optional(),
   autoZoomAndCenter: z.string().optional(),
+  addressSearchFoundText: z.string().optional(),
+  addressSearchNotFoundText: z.string().optional(),
+  addressSearchErrorText: z.string().optional(),
+  addressSearchOutsideAreaText: z.string().optional(),
 });
 
 export default function ProjectSettingsMap() {
@@ -56,6 +61,18 @@ export default function ProjectSettingsMap() {
       tilesVariant: data?.config?.map?.tilesVariant || 'nlmaps',
       customUrl: data?.config?.map?.customUrl || '',
       autoZoomAndCenter: data?.config?.map?.autoZoomAndCenter || 'area',
+      addressSearchFoundText:
+        data?.config?.map?.addressSearchFoundText ||
+        defaultAddressSearchTexts.foundText,
+      addressSearchNotFoundText:
+        data?.config?.map?.addressSearchNotFoundText ||
+        defaultAddressSearchTexts.notFoundText,
+      addressSearchErrorText:
+        data?.config?.map?.addressSearchErrorText ||
+        defaultAddressSearchTexts.errorText,
+      addressSearchOutsideAreaText:
+        data?.config?.map?.addressSearchOutsideAreaText ||
+        defaultAddressSearchTexts.outsideAreaText,
     };
   }, [data, areas]);
 
@@ -78,6 +95,10 @@ export default function ProjectSettingsMap() {
           tilesVariant: values.tilesVariant,
           customUrl: values.customUrl,
           autoZoomAndCenter: values.autoZoomAndCenter,
+          addressSearchFoundText: values.addressSearchFoundText,
+          addressSearchNotFoundText: values.addressSearchNotFoundText,
+          addressSearchErrorText: values.addressSearchErrorText,
+          addressSearchOutsideAreaText: values.addressSearchOutsideAreaText,
         },
       });
       if (project) {
@@ -313,6 +334,83 @@ export default function ProjectSettingsMap() {
                         </SelectItem>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="md:col-span-2">
+                <Heading size="lg">Teksten voor zoeken op adres</Heading>
+                <FormDescription>
+                  Deze meldingen worden getoond bij het zoeken op postcode en
+                  huisnummer in formulieren met een locatievraag. Maak je een
+                  veld leeg, dan wordt de standaardtekst gebruikt en staat die
+                  na het opslaan weer ingevuld.
+                </FormDescription>
+              </div>
+
+              <FormField
+                control={form.control}
+                name="addressSearchFoundText"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>Melding bij een gevonden adres</FormLabel>
+                    <FormDescription>
+                      {
+                        'Je kunt {street}, {houseNumber} en {city} gebruiken als invulvelden.'
+                      }
+                    </FormDescription>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="addressSearchNotFoundText"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>
+                      Melding wanneer geen adres is gevonden
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="addressSearchErrorText"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>
+                      Melding wanneer het opzoeken van een adres mislukt
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="addressSearchOutsideAreaText"
+                render={({ field }) => (
+                  <FormItem className="md:col-span-2">
+                    <FormLabel>
+                      Melding wanneer het adres buiten het gebied ligt
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}

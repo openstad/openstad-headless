@@ -24,6 +24,10 @@ import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
+  defaultAddressSearchTexts,
+  renderFoundAddressText,
+} from '@openstad-headless/lib/address-search-texts';
+import {
   ArrowDown,
   ArrowLeft,
   ArrowRight,
@@ -479,6 +483,77 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     [form]
   );
 
+  const [addressPostcode, setAddressPostcode] = useState('');
+  const [addressHuisnummer, setAddressHuisnummer] = useState('');
+  const [addressLookupStatus, setAddressLookupStatus] = useState<
+    'idle' | 'loading' | 'found' | 'notfound' | 'error'
+  >('idle');
+  const [foundAddress, setFoundAddress] = useState<{
+    straat: string;
+    huisnummer: string;
+    woonplaats: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const cleanPostcode = addressPostcode.replace(/\s+/g, '').toUpperCase();
+    const cleanHuisnummer = addressHuisnummer.trim();
+
+    if (
+      !/^[1-9][0-9]{3}[A-Z]{2}$/.test(cleanPostcode) ||
+      cleanHuisnummer === ''
+    ) {
+      setAddressLookupStatus('idle');
+      setFoundAddress(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+      setAddressLookupStatus('loading');
+
+      fetch(
+        `/api/address-lookup?postcode=${cleanPostcode}&huisnummer=${encodeURIComponent(cleanHuisnummer)}`,
+        { signal: controller.signal }
+      )
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`Address lookup failed with status ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          const result = data?.results?.[0];
+          if (!result) {
+            setFoundAddress(null);
+            setAddressLookupStatus('notfound');
+            return;
+          }
+
+          const lat = parseFloat(result.latitude);
+          const lng = parseFloat(result.longitude);
+          if (Number.isFinite(lat) && Number.isFinite(lng)) {
+            setFoundAddress(result);
+            setAddressLookupStatus('found');
+            form.setValue('location', JSON.stringify({ lat, lng }));
+          } else {
+            setFoundAddress(null);
+            setAddressLookupStatus('error');
+          }
+        })
+        .catch((err) => {
+          if (err.name !== 'AbortError') {
+            setAddressLookupStatus('error');
+            setFoundAddress(null);
+          }
+        });
+    }, 400);
+
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [addressPostcode, addressHuisnummer, form]);
+
   return (
     <div className="p-6 bg-white rounded-md">
       <ImageGalleryStyle />
@@ -846,6 +921,53 @@ export default function ResourceForm({ onFormSubmit }: Props) {
           /> */}
 
           <div className="col-span-full lg:col-span-1 flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-medium">
+                Zoek locatie op postcode en huisnummer
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Postcode"
+                  aria-label="Postcode"
+                  value={addressPostcode}
+                  onChange={(e) => setAddressPostcode(e.target.value)}
+                  className="max-w-[140px]"
+                />
+                <Input
+                  placeholder="Huisnummer"
+                  aria-label="Huisnummer"
+                  value={addressHuisnummer}
+                  onChange={(e) => setAddressHuisnummer(e.target.value)}
+                  className="max-w-[120px]"
+                />
+              </div>
+              <div aria-live="polite" className="text-sm">
+                {addressLookupStatus === 'loading' && (
+                  <span>Adres zoeken...</span>
+                )}
+                {addressLookupStatus === 'found' && foundAddress && (
+                  <span>
+                    {renderFoundAddressText(
+                      projectData?.config?.map?.addressSearchFoundText ||
+                        defaultAddressSearchTexts.foundText,
+                      foundAddress
+                    )}
+                  </span>
+                )}
+                {addressLookupStatus === 'notfound' && (
+                  <span>
+                    {projectData?.config?.map?.addressSearchNotFoundText ||
+                      defaultAddressSearchTexts.notFoundText}
+                  </span>
+                )}
+                {addressLookupStatus === 'error' && (
+                  <span>
+                    {projectData?.config?.map?.addressSearchErrorText ||
+                      defaultAddressSearchTexts.errorText}
+                  </span>
+                )}
+              </div>
+            </div>
             <FormField
               control={form.control}
               name="location"

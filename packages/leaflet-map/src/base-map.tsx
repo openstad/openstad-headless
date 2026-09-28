@@ -28,6 +28,7 @@ import { MapConsumer } from './map-consumer';
 import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
 import MarkerIcon from './marker-icon';
+import { PanToLocation } from './pan-to-location';
 import TileLayer from './tile-layer';
 import type { BaseMapWidgetProps } from './types/basemap-widget-props';
 import type { LocationType } from './types/location';
@@ -264,6 +265,7 @@ const BaseMap = ({
   markerInteractionType = 'default',
   customLegend = [],
   zoomAfterInit = true,
+  panToLocation = undefined,
   ...props
 }: PropsWithChildren<
   BaseMapWidgetProps & {
@@ -271,6 +273,7 @@ const BaseMap = ({
       e: LeafletMouseEvent & { isInArea: boolean },
       map: object
     ) => void;
+    panToLocation?: { lat: number; lng: number };
   }
 >) => {
   const datastore = new DataStore({
@@ -747,6 +750,7 @@ const BaseMap = ({
             scrollWheelZoom={scrollWheelZoom}
             zoom={zoom}>
             <MapConsumer mapId={mapId} />
+            <PanToLocation location={panToLocation} />
             <InvalidateSizeOnResize />
             <MapInteraction isTouch={isTouchDevice} />
             <AutoZoom

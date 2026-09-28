@@ -71,6 +71,7 @@ const formSchema = z.object({
   fieldKey: z.string(),
   fieldRequired: z.boolean().optional(),
   onlyForModerator: z.boolean().optional(),
+  enableAddressSearch: z.boolean().optional(),
   minCharacters: z.string().optional(),
   maxCharacters: z.string().optional(),
   maxChoices: z.string().optional(),
@@ -239,6 +240,7 @@ export default function WidgetResourceFormItems(
             fieldKey: values.fieldKey || '',
             fieldRequired: values.fieldRequired || false,
             onlyForModerator: values.onlyForModerator || false,
+            enableAddressSearch: values.enableAddressSearch || false,
             minCharacters: values.minCharacters,
             maxCharacters: values.maxCharacters,
             maxChoices: values.maxChoices || '',
@@ -387,6 +389,7 @@ export default function WidgetResourceFormItems(
     fieldKey: '',
     fieldRequired: false,
     onlyForModerator: false,
+    enableAddressSearch: false,
     minCharacters: '',
     maxCharacters: '',
     maxChoices: '',
@@ -442,6 +445,7 @@ export default function WidgetResourceFormItems(
         fieldKey: selectedItem.fieldKey || '',
         fieldRequired: selectedItem.fieldRequired || false,
         onlyForModerator: selectedItem.onlyForModerator || false,
+        enableAddressSearch: selectedItem.enableAddressSearch || false,
         minCharacters: selectedItem.minCharacters || '',
         maxCharacters: selectedItem.maxCharacters || '',
         maxChoices: selectedItem.maxChoices || '',
@@ -1836,6 +1840,44 @@ export default function WidgetResourceFormItems(
                               </em>
                             </FormDescription>
                             <Input type="number" min="1" {...field} />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+
+                    {['map', 'location'].includes(form.watch('type') || '') && (
+                      <FormField
+                        control={form.control}
+                        name="enableAddressSearch"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>
+                              Kan de gebruiker de locatie zoeken met postcode en
+                              huisnummer?
+                            </FormLabel>
+                            <FormDescription>
+                              <em className="text-xs">
+                                Toont invulvelden voor postcode en huisnummer
+                                boven de kaart. Bij een match wordt de pin op
+                                het gevonden adres gezet.
+                              </em>
+                            </FormDescription>
+                            <Select
+                              onValueChange={(e: string) =>
+                                field.onChange(e === 'true')
+                              }
+                              value={field.value ? 'true' : 'false'}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Kies een optie" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="true">Ja</SelectItem>
+                                <SelectItem value="false">Nee</SelectItem>
+                              </SelectContent>
+                            </Select>
                             <FormMessage />
                           </FormItem>
                         )}
