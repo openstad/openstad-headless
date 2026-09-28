@@ -43,8 +43,11 @@ export const Dialog = ({
           <RadixDialog.Overlay className="osc-DialogOverlay" />
           <RadixDialog.Content
             className={`osc osc-DialogContent ${className}`}
-            aria-label={ariaLabelledBy ? undefined : ariaLabel}
-            aria-labelledby={ariaLabelledBy}>
+            {...(ariaLabelledBy
+              ? { 'aria-labelledby': ariaLabelledBy }
+              : ariaLabel
+                ? { 'aria-label': ariaLabel }
+                : {})}>
             <div>
               <RadixDialog.Close asChild>
                 <IconButton
