@@ -21,11 +21,13 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import usePluginCapabilities from '@/hooks/use-plugin-capabilities';
 import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
 import { usePanelSwitchFocus } from '@/hooks/usePanelSwitchFocus';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { fromCsvIds, toggleCsvId } from '@/lib/link-settings';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -140,6 +142,8 @@ const formSchema = z.object({
   routingSelectedAnswer: z.union([z.string(), z.array(z.string())]).optional(),
   selectAll: z.boolean().optional(),
   selectAllLabel: z.string().optional(),
+  linkSource: z.string().optional(),
+  linkTags: z.string().optional(),
 });
 
 const matrixDefault = {
@@ -192,6 +196,7 @@ export default function WidgetResourceFormItems(
   const { data: allStatuses } = useStatuses(project as string);
   const { data: allTags } = useTags(project as string);
   const firstTagType = allTags?.[0]?.type ?? '';
+  const { capabilities } = usePluginCapabilities();
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
@@ -274,6 +279,8 @@ export default function WidgetResourceFormItems(
             routingSelectedAnswer: values.routingSelectedAnswer || '',
             selectAll: values.selectAll || false,
             selectAllLabel: values.selectAllLabel || '',
+            linkSource: values.linkSource || '',
+            linkTags: values.linkTags || '',
           },
         ];
       });
@@ -427,6 +434,8 @@ export default function WidgetResourceFormItems(
     routingSelectedAnswer: '',
     selectAll: false,
     selectAllLabel: '',
+    linkSource: '',
+    linkTags: '',
   });
 
   const form = useForm<FormData>({
@@ -489,6 +498,8 @@ export default function WidgetResourceFormItems(
           typeof selectedItem.selectAllLabel === 'undefined'
             ? 'Selecteer alles'
             : selectedItem.selectAllLabel,
+        linkSource: selectedItem.linkSource || '',
+        linkTags: selectedItem.linkTags || '',
       });
       setOptions((selectedItem.options || []).map(withId));
       const matrix = selectedItem.matrix || matrixDefault;
@@ -739,6 +750,11 @@ export default function WidgetResourceFormItems(
         form.setValue('fieldKey', 'timeline');
       }
       form.setValue('fieldType', 'timeline');
+    } else if (form.watch('type') === 'resourceLink') {
+      form.setValue('fieldType', 'resourceLink');
+      if (!form.watch('linkSource')) {
+        form.setValue('linkSource', 'openstad');
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.watch('type')]);
@@ -1288,6 +1304,11 @@ export default function WidgetResourceFormItems(
                               <SelectItem value="timeline">
                                 Inzending: Tijdlijn
                               </SelectItem>
+                              {capabilities.linkRequests ? (
+                                <SelectItem value="resourceLink">
+                                  Inzending koppelen
+                                </SelectItem>
+                              ) : null}
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -1390,6 +1411,7 @@ export default function WidgetResourceFormItems(
                               'select',
                               'matrix',
                               'timeline',
+                              'resourceLink',
                             ];
                             const type = form.watch('type');
                             const fieldKey = !nonStaticType.includes(type || '')
@@ -2278,6 +2300,104 @@ export default function WidgetResourceFormItems(
                             }}
                           />
                         )}
+                      </>
+                    )}
+
+                    {form.watch('type') === 'resourceLink' && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="linkSource"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Bron</FormLabel>
+                              <FormDescription>
+                                Waaruit kan de indiener kiezen? Nadat het
+                                formulier is verstuurd, wordt de andere kant om
+                                bevestiging gevraagd.
+                              </FormDescription>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value || 'openstad'}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="openstad">
+                                    Inzendingen in dit project
+                                  </SelectItem>
+                                  {capabilities.sources.map((source) => (
+                                    <SelectItem
+                                      key={source.key}
+                                      value={source.key}>
+                                      {source.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        {form.watch('linkSource') !== 'openstad' ? null : (
+                          <FormField
+                            control={form.control}
+                            name="linkTags"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Alleen inzendingen met tag
+                                </FormLabel>
+                                <FormDescription>
+                                  Laat leeg om in alle inzendingen te zoeken.
+                                  Bijvoorbeeld: alleen stadmakers.
+                                </FormDescription>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
+                                  {(allTags || []).map((tag: any) => (
+                                    <label
+                                      key={tag.id}
+                                      className="flex items-center gap-2 text-sm">
+                                      <Checkbox
+                                        checked={fromCsvIds(
+                                          field.value
+                                        ).includes(String(tag.id))}
+                                        onCheckedChange={(checked) =>
+                                          field.onChange(
+                                            toggleCsvId(
+                                              field.value,
+                                              tag.id,
+                                              checked === true
+                                            )
+                                          )
+                                        }
+                                      />
+                                      {tag.name}
+                                      <span className="text-muted-foreground">
+                                        ({tag.type})
+                                      </span>
+                                    </label>
+                                  ))}
+                                </div>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+                        <FormField
+                          control={form.control}
+                          name="placeholder"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Placeholder zoekveld</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Zoeken..." {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </>
                     )}
 

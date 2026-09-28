@@ -25,6 +25,7 @@ import {
 import WidgetResourceFormConfirmation from './confirmation';
 import WidgetResourceFormGeneral from './general';
 import WidgetResourceFormInfo from './info';
+import WidgetResourceFormLinkRequests from './link-requests';
 import WidgetResourceFormSubmit from './submit';
 
 export const getServerSideProps = withApiUrl;
@@ -94,6 +95,7 @@ export default function WidgetResourceForm({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
             <TabsContent value="submit" className="p-0">
               <WidgetResourceFormSubmit />
+              <WidgetResourceFormLinkRequests />
             </TabsContent>
             <TabsContent value="confirmation" className="p-0">
               <WidgetResourceFormConfirmation />
