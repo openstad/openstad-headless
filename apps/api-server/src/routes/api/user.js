@@ -809,11 +809,13 @@ router
           delete synchronizedUpdatedUserData[userProjectSpecificField];
         }
 
+        // Fall back to the stored idpUser when updateUser was skipped (the user's provider differs from the project's default provider).
+        const idpUser = updatedUserData.idpUser || user.idpUser;
         let apiUsers = await db.User.scope(['includeProject']).findAll({
           where: {
             idpUser: {
-              identifier: updatedUserData.idpUser.identifier,
-              provider: updatedUserData.idpUser.provider,
+              identifier: idpUser.identifier,
+              provider: idpUser.provider,
             },
             projectId: { [Op.not]: 0 },
           },
