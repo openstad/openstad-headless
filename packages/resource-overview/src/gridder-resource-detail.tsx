@@ -25,6 +25,7 @@ import React, { useState } from 'react';
 import { canLikeResource, hasRole } from '../../lib';
 import { sanitizeHtml } from '../../lib/sanitize';
 import { Icon } from '../../ui/src/icon';
+import RenderContent from '../../ui/src/rte-formatting/rte-formatting';
 import './gridder-resource-detail.css';
 
 export type GridderResourceDetailProps = BaseProps &
@@ -224,7 +225,9 @@ export const GridderResourceDetail = ({
                 }}></Paragraph>
               <Paragraph
                 dangerouslySetInnerHTML={{
-                  __html: sanitizeHtml(resource.description),
+                  __html: RenderContent(resource.description, {
+                    headingBaseLevel: 3,
+                  }),
                 }}></Paragraph>
             </div>
           </div>

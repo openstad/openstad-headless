@@ -11,6 +11,7 @@ import {
 } from '@openstad-headless/ui/src';
 import { Carousel } from '@openstad-headless/ui/src';
 import { Dialog } from '@openstad-headless/ui/src';
+import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
 import '@utrecht/component-library-css';
 import {
   Button,
@@ -292,7 +293,9 @@ export const StemBegrootResourceDetailDialog = ({
                           {displayDescription ? (
                             <Paragraph
                               dangerouslySetInnerHTML={{
-                                __html: sanitizeHtml(resource?.description),
+                                __html: RenderContent(resource?.description, {
+                                  headingBaseLevel: 3,
+                                }),
                               }}
                             />
                           ) : null}

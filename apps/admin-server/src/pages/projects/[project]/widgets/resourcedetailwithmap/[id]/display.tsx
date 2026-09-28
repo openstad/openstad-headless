@@ -1,11 +1,20 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
@@ -29,6 +38,7 @@ const formSchema = z.object({
   displaySocials: z.boolean(),
   displayStatus: z.boolean(),
   displayLikes: z.boolean(),
+  descriptionHeadingLevel: z.string().optional(),
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -58,6 +68,7 @@ export default function WidgetResourceDetailDisplay(
       displaySocials: undefinedToTrueOrProp(props?.displaySocials),
       displayStatus: undefinedToTrueOrProp(props?.displayStatus),
       displayLikes: undefinedToTrueOrProp(props?.displayLikes),
+      descriptionHeadingLevel: props?.descriptionHeadingLevel || '3',
     },
   });
 
@@ -158,6 +169,39 @@ export default function WidgetResourceDetailDisplay(
               </FormItem>
             )}
           />
+          {form.watch('displayDescription') && (
+            <FormField
+              control={form.control}
+              name="descriptionHeadingLevel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Heading-niveau opmaak in beschrijving</FormLabel>
+                  <FormDescription>
+                    Bepaalt als welk kopniveau een &apos;Heading&apos; uit de
+                    tekstopmaak van de inzender wordt weergegeven.
+                  </FormDescription>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      props.onFieldChanged(field.name, value);
+                    }}
+                    value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecteer een optie" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={'2'}>Heading 2 (H2)</SelectItem>
+                      <SelectItem value={'3'}>Heading 3 (H3)</SelectItem>
+                      <SelectItem value={'4'}>Heading 4 (H4)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
           <FormField
             control={form.control}
             name="displayLocation"
