@@ -19,17 +19,24 @@ const ALWAYS_BLOCKED_USER_KEYS = new Set([
 const ALWAYS_BLOCKED_TOP_LEVEL = new Set(['ip', 'userId']);
 
 // Free-form JSON blobs that are ALWAYS removed.
-// These can contain arbitrary PII typed in by end-users.
-const ALWAYS_BLOCKED_BLOBS = new Set(['submittedData', 'extraData']);
+// These can contain arbitrary PII typed in by end-users. `result` is the raw
+// choiceguide answers blob — never exposed as-is; answers are only available
+// opt-in via the flattened `answer_<key>` columns (dataScope.choiceguides.
+// answerFields), exactly like submissions' `submittedData`/formFields.
+const ALWAYS_BLOCKED_BLOBS = new Set(['submittedData', 'extraData', 'result']);
 
 /**
  * The complete catalog of reportable components.
  *
  * safeFields   — fields that are never PII; exposed without any admin opt-in.
- * personalFields — user-authored text or identifiers that require explicit
- *                  admin opt-in.  Free text (description/summary/result) and
- *                  user.* dot-paths live here.
+ * personalFields — user-authored text that requires explicit admin opt-in.
+ *                  The opt-in itself lives in project.config.dataScope —
+ *                  admin-configured, enforced in the project PUT route
+ *                  (routes/api/project.js): only an admin may change it.
  * pathPattern  — URL path segment used in /stats routing to match this component.
+ *
+ * No user.* fields: reporting identifies a person only by the HMAC pseudonym in
+ * `userId` (lib/reporting/pseudonymize.js), never by name.
  */
 const COMPONENTS = {
   resources: {
@@ -44,20 +51,12 @@ const COMPONENTS = {
       'publishDate',
       'startDate',
       'endDate',
-      'status',
       'budget',
       'tags',
       'location',
     ],
     // title/summary/description are free text authored by the submitter.
-    personalFields: [
-      'title',
-      'summary',
-      'description',
-      'images',
-      'user.displayName',
-      'user.nickName',
-    ],
+    personalFields: ['title', 'summary', 'description', 'images'],
   },
 
   votes: {
@@ -74,7 +73,7 @@ const COMPONENTS = {
       'confirmed',
     ],
     // ip and userId are always blocked — not listed here.
-    personalFields: ['user.displayName', 'user.nickName'],
+    personalFields: [],
   },
 
   comments: {
@@ -89,12 +88,9 @@ const COMPONENTS = {
       'updatedAt',
       'sentiment',
       'label',
-      'status',
-      'modBreak',
-      'modBreakDatetime',
     ],
     // description is free text authored by the commenter.
-    personalFields: ['description', 'user.displayName', 'user.nickName'],
+    personalFields: ['description'],
   },
 
   submissions: {
@@ -110,7 +106,8 @@ const COMPONENTS = {
       'isSpam',
     ],
     // submittedData is always blocked — arbitrary user JSON, not listed here.
-    personalFields: ['user.displayName', 'user.nickName'],
+    // Answers are opt-in per field via dataScope.submissions.formFields.
+    personalFields: [],
   },
 
   choiceguides: {
@@ -124,8 +121,63 @@ const COMPONENTS = {
       'updatedAt',
       'isSpam',
     ],
-    // result is user-authored quiz data; kept as opt-in personal field.
-    personalFields: ['result', 'user.displayName', 'user.nickName'],
+    // result (the raw answers blob) is always blocked — see
+    // ALWAYS_BLOCKED_BLOBS. Answers are only exposed via the flattened
+    // answer_<key> columns (dataScope.choiceguides.answerFields opt-in).
+    personalFields: [],
+  },
+
+  // ADDITIVE (reporting endpoints, issue #1651): the project's own metadata.
+  // Safe-only — public project config content, no participant PII. Does NOT
+  // loosen any existing PII rule. Project.config (JSON) is intentionally
+  // excluded from safeFields.
+  projects: {
+    label: 'Projecten',
+    pathPattern: '/reports/projects',
+    safeFields: ['id', 'name', 'title', 'url', 'createdAt', 'updatedAt'],
+    personalFields: [],
+  },
+
+  // ADDITIVE (reporting endpoints, issue #1653): choice-guide DEFINITION
+  // content (the guide itself + its question definitions) — safe-only, same
+  // rationale as `projects` above. This is admin-authored form structure, not
+  // participant data: no PII, so no personalFields to opt into.
+  //
+  // Backed by the Widget model (type='choiceguide'), NOT the separate
+  // ChoicesGuide/ChoicesGuideQuestion(Group) tables — verified against the
+  // live schema while building #441: ChoicesGuideResult has no
+  // `choicesGuideId` column (only `widgetId`), those tables are empty in this
+  // deployment, have no admin UI, and the one route that queries
+  // ChoicesGuideResult by `choicesGuideId` (routes/api/choicesguide.js) would
+  // error against a nonexistent column if it were ever hit — i.e. dead code.
+  // The live choiceguide widget stores its question definitions in
+  // Widget.config.items, exactly like enquete/submissions (#440), and
+  // ChoicesGuideResult.widgetId is the only real join key. `widgetId` (on
+  // choiceguideguides' own `id` / choiceguidequestions' `widgetId`) therefore
+  // takes the place of the plan's assumed `choicesGuideId`.
+  choiceguideguides: {
+    label: 'Keuzewijzers (definitie)',
+    pathPattern: '/reports/choice-guides',
+    // Widget has no separate `title` column — `description` is the
+    // admin-facing guide name (the existing GET /choicesguide/widgets admin
+    // route already treats it as such). Widget.config (introTitle etc.) is a
+    // free-form JSON blob, excluded from safeFields like every other
+    // component's config/result blob.
+    safeFields: ['id', 'projectId', 'description', 'createdAt', 'updatedAt'],
+    personalFields: [],
+  },
+  // Question definitions live in Widget.config.items, so there is no Sequelize
+  // model to page through: the endpoint (added later in this reporting series)
+  // is a bespoke handler that does not go through makeReportEndpoint /
+  // buildReportingWhere. That is why this is the one component key with NO
+  // entry in the api-server's component-registry, which exists only to map a
+  // component onto a model + project-scope strategy — deliberate, not an
+  // oversight.
+  choiceguidequestions: {
+    label: 'Keuzewijzer vragen',
+    pathPattern: '/reports/choice-guide-questions',
+    safeFields: ['id', 'widgetId', 'fieldKey', 'title', 'type', 'seqnr'],
+    personalFields: [],
   },
 };
 
@@ -146,6 +198,21 @@ const SEGMENT_TO_COMPONENT = {
   choicesguide: 'choiceguides',
   choicesguides: 'choiceguides',
   choiceguide: 'choiceguides',
+  // ADDITIVE (reporting endpoints). `enquiries` reuses the submissions
+  // component (enquete-type submissions). Only the plural `projects` segment is
+  // mapped — NOT the singular `project`, which would collide with the
+  // ubiquitous /api/project/:id path segment (matchComponent scans from the end,
+  // so the trailing `projects`/`enquiries` segment wins).
+  enquiries: 'submissions',
+  projects: 'projects',
+  // ADDITIVE (#441). Hyphenated path segments, matched whole (matchComponent
+  // splits on '/', not '-').
+  'choice-guides': 'choiceguideguides',
+  'choice-guide-questions': 'choiceguidequestions',
+  // choice-guide-results reuses the existing `choiceguides` component
+  // (ChoicesGuideResult) — same model/safeFields as the legacy
+  // /choicesguides `/stats` path, just a new URL segment.
+  'choice-guide-results': 'choiceguides',
 };
 
 /**

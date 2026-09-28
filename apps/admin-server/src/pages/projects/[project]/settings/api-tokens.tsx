@@ -1,11 +1,10 @@
 import { ApiTokenStatusBadge } from '@/components/api-token-status-badge';
 import { Button } from '@/components/ui/button';
+import { PageLayout } from '@/components/ui/page-layout';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import { ApiToken, useProjectApiTokens } from '@/hooks/use-api-tokens';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
-
-import { PageLayout } from '../../../components/ui/page-layout';
 
 function maskToken(token: ApiToken) {
   return `${token.tokenPrefix}...${token.lastFour}`;
@@ -51,7 +50,7 @@ export default function ProjectApiTokens() {
           },
           {
             name: 'API-tokens',
-            url: `/projects/${project}/api-tokens`,
+            url: `/projects/${project}/settings/api-tokens`,
           },
         ]}>
         <div className="container py-6">

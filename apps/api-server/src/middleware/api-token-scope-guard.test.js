@@ -39,8 +39,13 @@ function makeRes() {
   const res = {
     _status: null,
     _body: null,
+    _headers: {},
     status(code) {
       this._status = code;
+      return this;
+    },
+    set(key, value) {
+      this._headers[key] = value;
       return this;
     },
     json(body) {
@@ -89,6 +94,13 @@ describe('apiTokenScopeGuard', () => {
 
       expect(res._status).toBe(403);
       expect(next).not.toHaveBeenCalled();
+      expect(res._headers['Content-Type']).toBe('application/problem+json');
+      expect(res._headers['API-Version']).toBe('1.0.0');
+      expect(res._body).toEqual({
+        type: 'https://developer.overheid.nl/api-design-rules/problem/403',
+        title: 'Reporting tokens only allow GET requests',
+        status: 403,
+      });
     });
 
     it('blocks PUT with 403', () => {
@@ -191,6 +203,23 @@ describe('apiTokenScopeGuard', () => {
         enabledPersonalFields: ['title'],
       });
     });
+
+    it('sets API-Version even on the pass-through path (not just on 403s)', () => {
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path: '/project/1/resource/total',
+        projectDataScope: {
+          resources: { enabled: true, personalFields: ['title'] },
+        },
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
+      expect(res._headers['API-Version']).toBe('1.0.0');
+    });
   });
 
   describe('reporting token — allowlisted non-component path', () => {
@@ -215,6 +244,24 @@ describe('apiTokenScopeGuard', () => {
       expect(req.reportingScope.enabledComponents).toEqual(['votes']);
     });
 
+    it('allows /openapi.json even when no component is enabled — the spec is documentation, and reports/index.js already serves it without a token', () => {
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path: '/api/project/1/reports/v1/openapi.json',
+        projectDataScope: { votes: { enabled: false, personalFields: [] } },
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
+      expect(next).toHaveBeenCalledOnce();
+      // report-field-filter blocks any reporting response reaching it with no
+      // scope attached, so the guard must still set one.
+      expect(req.reportingScope).toMatchObject({ componentKey: null });
+    });
+
     it('blocks /overview when no component is enabled (fail-closed)', () => {
       const req = makeReq({
         apiTokenScope: 'reports',
@@ -237,6 +284,117 @@ describe('apiTokenScopeGuard', () => {
         method: 'GET',
         path: '/project/1/overview',
         projectDataScope: undefined,
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
+      expect(res._status).toBe(403);
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('blocks /reports/users/anonymized (#442) when only an unrelated component is enabled', () => {
+      // Enabling e.g. 'votes' must NOT unlock the project-wide participant
+      // roster — that requires its own dedicated dataScope.users.enabled.
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path: '/project/1/reports/users/anonymized',
+        projectDataScope: { votes: { enabled: true, personalFields: [] } },
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
+      expect(res._status).toBe(403);
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('allows /reports/users/anonymized when the users component is enabled', () => {
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path: '/project/1/reports/users/anonymized',
+        projectDataScope: {
+          votes: { enabled: true, personalFields: [] },
+          users: { enabled: true },
+        },
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
+      expect(next).toHaveBeenCalledOnce();
+      expect(req.reportingScope).toMatchObject({ componentKey: null });
+    });
+
+    it('allows /reports/users/aggregates when the users component is enabled', () => {
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path: '/project/1/reports/users/aggregates',
+        projectDataScope: { users: { enabled: true } },
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
+      expect(next).toHaveBeenCalledOnce();
+    });
+
+    it('blocks /reports/users/aggregates when the users component is disabled', () => {
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path: '/project/1/reports/users/aggregates',
+        projectDataScope: {
+          votes: { enabled: true, personalFields: [] },
+          users: { enabled: false },
+        },
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
+      expect(res._status).toBe(403);
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    // The allowlist used to key on the terminal segment alone. Because this
+    // guard is mounted app-wide, that allowlisted ANY path ending in
+    // 'aggregates'/'anonymized' as soon as dataScope.users was enabled.
+    it.each([
+      '/project/1/reports/audit-log/aggregates',
+      '/project/1/reports/payments/anonymized',
+      '/project/1/user/aggregates',
+      '/project/1/aggregates',
+    ])('blocks %s even when the users component is enabled', (path) => {
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path,
+        projectDataScope: { users: { enabled: true } },
+      });
+      const res = makeRes();
+      const next = vi.fn();
+
+      apiTokenScopeGuard(req, res, next);
+
+      expect(res._status).toBe(403);
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it('blocks /reports/users/anonymized when no component is enabled (fail-closed)', () => {
+      const req = makeReq({
+        apiTokenScope: 'reports',
+        method: 'GET',
+        path: '/project/1/reports/users/anonymized',
+        projectDataScope: { votes: { enabled: false, personalFields: [] } },
       });
       const res = makeRes();
       const next = vi.fn();

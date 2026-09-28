@@ -21,38 +21,53 @@ export const DATA_SCOPE_COMPONENTS = {
       { key: 'summary', label: 'Samenvatting' },
       { key: 'description', label: 'Beschrijving' },
       { key: 'images', label: 'Afbeeldingen' },
-      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
-      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
     ],
   },
   votes: {
     label: 'Stemmen',
-    personalFields: [
-      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
-      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
-    ],
+    personalFields: [],
   },
   comments: {
     label: 'Reacties',
-    personalFields: [
-      { key: 'description', label: 'Reactietekst' },
-      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
-      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
-    ],
+    personalFields: [{ key: 'description', label: 'Reactietekst' }],
   },
   submissions: {
     label: 'Enquêtes',
-    personalFields: [
-      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
-      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
-    ],
+    // Answers are exposed via the separate field_<key> opt-in instead.
+    personalFields: [],
   },
   choiceguides: {
     label: 'Keuzewijzers',
-    personalFields: [
-      { key: 'result', label: 'Keuzewijzer antwoorden' },
-      { key: 'user.displayName', label: 'Weergavenaam (gepseudonimiseerd)' },
-      { key: 'user.nickName', label: 'Bijnaam (gepseudonimiseerd)' },
-    ],
+    // 'result' (the raw answers blob) is intentionally NOT listed here — it
+    // is always blocked (see ALWAYS_BLOCKED_BLOBS in report-data-scope.js).
+    // Answers are exposed via the separate answer_<key> opt-in instead.
+    personalFields: [],
+  },
+  // ADDITIVE (reporting endpoints, issue #1651): the project's own metadata is
+  // public and has no personal fields.
+  projects: {
+    label: 'Projecten',
+    personalFields: [],
+  },
+  // ADDITIVE (reporting endpoints, issue #1653): choice-guide definition
+  // content (guide + question definitions) is admin-authored structure, not
+  // participant data — no personal fields.
+  choiceguideguides: {
+    label: 'Keuzewijzers (definitie)',
+    personalFields: [],
+  },
+  choiceguidequestions: {
+    label: 'Keuzewijzer vragen',
+    personalFields: [],
+  },
+  // Dedicated opt-in for the anonymized/aggregated participant endpoints
+  // (/reports/users/anonymized, /reports/users/aggregates). Deliberately
+  // separate from every other component's toggle: those endpoints return a
+  // project-wide participant roster across ALL data sources, so enabling e.g.
+  // only 'votes' reporting must NOT also unlock this. No personal fields to
+  // opt into — the exposed shape is fixed (pseudonymized id, role, timestamps).
+  users: {
+    label: 'Deelnemers (geanonimiseerd)',
+    personalFields: [],
   },
 } as const;

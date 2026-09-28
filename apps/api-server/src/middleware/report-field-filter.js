@@ -122,10 +122,21 @@ function reportFieldFilter(req, res, next) {
   const originalJson = res.json.bind(res);
 
   res.json = function filteredJson(payload) {
-    // Error responses pass through untouched so reporting clients keep the
-    // status message; projecting the body to safeFields would empty it and
-    // make a 404 indistinguishable from a 500 or a scope block.
+    // Error responses (4xx/5xx) pass through untouched. They are synthesized by
+    // this app — e.g. the reporting filter's { error: {code,message,param,hint} }
+    // shape (filters.js) or the error-handler's { status, message, … } — never
+    // raw DB records, so they carry no PII. Projecting them to safeFields would
+    // empty the body and make a 404 indistinguishable from a 500 or a scope block.
     if (res.statusCode >= 400) {
+      return originalJson(payload);
+    }
+
+    // Schema/metadata responses (e.g. /submissions/fields, #440): the route
+    // itself sets this because it returns form STRUCTURE (field name/label/
+    // type), not participant data, so projecting it to the component's
+    // safeFields would empty it out. Still gated by the scope-guard's normal
+    // component-enabled check, same as any other reporting request.
+    if (req.reportSchemaResponse) {
       return originalJson(payload);
     }
 
