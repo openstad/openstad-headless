@@ -97,6 +97,19 @@ describe('toRelatedItems', () => {
     expect(items.map((item) => item.key)).toEqual(['openstad:2']);
   });
 
+  it('drops external urls that are not http or https', () => {
+    const items = toRelatedItems([links[2]], {
+      externalItems: {
+        'metkoos:k1': {
+          id: 'k1',
+          label: 'Kunstlessen',
+          url: 'javascript:alert(1)',
+        },
+      },
+    });
+    expect(items[0].url).toBeUndefined();
+  });
+
   it('leaves out external links whose item could not be loaded', () => {
     expect(toRelatedItems([links[2]], {}).map((item) => item.key)).toEqual([]);
   });

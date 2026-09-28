@@ -38,6 +38,10 @@ export function parseTagIds(tagIds?: string): string[] {
     .filter(Boolean);
 }
 
+export function isHttpUrl(url?: string): boolean {
+  return typeof url === 'string' && /^https?:\/\//i.test(url);
+}
+
 export function buildItemLink(
   itemLink: string | undefined,
   id: string
@@ -112,7 +116,7 @@ export function toRelatedItems(
         id: link.targetId,
         title: item.label,
         image: item.image,
-        url: item.url,
+        url: isHttpUrl(item.url) ? item.url : undefined,
       });
     }
   }
