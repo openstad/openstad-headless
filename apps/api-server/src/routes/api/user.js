@@ -440,71 +440,93 @@ router
     return res.json(req.results);
   });
 
-// get user's two-factor status
+// two-factor status and reset
 // --------------
-router.get('/:userId/two-factor-status', async (req, res, next) => {
-  try {
-    const userId = parseInt(req.params.userId);
+// Both expose or change the target user's second authentication factor, so they
+// require the same authorization as updating that user: moderator or owner.
+function withTwoFactorTarget(req, res, next) {
+  // This router is also mounted without a project, where projectId is absent.
+  const where = { id: parseInt(req.params.userId) };
+  if (req.params.projectId) where.projectId = req.params.projectId;
 
-    const apiUser = await db.User.findOne({ where: { id: userId } });
-    if (!apiUser) {
-      return res.status(404).json({ error: 'API user not found' });
-    }
+  return db.User.scope(...req.scope)
+    .findOne({ where })
+    .then((found) => {
+      if (!found) throw createError(404, 'User not found');
+      req.results = found;
+      next();
+      return null;
+    })
+    .catch(next);
+}
 
-    // auth server settings
-    req.authConfig = await authSettings.config({
-      project: req.project,
-      useAuth: req.query.useAuth || 'default',
-    });
-    req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
+function canManageTwoFactor(req, res, next) {
+  if (!(req.results && req.results.can && req.results.can('update')))
+    return next(createError(403, 'You cannot manage two factor for this User'));
+  return next();
+}
 
-    // fetch auth user
-    const authUser = await req.adapter.service.fetchUserData({
-      authConfig: req.authConfig,
-      userId: apiUser.idpUser.identifier,
-    });
-
-    // return true if twoFactorConfigured equals 1
-    const isTwoFactorConfigured = authUser?.twoFactorConfigured === 1;
-    res.json({ twoFactorEnabled: isTwoFactorConfigured });
-  } catch (err) {
-    next(err);
-  }
-});
-
-router.put('/:userId/reset-two-factor', async (req, res, next) => {
-  try {
-    const userId = parseInt(req.params.userId);
-
-    const user = await db.User.findOne({ where: { id: userId } });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // auth server settings
-    req.authConfig = await authSettings.config({
-      project: req.project,
-      useAuth: req.query.useAuth || 'default',
-    });
-    req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
-
-    // Reset two-factor authentication in the auth database
-    if (user.idpUser?.identifier && req.adapter.service.updateUser) {
-      await req.adapter.service.updateUser({
-        authConfig: req.authConfig,
-        userData: {
-          id: user.idpUser.identifier,
-          twoFactorToken: null,
-          twoFactorConfigured: null,
-        },
+router
+  .route('/:userId(\\d+)/two-factor-status')
+  .all(withTwoFactorTarget)
+  .all(auth.useReqUser)
+  .all(canManageTwoFactor)
+  .get(async (req, res, next) => {
+    try {
+      // auth server settings
+      req.authConfig = await authSettings.config({
+        project: req.project,
+        useAuth: req.query.useAuth || 'default',
       });
-    }
+      req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
 
-    res.json({ success: true });
-  } catch (err) {
-    next(err);
-  }
-});
+      // fetch auth user
+      const authUser = await req.adapter.service.fetchUserData({
+        authConfig: req.authConfig,
+        userId: req.results.idpUser.identifier,
+      });
+
+      // return true if twoFactorConfigured equals 1
+      const isTwoFactorConfigured = authUser?.twoFactorConfigured === 1;
+      res.json({ twoFactorEnabled: isTwoFactorConfigured });
+    } catch (err) {
+      next(err);
+    }
+  });
+
+router
+  .route('/:userId(\\d+)/reset-two-factor')
+  .all(withTwoFactorTarget)
+  .all(auth.useReqUser)
+  .all(canManageTwoFactor)
+  .put(async (req, res, next) => {
+    try {
+      const user = req.results;
+
+      // auth server settings
+      req.authConfig = await authSettings.config({
+        project: req.project,
+        useAuth: req.query.useAuth || 'default',
+      });
+      req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
+
+      // Reset two-factor authentication in the auth database
+      if (user.idpUser?.identifier && req.adapter.service.updateUser) {
+        await req.adapter.service.updateUser({
+          authConfig: req.authConfig,
+          userData: {
+            id: user.idpUser.identifier,
+            twoFactorToken: null,
+            twoFactorConfigured: null,
+          },
+        });
+      }
+
+      res.json({ success: true });
+    } catch (err) {
+      next(err);
+    }
+  });
 
 // anonymize user
 // --------------
@@ -843,7 +865,7 @@ router
                 : synchronizedUpdatedUserData
             );
 
-            if (!req.user.can('update', apiUser)) {
+            if (!apiUser.can('update', req.user)) {
               syncErrors.push(
                 new Error(
                   `Not authorized to update user ${apiUser.id} in project ${apiUser.projectId}`

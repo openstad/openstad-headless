@@ -89,6 +89,7 @@ export default function CreateUserGeneral() {
         const response = await fetch(
           `/api/openstad/api/project/${user.projectId}/user/${user.id}/two-factor-status`
         );
+        if (!response.ok) throw new Error(response.statusText);
         const data = await response.json();
         setIsTwoFactorEnabled(data.twoFactorEnabled);
       } catch (error) {
@@ -112,12 +113,13 @@ export default function CreateUserGeneral() {
 
   async function handleResetTwoFactor() {
     try {
-      await fetch(
+      const response = await fetch(
         `/api/openstad/api/project/${user.projectId}/user/${user.id}/reset-two-factor`,
         {
           method: 'PUT',
         }
       );
+      if (!response.ok) throw new Error(response.statusText);
 
       setIsTwoFactorEnabled(false);
       toast.success('Two-factor authentication reset succesvol');

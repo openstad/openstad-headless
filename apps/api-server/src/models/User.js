@@ -696,19 +696,15 @@ module.exports = function (db, sequelize, DataTypes) {
       return valid;
     },
 
-    canUpdate: function (self, user) {
+    canUpdate: function (user, self) {
+      // copy the base functionality
       self = self || this;
 
-      // The user can either be the one being updated or the one making the update. The user possessing the auth key is the one making the update.
-      if (user?.auth) {
-        self = user;
-        user = self;
-      }
-
+      if (!user) user = self.auth && self.auth.user;
       if (!user || !user.role) user = { role: 'all' };
 
       let valid = userHasRole(
-        self,
+        user,
         self.auth && self.auth.updateableBy,
         self.id
       );
@@ -721,7 +717,8 @@ module.exports = function (db, sequelize, DataTypes) {
           self.idpUser.identifier &&
           self.idpUser.identifier == user.idpUser.identifier);
 
-      valid = valid && userHasRole(self, user.role);
+      // extra: geen acties op users met meer rechten dan je zelf hebt
+      valid = valid && userHasRole(user, self.role);
 
       return valid;
     },
