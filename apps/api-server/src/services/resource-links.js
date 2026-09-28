@@ -103,7 +103,13 @@ async function listLinks({ projectId, resourceId, user }) {
   return [...outgoingLinks, ...incomingLinks];
 }
 
-async function createLink({ projectId, resourceId, targetSource, targetId }) {
+async function createLink({
+  projectId,
+  resourceId,
+  targetSource,
+  targetId,
+  transaction,
+}) {
   const source = typeof targetSource === 'string' ? targetSource : '';
   const target =
     targetId === undefined || targetId === null ? '' : String(targetId);
@@ -124,6 +130,7 @@ async function createLink({ projectId, resourceId, targetSource, targetId }) {
     }
     const targetResource = await db.Resource.findOne({
       where: { id: parseInt(target, 10), projectId },
+      transaction,
     });
     if (!targetResource) {
       throw createError(404, 'Target resource not found');
@@ -142,18 +149,22 @@ async function createLink({ projectId, resourceId, targetSource, targetId }) {
   }
   const duplicate = await db.ResourceLink.findOne({
     where: { projectId, [Op.or]: duplicateConditions },
+    transaction,
   });
   if (duplicate) {
     throw createError(409, 'Link already exists');
   }
 
   try {
-    return await db.ResourceLink.create({
-      projectId,
-      resourceId,
-      targetSource: source,
-      targetId: target,
-    });
+    return await db.ResourceLink.create(
+      {
+        projectId,
+        resourceId,
+        targetSource: source,
+        targetId: target,
+      },
+      { transaction }
+    );
   } catch (err) {
     if (err.name === 'SequelizeUniqueConstraintError') {
       throw createError(409, 'Link already exists');
@@ -162,18 +173,19 @@ async function createLink({ projectId, resourceId, targetSource, targetId }) {
   }
 }
 
-async function removeLink({ projectId, resourceId, linkId }) {
+async function removeLink({ projectId, resourceId, linkId, transaction }) {
   const link = await db.ResourceLink.findOne({
     where: {
       id: linkId,
       projectId,
       [Op.or]: [{ resourceId }, incomingWhere(projectId, resourceId)],
     },
+    transaction,
   });
   if (!link) {
     throw createError(404, 'Link not found');
   }
-  await link.destroy();
+  await link.destroy({ transaction });
 }
 
 module.exports = { OPENSTAD_SOURCE, listLinks, createLink, removeLink };
