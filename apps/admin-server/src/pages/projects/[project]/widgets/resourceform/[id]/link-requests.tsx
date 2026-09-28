@@ -42,7 +42,7 @@ const formSchema = z.object({
 export default function WidgetResourceFormLinkRequests() {
   type FormData = z.infer<typeof formSchema>;
   const category = 'linkRequests';
-  const { capabilities } = usePluginCapabilities();
+  const { capabilities, error: capabilitiesError } = usePluginCapabilities();
   const { data: widget, updateConfig } = useWidgetConfig<any>();
 
   const defaults = useCallback(
@@ -71,13 +71,22 @@ export default function WidgetResourceFormLinkRequests() {
     }
   }
 
-  if (!capabilities.linkRequests) return null;
+  const hasConfig = !!widget?.config?.[category];
+  if (!capabilities.linkRequests && !hasConfig && !capabilitiesError) {
+    return null;
+  }
 
   return (
     <div className="p-6 bg-white rounded-md mt-4">
       <Form {...form}>
         <Heading size="xl">Koppelverzoeken</Heading>
         <Separator className="my-4" />
+        {capabilitiesError ? (
+          <p className="text-sm text-destructive mb-4">
+            De plugin-instellingen konden niet worden geladen. Controleer of de
+            plugin actief is voordat je deze instellingen wijzigt.
+          </p>
+        ) : null}
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-2/3 grid grid-cols-1 gap-4">
