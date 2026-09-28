@@ -77,13 +77,16 @@ export default function WidgetDistributionModule({ apiUrl }: WithApiUrlProps) {
               )}
             </TabsContent>
             <TabsContent value="items" className="p-0">
-              {previewConfig && (
-                <WidgetDistributionModuleItems
-                  {...previewConfig}
-                  updateConfig={tabUpdateConfig}
-                  onFieldChanged={onFieldChanged}
-                />
-              )}
+              {previewConfig &&
+                String((previewConfig as { widgetId?: unknown }).widgetId) ===
+                  String(id) && (
+                  <WidgetDistributionModuleItems
+                    key={String(id)}
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
+                )}
             </TabsContent>
             <TabsContent value="distribute" className="p-0">
               {previewConfig && (

@@ -76,13 +76,16 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
               )}
             </TabsContent>
             <TabsContent value="items" className="p-0">
-              {previewConfig && (
-                <WidgetEnqueteItems
-                  {...previewConfig}
-                  updateConfig={tabUpdateConfig}
-                  onFieldChanged={onFieldChanged}
-                />
-              )}
+              {previewConfig &&
+                String((previewConfig as { widgetId?: unknown }).widgetId) ===
+                  String(id) && (
+                  <WidgetEnqueteItems
+                    key={String(id)}
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
+                )}
             </TabsContent>
             {/* <TabsContent value="display" className="p-0">
               {previewConfig && (

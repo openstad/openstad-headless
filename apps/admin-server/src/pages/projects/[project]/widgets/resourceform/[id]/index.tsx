@@ -87,13 +87,16 @@ export default function WidgetResourceForm({ apiUrl }: WithApiUrlProps) {
               )}
             </TabsContent>
             <TabsContent value="items" className="p-0">
-              {previewConfig && (
-                <WidgetResourceFormItems
-                  {...previewConfig}
-                  updateConfig={tabUpdateConfig}
-                  onFieldChanged={onFieldChanged}
-                />
-              )}
+              {previewConfig &&
+                String((previewConfig as { widgetId?: unknown }).widgetId) ===
+                  String(id) && (
+                  <WidgetResourceFormItems
+                    key={String(id)}
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
+                )}
             </TabsContent>
             <TabsContent value="submit" className="p-0">
               {previewConfig && (

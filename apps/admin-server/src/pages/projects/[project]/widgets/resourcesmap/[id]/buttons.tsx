@@ -143,7 +143,7 @@ export default function WidgetResourcesMapButton(
                           field.onChange(e);
                           props.onFieldChanged('ctaButton', {
                             show: props?.ctaButton?.show,
-                            label: props?.countButton?.label,
+                            label: props?.ctaButton?.label,
                             href: e.target.value,
                           });
                         }}

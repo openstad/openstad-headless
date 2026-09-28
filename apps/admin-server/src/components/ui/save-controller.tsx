@@ -61,6 +61,15 @@ type SaveControllerValue = {
    * still resolve and flash "saved"/blocked on the new one.
    */
   invalidateInFlightSave: () => void;
+  /**
+   * Skip the unsaved-changes prompt for the next route change this page
+   * starts itself. A create flow navigates to the new record the moment it
+   * exists, and the registration is still reported as dirty at that point:
+   * clearing the form's baseline only reaches this provider on a later render,
+   * so the guard would ask the user to confirm leaving a page whose work was
+   * just saved. The flag is one-shot and clears when the navigation settles.
+   */
+  allowNextNavigation: () => void;
 };
 
 const SaveControllerContext = createContext<SaveControllerValue | null>(null);
@@ -95,6 +104,11 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const successTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const registrationToken = useRef(0);
+  // Synchronous lock: `phase` only flips to 'saving' on the next render, so a
+  // second triggerSave() fired before that commit (e.g. a fast double-click
+  // on the error-state retry button) could otherwise start a second
+  // save-and-merge pass while the first is still in flight.
+  const savingRef = useRef(false);
 
   const clearSuccessTimer = useCallback(() => {
     if (successTimer.current) {
@@ -143,6 +157,8 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
   );
 
   const triggerSave = useCallback(() => {
+    if (savingRef.current) return;
+
     const pending = Array.from(registrationsRef.current.entries()).filter(
       ([, registration]) =>
         registration.isDirty && registration.enabled !== false
@@ -153,77 +169,82 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
     const isStale = () => registrationToken.current !== token;
     const namedForms = registrationsRef.current.size > 1;
 
+    savingRef.current = true;
     clearSuccessTimer();
     setErrorMessage(null);
     setPhase('saving');
 
     const saveAll = async () => {
-      const failures: { label?: string; message: string }[] = [];
+      try {
+        const failures: { label?: string; message: string }[] = [];
 
-      // Sequential on purpose: several of these endpoints read, merge and write
-      // the same record, so parallel requests would let the last one win and
-      // silently drop the others.
-      for (const [key, snapshot] of pending) {
-        if (isStale()) return;
-        const registrations = registrationsRef.current;
-        // A form can unmount while the batch runs; the snapshot keeps its
-        // pending edit saveable. One that is still mounted and already clean
-        // was saved by something else, so it is skipped.
-        const current = registrations.get(key);
-        if (current && !current.isDirty) continue;
-        const registration = current ?? snapshot;
-        try {
-          await registration.save();
-        } catch (error: unknown) {
-          // Carry on with the other forms: one broken form must not block the
-          // changes the user made everywhere else on the page.
-          failures.push({
-            label: registration.label,
-            message: errorMessageOf(error),
-          });
+        // Sequential on purpose: several of these endpoints read, merge and write
+        // the same record, so parallel requests would let the last one win and
+        // silently drop the others.
+        for (const [key, snapshot] of pending) {
+          if (isStale()) return;
+          const registrations = registrationsRef.current;
+          // A form can unmount while the batch runs; the snapshot keeps its
+          // pending edit saveable. One that is still mounted and already clean
+          // was saved by something else, so it is skipped.
+          const current = registrations.get(key);
+          if (current && !current.isDirty) continue;
+          const registration = current ?? snapshot;
+          try {
+            await registration.save();
+          } catch (error: unknown) {
+            // Carry on with the other forms: one broken form must not block the
+            // changes the user made everywhere else on the page.
+            failures.push({
+              label: registration.label,
+              message: errorMessageOf(error),
+            });
+          }
         }
+
+        if (isStale()) return;
+
+        if (failures.length === 0) {
+          // Dirty state is the registered form's to report, not this callback's.
+          // Every consumer clears it after a successful save and re-registers,
+          // which lands here through `register`. Forcing it false from here would
+          // also hide a field the user typed while the request was in flight:
+          // that edit was never sent, so the bar has to keep offering to save it.
+          setPhase('success');
+          clearSuccessTimer();
+          successTimer.current = setTimeout(() => {
+            setPhase('idle');
+            successTimer.current = null;
+          }, SUCCESS_AUTO_HIDE_MS);
+          return;
+        }
+
+        const savedTheRest =
+          pending.length > failures.length
+            ? ' De overige wijzigingen zijn wel opgeslagen.'
+            : '';
+        const labels = failures
+          .map((failure) => failure.label)
+          .filter((label): label is string => !!label);
+
+        let message: string;
+        if (!namedForms || failures.length === 1) {
+          const prefix =
+            namedForms && failures[0].label ? `${failures[0].label}: ` : '';
+          message = `${prefix}${failures[0].message}${savedTheRest}`;
+        } else if (labels.length === failures.length) {
+          message = `De volgende onderdelen konden niet worden opgeslagen: ${listLabels(
+            labels
+          )}.${savedTheRest}`;
+        } else {
+          message = `${failures.length} onderdelen konden niet worden opgeslagen.${savedTheRest}`;
+        }
+
+        setErrorMessage(message);
+        setPhase('error');
+      } finally {
+        savingRef.current = false;
       }
-
-      if (isStale()) return;
-
-      if (failures.length === 0) {
-        // Dirty state is the registered form's to report, not this callback's.
-        // Every consumer clears it after a successful save and re-registers,
-        // which lands here through `register`. Forcing it false from here would
-        // also hide a field the user typed while the request was in flight:
-        // that edit was never sent, so the bar has to keep offering to save it.
-        setPhase('success');
-        clearSuccessTimer();
-        successTimer.current = setTimeout(() => {
-          setPhase('idle');
-          successTimer.current = null;
-        }, SUCCESS_AUTO_HIDE_MS);
-        return;
-      }
-
-      const savedTheRest =
-        pending.length > failures.length
-          ? ' De overige wijzigingen zijn wel opgeslagen.'
-          : '';
-      const labels = failures
-        .map((failure) => failure.label)
-        .filter((label): label is string => !!label);
-
-      let message: string;
-      if (!namedForms || failures.length === 1) {
-        const prefix =
-          namedForms && failures[0].label ? `${failures[0].label}: ` : '';
-        message = `${prefix}${failures[0].message}${savedTheRest}`;
-      } else if (labels.length === failures.length) {
-        message = `De volgende onderdelen konden niet worden opgeslagen: ${listLabels(
-          labels
-        )}.${savedTheRest}`;
-      } else {
-        message = `${failures.length} onderdelen konden niet worden opgeslagen.${savedTheRest}`;
-      }
-
-      setErrorMessage(message);
-      setPhase('error');
     };
 
     saveAll();
@@ -250,8 +271,11 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
   const state: SaveState = useMemo(() => {
     if (phase === 'saving') return 'saving';
     if (phase === 'error') return 'error';
-    if (phase === 'success') return 'success';
+    // An edit made while the request was in flight (or right after it
+    // resolved) keeps `isDirty` true; that edit was never sent, so it must
+    // win over a stale 'success' confirmation instead of being hidden by it.
     if (isRegistered && isDirty) return 'dirty';
+    if (phase === 'success') return 'success';
     return 'neutral';
   }, [phase, isRegistered, isDirty]);
 
@@ -259,7 +283,25 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setSavedState(false);
   }, [setSavedState]);
-  getCurrentStateRef.current = () => isRegistered && isDirty;
+
+  const skipNavigationGuardRef = useRef(false);
+  const allowNextNavigation = useCallback(() => {
+    skipNavigationGuardRef.current = true;
+  }, []);
+  getCurrentStateRef.current = () =>
+    skipNavigationGuardRef.current ? false : isRegistered && isDirty;
+
+  useEffect(() => {
+    const clear = () => {
+      skipNavigationGuardRef.current = false;
+    };
+    router.events.on('routeChangeComplete', clear);
+    router.events.on('routeChangeError', clear);
+    return () => {
+      router.events.off('routeChangeComplete', clear);
+      router.events.off('routeChangeError', clear);
+    };
+  }, [router]);
 
   const value = useMemo<SaveControllerValue>(
     () => ({
@@ -271,6 +313,7 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
       triggerSave,
       dismissError,
       invalidateInFlightSave,
+      allowNextNavigation,
     }),
     [
       state,
@@ -281,6 +324,7 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
       triggerSave,
       dismissError,
       invalidateInFlightSave,
+      allowNextNavigation,
     ]
   );
 

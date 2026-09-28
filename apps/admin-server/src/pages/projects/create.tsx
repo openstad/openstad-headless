@@ -9,6 +9,10 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  useRegisterFormSave,
+  useSaveController,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useProject } from '@/hooks/use-project';
@@ -55,23 +59,35 @@ export default function CreateProject() {
     };
   }
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const { allowNextNavigation } = useSaveController();
+
+  const save = React.useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
+
     const project = await createProject(values.projectName);
 
     if (project && project?.status === 500) {
-      toast.error('Je hebt geen toegang tot deze actie.');
-      return;
+      throw new Error('Je hebt geen toegang tot deze actie.');
+    }
+    if (!project) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
 
-    if (project) {
-      toast.success('Project aangemaakt!');
-      const projectId = project?.id || project;
+    // A freshly created record is not an unsaved edit, so leaving this page
+    // must not prompt.
+    allowNextNavigation();
+    toast.success('Project aangemaakt!');
+    const projectId = project?.id || project;
+    router.push(`/projects/${projectId}/settings`);
+  }, [form, createProject, router, allowNextNavigation]);
 
-      router.push(`/projects/${projectId}/settings`);
-    } else {
-      toast.error('Er is helaas iets mis gegaan.');
-    }
-  }
+  // Only the create form registers. The JSON import below stays a one-shot
+  // action with its own button: it is not an edit the bar can hold.
+  useRegisterFormSave(form, save, { label: 'Aanmaken' });
 
   async function onImport(values: z.infer<typeof importFormSchema>) {
     try {
@@ -83,6 +99,9 @@ export default function CreateProject() {
         data.emailConfig
       );
       if (project) {
+        // The create form above is registered, so a typed project name
+        // makes the page dirty; importing is a save too, not an abandon.
+        allowNextNavigation();
         toast.success('Project aangemaakt!');
         router.push(`/projects/${project.id}/settings`);
       } else {
@@ -108,7 +127,7 @@ export default function CreateProject() {
             <Heading size="xl">Project toevoegen</Heading>
             <Separator className="my-4" />
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={(event) => event.preventDefault()}
               className="lg:w-2/3 grid grid-cols-1 lg:grid-cols-1 gap-x-4 gap-y-8">
               <FormField
                 control={form.control}
@@ -123,9 +142,6 @@ export default function CreateProject() {
                   </FormItem>
                 )}
               />
-              <Button variant="default" type="submit" className="w-fit">
-                Opslaan
-              </Button>
             </form>
           </Form>
           <Form {...importForm} className="p-6 bg-white rounded-md mt-4">

@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import {
   rebaselineAfterSave,
   useRegisterSave,
+  useSaveController,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -380,13 +381,14 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
         router.push(`/projects/${project}/resources`);
 
         // SWR reload
-        const url = `/api/openstad/api/project/${project}/resource/${id}`;
-        mutate(url);
+        mutate();
       })
       .catch((e) => {
         toast.error(`Plan kon niet ${id ? 'aangepast' : 'aangemaakt'} worden`);
       });
   }
+
+  const { allowNextNavigation } = useSaveController();
 
   const save = useCallback(async () => {
     const valid = await form.trigger();
@@ -399,14 +401,42 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
     // parse as well, or those fields persist as strings.
     const sent = cloneDeep(form.getValues());
     const finalValues = buildSubmitValues(schema.parse(sent) as FormType);
-    await onFormSubmit(finalValues);
+    // The save bar shows a thrown message as-is, and the resource hooks throw
+    // English or network errors, so replace them with the message the removed
+    // submit button showed.
+    try {
+      await onFormSubmit(finalValues);
+    } catch {
+      throw new Error(
+        `Inzending kon niet ${id ? 'aangepast' : 'aangemaakt'} worden`
+      );
+    }
 
     rebaselineAfterSave(form, sent);
 
     // SWR reload
-    const url = `/api/openstad/api/project/${project}/resource/${id}`;
-    mutate(url);
-  }, [form, schema, buildSubmitValues, onFormSubmit, project, id, mutate]);
+    await mutate();
+
+    // Creating leaves this page for the list, the way the removed submit
+    // button did; editing stays put. Without allowNextNavigation the
+    // unsaved-changes guard would block the redirect, because the cleared
+    // baseline only reaches the controller on a later render.
+    if (!id) {
+      allowNextNavigation();
+      toast.success('Inzending succesvol aangemaakt');
+      router.push(`/projects/${project}/resources`);
+    }
+  }, [
+    form,
+    schema,
+    buildSubmitValues,
+    onFormSubmit,
+    mutate,
+    id,
+    project,
+    router,
+    allowNextNavigation,
+  ]);
 
   useRegisterSave({
     enabled: !!useGlobalSave,

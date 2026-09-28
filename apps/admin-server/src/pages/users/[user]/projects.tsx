@@ -56,7 +56,7 @@ export default function CreateUserProjects() {
         if (roleId === '') {
           updated.splice(index, 1);
         } else {
-          updated[index].roleId = roleId;
+          updated[index] = { ...updated[index], roleId };
         }
       } else if (roleId !== '') {
         updated.push({ projectId, roleId });
@@ -71,7 +71,7 @@ export default function CreateUserProjects() {
       const index = updated.findIndex((e) => e.projectId === projectId);
 
       if (index !== -1) {
-        updated[index].consent = consent;
+        updated[index] = { ...updated[index], consent };
       } else {
         updated.push({ projectId, consent });
       }
@@ -138,9 +138,30 @@ export default function CreateUserProjects() {
       throw new Error(error.message || 'User kon niet worden bijgewerkt');
     }
 
-    // Clear the pending edits so the save bar can report success.
-    setProjectRoles([]);
-    setEmailNotificationConsents([]);
+    // Clear only the pending edits that were actually sent (this closure's
+    // `projectRoles`/`emailNotificationConsents` snapshot). An edit made
+    // while the requests were in flight was never sent, so it must survive
+    // this reset instead of being silently discarded.
+    setProjectRoles((prev) =>
+      prev.filter(
+        (pending) =>
+          !projectRoles.some(
+            (sent) =>
+              sent.projectId === pending.projectId &&
+              sent.roleId === pending.roleId
+          )
+      )
+    );
+    setEmailNotificationConsents((prev) =>
+      prev.filter(
+        (pending) =>
+          !emailNotificationConsents.some(
+            (sent) =>
+              sent.projectId === pending.projectId &&
+              sent.consent === pending.consent
+          )
+      )
+    );
     await mutate();
   }, [
     projectRoles,

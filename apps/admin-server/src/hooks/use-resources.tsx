@@ -110,7 +110,7 @@ export default function useResources(
       resourcesListSwr.mutate(updatedList);
       return data;
     } else {
-      throw new Error('Het plan kon niet worden opgeslagen.');
+      throw new Error('De inzending kon niet worden opgeslagen.');
     }
   }
 

@@ -95,6 +95,9 @@ export default function ArgumentsGeneral({
   useSyncDraftForm(form, props.onFieldChanged, {
     schema: finalSchema,
     label: 'Algemeen',
+    // Explicit id: this tab's label collides with resourcedetail's own
+    // "Algemeen" tab when both are mounted on the same resourcedetail page.
+    id: 'commentsWidget.general',
   });
 
   const { data } = useResources(props.projectId);

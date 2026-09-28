@@ -12,12 +12,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { useRegisterSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
-import useUnsavedChanges from '@/hooks/use-unsaved-changes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import 'leaflet/dist/leaflet.css';
+import isEqual from 'lodash/isEqual';
 import { ArrowLeft, MapPin, Trash2, X } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -49,8 +50,11 @@ interface MarkersEditorProps {
   initialName: string;
   initialMarkers: Marker[];
   project: string;
+  /**
+   * Must reject on failure: the global save bar reports the outcome, and a
+   * swallowed error would leave it claiming the save succeeded.
+   */
   onSave: (name: string, markers: Marker[]) => Promise<void>;
-  isSaving?: boolean;
 }
 
 export default function MarkersEditor({
@@ -58,7 +62,6 @@ export default function MarkersEditor({
   initialMarkers,
   project,
   onSave,
-  isSaving = false,
 }: MarkersEditorProps) {
   const [markers, setMarkers] = useState<Marker[]>(initialMarkers);
   const [activeMarkerIndex, setActiveMarkerIndex] = useState<number | null>(
@@ -71,8 +74,16 @@ export default function MarkersEditor({
   const [markerIconFn, setMarkerIconFn] = useState<any>(null);
   const [skipNextMapClick, setSkipNextMapClick] = useState(false);
   const lastAppliedInitialRef = useRef<string>('');
-
-  const { setSavedState, getCurrentStateRef } = useUnsavedChanges();
+  const [isDirty, setIsDirty] = useState(false);
+  const isDirtyRef = useRef(false);
+  // The save bar owns the unsaved-changes guard for the whole app, so this
+  // component keeps only what its own dirty check needs.
+  const savedStateRef = useRef<{ name: string; markers: Marker[] } | null>(
+    null
+  );
+  const getFullStateRef = useRef<
+    (() => { name: string; markers: Marker[] }) | null
+  >(null);
 
   const nameForm = useForm<{ name: string }>({
     resolver: zodResolver<any>(
@@ -98,15 +109,24 @@ export default function MarkersEditor({
 
   const watchedColor = markerForm.watch('color');
   const watchedIcon = markerForm.watch('icon');
+  const watchedName = nameForm.watch('name');
+  const watchedMarker = markerForm.watch();
 
   useEffect(() => {
     const key = JSON.stringify({ name: initialName, markers: initialMarkers });
     if (key === lastAppliedInitialRef.current) return;
+    // A successful save writes the server response into SWR, which lands here
+    // as new initial values. Adopting them while the user has since edited
+    // something would reset the editor to the state that was sent and drop
+    // that edit, so hold off until it is saved too.
+    if (isDirtyRef.current) return;
     lastAppliedInitialRef.current = key;
 
     setMarkers(initialMarkers);
     nameForm.reset({ name: initialName });
-    setSavedState({ name: initialName, markers: initialMarkers });
+    savedStateRef.current = { name: initialName, markers: initialMarkers };
+    isDirtyRef.current = false;
+    setIsDirty(false);
   }, [initialName, initialMarkers]);
 
   function getFullState() {
@@ -117,7 +137,21 @@ export default function MarkersEditor({
     return { name: nameForm.getValues('name'), markers: currentMarkers };
   }
 
-  getCurrentStateRef.current = getFullState;
+  getFullStateRef.current = getFullState;
+
+  // Recompute after every state-changing action, so the bar reflects the edit
+  // that was just made rather than the previous render's state.
+  const refreshDirty = useCallback(() => {
+    if (!savedStateRef.current) return;
+    const dirty = !isEqual(getFullStateRef.current?.(), savedStateRef.current);
+    isDirtyRef.current = dirty;
+    setIsDirty(dirty);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- read via refs
+  }, []);
+
+  useEffect(() => {
+    refreshDirty();
+  }, [markers, activeMarkerIndex, watchedName, watchedMarker, refreshDirty]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -255,12 +289,21 @@ export default function MarkersEditor({
 
   async function handleSave() {
     const isValid = await nameForm.trigger();
-    if (!isValid) return;
+    if (!isValid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
 
     const { name, markers: currentMarkers } = getFullState();
-    setSavedState({ name, markers: currentMarkers });
     await onSave(name, currentMarkers);
+
+    // Only adopt the new baseline once the request succeeded. Doing it first
+    // would make a failed save look clean: the navigation guard would stop
+    // warning and the error bar's retry would find nothing left to save.
+    savedStateRef.current = structuredClone({ name, markers: currentMarkers });
+    refreshDirty();
   }
+
+  useRegisterSave({ isDirty, save: handleSave });
 
   return (
     <>
@@ -626,12 +669,6 @@ export default function MarkersEditor({
             )}
           </div>
         </div>
-
-        <Separator className="my-4" />
-
-        <Button onClick={handleSave} disabled={isSaving}>
-          {isSaving ? 'Opslaan...' : 'Opslaan'}
-        </Button>
       </div>
     </>
   );

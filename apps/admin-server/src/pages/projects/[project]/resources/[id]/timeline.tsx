@@ -30,6 +30,11 @@ export default function ProjectResourceTimeline() {
   // fresh id, so the baseline is kept as a snapshot instead of being derived
   // from the resource on every render.
   const savedItems = React.useRef<AgendaItem[]>([]);
+  // `save` closes over `items` at the value it had when that closure was
+  // created, so comparing it against `items` again after the `await` always
+  // matches trivially. This ref tracks the true latest value (updated on
+  // every edit) so an edit made while the request is in flight is detected.
+  const itemsRef = React.useRef<AgendaItem[]>(items);
 
   const itemsInitialized = React.useRef(false);
   useEffect(() => {
@@ -39,12 +44,14 @@ export default function ProjectResourceTimeline() {
       (resource?.timeline ?? []).map(withId)
     ) as AgendaItem[];
     savedItems.current = seeded;
+    itemsRef.current = seeded;
     setItems(seeded);
     setIsDirty(false);
   }, [resource?.id]);
 
   function handleItemsChange(next: AgendaItem[]) {
     const filled = fillTimelineEndDates(next) as AgendaItem[];
+    itemsRef.current = filled;
     setItems(filled);
     setIsDirty(!isEqual(filled, savedItems.current));
   }
@@ -56,7 +63,7 @@ export default function ProjectResourceTimeline() {
     await update(Number.parseInt(id as string), { timeline });
 
     savedItems.current = timeline;
-    setIsDirty(false);
+    setIsDirty(!isEqual(itemsRef.current, timeline));
     itemsInitialized.current = false;
     await mutate();
   }, [id, items, update, mutate]);

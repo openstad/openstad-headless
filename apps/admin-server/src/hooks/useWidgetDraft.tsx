@@ -59,10 +59,11 @@ let draftValidatorSeq = 0;
 export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
   form: UseFormReturn<TFieldValues>,
   onFieldChanged?: (name: string, value: any) => void,
-  options?: { schema?: DraftSchema; label?: string }
+  options?: { schema?: DraftSchema; label?: string; id?: string }
 ) {
   const schema = options?.schema;
   const label = options?.label;
+  const id = options?.id;
   const hasSchema = !!schema;
   const schemaRef = useRef(schema);
   schemaRef.current = schema;
@@ -73,11 +74,18 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
   const pendingRef = useRef<Set<string>>(new Set());
   const wasEditedRef = useRef(false);
 
+  // The key must be unique BETWEEN tabs and STABLE ACROSS A REMOUNT of the
+  // same tab, so a call-site `id` (identical on every remount) wins over the
+  // tab's display `label` (which can collide between tabs), which in turn
+  // wins over a per-mount `seq` counter (only safe when nothing else is
+  // stored under this validator across a remount).
   const validatorKeyRef = useRef<string | undefined>(undefined);
   if (validatorKeyRef.current === undefined) {
-    validatorKeyRef.current = label
-      ? `label:${label}`
-      : `seq:${(draftValidatorSeq += 1)}`;
+    validatorKeyRef.current = id
+      ? `id:${id}`
+      : label
+        ? `label:${label}`
+        : `seq:${(draftValidatorSeq += 1)}`;
   }
 
   const flush = useMemo(
@@ -105,9 +113,32 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
   useEffect(() => {
     if (!onFieldChanged) return;
 
+    const key = validatorKeyRef.current as string;
+    const validateValues = (values: any): ReturnType<DraftValidator> => {
+      const result = schemaRef.current!.safeParse(values);
+      if (result.success) return { ok: true };
+      const firstMessage = result.error?.issues?.[0]?.message;
+      return { ok: false, label, message: firstMessage || 'ongeldige waarde.' };
+    };
+    const installLiveValidator = () => {
+      draftValidators.set(key, () =>
+        wasEditedRef.current ? validateValues(form.getValues()) : { ok: true }
+      );
+    };
+
+    // A prior mount of this same tab may have left a strict snapshot
+    // validator behind (unmounted while invalid). Keep it in place across
+    // this remount instead of clobbering it with a fresh, permissive one —
+    // otherwise switching tabs and back would silently un-block an invalid
+    // save. It only gets replaced once the user actually edits again below.
+    const hadInheritedEntry = draftValidators.has(key);
+
     const subscription = form.watch((values, { name }) => {
       latestRef.current = values;
       if (name) {
+        if (!wasEditedRef.current && schemaRef.current) {
+          installLiveValidator();
+        }
         wasEditedRef.current = true;
         pendingRef.current.add(name);
         flush();
@@ -116,20 +147,11 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
 
     const unregisterFlush = registerFieldFlusher(() => flush.flush());
 
-    const key = validatorKeyRef.current as string;
-    const validateValues = (values: any): ReturnType<DraftValidator> => {
-      const result = schemaRef.current!.safeParse(values);
-      if (result.success) return { ok: true };
-      const firstMessage = result.error?.issues?.[0]?.message;
-      return { ok: false, label, message: firstMessage || 'ongeldige waarde.' };
-    };
-    if (schemaRef.current) {
+    if (schemaRef.current && !hadInheritedEntry) {
       // Only validate a tab the user actually touched. Stored config that
       // predates a schema change would otherwise block the whole widget save
       // from every tab, just because this one was mounted once.
-      draftValidators.set(key, () =>
-        wasEditedRef.current ? validateValues(form.getValues()) : { ok: true }
-      );
+      installLiveValidator();
     }
 
     return () => {
@@ -140,9 +162,13 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
         if (label && wasEditedRef.current) {
           const snapshot = form.getValues();
           draftValidators.set(key, () => validateValues(snapshot));
-        } else {
+        } else if (!hadInheritedEntry) {
+          // We own this entry (nothing was inherited from a prior mount) and
+          // the user never edited it this time round — safe to drop.
           draftValidators.delete(key);
         }
+        // else: an inherited strict snapshot was never touched this mount —
+        // leave it exactly as it was.
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- schema read via schemaRef above

@@ -9,12 +9,16 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  useRegisterFormSave,
+  useSaveController,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useUniqueCodes from '@/hooks/use-unique-codes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -37,15 +41,30 @@ export default function ProjectCodeCreate() {
     defaultValues: {},
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const codes = await createUniqueCodes(values.numberOfCodes);
-    if (codes) {
-      toast.success('De codes worden aangemaakt!');
-      router.push(`/projects/${project}/unique-codes`);
-    } else {
-      toast.error('Er is helaas iets mis gegaan.');
+  const { allowNextNavigation } = useSaveController();
+
+  const save = useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
     }
-  }
+    const values = formSchema.parse(form.getValues());
+
+    const codes = await createUniqueCodes(values.numberOfCodes);
+    if (!codes) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+
+    // A freshly created record is not an unsaved edit, so leaving this page
+    // must not prompt. useRegisterFormSave re-baselines the form afterwards,
+    // but that only reaches the controller on a later render -- the push
+    // starts now, so the guard has to be told directly.
+    allowNextNavigation();
+    toast.success('De codes worden aangemaakt!');
+    router.push(`/projects/${project}/unique-codes`);
+  }, [form, createUniqueCodes, router, project, allowNextNavigation]);
+
+  useRegisterFormSave(form, save, { label: 'Aanmaken' });
 
   return (
     <div>
@@ -70,7 +89,7 @@ export default function ProjectCodeCreate() {
             <Separator className="my-4" />
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(onSubmit)}
+                onSubmit={(event) => event.preventDefault()}
                 className="lg:w-3/4 grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -91,9 +110,6 @@ export default function ProjectCodeCreate() {
                   )}
                 />
                 <div className="col-span-full flex gap-4">
-                  <Button type="submit" className="w-fit">
-                    Opslaan
-                  </Button>
                   <Button
                     type="button"
                     variant="outline"

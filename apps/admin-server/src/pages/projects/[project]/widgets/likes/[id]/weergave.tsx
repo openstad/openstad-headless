@@ -93,6 +93,9 @@ export default function LikesDisplay({
   useSyncDraftForm(form, props.onFieldChanged, {
     schema: finalSchema,
     label: 'Weergave',
+    // Explicit id: this tab's label collides with resourcedetail's own
+    // "Weergave" tab when both are mounted on the same resourcedetail page.
+    id: 'likesWidget.weergave',
   });
 
   return (

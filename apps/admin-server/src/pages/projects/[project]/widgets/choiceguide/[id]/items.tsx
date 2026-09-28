@@ -24,6 +24,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
+import { useDraftItems } from '@/hooks/useDraftItems';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { generateId, withId } from '@/lib/widget-item-helpers';
@@ -192,7 +193,10 @@ export default function WidgetChoiceGuideItems(
   props: ChoiceGuideProps & EditFieldProps<ChoiceGuideProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, commitItems] = useDraftItems<Item>(
+    props.items,
+    props.onFieldChanged
+  );
   const [options, setOptions] = useState<Option[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
@@ -274,7 +278,7 @@ export default function WidgetChoiceGuideItems(
 
       const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
 
-      setItems((currentItems) =>
+      commitItems((currentItems) =>
         currentItems.map((item) => {
           if (item.id === selectedItem.id) {
             return {
@@ -302,7 +306,7 @@ export default function WidgetChoiceGuideItems(
       );
       setSelectedItemId(null);
     } else {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
           (max, i) => Math.max(max, parseInt(i.trigger) || 0),
           0
@@ -524,24 +528,6 @@ export default function WidgetChoiceGuideItems(
     defaultValues: defaults(),
   });
 
-  const itemsInitialized = React.useRef(false);
-  const syncedItemsRef = React.useRef<string>(JSON.stringify(items));
-  useEffect(() => {
-    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
-      itemsInitialized.current = true;
-      const seeded = props.items.map(withId);
-      syncedItemsRef.current = JSON.stringify(seeded);
-      setItems(seeded);
-    }
-  }, [props?.items]);
-
-  const { onFieldChanged } = props;
-  useEffect(() => {
-    if (!onFieldChanged) return;
-    if (JSON.stringify(items) === syncedItemsRef.current) return;
-    onFieldChanged('items', items);
-  }, [items]);
-
   // Sets form to selected item values when item is selected
   useEffect(() => {
     if (selectedItem) {
@@ -650,7 +636,7 @@ export default function WidgetChoiceGuideItems(
     matrixType: 'rows' | 'columns' = 'rows'
   ) => {
     if (isItemAction) {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         const index = currentItems.findIndex(
           (entry) => entry.trigger === clickedTrigger
         );

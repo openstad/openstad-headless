@@ -77,13 +77,16 @@ export default function WidgetAgenda({ apiUrl }: WithApiUrlProps) {
               )}
             </TabsContent>
             <TabsContent value="items" className="p-0">
-              {previewConfig && (
-                <WidgetAgendaItems
-                  {...previewConfig}
-                  updateConfig={tabUpdateConfig}
-                  onFieldChanged={onFieldChanged}
-                />
-              )}
+              {previewConfig &&
+                String((previewConfig as { widgetId?: unknown }).widgetId) ===
+                  String(id) && (
+                  <WidgetAgendaItems
+                    key={String(id)}
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
+                )}
             </TabsContent>
             <TabsContent value="display" className="p-0">
               {previewConfig && (

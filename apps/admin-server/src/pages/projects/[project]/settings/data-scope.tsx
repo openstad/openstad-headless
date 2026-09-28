@@ -1,5 +1,4 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -11,18 +10,19 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterFormSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Switch from '@radix-ui/react-switch';
 import { AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/router';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
+import { useSyncFormDefaults } from '../../../../hooks/useSyncFormDefaults';
 import { DATA_SCOPE_COMPONENTS } from '../../../../lib/data-scope-catalog';
 
 // Single source of truth for labels/fields lives in lib/data-scope-catalog.ts;
@@ -75,11 +75,15 @@ export default function ProjectSettingsDataScope() {
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  useSyncFormDefaults(form, defaults, data);
 
-  async function onSubmit(values: FormValues) {
+  const save = useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
+
     // A disabled component must not retain opted-in personal fields: clear them
     // so re-enabling the component later starts from a clean (empty) state.
     const normalized = (Object.keys(values) as ComponentKey[]).reduce(
@@ -92,18 +96,13 @@ export default function ProjectSettingsDataScope() {
       {} as FormValues
     );
 
-    try {
-      const result = await updateProject({ dataScope: normalized });
-      if (result && !result.error) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('Could not update dataScope', error);
-      toast.error('Er is helaas iets mis gegaan.');
+    const result = await updateProject({ dataScope: normalized });
+    if (!result || result.error) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+  }, [form, updateProject]);
+
+  useRegisterFormSave(form, save);
 
   return (
     <div>
@@ -127,7 +126,7 @@ export default function ProjectSettingsDataScope() {
           ) : (
             <Form {...form}>
               <form
-                onSubmit={form.handleSubmit(onSubmit)}
+                onSubmit={(event) => event.preventDefault()}
                 className="w-full lg:w-5/6">
                 <Heading size="xl">Data via API</Heading>
                 <Separator className="my-4" />
@@ -240,10 +239,6 @@ export default function ProjectSettingsDataScope() {
                     );
                   })}
                 </div>
-
-                <Button type="submit" className="mt-6 w-fit">
-                  Opslaan
-                </Button>
               </form>
             </Form>
           )}

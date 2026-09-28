@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -9,12 +8,16 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  useRegisterFormSave,
+  useSaveController,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useAccessCodes from '@/hooks/use-access-codes';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -33,15 +36,30 @@ export default function ProjectCodeCreate() {
     defaultValues: {},
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const codes = await createAccessCode(values.accessCode);
-    if (codes) {
-      toast.success('De toegangscode is aangemaakt!');
-      router.push(`/projects/${project}/access-codes`);
-    } else {
-      toast.error('Er is helaas iets mis gegaan.');
+  const { allowNextNavigation } = useSaveController();
+
+  const save = useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
     }
-  }
+    const values = formSchema.parse(form.getValues());
+
+    const codes = await createAccessCode(values.accessCode);
+    if (!codes) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+
+    // A freshly created record is not an unsaved edit, so leaving this page
+    // must not prompt. useRegisterFormSave re-baselines the form afterwards,
+    // but that only reaches the controller on a later render -- the push
+    // starts now, so the guard has to be told directly.
+    allowNextNavigation();
+    toast.success('De toegangscode is aangemaakt!');
+    router.push(`/projects/${project}/access-codes`);
+  }, [form, createAccessCode, router, project, allowNextNavigation]);
+
+  useRegisterFormSave(form, save, { label: 'Aanmaken' });
 
   return (
     <div>
@@ -69,7 +87,7 @@ export default function ProjectCodeCreate() {
             <Heading size="xl">Toevoegen</Heading>
             <Separator className="my-4" />
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={(event) => event.preventDefault()}
               className="lg:w-3/4 grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -84,9 +102,6 @@ export default function ProjectCodeCreate() {
                   </FormItem>
                 )}
               />
-              <Button className="w-fit col-span-full" type="submit">
-                Opslaan
-              </Button>
             </form>
           </Form>
         </div>

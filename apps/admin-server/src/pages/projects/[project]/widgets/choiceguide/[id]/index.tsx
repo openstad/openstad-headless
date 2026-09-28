@@ -80,14 +80,17 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
               )}
             </TabsContent>
             <TabsContent value="items" className="p-0">
-              {previewConfig && (
-                // @ts-ignore
-                <WidgetChoiceGuideItems
-                  {...previewConfig}
-                  updateConfig={tabUpdateConfig}
-                  onFieldChanged={onFieldChanged}
-                />
-              )}
+              {previewConfig &&
+                String((previewConfig as { widgetId?: unknown }).widgetId) ===
+                  String(id) && (
+                  // @ts-ignore
+                  <WidgetChoiceGuideItems
+                    key={String(id)}
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
+                )}
             </TabsContent>
             <TabsContent value="choiceOptions" className="p-0">
               {previewConfig && (
