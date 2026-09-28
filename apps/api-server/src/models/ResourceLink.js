@@ -37,8 +37,14 @@ module.exports = function (db, sequelize, DataTypes) {
   );
 
   ResourceLink.associate = function (models) {
-    ResourceLink.belongsTo(models.Project, { foreignKey: 'projectId' });
-    ResourceLink.belongsTo(models.Resource, { foreignKey: 'resourceId' });
+    ResourceLink.belongsTo(models.Project, {
+      foreignKey: 'projectId',
+      onDelete: 'CASCADE',
+    });
+    ResourceLink.belongsTo(models.Resource, {
+      foreignKey: 'resourceId',
+      onDelete: 'CASCADE',
+    });
   };
 
   ResourceLink.auth = ResourceLink.prototype.auth = {

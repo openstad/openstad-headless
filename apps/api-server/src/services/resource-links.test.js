@@ -51,7 +51,9 @@ db.ResourceLink.findOne = async ({ where }) => {
   const found = findLinks(where)[0];
   return found ? linkRow(found) : null;
 };
+let createError = null;
 db.ResourceLink.create = async (data) => {
+  if (createError) throw createError;
   created = data;
   return { id: 99, ...data };
 };
@@ -83,6 +85,7 @@ describe('resource-links service', () => {
     links = [];
     created = null;
     destroyed = null;
+    createError = null;
   });
 
   describe('createLink', () => {
@@ -152,6 +155,20 @@ describe('resource-links service', () => {
         targetSource: 'openstad',
         targetId: '20',
       });
+    });
+
+    it('turns a unique constraint violation into 409', async () => {
+      createError = Object.assign(new Error('Validation error'), {
+        name: 'SequelizeUniqueConstraintError',
+      });
+      await expect(
+        resourceLinks.createLink({
+          projectId: PROJECT_ID,
+          resourceId: 10,
+          targetSource: 'openstad',
+          targetId: 20,
+        })
+      ).rejects.toMatchObject({ status: 409 });
     });
 
     it('creates an external link without looking up a resource', async () => {
