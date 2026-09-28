@@ -394,7 +394,10 @@ type Props = {
     | 'new enquete - user'
     | 'notification comment - user'
     | 'notification comment reply - user'
-    | 'new comment - admin';
+    | 'new comment - admin'
+    | 'contact message - user'
+    | (string & {});
+  typeLabel?: string;
   engine?: 'email' | 'sms';
   id?: string;
   label?: string;
@@ -402,7 +405,7 @@ type Props = {
   body?: string;
 };
 
-const notificationTypes = {
+const notificationTypes: Record<string, string> = {
   'login email': 'Inloggen via e-mail',
   'login sms': 'Inloggen via sms',
   'new published resource - user feedback':
@@ -422,6 +425,7 @@ const notificationTypes = {
   'notification comment reply - user':
     'Nieuwe reactie op een reactie - Notificatie naar de gebruiker',
   'new comment - admin': 'Nieuwe reactie - Notificatie naar de admin',
+  'contact message - user': 'Contactbericht - Notificatie naar de indiener',
 };
 
 const formSchema = z.object({
@@ -449,6 +453,7 @@ const formSchema = z.object({
 
 export function NotificationForm({
   type,
+  typeLabel,
   engine,
   id,
   label,
@@ -458,7 +463,7 @@ export function NotificationForm({
   const router = useRouter();
   const project = router.query.project as string;
   const { data, create, update } = useNotificationTemplate(project as string);
-  const notificationTitle = notificationTypes[type];
+  const notificationTitle = typeLabel || notificationTypes[type] || type;
 
   type MailContextType = {
     user: { name: string; fullName: string };

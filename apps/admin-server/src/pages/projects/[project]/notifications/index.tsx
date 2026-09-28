@@ -3,39 +3,44 @@ import AccordionUI from '@/components/ui/accordion';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Separator } from '@/components/ui/separator';
 import useNotificationTemplate from '@/hooks/use-notification-template';
+import usePluginCapabilities from '@/hooks/use-plugin-capabilities';
+import {
+  NotificationTypeDefinition,
+  mergeNotificationTypes,
+} from '@/lib/link-settings';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 
 export default function ProjectNotifications() {
-  type NotificationType =
-    | 'login email'
-    | 'login sms'
-    | 'new published resource - user feedback'
-    | 'new published resource - admin update'
-    | 'updated resource - user feedback'
-    | 'user account about to expire'
-    | 'new enquete - admin'
-    | 'new enquete - user'
-    | 'notification comment - user'
-    | 'notification comment reply - user'
-    | 'new comment - admin';
+  const coreTypes: NotificationTypeDefinition[] = [
+    { type: 'login email', label: '' },
+    { type: 'login sms', label: '' },
+    { type: 'new published resource - user feedback', label: '' },
+    { type: 'new published resource - admin update', label: '' },
+    { type: 'updated resource - user feedback', label: '' },
+    { type: 'user account about to expire', label: '' },
+    { type: 'new enquete - admin', label: '' },
+    { type: 'new enquete - user', label: '' },
+    { type: 'notification comment - user', label: '' },
+    { type: 'notification comment reply - user', label: '' },
+    { type: 'new comment - admin', label: '' },
+    { type: 'contact message - user', label: '' },
+  ];
 
-  const defaultDefinitions: { [type in NotificationType]: any[] } = {
-    'login email': [],
-    'login sms': [],
-    'new published resource - user feedback': [],
-    'new published resource - admin update': [],
-    'updated resource - user feedback': [],
-    'user account about to expire': [],
-    'new enquete - admin': [],
-    'new enquete - user': [],
-    'notification comment - user': [],
-    'notification comment reply - user': [],
-    'new comment - admin': [],
-  };
+  const { capabilities } = usePluginCapabilities();
+  const notificationTypes = mergeNotificationTypes(
+    coreTypes,
+    capabilities.notificationTypes
+  );
+  const typeLabels: Record<string, string> = Object.fromEntries(
+    notificationTypes
+      .filter((definition) => definition.label)
+      .map((definition) => [definition.type, definition.label])
+  );
 
-  const [typeDefinitions, setTypeDefinitions] =
-    React.useState<{ [type in NotificationType]: any[] }>(defaultDefinitions);
+  const [typeDefinitions, setTypeDefinitions] = React.useState<
+    Record<string, any[]>
+  >({});
 
   const router = useRouter();
   const project = router.query.project as string;
@@ -58,20 +63,20 @@ export default function ProjectNotifications() {
   Hieronder worden per bruikbaar onderdeel alle variabelen opgenoemd.`;
 
   React.useEffect(() => {
-    if (Array.isArray(data)) {
-      const currentTypeDefinitions = Object.assign({}, defaultDefinitions);
+    const currentTypeDefinitions: Record<string, any[]> = Object.fromEntries(
+      notificationTypes.map((definition) => [definition.type, []])
+    );
 
+    if (Array.isArray(data)) {
       data.forEach((template) => {
         if (template.type in currentTypeDefinitions) {
-          currentTypeDefinitions[template.type as NotificationType].push(
-            template
-          );
+          currentTypeDefinitions[template.type].push(template);
         }
       });
-
-      setTypeDefinitions(currentTypeDefinitions);
     }
-  }, [data]);
+
+    setTypeDefinitions(currentTypeDefinitions);
+  }, [data, JSON.stringify(notificationTypes)]);
 
   return (
     <div>
@@ -235,7 +240,10 @@ export default function ProjectNotifications() {
                 <React.Fragment key={index}>
                   {templateList.length === 0 && (
                     <div key={type}>
-                      <NotificationForm type={type as NotificationType} />
+                      <NotificationForm
+                        type={type}
+                        typeLabel={typeLabels[type]}
+                      />
                       {index !== Object.entries(typeDefinitions).length - 1 && (
                         <Separator />
                       )}
@@ -245,6 +253,7 @@ export default function ProjectNotifications() {
                     <div key={template.id}>
                       <NotificationForm
                         type={template.type}
+                        typeLabel={typeLabels[template.type]}
                         engine={template.engine}
                         id={template.id}
                         label={template.label}
