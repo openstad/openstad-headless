@@ -19,6 +19,7 @@ const {
   removeSpamMetaFields,
 } = require('../../services/spam-detector');
 const { stripVisibilityScope } = require('../../lib/resource-create-scope');
+const { normalizeContributedUrl } = require('../../util/normalize-url');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -487,6 +488,19 @@ router
       });
     }
 
+    if (data.extraData && typeof data.extraData.url !== 'undefined') {
+      const urlResult = normalizeContributedUrl(data.extraData.url);
+      if (!urlResult.ok) {
+        return next(
+          createError(
+            400,
+            'De ingevulde URL is ongeldig. Controleer of de link correct is en begin met https://'
+          )
+        );
+      }
+      data.extraData.url = urlResult.value;
+    }
+
     let responseData;
     db.Resource.authorizeData(data, 'create', req.user, null, req.project)
       .create(data)
@@ -784,6 +798,19 @@ router
 
     if (!userhasModeratorRights(req.user)) {
       delete data.modBreaks;
+    }
+
+    if (data.extraData && typeof data.extraData.url !== 'undefined') {
+      const urlResult = normalizeContributedUrl(data.extraData.url);
+      if (!urlResult.ok) {
+        return next(
+          createError(
+            400,
+            'De ingevulde URL is ongeldig. Controleer of de link correct is en begin met https://'
+          )
+        );
+      }
+      data.extraData.url = urlResult.value;
     }
 
     resource
