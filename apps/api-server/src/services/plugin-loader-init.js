@@ -58,7 +58,7 @@ function initPluginLoader() {
         var pluginContext = {
           config: plugin.config,
           pluginName: plugin.name,
-          services: { resourceLinks: require('./resource-links') },
+          services: require('./plugin-extensions').getPluginServices(),
         };
 
         for (var route of plugin.api.routes) {

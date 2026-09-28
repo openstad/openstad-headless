@@ -3,9 +3,15 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+process.env.NODE_CONFIG_DIR = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../../config'
+);
+process.env.SUPPRESS_NO_CONFIG_WARNING = '1';
+
 const require = createRequire(import.meta.url);
 const { resolvePluginFile } = require('@openstad-headless/plugin-loader');
-const { buildExtensions } = require('./plugin-extensions');
+const { buildExtensions, getPluginServices } = require('./plugin-extensions');
 
 const fixtureDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -232,5 +238,14 @@ describe('plugin extensions', () => {
       sources: [],
       notificationTypes: [],
     });
+  });
+});
+
+describe('getPluginServices', () => {
+  it('gives plugins the database and the resource links service', () => {
+    const pluginServices = getPluginServices();
+
+    expect(pluginServices.db).toBe(require('../db'));
+    expect(pluginServices.resourceLinks).toBe(require('./resource-links'));
   });
 });

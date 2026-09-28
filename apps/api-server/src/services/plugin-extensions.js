@@ -50,6 +50,13 @@ function coreTemplateExists(type) {
   );
 }
 
+function getPluginServices() {
+  return {
+    db: require('../db'),
+    resourceLinks: require('./resource-links'),
+  };
+}
+
 function buildExtensions(plugins, services, resolvePluginFile) {
   let linkRequestHandler = null;
   const contactHandlers = new Map();
@@ -207,7 +214,7 @@ function init() {
 
     extensions = buildExtensions(
       plugins,
-      { resourceLinks: require('./resource-links') },
+      getPluginServices(),
       PluginLoader.resolvePluginFile
     );
   } catch (err) {
@@ -225,4 +232,4 @@ function get() {
   return extensions;
 }
 
-module.exports = { buildExtensions, init, get };
+module.exports = { buildExtensions, getPluginServices, init, get };
