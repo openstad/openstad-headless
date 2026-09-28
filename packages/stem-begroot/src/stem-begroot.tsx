@@ -1157,7 +1157,7 @@ function StemBegroot({
         areaId={props.map.areaId}
         displayPriceLabel={props.displayPriceLabel}
         displayRanking={props.displayRanking}
-        showVoteCount={props.showVoteCount}
+        showVoteCount={props.showVoteCount && !!props.votes?.isViewable}
         showOriginalResource={props.showOriginalResource ?? true}
         originalResourceUrl={props.originalResourceUrl}
         displayTitle={props.displayTitle ?? true}
@@ -1659,7 +1659,7 @@ function StemBegroot({
               }}
               displayPriceLabel={props.displayPriceLabel}
               displayRanking={props.displayRanking}
-              showVoteCount={props.showVoteCount}
+              showVoteCount={props.showVoteCount && !!props.votes?.isViewable}
               showOriginalResource={props.showOriginalResource ?? true}
               originalResourceUrl={props.originalResourceUrl}
               displayTitle={props.displayTitle ?? true}

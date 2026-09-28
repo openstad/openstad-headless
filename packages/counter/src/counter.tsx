@@ -125,6 +125,10 @@ function Counter({
     amountDisplayed = resources?.metadata?.totalCount || 0;
   }
 
+  if (counterType === 'vote' && !props.votes?.isViewable) {
+    return null;
+  }
+
   if (counterType === 'vote') {
     if (opinion === 'for') {
       amountDisplayed = resource.yes || 0;

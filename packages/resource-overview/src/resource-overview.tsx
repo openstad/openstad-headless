@@ -379,6 +379,7 @@ const defaultItemRenderer = (
       : null;
   const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
   const selectedOpinion = resource?.userVote?.opinion;
+  const showVoteCount = !!props.displayVote && !!props.votes?.isViewable;
 
   const TileFooter = ({
     doVote,
@@ -389,6 +390,7 @@ const defaultItemRenderer = (
   }) => {
     const displayResource = likeResource || resource;
     const opinion = displayResource?.userVote?.opinion;
+    const showVoteIcons = !!doVote || !!props.displayVote;
 
     const vote = async (sentiment: string) => {
       if (doVote) {
@@ -402,12 +404,12 @@ const defaultItemRenderer = (
         className={`osc-resource-overview-content-item-footer ${
           doVote ? 'liking-allowed' : ''
         }`}>
-        {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
+        {props.likeWidget?.variant != 'micro-score' && showVoteIcons && (
           <>
             <Icon
               icon="ri-thumb-up-line"
               variant="big"
-              text={displayResource.yes}
+              text={showVoteCount ? displayResource.yes : undefined}
               description="Stemmen voor"
               onClick={() => vote('yes')}
               className={opinion === 'yes' ? 'selected' : ''}
@@ -417,7 +419,7 @@ const defaultItemRenderer = (
               <Icon
                 icon="ri-thumb-down-line"
                 variant="big"
-                text={displayResource.no}
+                text={showVoteCount ? displayResource.no : undefined}
                 description="Stemmen tegen"
                 onClick={() => vote('no')}
                 className={opinion === 'no' ? 'selected' : ''}
@@ -426,7 +428,7 @@ const defaultItemRenderer = (
           </>
         )}
 
-        {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
+        {props.likeWidget?.variant == 'micro-score' && showVoteIcons && (
           <div className="micro-score-container">
             <Icon
               icon={`${
@@ -439,9 +441,11 @@ const defaultItemRenderer = (
                 opinion === 'yes' ? 'selected' : ''
               }`}
             />
-            <Paragraph className="votes-score">
-              {displayResource.netVotes}
-            </Paragraph>
+            {showVoteCount && (
+              <Paragraph className="votes-score">
+                {displayResource.netVotes}
+              </Paragraph>
+            )}
             {props.likeWidget?.displayDislike && (
               <Icon
                 icon={`${
@@ -696,14 +700,14 @@ const defaultItemRenderer = (
                   <Icon
                     icon="ri-thumb-up-line"
                     variant="big"
-                    text={resource.yes}
+                    text={showVoteCount ? resource.yes : undefined}
                     className={selectedOpinion === 'yes' ? 'selected' : ''}
                   />
                   {props.likeWidget?.displayDislike && (
                     <Icon
                       icon="ri-thumb-down-line"
                       variant="big"
-                      text={resource.no}
+                      text={showVoteCount ? resource.no : undefined}
                       className={selectedOpinion === 'no' ? 'selected' : ''}
                     />
                   )}
@@ -724,9 +728,11 @@ const defaultItemRenderer = (
                       selectedOpinion === 'yes' ? 'selected' : ''
                     }`}
                   />
-                  <Paragraph className="votes-score">
-                    {resource.netVotes}
-                  </Paragraph>
+                  {showVoteCount && (
+                    <Paragraph className="votes-score">
+                      {resource.netVotes}
+                    </Paragraph>
+                  )}
                   {props.likeWidget?.displayDislike && (
                     <Icon
                       icon={`${
@@ -817,6 +823,7 @@ type DialogResourceItemProps = {
   clickableImage?: boolean;
   onRemoveClick: (resource: any) => void;
   forwardProps: ResourceOverviewWidgetProps;
+  refreshResourceLikes?: () => void;
 };
 
 function DialogResourceItem({
@@ -1469,6 +1476,7 @@ function ResourceOverviewInner({
                     console.error(e);
                   }
                 }}
+                refreshResourceLikes={refreshLikes}
                 forwardProps={props}
               />
             )}></Carousel>
