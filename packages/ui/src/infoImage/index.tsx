@@ -90,7 +90,7 @@ const InfoImage = ({
       )}
       {createImageSlider && imageArray.length > 0 ? (
         <Carousel
-          items={images}
+          items={imageArray}
           buttonText={{
             next: 'Volgende afbeelding',
             previous: 'Vorige afbeelding',
