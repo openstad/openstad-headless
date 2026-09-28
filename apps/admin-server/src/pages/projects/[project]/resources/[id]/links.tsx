@@ -1,3 +1,4 @@
+import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -32,7 +33,6 @@ export default function ProjectResourceLinks() {
     []
   );
   const [searched, setSearched] = useState(false);
-  const [confirmRemoveId, setConfirmRemoveId] = useState<number | null>(null);
   const [externalSource, setExternalSource] = useState('');
   const [externalId, setExternalId] = useState('');
 
@@ -63,7 +63,6 @@ export default function ProjectResourceLinks() {
   async function handleRemove(linkId: number) {
     try {
       await removeLink(linkId);
-      setConfirmRemoveId(null);
       toast.success('Koppeling verwijderd');
     } catch (e: any) {
       toast.error(e.message);
@@ -83,10 +82,16 @@ export default function ProjectResourceLinks() {
       <table className="w-full text-sm">
         <thead>
           <tr className="text-left border-b">
-            <th className="py-2">Gekoppeld aan</th>
-            <th className="py-2">Bron</th>
-            <th className="py-2">Richting</th>
-            <th className="py-2">
+            <th scope="col" className="py-2">
+              Gekoppeld aan
+            </th>
+            <th scope="col" className="py-2">
+              Bron
+            </th>
+            <th scope="col" className="py-2">
+              Richting
+            </th>
+            <th scope="col" className="py-2">
               <span className="sr-only">Acties</span>
             </th>
           </tr>
@@ -113,30 +118,20 @@ export default function ProjectResourceLinks() {
                     : 'Naar deze inzending'}
                 </td>
                 <td className="py-2 text-right">
-                  {confirmRemoveId === link.id ? (
-                    <span className="inline-flex gap-2 items-center">
-                      Weet je het zeker?
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        onClick={() => handleRemove(link.id)}>
-                        Verwijderen
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setConfirmRemoveId(null)}>
-                        Annuleren
-                      </Button>
-                    </span>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => setConfirmRemoveId(link.id)}>
-                      Koppeling verwijderen
-                    </Button>
-                  )}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={(e) => e.preventDefault()}>
+                    <ConfirmActionDialog
+                      buttonText="Koppeling verwijderen"
+                      header="Koppeling verwijderen"
+                      message="Weet je zeker dat je deze koppeling wilt verwijderen? Er wordt geen e-mail verstuurd."
+                      confirmButtonText="Verwijderen"
+                      cancelButtonText="Annuleren"
+                      confirmButtonVariant="destructive"
+                      onConfirmAccepted={() => handleRemove(link.id)}
+                    />
+                  </Button>
                 </td>
               </tr>
             ))

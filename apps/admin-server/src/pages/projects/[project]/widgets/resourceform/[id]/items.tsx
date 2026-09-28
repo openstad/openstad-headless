@@ -1,3 +1,4 @@
+import { CheckboxList } from '@/components/checkbox-list';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -196,7 +197,7 @@ export default function WidgetResourceFormItems(
   const { data: allStatuses } = useStatuses(project as string);
   const { data: allTags } = useTags(project as string);
   const firstTagType = allTags?.[0]?.type ?? '';
-  const { capabilities } = usePluginCapabilities();
+  const { capabilities, error: capabilitiesError } = usePluginCapabilities();
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
@@ -1304,13 +1305,22 @@ export default function WidgetResourceFormItems(
                               <SelectItem value="timeline">
                                 Inzending: Tijdlijn
                               </SelectItem>
-                              {capabilities.linkRequests ? (
-                                <SelectItem value="resourceLink">
-                                  Inzending koppelen
-                                </SelectItem>
-                              ) : null}
+                              <SelectItem
+                                value="resourceLink"
+                                disabled={!capabilities.linkRequests}>
+                                {capabilities.linkRequests
+                                  ? 'Inzending koppelen'
+                                  : 'Inzending koppelen (plugin niet actief)'}
+                              </SelectItem>
                             </SelectContent>
                           </Select>
+                          {capabilitiesError ? (
+                            <p className="text-sm text-destructive">
+                              De plugin-instellingen konden niet worden geladen.
+                              Vraagtypes van plugins zijn daardoor niet
+                              beschikbaar.
+                            </p>
+                          ) : null}
                           <FormMessage />
                         </FormItem>
                       )}></FormField>
@@ -2342,48 +2352,37 @@ export default function WidgetResourceFormItems(
                           )}
                         />
                         {form.watch('linkSource') !== 'openstad' ? null : (
-                          <FormField
-                            control={form.control}
-                            name="linkTags"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>
-                                  Alleen inzendingen met tag
-                                </FormLabel>
-                                <FormDescription>
-                                  Laat leeg om in alle inzendingen te zoeken.
-                                  Bijvoorbeeld: alleen stadmakers.
-                                </FormDescription>
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
-                                  {(allTags || []).map((tag: any) => (
-                                    <label
-                                      key={tag.id}
-                                      className="flex items-center gap-2 text-sm">
-                                      <Checkbox
-                                        checked={fromCsvIds(
-                                          field.value
-                                        ).includes(String(tag.id))}
-                                        onCheckedChange={(checked) =>
-                                          field.onChange(
-                                            toggleCsvId(
-                                              field.value,
-                                              tag.id,
-                                              checked === true
-                                            )
-                                          )
-                                        }
-                                      />
-                                      {tag.name}
-                                      <span className="text-muted-foreground">
-                                        ({tag.type})
-                                      </span>
-                                    </label>
-                                  ))}
-                                </div>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
+                          <div>
+                            <FormLabel>Alleen inzendingen met tag</FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              Laat leeg om in alle inzendingen te zoeken.
+                              Bijvoorbeeld: alleen stadmakers.
+                            </p>
+                            <CheckboxList
+                              form={form}
+                              fieldName="linkTags"
+                              fieldLabel="Alleen inzendingen met tag"
+                              label={(tag: any) => tag.name}
+                              keyForGrouping="type"
+                              keyPerItem={(tag: any) => `${tag.id}`}
+                              items={allTags || []}
+                              selectedPredicate={(tag: any) =>
+                                fromCsvIds(form.getValues('linkTags')).includes(
+                                  `${tag.id}`
+                                )
+                              }
+                              onValueChange={(tag: any, checked: boolean) =>
+                                form.setValue(
+                                  'linkTags',
+                                  toggleCsvId(
+                                    form.getValues('linkTags'),
+                                    tag.id,
+                                    checked
+                                  )
+                                )
+                              }
+                            />
+                          </div>
                         )}
                         <FormField
                           control={form.control}

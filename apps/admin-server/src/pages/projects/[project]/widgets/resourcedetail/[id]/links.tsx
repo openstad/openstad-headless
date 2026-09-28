@@ -1,5 +1,5 @@
+import { CheckboxList } from '@/components/checkbox-list';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
@@ -96,7 +96,7 @@ export default function WidgetResourceDetailLinks(
   const router = useRouter();
   const { project } = router.query;
   const { data: allTags } = useTags(project as string);
-  const { capabilities } = usePluginCapabilities();
+  const { capabilities, error: capabilitiesError } = usePluginCapabilities();
 
   const related = props.relatedResources || {};
   const contact = props.contactBlock || {};
@@ -204,33 +204,28 @@ export default function WidgetResourceDetailLinks(
   );
 
   const tagField = (name: any, label: string, description: string) => (
-    <FormField
-      control={form.control}
-      name={name}
-      render={({ field }) => (
-        <FormItem>
-          <FormLabel>{label}</FormLabel>
-          <FormDescription>{description}</FormDescription>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
-            {(allTags || []).map((tag: any) => (
-              <label key={tag.id} className="flex items-center gap-2 text-sm">
-                <Checkbox
-                  checked={fromCsvIds(field.value).includes(String(tag.id))}
-                  onCheckedChange={(checked) =>
-                    field.onChange(
-                      toggleCsvId(field.value, tag.id, checked === true)
-                    )
-                  }
-                />
-                {tag.name}
-                <span className="text-muted-foreground">({tag.type})</span>
-              </label>
-            ))}
-          </div>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
+    <div>
+      <FormLabel>{label}</FormLabel>
+      <p className="text-sm text-muted-foreground">{description}</p>
+      <CheckboxList
+        form={form}
+        fieldName={name}
+        fieldLabel={label}
+        label={(tag: any) => tag.name}
+        keyForGrouping="type"
+        keyPerItem={(tag: any) => `${tag.id}`}
+        items={allTags || []}
+        selectedPredicate={(tag: any) =>
+          fromCsvIds(form.getValues(name)).includes(`${tag.id}`)
+        }
+        onValueChange={(tag: any, checked: boolean) =>
+          form.setValue(
+            name,
+            toggleCsvId(form.getValues(name), tag.id, checked)
+          )
+        }
+      />
+    </div>
   );
 
   return (
@@ -330,8 +325,21 @@ export default function WidgetResourceDetailLinks(
                             {handler.label}
                           </SelectItem>
                         ))}
+                        {field.value !== DEFAULT_HANDLER &&
+                        !capabilities.contactHandlers.some(
+                          (handler) => handler.key === field.value
+                        ) ? (
+                          <SelectItem value={field.value}>
+                            {field.value} (plugin niet gevonden)
+                          </SelectItem>
+                        ) : null}
                       </SelectContent>
                     </Select>
+                    {capabilitiesError ? (
+                      <p className="text-sm text-destructive">
+                        De plugin-instellingen konden niet worden geladen.
+                      </p>
+                    ) : null}
                     <FormMessage />
                   </FormItem>
                 )}
