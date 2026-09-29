@@ -16,7 +16,7 @@ import {
 import React, { useEffect, useState } from 'react';
 
 import './link-confirm-dialog.css';
-import { type LinkValue, linkKey } from './link-selection';
+import { type LinkValue, linkKey, splitAddedLinks } from './link-selection';
 
 const MAX_MESSAGE_LENGTH = 1000;
 
@@ -29,6 +29,7 @@ type LinkConfirmDialogProps = {
   messageLabel?: string;
   chosenHeading?: string;
   removedHeading?: string;
+  ownHeading?: string;
   confirmText?: string;
   cancelText?: string;
   onConfirm: (messages: Record<string, string>) => void;
@@ -44,12 +45,14 @@ export function LinkConfirmDialog({
   messageLabel = 'Schrijf een toelichting',
   chosenHeading = 'Jouw keuze:',
   removedHeading = 'Deze koppelingen worden ingetrokken:',
+  ownHeading = 'Deze eigen inzendingen worden direct gekoppeld:',
   confirmText = 'Versturen',
   cancelText = 'Annuleren',
   onConfirm,
   onCancel,
 }: LinkConfirmDialogProps) {
   const [messages, setMessages] = useState<Record<string, string>>({});
+  const { others, own } = splitAddedLinks(added);
 
   useEffect(() => {
     if (open) setMessages({});
@@ -66,13 +69,13 @@ export function LinkConfirmDialog({
           <RteContent content={description} unwrapSingleRootDiv={true} />
         </DialogDescription>
 
-        {added.length > 0 ? (
+        {others.length > 0 ? (
           <>
             <Heading level={3} appearance="utrecht-heading-6">
               {chosenHeading}
             </Heading>
             <ul className="osc-link-confirm-list">
-              {added.map((item) => {
+              {others.map((item) => {
                 const key = linkKey(item);
                 const textareaId = `osc-link-message-${key.replace(/[^a-z0-9-]/gi, '-')}`;
                 return (
@@ -103,6 +106,23 @@ export function LinkConfirmDialog({
                   </li>
                 );
               })}
+            </ul>
+          </>
+        ) : null}
+
+        {own.length > 0 ? (
+          <>
+            <Heading level={3} appearance="utrecht-heading-6">
+              {ownHeading}
+            </Heading>
+            <ul className="osc-link-confirm-list">
+              {own.map((item) => (
+                <li key={linkKey(item)}>
+                  <Paragraph>
+                    <strong>{item.label}</strong>
+                  </Paragraph>
+                </li>
+              ))}
             </ul>
           </>
         ) : null}

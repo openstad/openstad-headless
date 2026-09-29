@@ -22,6 +22,7 @@ import {
   getLinkFields,
   itemsToFetch,
   linkKey,
+  needsLinkConfirmation,
 } from './parts/link-selection';
 import type { ResourceFormWidgetProps } from './props.js';
 
@@ -421,7 +422,10 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     const hasLinkChanges =
       payload.added.length > 0 || payload.removed.length > 0;
 
-    if (hasLinkChanges && props.linkRequests?.confirmEnabled !== false) {
+    if (
+      needsLinkConfirmation(payload) &&
+      props.linkRequests?.confirmEnabled !== false
+    ) {
       setPendingLinkSubmit({
         formData: formDataWithoutLinks,
         valuesByField,
