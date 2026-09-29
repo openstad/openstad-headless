@@ -68,6 +68,14 @@ export default function useResources(
       : resourcesListSwr.data?.records || [];
   }
 
+  // Keep the `{ metadata, records }` wrapper so pagination survives local edits.
+  function mutateRecords(list: unknown[]) {
+    const current = resourcesListSwr.data;
+    resourcesListSwr.mutate(
+      !current || Array.isArray(current) ? list : { ...current, records: list }
+    );
+  }
+
   async function create(body: any) {
     const res = await fetch(url, {
       method: 'POST',
@@ -79,7 +87,7 @@ export default function useResources(
 
     if (res.ok) {
       const data = await res.json();
-      resourcesListSwr.mutate([...getExistingRecords(), data]);
+      mutateRecords([...getExistingRecords(), data]);
       return data;
     } else {
       throw new Error('Could not create the plan');
@@ -107,7 +115,7 @@ export default function useResources(
         (ed: any) => ed.id !== data.id
       );
       updatedList.push(data);
-      resourcesListSwr.mutate(updatedList);
+      mutateRecords(updatedList);
       return data;
     } else {
       throw new Error('Could not update the plan');
@@ -131,7 +139,7 @@ export default function useResources(
       const updatedList = getExistingRecords().filter(
         (ed: any) => ed.id !== id
       );
-      resourcesListSwr.mutate(updatedList);
+      mutateRecords(updatedList);
       return updatedList;
     } else {
       throw new Error('Could not remove the plan');
@@ -152,7 +160,7 @@ export default function useResources(
     if (res.ok) {
       const data = await res.json();
 
-      resourcesListSwr.mutate([...getExistingRecords(), ...data]);
+      mutateRecords([...getExistingRecords(), ...data]);
       return data;
     } else {
       throw new Error('Could not duplicate the widgets');

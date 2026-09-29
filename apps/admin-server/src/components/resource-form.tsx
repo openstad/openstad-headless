@@ -350,8 +350,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         router.push(`/projects/${project}/resources`);
 
         // SWR reload
-        const url = `/api/openstad/api/project/${project}/resource/${id}`;
-        mutate(url);
+        mutate();
       })
       .catch((e) => {
         toast.error(`Plan kon niet ${id ? 'aangepast' : 'aangemaakt'} worden`);

@@ -48,7 +48,7 @@ export default function WidgetChoiceGuidePolygons(
 
   const { data: areas } =
     (useAreas(projectKey) as {
-      data: { id: string; name: string; visible?: boolean }[];
+      data: { id: string; name: string; hidePolygon?: boolean }[];
     }) ?? [];
 
   return (
@@ -73,7 +73,7 @@ export default function WidgetChoiceGuidePolygons(
                   Array.isArray(field.value) &&
                   field.value.some((obj) => obj.id === Number(item.id));
                 const label =
-                  item.visible === false
+                  item.hidePolygon === true
                     ? `${item.name} (verborgen)`
                     : item.name;
 

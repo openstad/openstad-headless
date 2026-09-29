@@ -140,10 +140,9 @@ export const CheckboxList = <T extends { [key: string]: any }>({
                   <section
                     className={`grid gap-x-3 gap-y-4 flex-col my-4 content-start`}>
                     <FormLabel className="font-normal">
-                      {`${
-                        groupName[0].toUpperCase() +
-                        (groupName.length > 1 ? groupName.slice(1) : '')
-                      }`}
+                      {groupName
+                        ? groupName[0].toUpperCase() + groupName.slice(1)
+                        : ''}
                     </FormLabel>
                     <fieldset className="p-0 rounded grid grid-cols-1 space-y-1">
                       <legend className="sr-only">{fieldLabel}</legend>

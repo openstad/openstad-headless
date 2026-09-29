@@ -56,14 +56,12 @@ export function useWidgetsHook(projectId?: string) {
     });
 
     if (res.ok) {
-      const existingData = [...widgetsSwr.data];
-      const updatedList = existingData.filter((ed) => ed.id === id);
-
-      updatedList[0].description = body.description;
+      const updatedList = [...widgetsSwr.data].map((ed) =>
+        ed.id === id ? { ...ed, description: body.description } : ed
+      );
       widgetsSwr.mutate(updatedList);
 
-      console.log({ new: widgetsSwr.data });
-      return widgetsSwr.data;
+      return updatedList;
     } else {
       throw new Error('Could not update the widget');
     }

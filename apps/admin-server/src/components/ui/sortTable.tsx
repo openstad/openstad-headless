@@ -12,8 +12,9 @@ const sortFunctions = {
     b.type.toLowerCase().localeCompare(a.type.toLowerCase()),
   resource: (a: any, b: any) =>
     a.title.toLowerCase().localeCompare(b.title.toLowerCase()),
-  'voted-yes': (a: any, b: any) => b.resource?.yes || 0 - a.resource?.yes || 0,
-  'voted-no': (a: any, b: any) => b.resource?.no || 0 - a.resource?.no || 0,
+  'voted-yes': (a: any, b: any) =>
+    (b.resource?.yes || 0) - (a.resource?.yes || 0),
+  'voted-no': (a: any, b: any) => (b.resource?.no || 0) - (a.resource?.no || 0),
   name: (a: any, b: any) =>
     a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
   url: (a: any, b: any) =>
