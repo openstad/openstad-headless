@@ -228,19 +228,6 @@ export function buildPrefill(
   return prefill;
 }
 
-export const LINK_REQUEST_ERROR_MESSAGE =
-  'Koppelverzoeken konden niet worden verstuurd';
-
-export function linkRequestMessage(linkRequests: unknown): string | null {
-  if (!linkRequests || typeof linkRequests !== 'object') return null;
-  const { notice, error } = linkRequests as {
-    notice?: unknown;
-    error?: unknown;
-  };
-  if (typeof notice === 'string' && notice) return notice;
-  return error ? LINK_REQUEST_ERROR_MESSAGE : null;
-}
-
 export function restoreLinkValues(
   formData: Record<string, unknown>,
   linkFields: LinkField[],

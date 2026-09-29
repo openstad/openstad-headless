@@ -7,7 +7,6 @@ import {
   extractLinkValues,
   getLinkFields,
   itemsToFetch,
-  linkRequestMessage,
   needsLinkConfirmation,
   restoreLinkValues,
   splitAddedLinks,
@@ -192,25 +191,6 @@ describe('own submissions', () => {
     const payload = buildLinkPayload({ stadmakers: [own] }, {});
     expect(payload.added).toEqual([own]);
     expect(payload.links).toEqual([{ source: 'openstad', id: '9' }]);
-  });
-});
-
-describe('linkRequestMessage', () => {
-  it('shows the notice of the link request handler', () => {
-    expect(
-      linkRequestMessage({ requested: [], notice: 'Niet verstuurd: Arno.' })
-    ).toBe('Niet verstuurd: Arno.');
-  });
-
-  it('shows a general message when the handler failed', () => {
-    expect(linkRequestMessage({ error: 'database down' })).toBe(
-      'Koppelverzoeken konden niet worden verstuurd'
-    );
-  });
-
-  it('shows nothing when everything was sent', () => {
-    expect(linkRequestMessage({ requested: [] })).toBeNull();
-    expect(linkRequestMessage(undefined)).toBeNull();
   });
 });
 
