@@ -316,6 +316,48 @@ router
   });
 
 router
+  .route('/:resourceId(\\d+)/share')
+  .get(rateLimiter())
+  .all(function (req, res, next) {
+    let resourceId = parseInt(req.params.resourceId) || 0;
+
+    db.Resource.scope(...req.scope)
+      .findOne({
+        where: { id: resourceId, projectId: req.params.projectId },
+      })
+      .then((found) => {
+        if (!found) {
+          return next(createError(404, 'Resource not found'));
+        }
+        found.project = req.project;
+        if (!found.can || !found.can('view', req.user)) {
+          return next(createError(404, 'Resource not found'));
+        }
+        req.resource = found;
+        req.results = found;
+        next();
+      })
+      .catch(next);
+  })
+  .get(auth.can('Resource', 'view'))
+  .get(function (req, res, next) {
+    const resource = req.results;
+    const images = Array.isArray(resource.images) ? resource.images : [];
+    const imageUrls = images
+      .map((image) => (image && image.url ? image.url : null))
+      .filter(Boolean);
+
+    res.json({
+      id: resource.id,
+      title: resource.title,
+      summary: resource.summary,
+      image: imageUrls[0] || null,
+      images: imageUrls,
+      url: (req.project && req.project.url) || null,
+    });
+  });
+
+router
   .route('/')
 
   // list resources
