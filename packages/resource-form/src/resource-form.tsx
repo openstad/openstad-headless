@@ -22,6 +22,7 @@ import {
   getLinkFields,
   itemsToFetch,
   linkKey,
+  linkRequestMessage,
   needsLinkConfirmation,
 } from './parts/link-selection';
 import type { ResourceFormWidgetProps } from './props.js';
@@ -401,11 +402,9 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
   const submitButtonText = editMode ? 'Opslaan' : submitButton || 'Versturen';
 
   const notifyLinkRequestError = (result) => {
-    if (result?.linkRequests?.error) {
-      NotificationService.addNotification(
-        'Koppelverzoeken konden niet worden verstuurd',
-        'error'
-      );
+    const message = linkRequestMessage(result?.linkRequests);
+    if (message) {
+      NotificationService.addNotification(message, 'error');
     }
   };
 
