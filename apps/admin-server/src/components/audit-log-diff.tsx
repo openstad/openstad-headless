@@ -1,4 +1,8 @@
-import { getItemDisplayFields } from '@/components/audit-log-field-config';
+import {
+  getItemDisplayFields,
+  isHiddenItemField,
+  isInternalField,
+} from '@/components/audit-log-field-config';
 import {
   fieldLabel,
   formatFieldValue,
@@ -17,10 +21,12 @@ function FieldDiff({
   label,
   oldVal,
   newVal,
+  widgetType,
 }: {
   label: string;
   oldVal?: any;
   newVal?: any;
+  widgetType?: string;
 }) {
   const o = label ? formatFieldValue(label, oldVal) : formatValue(oldVal);
   const n = label ? formatFieldValue(label, newVal) : formatValue(newVal);
@@ -28,7 +34,9 @@ function FieldDiff({
 
   return (
     <div className="py-0.5">
-      {label && <span className="font-medium">{fieldLabel(label)}: </span>}
+      {label && (
+        <span className="font-medium">{fieldLabel(label, widgetType)}: </span>
+      )}
       {oldVal !== undefined && oldVal !== null && (
         <>
           <span className="text-red-600 line-through">{o}</span>
@@ -44,10 +52,12 @@ function ItemDetails({
   item,
   keys,
   variant,
+  widgetType,
 }: {
   item: any;
   keys: string[];
   variant: 'added' | 'deleted';
+  widgetType?: string;
 }) {
   if (keys.length === 0) return null;
   const isDeleted = variant === 'deleted';
@@ -56,14 +66,14 @@ function ItemDetails({
       className={`ml-3 border-l pl-2 ${isDeleted ? 'border-red-200' : 'border-green-200'}`}>
       {keys.map((k) => {
         const val = formatFieldValue(k, item[k]);
+        if (!val) return null;
         return (
           <div
             key={k}
             className={
               isDeleted ? 'text-red-600 line-through' : 'text-green-700'
             }>
-            {fieldLabel(k)}
-            {val ? `: ${val}` : ''}
+            {fieldLabel(k, widgetType)}: {val}
           </div>
         );
       })}
@@ -75,10 +85,12 @@ function RenderDiff({
   prev,
   next,
   depth = 0,
+  widgetType,
 }: {
   prev: any;
   next: any;
   depth?: number;
+  widgetType?: string;
 }) {
   if (depth > 5) return <span>{formatValue(next)}</span>;
 
@@ -146,6 +158,7 @@ function RenderDiff({
             item={item}
             keys={getRelevantKeys(item)}
             variant="deleted"
+            widgetType={widgetType}
           />
         </div>
       )
@@ -161,6 +174,7 @@ function RenderDiff({
             item={item}
             keys={getRelevantKeys(item)}
             variant="added"
+            widgetType={widgetType}
           />
         </div>
       )
@@ -169,7 +183,8 @@ function RenderDiff({
     matched.forEach(({ label, prev: p, next: n }, i) => {
       if (typeof n !== 'object' || typeof p !== 'object') return;
       const changed = Object.keys(n).filter(
-        (k) => JSON.stringify(p[k]) !== JSON.stringify(n[k])
+        (k) =>
+          !isHiddenItemField(k) && JSON.stringify(p[k]) !== JSON.stringify(n[k])
       );
       if (changed.length === 0) return;
       elements.push(
@@ -177,7 +192,13 @@ function RenderDiff({
           <span className="font-medium">{label}:</span>
           <div className="ml-3 border-l pl-2 border-gray-200">
             {changed.map((k) => (
-              <FieldDiff key={k} label={k} oldVal={p[k]} newVal={n[k]} />
+              <FieldDiff
+                key={k}
+                label={k}
+                oldVal={p[k]}
+                newVal={n[k]}
+                widgetType={widgetType}
+              />
             ))}
           </div>
         </div>
@@ -198,7 +219,9 @@ function RenderDiff({
       new Set([...Object.keys(prevObj), ...Object.keys(next)])
     );
     const changed = allKeys.filter(
-      (k) => JSON.stringify(prevObj[k]) !== JSON.stringify(next[k])
+      (k) =>
+        !isInternalField(k) &&
+        JSON.stringify(prevObj[k]) !== JSON.stringify(next[k])
     );
     if (changed.length === 0) return null;
 
@@ -209,13 +232,26 @@ function RenderDiff({
           if (nv && typeof nv === 'object') {
             return (
               <div key={k} className="py-0.5">
-                <span className="font-medium">{fieldLabel(k)}:</span>
-                <RenderDiff prev={prevObj[k]} next={nv} depth={depth + 1} />
+                <span className="font-medium">
+                  {fieldLabel(k, widgetType)}:
+                </span>
+                <RenderDiff
+                  prev={prevObj[k]}
+                  next={nv}
+                  depth={depth + 1}
+                  widgetType={widgetType}
+                />
               </div>
             );
           }
           return (
-            <FieldDiff key={k} label={k} oldVal={prevObj[k]} newVal={nv} />
+            <FieldDiff
+              key={k}
+              label={k}
+              oldVal={prevObj[k]}
+              newVal={nv}
+              widgetType={widgetType}
+            />
           );
         })}
       </div>
@@ -229,10 +265,12 @@ export default function ChangesDisplay({
   previousData,
   newData,
   action,
+  widgetType,
 }: {
   previousData: Record<string, any> | null;
   newData: Record<string, any> | null;
   action: string;
+  widgetType?: string;
 }) {
   if (action === 'GET' || action === 'login' || action === 'logout') {
     if (newData && Object.keys(newData).length > 0) {
@@ -240,7 +278,9 @@ export default function ChangesDisplay({
         <div className="text-xs text-muted-foreground">
           {Object.entries(newData).map(([key, value]) => (
             <div key={key}>
-              <span className="font-medium">{fieldLabel(key)}:</span>{' '}
+              <span className="font-medium">
+                {fieldLabel(key, widgetType)}:
+              </span>{' '}
               {formatValue(value)}
             </div>
           ))}
@@ -255,14 +295,22 @@ export default function ChangesDisplay({
   if (action === 'DELETE' && previousData) {
     return (
       <div className="text-xs text-muted-foreground">
-        <RenderDiff prev={undefined} next={previousData} />
+        <RenderDiff
+          prev={undefined}
+          next={previousData}
+          widgetType={widgetType}
+        />
       </div>
     );
   }
 
   return (
     <div className="text-xs text-muted-foreground">
-      <RenderDiff prev={previousData || {}} next={newData || {}} />
+      <RenderDiff
+        prev={previousData || {}}
+        next={newData || {}}
+        widgetType={widgetType}
+      />
     </div>
   );
 }
