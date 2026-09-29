@@ -30,6 +30,7 @@ const {
 const getWidgetSettings = require('../routes/widget/widget-settings');
 
 const dup = require('../services/projectDuplication');
+const projectUsers = require('../services/projectUsers');
 const authClientSync = require('../services/authClientSync');
 const projectCertificates = require('../services/projectCertificates');
 
@@ -717,56 +718,26 @@ async function addCurrentUserAsAdmin(req, res, next) {
   });
 
   if (sourceUser && req.user) {
-    const userData = { ...sourceUser };
-    delete userData.id;
-    userData.projectId = project.id;
+    const authContext = await projectUsers.resolveAuthContext(project);
+    await projectUsers.upsertProjectUser(
+      sourceUser,
+      project,
+      undefined,
+      authContext
+    );
+  }
 
-    const existingProjectUser = await db.User.findOne({
-      where: Sequelize.and(
-        {
-          idpUser: {
-            identifier:
-              sourceUser && sourceUser.idpUser && sourceUser.idpUser.identifier,
-            provider:
-              sourceUser && sourceUser.idpUser && sourceUser.idpUser.provider,
-          },
-        },
-        { projectId: project.id }
-      ),
-    });
+  return next();
+}
 
-    if (existingProjectUser) {
-      await existingProjectUser.update(userData);
-    } else {
-      await db.User.create(userData);
-    }
-
-    // Sync user role to auth server so user_roles entry is created
-    try {
-      const authConfig = await authSettings.config({
-        project,
-        useAuth: 'default',
-      });
-      const adapter = await authSettings.adapter({ authConfig });
-      if (
-        userData.idpUser &&
-        userData.idpUser.identifier &&
-        adapter.service.updateUser
-      ) {
-        await adapter.service.updateUser({
-          authConfig,
-          userData: {
-            id: userData.idpUser.identifier,
-            role: userData.role,
-          },
-        });
-      }
-    } catch (err) {
-      console.error(
-        'Failed to sync user role to auth server for new project:',
-        err
-      );
-    }
+async function addAutoAdminUsers(req, res, next) {
+  // Give flagged admin-project users admin rights on the new project (#1738)
+  try {
+    const project = await db.Project.findOne({ where: { id: req.results.id } });
+    if (project) await projectUsers.addAutoAdminUsers(project);
+  } catch (err) {
+    // The project is already created; do not fail the request over this
+    console.error('Failed to add auto-admin users to new project:', err);
   }
 
   return next();
@@ -1251,6 +1222,7 @@ module.exports = {
   syncAuthProvidersAfterCreate,
   createDuplicatedData,
   addCurrentUserAsAdmin,
+  addAutoAdminUsers,
   publishNewProjectEvent,
   respondCreatedProject,
   // issues
