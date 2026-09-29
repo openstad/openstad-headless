@@ -100,6 +100,9 @@
         "fast-xml-parser": "$fast-xml-parser"
       }
     },
+    "image-steam": {
+      "sharp": "^0.35.4"
+    },
     "next": {
       "postcss": "8.5.26"
     },

@@ -157,8 +157,8 @@ const imageSteamConfig = {
   processor: {
     sharp: {
       defaults: {
-        // Fix for Samsung S9 JPG's
-        failOnError: false,
+        // Fix for Samsung S9 JPG's (sharp >= 0.34 replaced failOnError with failOn)
+        failOn: 'none',
       },
     },
   },
