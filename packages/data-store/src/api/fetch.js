@@ -1,3 +1,16 @@
+import { LocalStorage } from '../../../lib/local-storage';
+
+function clearInvalidToken(api, response) {
+  if (!api.currentUserJWT) return;
+  const authHeader = response.headers?.get?.('WWW-Authenticate') || '';
+  if (response.status !== 401 && !authHeader.includes('invalid_token')) return;
+
+  delete api.currentUserJWT;
+  try {
+    new LocalStorage({ projectId: api.projectId }).remove('openStadUser');
+  } catch (err) {}
+}
+
 function makeLocalErrorId() {
   if (typeof window !== 'undefined' && window.crypto?.randomUUID) {
     return window.crypto.randomUUID();
@@ -94,6 +107,8 @@ export default async function doFetch(url = '', options = {}) {
       dispatchOscError(error);
       throw error;
     }
+
+    clearInvalidToken(self, response);
 
     if (!response.ok) {
       let bodyText = await response.text();
