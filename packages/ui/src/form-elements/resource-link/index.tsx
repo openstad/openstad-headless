@@ -16,7 +16,10 @@ export type ResourceLinkValue = {
   id: string;
   label: string;
   image?: string;
+  own?: boolean;
 };
+
+type ResourceLinkOption = ComboboxOption & { own?: boolean };
 
 export type ResourceLinkFieldProps = {
   title?: string;
@@ -92,12 +95,13 @@ const ResourceLinkField: FC<ResourceLinkFieldProps> = ({
     return Array.isArray(results) ? results : [];
   };
 
-  const handleChange = (options: ComboboxOption[]) => {
+  const handleChange = (options: ResourceLinkOption[]) => {
     const values = options.map((option) => ({
       source: linkSource as string,
       id: option.id,
       label: option.label,
       ...(option.image ? { image: option.image } : {}),
+      ...(option.own ? { own: true } : {}),
     }));
     setSelected(values);
     onChange?.({ name: fieldKey, value: values });

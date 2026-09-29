@@ -7,6 +7,8 @@ import {
   extractLinkValues,
   getLinkFields,
   itemsToFetch,
+  needsLinkConfirmation,
+  splitAddedLinks,
 } from './link-selection';
 
 const stadmakerField = {
@@ -157,5 +159,36 @@ describe('buildPrefill', () => {
     expect(prefill.activiteiten).toEqual([
       { source: 'metkoos', id: 'k1', label: 'k1' },
     ]);
+  });
+});
+
+describe('own submissions', () => {
+  const own = {
+    source: 'openstad',
+    id: '9',
+    label: 'Eigen inzending',
+    own: true,
+  };
+
+  it('splits added items into items of others and own items', () => {
+    expect(splitAddedLinks([arno, own, lena])).toEqual({
+      others: [arno, lena],
+      own: [own],
+    });
+  });
+
+  it('asks for confirmation only when others are involved', () => {
+    expect(needsLinkConfirmation({ added: [own], removed: [] })).toBe(false);
+    expect(needsLinkConfirmation({ added: [own, arno], removed: [] })).toBe(
+      true
+    );
+    expect(needsLinkConfirmation({ added: [own], removed: [lena] })).toBe(true);
+    expect(needsLinkConfirmation({ added: [], removed: [] })).toBe(false);
+  });
+
+  it('keeps the own flag in the payload of added items', () => {
+    const payload = buildLinkPayload({ stadmakers: [own] }, {});
+    expect(payload.added).toEqual([own]);
+    expect(payload.links).toEqual([{ source: 'openstad', id: '9' }]);
   });
 });

@@ -28,11 +28,12 @@ db.Resource.scope = (...args) => {
       return [
         {
           id: 2,
+          userId: 10,
           title: 'Stadmaker',
           images: [{ url: 'https://img/2' }],
           ...(args.includes('includeTags') ? { tags: [{ id: 8 }] } : {}),
         },
-        { id: 3, title: 'Zonder foto', images: [] },
+        { id: 3, userId: 11, title: 'Zonder foto', images: [] },
       ];
     },
   };
@@ -172,6 +173,21 @@ describe('link options', () => {
       '/project/1/link-options/openstad?mine=1'
     );
     expect(res.status).toBe(401);
+  });
+
+  it('marks the own submissions of the logged in user', async () => {
+    const app = createApp({ role: 'member', id: 10 });
+    const search = await request(app).get(
+      '/project/1/link-options/openstad?search=stad'
+    );
+    const items = await request(app).get(
+      '/project/1/link-options/openstad/items?ids=2,3'
+    );
+
+    expect(search.body.map((option) => option.own)).toEqual([true, undefined]);
+    expect(items.body.map((option) => option.own)).toEqual([true, undefined]);
+    expect(queries[0].attributes).toContain('userId');
+    expect(search.body[0]).not.toHaveProperty('userId');
   });
 
   it('does not filter on owner without mine', async () => {

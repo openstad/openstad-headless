@@ -6,6 +6,7 @@ export type LinkValue = {
   id: string;
   label: string;
   image?: string;
+  own?: boolean;
 };
 
 export type LinkField = {
@@ -128,6 +129,25 @@ export function buildLinkPayload(
     added,
     removed,
   };
+}
+
+export function splitAddedLinks(added: LinkValue[]): {
+  others: LinkValue[];
+  own: LinkValue[];
+} {
+  return {
+    others: added.filter((value) => !value.own),
+    own: added.filter((value) => value.own),
+  };
+}
+
+export function needsLinkConfirmation(
+  payload: Pick<LinkPayload, 'added' | 'removed'>
+): boolean {
+  return (
+    payload.removed.length > 0 ||
+    splitAddedLinks(payload.added).others.length > 0
+  );
 }
 
 export function itemsToFetch(
