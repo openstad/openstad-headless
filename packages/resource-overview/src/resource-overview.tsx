@@ -1510,7 +1510,7 @@ function ResourceOverviewInner({
               displayTagFilters={props.displayTagFilters || false}
               displaySearch={props.displaySearch || false}
               displayLocationFilter={props.displayLocationFilter || false}
-              searchPlaceholder={props.searchPlaceholder || 'Zoeken'}
+              searchPlaceholder={props.searchPlaceholder ?? 'Zoeken'}
               resetText={props.resetText || 'Reset'}
               applyText={props.applyText || 'Toepassen'}
               tagGroups={props.tagGroups || []}

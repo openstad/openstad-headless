@@ -308,6 +308,13 @@ export default function WidgetEnqueteItems(
             routingSelectedAnswer: values.routingSelectedAnswer || '',
             infoField: values.infoField || '',
             infofieldExplanation: values.infofieldExplanation || false,
+            infoBlockStyle: values.infoBlockStyle || 'default',
+            infoBlockShareButton: values.infoBlockShareButton || false,
+            infoBlockExtraButton: values.infoBlockExtraButton || '',
+            infoBlockExtraButtonTitle: values.infoBlockExtraButtonTitle || '',
+            videoUrl: values.videoUrl || '',
+            videoSubtitle: values.videoSubtitle || false,
+            videoLang: values.videoLang || '',
             numberingStyle: values.numberingStyle || 'none',
             images: values?.images || [],
             // Keeping these for backwards compatibility

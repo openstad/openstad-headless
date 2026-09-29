@@ -45,7 +45,7 @@ export default function ArgumentsList({
     resolver: zodResolver<any>(finalSchema),
     defaultValues: {
       title: props?.title || '',
-      emptyListText: props?.emptyListText || 'Nog geen reacties geplaatst.',
+      emptyListText: props?.emptyListText ?? 'Nog geen reacties geplaatst.',
       closedText:
         props?.closedText ||
         'Het insturen van reacties is gesloten, u kunt niet meer reageren',

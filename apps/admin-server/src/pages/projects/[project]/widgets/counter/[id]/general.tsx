@@ -94,6 +94,7 @@ export default function CounterDisplay(
       includeOrExclude: props?.includeOrExclude || 'include',
       onlyIncludeOrExcludeTagIds: props?.onlyIncludeOrExcludeTagIds || '',
       rigCounter: props?.rigCounter || '0',
+      amount: props?.amount,
     },
   });
 
