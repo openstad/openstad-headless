@@ -893,11 +893,13 @@ function ResourceOverviewInner({
     api: props.api,
   });
 
-  const stringToArray = (str: string) => {
+  const stringToArray = (value: any) => {
+    if (value === null || value === undefined) return [];
+    const str = Array.isArray(value) ? value.join(',') : String(value);
     return str
-      .trim()
       .split(',')
-      .filter((t) => t && !isNaN(+t.trim()))
+      .map((t) => t.trim())
+      .filter((t) => t && !isNaN(+t))
       .map((t) => Number.parseInt(t));
   };
 
