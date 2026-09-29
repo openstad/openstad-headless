@@ -37,6 +37,8 @@ const formSchema = z.object({
   confirmEnabled: z.boolean(),
   confirmTitle: z.string().optional(),
   confirmDescription: z.string().optional(),
+  revokeTitle: z.string().optional(),
+  revokeDescription: z.string().optional(),
 });
 
 export default function WidgetResourceFormLinkRequests() {
@@ -50,6 +52,8 @@ export default function WidgetResourceFormLinkRequests() {
       confirmEnabled: widget?.config?.[category]?.confirmEnabled !== false,
       confirmTitle: widget?.config?.[category]?.confirmTitle || '',
       confirmDescription: widget?.config?.[category]?.confirmDescription || '',
+      revokeTitle: widget?.config?.[category]?.revokeTitle || '',
+      revokeDescription: widget?.config?.[category]?.revokeDescription || '',
     }),
     [widget?.config]
   );
@@ -127,6 +131,43 @@ export default function WidgetResourceFormLinkRequests() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Beschrijving van de pop-up</FormLabel>
+                <FormControl>
+                  <TrixEditor
+                    value={field.value || ''}
+                    onChange={(e: any) => field.onChange(e.target.value)}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="revokeTitle"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Titel van de pop-up bij alleen intrekken</FormLabel>
+                <FormDescription>
+                  Wordt gebruikt als de indiener alleen koppelingen verwijdert.
+                </FormDescription>
+                <FormControl>
+                  <Input
+                    placeholder="Je gaat koppelingen intrekken"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="revokeDescription"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Beschrijving van de pop-up bij alleen intrekken
+                </FormLabel>
                 <FormControl>
                   <TrixEditor
                     value={field.value || ''}

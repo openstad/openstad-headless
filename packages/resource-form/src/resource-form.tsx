@@ -615,6 +615,8 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
           removed={pendingLinkSubmit?.payload.removed || []}
           title={props.linkRequests?.confirmTitle || undefined}
           description={props.linkRequests?.confirmDescription || undefined}
+          revokeTitle={props.linkRequests?.revokeTitle || undefined}
+          revokeDescription={props.linkRequests?.revokeDescription || undefined}
           onConfirm={onConfirmLinks}
           onCancel={onCancelLinks}
         />
