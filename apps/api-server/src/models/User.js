@@ -105,7 +105,19 @@ module.exports = function (db, sequelize, DataTypes) {
                 roleToReturn = fallBackRole;
               }
             } else {
-              roleToReturn = actionUserRole;
+              // view/list: only privileged callers or the user themselves see the real role;
+              // everyone else gets a neutral value so roles cannot be harvested/enumerated
+              const isPrivileged = userHasRole(user, 'moderator');
+              const isSelf =
+                !!user &&
+                !!self &&
+                ((user.id && user.id === self.id) ||
+                  (user.idpUser &&
+                    self.idpUser &&
+                    user.idpUser.identifier &&
+                    user.idpUser.identifier === self.idpUser.identifier));
+              roleToReturn =
+                isPrivileged || isSelf ? actionUserRole : fallBackRole;
             }
             return roleToReturn;
           },
