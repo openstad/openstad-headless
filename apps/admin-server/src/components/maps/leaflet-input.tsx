@@ -1,16 +1,18 @@
 import 'leaflet/dist/leaflet.css';
 import React, { useEffect, useState } from 'react';
+import type * as ReactLeaflet from 'react-leaflet';
 
-interface LeafletComponents {
-  MapContainer: React.ComponentType<any>;
-  TileLayer: React.ComponentType<any>;
-  Marker: React.ComponentType<any>;
-  useMapEvents: (events: { [key: string]: (e: any) => void }) => void;
-}
+type LeafletComponents = Pick<
+  typeof ReactLeaflet,
+  'MapContainer' | 'TileLayer' | 'Marker' | 'useMapEvents'
+>;
+
+// Leaflet stores its internal map id on the container element.
+type LeafletContainer = HTMLElement & { _leaflet_id?: number };
 
 interface MapComponentProps {
   onSelectLocation?: (location: string) => void;
-  field: any;
+  field: { value?: string };
   center?: { lat: number; lng: number };
 }
 
@@ -23,8 +25,9 @@ const MapInput: React.FC<MapComponentProps> = ({
   const [markerPosition, setMarkerPosition] = useState<L.LatLng | null>(null);
   const [leafletComponents, setLeafletComponents] =
     useState<LeafletComponents | null>(null);
-  const [dynamicMarkerIcon, setDynamicMarkerIcon] =
-    useState<React.ComponentType<any> | null>(null);
+  const [dynamicMarkerIcon, setDynamicMarkerIcon] = useState<
+    L.Icon | L.DivIcon | null
+  >(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -37,8 +40,8 @@ const MapInput: React.FC<MapComponentProps> = ({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const proto = L.Map.prototype as any;
         const orig = proto._initContainer;
-        proto._initContainer = function (id: any) {
-          const container =
+        proto._initContainer = function (id: string | LeafletContainer) {
+          const container: LeafletContainer | null =
             typeof id === 'string' ? document.getElementById(id) : id;
           if (container && container._leaflet_id) {
             container._leaflet_id = undefined;
@@ -117,7 +120,10 @@ const MapInput: React.FC<MapComponentProps> = ({
           referrerPolicy="no-referrer-when-downgrade"
         />
         {markerPosition && (
-          <Marker position={markerPosition} icon={dynamicMarkerIcon} />
+          <Marker
+            position={markerPosition}
+            icon={dynamicMarkerIcon ?? undefined}
+          />
         )}
         <MapEvents />
       </MapContainer>

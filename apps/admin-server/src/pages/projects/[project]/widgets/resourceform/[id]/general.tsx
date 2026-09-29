@@ -76,7 +76,7 @@ export default function WidgetResourceFormGeneral() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig<any>();
+  } = useWidgetConfig<{ [category]?: Partial<FormData> }>();
 
   const defaults = useCallback(
     () => ({

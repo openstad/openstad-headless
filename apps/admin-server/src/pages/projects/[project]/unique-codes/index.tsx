@@ -78,7 +78,7 @@ export default function ProjectCodes() {
     try {
       const allCodes = await fetchAllUniqueCodes();
 
-      const uniqueCodesData = allCodes?.data?.flat().map((code: any) => ({
+      const uniqueCodesData = allCodes?.data?.flat().map((code) => ({
         ...code,
         userId: code.userId ? 'Ja' : 'Nee',
       }));
@@ -196,7 +196,7 @@ export default function ProjectCodes() {
                     Geen stemcodes gevonden.
                   </li>
                 )}
-                {uniquecodes?.data?.map((code: any) => (
+                {uniquecodes?.data?.map((code) => (
                   <li
                     key={code.id}
                     className="grid grid-cols-4 items-center py-3 px-2 hover:bg-muted transition-all duration-200 border-b">

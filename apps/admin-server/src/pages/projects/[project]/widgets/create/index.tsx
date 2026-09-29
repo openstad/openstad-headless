@@ -45,7 +45,7 @@ export default function CreateWidget({}: WithApiUrlProps) {
       widget[1].name.toLowerCase().includes(filterSearchType.toLowerCase())
   );
 
-  async function submit(type: any, description: any) {
+  async function submit(type: string, description: string) {
     if (!projectId) return;
     try {
       const widget = await createWidget(type, description);

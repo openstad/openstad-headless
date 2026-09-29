@@ -1,11 +1,14 @@
 import * as Switch from '@radix-ui/react-switch';
 import { useEffect } from 'react';
-import { ControllerRenderProps } from 'react-hook-form';
 
 // Simple yes/no selector that uses a props.onFieldchanged method to emit changes
 export function YesNoSelect(
-  field: ControllerRenderProps<any, any>,
-  props: { onFieldChanged?: (key: string, value: any) => void }
+  field: {
+    name: string;
+    value?: boolean;
+    onChange: (value: boolean) => void;
+  },
+  props: { onFieldChanged?: (key: string, value: unknown) => void }
 ) {
   // Init value
   useEffect(() => {

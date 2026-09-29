@@ -21,6 +21,7 @@ import { Heading } from '@/components/ui/typography';
 import useMarkers from '@/hooks/use-markers';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { BaseMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/basemap-widget-props';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -44,7 +45,10 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function WidgetMapMarkers() {
-  const { data: widget, updateConfig } = useWidgetConfig<any>();
+  const { data: widget, updateConfig } =
+    useWidgetConfig<
+      Pick<BaseMapWidgetProps, 'markerSets' | 'markerInteractionType'>
+    >();
 
   const router = useRouter();
   const projectId = router.query.project as string;

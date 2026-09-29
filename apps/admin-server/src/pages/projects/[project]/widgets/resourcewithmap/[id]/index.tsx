@@ -54,7 +54,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
     updateConfig: (config: ResourceOverviewWidgetProps) =>
       updateConfig({ ...widget.config, ...config }),
 
-    onFieldChanged: (key: string, value: any) => {
+    onFieldChanged: (key: string, value: unknown) => {
       if (previewConfig) {
         updatePreview({
           ...previewConfig,

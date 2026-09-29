@@ -40,6 +40,9 @@ const formSchema = z
 export default function WidgetResourcesMapDatalayers(
   props: ResourceOverviewMapWidgetTabProps &
     EditFieldProps<ResourceOverviewMapWidgetTabProps> & {
+      // The persisted shape ({ id, name, activeOnInit }) does not match leaflet-map's DataLayer
+      // (which requires layer and icon); fixing it needs a shared type change.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       datalayer?: any;
       enableOnOffSwitching?: boolean;
       activeOnInit?: boolean;
@@ -55,6 +58,7 @@ export default function WidgetResourcesMapDatalayers(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
+      // Known issue: array field defaults to an empty string when unset.
       datalayer: props?.datalayer || '',
       enableOnOffSwitching: props?.enableOnOffSwitching || false,
     },

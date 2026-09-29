@@ -124,7 +124,7 @@ export default function WidgetMultiProjectSettings(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-full grid grid-cols-1 gap-4">
-          {projects?.map((project: any) => (
+          {projects?.map((project) => (
             <FormField
               key={project.id}
               control={form.control}
@@ -149,7 +149,7 @@ export default function WidgetMultiProjectSettings(
                           whiteSpace: 'nowrap',
                           marginBottom: '12px',
                         }}
-                        htmlFor={project.id}>
+                        htmlFor={String(project.id)}>
                         {project.name}
                       </FormLabel>
                       <FormControl>

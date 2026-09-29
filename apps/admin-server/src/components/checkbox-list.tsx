@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import React, { Fragment, useEffect, useRef } from 'react';
+import type { UseFormReturn } from 'react-hook-form';
 
 import { Checkbox } from './ui/checkbox';
 import {
@@ -11,7 +12,10 @@ import {
 } from './ui/form';
 
 type Props<T> = {
-  form: any;
+  // UseFormReturn is invariant in its field values and fieldName is a runtime
+  // string, so callers' typed forms cannot be passed as UseFormReturn<FieldValues>.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  form: UseFormReturn<any>;
   fieldName: string;
   fieldLabel?: string;
   label?: (item: T) => string;
@@ -23,7 +27,7 @@ type Props<T> = {
   layout?: 'horizontal' | 'vertical';
 };
 
-export const CheckboxList = <T extends { [key: string]: any }>({
+export const CheckboxList = <T extends object>({
   form,
   fieldName,
   fieldLabel,
@@ -42,7 +46,9 @@ export const CheckboxList = <T extends { [key: string]: any }>({
   useEffect(() => {
     if (Array.isArray(items) && keyForGrouping) {
       const groupNames = _.chain(items).map(keyForGrouping).uniq().value();
-      setGroupedNames(groupNames);
+      // Known issue: items without a group value (e.g. tag.type null) end up
+      // as a null group name, which breaks the capitalisation below.
+      setGroupedNames(groupNames as string[]);
     }
   }, [items]);
 

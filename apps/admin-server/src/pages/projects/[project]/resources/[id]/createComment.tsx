@@ -56,7 +56,7 @@ export default function ProjectResourceCreateArgument() {
   const notifyFailed = (err?: string) =>
     toast.error(err || 'Reactie plaatsen mislukt');
   const notifyError = () => toast.error('Er is een fout opgetreden');
-  const notify = (message: string, icon: any) =>
+  const notify = (message: string, icon: string) =>
     toast(message, { icon, duration: 8000 });
 
   async function onSubmit(values: Formdata) {

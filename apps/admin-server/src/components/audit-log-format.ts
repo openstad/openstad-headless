@@ -3,6 +3,11 @@ import {
   VALUE_LABELS,
 } from '@/components/audit-log-field-config';
 
+// Audit-log previousData/newData are arbitrary snapshots of any model, so the
+// helpers below read nested fields dynamically; this is the one documented any.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AuditValue = any;
+
 export function stripHtml(str: string): string {
   return str.replace(/<[^>]*>/g, '').trim();
 }
@@ -11,7 +16,7 @@ export function fieldLabel(key: string): string {
   return FIELD_LABELS[key] || key;
 }
 
-export function formatValue(value: any): string {
+export function formatValue(value: AuditValue): string {
   if (value === null || value === undefined) return '';
   if (typeof value === 'boolean') return value ? 'Ja' : 'Nee';
   if (typeof value === 'number') return String(value);
@@ -34,11 +39,11 @@ export function formatValue(value: any): string {
 
     if (
       Object.values(value).some(
-        (v: any) => v?.weightX !== undefined || v?.weightAB !== undefined
+        (v: AuditValue) => v?.weightX !== undefined || v?.weightAB !== undefined
       )
     )
       return Object.entries(value)
-        .map(([k, w]: [string, any]) => {
+        .map(([k, w]: [string, AuditValue]) => {
           const p = [];
           if (w.weightX !== undefined) p.push(`X: ${w.weightX}`);
           if (w.weightY !== undefined) p.push(`Y: ${w.weightY}`);
@@ -57,11 +62,11 @@ export function formatValue(value: any): string {
   return String(value);
 }
 
-export function formatFieldValue(key: string, value: any): string {
+export function formatFieldValue(key: string, value: AuditValue): string {
   return VALUE_LABELS[key]?.[String(value)] || formatValue(value);
 }
 
-export function optionLabel(v: any): string | null {
+export function optionLabel(v: AuditValue): string | null {
   if (!v || typeof v !== 'object') return null;
 
   const t = v?.titles?.[0];
@@ -84,7 +89,7 @@ export function optionLabel(v: any): string | null {
   return v.name || (v.title && stripHtml(v.title)) || v.label || v.key || null;
 }
 
-export function getItemLabel(item: any, index: number): string {
+export function getItemLabel(item: AuditValue, index: number): string {
   return (
     (item?.title && stripHtml(item.title)) ||
     item?.fieldKey ||
@@ -94,7 +99,7 @@ export function getItemLabel(item: any, index: number): string {
   );
 }
 
-export function getItemId(item: any): string | null {
+export function getItemId(item: AuditValue): string | null {
   if (!item || typeof item !== 'object') return null;
   return item.trigger || item.fieldKey || item.id || null;
 }

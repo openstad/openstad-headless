@@ -1,19 +1,22 @@
+import type { ApiTag } from '@openstad-headless/types';
+
 export async function getOrCreateTag(
   tagName: string,
   tagType: string,
   seqnr: number,
-  existingTags: any[],
+  existingTags: ApiTag[],
   createTagFn: (
     name: string,
     type: string,
     seqnr: number,
     addToNewResources: boolean
-  ) => Promise<any>
+  ) => Promise<ApiTag>
 ): Promise<number> {
   const existing = existingTags.find(
-    (t: any) =>
+    (t) =>
       t.name.toLowerCase() === tagName.toLowerCase() &&
-      t.type.toLowerCase() === tagType.toLowerCase()
+      // Known issue: tags without a type (type is null) make this throw.
+      t.type!.toLowerCase() === tagType.toLowerCase()
   );
 
   if (existing) {
@@ -25,14 +28,14 @@ export async function getOrCreateTag(
 }
 
 export async function processTags(
-  value: any,
-  existingTags: any[],
+  value: { 'tags.*'?: Record<string, unknown> },
+  existingTags: ApiTag[],
   createTagFn: (
     name: string,
     type: string,
     seqnr: number,
     addToNewResources: boolean
-  ) => Promise<any>
+  ) => Promise<ApiTag>
 ): Promise<number[]> {
   const tagIds: number[] = [];
 
@@ -45,7 +48,7 @@ export async function processTags(
   // Find highest seqnr across all tags
   const maxSeqnr =
     existingTags.length > 0
-      ? Math.max(...existingTags.map((t: any) => t.seqnr || 0))
+      ? Math.max(...existingTags.map((t) => t.seqnr || 0))
       : 0;
 
   for (const tagType of Object.keys(tagsObject)) {
@@ -78,7 +81,9 @@ export async function processTags(
   return tagIds;
 }
 
-export function extractUniqueTags(values: any[]): Map<string, Set<string>> {
+export function extractUniqueTags(
+  values: { 'tags.*'?: unknown }[]
+): Map<string, Set<string>> {
   const unique = new Map<string, Set<string>>();
 
   values.forEach((row) => {
@@ -102,18 +107,18 @@ export function extractUniqueTags(values: any[]): Map<string, Set<string>> {
 
 export async function prepareTags(
   uniqueTags: Map<string, Set<string>>,
-  existingTags: any[],
+  existingTags: ApiTag[],
   createTagFn: (
     name: string,
     type: string,
     seqnr: number,
     addToNewResources: boolean
-  ) => Promise<any>
+  ) => Promise<ApiTag>
 ): Promise<Map<string, number>> {
   const mapping = new Map<string, number>();
   const maxSeqnr =
     existingTags.length > 0
-      ? Math.max(...existingTags.map((t: any) => t.seqnr || 0))
+      ? Math.max(...existingTags.map((t) => t.seqnr || 0))
       : 0;
 
   let index = 1;

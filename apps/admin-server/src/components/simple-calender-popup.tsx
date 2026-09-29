@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { CalendarIcon, RotateCcw } from 'lucide-react';
 import React from 'react';
-import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
+import { FieldValues, Path, PathValue, UseFormReturn } from 'react-hook-form';
 
 import { Button } from './ui/button';
 import {
@@ -17,19 +17,19 @@ import {
 } from './ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
 
-// Would like to use a generic solution <T> to enable hinting in the using file
-// Now to remove the errors UseFormReturn<any> has to be used
-export const SimpleCalendar: React.FC<{
-  form: UseFormReturn<any>;
-  fieldName: Path<FieldValues>;
+type SimpleCalendarProps<T extends FieldValues> = {
+  form: UseFormReturn<T>;
+  fieldName: Path<T>;
   fieldInfo?: string;
   description?: string;
   label: string;
   placeholder?: string;
   withReset?: boolean;
-  resetValue?: any;
+  resetValue?: PathValue<T, Path<T>>;
   allowPast?: boolean;
-}> = ({
+};
+
+export const SimpleCalendar = <T extends FieldValues>({
   form,
   fieldName,
   label,
@@ -39,7 +39,7 @@ export const SimpleCalendar: React.FC<{
   allowPast,
   fieldInfo,
   description,
-}) => {
+}: SimpleCalendarProps<T>) => {
   return (
     <FormField
       control={form.control}
@@ -93,7 +93,13 @@ export const SimpleCalendar: React.FC<{
                 />
                 {withReset && (
                   <Button
-                    onClick={() => form.setValue(field.name, resetValue)}
+                    onClick={() =>
+                      // Without resetValue the field is cleared to undefined.
+                      form.setValue(
+                        field.name,
+                        resetValue as PathValue<T, Path<T>>
+                      )
+                    }
                     type="button"
                     variant={'ghost'}
                     className="w-full rounded-none text-xs font-normal">

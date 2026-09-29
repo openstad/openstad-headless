@@ -1,29 +1,33 @@
-const flattenObject = (obj: any, parent: string = '', res: any = {}) => {
-  for (let key in obj) {
+type FlatRecord = Record<string, unknown>;
+
+const flattenObject = (
+  obj: object,
+  parent: string = '',
+  res: FlatRecord = {}
+): FlatRecord => {
+  for (const [key, value] of Object.entries(obj)) {
     const propName = parent ? `${parent}.${key}` : key;
-    if (typeof obj[key] === 'object' && obj[key] !== null) {
+    if (typeof value === 'object' && value !== null) {
       if (key === 'extraData') {
-        const cleanedExtraData = cleanExtraData(obj[key]);
+        const cleanedExtraData = cleanExtraData(value);
         if (cleanedExtraData.embeddedUrl) {
           res[`${propName}.embeddedUrl`] = cleanedExtraData.embeddedUrl;
           delete cleanedExtraData.embeddedUrl;
         }
         res[propName] = JSON.stringify(cleanedExtraData);
-      } else if (Array.isArray(obj[key])) {
-        res[propName] = obj[key]
-          .map((item: any) => JSON.stringify(item))
-          .join(',');
+      } else if (Array.isArray(value)) {
+        res[propName] = value.map((item) => JSON.stringify(item)).join(',');
       } else {
-        flattenObject(obj[key], propName, res);
+        flattenObject(value, propName, res);
       }
     } else {
-      res[propName] = obj[key];
+      res[propName] = value;
     }
   }
   return res;
 };
 
-const cleanExtraData = (obj: any) => {
+const cleanExtraData = (obj: object): FlatRecord => {
   const dbFixedColumns = [
     'title',
     'summary',
@@ -34,12 +38,10 @@ const cleanExtraData = (obj: any) => {
     'tags',
     'documents',
   ];
-  const cleanedObj: any = {};
-  for (const key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      if (!dbFixedColumns.includes(key)) {
-        cleanedObj[key] = obj[key];
-      }
+  const cleanedObj: FlatRecord = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (!dbFixedColumns.includes(key)) {
+      cleanedObj[key] = value;
     }
   }
   return cleanedObj;

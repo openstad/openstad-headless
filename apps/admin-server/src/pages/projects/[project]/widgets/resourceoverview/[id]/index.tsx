@@ -56,7 +56,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
     updateConfig: (config: MultiProjectResourceOverviewProps) =>
       updateConfig({ ...widget.config, ...config }),
 
-    onFieldChanged: (key: string, value: any) => {
+    onFieldChanged: (key: string, value: unknown) => {
       console.log('onFieldChanged', key, value);
       if (previewConfig) {
         updatePreview({

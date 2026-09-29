@@ -56,7 +56,7 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
       updatePreview(newConfig);
     },
 
-    onFieldChanged: (key: string, value: any) => {
+    onFieldChanged: (key: string, value: unknown) => {
       if (previewConfig) {
         updatePreview({
           ...previewConfig,

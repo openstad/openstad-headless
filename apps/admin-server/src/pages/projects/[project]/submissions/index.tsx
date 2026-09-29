@@ -17,23 +17,13 @@ import useSubmissions from '@/hooks/use-submission';
 import useUsers from '@/hooks/use-users';
 import { useWidgetsHook } from '@/hooks/use-widgets';
 import { exportSubmissionsToCSV } from '@/lib/export-helpers/submissions-export';
+import type { ApiWidget } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 import { Button } from '../../../../components/ui/button';
 import { PageLayout } from '../../../../components/ui/page-layout';
-
-interface Submission {
-  id: string;
-  projectId: number;
-  userId: number | null;
-  widgetId: number;
-  status: 'approved' | 'pending' | 'unapproved';
-  submittedData: Record<string, unknown>;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export default function ProjectSubmissions() {
   const router = useRouter();
@@ -44,14 +34,17 @@ export default function ProjectSubmissions() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<string>('createdAt');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
+  // Submission ids are UUID strings.
+  const [selectedItems, setSelectedItems] = useState<string[]>([]);
 
   const [activeWidget, setActiveWidget] = useState('0');
   const [allWidgets, setAllWidgets] = useState<{ id: number; name: string }[]>(
     []
   );
 
-  const [selectedWidget, setSelectedWidget] = useState<any>(null);
+  const [selectedWidget, setSelectedWidget] = useState<
+    ApiWidget | null | undefined
+  >(null);
 
   const [totalCount, setTotalCount] = useState(0);
 
@@ -66,15 +59,13 @@ export default function ProjectSubmissions() {
     if (!!data && !!widgetData) {
       let widgets: { id: number; name: string }[] = [];
 
-      data.forEach((submission: any) => {
+      data.forEach((submission) => {
         const widgetId = submission.widgetId;
-        const usedWidget = widgetData.find(
-          (widget: any) => widget.id === widgetId
-        );
+        const usedWidget = widgetData.find((widget) => widget.id === widgetId);
 
         if (
           usedWidget &&
-          !widgets.some((widget: any) => widget.id === usedWidget.id)
+          !widgets.some((widget) => widget.id === usedWidget.id)
         ) {
           widgets.push({
             id: usedWidget.id,
@@ -87,7 +78,7 @@ export default function ProjectSubmissions() {
     }
   }, [data, widgetData]);
 
-  const selectClick = (value: any) => {
+  const selectClick = (value: string) => {
     const ID = value !== '0' ? value?.split(' - ')[0] : '0';
     setActiveWidget(value);
 
@@ -98,13 +89,13 @@ export default function ProjectSubmissions() {
   };
 
   const filteredSubmissions = useMemo(() => {
-    const submissions = [...((data || []) as Submission[])];
+    const submissions = [...(data || [])];
     const selectedWidgetId =
       activeWidget !== '0' ? activeWidget.split(' - ')[0] : null;
 
     const widgetFiltered = selectedWidgetId
       ? submissions.filter(
-          (submission: any) =>
+          (submission) =>
             (submission.widgetId || 0).toString() === selectedWidgetId
         )
       : submissions;
@@ -112,7 +103,7 @@ export default function ProjectSubmissions() {
     const term = searchTerm.trim().toLowerCase();
     const searched = !term
       ? widgetFiltered
-      : widgetFiltered.filter((submission: any) => {
+      : widgetFiltered.filter((submission) => {
           const submittedDataText = JSON.stringify(
             submission.submittedData || {}
           ).toLowerCase();
@@ -138,16 +129,18 @@ export default function ProjectSubmissions() {
           return target.includes(term);
         });
 
-    const sorted = [...searched].sort((a: any, b: any) => {
-      const toComparable = (value: any) => {
+    const sorted = [...searched].sort((a, b) => {
+      const toComparable = (value: unknown) => {
         if (value === null || value === undefined) return '';
         if (typeof value === 'object')
           return JSON.stringify(value).toLowerCase();
         return String(value).toLowerCase();
       };
 
-      let aValue: any = a[sortField];
-      let bValue: any = b[sortField];
+      const aRow: Record<string, unknown> = a;
+      const bRow: Record<string, unknown> = b;
+      let aValue = aRow[sortField];
+      let bValue = bRow[sortField];
       if (sortField === 'submittedData') {
         aValue = a.submittedData;
         bValue = b.submittedData;
@@ -208,7 +201,7 @@ export default function ProjectSubmissions() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="0">Filter inzendingen op widget</SelectItem>
-                {allWidgets?.map((widget: any) => (
+                {allWidgets?.map((widget) => (
                   <SelectItem
                     key={widget.id}
                     value={`${widget.id} - ${widget.name}`}>{`${widget.id} - ${widget.name}`}</SelectItem>
@@ -300,13 +293,11 @@ export default function ProjectSubmissions() {
               <Checkbox
                 checked={
                   filteredSubmissions?.length > 0 &&
-                  filteredSubmissions.every((s: any) =>
-                    selectedItems.includes(s.id)
-                  )
+                  filteredSubmissions.every((s) => selectedItems.includes(s.id))
                 }
                 onCheckedChange={(checked) => {
                   const currentPageIds =
-                    filteredSubmissions?.map((s: any) => s.id) || [];
+                    filteredSubmissions?.map((s) => s.id) || [];
                   if (checked) {
                     setSelectedItems((prev) =>
                       Array.from(new Set([...prev, ...currentPageIds]))
@@ -349,10 +340,10 @@ export default function ProjectSubmissions() {
               <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
             </div>
             <ul className="admin-overview">
-              {filteredSubmissions?.map((submission: any) => {
+              {filteredSubmissions?.map((submission) => {
                 const userId = submission.userId;
                 const user =
-                  usersData?.find((user: any) => user.id === userId) || null;
+                  usersData?.find((user) => user.id === userId) || null;
                 const currentUserKey =
                   !!user && user.idpUser?.identifier && user.idpUser?.provider
                     ? `${user.idpUser.provider}-*-${user.idpUser.identifier}`
@@ -360,8 +351,7 @@ export default function ProjectSubmissions() {
 
                 const widgetId = submission.widgetId;
                 const usedWidget =
-                  widgetData?.find((widget: any) => widget.id === widgetId) ||
-                  null;
+                  widgetData?.find((widget) => widget.id === widgetId) || null;
                 const widgetName = usedWidget ? usedWidget.description : null;
                 const widgetType = usedWidget ? usedWidget.type : null;
 

@@ -22,10 +22,13 @@ import toast from 'react-hot-toast';
 
 import projectListSwr from '../../hooks/use-project-list';
 
+// `title` is omitted because sortTable rows do not allow a null title.
+type ProjectRow = Omit<ApiProject, 'title'>;
+
 type SearchableField = {
   key: string;
   label: string;
-  getValue: (project: ApiProject) => string;
+  getValue: (project: ProjectRow) => string;
 };
 
 const SEARCHABLE_FIELDS: SearchableField[] = [
@@ -104,15 +107,15 @@ export default function Projects() {
   }, [data, statusFilter, searchTerm, filterSearchType]);
 
   // Separate state for column sorting (sortTable mutates imperatively)
-  const [sortedData, setSortedData] = useState<any[] | null>(null);
+  const [sortedData, setSortedData] = useState<ProjectRow[] | null>(null);
   useEffect(() => setSortedData(null), [filteredData]);
 
-  const displayData = sortedData ?? filteredData;
+  const displayData: ProjectRow[] | undefined = sortedData ?? filteredData;
 
   const sessionData = useContext(SessionContext);
   const { createTemplateFromProject } = useTemplates();
 
-  const [templateSource, setTemplateSource] = useState<any>(null);
+  const [templateSource, setTemplateSource] = useState<ProjectRow | null>(null);
   const [templateName, setTemplateName] = useState('');
   const [templateSaving, setTemplateSaving] = useState(false);
 
@@ -289,7 +292,7 @@ export default function Projects() {
               </ListHeading>
             </div>
             <ul>
-              {displayData?.map((project: any) => (
+              {displayData?.map((project) => (
                 <li
                   className="grid grid-cols-2 lg:grid-cols-8 items-center py-3 px-2 h-16 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
                   key={project.id}

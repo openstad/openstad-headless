@@ -8,7 +8,7 @@ import {
 import * as React from 'react';
 
 type Props = {
-  field: any;
+  field: { name: string; value?: string; onChange: (value: string) => void };
   whitelistedEmails: string[];
 };
 

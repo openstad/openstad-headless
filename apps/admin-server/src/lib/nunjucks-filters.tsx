@@ -3,6 +3,7 @@ import nunjucks from 'nunjucks';
 type Tag = {
   label?: string;
   name?: string;
+  type?: string | null;
 };
 
 type Status = {
@@ -11,7 +12,7 @@ type Status = {
 };
 
 // Custom filter functions
-function dump(obj: any): string {
+function dump(obj: unknown): string {
   if (obj === null || obj === undefined) return '';
   return JSON.stringify(obj, null, 2);
 }
@@ -59,20 +60,20 @@ function replace(str: string, search: string, replacement: string): string {
   return str.split(search).join(replacement);
 }
 
-function tags(resource: any): string {
+function tags(resource: { tags?: unknown }): string {
   if (!Array.isArray(resource.tags)) return '';
   return resource.tags.map((tag: Tag) => tag.label || tag.name).join(', ');
 }
 
-function tagGroup(resource: any, type: any): string {
+function tagGroup(resource: { tags?: unknown }, type: unknown): string {
   if (!Array.isArray(resource.tags)) return '';
   return resource?.tags
-    ?.filter((tag: any) => tag.type === type)
+    ?.filter((tag: Tag) => tag.type === type)
     .map((tag: Tag) => tag.label || tag.name)
     .join(', ');
 }
 
-function status(resource: any): string {
+function status(resource: { statuses?: unknown }): string {
   if (!Array.isArray(resource.statuses)) return '';
   return resource.statuses
     .map((status: Status) => status.label || status.name)

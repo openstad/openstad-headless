@@ -45,10 +45,10 @@ export default function ProjectResourceVotes() {
             </ListHeading>
           </div>
           <ul className="admin-overview">
-            {votes?.map((vote: any) => {
+            {votes?.map((vote) => {
               const userId = vote.userId;
               const user =
-                usersData?.find((user: any) => user.id === userId) || null;
+                usersData?.find((user) => user.id === userId) || null;
               const currentUserKey =
                 user?.idpUser?.identifier && user?.idpUser?.provider
                   ? `${user.idpUser.provider}-*-${user.idpUser.identifier}`

@@ -1,16 +1,18 @@
+import type { ApiStatus } from '@openstad-headless/types';
+
 export async function getOrCreateStatus(
   statusName: string,
   seqnr: number,
-  existingStatuses: any[],
+  existingStatuses: ApiStatus[],
   createStatusFn: (
     name: string,
     seqnr: number,
     addToNewResources: boolean
-  ) => Promise<any>
+  ) => Promise<ApiStatus>
 ): Promise<number> {
   // Case-insensitive matching to avoid duplicates
   const existing = existingStatuses.find(
-    (s: any) => s.name.toLowerCase() === statusName.toLowerCase()
+    (s) => s.name.toLowerCase() === statusName.toLowerCase()
   );
 
   if (existing) {
@@ -22,13 +24,13 @@ export async function getOrCreateStatus(
 }
 
 export async function processStatuses(
-  value: any,
-  existingStatuses: any[],
+  value: { statuses?: string },
+  existingStatuses: ApiStatus[],
   createStatusFn: (
     name: string,
     seqnr: number,
     addToNewResources: boolean
-  ) => Promise<any>
+  ) => Promise<ApiStatus>
 ): Promise<number[]> {
   if (!value.statuses) {
     return [];
@@ -47,7 +49,7 @@ export async function processStatuses(
   // Find the highest sequence number
   const maxSeqnr =
     existingStatuses.length > 0
-      ? Math.max(...existingStatuses.map((s: any) => s.seqnr || 0))
+      ? Math.max(...existingStatuses.map((s) => s.seqnr || 0))
       : 0;
 
   const statusIds: number[] = [];
@@ -65,7 +67,9 @@ export async function processStatuses(
   return statusIds;
 }
 
-export function extractUniqueStatuses(values: any[]): Set<string> {
+export function extractUniqueStatuses(
+  values: { statuses?: string }[]
+): Set<string> {
   const unique = new Set<string>();
   values.forEach((row) => {
     if (row.statuses) {
@@ -81,17 +85,17 @@ export function extractUniqueStatuses(values: any[]): Set<string> {
 
 export async function prepareStatuses(
   uniqueStatuses: Set<string>,
-  existingStatuses: any[],
+  existingStatuses: ApiStatus[],
   createStatusFn: (
     name: string,
     seqnr: number,
     addToNewResources: boolean
-  ) => Promise<any>
+  ) => Promise<ApiStatus>
 ): Promise<Map<string, number>> {
   const mapping = new Map<string, number>();
   const maxSeqnr =
     existingStatuses.length > 0
-      ? Math.max(...existingStatuses.map((s: any) => s.seqnr || 0))
+      ? Math.max(...existingStatuses.map((s) => s.seqnr || 0))
       : 0;
 
   let index = 1;

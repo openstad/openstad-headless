@@ -17,20 +17,26 @@ import * as z from 'zod';
 
 const formSchema = z.object({});
 
+// projectId holds the (numeric) project.id at runtime.
 type ProjectRole = {
-  projectId: string;
+  projectId: string | number;
   roleId: string;
 };
 
 type EmailNotificationConsent = {
-  projectId: string;
+  projectId: string | number;
   consent: boolean;
 };
 
 type CombinedProjectRoleAndConsent = {
-  projectId: string;
+  projectId: string | number;
   roleId?: string;
   consent?: boolean;
+};
+
+type RoleEntry = {
+  projectId: string | number | null;
+  role: string;
 };
 
 export default function CreateUserProjects() {
@@ -50,7 +56,7 @@ export default function CreateUserProjects() {
     defaultValues: {},
   });
 
-  const addProject = (projectId: string, roleId: string) => {
+  const addProject = (projectId: string | number, roleId: string) => {
     setProjectRoles((prev) => {
       let updated = [...prev];
       const index = updated.findIndex((e) => e.projectId === projectId);
@@ -68,7 +74,10 @@ export default function CreateUserProjects() {
     });
   };
 
-  const addEmailNotificationConsent = (projectId: string, consent: boolean) => {
+  const addEmailNotificationConsent = (
+    projectId: string | number,
+    consent: boolean
+  ) => {
     setEmailNotificationConsents((prev) => {
       let updated = [...prev];
       const index = updated.findIndex((e) => e.projectId === projectId);
@@ -83,7 +92,7 @@ export default function CreateUserProjects() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    let error: any;
+    let error: unknown;
 
     const mergedProjects: CombinedProjectRoleAndConsent[] = [
       ...projectRoles,
@@ -137,7 +146,10 @@ export default function CreateUserProjects() {
     }
 
     if (error) {
-      toast.error(error.message || 'User kon niet worden bijgewerkt');
+      toast.error(
+        (error instanceof Error && error.message) ||
+          'User kon niet worden bijgewerkt'
+      );
     } else {
       toast.success('User is bijgewerkt');
       window.location.reload();
@@ -146,8 +158,8 @@ export default function CreateUserProjects() {
 
   if (!projects || !users) return null;
 
-  const mergedRoles = Array.isArray(users)
-    ? users.map((user: any) => {
+  const mergedRoles: RoleEntry[] = Array.isArray(users)
+    ? users.map((user): RoleEntry => {
         const override = projectRoles.find(
           (pr) => pr.projectId == user.projectId
         );
@@ -156,14 +168,14 @@ export default function CreateUserProjects() {
     : [users];
 
   projectRoles.forEach((pr) => {
-    if (!mergedRoles.find((u: any) => u.projectId == pr.projectId)) {
+    if (!mergedRoles.find((u) => u.projectId == pr.projectId)) {
       mergedRoles.push({ projectId: pr.projectId, role: pr.roleId });
     }
   });
 
-  const hasEditorRole = mergedRoles.some((item: any) => item.role === 'editor');
+  const hasEditorRole = mergedRoles.some((item) => item.role === 'editor');
   const adminProject = mergedRoles.find(
-    (item: any) => item.projectId == adminProjectId
+    (item) => item.projectId == adminProjectId
   );
   const isAdminOrEditorInAdminProject =
     adminProject &&
@@ -190,7 +202,7 @@ export default function CreateUserProjects() {
               </ListHeading>
             </div>
             <ul>
-              {projects.map((project: any) => {
+              {projects.map((project) => {
                 let user;
                 if (!Array.isArray(users)) {
                   user = users;
@@ -198,9 +210,7 @@ export default function CreateUserProjects() {
                     return;
                   }
                 } else {
-                  user = users.find(
-                    (user: any) => user.projectId == project.id
-                  );
+                  user = users.find((user) => user.projectId == project.id);
                 }
                 const roleOverride = projectRoles.find(
                   (pr) => pr.projectId == project.id

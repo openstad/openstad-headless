@@ -1,21 +1,64 @@
 import { stripHtmlTags } from '@openstad-headless/lib/strip-html-tags';
+import type { ApiUser, ApiWidget, DynamicJson } from '@openstad-headless/types';
 import * as XLSX from 'xlsx';
 
 import { InitializeWeights } from '../../../../../packages/choiceguide/src/parts/init-weights';
 import { calculateScoreForItem } from '../../../../../packages/choiceguide/src/parts/scoreUtils';
+import type { ChoiceOptions } from '../../../../../packages/choiceguide/src/props';
 import { fetchMatrixData } from './fetch-matrix-data';
 import { getRuntimeSpamFilterEnabled } from './get-runtime-spam-flag';
 
+// Choiceguide config item, as far as this export reads it.
+type ChoiceGuideItem = {
+  type?: string;
+  trigger?: string;
+  title?: string;
+  description?: string;
+  explanationA?: string;
+  explanationB?: string;
+  matrix?: { rows?: { trigger: string; text?: string }[] };
+  options?: {
+    titles: [{ key?: string; title?: string; isOtherOption?: boolean }];
+    trigger: string;
+  }[];
+};
+
+// Choiceguide answer value as stored in the result JSON column.
+type ChoiceGuideAnswer = {
+  skipQuestion?: boolean;
+  skipQuestionExplanation?: string;
+  lat?: number;
+  lng?: number;
+  value?: unknown;
+};
+
+type ChoiceGuideCell = {
+  result: string | number | ChoiceGuideAnswer | null | undefined;
+  value: string;
+};
+
+// Row as returned by the choicesguide results endpoint (with includeUser).
+type ChoiceGuideResultRow = {
+  id: number;
+  createdAt: string;
+  projectId: number;
+  userId: number | null;
+  isSpam?: boolean;
+  // Known issue: the api returns `phoneNumber`, so `phonenumber` is always undefined and the export column stays empty.
+  user?: (Partial<ApiUser> & { phonenumber?: string }) | null;
+  result?: DynamicJson;
+};
+
 export const exportChoiceGuideToCSV = async (
   widgetName: string,
-  selectedWidget: any,
+  selectedWidget: ApiWidget | null | undefined,
   project: string,
   limit: number
 ) => {
   const includeSpamColumn = await getRuntimeSpamFilterEnabled();
 
   const fetchResults = async () => {
-    let allData: any = [];
+    let allData: ChoiceGuideResultRow[] = [];
     let page = 0;
     let hasMoreData = true;
     const maxRetries = 3;
@@ -32,7 +75,10 @@ export const exportChoiceGuideToCSV = async (
       return [];
     }
 
-    const fetchBatch = async (page: number, retries: number = 0) => {
+    const fetchBatch = async (
+      page: number,
+      retries: number = 0
+    ): Promise<ChoiceGuideResultRow[]> => {
       try {
         const url = `/api/openstad/api/project/${projectNumber}/choicesguide?page=${page}&limit=50&widgetId=${selectedWidget?.id}&includeUser=1`;
         const response = await fetch(url);
@@ -43,7 +89,7 @@ export const exportChoiceGuideToCSV = async (
         }
 
         const data = await response.json();
-        const currentBatch = data?.data || [];
+        const currentBatch: ChoiceGuideResultRow[] = data?.data || [];
 
         if (currentBatch.length < 50) {
           hasMoreData = false;
@@ -77,9 +123,7 @@ export const exportChoiceGuideToCSV = async (
 
   fetchResults().then((data) => {
     data = data || [];
-    const includeHashedIpColumn = data.some(
-      (row: any) => !!row?.result?.ipAddress
-    );
+    const includeHashedIpColumn = data.some((row) => !!row?.result?.ipAddress);
 
     if (
       selectedWidget &&
@@ -93,7 +137,7 @@ export const exportChoiceGuideToCSV = async (
       const choiceType = selectedWidget?.config?.choicesType || 'default';
 
       const fieldKeyToTitleMap = new Map();
-      items.forEach((item: any) => {
+      items.forEach((item: ChoiceGuideItem) => {
         if (item.type === 'none') {
           return;
         }
@@ -109,7 +153,7 @@ export const exportChoiceGuideToCSV = async (
         const newKey = item.type + '-' + item.trigger;
 
         if (item.type === 'matrix') {
-          item.matrix?.rows?.forEach((row: any) => {
+          item.matrix?.rows?.forEach((row) => {
             const matrixKey = `${newKey}_${row.trigger}`;
             fieldKeyToTitleMap.set(matrixKey, `${title}: ${row.text}`);
           });
@@ -151,7 +195,7 @@ export const exportChoiceGuideToCSV = async (
                     : [triggerKey, indexKey];
 
                 possibleKeys.forEach((key) => {
-                  const hasData = data.some((row: any) => !!row?.result?.[key]);
+                  const hasData = data.some((row) => !!row?.result?.[key]);
                   if (hasData) {
                     fieldKeyToTitleMap.set(key, otherTitle);
                   }
@@ -162,12 +206,12 @@ export const exportChoiceGuideToCSV = async (
         }
       });
 
-      data = data.map((row: any) => {
-        const scores: { [key: string]: any } = {};
+      data = data.map((row) => {
+        const scores: { [key: string]: string | number } = {};
         const result = row?.result || {};
         const hiddenFields = result?.hiddenFields || [];
 
-        let weights: any = {};
+        let weights: Parameters<typeof calculateScoreForItem>[2] = {};
         try {
           weights = InitializeWeights(
             items,
@@ -179,7 +223,7 @@ export const exportChoiceGuideToCSV = async (
           weights = {};
         }
 
-        choiceOptions.forEach((choiceOption: any) => {
+        choiceOptions.forEach((choiceOption: ChoiceOptions) => {
           try {
             const calculatedScores = calculateScoreForItem(
               choiceOption,
@@ -189,15 +233,15 @@ export const exportChoiceGuideToCSV = async (
               hiddenFields,
               items
             );
-            scores[choiceOption.title] = calculatedScores.x
+            scores[String(choiceOption.title)] = calculatedScores.x
               ? calculatedScores.x.toFixed(0)
               : 0;
           } catch (error) {
-            scores[choiceOption.title] = 0;
+            scores[String(choiceOption.title)] = 0;
           }
         });
 
-        const rowMap = new Map();
+        const rowMap = new Map<number, ChoiceGuideCell>();
         fieldKeyToTitleMap.forEach((value, key) => {
           const index = Array.from(fieldKeyToTitleMap.keys()).indexOf(key);
 
@@ -213,7 +257,7 @@ export const exportChoiceGuideToCSV = async (
           }
         });
 
-        Object.keys(scores).forEach((key: any) => {
+        Object.keys(scores).forEach((key) => {
           const index = rowMap.size;
           rowMap.set(index, { result: scores[key], value: `Score: ${key}` });
         });
@@ -251,11 +295,11 @@ export const exportChoiceGuideToCSV = async (
 
     const fileName = transformString() + '.xlsx';
 
-    const normalizeData = (value: any) => {
+    const normalizeData = (value: ChoiceGuideCell['result']) => {
       let parsedValue;
 
       try {
-        parsedValue = JSON.parse(value);
+        parsedValue = JSON.parse(String(value));
       } catch (error) {}
 
       if (Array.isArray(parsedValue)) {
@@ -282,10 +326,10 @@ export const exportChoiceGuideToCSV = async (
       return value;
     };
 
-    const rows: any[] = [];
+    const rows: Record<string, unknown>[] = [];
 
-    data.forEach((row: any) => {
-      const rowObj: Record<string, any> = {
+    data.forEach((row) => {
+      const rowObj: Record<string, unknown> = {
         ID: row.id,
         'Aangemaakt op': row.createdAt,
         'Project ID': row.projectId,
@@ -309,7 +353,7 @@ export const exportChoiceGuideToCSV = async (
       }
 
       const keyCount: Record<string, number> = {};
-      Object.values(row.result || {}).forEach((item: any) => {
+      Object.values(row.result || {}).forEach((item: ChoiceGuideCell) => {
         const baseKey = item.value;
         let key = keyCount[baseKey]
           ? `${baseKey} (${keyCount[baseKey]++})`

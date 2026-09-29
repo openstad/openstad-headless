@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 import { useWidgetConfig } from './use-widget-config';
 
-export function useWidgetPreview<T extends { [key: string]: any }>(
+export function useWidgetPreview<T extends object>(
   widgetSettings: Partial<{
     [key in keyof T]: T[key];
   }>,

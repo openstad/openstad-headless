@@ -19,7 +19,7 @@ import * as Switch from '@radix-ui/react-switch';
 import { AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useMemo } from 'react';
-import { useForm } from 'react-hook-form';
+import { type Control, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
 
@@ -58,7 +58,7 @@ function getWidgetFormFields(
 
   for (const widget of widgets || []) {
     if (widget.type !== widgetType) continue;
-    const items = (widget.config as any)?.items;
+    const items = widget.config?.items;
     if (!Array.isArray(items)) continue;
 
     for (const item of items) {
@@ -119,7 +119,7 @@ function FieldCheckboxGroup({
   sectionLabel,
   options,
 }: {
-  control: any;
+  control: Control<FormValues>;
   keyName: ComponentKey;
   fieldName: 'personalFields' | 'formFields' | 'answerFields';
   sectionLabel: string;
@@ -134,14 +134,14 @@ function FieldCheckboxGroup({
       </p>
       <FormField
         control={control}
-        name={`${keyName}.${fieldName}` as any}
+        name={`${keyName}.${fieldName}`}
         render={() => (
           <FormItem className="space-y-2">
             {options.map((opt) => (
               <FormField
                 key={opt.key}
                 control={control}
-                name={`${keyName}.${fieldName}` as any}
+                name={`${keyName}.${fieldName}`}
                 render={({ field }) => {
                   const currentValues: string[] = field.value || [];
                   return (
@@ -175,7 +175,12 @@ function FieldCheckboxGroup({
   );
 }
 
-function buildDefaults(dataScopeConfig: any): FormValues {
+// Stored project.config.dataScope; components and fields may be missing.
+type StoredDataScope = {
+  [K in ComponentKey]?: Partial<FormValues[K]>;
+};
+
+function buildDefaults(dataScopeConfig?: StoredDataScope): FormValues {
   return (Object.keys(COMPONENTS) as ComponentKey[]).reduce(
     (acc, key) => ({
       ...acc,
@@ -296,14 +301,14 @@ export default function ProjectSettingsDataScope() {
                       (typeof COMPONENTS)[ComponentKey],
                     ][]
                   ).map(([key, def]) => {
-                    const enabled = form.watch(`${key}.enabled` as any);
+                    const enabled = form.watch(`${key}.enabled`);
                     return (
                       <div
                         key={key}
                         className="rounded-md border p-5 bg-white space-y-4">
                         <FormField
                           control={form.control}
-                          name={`${key}.enabled` as any}
+                          name={`${key}.enabled`}
                           render={({ field }) => (
                             <FormItem className="flex flex-row items-center justify-between">
                               <div>

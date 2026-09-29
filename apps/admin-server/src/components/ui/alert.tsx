@@ -1,6 +1,16 @@
-import React from 'react';
+import React, { ReactNode } from 'react';
 
-export function Alert({ variant = 'info', className = '', children }: any) {
+type AlertProps = {
+  variant?: string;
+  className?: string;
+  children?: ReactNode;
+};
+
+export function Alert({
+  variant = 'info',
+  className = '',
+  children,
+}: AlertProps) {
   const color =
     variant === 'warning'
       ? 'bg-yellow-100 border-yellow-400 text-yellow-800'
@@ -14,10 +24,13 @@ export function Alert({ variant = 'info', className = '', children }: any) {
   );
 }
 
-export function AlertTitle({ children }: any) {
+// Known issue: callers pass className, but it is not applied.
+type AlertPartProps = { children?: ReactNode; className?: string };
+
+export function AlertTitle({ children }: AlertPartProps) {
   return <div className="font-bold mb-1">{children}</div>;
 }
 
-export function AlertDescription({ children }: any) {
+export function AlertDescription({ children }: AlertPartProps) {
   return <div>{children}</div>;
 }

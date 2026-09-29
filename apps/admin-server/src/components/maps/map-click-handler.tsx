@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
+import type { useMapEvents as UseMapEvents } from 'react-leaflet';
 
 interface MapClickHandlerProps {
-  useMapEvents: (events: { [key: string]: (e: any) => void }) => void;
+  useMapEvents: typeof UseMapEvents;
   onMapClick: (latlng: { lat: number; lng: number }) => void;
 }
 
@@ -16,7 +17,7 @@ export default function MapClickHandler({
   }, [onMapClick]);
 
   useMapEvents({
-    click: (e: any) => onMapClickRef.current(e.latlng),
+    click: (e) => onMapClickRef.current(e.latlng),
   });
 
   return null;

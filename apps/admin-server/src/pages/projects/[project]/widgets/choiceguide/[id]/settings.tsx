@@ -4,7 +4,10 @@ import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChoiceGuide } from '@openstad-headless/choiceguide/src/props';
+import {
+  ChoiceGuide,
+  ChoiceGuideProps,
+} from '@openstad-headless/choiceguide/src/props';
 import React, { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -39,7 +42,7 @@ export default function WidgetChoiceGuideGeneralSettings(
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig<any>();
+  } = useWidgetConfig<ChoiceGuideProps>();
 
   const defaults = useCallback(
     () => ({

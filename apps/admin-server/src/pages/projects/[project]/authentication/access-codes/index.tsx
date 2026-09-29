@@ -42,7 +42,7 @@ export default function ProjectCodes() {
 
   useEffect(() => {
     let codes = accesscodes?.data || [];
-    codes = codes?.sort((a: any, b: any) => a.id - b.id);
+    codes = codes?.sort((a, b) => a.id - b.id);
 
     setFilterData(codes);
   }, [accesscodes]);
@@ -131,7 +131,7 @@ export default function ProjectCodes() {
               </ListHeading>
             </div>
             <ul className="admin-overview">
-              {filterData?.map((code: any) => (
+              {filterData?.map((code) => (
                 <li
                   key={code.id}
                   className="grid grid-cols-2 lg:grid-cols-3 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">

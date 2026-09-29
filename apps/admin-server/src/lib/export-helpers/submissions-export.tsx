@@ -1,23 +1,64 @@
 import { stripHtmlTags } from '@openstad-headless/lib/strip-html-tags';
+import type { ApiUser, ApiWidget, DynamicJson } from '@openstad-headless/types';
 import * as XLSX from 'xlsx';
 
 import { fetchMatrixData } from './fetch-matrix-data';
 import { getRuntimeSpamFilterEnabled } from './get-runtime-spam-flag';
 import { normalizeToArray } from './normalize-to-array';
 
+// Form widget config item, as far as this export reads it.
+type FormItemOption = {
+  trigger?: string;
+  value?: string;
+  label?: string;
+  titles?: { key?: string; title?: string; isOtherOption?: boolean }[];
+};
+
+type FormItem = {
+  questionType?: string;
+  fieldKey?: string;
+  title?: string;
+  matrix?: {
+    rows?: { trigger: string; text?: string }[];
+    columns?: { trigger: string; text?: string }[];
+  };
+  options?: FormItemOption[];
+};
+
+// Submission fields this export reads.
+type SubmissionRow = {
+  id?: string | number;
+  createdAt?: string;
+  projectId?: number | null;
+  userId?: number | null;
+  isSpam?: boolean;
+  submittedData?: DynamicJson;
+  // Known issue: the api returns `phoneNumber`, so `phonenumber` is always undefined and the export column stays empty.
+  user?: (Partial<ApiUser> & { phonenumber?: string }) | null;
+};
+
+// Swipe / dilemma answer as stored in submittedData.
+type ChoiceAnswer = {
+  answer?: string;
+  title?: string;
+  explanation?: string;
+  dilemmaId?: string | number;
+  cardId?: string | number;
+};
+
 export interface ExportSettings {
   splitMultipleChoice: boolean;
 }
 
 export const exportSubmissionsToCSV = async (
-  data: any,
+  data: SubmissionRow[],
   widgetName: string,
-  selectedWidget: any,
+  selectedWidget: ApiWidget | null | undefined,
   settings?: ExportSettings
 ) => {
   const includeSpamColumn = await getRuntimeSpamFilterEnabled();
   const includeHashedIpColumn = data?.some(
-    (row: any) => !!row?.submittedData?.ipAddress
+    (row) => !!row?.submittedData?.ipAddress
   );
 
   function transformString() {
@@ -38,11 +79,11 @@ export const exportSubmissionsToCSV = async (
 
   const fileName = transformString() + '.xlsx';
 
-  const normalizeData = (value: any, fieldType?: string) => {
+  const normalizeData = (value: unknown, fieldType?: string) => {
     let parsedValue;
 
     try {
-      parsedValue = JSON.parse(value);
+      parsedValue = JSON.parse(String(value));
     } catch (error) {}
 
     if (Array.isArray(parsedValue)) {
@@ -53,7 +94,7 @@ export const exportSubmissionsToCSV = async (
       if (Array.isArray(value) && value.length > 0) {
         if (typeof value[0] === 'object') {
           return value
-            .map((item: any) => {
+            .map((item: object) => {
               return Object.entries(item)
                 .map(([key, val]) => `${key}: ${val}`)
                 .join(', ');
@@ -62,7 +103,8 @@ export const exportSubmissionsToCSV = async (
         }
       }
 
-      return Object.entries(value)
+      // Known issue: a null value passes the typeof check and makes Object.entries throw.
+      return Object.entries(value!)
         .map(([key, val]) => `${key}: ${val}`)
         .join(', ');
     }
@@ -79,12 +121,12 @@ export const exportSubmissionsToCSV = async (
 
   const fieldKeyToTitleMap = new Map();
   const multipleChoiceOptionsMap = new Map<
-    string,
+    string | undefined,
     { title: string; options: string[] }
   >();
 
-  if (selectedWidget?.config?.items?.length > 0) {
-    selectedWidget.config.items.forEach((item: any) => {
+  if (selectedWidget && selectedWidget.config?.items?.length > 0) {
+    selectedWidget.config.items.forEach((item: FormItem) => {
       if (
         item.questionType === 'none' &&
         selectedWidget?.type !== 'distributionmodule'
@@ -93,7 +135,7 @@ export const exportSubmissionsToCSV = async (
 
       const title = item.title || item.fieldKey;
       if (item.questionType === 'matrix') {
-        item.matrix?.rows?.forEach((row: any) => {
+        item.matrix?.rows?.forEach((row) => {
           const matrixKey = `matrix_${item.fieldKey}_${row.trigger}`;
           fieldKeyToTitleMap.set(matrixKey, `${title}: ${row.text}`);
         });
@@ -109,7 +151,7 @@ export const exportSubmissionsToCSV = async (
         Array.isArray(item.options)
       ) {
         const optionLabels: string[] = [];
-        item.options.forEach((option: any) => {
+        item.options.forEach((option) => {
           const optionTitle =
             option.titles?.[0]?.key ||
             option.titles?.[0]?.title ||
@@ -122,14 +164,15 @@ export const exportSubmissionsToCSV = async (
         });
         if (optionLabels.length > 0) {
           multipleChoiceOptionsMap.set(item.fieldKey, {
-            title: stripHtmlTags(title),
+            // Known issue: an item without title and fieldKey makes stripHtmlTags throw.
+            title: stripHtmlTags(title!),
             options: optionLabels,
           });
         }
       }
 
       if (item.options && Array.isArray(item.options)) {
-        item.options.forEach((option: any, index: number) => {
+        item.options.forEach((option, index: number) => {
           const titles = option.titles;
           if (
             titles &&
@@ -146,9 +189,7 @@ export const exportSubmissionsToCSV = async (
               triggerKey === indexKey ? [triggerKey] : [triggerKey, indexKey];
 
             possibleKeys.forEach((key) => {
-              const hasData = data.some(
-                (row: any) => !!row?.submittedData?.[key]
-              );
+              const hasData = data.some((row) => !!row?.submittedData?.[key]);
               if (hasData) {
                 fieldKeyToTitleMap.set(key, otherTitle);
               }
@@ -159,8 +200,8 @@ export const exportSubmissionsToCSV = async (
     });
   }
 
-  const rows = data.map((row: any) => {
-    const rowData: Record<string, any> = {
+  const rows = data.map((row) => {
+    const rowData: Record<string, unknown> = {
       ID: row.id || ' ',
       'Aangemaakt op': row.createdAt || ' ',
       'Project ID': row.projectId || ' ',
@@ -199,17 +240,17 @@ export const exportSubmissionsToCSV = async (
       }
 
       const fieldType = (selectedWidget?.config?.items || []).find(
-        (item: any) => item.fieldKey === key
+        (item: FormItem) => item.fieldKey === key
       )?.questionType;
       const fieldTitle = (selectedWidget?.config?.items || []).find(
-        (item: any) => item.fieldKey === key
+        (item: FormItem) => item.fieldKey === key
       )?.title;
 
       if (
         typeof rawValue === 'object' &&
         (fieldType === 'swipe' || fieldType === 'dilemma')
       ) {
-        Object.values(rawValue).forEach((item: any) => {
+        Object.values<ChoiceAnswer>(rawValue).forEach((item) => {
           let returnText = fieldType === 'swipe' ? item.answer : item.title;
           if (item.explanation) returnText += `: ${item.explanation}`;
 

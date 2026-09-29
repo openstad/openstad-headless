@@ -60,7 +60,7 @@ const AUTH_METHOD_LABELS: Record<string, string> = {
   phonenumber: 'SMS',
 };
 
-function AuthEventDetails({ data }: { data: any }) {
+function AuthEventDetails({ data }: { data: { method?: string } | null }) {
   if (!data) return null;
   const method = data?.method;
   if (!method) return null;
@@ -175,7 +175,7 @@ export default function AuditLogTable({
           </ListHeading>
         </div>
         <ul>
-          {records.map((entry: any) => (
+          {records.map((entry) => (
             <li
               key={entry.id}
               className="grid grid-cols-1 lg:grid-cols-12 gap-x-4 items-start py-3 px-2 border-b border-border hover:bg-muted/50">

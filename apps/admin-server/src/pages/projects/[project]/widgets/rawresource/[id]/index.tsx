@@ -60,10 +60,10 @@ export default function WidgetRawResource({ apiUrl }: WithApiUrlProps) {
               {previewConfig && (
                 <WidgetRawGeneral
                   {...previewConfig}
-                  updateConfig={(config: any) =>
+                  updateConfig={(config: RawResourceWidgetProps) =>
                     updateConfig({ ...widget.config, ...config })
                   }
-                  onFieldChanged={(key: any, value: any) => {
+                  onFieldChanged={(key: string, value: unknown) => {
                     if (previewConfig) {
                       updatePreview({
                         ...previewConfig,

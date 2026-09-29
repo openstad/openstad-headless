@@ -26,8 +26,8 @@ const keyMap: Record<string, string> = {
   updatedAt: 'Laatst bijgewerkt',
 };
 
-const cleanCommentsData = (original: Record<string, any>) => {
-  const cleaned: Record<string, any> = {};
+const cleanCommentsData = (original: Record<string, unknown>) => {
+  const cleaned: Record<string, unknown> = {};
 
   Object.entries(keyMap).forEach(([key, label]) => {
     if (original.hasOwnProperty(key)) {
@@ -53,20 +53,20 @@ const cleanCommentsData = (original: Record<string, any>) => {
   return cleaned;
 };
 
-export const exportComments = (data: any[], fileName: string) => {
-  const allComments: any[] = [];
+export const exportComments = (data: object[], fileName: string) => {
+  const allComments: Record<string, unknown>[] = [];
 
   data.forEach((comment) => {
     const flattenedComment = flattenObject(comment);
     const cleanedComment = cleanCommentsData(flattenedComment);
     allComments.push(cleanedComment);
 
-    let replies = [];
+    let replies: { parentId?: unknown; description?: unknown }[] = [];
     if (typeof flattenedComment.replies === 'string') {
       try {
         replies = JSON.parse(`[${flattenedComment.replies}]`);
 
-        replies?.forEach((reply: any) => {
+        replies?.forEach((reply) => {
           reply.parentId = flattenedComment.id;
           reply.description = `└ ${reply.description || ''}`;
 

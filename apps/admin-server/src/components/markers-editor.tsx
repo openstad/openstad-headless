@@ -17,10 +17,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useUnsavedChanges from '@/hooks/use-unsaved-changes';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
+import type * as Leaflet from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { ArrowLeft, MapPin, Trash2, X } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import type * as ReactLeaflet from 'react-leaflet';
 import * as z from 'zod';
 
 const markerSchema = z.object({
@@ -38,12 +41,10 @@ const markerSchema = z.object({
 
 export type Marker = z.infer<typeof markerSchema>;
 
-interface LeafletComponents {
-  MapContainer: React.ComponentType<any>;
-  TileLayer: React.ComponentType<any>;
-  Marker: React.ComponentType<any>;
-  useMapEvents: (events: { [key: string]: (e: any) => void }) => void;
-}
+type LeafletComponents = Pick<
+  typeof ReactLeaflet,
+  'MapContainer' | 'TileLayer' | 'Marker' | 'useMapEvents'
+>;
 
 interface MarkersEditorProps {
   initialName: string;
@@ -67,8 +68,10 @@ export default function MarkersEditor({
   const [isSSR, setIsSSR] = useState(true);
   const [leafletComponents, setLeafletComponents] =
     useState<LeafletComponents | null>(null);
-  const [leafletLib, setLeafletLib] = useState<any>(null);
-  const [markerIconFn, setMarkerIconFn] = useState<any>(null);
+  const [leafletLib, setLeafletLib] = useState<typeof Leaflet | null>(null);
+  const [markerIconFn, setMarkerIconFn] = useState<typeof MarkerIcon | null>(
+    null
+  );
   const [skipNextMapClick, setSkipNextMapClick] = useState(false);
   const lastAppliedInitialRef = useRef<string>('');
 
@@ -164,7 +167,10 @@ export default function MarkersEditor({
   }
 
   const createMarkerIcon = useCallback(
-    (marker: Marker, isActive: boolean) => {
+    (
+      marker: Marker,
+      isActive: boolean
+    ): Leaflet.Icon | Leaflet.DivIcon | undefined => {
       if (!markerIconFn || !leafletLib) return undefined;
 
       if (marker.icon) {

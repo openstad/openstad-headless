@@ -1,7 +1,13 @@
+import type { userType } from '@/hooks/use-users';
+import type { ApiUser } from '@openstad-headless/types';
+
+// Import row columns that reference the original user.
+type UserImportRow = { 'user.id'?: number; user?: { id?: number } };
+
 export async function processUserId(
   project: string,
-  value: any,
-  createUser: (user: any) => Promise<any>
+  value: UserImportRow,
+  createUser: (user: userType) => Promise<ApiUser>
 ): Promise<number | undefined> {
   const originalUserId = value['user.id'] || value?.user?.id;
 
@@ -18,7 +24,7 @@ export async function processUserId(
       return originalUserId;
     }
 
-    const originalUser = await userResponse.json();
+    const originalUser: ApiUser = await userResponse.json();
 
     if (originalUser.idpUser?.identifier && originalUser.idpUser?.provider) {
       const projectUsersResponse = await fetch(
@@ -26,9 +32,9 @@ export async function processUserId(
       );
 
       if (projectUsersResponse.ok) {
-        const projectUsers = await projectUsersResponse.json();
+        const projectUsers: ApiUser[] = await projectUsersResponse.json();
         const existingUser = projectUsers.find(
-          (u: any) =>
+          (u) =>
             u.idpUser?.identifier === originalUser.idpUser.identifier &&
             u.idpUser?.provider === originalUser.idpUser.provider
         );
@@ -51,7 +57,7 @@ export async function processUserId(
   }
 }
 
-export function extractUniqueUserIds(values: any[]): Set<number> {
+export function extractUniqueUserIds(values: UserImportRow[]): Set<number> {
   const unique = new Set<number>();
 
   values.forEach((row) => {
@@ -65,7 +71,7 @@ export function extractUniqueUserIds(values: any[]): Set<number> {
 export async function prepareUsers(
   uniqueUserIds: Set<number>,
   project: string,
-  createUser: (user: any) => Promise<any>
+  createUser: (user: userType) => Promise<ApiUser>
 ): Promise<Map<number, number>> {
   const mapping = new Map<number, number>();
 

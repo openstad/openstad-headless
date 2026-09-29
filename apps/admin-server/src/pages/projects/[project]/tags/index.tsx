@@ -121,7 +121,7 @@ export default function ProjectTags({ preset }: { preset?: string }) {
           </ListHeading>
         </div>
         <ul className="admin-overview">
-          {filterData?.map((tag: any) => (
+          {filterData?.map((tag) => (
             <Link
               href={
                 isGlobal

@@ -5,7 +5,7 @@ import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useComments from '@/hooks/use-comments';
 import useResources from '@/hooks/use-resources';
 import { exportComments } from '@/lib/export-helpers/comments-export';
-import type { ApiTag } from '@openstad-headless/types';
+import type { ApiComment, ApiTag } from '@openstad-headless/types';
 import { Paginator } from '@openstad-headless/ui/src';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -16,6 +16,15 @@ import { Button } from '../../../../components/ui/button';
 import { PageLayout } from '../../../../components/ui/page-layout';
 
 type SortDirection = 'asc' | 'desc';
+
+// Listed comment with its tags grouped by type and, for the threaded view,
+// its replies nested underneath.
+type CommentRow = Omit<ApiComment, 'tags' | 'replies'> & {
+  tags?: Record<string, (string | undefined)[]> | Partial<ApiTag>[];
+  // Returned by includeVoteCount, missing from ApiComment.
+  no?: number;
+  replies?: CommentRow[];
+};
 
 const COMMENT_SORT_MAP: Record<string, string> = {
   id: 'id',
@@ -75,8 +84,8 @@ export default function ProjectComments() {
     }
   );
   const { data: resources } = useResources(project as string);
-  const [comments, setComments] = useState<any[]>([]);
-  const [nestedComments, setNestedComments] = useState<any[]>([]);
+  const [comments, setComments] = useState<CommentRow[]>([]);
+  const [nestedComments, setNestedComments] = useState<CommentRow[]>([]);
 
   async function transform() {
     const today = new Date();
@@ -110,7 +119,7 @@ export default function ProjectComments() {
 
   useEffect(() => {
     if (data) {
-      let comments = [];
+      let comments: CommentRow[] = [];
 
       for (let i = 0; i < data.length; i++) {
         comments.push({
@@ -123,15 +132,16 @@ export default function ProjectComments() {
     }
   }, [data]);
 
-  function nestComments(comments: any) {
-    const commentMap: any = {};
-    const nestedComments: any = [];
+  function nestComments(comments: CommentRow[]) {
+    const commentMap: Record<number, CommentRow & { replies: CommentRow[] }> =
+      {};
+    const nestedComments: CommentRow[] = [];
 
-    comments.forEach((comment: any) => {
+    comments.forEach((comment) => {
       commentMap[comment.id] = { ...comment, replies: [] };
     });
 
-    comments.forEach((comment: any) => {
+    comments.forEach((comment) => {
       if (comment.parentId === null) {
         nestedComments.push(commentMap[comment.id]);
       } else {
@@ -155,7 +165,7 @@ export default function ProjectComments() {
 
   useEffect(() => {
     if (!!resources) {
-      const resourceArray = resources.map((resource: any) => {
+      const resourceArray = resources.map((resource) => {
         const title =
           resource?.title && resource.title.length > 50
             ? `${resource.title.slice(0, 50)}...`
@@ -190,9 +200,9 @@ export default function ProjectComments() {
   const displayedComments =
     sortField === 'createdAt' ? nestedComments : comments;
 
-  function getAllCommentIds(comments: any[]): number[] {
+  function getAllCommentIds(comments: CommentRow[]): number[] {
     let ids: number[] = [];
-    comments.forEach((comment: any) => {
+    comments.forEach((comment) => {
       ids.push(comment.id);
       if (comment.replies && comment.replies.length > 0) {
         ids = ids.concat(getAllCommentIds(comment.replies));
@@ -201,10 +211,10 @@ export default function ProjectComments() {
     return ids;
   }
 
-  function renderComments(comments: any, pre = '') {
+  function renderComments(comments: CommentRow[], pre = '') {
     return (
       <ul className="admin-overview">
-        {comments.map((comment: any) => (
+        {comments.map((comment) => (
           <React.Fragment key={comment.id}>
             <li
               className={`grid grid-cols-4 lg:grid-cols-12 items-center py-3 px-2`}>
@@ -315,7 +325,7 @@ export default function ProjectComments() {
                 value={activeResource}
                 onChange={(e) => setActiveResource(e.target.value)}>
                 <option value="0">Filter inzendingen op resource</option>
-                {allResources?.map((resource: any) => (
+                {allResources?.map((resource) => (
                   <option
                     key={resource.id}
                     value={`${resource.id} - ${resource.name}`}>{`${resource.id} - ${resource.name}`}</option>

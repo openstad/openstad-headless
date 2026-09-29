@@ -3,6 +3,7 @@ import AccordionUI from '@/components/ui/accordion';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Separator } from '@/components/ui/separator';
 import useNotificationTemplate from '@/hooks/use-notification-template';
+import type { ApiNotificationTemplate } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 
@@ -19,7 +20,9 @@ export default function ProjectNotifications() {
     | 'notification comment - user'
     | 'notification comment reply - user';
 
-  const defaultDefinitions: { [type in NotificationType]: any[] } = {
+  const defaultDefinitions: {
+    [type in NotificationType]: ApiNotificationTemplate[];
+  } = {
     'login email': [],
     'login sms': [],
     'new published resource - user feedback': [],
@@ -33,7 +36,9 @@ export default function ProjectNotifications() {
   };
 
   const [typeDefinitions, setTypeDefinitions] =
-    React.useState<{ [type in NotificationType]: any[] }>(defaultDefinitions);
+    React.useState<{ [type in NotificationType]: ApiNotificationTemplate[] }>(
+      defaultDefinitions
+    );
 
   const router = useRouter();
   const project = router.query.project as string;
@@ -229,9 +234,12 @@ export default function ProjectNotifications() {
                   {templateList.map((template) => (
                     <div key={template.id}>
                       <NotificationForm
-                        type={template.type}
-                        engine={template.engine}
-                        id={template.id}
+                        // Grouped under its own type key above, so the type is a NotificationType
+                        type={template.type as NotificationType}
+                        // Known issue: NotificationForm only accepts 'email' | 'sms'; the legacy 'carrier pigeon' engine value is passed through unchanged
+                        engine={template.engine as 'email' | 'sms'}
+                        // NotificationForm expects a string id; it is only interpolated into the update URL
+                        id={String(template.id)}
                         label={template.label}
                         subject={template.subject}
                         body={template.body}

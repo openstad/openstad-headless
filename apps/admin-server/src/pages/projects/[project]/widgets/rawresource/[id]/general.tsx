@@ -104,7 +104,7 @@ export default function WidgetRawGeneral(
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="">Geen resource koppelen</SelectItem>
-                    {data?.map((resource: any) => (
+                    {data?.map((resource) => (
                       <SelectItem key={resource.id} value={`${resource.id}`}>
                         {resource.title}
                       </SelectItem>

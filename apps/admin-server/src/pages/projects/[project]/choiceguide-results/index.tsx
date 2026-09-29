@@ -13,6 +13,7 @@ import useChoiceGuideResults from '@/hooks/use-choiceguide-results';
 import useUsers from '@/hooks/use-users';
 import { useWidgetsHook } from '@/hooks/use-widgets';
 import { exportChoiceGuideToCSV } from '@/lib/export-helpers/choiceguide-export';
+import type { ApiWidget } from '@openstad-headless/types';
 import { Paginator } from '@openstad-headless/ui/src';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -23,6 +24,23 @@ import { Button } from '../../../../components/ui/button';
 import { PageLayout } from '../../../../components/ui/page-layout';
 
 type SortDirection = 'asc' | 'desc';
+
+// choices_guide_result row (apps/api-server/src/models/ChoicesGuideResult.js).
+type ChoiceGuideResult = {
+  id: number;
+  userId: number | null;
+  projectId: number;
+  widgetId: number;
+  result: unknown;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// GET /project/:id/choicesguide response.
+type ChoiceGuideResultList = {
+  data: ChoiceGuideResult[];
+  pagination: { page: number; totalPages: number; totalCount: number };
+};
 
 const CHOICEGUIDE_SORT_MAP: Record<string, string> = {
   widgetId: 'widgetId',
@@ -42,14 +60,14 @@ export default function ProjectChoiceGuideResults() {
   const router = useRouter();
   const { project } = router.query;
 
-  const [selectedWidget, setSelectedWidget] = useState<any>(null);
+  const [selectedWidget, setSelectedWidget] = useState<
+    ApiWidget | null | undefined
+  >(null);
 
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const pageLimit = 100;
-  const [resultsData, setResultsData] = useState<
-    { createdAt: string; id?: string }[]
-  >([]);
+  const [resultsData, setResultsData] = useState<ChoiceGuideResult[]>([]);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [apiSearchTerm] = useDebouncedValue(searchTerm, 400);
@@ -69,7 +87,7 @@ export default function ProjectChoiceGuideResults() {
 
   const [totalCount, setTotalCount] = useState(0);
 
-  const fetchResults = async () => {
+  const fetchResults = async (): Promise<ChoiceGuideResultList | undefined> => {
     try {
       const projectNumber = parseInt(project as string);
 
@@ -84,7 +102,8 @@ export default function ProjectChoiceGuideResults() {
         sort: `${CHOICEGUIDE_SORT_MAP[sortField] || 'createdAt'}_${sortDirection}`,
       });
 
-      if (selectedWidget?.id && selectedWidget?.id !== '0') {
+      // Known issue: widget ids are numbers, so the '0' check is always true.
+      if (selectedWidget?.id && String(selectedWidget?.id) !== '0') {
         params.set('widgetId', selectedWidget.id.toString());
       }
 
@@ -159,7 +178,7 @@ export default function ProjectChoiceGuideResults() {
     if (!!widgetData) {
       let widgets: { id: number; name: string }[] = [];
 
-      widgetData.forEach((widget: any) => {
+      widgetData.forEach((widget) => {
         if (widget?.type === 'choiceguide') {
           widgets.push({
             id: widget?.id,
@@ -172,7 +191,7 @@ export default function ProjectChoiceGuideResults() {
     }
   }, [widgetData]);
 
-  const selectClick = (value: any) => {
+  const selectClick = (value: string) => {
     const ID = value !== '0' ? value?.split(' - ')[0] : '0';
 
     setActiveWidget(value);
@@ -233,7 +252,7 @@ export default function ProjectChoiceGuideResults() {
                   <SelectItem value="0">
                     Filter inzendingen op widget
                   </SelectItem>
-                  {allWidgets?.map((widget: any) => (
+                  {allWidgets?.map((widget) => (
                     <SelectItem
                       key={widget.id}
                       value={`${widget.id} - ${widget.name}`}>{`${widget.id} - ${widget.name}`}</SelectItem>
@@ -318,11 +337,10 @@ export default function ProjectChoiceGuideResults() {
                 <Checkbox
                   checked={
                     resultsData?.length > 0 &&
-                    resultsData.every((r: any) => selectedItems.includes(r.id))
+                    resultsData.every((r) => selectedItems.includes(r.id))
                   }
                   onCheckedChange={(checked) => {
-                    const currentPageIds =
-                      resultsData?.map((r: any) => r.id) || [];
+                    const currentPageIds = resultsData?.map((r) => r.id) || [];
                     if (checked) {
                       setSelectedItems((prev) =>
                         Array.from(new Set([...prev, ...currentPageIds]))
@@ -365,10 +383,10 @@ export default function ProjectChoiceGuideResults() {
                 <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
               </div>
               <ul>
-                {resultsData?.map((choiceguideResult: any) => {
+                {resultsData?.map((choiceguideResult) => {
                   const userId = choiceguideResult.userId;
                   const user =
-                    usersData?.find((user: any) => user.id === userId) || null;
+                    usersData?.find((user) => user.id === userId) || null;
                   const currentUserKey =
                     !!user && user.idpUser?.identifier && user.idpUser?.provider
                       ? `${user.idpUser.provider}-*-${user.idpUser.identifier}`
@@ -376,7 +394,7 @@ export default function ProjectChoiceGuideResults() {
 
                   const widgetId = choiceguideResult.widgetId;
                   const usedWidget =
-                    widgetData?.find((widget: any) => widget.id === widgetId) ||
+                    widgetData?.find((widget) => widget.id === widgetId) ||
                     null;
                   const widgetName = usedWidget ? usedWidget.description : null;
                   const widgetType = usedWidget ? usedWidget.type : null;

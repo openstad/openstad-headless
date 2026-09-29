@@ -7,6 +7,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useWidgetsHook } from '@/hooks/use-widgets';
+import type { ApiWidget } from '@openstad-headless/types';
 import { Label } from '@radix-ui/react-label';
 import { Pen } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -15,14 +16,14 @@ import { Input } from './ui/input';
 
 type Props = {
   header: string;
-  widget: any;
+  widget: Pick<ApiWidget, 'id' | 'projectId' | 'description'>;
 };
 
 export function RenameResourceDialog({ header, widget }: Props) {
   const [open, setOpen] = useState<boolean>(false);
   const [name, setName] = useState<string>('');
   const [error, setError] = useState<boolean>(false);
-  const { updateWidget } = useWidgetsHook(widget.projectId);
+  const { updateWidget } = useWidgetsHook(String(widget.projectId));
 
   const onSubmit = async () => {
     if (name.length >= 5) {

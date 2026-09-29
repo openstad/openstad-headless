@@ -49,7 +49,10 @@ export default function CreateProject() {
   const [templateErrors, setTemplateErrors] = React.useState<
     Array<{ step: string; error: string }>
   >([]);
-  const [duplicatedData, setDuplicatedData] = React.useState<any>({});
+  const [duplicatedData, setDuplicatedData] = React.useState<{
+    rollbackSessionId?: string;
+    projectId?: number;
+  }>({});
   const [removingDuplicatedData, setRemovingDuplicatedData] =
     React.useState(false);
 
@@ -68,9 +71,10 @@ export default function CreateProject() {
     defaultValues: {},
   });
 
-  function handleChange(e: any) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const fileReader = new FileReader();
-    fileReader.readAsText(e.target.files[0], 'UTF-8');
+    // files is always set on a file input.
+    fileReader.readAsText(e.target.files![0], 'UTF-8');
     fileReader.onload = (e) => {
       if (typeof e?.target?.result === 'string') {
         setFile(e.target?.result);

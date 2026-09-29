@@ -38,6 +38,17 @@ interface ValidationError {
   message: string;
 }
 
+// Spreadsheet row after translateHeaders/processXlsRow; cells are parsed with
+// JSON.parse, so any column can hold any JSON value.
+type ImportRow = {
+  // Known issue: a numeric status name is parsed to a number and `.trim()` throws.
+  statuses?: string;
+  'tags.*'?: unknown;
+  'user.id'?: number;
+  user?: { id?: number };
+  [key: string]: unknown;
+};
+
 interface FileValidationNotification {
   messageType: string;
   color: string;
@@ -48,7 +59,7 @@ export const ImportButton = ({ project }: { project: string }) => {
   const [open, setOpen] = React.useState<boolean>(false);
   const [importing, setImporting] = React.useState<boolean>(false);
   const [fileName, setFileName] = React.useState<string>('');
-  const [values, setValues] = React.useState([]);
+  const [values, setValues] = React.useState<ImportRow[]>([]);
   const [useId, setUseId] = React.useState<boolean>(true);
   const [dialogStatus, setDialogStatus] = React.useState<
     'base' | 'importFinished'
@@ -79,17 +90,18 @@ export const ImportButton = ({ project }: { project: string }) => {
     window.location.reload();
   };
 
-  const handleSubmit = (callback: (value: any) => Promise<any>) => {
+  const handleSubmit = (callback: (value: ImportRow) => Promise<Response>) => {
     setImporting(true);
 
     const apiValidationErrors: ValidationError[] = [];
 
     Promise.all(
       values.map((value) =>
-        callback(value).catch((error: any) => {
+        callback(value).catch((error: Error) => {
           var valueKeys = Object.keys(value);
-          var formattedFirstValue: string = valueKeys[0] && value[valueKeys[0]];
-          var formattedSecondValue: string =
+          var formattedFirstValue: unknown =
+            valueKeys[0] && value[valueKeys[0]];
+          var formattedSecondValue: unknown =
             valueKeys[1] && value[valueKeys[1]];
 
           // add first info rows for more information what row failed
@@ -145,7 +157,7 @@ export const ImportButton = ({ project }: { project: string }) => {
   };
 
   const prepareData = (
-    value: Record<string, any>,
+    value: Record<string, unknown>,
     addRemoveKeys?: string[]
   ) => {
     // certain columns should not be sent, for instance date values, like createdAt and updatedAt
@@ -158,17 +170,18 @@ export const ImportButton = ({ project }: { project: string }) => {
       : standardRemoveKeys;
 
     const cleanUp = function (
-      value: any,
+      value: unknown,
       key: string,
-      parentValues: Record<string, any> | null
+      parentValues: Record<string, unknown> | null
     ) {
       if (
         value &&
         typeof value === 'object' &&
         !exceptionsObjectKeys.includes(key)
       ) {
-        Object.keys(value).forEach((childKey) => {
-          cleanUp(value[childKey], childKey, value);
+        const record = value as Record<string, unknown>;
+        Object.keys(record).forEach((childKey) => {
+          cleanUp(record[childKey], childKey, record);
         });
       } else {
         if ((!value || removeKeys.includes(key)) && parentValues) {
@@ -201,7 +214,7 @@ export const ImportButton = ({ project }: { project: string }) => {
   };
 
   const getStatusIdsFromMapping = (
-    value: any,
+    value: ImportRow,
     mapping: Map<string, number>
   ): number[] => {
     if (!value.statuses) return [];
@@ -216,7 +229,7 @@ export const ImportButton = ({ project }: { project: string }) => {
   };
 
   const getTagIdsFromMapping = (
-    value: any,
+    value: ImportRow,
     mapping: Map<string, number>
   ): number[] => {
     const tagIds: number[] = [];
@@ -240,7 +253,7 @@ export const ImportButton = ({ project }: { project: string }) => {
   };
 
   const getUserIdFromMapping = (
-    value: any,
+    value: ImportRow,
     mapping: Map<number, number>
   ): number | undefined => {
     const originalUserId = value['user.id'] || value?.user?.id;
@@ -251,25 +264,25 @@ export const ImportButton = ({ project }: { project: string }) => {
     // Prepare all statuses, tags, and user ids
     const { statusMapping, tagMapping, userMapping } = await prepareSubmit();
 
-    const callback = async (value: any) => {
-      value = translateHeaders(value);
+    const callback = async (row: ImportRow) => {
+      const value: ImportRow = translateHeaders(row);
       delete value.id;
 
       const statusIds = getStatusIdsFromMapping(value, statusMapping);
       const tagIds = getTagIdsFromMapping(value, tagMapping);
       const userId = getUserIdFromMapping(value, userMapping);
 
-      value = prepareData(value);
-      value.statuses = statusIds;
-      value.tags = tagIds;
-      value.userId = userId;
+      const payload = prepareData(value);
+      payload.statuses = statusIds;
+      payload.tags = tagIds;
+      payload.userId = userId;
 
       const response = await fetch(
         `/api/openstad/api/project/${project}/resource`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(value),
+          body: JSON.stringify(payload),
         }
       );
 
@@ -297,31 +310,31 @@ export const ImportButton = ({ project }: { project: string }) => {
     // Prepare all statuses, tags, and user ids
     const { statusMapping, tagMapping, userMapping } = await prepareSubmit();
 
-    const callback = async (value: any) => {
-      value = translateHeaders(value);
+    const callback = async (row: ImportRow) => {
+      const value: ImportRow = translateHeaders(row);
 
       const statusIds = getStatusIdsFromMapping(value, statusMapping);
       const tagIds = getTagIdsFromMapping(value, tagMapping);
       const userId = getUserIdFromMapping(value, userMapping);
 
-      value = prepareData(value);
+      const payload = prepareData(value);
 
       if (statusIds.length > 0) {
-        value.statuses = statusIds;
+        payload.statuses = statusIds;
       }
       if (tagIds.length > 0) {
-        value.tags = tagIds;
+        payload.tags = tagIds;
       }
       if (userId) {
-        value.userId = userId;
+        payload.userId = userId;
       }
 
       const response = await fetch(
-        `/api/openstad/api/project/${project}/resource/${value.id}`,
+        `/api/openstad/api/project/${project}/resource/${payload.id}`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(value),
+          body: JSON.stringify(payload),
         }
       );
 
