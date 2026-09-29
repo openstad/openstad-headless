@@ -21,7 +21,7 @@ import {
 import React, { useEffect, useId, useState } from 'react';
 
 import './contact-block.css';
-import { validateContact } from './links-helpers';
+import { contactTextDefaults, validateContact } from './links-helpers';
 
 const MAX_MESSAGE_LENGTH = 2000;
 
@@ -66,24 +66,29 @@ export function ContactBlock({
   headingLevel,
   currentUserProps,
   title = 'Wil je contact opnemen met de indiener?',
-  description = 'Via de contactknop stuur je een bericht dat alleen de indiener kan zien. De indiener kan op jouw bericht reageren via e-mail.',
+  description,
   buttonText = 'Stuur een bericht',
   handler = '',
   popupTitle = 'Je gaat een bericht versturen',
-  popupDescription = 'Via het onderstaande berichtenveld kun je een bericht versturen naar de indiener. Je bericht wordt verstuurd met een vermelding van jouw e-mailadres.',
+  popupDescription,
   showMessage = true,
   messageLabel = 'Typ je bericht',
   showConsent = true,
-  consentLabel = 'Ik ga akkoord met het delen van mijn e-mailadres volgens de privacyverklaring',
+  consentLabel,
   showOwnResource = false,
   ownResourceLabel = 'Kies je inzending',
   ownResourceTags,
   ownResourceEmptyText = 'Je hebt nog geen inzending die je hiervoor kunt kiezen.',
   loginTitle = 'Log in om een bericht te versturen',
-  loginDescription = 'Door in te loggen weten we zeker dat jouw e-mailadres gebruikt kan worden om jou te bereiken.',
+  loginDescription,
   loginButtonText = 'Inloggen',
   successMessage = 'Je bericht is verstuurd.',
 }: Props) {
+  const defaults = contactTextDefaults(handler);
+  const descriptionText = description ?? defaults.description;
+  const popupDescriptionText = popupDescription ?? defaults.popupDescription;
+  const consentLabelText = consentLabel ?? defaults.consentLabel;
+  const loginDescriptionText = loginDescription ?? defaults.loginDescription;
   const datastore: any = new DataStore({ projectId, api });
   const { data: currentUser } = datastore.useCurrentUser({
     ...currentUserProps,
@@ -195,8 +200,8 @@ export function ContactBlock({
         <Heading level={headingLevel} appearance="utrecht-heading-4">
           {title}
         </Heading>
-        {description ? (
-          <RteContent content={description} unwrapSingleRootDiv={true} />
+        {descriptionText ? (
+          <RteContent content={descriptionText} unwrapSingleRootDiv={true} />
         ) : null}
       </div>
       <Button type="button" onClick={openForm}>
@@ -213,7 +218,7 @@ export function ContactBlock({
         <div className="osc-contact-block-dialog-body">
           <DialogTitle>{loginTitle}</DialogTitle>
           <DialogDescription>
-            <Paragraph>{loginDescription}</Paragraph>
+            <Paragraph>{loginDescriptionText}</Paragraph>
           </DialogDescription>
           <div className="osc-contact-block-actions">
             <Button
@@ -240,7 +245,10 @@ export function ContactBlock({
           onSubmit={submit}>
           <DialogTitle>{popupTitle}</DialogTitle>
           <DialogDescription>
-            <RteContent content={popupDescription} unwrapSingleRootDiv={true} />
+            <RteContent
+              content={popupDescriptionText}
+              unwrapSingleRootDiv={true}
+            />
           </DialogDescription>
 
           {showOwnResource ? (
@@ -303,7 +311,7 @@ export function ContactBlock({
                 }
               />
               <FormLabel htmlFor={consentId} type="checkbox">
-                {consentLabel}
+                {consentLabelText}
               </FormLabel>
             </FormField>
           ) : null}

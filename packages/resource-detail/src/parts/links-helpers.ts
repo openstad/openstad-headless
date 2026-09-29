@@ -154,3 +154,33 @@ export function validateContact({
   if (showConsent && !consent) return consentRequiredText;
   return null;
 }
+
+export type ContactTextDefaults = {
+  description: string;
+  popupDescription: string;
+  consentLabel: string;
+  loginDescription: string;
+};
+
+const EMAIL_CONTACT_DEFAULTS: ContactTextDefaults = {
+  description:
+    'Via de contactknop stuur je een bericht dat alleen de indiener kan zien. De indiener kan op jouw bericht reageren via e-mail.',
+  popupDescription:
+    'Via het onderstaande berichtenveld kun je een bericht versturen naar de indiener. Je bericht wordt verstuurd met een vermelding van jouw e-mailadres.',
+  consentLabel:
+    'Ik ga akkoord met het delen van mijn e-mailadres volgens de privacyverklaring',
+  loginDescription:
+    'Door in te loggen weten we zeker dat jouw e-mailadres gebruikt kan worden om jou te bereiken.',
+};
+
+const HANDLER_CONTACT_DEFAULTS: ContactTextDefaults = {
+  description: 'Via deze knop stuur je een verzoek naar de indiener.',
+  popupDescription:
+    'Je kunt een bericht toevoegen. De indiener ziet dit bij je verzoek.',
+  consentLabel: 'Ik ga akkoord met de privacyverklaring',
+  loginDescription: 'Log in zodat de indiener weet van wie het verzoek komt.',
+};
+
+export function contactTextDefaults(handler?: string): ContactTextDefaults {
+  return handler ? HANDLER_CONTACT_DEFAULTS : EMAIL_CONTACT_DEFAULTS;
+}
