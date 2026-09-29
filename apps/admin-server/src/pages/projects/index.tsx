@@ -1,14 +1,23 @@
 import { SessionContext } from '@/auth-context';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import { sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
+import useTemplates from '@/hooks/use-template';
 import { HasAccess } from '@/lib/hasAccess';
-import { Check, ChevronRight, Plus } from 'lucide-react';
+import { Check, ChevronRight, LayoutTemplate, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import React from 'react';
+import toast from 'react-hot-toast';
 
 import projectListSwr from '../../hooks/use-project-list';
 
@@ -100,6 +109,25 @@ export default function Projects() {
   const displayData = sortedData ?? filteredData;
 
   const sessionData = useContext(SessionContext);
+  const { createTemplateFromProject } = useTemplates();
+
+  const [templateSource, setTemplateSource] = useState<any>(null);
+  const [templateName, setTemplateName] = useState('');
+  const [templateSaving, setTemplateSaving] = useState(false);
+
+  async function saveAsTemplate() {
+    if (!templateSource || !templateName.trim()) return;
+    setTemplateSaving(true);
+    try {
+      await createTemplateFromProject(templateName.trim(), templateSource.id);
+      toast.success('Template opgeslagen.');
+      setTemplateSource(null);
+    } catch (error) {
+      toast.error('Opslaan als template is niet gelukt.');
+    } finally {
+      setTemplateSaving(false);
+    }
+  }
 
   if (!data)
     return (
@@ -288,10 +316,26 @@ export default function Projects() {
                   <Paragraph className="hidden lg:flex truncate">
                     {fieldsByKey.url.getValue(project)}
                   </Paragraph>
-                  <Paragraph className="flex">
+                  <Paragraph className="flex items-center justify-end gap-2">
+                    {HasAccess(sessionData) && (
+                      <button
+                        type="button"
+                        title="Bewaar als template"
+                        aria-label={`Bewaar project ${
+                          project.name || ''
+                        } als template`}
+                        className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-gray-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTemplateName(project.name || '');
+                          setTemplateSource(project);
+                        }}>
+                        <LayoutTemplate strokeWidth={1.5} className="w-5 h-5" />
+                      </button>
+                    )}
                     <ChevronRight
                       strokeWidth={1.5}
-                      className="w-5 h-5 my-auto ml-auto"
+                      className="w-5 h-5 my-auto"
                     />
                   </Paragraph>
                 </li>
@@ -299,6 +343,39 @@ export default function Projects() {
             </ul>
           </div>
         </div>
+
+        <Dialog
+          open={!!templateSource}
+          onOpenChange={(open) => {
+            if (!open) setTemplateSource(null);
+          }}>
+          <DialogContent onClick={(e) => e.stopPropagation()}>
+            <DialogHeader>
+              <DialogTitle>Bewaar als template</DialogTitle>
+            </DialogHeader>
+            <p>
+              Er wordt een losstaande kopie van dit project opgeslagen als
+              template. Latere wijzigingen aan het project of de template
+              beïnvloeden elkaar niet.
+            </p>
+            <div className="space-y-2">
+              <label htmlFor="template-name" className="text-sm font-medium">
+                Templatenaam
+              </label>
+              <Input
+                id="template-name"
+                value={templateName}
+                onChange={(e) => setTemplateName(e.target.value)}
+                placeholder="Naam"
+              />
+            </div>
+            <Button
+              onClick={() => saveAsTemplate()}
+              disabled={templateSaving || !templateName.trim()}>
+              {templateSaving ? 'Bezig met opslaan' : 'Opslaan'}
+            </Button>
+          </DialogContent>
+        </Dialog>
       </PageLayout>
     </div>
   );

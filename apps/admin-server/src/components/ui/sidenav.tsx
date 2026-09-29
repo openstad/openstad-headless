@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import {
   AlertTriangle,
   FolderOpen,
+  LayoutTemplate,
   LogOut,
   Plug,
   Settings,
@@ -80,6 +81,28 @@ export function Sidenav({
             {narrow ? '' : 'Projecten'}
           </Button>
         </Link>
+        {adminRole && hasRole({ role: adminRole as Role }, 'admin') ? (
+          <Link href="/templates">
+            <Button
+              variant={
+                location.startsWith('/templates') ? 'secondary' : 'ghost'
+              }
+              className={cn(
+                'w-full flex flex-row justify-start',
+                narrow ? 'p-0 h-10 w-10 justify-center' : null
+              )}>
+              <LayoutTemplate
+                size="20"
+                className={
+                  location.startsWith('/templates')
+                    ? 'text-brand'
+                    : 'text-foreground'
+                }
+              />
+              {narrow ? '' : 'Templates'}
+            </Button>
+          </Link>
+        ) : null}
         {adminRole == 'superuser' ? (
           <Link href="/users">
             <Button
