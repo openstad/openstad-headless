@@ -49,7 +49,10 @@ export default function useAccessCodes(projectId?: string) {
       const updatedList = existingData.filter(
         (ed: { id: number }) => ed.id !== codeId
       );
-      accessCodesListSwr.mutate(updatedList);
+      accessCodesListSwr.mutate({
+        ...accessCodesListSwr.data,
+        data: updatedList,
+      });
       return updatedList;
     } else {
       throw new Error('Could not remove this access code');

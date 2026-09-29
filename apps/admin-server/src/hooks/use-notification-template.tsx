@@ -64,7 +64,11 @@ export default function useNotificationTemplate(projectId?: string) {
 
     if (res.ok) {
       const data = await res.json();
-      notificationTemplateSwr.mutate([...notificationTemplateSwr.data, data]);
+      notificationTemplateSwr.mutate(
+        notificationTemplateSwr.data.map((template: { id: number }) =>
+          template.id === data.id ? data : template
+        )
+      );
       return data;
     } else {
       throw new Error('Could not edit the template');

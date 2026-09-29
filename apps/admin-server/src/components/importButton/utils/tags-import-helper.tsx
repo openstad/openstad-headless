@@ -13,7 +13,7 @@ export async function getOrCreateTag(
   const existing = existingTags.find(
     (t: any) =>
       t.name.toLowerCase() === tagName.toLowerCase() &&
-      t.type.toLowerCase() === tagType.toLowerCase()
+      (t.type || '').toLowerCase() === tagType.toLowerCase()
   );
 
   if (existing) {

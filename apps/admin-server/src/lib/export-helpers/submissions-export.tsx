@@ -49,7 +49,7 @@ export const exportSubmissionsToCSV = async (
       return [...parsedValue].join(' | ');
     }
 
-    if (typeof value === 'object') {
+    if (typeof value === 'object' && value !== null) {
       if (Array.isArray(value) && value.length > 0) {
         if (typeof value[0] === 'object') {
           return value

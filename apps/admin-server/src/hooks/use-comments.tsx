@@ -130,9 +130,8 @@ export default function useComments(
 
     if (res.ok) {
       const newComment = await res.json();
-      const existingData = commentListSwr.data || [];
-      const updatedList = [newComment, ...existingData];
-      commentListSwr.mutate(updatedList);
+      // The list may hold resources or a paginated wrapper, so revalidate.
+      await commentListSwr.mutate();
       return newComment;
     } else {
       return await res.json();

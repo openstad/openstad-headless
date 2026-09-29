@@ -33,7 +33,7 @@ export function YesNoSelect(
 }
 
 export const undefinedToTrueOrProp = (
-  varOrUndefined: boolean | undefined
+  varOrUndefined: boolean | null | undefined
 ): boolean => {
-  return varOrUndefined === undefined || varOrUndefined;
+  return varOrUndefined === undefined || varOrUndefined === true;
 };
