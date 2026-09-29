@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   type ResourceLink,
   buildItemLink,
+  contactTextDefaults,
   externalIdsBySource,
   toRelatedItems,
   validateContact,
@@ -151,5 +152,18 @@ describe('validateContact', () => {
     expect(validateContact({ ...base, showOwnResource: true })).toBe(
       'inzending'
     );
+  });
+});
+
+describe('contactTextDefaults', () => {
+  it('mentions the e-mail address for the built-in contact form', () => {
+    const defaults = contactTextDefaults('');
+    expect(defaults.popupDescription).toContain('e-mailadres');
+    expect(defaults.consentLabel).toContain('e-mailadres');
+  });
+
+  it('does not promise to share the e-mail address for a plugin handler', () => {
+    const defaults = contactTextDefaults('link-request');
+    expect(Object.values(defaults).join(' ')).not.toMatch(/e-mail/);
   });
 });
