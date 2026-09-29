@@ -8,7 +8,7 @@ const ActionButtonsLine = (props: {
   handleSubmitCreate: () => void;
   handleSubmitOverwrite: () => void;
   handleReload: () => void;
-  values: any[];
+  values: unknown[];
   importing: boolean;
   useId: boolean;
   idPresent: boolean;

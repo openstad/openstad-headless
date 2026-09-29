@@ -41,7 +41,7 @@ export default function WidgetMapReaction() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig<any>();
+  } = useWidgetConfig<{ [category]?: Partial<FormData> }>();
 
   const defaults = useCallback(
     () => ({

@@ -2,13 +2,13 @@ import flattenObject from '@/lib/export-helpers/flattenObject';
 import * as XLSX from 'xlsx';
 
 export const exportToXLSX = (
-  data: any[],
+  data: object[],
   fileName: string,
   keyMap: Record<string, string>
 ) => {
   const cleanedData = data.map((item) => {
     const flat = flattenObject(item);
-    const cleaned: Record<string, any> = {};
+    const cleaned: Record<string, unknown> = {};
     Object.entries(keyMap).forEach(([key, label]) => {
       // Handle wildcard keys like tags.*
       if (key.endsWith('.*')) {

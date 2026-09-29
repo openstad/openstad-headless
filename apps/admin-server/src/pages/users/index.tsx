@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { useUsers, type userType } from '@/hooks/use-users';
+import type { ApiUser } from '@openstad-headless/types';
 import { ChevronLeft, ChevronRight, Loader, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -61,7 +62,7 @@ export default function Users() {
 
   if (!data && !lastDataRef.current) return null;
 
-  const exportData = (data: any[], fileName: string) => {
+  const exportData = (data: ApiUser[], fileName: string) => {
     const workbook = XLSX.utils.book_new();
     const worksheet = XLSX.utils.json_to_sheet(data);
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
@@ -181,7 +182,7 @@ export default function Users() {
               </ListHeading>
             </div>
             <ul>
-              {(data || [])?.map((user: any) => (
+              {(data || [])?.map((user) => (
                 <Link
                   href={`/users/${btoa(getUserRouteKey(user))}`}
                   key={getUserRouteKey(user)}>

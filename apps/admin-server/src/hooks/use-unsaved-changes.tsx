@@ -15,11 +15,11 @@ import { useCallback, useEffect, useRef } from 'react';
 export default function useUnsavedChanges(
   message = 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je wilt doorgaan?'
 ) {
-  const savedStateRef = useRef<any>(null);
-  const getCurrentStateRef = useRef<(() => any) | null>(null);
+  const savedStateRef = useRef<unknown>(null);
+  const getCurrentStateRef = useRef<(() => unknown) | null>(null);
   const router = useRouter();
 
-  const setSavedState = useCallback((state: any) => {
+  const setSavedState = useCallback((state: unknown) => {
     savedStateRef.current = structuredClone(state);
   }, []);
 

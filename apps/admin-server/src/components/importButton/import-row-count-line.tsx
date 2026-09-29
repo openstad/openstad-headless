@@ -1,7 +1,7 @@
 import { Info } from 'lucide-react';
 import React from 'react';
 
-const ImportRowCount = (props: { values: any[] }) => {
+const ImportRowCount = (props: { values: Record<string, unknown>[] }) => {
   const { values } = props;
 
   if (!values || values.length < 1) return <></>;

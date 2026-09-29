@@ -6,21 +6,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ControllerRenderProps } from 'react-hook-form';
+import { ControllerRenderProps, FieldValues } from 'react-hook-form';
 
 const NO_SELECTION_VALUE = '__none__';
 
 type Props<T> = {
-  field: ControllerRenderProps<any, any>;
+  field: ControllerRenderProps<FieldValues, string>;
   items?: Array<T>;
   keyForValue: keyof T;
   selected?: T[keyof T] | '';
-  onFieldChanged?: (key: string, value: keyof T) => void;
+  onFieldChanged?: (key: string, value: string) => void;
   label?: (item: T) => string;
   noSelection?: string;
 };
 
-export const ObjectListSelect = <T extends { [key: string]: any }>({
+export const ObjectListSelect = <T extends object>({
   field,
   items = [],
   keyForValue,
@@ -64,7 +64,7 @@ export const ObjectListSelect = <T extends { [key: string]: any }>({
             <SelectItem
               key={`${field.name}-dynamic-select-option-${index}`}
               value={`${item[keyForValue]}`}>
-              {label ? label(item) : item[keyForValue]}
+              {label ? label(item) : `${item[keyForValue]}`}
             </SelectItem>
           );
         })}

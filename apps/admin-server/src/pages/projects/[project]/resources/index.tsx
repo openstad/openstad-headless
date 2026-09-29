@@ -7,6 +7,12 @@ import useResources from '@/hooks/use-resources';
 import { getRuntimeSpamFilterEnabled } from '@/lib/export-helpers/get-runtime-spam-flag';
 import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
 import { keyMap } from '@/lib/keyMap';
+import type {
+  ApiFile,
+  ApiResource,
+  ApiStatus,
+  ApiTag,
+} from '@openstad-headless/types';
 import { Paginator } from '@openstad-headless/ui/src';
 import { ChevronRight, Plus } from 'lucide-react';
 import Link from 'next/link';
@@ -37,15 +43,17 @@ const RESOURCE_SEARCH_FIELD_MAP: Record<string, string> = {
   createdAt: 'text',
 };
 
-const prepareDataForExport = (data: any[]) => {
-  const allResources: any[] = [];
+const prepareDataForExport = (data: ApiResource[]) => {
+  // Rows get flattened export columns (e.g. `tags.<type>`) added in place.
+  const allResources: Record<string, unknown>[] = [];
 
-  data.forEach((resource) => {
+  data.forEach((row) => {
+    const resource: Record<string, unknown> = row;
     for (const [key, values] of Object.entries(resource)) {
       if (key === 'tags' && Array.isArray(values)) {
-        const tagsByType: Record<string, string[]> = {};
+        const tagsByType: Record<string, (string | undefined)[]> = {};
 
-        values.forEach((tag: any) => {
+        values.forEach((tag: Partial<ApiTag>) => {
           const columnName = `tags.${tag.type}`;
           if (!tagsByType[columnName]) {
             tagsByType[columnName] = [];
@@ -60,7 +68,7 @@ const prepareDataForExport = (data: any[]) => {
       if (key.startsWith('statuses') && Array.isArray(values)) {
         try {
           const createString = values
-            .map((value: any) => {
+            .map((value: Partial<ApiStatus>) => {
               return value.name;
             })
             .filter(Boolean)
@@ -76,7 +84,7 @@ const prepareDataForExport = (data: any[]) => {
       ) {
         try {
           const createString = values
-            .map((value: any) => {
+            .map((value: ApiFile & { description?: string }) => {
               return key.startsWith('images')
                 ? `${value.url}${
                     value.description ? ` (${value.description})` : ''
@@ -318,10 +326,10 @@ export default function ProjectResources() {
                   className="my-auto"
                   checked={
                     data?.length > 0 &&
-                    data.every((r: any) => selectedWidgets.includes(r.id))
+                    data.every((r) => selectedWidgets.includes(r.id))
                   }
                   onCheckedChange={(checked) => {
-                    const currentPageIds = data?.map((r: any) => r.id) || [];
+                    const currentPageIds = data?.map((r) => r.id) || [];
                     if (checked) {
                       setSelectedWidgets((prev) =>
                         Array.from(new Set([...prev, ...currentPageIds]))
@@ -378,7 +386,7 @@ export default function ProjectResources() {
                 <ListHeading className="hidden lg:flex lg:col-span-1 ml-auto"></ListHeading>
               </div>
               <ul className="admin-overview">
-                {data?.map((resource: any) => (
+                {data?.map((resource) => (
                   <li
                     key={resource.id}
                     className="grid grid-cols-2 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"

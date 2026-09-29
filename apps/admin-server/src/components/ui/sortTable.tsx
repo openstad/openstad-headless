@@ -1,58 +1,83 @@
-const sortFunctions = {
-  'date-added': (a: any, b: any) =>
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  createdAt: (a: any, b: any) =>
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  'date-modified': (a: any, b: any) =>
-    new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-  id: (a: any, b: any) => b.id - a.id,
-  seqnr: (a: any, b: any) => b.seqnr - a.seqnr,
-  resourceId: (a: any, b: any) => b.resourceId - a.resourceId,
-  type: (a: any, b: any) =>
-    b.type.toLowerCase().localeCompare(a.type.toLowerCase()),
-  resource: (a: any, b: any) =>
-    a.title.toLowerCase().localeCompare(b.title.toLowerCase()),
-  'voted-yes': (a: any, b: any) => b.resource?.yes || 0 - a.resource?.yes || 0,
-  'voted-no': (a: any, b: any) => b.resource?.no || 0 - a.resource?.no || 0,
-  name: (a: any, b: any) =>
-    a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
-  url: (a: any, b: any) =>
-    a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
-  email: (a: any, b: any) => {
+import type { DynamicJson } from '@openstad-headless/types';
+
+// Union of the fields the comparators read; each table only uses the keys its
+// rows have. Number() mirrors the implicit coercion of `-`.
+type SortableRow = {
+  createdAt?: string;
+  updatedAt?: string;
+  id?: number | string;
+  seqnr?: number;
+  resourceId?: number;
+  type?: string | null;
+  title?: string;
+  name?: string | null;
+  email?: string | null;
+  postcode?: string | null;
+  code?: string | number;
+  ip?: string | null;
+  userId?: number | null;
+  score?: string | number;
+  addToNewResources?: boolean;
+  extraFunctionality?: { canLike?: boolean };
+  resource?: { yes?: number; no?: number };
+  config?: DynamicJson;
+};
+
+type Comparator = (a: SortableRow, b: SortableRow) => number;
+
+const sortFunctions: Record<string, Comparator> = {
+  'date-added': (a, b) =>
+    new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime(),
+  createdAt: (a, b) =>
+    new Date(b.createdAt!).getTime() - new Date(a.createdAt!).getTime(),
+  'date-modified': (a, b) =>
+    new Date(b.updatedAt!).getTime() - new Date(a.updatedAt!).getTime(),
+  id: (a, b) => Number(b.id) - Number(a.id),
+  seqnr: (a, b) => Number(b.seqnr) - Number(a.seqnr),
+  resourceId: (a, b) => Number(b.resourceId) - Number(a.resourceId),
+  type: (a, b) => b.type!.toLowerCase().localeCompare(a.type!.toLowerCase()),
+  resource: (a, b) =>
+    a.title!.toLowerCase().localeCompare(b.title!.toLowerCase()),
+  // Known issue: `||` binds looser than `-`, so this is not a numeric diff.
+  'voted-yes': (a, b) => b.resource?.yes || 0 - Number(a.resource?.yes) || 0,
+  'voted-no': (a, b) => b.resource?.no || 0 - Number(a.resource?.no) || 0,
+  name: (a, b) => a.name!.toLowerCase().localeCompare(b.name!.toLowerCase()),
+  url: (a, b) => a.name!.toLowerCase().localeCompare(b.name!.toLowerCase()),
+  email: (a, b) => {
     let aEmail = a?.email || '';
     let bEmail = b?.email || '';
     return aEmail.toLowerCase().localeCompare(bEmail.toLowerCase());
   },
-  postcode: (a: any, b: any) => {
+  postcode: (a, b) => {
     let aPostcode = a?.postcode || '';
     let bPostcode = b?.postcode || '';
     return aPostcode.toLowerCase().localeCompare(bPostcode.toLowerCase());
   },
-  code: (a: any, b: any) => b.code - a.code,
-  ip: (a: any, b: any) => b.ip - a.ip,
-  userId: (a: any, b: any) => b.userId - a.userId,
-  endDate: (a: any, b: any) =>
+  code: (a, b) => Number(b.code) - Number(a.code),
+  ip: (a, b) => Number(b.ip) - Number(a.ip),
+  userId: (a, b) => Number(b.userId) - Number(a.userId),
+  endDate: (a, b) =>
     new Date(b.config?.project?.endDate).getTime() -
     new Date(a.config?.project?.endDate).getTime(),
-  votesIsActive: (a: any, b: any) =>
-    (b.config.votes.isActive ? 1 : -1) - (a.config.votes.isActive ? 1 : -1),
-  commentsIsActive: (a: any, b: any) =>
-    (b.config.comments.canComment ? 1 : -1) -
-    (a.config.comments.canComment ? 1 : -1),
-  addToNewResources: (a: any, b: any) =>
+  votesIsActive: (a, b) =>
+    (b.config!.votes.isActive ? 1 : -1) - (a.config!.votes.isActive ? 1 : -1),
+  commentsIsActive: (a, b) =>
+    (b.config!.comments.canComment ? 1 : -1) -
+    (a.config!.comments.canComment ? 1 : -1),
+  addToNewResources: (a, b) =>
     (b.addToNewResources ? 1 : -1) - (a.addToNewResources ? 1 : -1),
-  canLike: (a: any, b: any) =>
+  canLike: (a, b) =>
     (b.extraFunctionality?.canLike ? 1 : -1) -
     (a.extraFunctionality?.canLike ? 1 : -1),
-  score: (a: any, b: any) => b.score - a.score,
+  score: (a, b) => Number(b.score) - Number(a.score),
 };
 
-export const sortTable = <T,>(
+export const sortTable = <T extends SortableRow>(
   sortType: string,
   el: React.MouseEvent<HTMLElement, MouseEvent>,
   data: T[] | undefined = []
 ): T[] => {
-  const sortFunction = sortFunctions[sortType as keyof typeof sortFunctions];
+  const sortFunction = sortFunctions[sortType];
   if (!sortFunction) {
     return data;
   }

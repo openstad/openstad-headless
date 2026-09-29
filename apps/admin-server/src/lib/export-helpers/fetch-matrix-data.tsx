@@ -1,7 +1,19 @@
+import type { DynamicJson } from '@openstad-headless/types';
+
+// Widget config item (choiceguide or form) that may hold a matrix question.
+export type MatrixSourceItem = {
+  type?: string;
+  questionType?: string;
+  trigger?: string;
+  fieldKey?: string;
+  matrix?: { columns?: { trigger: string; text?: string }[] };
+};
+
 export const fetchMatrixData = (
   key: string,
-  allItems: any,
-  results: any,
+  allItems: MatrixSourceItem[],
+  // Submitted answers (submittedData / choiceguide result JSON column).
+  results: DynamicJson,
   isChoiceGuide = true
 ) => {
   const parts = key.split('_');
@@ -11,7 +23,7 @@ export const fetchMatrixData = (
   }
 
   const resultKey = parts[0];
-  let item = null;
+  let item: MatrixSourceItem | undefined;
   let fieldKey = '';
 
   if (isChoiceGuide) {
@@ -23,7 +35,7 @@ export const fetchMatrixData = (
     const itemTrigger = itemParts[1];
 
     item = allItems.find(
-      (i: any) => i.type === 'matrix' && i.trigger === itemTrigger
+      (i) => i.type === 'matrix' && i.trigger === itemTrigger
     );
   } else {
     fieldKey = key.replace('matrix_', '');
@@ -38,7 +50,7 @@ export const fetchMatrixData = (
     fieldKey = fieldKeyParts.join('_');
 
     item = allItems.find(
-      (i: any) => i.questionType === 'matrix' && i.fieldKey === fieldKey
+      (i) => i.questionType === 'matrix' && i.fieldKey === fieldKey
     );
   }
 
@@ -64,7 +76,7 @@ export const fetchMatrixData = (
           const resParts = res.split('_');
 
           const returnValue =
-            answers.find((a: any) => a.trigger === resParts[1])?.text || null;
+            answers.find((a) => a.trigger === resParts[1])?.text || null;
           if (returnValue) {
             acc.push(returnValue);
           }

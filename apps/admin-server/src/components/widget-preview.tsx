@@ -7,7 +7,7 @@ import { SessionContext } from '../auth-context';
 // Can we type config better? Or should we define types for all widgetConfigs and use them as seperate props. A.k.a. likeConifg?:LikeConfig, argConfig?: ArgConfig
 type Props = {
   type: string;
-  config?: any;
+  config?: object;
   projectId: string;
 };
 

@@ -8,6 +8,7 @@ import {
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useComments from '@/hooks/use-comments';
 import useUsers from '@/hooks/use-users';
+import type { ApiComment } from '@openstad-headless/types';
 import { MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -24,12 +25,11 @@ export default function ProjectResourceArguments() {
   );
   const { data: usersData } = useUsers();
 
-  function renderComments(comments: any, pre = '') {
+  function renderComments(comments: ApiComment[] | undefined, pre = '') {
     return (
       <ul className="admin-overview">
-        {comments?.map((comment: any) => {
-          const user =
-            usersData?.find((u: any) => u.id === comment.userId) || null;
+        {comments?.map((comment) => {
+          const user = usersData?.find((u) => u.id === comment.userId) || null;
           const userKey =
             user?.idpUser?.identifier && user?.idpUser?.provider
               ? `${user.idpUser.provider}-*-${user.idpUser.identifier}`

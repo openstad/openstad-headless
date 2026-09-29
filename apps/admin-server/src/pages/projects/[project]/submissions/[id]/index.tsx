@@ -4,6 +4,7 @@ import { PageLayout } from '@/components/ui/page-layout';
 import useSubmissions from '@/hooks/use-submission';
 import { useWidgetsHook } from '@/hooks/use-widgets';
 import { stripHtmlTags } from '@openstad-headless/lib/strip-html-tags';
+import type { ApiSubmission, DynamicJson } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
 import React, { useMemo } from 'react';
 
@@ -15,9 +16,7 @@ export default function ProjectStatusEdit() {
 
   const fieldTitles = useMemo(() => {
     if (!widgetData || !id) return null;
-    const widget = widgetData.find(
-      (w: any) => w.id.toString() === id.toString()
-    );
+    const widget = widgetData.find((w) => w.id.toString() === id.toString());
     const items = widget?.config?.items;
     if (!Array.isArray(items)) return null;
 
@@ -32,7 +31,7 @@ export default function ProjectStatusEdit() {
     return map;
   }, [widgetData, id]);
 
-  const Header = ({ sub }: any) => {
+  const Header = ({ sub }: { sub: ApiSubmission }) => {
     return (
       <table className="mb-10 w-full border border-gray-100">
         <tbody>
@@ -86,7 +85,10 @@ export default function ProjectStatusEdit() {
     );
   };
 
-  const Content = ({ sub }: any) => {
+  const Content = ({ sub }: { sub: DynamicJson }) => {
+    // A free-form submittedData value, duck-typed below as a location, a file
+    // list or a primitive; a precise type would need casts on every branch.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const renderValue = (value: any) => {
       if (typeof value === 'object' && value !== null) {
         if (value.lat && value.lng) {
@@ -183,7 +185,7 @@ export default function ProjectStatusEdit() {
         <div className="container py-6">
           <div className="p-6 bg-white rounded-md">
             {data &&
-              data.map((submission: any) => {
+              data.map((submission) => {
                 if (submission.id === dataId) {
                   return (
                     <div key={submission.id}>

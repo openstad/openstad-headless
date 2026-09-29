@@ -1,4 +1,4 @@
-export const normalizeToArray = (value: any): string[] => {
+export const normalizeToArray = (value: unknown): string[] => {
   if (!value) return [];
 
   if (Array.isArray(value)) {

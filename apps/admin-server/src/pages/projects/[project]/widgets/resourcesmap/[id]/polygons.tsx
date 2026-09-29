@@ -26,7 +26,7 @@ import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { useForm } from 'react-hook-form';
+import { UseFormReturn, useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 import { ResourceOverviewMapWidgetTabProps } from '.';
@@ -48,18 +48,22 @@ const formSchema = z.object({
   interactionType: z.enum(['default', 'direct']).optional().default('default'),
 });
 
+type PolygonConfig = NonNullable<
+  z.infer<typeof formSchema>['customPolygon']
+>[number];
+
 export default function WidgetResourcesMapButton(
   props: ResourceOverviewMapWidgetTabProps &
     EditFieldProps<ResourceOverviewMapWidgetTabProps> & {
-      customPolygon?: any;
-      customPolygonUrl?: any;
+      customPolygon?: PolygonConfig[];
+      customPolygonUrl?: Record<number, string>;
       interactionType?: 'default' | 'direct';
     }
 ) {
   type FormData = z.infer<typeof formSchema>;
 
   async function onSubmit(values: FormData) {
-    const customPolygon = values?.customPolygon?.map((item: any) => {
+    const customPolygon = values?.customPolygon?.map((item) => {
       const url = values?.customPolygonUrl?.[item.id] ?? item.url ?? '';
       return { ...item, url };
     });
@@ -71,13 +75,12 @@ export default function WidgetResourcesMapButton(
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
-  const existingPolygons = (props?.customPolygon || []).reduce(
-    (acc: any, p: any) => {
-      acc[p.id] = p;
-      return acc;
-    },
-    {}
-  );
+  const existingPolygons = (props?.customPolygon || []).reduce<
+    Record<number, PolygonConfig>
+  >((acc, p) => {
+    acc[p.id] = p;
+    return acc;
+  }, {});
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
@@ -112,7 +115,8 @@ export default function WidgetResourcesMapButton(
                   Array.isArray(field.value) &&
                   field.value.some((obj) => obj.id === Number(item.id));
 
-                const existingData = existingPolygons[Number(item.id)] || {};
+                const existingData: Partial<PolygonConfig> =
+                  existingPolygons[Number(item.id)] || {};
 
                 return (
                   <FormItem
@@ -332,14 +336,14 @@ function PolygonExtraField({
   existingData,
   render,
 }: {
-  form: any;
+  form: UseFormReturn<z.infer<typeof formSchema>>;
   itemId: number;
   fieldName: string;
-  existingData: any;
+  existingData: Partial<PolygonConfig>;
   render: (polygonIndex: number) => React.ReactNode;
 }) {
   const polygons = form.watch('customPolygon') || [];
-  const polygonIndex = polygons.findIndex((p: any) => p.id === itemId);
+  const polygonIndex = polygons.findIndex((p) => p.id === itemId);
   if (polygonIndex === -1) return null;
   return <>{render(polygonIndex)}</>;
 }

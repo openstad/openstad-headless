@@ -20,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import * as Switch from '@radix-ui/react-switch';
 import React, { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -41,7 +42,7 @@ export default function WidgetEnqueteConfirmation() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig<any>();
+  } = useWidgetConfig<EnqueteWidgetProps>();
 
   const defaults = useCallback(() => {
     const confirmationUser =
@@ -92,9 +93,7 @@ export default function WidgetEnqueteConfirmation() {
     visibility === 'always' &&
     (items.length === 0
       ? 'Je moet eerst velden aanmaken om dit te kunnen doen.'
-      : !items.some(
-            (item: { questionType: string }) => item.questionType === 'open'
-          )
+      : !items.some((item) => item.questionType === 'open')
         ? 'Je moet eerst een tekstveld aanmaken om dit te kunnen doen.'
         : null);
 
@@ -163,12 +162,12 @@ export default function WidgetEnqueteConfirmation() {
                     </FormControl>
                     <SelectContent>
                       {items
-                        .filter(
-                          (item: { questionType: string }) =>
-                            item.questionType === 'open'
-                        )
-                        .map((item: { fieldKey: string; title: string }) => (
-                          <SelectItem key={item.fieldKey} value={item.fieldKey}>
+                        .filter((item) => item.questionType === 'open')
+                        .map((item) => (
+                          // Known issue: fieldKey is optional on Item; an open question without a fieldKey yields a SelectItem without a value.
+                          <SelectItem
+                            key={item.fieldKey}
+                            value={item.fieldKey!}>
                             {item.title}
                           </SelectItem>
                         ))}

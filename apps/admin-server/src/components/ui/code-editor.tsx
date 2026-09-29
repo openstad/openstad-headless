@@ -48,7 +48,7 @@ const CodeEditor: React.FC<CodeEditorProps> = ({
   }, [initValue]);
 
   const onChange = React.useCallback(
-    (val: React.SetStateAction<string>, viewUpdate: any) => {
+    (val: React.SetStateAction<string>) => {
       const formattedValue = formatJSON(val);
       if (onValueChange) {
         onValueChange(formattedValue);

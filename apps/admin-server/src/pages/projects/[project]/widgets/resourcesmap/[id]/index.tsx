@@ -50,15 +50,15 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
     updateConfig: (config: ResourceOverviewMapWidgetProps) =>
       updateConfig({ ...widget.config, ...config }),
 
-    onFieldChanged: (key: string, value: any) => {
+    onFieldChanged: (key: string, value: unknown) => {
       if (previewConfig) {
         let updatedConfig = {
           ...previewConfig,
           [key]: value,
         };
-        if (key == 'categorize.categorizeByField')
+        if (key == 'categorize.categorizeByField' && typeof value === 'string')
           updatedConfig.categorize = { categorizeByField: value };
-        if (key == 'clustering.isActive')
+        if (key == 'clustering.isActive' && typeof value === 'boolean')
           updatedConfig.clustering = { isActive: value };
         updatePreview(updatedConfig);
       }

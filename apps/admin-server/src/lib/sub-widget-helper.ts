@@ -1,6 +1,6 @@
 type ConfigWithFunctions<ChildWidgetProps> = ChildWidgetProps & {
   updateConfig: (config: ChildWidgetProps) => void;
-  onFieldChanged: (key: string, value: any) => void;
+  onFieldChanged: (key: string, value: unknown) => void;
 };
 
 type ExtractConfigParams<
@@ -48,7 +48,7 @@ export function extractConfig<
       // stale snapshot (prevents one column overwriting another).
       updatePreview(mergedConfig);
     },
-    onFieldChanged: (key: string, value: any) => {
+    onFieldChanged: (key: string, value: unknown) => {
       if (previewConfig) {
         updatePreview({
           ...previewConfig,

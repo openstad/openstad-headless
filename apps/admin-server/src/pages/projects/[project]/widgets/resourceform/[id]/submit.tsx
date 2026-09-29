@@ -16,6 +16,7 @@ import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ResourceFormWidgetProps } from '@openstad-headless/resource-form/src/props';
 import React, { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -36,7 +37,7 @@ export default function WidgetResourceFormSubmit() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig<any>();
+  } = useWidgetConfig<ResourceFormWidgetProps>();
 
   const defaults = useCallback(
     () => ({

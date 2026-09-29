@@ -47,7 +47,7 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
     updateConfig: (config: StemBegrootWidgetProps) =>
       updateConfig({ ...widget.config, ...config }),
 
-    onFieldChanged: (key: string, value: any) => {
+    onFieldChanged: (key: string, value: unknown) => {
       if (previewConfig) {
         updatePreview({
           ...previewConfig,

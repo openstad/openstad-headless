@@ -10,6 +10,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import type { DynamicJson } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -54,7 +55,7 @@ export default function PluginWidgetPage({ apiUrl }: WithApiUrlProps) {
   const pluginProps = useMemo(
     () => ({
       config: widget?.config || {},
-      updateConfig: (config: any) => {
+      updateConfig: (config: DynamicJson) => {
         updateConfig(config);
         if (previewConfig) {
           updatePreview({

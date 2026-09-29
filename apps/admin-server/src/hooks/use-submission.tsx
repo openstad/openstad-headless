@@ -15,7 +15,7 @@ export default function useSubmissions(projectId?: string) {
   async function remove(
     id: string | number,
     multiple?: boolean,
-    ids?: number[]
+    ids?: (string | number)[]
   ) {
     const deleteUrl = multiple ? `${baseUrl}/delete` : `${baseUrl}/${id}`;
 

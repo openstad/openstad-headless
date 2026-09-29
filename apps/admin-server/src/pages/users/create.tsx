@@ -92,7 +92,7 @@ export default function CreateUser() {
                 fieldLabel="Basisproject (Een gebruiker moet altijd één project hebben.)"
                 items={projects}
                 keyForValue="id"
-                label={(project: any) => `${project.name}`}
+                label={(project) => `${project.name}`}
                 noSelection="&nbsp;"
               />
 

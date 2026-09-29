@@ -4,6 +4,7 @@ import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useUsers from '@/hooks/use-users';
 import useVotes from '@/hooks/use-votes';
 import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
+import type { ApiVote, Paginated } from '@openstad-headless/types';
 import { Paginator } from '@openstad-headless/ui/src';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -18,7 +19,7 @@ export default function ProjectResources() {
   const router = useRouter();
   const { project } = router.query;
   const { remove } = useVotes(project as string);
-  const [votes, setVotes] = useState<{ createdAt: string; id?: string }[]>([]);
+  const [votes, setVotes] = useState<ApiVote[]>([]);
   const [filterSearchType, setFilterSearchType] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
   const [apiSearchTerm] = useDebouncedValue(searchTerm, 400);
@@ -74,7 +75,7 @@ export default function ProjectResources() {
   const fetchResults = async (
     page: number,
     options?: { includeFilters?: boolean; includeSorting?: boolean }
-  ) => {
+  ): Promise<Paginated<ApiVote> | undefined> => {
     try {
       const projectNumber = parseInt(project as string);
 
@@ -153,7 +154,7 @@ export default function ProjectResources() {
   }, [apiSearchTerm, filterSearchType, sortDirection, sortField]);
 
   const fetchAllResults = async () => {
-    let allData: any[] = [];
+    let allData: ApiVote[] = [];
     let currentPage = 0;
     let totalPages = Math.ceil(totalCount / pageLimit);
     while (currentPage < totalPages) {
@@ -284,10 +285,10 @@ export default function ProjectResources() {
               </ListHeading>
             </div>
             <ul className="admin-overview">
-              {votes?.map((vote: any) => {
+              {votes?.map((vote) => {
                 const userId = vote.userId;
                 const user =
-                  usersData?.find((user: any) => user.id === userId) || null;
+                  usersData?.find((user) => user.id === userId) || null;
                 const currentUserKey =
                   !!user && user.idpUser?.identifier && user.idpUser?.provider
                     ? `${user.idpUser.provider}-*-${user.idpUser.identifier}`

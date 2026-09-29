@@ -12,8 +12,8 @@ const validRoles: Role[] = [
   'all',
 ];
 
-function isRole(role: any): role is Role {
-  return validRoles.includes(role);
+function isRole(role: string): role is Role {
+  return validRoles.some((validRole) => validRole === role);
 }
 
 export function HasAccess(user?: { role?: string }) {

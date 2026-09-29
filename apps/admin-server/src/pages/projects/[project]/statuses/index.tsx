@@ -117,7 +117,7 @@ export default function ProjectStatuses() {
               <ListHeading className="truncate">Acties</ListHeading>
             </div>
             <ul className="admin-overview">
-              {filterData?.map((status: any) => (
+              {filterData?.map((status) => (
                 <Link
                   href={`/projects/${project}/statuses/${status.id}`}
                   key={status.id}>

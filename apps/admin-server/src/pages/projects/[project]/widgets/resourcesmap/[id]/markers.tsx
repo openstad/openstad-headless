@@ -46,7 +46,6 @@ const formSchema = z.object({
 export default function WidgetResourcesMapMarkers(
   props: ResourceOverviewMapWidgetTabProps &
     EditFieldProps<ResourceOverviewMapWidgetTabProps> & {
-      markerSets?: any;
       markerInteractionType?: 'default' | 'direct';
       buttonType?: 'submit' | 'button';
     }

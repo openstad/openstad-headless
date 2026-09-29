@@ -1,7 +1,7 @@
 import { UploadDocument } from '@/hooks/upload-document';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import React, { useEffect } from 'react';
-import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
+import { FieldValues, Path, PathValue, UseFormReturn } from 'react-hook-form';
 
 import {
   FormControl,
@@ -13,16 +13,18 @@ import {
 } from './ui/form';
 import { Input } from './ui/input';
 
-export const ImageUploader: React.FC<{
-  form: UseFormReturn<any>;
-  fieldName: Path<FieldValues>;
+type ImageUploaderProps<T extends FieldValues> = {
+  form: UseFormReturn<T>;
+  fieldName: Path<T>;
   onImageUploaded?: (imageObject: { url: string }) => void;
   imageLabel?: string;
   description?: string;
   allowedTypes?: string[];
   project?: string;
   allowMultiple?: boolean;
-}> = ({
+};
+
+export const ImageUploader = <T extends FieldValues>({
   form,
   fieldName,
   onImageUploaded,
@@ -31,11 +33,11 @@ export const ImageUploader: React.FC<{
   description = '',
   project,
   allowMultiple = false,
-}) => {
+}: ImageUploaderProps<T>) => {
   const [file, setFile] = React.useState<{ url: string }>();
   const [fileUrl, setFileUrl] = React.useState<string>('');
 
-  function prepareFile(image: any) {
+  function prepareFile(image: File) {
     const formData = new FormData();
     formData.append('image', image);
     formData.append('filename', 'testName');
@@ -44,7 +46,7 @@ export const ImageUploader: React.FC<{
     return formData;
   }
 
-  async function uploadImage(data: any) {
+  async function uploadImage(data: File) {
     let response;
 
     if (
@@ -76,7 +78,8 @@ export const ImageUploader: React.FC<{
   useEffect(() => {
     if (file && fileUrl !== file.url) {
       setFileUrl(file.url);
-      form.setValue(fieldName, file.url);
+      // fieldName is expected to point at a string (URL) field.
+      form.setValue(fieldName, file.url as PathValue<T, Path<T>>);
       onImageUploaded && onImageUploaded(file);
     }
   }, [file, form, fieldName, onImageUploaded]);

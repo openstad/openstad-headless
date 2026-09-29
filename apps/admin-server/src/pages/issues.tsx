@@ -1,10 +1,23 @@
 import { PageLayout } from '@/components/ui/page-layout';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
+import type { ApiProject } from '@openstad-headless/types';
 import { ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/router';
 import React from 'react';
 
 import projectListSwr from '../hooks/use-project-list';
+
+// The issues endpoint returns projects with extra issue fields.
+type ProjectWithIssue = ApiProject & {
+  issue?: string;
+  domainBlocks?: {
+    widgetId: number;
+    domain: string;
+    referer: string;
+    count: number;
+    lastSeen: string;
+  }[];
+};
 
 export default function Projects() {
   const { data } = projectListSwr({ projectsWithIssues: true });
@@ -40,12 +53,12 @@ export default function Projects() {
               ))}
             </div>
             <ul>
-              {data.map((project: any) => {
+              {data.map((project: ProjectWithIssue) => {
                 if (
                   project.issue === 'blocked-domains' &&
                   project.domainBlocks
                 ) {
-                  return project.domainBlocks.map((block: any) => (
+                  return project.domainBlocks.map((block) => (
                     <li
                       className="grid grid-cols-2 lg:grid-cols-4 items-center py-3 px-2 hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-2"
                       key={`${project.id}-block-${block.widgetId}-${block.domain}`}

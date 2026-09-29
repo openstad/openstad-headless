@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import { useRouter } from 'next/router';
 import { ReactNode, useEffect, useState } from 'react';
 
-import { Breadcrumbs } from './breadcrumbs';
+import { Breadcrumb, Breadcrumbs } from './breadcrumbs';
 import { Sidenav } from './sidenav';
 import { SidenavProject } from './sidenav-project';
 import { Heading } from './typography';
@@ -22,7 +22,7 @@ export function PageLayout({
   children?: ReactNode;
   className?: string;
   pageHeader?: string;
-  breadcrumbs: any;
+  breadcrumbs: Breadcrumb[];
   action?: ReactNode;
 }) {
   const router = useRouter();

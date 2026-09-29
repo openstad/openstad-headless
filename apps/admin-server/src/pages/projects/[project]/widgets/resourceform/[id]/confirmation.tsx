@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ResourceFormWidgetProps } from '@openstad-headless/resource-form/src/props';
 import * as Switch from '@radix-ui/react-switch';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -29,7 +30,7 @@ export default function WidgetResourceFormConfirmation() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig<any>();
+  } = useWidgetConfig<ResourceFormWidgetProps>();
 
   const defaults = useCallback(() => {
     const confirmationUser =

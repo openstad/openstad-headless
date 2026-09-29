@@ -6,7 +6,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ChoiceOptions } from '@openstad-headless/choiceguide/src/props';
+import {
+  ChoiceGuideProps,
+  ChoiceOptions,
+} from '@openstad-headless/choiceguide/src/props';
 import { X } from 'lucide-react';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useRef } from 'react';
@@ -46,7 +49,7 @@ export default function WidgetChoiceGuideChoiceOptions(props: ChoiceOptions) {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig<any>();
+  } = useWidgetConfig<ChoiceGuideProps>();
 
   const chosenConfig = widget?.config?.choiceGuide?.choicesType || 'default';
   let dimensions = chosenConfig === 'plane' ? ['X', 'Y'] : ['X'];

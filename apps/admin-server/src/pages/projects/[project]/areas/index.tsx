@@ -37,7 +37,6 @@ export default function ProjectAreas() {
     name: string;
     createdAt: string;
     type: string;
-    [key: string]: any;
   };
 
   const [filterData, setFilterData] = useState<DataItem[]>([]);
@@ -47,10 +46,9 @@ export default function ProjectAreas() {
 
   useEffect(() => {
     const combinedData = [
-      ...(areas?.map((area: any) => ({ ...area, type: 'Polygoon' })) || []),
-      ...(datalayers?.map((layer: any) => ({ ...layer, type: 'Kaartlaag' })) ||
-        []),
-      ...(markersData?.map((set: any) => ({ ...set, type: 'Markers' })) || []),
+      ...(areas?.map((area) => ({ ...area, type: 'Polygoon' })) || []),
+      ...(datalayers?.map((layer) => ({ ...layer, type: 'Kaartlaag' })) || []),
+      ...(markersData?.map((set) => ({ ...set, type: 'Markers' })) || []),
     ];
 
     const sortedData = combinedData.sort(
@@ -193,7 +191,7 @@ export default function ProjectAreas() {
             </div>
 
             <ul className="admin-overview">
-              {filterData?.map((item: any) => (
+              {filterData?.map((item) => (
                 <Link href={getItemHref(item)} key={`${item.type}-${item.id}`}>
                   <li className="grid grid-cols-3 lg:grid-cols-5 items-center py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b">
                     <Paragraph className="hidden lg:flex truncate">

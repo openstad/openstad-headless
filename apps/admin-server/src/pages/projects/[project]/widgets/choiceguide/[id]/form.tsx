@@ -89,7 +89,7 @@ export default function ChoicesSelectorForm(
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig<any>();
+  } = useWidgetConfig<ChoiceGuideProps>();
 
   const defaults = useCallback(
     () => ({

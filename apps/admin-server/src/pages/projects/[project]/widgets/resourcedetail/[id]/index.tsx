@@ -69,7 +69,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
       updateConfig(merged);
       updatePreview(merged as ResourceDetailWidgetProps);
     },
-    onFieldChanged: (key: string, value: any) => {
+    onFieldChanged: (key: string, value: unknown) => {
       if (previewConfig) {
         updatePreview({
           ...previewConfig,

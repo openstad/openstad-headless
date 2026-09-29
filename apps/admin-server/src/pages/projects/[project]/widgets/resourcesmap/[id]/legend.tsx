@@ -36,7 +36,6 @@ const formSchema = z.object({
 export default function WidgetResourcesMapLegend(
   props: ResourceOverviewMapWidgetTabProps &
     EditFieldProps<ResourceOverviewMapWidgetTabProps> & {
-      customLegend?: any;
       buttonType?: 'submit' | 'button';
     }
 ) {
@@ -47,7 +46,7 @@ export default function WidgetResourcesMapLegend(
 
   const defaults = useCallback(
     () => ({
-      customLegend: (props?.customLegend || []).map((item: any) => ({
+      customLegend: (props?.customLegend || []).map((item) => ({
         label: item.label || '',
         color: item.color || '',
         icon: item.icon || '',

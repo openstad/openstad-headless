@@ -159,7 +159,7 @@ const formSchema = (
 type FormType = z.infer<typeof baseSchema>;
 
 type Props = {
-  onFormSubmit: (body: FormType) => Promise<any>;
+  onFormSubmit: (body: FormType) => Promise<unknown>;
 };
 
 export default function ResourceForm({ onFormSubmit }: Props) {
@@ -213,14 +213,19 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     if (a.name > b.name) return 1;
     return 0;
   });
-  const budgetFallback = (existingData: any, key: string = '') => {
+  const budgetFallback = (
+    existingData?: ApiResource &
+      Partial<Record<'min' | 'max' | 'interval', number>>,
+    key?: 'min' | 'max' | 'interval'
+  ) => {
     if (!existingData) return 0;
 
     if (typeof existingData?.budget === 'number') {
       return existingData.budget;
     }
 
-    return existingData[key] || 0;
+    // Known issue: resources have no min/max/interval fields, so this is always 0.
+    return (key && existingData[key]) || 0;
   };
 
   const defaults = useCallback(
@@ -235,11 +240,11 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       budgetMax: budgetFallback(existingData, 'max'),
       budgetInterval: budgetFallback(existingData, 'interval'),
       tags:
-        existingData?.tags?.map((t: any) => t.id) ||
+        existingData?.tags?.map((t) => t.id) ||
         projectData?.config?.resources?.defaultTagIds ||
         [],
       statuses:
-        existingData?.statuses?.map((t: any) => t.id) ||
+        existingData?.statuses?.map((t) => t.id) ||
         projectData?.config?.resources?.defaultStatusIds ||
         [],
       startDate: existingData?.startDate
@@ -251,7 +256,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
 
       modBreaks:
         existingData?.modBreaks
-          ?.map((mb: any) => ({
+          ?.map((mb) => ({
             id: mb.id || crypto.randomUUID(),
             description: mb.description || '',
             authorName: mb.authorName || '',
@@ -262,7 +267,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               : '',
           }))
           .sort(
-            (a: any, b: any) =>
+            (a, b) =>
               new Date(b.modBreakDate || 0).getTime() -
               new Date(a.modBreakDate || 0).getTime()
           ) || [],

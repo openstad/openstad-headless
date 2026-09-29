@@ -267,7 +267,7 @@ const HIDDEN_ITEM_FIELDS = new Set([
   'tags',
 ]);
 
-export function getItemDisplayFields(item: any): string[] {
+export function getItemDisplayFields(item: unknown): string[] {
   if (!item || typeof item !== 'object') return [];
   return Object.keys(item).filter((k) => !HIDDEN_ITEM_FIELDS.has(k));
 }

@@ -199,7 +199,7 @@ export default function ProjectSettingsMap() {
                 fieldInfo="Op de pagina 'Polygonen' kun je een eigen gebied aanmaken. Selecteer hieronder het gebied waar dit project onder valt."
                 items={areas}
                 keyForValue="id"
-                label={(area: any) => `${area.name}`}
+                label={(area) => `${area.name}`}
                 noSelection="&nbsp;"
               />
 

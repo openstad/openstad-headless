@@ -1,5 +1,6 @@
 import { getItemDisplayFields } from '@/components/audit-log-field-config';
 import {
+  type AuditValue,
   fieldLabel,
   formatFieldValue,
   formatValue,
@@ -8,7 +9,7 @@ import {
 } from '@/components/audit-log-format';
 import React from 'react';
 
-function getRelevantKeys(item: any): string[] {
+function getRelevantKeys(item: AuditValue): string[] {
   if (typeof item !== 'object') return [];
   return getItemDisplayFields(item);
 }
@@ -19,8 +20,8 @@ function FieldDiff({
   newVal,
 }: {
   label: string;
-  oldVal?: any;
-  newVal?: any;
+  oldVal?: AuditValue;
+  newVal?: AuditValue;
 }) {
   const o = label ? formatFieldValue(label, oldVal) : formatValue(oldVal);
   const n = label ? formatFieldValue(label, newVal) : formatValue(newVal);
@@ -45,7 +46,7 @@ function ItemDetails({
   keys,
   variant,
 }: {
-  item: any;
+  item: AuditValue;
   keys: string[];
   variant: 'added' | 'deleted';
 }) {
@@ -76,8 +77,8 @@ function RenderDiff({
   next,
   depth = 0,
 }: {
-  prev: any;
-  next: any;
+  prev: AuditValue;
+  next: AuditValue;
   depth?: number;
 }) {
   if (depth > 5) return <span>{formatValue(next)}</span>;
@@ -85,16 +86,16 @@ function RenderDiff({
   if (Array.isArray(next)) {
     const prevArr = Array.isArray(prev) ? prev : [];
 
-    const prevMap = new Map<string, any>();
-    prevArr.forEach((item: any) => {
+    const prevMap = new Map<string, AuditValue>();
+    prevArr.forEach((item: AuditValue) => {
       const id = getItemId(item);
       if (id) prevMap.set(id, item);
     });
 
-    const matched: { label: string; prev: any; next: any }[] = [];
-    const added: any[] = [];
+    const matched: { label: string; prev: AuditValue; next: AuditValue }[] = [];
+    const added: AuditValue[] = [];
 
-    next.forEach((item: any, i: number) => {
+    next.forEach((item: AuditValue, i: number) => {
       const id = getItemId(item);
       if (id && prevMap.has(id)) {
         matched.push({
@@ -111,8 +112,10 @@ function RenderDiff({
     const deleted = Array.from(prevMap.values());
 
     if (deleted.length === 0 && added.length === 0 && matched.length > 0) {
-      const prevOrder = prevArr.map((item: any) => getItemId(item) || '');
-      const nextOrder = next.map((item: any) => getItemId(item) || '');
+      const prevOrder = prevArr.map(
+        (item: AuditValue) => getItemId(item) || ''
+      );
+      const nextOrder = next.map((item: AuditValue) => getItemId(item) || '');
       const orderChanged =
         prevOrder.length === nextOrder.length &&
         prevOrder.some((id, i) => id !== nextOrder[i]);
@@ -230,8 +233,8 @@ export default function ChangesDisplay({
   newData,
   action,
 }: {
-  previousData: Record<string, any> | null;
-  newData: Record<string, any> | null;
+  previousData: Record<string, AuditValue> | null;
+  newData: Record<string, AuditValue> | null;
   action: string;
 }) {
   if (action === 'GET' || action === 'login' || action === 'logout') {

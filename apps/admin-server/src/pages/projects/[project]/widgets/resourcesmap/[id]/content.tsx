@@ -30,7 +30,9 @@ export default function WidgetResourcesMapContent() {
     data: widget,
     isLoading: isLoadingWidget,
     updateConfig,
-  } = useWidgetConfig<any>();
+  } = useWidgetConfig<{
+    [category]?: Partial<z.infer<typeof formSchema>>;
+  }>();
 
   const defaults = useCallback(
     () => ({

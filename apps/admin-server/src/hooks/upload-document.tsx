@@ -1,6 +1,6 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 
-function prepareDocument(document: any) {
+function prepareDocument(document: string | Blob) {
   const formData = new FormData();
   formData.append('document', document);
   formData.append('documentname', 'testName');
@@ -9,7 +9,7 @@ function prepareDocument(document: any) {
   return formData;
 }
 
-export async function UploadDocument(data: any, project?: string) {
+export async function UploadDocument(data: string | Blob, project?: string) {
   let document = prepareDocument(data);
 
   const projectNumber: number | undefined = validateProjectNumber(project);

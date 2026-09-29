@@ -71,7 +71,7 @@ export default function ChoiceGuideResultSettings(
     if (!!widgetData) {
       let widgets: { id: number; name: string }[] = [];
 
-      widgetData.forEach((widget: any) => {
+      widgetData.forEach((widget) => {
         if (widget?.type === 'choiceguide') {
           widgets.push({
             id: widget.id,

@@ -14,6 +14,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { BaseMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/basemap-widget-props';
 import { Plus, X } from 'lucide-react';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect } from 'react';
@@ -36,14 +37,15 @@ type FormData = z.infer<typeof formSchema>;
 export default function WidgetMapLegend() {
   const category = 'customLegend';
 
-  const { data: widget, updateConfig } = useWidgetConfig<any>();
+  const { data: widget, updateConfig } =
+    useWidgetConfig<Pick<BaseMapWidgetProps, typeof category>>();
 
   const router = useRouter();
   const { project } = router.query;
 
   const defaults = useCallback(
     () => ({
-      customLegend: (widget?.config?.[category] || []).map((item: any) => ({
+      customLegend: (widget?.config?.[category] || []).map((item) => ({
         label: item.label || '',
         color: item.color || '',
         icon: item.icon || '',

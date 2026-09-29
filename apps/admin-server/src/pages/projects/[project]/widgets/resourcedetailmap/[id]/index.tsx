@@ -40,7 +40,7 @@ export default function WidgetResourceDetailMap({ apiUrl }: WithApiUrlProps) {
     updateConfig: (config: ResourceDetailMapWidgetProps) =>
       updateConfig({ ...widget.config, ...config }),
 
-    onFieldChanged: (key: string, value: any) => {
+    onFieldChanged: (key: string, value: unknown) => {
       if (previewConfig) {
         updatePreview({
           ...previewConfig,

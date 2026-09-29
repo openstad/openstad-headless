@@ -15,6 +15,7 @@ import { Heading } from '@/components/ui/typography';
 import useNotificationTemplate from '@/hooks/use-notification-template';
 import { applyFilters } from '@/lib/nunjucks-filters';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { ApiResource } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
 import nunjucks from 'nunjucks';
 import * as React from 'react';
@@ -414,7 +415,7 @@ export function NotificationForm({
     name: string;
     loginurl: string;
     imagePath: string;
-    resource: any;
+    resource: Partial<ApiResource>;
   };
   const [mailContext, setMailContext] = useState<MailContextType>({
     user: { name: 'Gebruiker', fullName: 'Gebruiker' },
@@ -515,7 +516,10 @@ export function NotificationForm({
   const [templateData, setTemplateData] = useState(defaultValueBody || '');
   const [mjmlHtml, setMjmlHtml] = useState('');
 
-  let mailTemplate: any = nunjucksEnv.renderString(templateData, mailContext);
+  let mailTemplate: string = nunjucksEnv.renderString(
+    templateData,
+    mailContext
+  );
 
   const [error, setError] = useState<string | null>(null);
 
@@ -539,11 +543,14 @@ export function NotificationForm({
     convertMJMLToHTML();
   }, [mailContext]);
 
-  const handleOnChange = (e: any, field: any) => {
-    if (e.target.value.length > 0) {
+  const handleOnChange = (
+    e: React.KeyboardEvent<HTMLTextAreaElement>,
+    field: unknown
+  ) => {
+    if (e.currentTarget.value.length > 0) {
       try {
         convertMJMLToHTML(
-          nunjucksEnv.renderString(e.target.value, mailContext)
+          nunjucksEnv.renderString(e.currentTarget.value, mailContext)
         );
       } catch (err) {
         setError('Er is een fout opgetreden bij het renderen van de template.');
