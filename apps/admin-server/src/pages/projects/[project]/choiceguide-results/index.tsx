@@ -177,8 +177,8 @@ export default function ProjectChoiceGuideResults() {
 
     setActiveWidget(value);
 
-    const selectedWidget = widgetData.find(
-      (widget: any) => widget.id.toString() === ID
+    const selectedWidget = widgetData?.find(
+      (widget) => widget.id.toString() === ID
     );
     setSelectedWidget(selectedWidget);
     setPage(0);

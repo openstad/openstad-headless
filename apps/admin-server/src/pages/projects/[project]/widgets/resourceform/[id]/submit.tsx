@@ -67,11 +67,7 @@ export default function WidgetResourceFormSubmit() {
 
   const projectId = widget?.config?.projectId;
   const { data: loadedTags } = useTags(projectId);
-  const tags = (loadedTags || []) as Array<{
-    id: string;
-    name: string;
-    type?: string;
-  }>;
+  const tags = loadedTags || [];
 
   return (
     <div className="p-6 bg-white rounded-md">

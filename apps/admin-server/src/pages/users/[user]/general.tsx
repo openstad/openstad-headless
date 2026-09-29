@@ -56,14 +56,11 @@ export default function CreateUserGeneral() {
   const [isAnonymizeConfirmed, setIsAnonymizeConfirmed] = useState(false);
   const [isAnonymizing, setIsAnonymizing] = useState(false);
 
-  let user = data;
-  if (Array.isArray(data)) user = data[0];
+  const user = Array.isArray(data) ? data[0] : data;
 
   const rows = Array.isArray(data) ? data : data ? [data] : [];
   const adminProjectId = useAdminProjectId();
-  const adminProjectUser = rows.find(
-    (u: any) => u?.projectId === adminProjectId
-  );
+  const adminProjectUser = rows.find((u) => u?.projectId === adminProjectId);
   const canAutoAddToNewProjects =
     !!adminProjectUser && ['admin', 'editor'].includes(adminProjectUser.role);
   const [autoAddToNewProjects, setAutoAddToNewProjects] = useState(false);
@@ -73,6 +70,7 @@ export default function CreateUserGeneral() {
   }, [adminProjectUser?.autoAddToNewProjects]);
 
   async function handleAutoAddChange(checked: boolean) {
+    if (!adminProjectUser) return;
     setAutoAddToNewProjects(checked);
     try {
       await updateUser({
@@ -96,10 +94,11 @@ export default function CreateUserGeneral() {
       address: user?.address || '',
       city: user?.city || '',
       postcode: user?.postcode || '',
-      password: user?.password || '',
+      // Not part of the API user payload; the fields start empty.
+      password: '',
       firstname: user?.firstname || '',
       lastname: user?.lastname || '',
-      accessCode: user?.accessCode || '',
+      accessCode: '',
     }),
     [user]
   );
@@ -118,7 +117,7 @@ export default function CreateUserGeneral() {
     async function fetchTwoFactorStatus() {
       try {
         const response = await fetch(
-          `/api/openstad/api/project/${user.projectId}/user/${user.id}/two-factor-status`
+          `/api/openstad/api/project/${user?.projectId}/user/${user?.id}/two-factor-status`
         );
         const data = await response.json();
         setIsTwoFactorEnabled(data.twoFactorEnabled);
@@ -134,7 +133,7 @@ export default function CreateUserGeneral() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      await updateUser({ ...values, id: user.id, projectId: user.projectId });
+      await updateUser({ ...values, id: user?.id, projectId: user?.projectId });
       toast.success('User is bijgewerkt');
     } catch (err: unknown) {
       toast.error(
@@ -147,7 +146,7 @@ export default function CreateUserGeneral() {
   async function handleResetTwoFactor() {
     try {
       await fetch(
-        `/api/openstad/api/project/${user.projectId}/user/${user.id}/reset-two-factor`,
+        `/api/openstad/api/project/${user?.projectId}/user/${user?.id}/reset-two-factor`,
         {
           method: 'PUT',
         }

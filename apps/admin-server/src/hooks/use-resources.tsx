@@ -1,6 +1,10 @@
+import { ListResponse, getRecords } from '@/lib/records';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiResource, Paginated } from '@openstad-headless/types';
 import { useMemo } from 'react';
 import useSWR from 'swr';
+
+export type ResourceBody = Record<string, unknown>;
 
 export type ResourceListOptions = {
   sort?: string;
@@ -54,21 +58,24 @@ export default function useResources(
 
   const url = `${baseUrl}?${params.toString()}`;
 
-  const resourcesListSwr = useSWR(!skipFetch && projectNumber ? url : null);
+  const resourcesListSwr = useSWR<ListResponse<ApiResource>>(
+    !skipFetch && projectNumber ? url : null
+  );
 
   const records = useMemo(
-    () => resourcesListSwr.data?.records || resourcesListSwr.data || [],
+    () => getRecords(resourcesListSwr.data),
     [resourcesListSwr.data]
   );
-  const pagination = resourcesListSwr.data?.metadata || null;
+  const pagination =
+    resourcesListSwr.data && !Array.isArray(resourcesListSwr.data)
+      ? resourcesListSwr.data.metadata
+      : null;
 
-  function getExistingRecords(): any[] {
-    return Array.isArray(resourcesListSwr.data)
-      ? resourcesListSwr.data
-      : resourcesListSwr.data?.records || [];
+  function getExistingRecords(): ApiResource[] {
+    return getRecords(resourcesListSwr.data);
   }
 
-  async function create(body: any) {
+  async function create(body: ResourceBody): Promise<ApiResource> {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -78,7 +85,7 @@ export default function useResources(
     });
 
     if (res.ok) {
-      const data = await res.json();
+      const data: ApiResource = await res.json();
       resourcesListSwr.mutate([...getExistingRecords(), data]);
       return data;
     } else {
@@ -86,7 +93,7 @@ export default function useResources(
     }
   }
 
-  async function update(id: number, body: any) {
+  async function update(id: number, body: ResourceBody): Promise<ApiResource> {
     let updateUrl = `/api/openstad/api/project/${projectNumber}/resource/${id}?includeUserVote=1`;
 
     if (includeGlobalTags) {
@@ -102,9 +109,9 @@ export default function useResources(
     });
 
     if (res.ok) {
-      const data = await res.json();
+      const data: ApiResource = await res.json();
       const updatedList = getExistingRecords().filter(
-        (ed: any) => ed.id !== data.id
+        (ed) => ed.id !== data.id
       );
       updatedList.push(data);
       resourcesListSwr.mutate(updatedList);
@@ -128,9 +135,7 @@ export default function useResources(
     });
 
     if (res.ok) {
-      const updatedList = getExistingRecords().filter(
-        (ed: any) => ed.id !== id
-      );
+      const updatedList = getExistingRecords().filter((ed) => ed.id !== id);
       resourcesListSwr.mutate(updatedList);
       return updatedList;
     } else {
@@ -138,7 +143,7 @@ export default function useResources(
     }
   }
 
-  async function duplicate(ids: number[]) {
+  async function duplicate(ids: number[]): Promise<ApiResource[]> {
     const duplicateUrl = `/api/openstad/api/project/${projectNumber}/resource/duplicate`;
 
     const res = await fetch(duplicateUrl, {
@@ -150,7 +155,7 @@ export default function useResources(
     });
 
     if (res.ok) {
-      const data = await res.json();
+      const data: ApiResource[] = await res.json();
 
       resourcesListSwr.mutate([...getExistingRecords(), ...data]);
       return data;
@@ -159,7 +164,7 @@ export default function useResources(
     }
   }
 
-  async function fetchAll() {
+  async function fetchAll(): Promise<ApiResource[]> {
     const fetchAllParams = new URLSearchParams({
       includeUser: '1',
       includeVoteCount: '1',
@@ -167,7 +172,7 @@ export default function useResources(
       noPagination: 'true',
     });
     const response = await fetch(`${baseUrl}?${fetchAllParams.toString()}`);
-    const results = await response.json();
+    const results: Paginated<ApiResource> | null = await response.json();
     return results?.records || [];
   }
 

@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiWidget } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export function useWidgetsHook(projectId?: string) {
@@ -6,9 +7,12 @@ export function useWidgetsHook(projectId?: string) {
 
   let url = `/api/openstad/api/project/${projectNumber}/widgets`;
 
-  const widgetsSwr = useSWR(projectNumber ? url : null);
+  const widgetsSwr = useSWR<ApiWidget[]>(projectNumber ? url : null);
 
-  async function createWidget(typeId: string, description: string) {
+  async function createWidget(
+    typeId: string,
+    description: string
+  ): Promise<ApiWidget> {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -16,8 +20,8 @@ export function useWidgetsHook(projectId?: string) {
       },
       body: JSON.stringify({ type: typeId, description }),
     });
-    const data = await res.json();
-    widgetsSwr.mutate([...widgetsSwr.data, data]);
+    const data: ApiWidget = await res.json();
+    widgetsSwr.mutate([...(widgetsSwr.data || []), data]);
     return data;
   }
 
@@ -35,7 +39,7 @@ export function useWidgetsHook(projectId?: string) {
     });
 
     if (res.ok) {
-      const existingData = [...widgetsSwr.data];
+      const existingData = [...(widgetsSwr.data || [])];
       const updatedList = existingData.filter((ed) => ed.id !== id);
       widgetsSwr.mutate(updatedList);
       return updatedList;
@@ -44,7 +48,7 @@ export function useWidgetsHook(projectId?: string) {
     }
   }
 
-  async function updateWidget(id: number, body: any) {
+  async function updateWidget(id: number, body: { description: string }) {
     const updateUrl = `/api/openstad/api/project/${projectNumber}/widgets/${id}`;
 
     const res = await fetch(updateUrl, {
@@ -56,7 +60,7 @@ export function useWidgetsHook(projectId?: string) {
     });
 
     if (res.ok) {
-      const existingData = [...widgetsSwr.data];
+      const existingData = [...(widgetsSwr.data || [])];
       const updatedList = existingData.filter((ed) => ed.id === id);
 
       updatedList[0].description = body.description;
@@ -81,9 +85,9 @@ export function useWidgetsHook(projectId?: string) {
     });
 
     if (res.ok) {
-      const data = await res.json();
+      const data: ApiWidget[] = await res.json();
 
-      widgetsSwr.mutate([...widgetsSwr.data, ...data]);
+      widgetsSwr.mutate([...(widgetsSwr.data || []), ...data]);
       return data;
     } else {
       throw new Error('Could not duplicate the widgets');

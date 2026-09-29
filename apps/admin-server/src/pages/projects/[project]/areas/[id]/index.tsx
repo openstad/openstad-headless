@@ -46,15 +46,13 @@ export default function ProjectAreaEdit() {
 
   const defaults = useCallback(
     () => ({
-      name: data?.name || null,
+      name: data?.name || undefined,
       geoJSON: JSON.stringify(data?.geoJSON),
       hidePolygon:
         typeof data?.hidePolygon === 'boolean' ? data.hidePolygon : false,
-      tagIds: Array.isArray(data?.tags)
-        ? data.tags.map((tag: any) => tag.id)
-        : [],
+      tagIds: Array.isArray(data?.tags) ? data.tags.map((tag) => tag.id) : [],
       tagIdsOutside: Array.isArray(data?.outsideTags)
-        ? data.outsideTags.map((tag: any) => tag.id)
+        ? data.outsideTags.map((tag) => tag.id)
         : [],
     }),
     [data]

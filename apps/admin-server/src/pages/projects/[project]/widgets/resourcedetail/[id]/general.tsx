@@ -45,7 +45,7 @@ export default function WidgetResourceDetailGeneral(
   const router = useRouter();
   const projectId = router.query.project as string;
   const { data: resourceList } = useResources(projectId as string);
-  const resources = resourceList as { id: string; title: string }[];
+  const resources = resourceList;
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 

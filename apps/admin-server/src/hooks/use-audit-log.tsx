@@ -1,3 +1,4 @@
+import type { ApiAuditLogList } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export type AuditLogOptions = {
@@ -31,7 +32,7 @@ export default function useAuditLog(options: AuditLogOptions) {
   const projectPath = options.projectId ? `/project/${options.projectId}` : '';
   const url = `/api/openstad/api${projectPath}/audit-log?${params.toString()}`;
 
-  const swr = useSWR(url);
+  const swr = useSWR<ApiAuditLogList>(url);
 
   return {
     data: swr.data,

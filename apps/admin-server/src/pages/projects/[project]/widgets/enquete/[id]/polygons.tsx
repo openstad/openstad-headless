@@ -46,10 +46,7 @@ export default function WidgetEnquetePolygons(
   const projectKey =
     props.projectId === undefined ? projectId : props.projectId;
 
-  const { data: areas } =
-    (useAreas(projectKey) as {
-      data: { id: string; name: string; visible?: boolean }[];
-    }) ?? [];
+  const { data: areas } = useAreas(projectKey);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -72,8 +69,9 @@ export default function WidgetEnquetePolygons(
                 const isChecked =
                   Array.isArray(field.value) &&
                   field.value.some((obj) => obj.id === Number(item.id));
+                // Known issue: the area API has no `visible` field (hidePolygon).
                 const label =
-                  item.visible === false
+                  (item as { visible?: boolean }).visible === false
                     ? `${item.name} (verborgen)`
                     : item.name;
 

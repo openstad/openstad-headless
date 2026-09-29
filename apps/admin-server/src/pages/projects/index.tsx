@@ -12,6 +12,7 @@ import { sortTable } from '@/components/ui/sortTable';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useTemplates from '@/hooks/use-template';
 import { HasAccess } from '@/lib/hasAccess';
+import type { ApiProject } from '@openstad-headless/types';
 import { Check, ChevronRight, LayoutTemplate, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -24,7 +25,7 @@ import projectListSwr from '../../hooks/use-project-list';
 type SearchableField = {
   key: string;
   label: string;
-  getValue: (project: any) => string;
+  getValue: (project: ApiProject) => string;
 };
 
 const SEARCHABLE_FIELDS: SearchableField[] = [
@@ -55,24 +56,24 @@ const fieldsByKey = Object.fromEntries(
 );
 
 const applyStatusFilter = (
-  projects: any[],
+  projects: ApiProject[] | undefined,
   status: 'all' | 'ended' | 'active'
 ) => {
   if (!projects) return projects;
   if (status === 'all') return projects;
   if (status === 'ended')
-    return projects.filter(
-      (p: any) => p?.config?.project?.projectHasEnded === true
-    );
-  return projects.filter(
-    (p: any) => p?.config?.project?.projectHasEnded !== true
-  );
+    return projects.filter((p) => p?.config?.project?.projectHasEnded === true);
+  return projects.filter((p) => p?.config?.project?.projectHasEnded !== true);
 };
 
-const applySearchFilter = (projects: any[], term: string, fieldKey: string) => {
+const applySearchFilter = (
+  projects: ApiProject[] | undefined,
+  term: string,
+  fieldKey: string
+) => {
   if (!projects || term.length < 1) return projects;
   const lowerTerm = term.toLowerCase();
-  return projects.filter((item: any) => {
+  return projects.filter((item) => {
     if (fieldKey) {
       return (
         fieldsByKey[fieldKey]

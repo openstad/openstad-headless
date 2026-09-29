@@ -1,3 +1,4 @@
+import type { ApiTag } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 import { validateProjectNumber } from '../lib/validateProjectNumber';
@@ -16,14 +17,16 @@ export default function useTag(
     url += '?includeGlobalTags=true';
   }
 
-  const tagListSwr = useSWR(projectNumber || projectNumber === 0 ? url : null);
+  const tagListSwr = useSWR<ApiTag[]>(
+    projectNumber || projectNumber === 0 ? url : null
+  );
 
   async function createTag(
     name: string,
     type: string,
     seqnr: number,
     addToNewResources: boolean
-  ) {
+  ): Promise<ApiTag> {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -52,7 +55,7 @@ export default function useTag(
     });
 
     if (res.ok) {
-      const existingData = [...tagListSwr.data];
+      const existingData = [...(tagListSwr.data || [])];
       const updatedList = existingData.filter((ed) => ed.id !== id);
       tagListSwr.mutate(updatedList);
       return updatedList;

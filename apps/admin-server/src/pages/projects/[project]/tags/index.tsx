@@ -25,11 +25,7 @@ export default function ProjectTags({ preset }: { preset?: string }) {
   const debouncedSearchTable = searchTable(setFilterData, filterSearchType);
 
   useEffect(() => {
-    let loadedTags = (data || []) as {
-      id: number;
-      name: string;
-      type?: string;
-    }[];
+    let loadedTags = data || [];
 
     const filterStartData = loadedTags?.sort((a, b) => {
       const aType = a.type ?? '';

@@ -1,3 +1,4 @@
+import type { ApiTemplate, DynamicJson } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export type { ApiTemplate as ProjectTemplate } from '@openstad-headless/types';
@@ -5,9 +6,12 @@ export type { ApiTemplate as ProjectTemplate } from '@openstad-headless/types';
 export default function useTemplates() {
   const url = '/api/openstad/api/template';
 
-  const templatesSwr = useSWR(url);
+  const templatesSwr = useSWR<ApiTemplate[]>(url);
 
-  async function createTemplate(name: string, data: any) {
+  async function createTemplate(
+    name: string,
+    data: DynamicJson
+  ): Promise<ApiTemplate> {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -28,7 +32,7 @@ export default function useTemplates() {
   async function createTemplateFromProject(
     name: string,
     sourceProjectId: number | string
-  ) {
+  ): Promise<ApiTemplate> {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -46,7 +50,10 @@ export default function useTemplates() {
     return template;
   }
 
-  async function renameTemplate(id: number, name: string) {
+  async function renameTemplate(
+    id: number,
+    name: string
+  ): Promise<ApiTemplate> {
     const res = await fetch(`${url}/${id}`, {
       method: 'PUT',
       headers: {

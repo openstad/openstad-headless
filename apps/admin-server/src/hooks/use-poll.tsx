@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiPoll } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export default function usePolls(projectId?: string) {
@@ -6,7 +7,7 @@ export default function usePolls(projectId?: string) {
 
   const url = `/api/openstad/api/project/${projectNumber}/poll`;
 
-  const pollListSwr = useSWR(projectNumber ? url : null);
+  const pollListSwr = useSWR<ApiPoll[]>(projectNumber ? url : null);
 
   return { ...pollListSwr };
 }

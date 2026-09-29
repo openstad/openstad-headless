@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiArea } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export default function useAreas(projectId?: string) {
@@ -6,7 +7,7 @@ export default function useAreas(projectId?: string) {
 
   let url = `/api/openstad/api/area`;
 
-  const areasSwr = useSWR(projectNumber ? url : null);
+  const areasSwr = useSWR<ApiArea[]>(projectNumber ? url : null);
 
   async function createArea(
     name: string,
@@ -14,7 +15,7 @@ export default function useAreas(projectId?: string) {
     hidePolygon = false,
     tagIds: number[] = [],
     tagIdsOutside: number[] = []
-  ) {
+  ): Promise<ApiArea> {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -42,7 +43,7 @@ export default function useAreas(projectId?: string) {
     });
 
     if (res.ok) {
-      const existingData = [...areasSwr.data];
+      const existingData = [...(areasSwr.data || [])];
       const updatedList = existingData.filter((ed) => ed.id !== id);
       areasSwr.mutate(updatedList);
       return updatedList;

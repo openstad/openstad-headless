@@ -1,3 +1,4 @@
+import type { ApiProject } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 type paramsType = {
@@ -11,6 +12,6 @@ export default function useProjectList(params?: paramsType) {
     projectListSwrKey = `/api/openstad/api/project/issues`;
   }
 
-  let projectListSwr = useSWR(projectListSwrKey);
+  let projectListSwr = useSWR<ApiProject[]>(projectListSwrKey);
   return { ...projectListSwr };
 }

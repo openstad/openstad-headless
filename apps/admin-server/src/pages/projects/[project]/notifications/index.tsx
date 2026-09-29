@@ -60,7 +60,7 @@ export default function ProjectNotifications() {
       const currentTypeDefinitions = Object.assign({}, defaultDefinitions);
 
       data.forEach((template) => {
-        if (template.type in currentTypeDefinitions) {
+        if (template.type !== null && template.type in currentTypeDefinitions) {
           currentTypeDefinitions[template.type as NotificationType].push(
             template
           );

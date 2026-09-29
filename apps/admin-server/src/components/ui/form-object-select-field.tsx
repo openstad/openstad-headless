@@ -15,7 +15,7 @@ type Props<T> = {
   fieldName: string;
   fieldLabel?: string;
   fieldInfo?: string;
-  items: Array<T>;
+  items?: Array<T>;
   keyForValue: keyof T;
   onFieldChanged?: (key: string, value: keyof T) => void;
   label?: (item: T & Record<string, any>) => string;

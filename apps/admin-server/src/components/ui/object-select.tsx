@@ -12,7 +12,7 @@ const NO_SELECTION_VALUE = '__none__';
 
 type Props<T> = {
   field: ControllerRenderProps<any, any>;
-  items: Array<T>;
+  items?: Array<T>;
   keyForValue: keyof T;
   selected?: T[keyof T] | '';
   onFieldChanged?: (key: string, value: keyof T) => void;

@@ -56,8 +56,8 @@ export default function ProjectStatusEdit() {
 
   const defaults = useCallback(
     () => ({
-      name: data?.name || null,
-      seqnr: data?.seqnr || null,
+      name: data?.name || undefined,
+      seqnr: data?.seqnr || undefined,
       addToNewResources: data?.addToNewResources || false,
       backgroundColor: data?.backgroundColor || undefined,
       color: data?.color || undefined,

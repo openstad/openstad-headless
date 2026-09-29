@@ -23,6 +23,7 @@ import useResource from '@/hooks/use-resource';
 import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { ApiResource, DynamicJson } from '@openstad-headless/types';
 import {
   ArrowDown,
   ArrowLeft,
@@ -281,7 +282,10 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     }),
     [existingData]
   );
-  const [extraData, setExtraData] = useState(existingData?.extraData || '');
+  // Holds the initial extraData object until the editor stores a JSON string.
+  const [extraData, setExtraData] = useState<DynamicJson | string>(
+    existingData?.extraData || ''
+  );
   const [imageIndexOpen, setImageIndexOpen] = useState<number>(-1);
 
   const [targetUser, setTargetUser] = useState<{
@@ -335,7 +339,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     // Add extraData if its valid JSON
     try {
       if (extraData !== values.extraData) {
-        values.extraData = JSON.parse(extraData);
+        values.extraData = JSON.parse(String(extraData));
       }
     } catch (e) {}
 
@@ -351,7 +355,8 @@ export default function ResourceForm({ onFormSubmit }: Props) {
 
         // SWR reload
         const url = `/api/openstad/api/project/${project}/resource/${id}`;
-        mutate(url);
+        // Known issue: this is the bound mutate, so it stores `url` as data.
+        mutate(url as unknown as ApiResource);
       })
       .catch((e) => {
         toast.error(`Plan kon niet ${id ? 'aangepast' : 'aangemaakt'} worden`);
@@ -1132,7 +1137,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                     className="hidden"
                     hidden={true}
                     name={'extraData'}
-                    value={extraData} // Bind the state to the Textarea value
+                    value={String(extraData)} // Bind the state to the Textarea value
                     readOnly // Make the Textarea read-only since it's updated programmatically
                   />
                   <FormLabel>Extra data</FormLabel>
