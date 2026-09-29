@@ -42,10 +42,11 @@ const templateFormSchema = z.object({
 });
 
 export default function CreateProject() {
-  const { createProject, importProject } = useProject();
+  const { createProject, importProject, waitForDuplication } = useProject();
   const { data: templates } = useTemplates();
   const [file, setFile] = React.useState('');
   const [templateCreating, setTemplateCreating] = React.useState(false);
+  const [templateStillRunning, setTemplateStillRunning] = React.useState(false);
   const [templateErrors, setTemplateErrors] = React.useState<
     Array<{ step: string; error: string }>
   >([]);
@@ -141,10 +142,28 @@ export default function CreateProject() {
         return;
       }
 
-      const newId = await response.json();
-      toast.success('Project aangemaakt!');
-      if (newId) {
+      const body = await response.json();
+      const newId = body?.id;
+      if (!newId) {
+        throw new Error('Geen project-id ontvangen');
+      }
+
+      const outcome = await waitForDuplication(newId);
+      if (outcome.status === 'done') {
+        toast.success('Project aangemaakt!');
         router.push(`/projects/${newId}/widgets`);
+      } else if (outcome.status === 'running') {
+        setTemplateStillRunning(true);
+        toast(
+          'Het aanmaken duurt langer dan verwacht en gaat op de achtergrond door. Het project verschijnt vanzelf in het overzicht.',
+          { duration: 8000 }
+        );
+      } else {
+        setTemplateErrors(outcome.errors);
+        setDuplicatedData(outcome.duplicatedData || {});
+        toast.error(
+          'Er is een fout opgetreden bij het aanmaken van het project.'
+        );
       }
     } catch (error) {
       setTemplateErrors([
@@ -297,32 +316,35 @@ export default function CreateProject() {
                   variant="default"
                   type="submit"
                   className="w-fit"
-                  disabled={templateCreating}>
+                  disabled={templateCreating || templateStillRunning}>
                   {templateCreating ? 'Bezig met aanmaken' : 'Aanmaken'}
                 </Button>
               </form>
               {templateErrors.length > 0 && (
                 <div className="mt-4">
                   <Separator className="my-4" />
-                  <p>
-                    Het aanmaken is mislukt en de data is mogelijk deels
-                    aangemaakt. Klik op de knop hieronder om deze te
-                    verwijderen.
-                  </p>
                   <ul className="mt-2 text-red-600">
                     {templateErrors.map((error, index) => (
                       <li key={index}>{`${error.step} - ${error.error}`}</li>
                     ))}
                   </ul>
-                  <Button
-                    variant="default"
-                    className="mt-4"
-                    disabled={removingDuplicatedData}
-                    onClick={() => removeDuplicatedData()}>
-                    {removingDuplicatedData
-                      ? 'Bezig met verwijderen'
-                      : 'Verwijder mislukt project'}
-                  </Button>
+                  {duplicatedData?.rollbackSessionId && (
+                    <>
+                      <p className="mt-2">
+                        De data is mogelijk deels aangemaakt. Klik op de knop
+                        hieronder om deze te verwijderen.
+                      </p>
+                      <Button
+                        variant="default"
+                        className="mt-4"
+                        disabled={removingDuplicatedData}
+                        onClick={() => removeDuplicatedData()}>
+                        {removingDuplicatedData
+                          ? 'Bezig met verwijderen'
+                          : 'Verwijder mislukt project'}
+                      </Button>
+                    </>
+                  )}
                 </div>
               )}
             </Form>

@@ -135,6 +135,40 @@ export function useProject(scopes?: Array<string>) {
     }
   }
 
+  async function waitForDuplication(
+    projectId: number | string,
+    { interval = 1500, timeoutMs = 15 * 60 * 1000 } = {}
+  ): Promise<{ status: string; errors: any[]; duplicatedData?: any }> {
+    const deadline = Date.now() + timeoutMs;
+
+    while (Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, interval));
+      try {
+        const res = await fetch(
+          `/api/openstad/api/project/${projectId}/duplication-status`
+        );
+        if (!res.ok) {
+          console.error(
+            `Duplicatiestatus opvragen mislukt met status ${res.status}`
+          );
+          continue;
+        }
+        const data = await res.json();
+        if (data.status === 'done') return { status: 'done', errors: [] };
+        if (data.status === 'failed')
+          return {
+            status: 'failed',
+            errors: data.errors || [],
+            duplicatedData: data.duplicatedData,
+          };
+      } catch (e) {
+        console.error('Duplicatiestatus opvragen mislukt', e);
+      }
+    }
+
+    return { status: 'running', errors: [] };
+  }
+
   return {
     ...projectSwr,
     pdfAvailable: pdfStatusSwr.data?.available ?? null,
@@ -143,5 +177,6 @@ export function useProject(scopes?: Array<string>) {
     updateProject,
     updateProjectEmails,
     anonymizeUsersOfProject,
+    waitForDuplication,
   };
 }
