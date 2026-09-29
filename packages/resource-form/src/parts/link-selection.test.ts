@@ -9,6 +9,7 @@ import {
   itemsToFetch,
   linkRequestMessage,
   needsLinkConfirmation,
+  restoreLinkValues,
   splitAddedLinks,
 } from './link-selection';
 
@@ -210,5 +211,21 @@ describe('linkRequestMessage', () => {
   it('shows nothing when everything was sent', () => {
     expect(linkRequestMessage({ requested: [] })).toBeNull();
     expect(linkRequestMessage(undefined)).toBeNull();
+  });
+});
+
+describe('restoreLinkValues', () => {
+  it('puts the saved selection back in the link fields and keeps other edits', () => {
+    const restored = restoreLinkValues(
+      { title: 'Nieuwe titel', stadmakers: [lena] },
+      [stadmakerField, koosField],
+      { stadmakers: [arno] }
+    );
+
+    expect(restored).toEqual({
+      title: 'Nieuwe titel',
+      stadmakers: [arno],
+      activiteiten: [],
+    });
   });
 });

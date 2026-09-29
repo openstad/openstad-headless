@@ -240,3 +240,15 @@ export function linkRequestMessage(linkRequests: unknown): string | null {
   if (typeof notice === 'string' && notice) return notice;
   return error ? LINK_REQUEST_ERROR_MESSAGE : null;
 }
+
+export function restoreLinkValues(
+  formData: Record<string, unknown>,
+  linkFields: LinkField[],
+  prefilledByField: Record<string, LinkValue[]>
+): Record<string, unknown> {
+  const restored = { ...formData };
+  for (const field of linkFields) {
+    restored[field.fieldKey] = prefilledByField[field.fieldKey] || [];
+  }
+  return restored;
+}
