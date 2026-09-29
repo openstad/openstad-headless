@@ -7,7 +7,7 @@ data.page.title }} {% endblock %} {% block main %} {% area data.page, 'top' %}
     <div class="row">
       <div class="col-xs-12">
         <article class="news-grid">
-          {% for piece in data.pieces %}
+          {% if data.pieces.length %} {% for piece in data.pieces %}
           <a href="{{ piece._url }}" class="news-card">
             <figure>
               <img
@@ -28,6 +28,9 @@ data.page.title }} {% endblock %} {% block main %} {% area data.page, 'top' %}
             {{ pager.render({ page: data.currentPage, total: data.totalPages },
             data.url) }}
           </div>
+          {% else %}
+          <p class="utrecht-paragraph">Er zijn nog geen nieuwsberichten.</p>
+          {% endif %}
         </article>
       </div>
     </div>

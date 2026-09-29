@@ -4,7 +4,7 @@
     {{ data.widget.title }}
   </h2>
 
-  {% if data.widget.enableCarousel %}
+  {% if data.widget.relatedPosts.length %} {% if data.widget.enableCarousel %}
   <div class="carousel-controls">
     <button
       class="utrecht-button osc-icon-button carousel-prev"
@@ -68,4 +68,7 @@
     <div class="carousel-dots" data-carousel-dots></div>
     {% endif %}
   </div>
+  {% else %}
+  <p class="utrecht-paragraph">Er zijn nog geen nieuwsberichten.</p>
+  {% endif %}
 </section>
