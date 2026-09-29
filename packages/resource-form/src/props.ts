@@ -28,6 +28,8 @@ export type LinkRequests = {
   confirmEnabled?: boolean;
   confirmTitle?: string;
   confirmDescription?: string;
+  revokeTitle?: string;
+  revokeDescription?: string;
 };
 
 export type General = {

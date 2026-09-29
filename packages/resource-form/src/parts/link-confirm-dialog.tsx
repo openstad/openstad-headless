@@ -30,6 +30,9 @@ type LinkConfirmDialogProps = {
   chosenHeading?: string;
   removedHeading?: string;
   ownHeading?: string;
+  revokeTitle?: string;
+  revokeDescription?: string;
+  revokeConfirmText?: string;
   confirmText?: string;
   cancelText?: string;
   onConfirm: (messages: Record<string, string>) => void;
@@ -46,6 +49,9 @@ export function LinkConfirmDialog({
   chosenHeading = 'Jouw keuze:',
   removedHeading = 'Deze koppelingen worden ingetrokken:',
   ownHeading = 'Deze eigen inzendingen worden direct gekoppeld:',
+  revokeTitle = 'Je gaat koppelingen intrekken',
+  revokeDescription = 'De gekozen koppelingen worden verwijderd. De eigenaren van de andere inzendingen krijgen daarvan bericht.',
+  revokeConfirmText = 'Bevestigen',
   confirmText = 'Versturen',
   cancelText = 'Annuleren',
   onConfirm,
@@ -53,6 +59,7 @@ export function LinkConfirmDialog({
 }: LinkConfirmDialogProps) {
   const [messages, setMessages] = useState<Record<string, string>>({});
   const { others, own } = splitAddedLinks(added);
+  const onlyRevoking = added.length === 0;
 
   useEffect(() => {
     if (open) setMessages({});
@@ -64,9 +71,12 @@ export function LinkConfirmDialog({
       onOpenChange={(isOpen) => !isOpen && onCancel()}
       className="osc-link-confirm-dialog">
       <div className="osc-link-confirm-dialog-body">
-        <DialogTitle>{title}</DialogTitle>
+        <DialogTitle>{onlyRevoking ? revokeTitle : title}</DialogTitle>
         <DialogDescription>
-          <RteContent content={description} unwrapSingleRootDiv={true} />
+          <RteContent
+            content={onlyRevoking ? revokeDescription : description}
+            unwrapSingleRootDiv={true}
+          />
         </DialogDescription>
 
         {others.length > 0 ? (
@@ -144,7 +154,7 @@ export function LinkConfirmDialog({
 
         <div className="osc-link-confirm-actions">
           <Button type="button" onClick={() => onConfirm(messages)}>
-            {confirmText}
+            {onlyRevoking ? revokeConfirmText : confirmText}
           </Button>
           <SecondaryButton type="button" onClick={onCancel}>
             {cancelText}
