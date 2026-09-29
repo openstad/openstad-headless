@@ -6,6 +6,12 @@ export const withApiUrl = (async () => {
 
 export type WithApiUrlProps = InferGetServerSidePropsType<typeof withApiUrl>;
 
+export const withCmsUrl = (async () => {
+  return { props: { cmsUrl: process.env.CMS_URL ?? '' } };
+}) satisfies GetServerSideProps<{ cmsUrl: string }>;
+
+export type WithCmsUrlProps = InferGetServerSidePropsType<typeof withCmsUrl>;
+
 export const withWhitelistedEmails = (async () => {
   const whitelistedEmails = (process.env.WHITELISTED_EMAILS ?? '')
     .split(/[\n,]/)
