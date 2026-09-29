@@ -732,9 +732,6 @@ module.exports = {
       'AZURE_ADMIN_PROJECT_ID',
     ],
   },
-  setup: async (config) => {
-    /* ... */
-  },
 };
 ```
 
@@ -743,6 +740,9 @@ Takeaways from this pattern:
 - **Minimal manifest.** The plugin registers just one `before:routes` middleware
   (priority `50`, i.e. before the default `100`) plus the required `envVars`. The
   heavy logic (the OIDC adapter) lives in `api/adapters/`.
+- **No lifecycle hooks.** The loader never calls a function on the plugin module
+  (there is no `setup`/`init`); initialization logic belongs in the middleware or
+  handler itself.
 - **Not everything goes through the manifest.** The auth adapter can be loaded by
   the api-server via `config.auth.adapter.<name>.modulePath`, which a **separate
   registration script** (`scripts/register-oidc-provider.js`) writes into the
