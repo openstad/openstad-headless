@@ -69,18 +69,14 @@ export default function CounterDisplay(
   const { data: choiceGuides } = useChoiceGuideWidgets(projectId as string);
   const { data: enquetes } = useEnqueteWidgets(projectId as string);
   const { data: resourceList } = useResources(projectId as string);
-  const resources = resourceList as { id: string; title: string }[];
+  const resources = resourceList;
 
   function onSubmit(values: Formdata) {
     props.updateConfig({ ...props, ...values });
   }
 
   const { data: loadedTags } = useTags(props.projectId);
-  const tags = (loadedTags || []) as Array<{
-    id: string;
-    name: string;
-    type?: string;
-  }>;
+  const tags = loadedTags || [];
 
   const form = useForm<Formdata>({
     resolver: zodResolver<any>(formSchema),

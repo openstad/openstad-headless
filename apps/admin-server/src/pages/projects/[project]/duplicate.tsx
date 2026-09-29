@@ -44,7 +44,7 @@ export default function ProjectDuplicate() {
 
   const defaults = useCallback(
     () => ({
-      name: data?.name || null,
+      name: data?.name || undefined,
     }),
     [data?.name]
   );
@@ -99,6 +99,7 @@ export default function ProjectDuplicate() {
   };
 
   async function duplicate(values: z.infer<typeof formSchema>) {
+    if (!data) return;
     setDuplicatingInProgress(true);
     setDuplicatedData({});
 

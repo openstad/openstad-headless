@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiAction } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export default function useActions(projectId?: string) {
@@ -6,7 +7,7 @@ export default function useActions(projectId?: string) {
 
   const url = `/api/openstad/api/project/${projectNumber}/action`;
 
-  const actionListSwr = useSWR(projectNumber ? url : null);
+  const actionListSwr = useSWR<ApiAction[]>(projectNumber ? url : null);
 
   return { ...actionListSwr };
 }

@@ -5,6 +5,7 @@ import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useComments from '@/hooks/use-comments';
 import useResources from '@/hooks/use-resources';
 import { exportComments } from '@/lib/export-helpers/comments-export';
+import type { ApiTag } from '@openstad-headless/types';
 import { Paginator } from '@openstad-headless/ui/src';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -85,13 +86,15 @@ export default function ProjectComments() {
     exportComments(allData, `${projectId}_reacties_${formattedDate}.xlsx`);
   }
 
-  function categorizeTags(tags: { type: string; name: string }[]) {
+  function categorizeTags(tags?: Partial<ApiTag>[]) {
     if (!tags) return {};
-    return tags.reduce((acc: any, tag: { type: string; name: string }) => {
-      if (!acc[tag.type]) {
-        acc[tag.type] = [];
+    return tags.reduce<Record<string, (string | undefined)[]>>((acc, tag) => {
+      // Untyped tags are grouped under the "null"/"undefined" key.
+      const type = String(tag.type);
+      if (!acc[type]) {
+        acc[type] = [];
       }
-      acc[tag.type].push(tag.name);
+      acc[type].push(tag.name);
       return acc;
     }, {});
   }

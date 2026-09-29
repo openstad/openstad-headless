@@ -47,11 +47,11 @@ const sortFunctions = {
   score: (a: any, b: any) => b.score - a.score,
 };
 
-export const sortTable = (
+export const sortTable = <T,>(
   sortType: string,
   el: React.MouseEvent<HTMLElement, MouseEvent>,
-  data: Array<any>
-) => {
+  data: T[] | undefined = []
+): T[] => {
   const sortFunction = sortFunctions[sortType as keyof typeof sortFunctions];
   if (!sortFunction) {
     return data;
@@ -66,7 +66,7 @@ export const sortTable = (
 
   const direction = el.currentTarget.classList.contains('--up') ? 'up' : 'down';
 
-  const sortedWidgets = [...data].sort((a: any, b: any) => {
+  const sortedWidgets = [...data].sort((a, b) => {
     const result = sortFunction(a, b);
     return direction === 'up' ? result : -result;
   });
@@ -80,17 +80,17 @@ export const searchTable = (
   delay: number = 250
 ) => {
   let timerId: NodeJS.Timeout;
-  const debouncedSearchTable = (
+  const debouncedSearchTable = <T extends object>(
     searchTerm: string,
-    data: Array<any> = [],
-    originalData: Array<any> = []
+    data: T[] = [],
+    originalData: T[] = []
   ) => {
     clearTimeout(timerId);
     timerId = setTimeout(() => {
       if (searchTerm.length >= 1) {
         const searchResult = data.filter((item) => {
           if (type) {
-            const value = item[type];
+            const value = (item as Record<string, unknown>)[type];
             return String(value || '')
               .toLowerCase()
               .includes(searchTerm.toLowerCase());

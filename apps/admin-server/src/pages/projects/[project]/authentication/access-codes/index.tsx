@@ -34,7 +34,7 @@ export default function ProjectCodes() {
     const projectId = router.query.project;
     const formattedDate = today.toISOString().split('T')[0].replace(/-/g, '');
     exportToXLSX(
-      accesscodes?.data,
+      accesscodes?.data || [],
       `${projectId}_toegangscodes_${formattedDate}.xlsx`,
       keyMap
     );

@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { AuthAccessCode, AuthCodeList } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export default function useAccessCodes(projectId?: string) {
@@ -11,7 +12,9 @@ export default function useAccessCodes(projectId?: string) {
     `/api/openstad/auth/project/${projectNumber}/accesscode?` +
     params.toString();
 
-  const accessCodesListSwr = useSWR(projectNumber ? url : null);
+  const accessCodesListSwr = useSWR<AuthCodeList<AuthAccessCode>>(
+    projectNumber ? url : null
+  );
 
   async function createAccessCode(code?: string) {
     try {
@@ -46,10 +49,11 @@ export default function useAccessCodes(projectId?: string) {
 
     if (res.ok) {
       const existingData = [...(accessCodesListSwr?.data?.data || [])];
-      const updatedList = existingData.filter(
-        (ed: { id: number }) => ed.id !== codeId
+      const updatedList = existingData.filter((ed) => ed.id !== codeId);
+      // Known issue: replaces the `{ total, data }` response with a bare list.
+      accessCodesListSwr.mutate(
+        updatedList as unknown as AuthCodeList<AuthAccessCode>
       );
-      accessCodesListSwr.mutate(updatedList);
       return updatedList;
     } else {
       throw new Error('Could not remove this access code');

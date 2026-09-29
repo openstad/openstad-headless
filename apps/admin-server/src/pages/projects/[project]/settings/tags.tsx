@@ -39,11 +39,7 @@ export default function ProjectSettingsTags() {
   }, [form, defaults]);
 
   const { data: loadedTags } = useTags(project as string);
-  const tags = (loadedTags || []) as Array<{
-    id: string;
-    name: string;
-    type?: string;
-  }>;
+  const tags = loadedTags || [];
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {

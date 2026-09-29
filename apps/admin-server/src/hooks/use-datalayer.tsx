@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiDatalayer, DynamicJson } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export default function useArea(layerId?: string) {
@@ -6,9 +7,13 @@ export default function useArea(layerId?: string) {
 
   let url = `/api/openstad/api/datalayer/${layerNumber}`;
 
-  const datalayerSwr = useSWR(layerNumber ? url : null);
+  const datalayerSwr = useSWR<ApiDatalayer>(layerNumber ? url : null);
 
-  async function updateDatalayer(name: string, layer: string, icon: any) {
+  async function updateDatalayer(
+    name: string,
+    layer: string,
+    icon: DynamicJson
+  ): Promise<ApiDatalayer> {
     const res = await fetch(url, {
       method: 'PUT',
       headers: {

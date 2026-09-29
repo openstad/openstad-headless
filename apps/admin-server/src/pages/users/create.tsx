@@ -40,8 +40,8 @@ export default function CreateUser() {
         projectId: values.projectId,
       });
       toast.success('User is toegevoegd');
-      user.key = `${user.idpUser.provider}-*-${user.idpUser.identifier}`;
-      document.location.href = `/users/${btoa(user.key)}`;
+      const key = `${user.idpUser.provider}-*-${user.idpUser.identifier}`;
+      document.location.href = `/users/${btoa(key)}`;
     } catch (err: unknown) {
       toast.error(
         (err instanceof Error && err.message) ||

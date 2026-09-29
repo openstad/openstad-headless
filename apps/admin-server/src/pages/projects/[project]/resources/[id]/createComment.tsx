@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useComments from '@/hooks/use-comments';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { ApiResource } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -47,7 +48,8 @@ type CreateCommentData = {
 export default function ProjectResourceCreateArgument() {
   const router = useRouter();
   const { project } = router.query;
-  const { data, createComment } = useComments(project as string);
+  // Without getFromComments this lists resources (with nested comments).
+  const { data, createComment } = useComments<ApiResource>(project as string);
   const [disableSubmit, setDisableSubmit] = useState(false);
 
   const notifySuccess = () => toast.success('Reactie succesvol geplaatst');

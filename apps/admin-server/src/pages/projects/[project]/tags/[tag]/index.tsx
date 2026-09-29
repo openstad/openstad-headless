@@ -56,9 +56,9 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
 
   const defaults = useCallback(
     () => ({
-      name: data?.name || null,
-      type: data?.type || null,
-      seqnr: data?.seqnr || null,
+      name: data?.name || undefined,
+      type: data?.type || undefined,
+      seqnr: data?.seqnr || undefined,
       addToNewResources: data?.addToNewResources || false,
       backgroundColor: data?.backgroundColor || undefined,
       color: data?.color || undefined,
@@ -66,13 +66,14 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
       mapIcon: data?.mapIcon || undefined,
       mapIconUploader: '',
       listIcon: data?.listIcon || undefined,
+      // Known issue: a null column value passes through as null.
       useDifferentSubmitAddress: undefinedToTrueOrProp(
-        data?.useDifferentSubmitAddress
+        data?.useDifferentSubmitAddress as boolean | undefined
       ),
       emails: data?.newSubmitAddress
         ? data.newSubmitAddress
             .split(',')
-            .map((address: string) => ({ address: address.trim() }))
+            .map((address) => ({ address: address.trim() }))
         : [{ address: '' }],
       defaultResourceImage: data?.defaultResourceImage || '',
       documentMapIconColor: data?.documentMapIconColor || '#555588',
@@ -90,9 +91,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
       values.emails !== undefined &&
       values.emails.length > 0
     ) {
-      const csv = values.emails
-        .map((email: { address: any }) => email.address)
-        .join(',');
+      const csv = values.emails.map((email) => email.address).join(',');
       values.newSubmitAddress = csv;
     }
 

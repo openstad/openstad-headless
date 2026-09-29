@@ -1,4 +1,10 @@
+import { ListResponse, getRecords } from '@/lib/records';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type {
+  ApiComment,
+  ApiResource,
+  Paginated,
+} from '@openstad-headless/types';
 import { useMemo } from 'react';
 import useSWR from 'swr';
 
@@ -10,7 +16,9 @@ export type CommentListOptions = {
   resourceId?: string;
 };
 
-export default function useComments(
+export default function useComments<
+  T extends ApiComment | ApiResource = ApiComment,
+>(
   projectId?: string,
   includes?: string,
   getFromComments?: boolean,
@@ -53,13 +61,18 @@ export default function useComments(
   }
   const url = `${baseUrl}${params.toString() ? `&${params.toString()}` : ''}`;
 
-  const commentListSwr = useSWR(projectNumber ? url : null);
+  // Lists comments, or resources with nested comments when !getFromComments;
+  // callers pick the item type via T.
+  const commentListSwr = useSWR<ListResponse<T>>(projectNumber ? url : null);
 
   const records = useMemo(
-    () => commentListSwr.data?.records || commentListSwr.data || [],
+    () => getRecords(commentListSwr.data),
     [commentListSwr.data]
   );
-  const pagination = commentListSwr.data?.metadata || null;
+  const pagination =
+    commentListSwr.data && !Array.isArray(commentListSwr.data)
+      ? commentListSwr.data.metadata
+      : null;
 
   async function removeComment(id: number, multiple?: boolean, ids?: number[]) {
     const deleteUrl = multiple
@@ -100,7 +113,9 @@ export default function useComments(
     parentId = undefined,
     confirmation = false,
     confirmationReplies = false,
-  }: createComment) {
+  }: createComment): Promise<
+    Partial<ApiComment> & { error?: string; message?: string }
+  > {
     let url = `/api/openstad/api/project/${projectId}/resource/${resourceId}/comment`;
 
     const body: {
@@ -129,9 +144,14 @@ export default function useComments(
     });
 
     if (res.ok) {
-      const newComment = await res.json();
+      const newComment: ApiComment = await res.json();
       const existingData = commentListSwr.data || [];
-      const updatedList = [newComment, ...existingData];
+      // Known issue: the list may hold resources or a paginated wrapper, so
+      // prepending a comment here does not match its shape.
+      const updatedList = [
+        newComment,
+        ...(existingData as T[]),
+      ] as unknown as ListResponse<T>;
       commentListSwr.mutate(updatedList);
       return newComment;
     } else {
@@ -139,12 +159,12 @@ export default function useComments(
     }
   }
 
-  async function fetchAll() {
+  async function fetchAll(): Promise<T[]> {
     const fetchAllParams = new URLSearchParams({
       noPagination: 'true',
     });
     const response = await fetch(`${baseUrl}&${fetchAllParams.toString()}`);
-    const results = await response.json();
+    const results: Paginated<T> | null = await response.json();
     return results?.records || [];
   }
 

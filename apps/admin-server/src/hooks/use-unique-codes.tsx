@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { AuthCodeList, AuthUniqueCode } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export default function useUniqueCodes(
@@ -31,10 +32,13 @@ export default function useUniqueCodes(
     `/api/openstad/auth/project/${projectNumber}/uniquecode?` +
     params.toString();
 
-  const uniqueCodesListSwr = useSWR(shouldFetch ? url : null, {
-    revalidateOnFocus: false,
-    keepPreviousData: true,
-  });
+  const uniqueCodesListSwr = useSWR<AuthCodeList<AuthUniqueCode>>(
+    shouldFetch ? url : null,
+    {
+      revalidateOnFocus: false,
+      keepPreviousData: true,
+    }
+  );
 
   async function fetchAllUniqueCodes() {
     const exportParams = new URLSearchParams();
@@ -47,7 +51,7 @@ export default function useUniqueCodes(
 
     const res = await fetch(exportUrl);
     if (res.ok) {
-      const data = await res.json();
+      const data: AuthCodeList<AuthUniqueCode> = await res.json();
       return data;
     } else {
       throw new Error('Failed to fetch all stemcodes');
@@ -88,12 +92,12 @@ export default function useUniqueCodes(
       },
     });
     if (res.ok) {
-      const data = await res.json();
-      const existingData = [...uniqueCodesListSwr.data.data];
+      const data: AuthUniqueCode = await res.json();
+      const existingData = [...(uniqueCodesListSwr.data?.data || [])];
       const updatedList = existingData.filter((ed) => ed.id !== id);
       updatedList.push(data);
       uniqueCodesListSwr.mutate({
-        ...uniqueCodesListSwr.data,
+        total: uniqueCodesListSwr.data?.total ?? updatedList.length,
         data: updatedList,
       });
       return updatedList;

@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiSubmission } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export default function useSubmissions(projectId?: string) {
@@ -7,7 +8,9 @@ export default function useSubmissions(projectId?: string) {
   const baseUrl = `/api/openstad/api/project/${projectNumber}/submission`;
   const url = `${baseUrl}?includeUser=1`;
 
-  const { data, isLoading, error, mutate } = useSWR(projectNumber ? url : null);
+  const { data, isLoading, error, mutate } = useSWR<ApiSubmission[]>(
+    projectNumber ? url : null
+  );
 
   async function remove(
     id: string | number,

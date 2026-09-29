@@ -41,11 +41,7 @@ export default function ArgumentsInclude(
   }
 
   const { data: loadedTags } = useTags(props.projectId);
-  const tags = (loadedTags || []) as Array<{
-    id: string;
-    name: string;
-    type?: string;
-  }>;
+  const tags = loadedTags || [];
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
