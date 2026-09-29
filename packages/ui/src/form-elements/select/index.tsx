@@ -11,15 +11,27 @@ import {
 } from '@utrecht/component-library-react';
 import React, { useState } from 'react';
 import { FC } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
+import TextInput from '../text';
 
 export type SelectFieldProps = {
   overrideDefaultValue?: FormValue;
   title?: string;
   description?: string;
-  choices?: string[] | [{ value: string; label: string }];
+  choices?:
+    | string[]
+    | [
+        {
+          value: string;
+          label: string;
+          isOtherOption?: boolean;
+          defaultValue?: boolean;
+          trigger?: string;
+        },
+      ];
   fieldRequired?: boolean;
   requiredWarning?: string;
   fieldKey: string;
@@ -73,13 +85,39 @@ const SelectField: FC<SelectFieldProps> = ({
   createImageSlider = false,
   imageClickable = false,
 }) => {
-  choices = choices.map((choice) => {
-    if (typeof choice === 'string') {
-      return { value: choice, label: choice };
-    } else {
-      return choice;
-    }
-  }) as [{ value: string; label: string }];
+  type NormalizedChoice = {
+    value: string;
+    label: string;
+    isOtherOption?: boolean;
+    trigger?: string;
+  };
+
+  const normalizedChoices: NormalizedChoice[] = useMemo(
+    () =>
+      choices.map((choice) => {
+        if (typeof choice === 'string') {
+          return { value: choice, label: choice };
+        } else {
+          return choice;
+        }
+      }),
+    [choices]
+  );
+
+  const [otherOptionValues, setOtherOptionValues] = useState<{
+    [key: string]: string;
+  }>({});
+
+  useEffect(() => {
+    const initialOtherOptionValues: { [key: string]: string } = {};
+    normalizedChoices?.forEach((choice, index) => {
+      if (choice?.isOtherOption) {
+        const id = choice.trigger || `${index}`;
+        initialOtherOptionValues[`${fieldKey}_${id}_other`] = '';
+      }
+    });
+    setOtherOptionValues(initialOtherOptionValues);
+  }, [normalizedChoices, fieldKey]);
 
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
@@ -99,6 +137,30 @@ const SelectField: FC<SelectFieldProps> = ({
     : initialValue;
 
   const [selected, setSelected] = useState<string | string[]>(initialValue);
+
+  const selectedChoiceIndex = normalizedChoices.findIndex(
+    (choice) => choice.value === selected
+  );
+  const selectedChoice =
+    selectedChoiceIndex > -1
+      ? normalizedChoices[selectedChoiceIndex]
+      : undefined;
+
+  const handleOtherOptionChange = (e: { name: string; value: string }) => {
+    setOtherOptionValues({
+      ...otherOptionValues,
+      [e.name]: e.value,
+    });
+    if (onChange) {
+      onChange(
+        {
+          name: e.name,
+          value: e.value,
+        },
+        false
+      );
+    }
+  };
 
   return (
     <FormField type="select">
@@ -149,7 +211,7 @@ const SelectField: FC<SelectFieldProps> = ({
           <MultiSelect
             label={defaultOption}
             id={fieldKey}
-            options={choices.map((choice) => ({
+            options={normalizedChoices.map((choice) => ({
               value: choice.value,
               label: choice.label,
               checked: Array.isArray(selected)
@@ -186,18 +248,63 @@ const SelectField: FC<SelectFieldProps> = ({
                   value: e.target.value,
                 });
               }
+
+              const newChoiceIndex = normalizedChoices.findIndex(
+                (choice) => choice.value === e.target.value
+              );
+              const newChoice =
+                newChoiceIndex > -1
+                  ? normalizedChoices[newChoiceIndex]
+                  : undefined;
+              const newTrigger = newChoice?.trigger || `${newChoiceIndex}`;
+
+              const updatedOtherOptionValues = { ...otherOptionValues };
+              Object.keys(updatedOtherOptionValues).forEach((key) => {
+                if (key !== `${fieldKey}_${newTrigger}_other`) {
+                  updatedOtherOptionValues[key] = '';
+                  if (onChange) {
+                    onChange(
+                      {
+                        name: key,
+                        value: '',
+                      },
+                      false
+                    );
+                  }
+                }
+              });
+              setOtherOptionValues(updatedOtherOptionValues);
             }}
             disabled={disabled}
             aria-invalid={fieldInvalid}
             aria-describedby={`${randomId}_error`}
             value={selected}>
             <SelectOption value="">{defaultOption}</SelectOption>
-            {choices?.map((value, index) => (
+            {normalizedChoices?.map((value, index) => (
               <SelectOption key={index} value={value && value.value}>
                 {value && value.label}
               </SelectOption>
             ))}
           </Select>
+        )}
+        {!multiple && selectedChoice?.isOtherOption && (
+          <div className="marginTop10 marginBottom15">
+            <TextInput
+              type="text"
+              // @ts-ignore
+              onChange={(e: { name: string; value: string }) =>
+                handleOtherOptionChange(e)
+              }
+              fieldKey={`${fieldKey}_${
+                selectedChoice.trigger || selectedChoiceIndex
+              }_other`}
+              title=""
+              fieldInvalid={false}
+              randomId={`${fieldKey}_${
+                selectedChoice.trigger || selectedChoiceIndex
+              }`}
+            />
+          </div>
         )}
       </Paragraph>
     </FormField>
