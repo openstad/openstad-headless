@@ -18,6 +18,7 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Heading } from '@/components/ui/typography';
+import { useAnonymizeUsersToastMessage } from '@/hooks/use-anonymize-users-toast';
 import useNotificationTemplate from '@/hooks/use-notification-template';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
@@ -64,6 +65,7 @@ export default function ProjectSettingsUsers(
   const router = useRouter();
   const { project } = router.query;
   const { data, updateProject, anonymizeUsersOfProject } = useProject();
+  const showAnonymizeUsersError = useAnonymizeUsersToastMessage();
 
   const anonymizeCategory = 'anonymize';
 
@@ -164,9 +166,7 @@ export default function ProjectSettingsUsers(
       await anonymizeUsersOfProject();
       toast.success('Alle gebruikers zijn geanonimiseerd!');
     } catch (error) {
-      toast.error(
-        'Het project moet eerst zijn beëindigd voordat gebruikers geanonimiseerd kunnen worden.'
-      );
+      showAnonymizeUsersError(error);
     }
   }
 
