@@ -7,6 +7,11 @@ module.exports = {
   jobs: new Map(),
 
   start: function () {
+    if (process.env.USE_KUBERNETES_CRONJOBS === 'true') {
+      console.log('Cron jobs disabled: USE_KUBERNETES_CRONJOBS is enabled');
+      return this;
+    }
+
     var jobs = this.jobs;
     util.invokeDir('./cron', function (jobDef, fileName) {
       try {

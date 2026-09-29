@@ -2,6 +2,32 @@
 global:
   ingress:
     type: nginx
+  # Pod anti-affinity to spread replicas of each deployment across nodes.
+  # mode: "preferred" (best-effort) or "required" (hard constraint, use with cluster autoscaler)
+  podAntiAffinity:
+    enabled: false
+    mode: preferred
+  # Horizontal Pod Autoscaler defaults for all services.
+  # Per-service overrides can be set under <service>.autoscaling.
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 5
+    # targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+    behavior:
+      scaleUp:
+        stabilizationWindowSeconds: 60
+        policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 60
+      scaleDown:
+        stabilizationWindowSeconds: 300
+        policies:
+          - type: Percent
+            value: 10
+            periodSeconds: 60
   # Global OpenTelemetry toggle (per-service can override in their `extraEnvVars` or by adding `otelEnabled` to that service).
   # NOTE: Service override is supported by the helm templates even if not shown in this default values file.
   otelEnabled: false
@@ -334,6 +360,12 @@ api:
   # Enable spam detection and spam flags
   spamFilterEnabled: "false"
   disableProjectIssueWarnings: "false"
+  # When running multiple replicas, offload cron jobs to a Kubernetes CronJob
+  # to prevent duplicate execution across pods.
+  useKubernetesCronjobs: false
+  # How often the K8s CronJob runs (in minutes). Each run picks up all
+  # application-level cron jobs that were scheduled within this window.
+  cronWindowMinutes: 15
   # Resources:
   resources:
     # Max resources

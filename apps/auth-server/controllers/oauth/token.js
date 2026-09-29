@@ -1,6 +1,7 @@
 'use strict';
 
-const memoryStorage = require('../../memoryStorage');
+const databaseStorage = require('../../databaseStorage');
+const db = require('../../db');
 const validate = require('../../validate');
 
 /**
@@ -27,11 +28,10 @@ const validate = require('../../validate');
 exports.info = (req, res) =>
   validate
     .tokenForHttp(req.query.access_token)
-    .then(() => memoryStorage.accessTokens.find(req.query.access_token))
+    .then(() => databaseStorage.accessTokens.find(req.query.access_token))
     .then((token) => validate.tokenExistsForHttp(token))
     .then((token) =>
-      memoryStorage.clients
-        .find(token.clientID)
+      db.Client.findOne({ where: { id: token.clientID } })
         .then((client) => validate.clientExistsForHttp(client))
         .then((client) => ({ client, token }))
     )
@@ -70,10 +70,10 @@ exports.info = (req, res) =>
 exports.revoke = (req, res) =>
   validate
     .tokenForHttp(req.query.token)
-    .then(() => memoryStorage.accessTokens.delete(req.query.token))
+    .then(() => databaseStorage.accessTokens.delete(req.query.token))
     .then((token) => {
       if (token == null) {
-        return memoryStorage.refreshTokens.delete(req.query.token);
+        return databaseStorage.refreshTokens.delete(req.query.token);
       }
       return token;
     })
