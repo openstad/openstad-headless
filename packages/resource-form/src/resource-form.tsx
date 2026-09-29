@@ -24,6 +24,7 @@ import {
   linkKey,
   linkRequestMessage,
   needsLinkConfirmation,
+  restoreLinkValues,
 } from './parts/link-selection';
 import type { ResourceFormWidgetProps } from './props.js';
 
@@ -120,6 +121,11 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     valuesByField: Record<string, LinkValue[]>;
     payload: LinkPayload;
   } | null>(null);
+  const [formKey, setFormKey] = useState(0);
+  const [restoredFormValues, setRestoredFormValues] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
 
   useEffect(() => {
     if (isLoading) return;
@@ -447,6 +453,16 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
   }
 
   function onCancelLinks() {
+    if (pendingLinkSubmit) {
+      setRestoredFormValues(
+        restoreLinkValues(
+          pendingLinkSubmit.formData,
+          linkFields,
+          editMode ? linkPrefill : {}
+        )
+      );
+      setFormKey((key) => key + 1);
+    }
     setPendingLinkSubmit(null);
     setDisableSubmit(false);
   }
@@ -592,6 +608,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
           </>
         ) : (
           <Form
+            key={formKey}
             fields={formFields}
             secondaryLabel={saveConceptButton || ''}
             submitHandler={onSubmit}
@@ -607,6 +624,9 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
             totalPages={totalPages}
             totalFieldCount={totalFieldCount}
             {...props}
+            {...(restoredFormValues
+              ? { initialValues: restoredFormValues }
+              : {})}
           />
         )}
         <LinkConfirmDialog
