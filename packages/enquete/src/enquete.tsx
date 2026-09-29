@@ -435,6 +435,16 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['imageUrl'] = props?.imageUrl;
           fieldData['multiple'] = item.multiple;
           fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
+          fieldData['imageCropEnabled'] = item.imageCropEnabled || false;
+          fieldData['imageCropRequired'] = item.imageCropRequired || false;
+          fieldData['imageCropRatioWidth'] =
+            item.imageCropRatioWidth ||
+            props?.project?.imageCropRatioWidth ||
+            16;
+          fieldData['imageCropRatioHeight'] =
+            item.imageCropRatioHeight ||
+            props?.project?.imageCropRatioHeight ||
+            9;
           break;
         case 'documentUpload':
           fieldData['type'] = 'documentUpload';

@@ -243,6 +243,24 @@ app.get('/image/*', rateLimiter(), async function (req, res, next) {
 
     // SSRF mitigation: Validate and sanitize image path
     const safeImageNamePattern = /^[a-zA-Z0-9_\-\.]+$/;
+
+    const stepsIndex = req.url.indexOf('/:/');
+    if (stepsIndex !== -1) {
+      const fileNameBeforeSteps = req.url.slice(0, stepsIndex);
+      const hasExtension = fileNameBeforeSteps.includes('.');
+      const extension = hasExtension
+        ? fileNameBeforeSteps.split('.').pop().toLowerCase()
+        : null;
+      if (
+        !safeImageNamePattern.test(fileNameBeforeSteps) ||
+        (hasExtension && !ALLOWED_EXTENSIONS.includes(extension))
+      ) {
+        return res.status(400).send('Invalid image filename or path');
+      }
+      req.url = '/images/' + req.url;
+      return imageHandler(req, res);
+    }
+
     const unsafePath = req.url;
 
     // Prevent directory traversal or illegal characters

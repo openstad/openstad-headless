@@ -19,6 +19,14 @@ module.exports = {
         type: 'boolean',
         default: false,
       },
+      imageCropRatioWidth: {
+        type: 'int',
+        default: 16,
+      },
+      imageCropRatioHeight: {
+        type: 'int',
+        default: 9,
+      },
     },
   },
 

@@ -15,3 +15,28 @@
 .filepond--wrapper .filepond--drop-label label {
   cursor: pointer;
 }
+
+.image-crop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-block-start: 8px;
+}
+
+.image-crop-list-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.image-crop-list-thumb {
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.image-crop-list-name {
+  flex: 1;
+  min-inline-size: 120px;
+  overflow-wrap: anywhere;
+}

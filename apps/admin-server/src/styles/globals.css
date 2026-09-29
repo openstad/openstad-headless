@@ -388,3 +388,11 @@ ul.admin-overview > li > a > div {
 ul.admin-overview > li > a {
   display: flex;
 }
+
+.leaflet-container {
+  isolation: isolate;
+}
+
+#widget-preview-container .leaflet-container {
+  isolation: auto;
+}
