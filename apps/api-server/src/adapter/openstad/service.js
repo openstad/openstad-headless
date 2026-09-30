@@ -3,6 +3,11 @@ const mapUserData = require('../../util/map-user-data');
 const authSettings = require('../../util/auth-settings');
 const config = require('config');
 const db = require('../../db');
+const {
+  hasLoginValue,
+  readLoadedLoginSection,
+  toClientConfig,
+} = require('./login-mail-config');
 
 let service = {};
 
@@ -278,6 +283,27 @@ service.fetchClient = async function ({ authConfig, project }) {
   }
 };
 
+// Maps emailConfig.login to the fromEmail/fromName/contactEmail the auth client expects.
+// Only non-empty values are returned, and emailConfig is read from the database when the
+// project was loaded with the default scope, which leaves it out.
+async function getLoginMailClientConfig(project) {
+  let login = readLoadedLoginSection(project);
+  if (!hasLoginValue(login) && project?.id) {
+    try {
+      const withEmailConfig = await db.Project.scope(
+        'includeEmailConfig'
+      ).findByPk(project.id);
+      login = readLoadedLoginSection(withEmailConfig);
+    } catch (err) {
+      console.log('Could not read login e-mail settings for auth client', err);
+      return {};
+    }
+  }
+  if (!hasLoginValue(login)) return {};
+
+  return toClientConfig(login);
+}
+
 service.createClient = async function ({ authConfig, project }) {
   // sync only configuration that is used by the OpenStad auth server - compare updateConfig below
   let newConfig = {
@@ -291,6 +317,7 @@ service.createClient = async function ({ authConfig, project }) {
       inlineCSS: project.config.styling?.inlineCSS,
       displayClientName: project.config.styling?.displayClientName,
     },
+    ...(await getLoginMailClientConfig(project)),
   };
 
   try {
@@ -457,11 +484,15 @@ service.updateClient = async function ({ authConfig, project }) {
       'clientDisclaimerUrl',
       'clientDisclaimerText',
     ];
+    const loginMailConfig = await getLoginMailClientConfig(project);
     properties.forEach((property) => {
       if (authConfig?.config && authConfig.config[property]) {
         newClientConfig[property] = authConfig.config[property];
       } else if (client?.config && client.config[property]) {
         newClientConfig[property] = client.config[property];
+      } else if (loginMailConfig[property]) {
+        // falls back to the project's login e-mail settings
+        newClientConfig[property] = loginMailConfig[property];
       }
     });
 

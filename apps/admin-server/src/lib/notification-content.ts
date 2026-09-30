@@ -178,6 +178,30 @@ export const DEFAULT_STYLING: Required<
   textColor: '#555555',
 };
 
+const STYLING_KEYS: Array<keyof NotificationStyling> = [
+  'logo',
+  'primaryColor',
+  'backgroundColor',
+  'textColor',
+];
+
+/**
+ * The styling a project's mails actually use, per field: its own value, else the global
+ * settings, else nothing (the caller falls back to DEFAULT_STYLING). An empty string means
+ * "not set", the same rule the rest of the mail styling follows, so a project inherits the
+ * global brand until it fills a field in itself.
+ */
+export function resolveInheritedStyling(
+  ownStyling?: NotificationStyling | null,
+  globalStyling?: NotificationStyling | null
+): NotificationStyling {
+  const resolved: NotificationStyling = {};
+  STYLING_KEYS.forEach((key) => {
+    resolved[key] = ownStyling?.[key] || globalStyling?.[key] || '';
+  });
+  return resolved;
+}
+
 const HEADING_COLOR = '#333333';
 const FOOTER_COLOR = '#999999';
 const DIVIDER_COLOR = '#cccccc';

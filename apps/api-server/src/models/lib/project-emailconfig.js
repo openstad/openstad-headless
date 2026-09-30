@@ -40,6 +40,14 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         type: 'string', // todo: add type email/list of emails
         default: apiConfig.mail.from,
       },
+      fromName: {
+        type: 'string',
+        default: '',
+      },
+      replyTo: {
+        type: 'string', // todo: add type email/list of emails
+        default: '',
+      },
       projectmanagerAddress: {
         type: 'string', // todo: add type email/list of emails
         default: 'EMAIL@NOT.DEFINED',
@@ -191,6 +199,24 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
       },
       textColor: {
         type: 'string',
+        default: '',
+      },
+    },
+  },
+
+  login: {
+    type: 'object',
+    subset: {
+      fromAddress: {
+        type: 'string', // todo: add type email/list of emails
+        default: '',
+      },
+      fromName: {
+        type: 'string',
+        default: '',
+      },
+      helpAddress: {
+        type: 'string', // todo: add type email/list of emails
         default: '',
       },
     },

@@ -23,6 +23,16 @@ router.use(auditLogMiddleware());
 // projects
 router.use('/project', require('./project'));
 
+// global settings (branding + e-mail defaults inherited by new projects)
+const globalSettings = require('./global-settings');
+router.use('/global-settings', globalSettings.router);
+// read-only, project scoped: lets a project editor see the inherited values on their own
+// project pages without granting access to the platform-wide update route
+router.use(
+  '/project/:projectId(\\d+)/global-settings',
+  globalSettings.readOnlyRouter
+);
+
 // comments
 router.use(
   '/project/:projectId(\\d+)(/resource/:resourceId(\\d+))?/comment',

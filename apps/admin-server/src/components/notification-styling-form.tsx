@@ -25,8 +25,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useGlobalSettings } from '@/hooks/use-global-settings';
 import useNotificationTemplate from '@/hooks/use-notification-template';
 import { useProject } from '@/hooks/use-project';
+import { ADMIN_PROJECT_ID } from '@/lib/admin-project';
 import {
   DEFAULT_STYLING,
   NotificationStyling,
@@ -35,7 +37,13 @@ import {
   isPlainTextType,
   normalizeContent,
   renderNotificationMjml,
+  resolveInheritedStyling,
 } from '@/lib/notification-content';
+import {
+  NotificationScope,
+  isGlobalScope,
+  projectNotificationScope,
+} from '@/lib/notification-scope';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import * as React from 'react';
@@ -68,6 +76,9 @@ function logoName(url: string): string {
 }
 
 type Props = {
+  // Which templates the colour change regenerates, and where the styling is stored.
+  // Defaults to the project of the current route.
+  scope?: NotificationScope;
   /**
    * Fires on every edit, so the mail previews next to this form can show the
    * new brand style before it is saved.
@@ -75,24 +86,40 @@ type Props = {
   onStylingChange?: (styling: NotificationStyling) => void;
 };
 
-export function NotificationStylingForm({ onStylingChange }: Props) {
+export function NotificationStylingForm({ scope, onStylingChange }: Props) {
   const router = useRouter();
   const project = router.query.project as string;
+  const activeScope = scope || projectNotificationScope(project);
+  const globalScope = isGlobalScope(activeScope);
+
   const { data: projectData, updateProjectEmails } = useProject([
     'includeAuthConfig',
   ]);
-  const { data: templates, update } = useNotificationTemplate(project);
+  // On a project page this reads the project scoped route, which an editor may call; the
+  // unscoped one is admin-only. Both are needed: a project inherits the global brand for
+  // every field it left empty.
+  const { data: globalSettings, updateGlobalSettings } = useGlobalSettings(
+    globalScope ? undefined : project
+  );
+  const { data: templates, update } = useNotificationTemplate(activeScope);
 
-  const styling = projectData?.emailConfig?.styling;
+  const globalStyling: NotificationStyling | undefined =
+    globalSettings?.emailConfig?.styling;
+  const styling = globalScope
+    ? globalStyling
+    : resolveInheritedStyling(projectData?.emailConfig?.styling, globalStyling);
 
   // The logos an admin already uploaded elsewhere in this project, so they can
   // pick one instead of pasting a URL. See /projects/[project]/authentication.
   const knownLogos: string[] = React.useMemo(() => {
-    const candidates = [
-      projectData?.config?.auth?.provider?.openstad?.config?.styling?.logo,
-      projectData?.config?.styling?.logo,
-      styling?.logo,
-    ];
+    const candidates = globalScope
+      ? [globalSettings?.config?.styling?.logo, styling?.logo]
+      : [
+          projectData?.config?.auth?.provider?.openstad?.config?.styling?.logo,
+          projectData?.config?.styling?.logo,
+          globalStyling?.logo,
+          styling?.logo,
+        ];
     return Array.from(
       new Set(
         candidates.filter(
@@ -100,7 +127,13 @@ export function NotificationStylingForm({ onStylingChange }: Props) {
         )
       )
     );
-  }, [projectData?.config, styling?.logo]);
+  }, [
+    globalScope,
+    globalSettings?.config,
+    globalStyling?.logo,
+    projectData?.config,
+    styling?.logo,
+  ]);
 
   const defaults = useCallback(
     () => ({
@@ -182,10 +215,18 @@ export function NotificationStylingForm({ onStylingChange }: Props) {
     };
 
     try {
-      const updatedProject = await updateProjectEmails({ styling });
-      if (!updatedProject) {
-        toast.error('Er is helaas iets mis gegaan.');
-        return;
+      if (globalScope) {
+        const { ok } = await updateGlobalSettings({ emailConfig: { styling } });
+        if (!ok) {
+          toast.error('Er is helaas iets mis gegaan.');
+          return;
+        }
+      } else {
+        const updatedProject = await updateProjectEmails({ styling });
+        if (!updatedProject) {
+          toast.error('Er is helaas iets mis gegaan.');
+          return;
+        }
       }
 
       const updated = await regenerateManagedTemplates(styling);
@@ -206,8 +247,9 @@ export function NotificationStylingForm({ onStylingChange }: Props) {
         Huisstijl van de e-mails
       </h3>
       <p className="text-sm mt-1">
-        Logo en kleuren gelden voor alle e-mails van dit project. E-mails
-        waarvan je de HTML zelf beheert, houden hun eigen opmaak.
+        {globalScope
+          ? 'Logo en kleuren gelden voor alle e-mails hieronder. Een project met een eigen huisstijl houdt die eigen opmaak.'
+          : 'Logo en kleuren gelden voor alle e-mails van dit project. E-mails waarvan je de HTML zelf beheert, houden hun eigen opmaak.'}
       </p>
 
       <Form {...form}>
@@ -268,7 +310,7 @@ export function NotificationStylingForm({ onStylingChange }: Props) {
 
           <ImageUploader
             form={form}
-            project={project}
+            project={globalScope ? ADMIN_PROJECT_ID : project}
             fieldName="imageLogo"
             imageLabel="Nieuw logo uploaden"
             allowedTypes={['image/*']}

@@ -38,6 +38,7 @@ import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
+import { useGlobalSettings } from '../../../../hooks/use-global-settings';
 import { useProject } from '../../../../hooks/use-project';
 
 export const getServerSideProps = withWhitelistedEmails;
@@ -95,6 +96,15 @@ export default function ProjectAuthentication({
   const router = useRouter();
   const { project } = router.query;
   const { data, updateProject } = useProject(['includeAuthConfig']);
+  // Reference only: an empty field here falls back to the global settings value.
+  const { data: globalSettings } = useGlobalSettings(project as string);
+  const globalLogo = globalSettings?.config?.styling?.logo;
+  const globalFavicon = globalSettings?.config?.styling?.favicon;
+  const globalLoginFromAddress =
+    globalSettings?.emailConfig?.login?.fromAddress;
+  const globalLoginFromName = globalSettings?.emailConfig?.login?.fromName;
+  const globalLoginHelpAddress =
+    globalSettings?.emailConfig?.login?.helpAddress;
 
   const defaults = useCallback(
     () => ({
@@ -319,8 +329,17 @@ export default function ProjectAuthentication({
                       <FormLabel>
                         E-mailadres voor contact en hulpvragen
                       </FormLabel>
+                      {!field.value && globalLoginHelpAddress && (
+                        <FormDescription>
+                          Overgenomen van de algemene instellingen:{' '}
+                          {globalLoginHelpAddress}
+                        </FormDescription>
+                      )}
                       <FormControl>
-                        <Input placeholder="" {...field} />
+                        <Input
+                          placeholder={globalLoginHelpAddress || ''}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -449,6 +468,16 @@ export default function ProjectAuthentication({
                     <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                       Geüploade logo
                     </label>
+                    {!form.watch('logo') && globalLogo && (
+                      <FormDescription>
+                        Overgenomen van de algemene instellingen:
+                        <img
+                          src={globalLogo}
+                          alt="logo uit de algemene instellingen"
+                          className="max-h-16 mt-2"
+                        />
+                      </FormDescription>
+                    )}
                     <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
                       {!!form.watch('logo') && (
                         <div style={{ position: 'relative' }}>
@@ -477,6 +506,16 @@ export default function ProjectAuthentication({
                     <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                       Geüploade favicon
                     </label>
+                    {!form.watch('favicon') && globalFavicon && (
+                      <FormDescription>
+                        Overgenomen van de algemene instellingen:
+                        <img
+                          src={globalFavicon}
+                          alt="favicon uit de algemene instellingen"
+                          className="max-h-16 mt-2"
+                        />
+                      </FormDescription>
+                    )}
                     <section className="grid col-span-full grid-cols-3 gap-x-4 gap-y-8 ">
                       {!!form.watch('favicon') && (
                         <div style={{ position: 'relative' }}>
@@ -521,6 +560,12 @@ export default function ProjectAuthentication({
                           <FormLabel>
                             Afzender adres van login e-mails
                           </FormLabel>
+                          {!field.value && globalLoginFromAddress && (
+                            <FormDescription>
+                              Overgenomen van de algemene instellingen:{' '}
+                              {globalLoginFromAddress}
+                            </FormDescription>
+                          )}
                           <FormControl>
                             {whitelistedEmails.length > 0 ? (
                               <WhitelistedEmailSelect
@@ -528,7 +573,10 @@ export default function ProjectAuthentication({
                                 whitelistedEmails={whitelistedEmails}
                               />
                             ) : (
-                              <Input placeholder="" {...field} />
+                              <Input
+                                placeholder={globalLoginFromAddress || ''}
+                                {...field}
+                              />
                             )}
                           </FormControl>
                           <FormMessage />
@@ -544,8 +592,17 @@ export default function ProjectAuthentication({
                           <FormLabel>
                             Naam van de afzender van login e-mails
                           </FormLabel>
+                          {!field.value && globalLoginFromName && (
+                            <FormDescription>
+                              Overgenomen van de algemene instellingen:{' '}
+                              {globalLoginFromName}
+                            </FormDescription>
+                          )}
                           <FormControl>
-                            <Input placeholder="" {...field} />
+                            <Input
+                              placeholder={globalLoginFromName || ''}
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

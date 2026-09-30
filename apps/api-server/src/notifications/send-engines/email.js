@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 const AzureTransport = require('@openstad-headless/lib/azure-transport');
 require('dotenv').config();
 
-module.exports = async function sendMessage({ message }) {
+module.exports = async function sendMessage({ message, replyTo }) {
   try {
     const transporterType = !!process.env.MAIL_TRANSPORTER_TYPE
       ? process.env.MAIL_TRANSPORTER_TYPE
@@ -36,6 +36,11 @@ module.exports = async function sendMessage({ message }) {
       text: message.text,
       html: message.body,
     };
+
+    // without a configured address, replies keep going to the sender
+    if (replyTo) {
+      mailOptions.replyTo = replyTo;
+    }
 
     if (message._pdfAttachment) {
       mailOptions.attachments = [message._pdfAttachment];

@@ -1,7 +1,7 @@
 const nunjucks = require('nunjucks');
 const mjml2html = require('mjml');
 const sendMessage = require('../notifications/send-engines');
-const defaultTemplatesCatalog = require('../notifications/default-templates-catalog');
+const { resolveTemplate } = require('../notifications/resolve-template');
 const authSettings = require('../util/auth-settings');
 
 // Elke ontvanger van elke mail levert een eigen NotificationMessage op, en die
@@ -31,6 +31,29 @@ async function fetchClientName(project) {
     // best-effort only; auth server may be unreachable or unconfigured
   }
   return null;
+}
+
+// The mail logo of the global settings, used when a project has not set its own. Cached
+// for the same reason as the client name above: one mail to hundreds of recipients is
+// hundreds of NotificationMessage rows, and this value changes rarely.
+const GLOBAL_LOGO_TTL_MS = 5 * 60 * 1000;
+let globalLogoCache = null;
+
+// Fails soft: no logo is a valid state, so a database problem must not stop the mail.
+async function resolveGlobalMailLogo(db) {
+  if (globalLogoCache && globalLogoCache.expiresAt > Date.now()) {
+    return globalLogoCache.logo;
+  }
+
+  try {
+    const siteConfig = await db.SiteConfig.findOne({ where: { id: 1 } });
+    const logo = siteConfig?.emailConfig?.styling?.logo || '';
+    globalLogoCache = { logo, expiresAt: Date.now() + GLOBAL_LOGO_TTL_MS };
+    return logo;
+  } catch (err) {
+    console.log('Could not read the global mail logo', err);
+    return '';
+  }
 }
 
 async function resolveClientName(project, fallback) {
@@ -116,17 +139,12 @@ module.exports = (db, sequelize, DataTypes) => {
           if (options.data) {
             let template, templateData;
             try {
-              template = await db.NotificationTemplate.findOne({
-                where: {
-                  projectId: instance.projectId,
-                  type: instance.type,
-                },
+              // Project row, then the global template, then the shipped default.
+              template = await resolveTemplate({
+                db,
+                projectId: instance.projectId,
+                type: instance.type,
               });
-              if (!template) {
-                template = await defaultTemplatesCatalog.getDefaultTemplate(
-                  instance.type
-                );
-              }
               if (!template) throw new Error('Notification template not found');
 
               // Zonder deze check rendert mjml2html een blanco body naar niets,
@@ -145,11 +163,14 @@ module.exports = (db, sequelize, DataTypes) => {
               ).findByPk(instance.projectId);
 
               templateData.imagePath = process.env.EMAIL_ASSETS_URL || '';
+              // Project logo, then the global one. Read here instead of baked into the
+              // body, so a project without its own logo follows the global settings.
               templateData.logo =
                 (templateData.project &&
                   templateData.project.emailConfig &&
                   templateData.project.emailConfig.styling &&
                   templateData.project.emailConfig.styling.logo) ||
+                (await resolveGlobalMailLogo(db)) ||
                 '';
               templateData.projectName =
                 (templateData.project &&
@@ -247,7 +268,18 @@ module.exports = (db, sequelize, DataTypes) => {
 
   NotificationMessage.prototype.send = async function () {
     try {
-      await sendMessage[this.engine]({ message: this });
+      // emailConfig is outside the default scope; no address means no header.
+      let replyTo;
+      try {
+        const project = await db.Project.scope('includeEmailConfig').findByPk(
+          this.projectId
+        );
+        replyTo = project?.emailConfig?.notifications?.replyTo || undefined;
+      } catch (err) {
+        console.log('Could not read reply-to address for notification', err);
+      }
+
+      await sendMessage[this.engine]({ message: this, replyTo });
       await this.update({ status: 'sent' });
     } catch (err) {
       console.error('Send failed:', err);

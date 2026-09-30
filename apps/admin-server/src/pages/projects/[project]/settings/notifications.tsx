@@ -36,6 +36,7 @@ import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
+import { useGlobalSettings } from '../../../../hooks/use-global-settings';
 import { useProject } from '../../../../hooks/use-project';
 
 export const getServerSideProps = withWhitelistedEmails;
@@ -59,6 +60,11 @@ export default function ProjectSettingsNotifications({
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProjectEmails, pdfAvailable } = useProject();
+  const { data: globalSettings } = useGlobalSettings(project as string);
+  const globalFromAddress =
+    globalSettings?.emailConfig?.[category]?.fromAddress;
+  const globalFromName = globalSettings?.emailConfig?.[category]?.fromName;
+
   const defaults = useCallback(
     () => ({
       fromAddress: data?.emailConfig?.[category]?.fromAddress || '',
@@ -145,6 +151,12 @@ export default function ProjectSettingsNotifications({
                         }
                       />
                     </FormLabel>
+                    {!field.value && globalFromAddress && (
+                      <FormDescription>
+                        Overgenomen van de algemene instellingen:{' '}
+                        {globalFromAddress}
+                      </FormDescription>
+                    )}
                     <FormControl>
                       {whitelistedEmails.length > 0 ? (
                         <WhitelistedEmailSelect
@@ -152,7 +164,10 @@ export default function ProjectSettingsNotifications({
                           whitelistedEmails={whitelistedEmails}
                         />
                       ) : (
-                        <Input placeholder="" {...field} />
+                        <Input
+                          placeholder={globalFromAddress || ''}
+                          {...field}
+                        />
                       )}
                     </FormControl>
                     <FormMessage />
@@ -177,9 +192,16 @@ export default function ProjectSettingsNotifications({
                       Als je hier een naam invult komt dit voor het e-mailadres
                       van de afzender te staan, bijvoorbeeld: OpenStad site
                       &#60;info@openstad.nl&#62;
+                      {!field.value && globalFromName && (
+                        <>
+                          <br />
+                          Overgenomen van de algemene instellingen:{' '}
+                          {globalFromName}
+                        </>
+                      )}
                     </FormDescription>
                     <FormControl>
-                      <Input placeholder="" {...field} />
+                      <Input placeholder={globalFromName || ''} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

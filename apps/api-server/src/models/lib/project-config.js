@@ -437,4 +437,19 @@ module.exports = {
       },
     },
   },
+
+  styling: {
+    // general project branding; falls back into the auth-provider styling and email styling when those are not set
+    type: 'object',
+    subset: {
+      logo: {
+        type: 'string',
+        default: '',
+      },
+      favicon: {
+        type: 'string',
+        default: '',
+      },
+    },
+  },
 };

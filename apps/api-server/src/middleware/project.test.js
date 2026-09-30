@@ -36,6 +36,26 @@ describe('bypass paths', () => {
     expect(db.Project.findOne).not.toHaveBeenCalled();
   });
 
+  // The global notification templates belong to no project, like /api/global-settings.
+  it('bypasses /notification/global routes', async () => {
+    db.Project.findOne = vi.fn();
+    const app = createApp();
+
+    await request(app).get('/notification/global/template');
+
+    expect(db.Project.findOne).not.toHaveBeenCalled();
+  });
+
+  // The read-only variant is project scoped and must still resolve its project.
+  it('still resolves the project for /notification/project/:id/global-template', async () => {
+    db.Project.findOne = vi.fn().mockResolvedValue({ id: 2 });
+    const app = createApp();
+
+    await request(app).get('/notification/project/2/global-template');
+
+    expect(db.Project.findOne).toHaveBeenCalledWith({ where: { id: 2 } });
+  });
+
   it('bypasses /api/pending-budget-vote', async () => {
     db.Project.findOne = vi.fn();
     const app = createApp();
