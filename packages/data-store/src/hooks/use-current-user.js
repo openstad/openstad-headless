@@ -129,6 +129,13 @@ export default function useCurrentUser(props) {
           projectId: self.projectId,
         });
 
+        if (!openStadUser?.id) {
+          console.log('[osc-auth] token not accepted, continuing anonymous');
+          delete self.api.currentUserJWT;
+          storage.remove('openStadUser');
+          return {};
+        }
+
         console.log(
           `[osc-auth] user authenticated: userId=${openStadUser?.id} role=${openStadUser?.role}`
         );
@@ -139,6 +146,7 @@ export default function useCurrentUser(props) {
         return openStadUser;
       } catch (err) {
         console.log(`[osc-auth] user fetch failed: ${err?.message}`);
+        delete self.api.currentUserJWT;
         storage.remove('openStadUser');
         return {};
       }
