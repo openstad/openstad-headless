@@ -7,6 +7,12 @@ const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const getWidgetSettings = require('../widget/widget-settings');
 const createError = require('http-errors');
 const { snapshotWidgetVersion } = require('../../services/widget-version');
+const {
+  canUserUseSourceProjectForDuplication,
+  canUserWriteToProject,
+  remapWidgetConfigForProject,
+  buildTargetMaps,
+} = require('../../util/widget-copy');
 router.all('*', function (req, res, next) {
   req.scope = [];
   return next();
@@ -179,6 +185,151 @@ router
       );
 
       res.json(duplicatedWidgets);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+// Copy widgets from another project into this one
+router
+  .route('/copy')
+  .post(auth.useReqUser)
+  .post(rateLimiter(), async function (req, res, next) {
+    const targetProjectId = parseInt(req.params.projectId, 10);
+    const sourceProjectId = parseInt(req.body.sourceProjectId, 10);
+    let ids = req.body.ids;
+
+    // `>= 1`, not just an integer: the permission check treats a falsy source
+    // project as "no source project" and returns true, so 0 would skip it.
+    if (!Number.isInteger(sourceProjectId) || sourceProjectId < 1) {
+      return next(
+        createError(
+          400,
+          'Invalid request: sourceProjectId must be a positive integer'
+        )
+      );
+    }
+    if (sourceProjectId === targetProjectId) {
+      return next(
+        createError(
+          400,
+          'Invalid request: sourceProjectId must differ from the target project'
+        )
+      );
+    }
+    if (!ids || !Array.isArray(ids)) {
+      return next(createError(400, 'Invalid request: ids must be an array'));
+    }
+    ids = ids.filter((id) => Number.isInteger(id));
+    if (ids.length === 0) {
+      return next(createError(400, 'Invalid request: no valid ids provided'));
+    }
+
+    try {
+      const canUseSourceProject = await canUserUseSourceProjectForDuplication({
+        user: req.user,
+        sourceProjectId,
+      });
+      if (!canUseSourceProject) {
+        return next(
+          createError(
+            403,
+            'Not allowed to copy widgets from this source project'
+          )
+        );
+      }
+
+      const canWriteToTargetProject = await canUserWriteToProject({
+        user: req.user,
+        targetProjectId,
+      });
+      if (!canWriteToTargetProject) {
+        return next(
+          createError(403, 'Not allowed to copy widgets into this project')
+        );
+      }
+
+      const sourceWidgets = await db.Widget.findAll({
+        where: { id: ids, projectId: sourceProjectId },
+      });
+
+      if (sourceWidgets.length === 0) {
+        return next(
+          createError(
+            404,
+            'No widgets found for the provided IDs in the source project'
+          )
+        );
+      }
+
+      for (const widget of sourceWidgets) {
+        // Pass req.user explicitly. Assigning widget.auth.user instead would
+        // mutate Widget.prototype.auth -- the object every Widget instance
+        // shares -- and leak this user into later requests.
+        if (!widget.can || !widget.can('create', req.user)) {
+          return next(
+            createError(403, `You cannot copy widget with ID ${widget.id}`)
+          );
+        }
+      }
+
+      const { tagMap, statusMap, markerSetMap } = await buildTargetMaps(
+        sourceProjectId,
+        targetProjectId
+      );
+
+      // Both passes run in one transaction: pass 1 stores the source config
+      // verbatim, so a failure in pass 2 would otherwise leave widgets behind
+      // that still point at the source project's tags, statuses and widgets.
+      const newWidgets = await db.sequelize.transaction(async (transaction) => {
+        // Pass 1: create the copies so widget-to-widget references between
+        // two widgets copied in the same batch can be remapped in pass 2.
+        const widgetMap = {};
+        const created = [];
+        for (const widget of sourceWidgets) {
+          const newWidget = await db.Widget.create(
+            {
+              projectId: targetProjectId,
+              description: widget.description,
+              type: widget.type,
+              config: widget.config || {},
+            },
+            { transaction }
+          );
+          widgetMap[widget.id] = newWidget.id;
+          created.push(newWidget);
+        }
+
+        // Pass 2: remap project-specific references in each copy's config.
+        for (const newWidget of created) {
+          const config = JSON.parse(JSON.stringify(newWidget.config || {}));
+          const { clearedKeys } = remapWidgetConfigForProject(config, {
+            widgetMap,
+            // No resourceMap: resources are not copied, so resourceId is cleared.
+            resourceMap: {},
+            tagMap,
+            statusMap,
+            markerSetMap,
+            projectId: targetProjectId,
+          });
+          config.projectId = targetProjectId;
+          await newWidget.update({ config }, { transaction });
+
+          // Logged, not silent: a cleared reference is a visible difference
+          // between the source widget and its copy.
+          if (clearedKeys.length) {
+            console.log(
+              `[widget-copy] widget ${newWidget.id}: cleared ${clearedKeys.join(
+                ', '
+              )} (no equivalent in project ${targetProjectId})`
+            );
+          }
+        }
+
+        return created;
+      });
+
+      res.json(newWidgets);
     } catch (error) {
       next(error);
     }
