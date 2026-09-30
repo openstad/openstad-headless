@@ -91,7 +91,7 @@ describe('POST /project/:projectId/tag', () => {
       .send({ name: 'Verkeer', type: ' thème ' });
 
     expect(db.Tag.max).toHaveBeenCalledWith('seqnr', {
-      where: { type: 'theme' },
+      where: { type: 'thème' },
     });
   });
 

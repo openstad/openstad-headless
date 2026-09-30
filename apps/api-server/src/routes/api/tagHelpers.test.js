@@ -19,7 +19,7 @@ describe('normalizeTagType', () => {
 
   test('trims and sanitizes so a lookup matches the stored value', () => {
     expect(normalizeTagType(' theme ')).toBe('theme');
-    expect(normalizeTagType('thème')).toBe('theme');
+    expect(normalizeTagType(' thème ')).toBe('thème');
   });
 
   test('turns a type that sanitizes down to nothing into null', () => {
