@@ -21,7 +21,7 @@ export default function useTag(
   async function createTag(
     name: string,
     type: string,
-    seqnr: number,
+    seqnr: number | null | undefined,
     addToNewResources: boolean
   ) {
     const res = await fetch(url, {
@@ -33,7 +33,7 @@ export default function useTag(
         projectId: projectNumber,
         name,
         type,
-        seqnr,
+        seqnr: seqnr ?? null,
         addToNewResources,
       }),
     });

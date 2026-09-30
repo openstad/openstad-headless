@@ -29,15 +29,24 @@ export default function ProjectTags({ preset }: { preset?: string }) {
       id: number;
       name: string;
       type?: string;
+      seqnr?: number;
     }[];
 
-    const filterStartData = loadedTags?.sort((a, b) => {
+    // Sort a copy: `data` is the SWR cache array, sorting it in place would
+    // mutate shared state.
+    const filterStartData = [...loadedTags].sort((a, b) => {
       const aType = a.type ?? '';
       const bType = b.type ?? '';
 
       if (aType < bType) return -1;
       if (aType > bType) return 1;
 
+      const aSeqnr = a.seqnr ?? Number.MAX_SAFE_INTEGER;
+      const bSeqnr = b.seqnr ?? Number.MAX_SAFE_INTEGER;
+
+      if (aSeqnr !== bSeqnr) return aSeqnr - bSeqnr;
+
+      // Keep the order stable when two tags share a sequence number.
       if (a.name < b.name) return -1;
       if (a.name > b.name) return 1;
 

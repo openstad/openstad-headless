@@ -35,7 +35,7 @@ module.exports = function (db, sequelize, DataTypes) {
       seqnr: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        default: 10,
+        defaultValue: 10,
       },
 
       addToNewResources: {

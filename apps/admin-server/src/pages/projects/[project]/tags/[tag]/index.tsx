@@ -221,7 +221,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>
-                            Sequence nummer
+                            Volgorde
                             <InfoDialog
                               content={
                                 'Dit nummer bepaalt de volgorde waarin de tags worden getoond. Automatisch worden tientallen gegenereerd, zodat je later ruimte hebt om tags tussen te voegen.'

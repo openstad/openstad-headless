@@ -28,7 +28,15 @@ import * as z from 'zod';
 const formSchema = z.object({
   name: z.string(),
   type: z.string(),
-  seqnr: z.coerce.number(),
+  // An empty field must stay empty: z.coerce.number() would turn '' into 0,
+  // which the API reads as an explicit sequence number instead of "not provided".
+  seqnr: z.preprocess(
+    (value) =>
+      value === null || (typeof value === 'string' && value.trim() === '')
+        ? undefined
+        : value,
+    z.coerce.number().optional()
+  ),
   addToNewResources: z.boolean().optional(),
 });
 
@@ -62,7 +70,7 @@ export default function ProjectTagCreate({ preset }: { preset?: string }) {
     const tag = await createTag(
       values.name,
       values.type,
-      values.seqnr,
+      values.seqnr ?? null,
       values.addToNewResources || false
     );
     if (!tag?.id) {
@@ -179,10 +187,10 @@ export default function ProjectTagCreate({ preset }: { preset?: string }) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Sequence nummer
+                      Volgorde (optioneel)
                       <InfoDialog
                         content={
-                          'Dit nummer bepaalt de volgorde waarin de tags worden getoond. Automatisch worden tientallen gegenereerd, zodat je later ruimte hebt om tags tussen te voegen.'
+                          'Dit nummer bepaalt de volgorde waarin de tags worden getoond. Laat je dit veld leeg, dan wordt de tag automatisch onderaan de groep geplaatst. Automatisch worden tientallen gegenereerd, zodat je later ruimte hebt om tags tussen te voegen.'
                         }
                       />
                     </FormLabel>
