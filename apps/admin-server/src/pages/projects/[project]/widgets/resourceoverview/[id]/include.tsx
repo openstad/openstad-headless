@@ -159,7 +159,7 @@ export default function WidgetResourceOverviewInclude(
           <CheckboxList
             form={form}
             fieldName="onlyIncludeTagIds"
-            fieldLabel=""
+            fieldLabel="Toon alleen inzendingen met deze tags"
             label={(t) => t.name}
             keyForGrouping="type"
             keyPerItem={(t) => `${t.id}`}
@@ -235,7 +235,7 @@ export default function WidgetResourceOverviewInclude(
               <CheckboxList
                 form={form}
                 fieldName="onlyIncludeStatusIds"
-                fieldLabel=""
+                fieldLabel="Toon alleen inzendingen met deze statussen"
                 layout="vertical"
                 label={(t) => t.name}
                 keyPerItem={(t) => `${t.id}`}
