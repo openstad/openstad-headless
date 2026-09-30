@@ -7,7 +7,8 @@ import { validateProjectNumber } from '@/lib/validateProjectNumber';
  * a missing provider there would be a silent bug.
  */
 export type NotificationScope =
-  { kind: 'project'; projectId: string } | { kind: 'global' };
+  | { kind: 'project'; projectId: string }
+  | { kind: 'global' };
 
 export const GLOBAL_NOTIFICATION_SCOPE: NotificationScope = { kind: 'global' };
 

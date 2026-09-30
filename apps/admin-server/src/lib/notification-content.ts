@@ -32,7 +32,12 @@ export type NotificationContent = {
 
 export type NotificationContentField = {
   key:
-    'heading' | 'greeting' | 'intro' | 'buttonLabel' | 'buttonUrl' | 'footer';
+    | 'heading'
+    | 'greeting'
+    | 'intro'
+    | 'buttonLabel'
+    | 'buttonUrl'
+    | 'footer';
   label: string;
   input: 'text' | 'textarea';
   /** Short help text under the label, for fields whose effect is not obvious. */
