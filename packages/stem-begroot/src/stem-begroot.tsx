@@ -11,7 +11,12 @@ import {
 } from '@openstad-headless/ui/src';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import '@utrecht/component-library-css';
-import { Button, ButtonLink, Heading } from '@utrecht/component-library-react';
+import {
+  Button,
+  ButtonLink,
+  Heading,
+  Paragraph,
+} from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
 import React, {
   useCallback,
@@ -69,7 +74,6 @@ export type StemBegrootWidgetProps = BaseProps &
     displayDescription?: boolean;
     displayTagFilters?: boolean;
     tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
-    displayTagGroupName?: boolean;
     defaultSorting?: string;
     sorting?: Array<{ label: string; value: string }>;
     displaySorting?: boolean;
@@ -319,6 +323,7 @@ function StemBegroot({
   const [tagCounter, setTagCounter] = useState<Array<TagType>>([]);
 
   const [tags, setTags] = useState<number[]>(initTags);
+  const [userSelectedTags, setUserSelectedTags] = useState<number[]>([]);
 
   const [sort, setSort] = useState<string | undefined>(
     props.defaultSorting || undefined
@@ -355,13 +360,47 @@ function StemBegroot({
     return tags;
   }, [tags, activeTabTagIds, isPerTagVoting]);
 
+  const groupedTags: { [key: string]: number[] } = useMemo(() => {
+    const tagsMap: { [key: string]: number[] } = {};
+    allTags.forEach((tag: { type: string; id: number }) => {
+      if (!tagsMap[tag.type]) {
+        tagsMap[tag.type] = [];
+      }
+      tagsMap[tag.type].push(tag.id);
+    });
+    return tagsMap;
+  }, [allTags]);
+
+  const useTagGroups =
+    filterBehavior === 'and' &&
+    userSelectedTags.length > 0 &&
+    !(isPerTagVoting && activeTabTagIds.length > 0);
+
+  const apiTagGroups = useMemo(() => {
+    if (!useTagGroups) return [];
+
+    const groups: number[][] = [];
+    Object.keys(groupedTags).forEach((tagType) => {
+      const selectedOfType = userSelectedTags.filter((tagId) =>
+        groupedTags[tagType].includes(tagId)
+      );
+      if (selectedOfType.length > 0) {
+        groups.push(selectedOfType);
+      }
+    });
+    return groups;
+  }, [useTagGroups, userSelectedTags, groupedTags]);
+
+  const flatApiTags = apiTagGroups.length > 0 ? [] : apiTags;
+
   const {
     data: resources,
     isLoading,
     submitVotes,
   } = datastore.useResources({
     projectId: props.projectId,
-    tags: apiTags,
+    tags: flatApiTags,
+    tagGroups: apiTagGroups,
     statuses: initStatuses,
     sort,
     search,
@@ -1552,6 +1591,7 @@ function StemBegroot({
                       itemsPerPage={itemsPerPage}
                       resources={resources}
                       onUpdateFilter={(f) => {
+                        setUserSelectedTags(f.tags);
                         if (f.tags.length === 0) {
                           setTags(tagIdsToLimitResourcesTo);
                         } else {
@@ -1563,6 +1603,16 @@ function StemBegroot({
                       preFilterTags={prefilterTagObj}
                     />
                   ) : null}
+
+                  {props.displaySearchText &&
+                    props.textActiveSearch &&
+                    search && (
+                      <Paragraph className="osc-searchtext" role="status">
+                        {props.textActiveSearch
+                          .replace('[search]', search)
+                          .replace('[zoekterm]', search)}
+                      </Paragraph>
+                    )}
 
                   <Spacer size={1} />
                 </>

@@ -25,9 +25,7 @@ const config: ResourceFormWidgetProps = {
   items: defaultFormValues,
 
   resourceType: 'resource',
-  formName: 'testformname',
   redirectUrl: 'http://example.com/redirect',
-  hideAdmin: false,
 
   confirmationUser: false,
   confirmationAdmin: false,
@@ -35,13 +33,11 @@ const config: ResourceFormWidgetProps = {
   submit: {
     submitButton: 'Opleveren',
     saveButton: 'Opslaan',
-    saveConceptButton: 'Opslaan als concept',
   },
   info: {
     allowAnonymousSubmissions: false,
     loginText: 'Inloggen om deel te nemen.',
     loginButtonText: 'Inloggen',
-    nameInHeader: false,
   },
 };
 ReactDOM.createRoot(document.getElementById('root')!).render(

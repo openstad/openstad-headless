@@ -55,8 +55,6 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="items">Items</TabsTrigger>
-              {/* <TabsTrigger value="display">Weergave</TabsTrigger> */}
-              {/* <TabsTrigger value="confirmation">Bevestiging</TabsTrigger> */}
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
@@ -96,27 +94,6 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
                 />
               )}
             </TabsContent>
-            {/* <TabsContent value="display" className="p-0">
-              {previewConfig && (
-                <WidgetEnqueteDisplay
-                  {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
-                />
-              )}
-            </TabsContent> */}
-            {/* <TabsContent value="confirmation" className="p-0">
-              <WidgetEnqueteConfirmation />
-            </TabsContent> */}
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
