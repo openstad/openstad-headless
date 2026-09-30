@@ -264,6 +264,9 @@ service.fetchClient = async function ({ authConfig, project }) {
           `${authConfig.clientId}:${authConfig.clientSecret}`
         ).toString('base64')}`,
       },
+      // Zonder deze grens blijft een trage auth-server minutenlang hangen, en
+      // daarmee ook het versturen van notificaties.
+      signal: AbortSignal.timeout(5000),
     });
     if (!response.ok) {
       throw new Error('OpenStad.service.fetchClient: fetch client failed');

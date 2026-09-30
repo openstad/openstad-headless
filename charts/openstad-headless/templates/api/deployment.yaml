@@ -201,6 +201,12 @@ spec:
           - name: AUTH_ADAPTER_OPENSTAD_SERVERURL_INTERNAL
             value: http://{{ template "openstad.auth.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.auth.service.httpPort }}
 
+          # De notificatiesjablonen laden hun afbeeldingen via {{ "{{ imagePath }}" }}.
+          # Zonder deze waarde wordt dat een relatief pad en is de afbeelding in
+          # elke mail stuk. Zelfde bron als bij de auth-server.
+          - name: EMAIL_ASSETS_URL
+            value: https://{{ template "openstad.auth.url" . }}/email
+
           - name: IMAGE_APP_URL
             value: https://{{ template "openstad.image.url" . }}
 

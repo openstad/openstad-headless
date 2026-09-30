@@ -179,6 +179,20 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         type: 'string',
         default: '',
       },
+      // Brand colours for the generated mail layout. Empty means "not set":
+      // the admin renderer then falls back to the OpenStad defaults.
+      primaryColor: {
+        type: 'string',
+        default: '',
+      },
+      backgroundColor: {
+        type: 'string',
+        default: '',
+      },
+      textColor: {
+        type: 'string',
+        default: '',
+      },
     },
   },
 };

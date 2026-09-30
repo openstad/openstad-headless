@@ -1,5 +1,34 @@
+import type { NotificationContent } from '@/lib/notification-content';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
+
+export type NotificationTemplateDefault = {
+  type: string;
+  label: string;
+  subject: string;
+  body: string;
+  content: NotificationContent | null;
+};
+
+/**
+ * Replace the template with the same id, or append it when it is new. Plain
+ * appending duplicated the row after every save.
+ */
+function upsertTemplate(list: any, template: any) {
+  const templates = Array.isArray(list) ? list : [];
+  const exists = templates.some((item) => item.id === template.id);
+  return exists
+    ? templates.map((item) => (item.id === template.id ? template : item))
+    : [...templates, template];
+}
+
+export function useNotificationTemplateDefaults(projectId?: string) {
+  const projectNumber: number | undefined = validateProjectNumber(projectId);
+
+  const url = `/api/openstad/notification/project/${projectNumber}/template/defaults`;
+
+  return useSWR<NotificationTemplateDefault[]>(projectNumber ? url : null);
+}
 
 export default function useNotificationTemplate(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
@@ -8,20 +37,14 @@ export default function useNotificationTemplate(projectId?: string) {
 
   const notificationTemplateSwr = useSWR(projectNumber ? url : null);
 
-  // The list can still be loading while a form is saved, so the cache update
-  // must not spread `undefined`.
-  const currentTemplates = () =>
-    Array.isArray(notificationTemplateSwr.data)
-      ? notificationTemplateSwr.data
-      : [];
-
   async function create(
     projectId: string,
     engine: string,
     type: string,
     label: string,
     subject: string,
-    body: string
+    body: string,
+    content: NotificationContent | null = null
   ) {
     const projectNumber: number | undefined = validateProjectNumber(projectId);
 
@@ -37,12 +60,15 @@ export default function useNotificationTemplate(projectId?: string) {
         label: label,
         subject: subject,
         body: body,
+        content: content,
       }),
     });
 
     if (res.ok) {
       const data = await res.json();
-      notificationTemplateSwr.mutate([...currentTemplates(), data]);
+      notificationTemplateSwr.mutate(
+        upsertTemplate(notificationTemplateSwr.data, data)
+      );
       return data;
     } else {
       throw new Error('Could not create the template');
@@ -53,7 +79,8 @@ export default function useNotificationTemplate(projectId?: string) {
     id: string,
     label: string,
     subject: string,
-    body: string
+    body: string,
+    content: NotificationContent | null = null
   ) {
     let url = `/api/openstad/notification/project/${projectNumber}/template/${id}`;
     const res = await fetch(url, {
@@ -65,24 +92,14 @@ export default function useNotificationTemplate(projectId?: string) {
         label: label,
         subject: subject,
         body: body,
+        content: content,
       }),
     });
 
     if (res.ok) {
       const data = await res.json();
-      // Replace the stored template instead of appending it: the page groups
-      // the list by type, so a second entry for the same id would render a
-      // duplicate form right after the save.
-      const templates = currentTemplates();
-      const index = templates.findIndex(
-        (template: any) => String(template?.id) === String(data?.id)
-      );
       notificationTemplateSwr.mutate(
-        index === -1
-          ? [...templates, data]
-          : templates.map((template: any, i: number) =>
-              i === index ? data : template
-            )
+        upsertTemplate(notificationTemplateSwr.data, data)
       );
       return data;
     } else {

@@ -1,11 +1,22 @@
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogFooter } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Heading, Paragraph } from '@/components/ui/typography';
 import { DialogClose } from '@radix-ui/react-dialog';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 
 type Props = {
-  buttonText: string;
+  buttonText?: string;
+  /**
+   * The element that opens the dialog. Prefer this over `buttonText`: a real
+   * button keeps the dialog reachable with the keyboard, while the plain
+   * `buttonText` div only reacts to a click on the text itself.
+   */
+  trigger?: ReactNode;
   header: string;
   message: string;
   confirmButtonText?: string;
@@ -24,6 +35,7 @@ type Props = {
 
 export function ConfirmActionDialog({
   buttonText,
+  trigger,
   header,
   message,
   confirmButtonText = 'Verwijderen',
@@ -35,14 +47,18 @@ export function ConfirmActionDialog({
 
   return (
     <Dialog open={open} modal={true} onOpenChange={setOpen}>
-      <div
-        className="flex items-center"
-        onClick={(e) => {
-          e.preventDefault();
-          setOpen(true);
-        }}>
-        {buttonText}
-      </div>
+      {trigger ? (
+        <DialogTrigger asChild>{trigger}</DialogTrigger>
+      ) : (
+        <div
+          className="flex items-center"
+          onClick={(e) => {
+            e.preventDefault();
+            setOpen(true);
+          }}>
+          {buttonText}
+        </div>
+      )}
       <DialogContent
         onEscapeKeyDown={(e: KeyboardEvent) => {
           e.stopPropagation();

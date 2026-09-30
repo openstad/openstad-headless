@@ -1,7 +1,13 @@
 import { fetchSessionUser } from '@/auth-context';
+import { CopyableVar } from '@/components/copyable-var';
+import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
+import AccordionUI from '@/components/ui/accordion';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -13,17 +19,37 @@ import {
   useRegisterSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
-import useNotificationTemplate from '@/hooks/use-notification-template';
-import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
+import useNotificationTemplate, {
+  useNotificationTemplateDefaults,
+} from '@/hooks/use-notification-template';
+import { useProject } from '@/hooks/use-project';
+import {
+  FIXED_BLOCKS_BY_TYPE,
+  NOTIFICATION_CONTENT_FIELDS,
+  NOTIFICATION_TYPE_LABELS,
+  NotificationContent,
+  NotificationStyling,
+  NotificationType,
+  hasContent,
+  isPlainTextType,
+  normalizeContent,
+  renderNotificationMjml,
+  showsLogo,
+} from '@/lib/notification-content';
+import {
+  buildPreviewContext,
+  variablesForType,
+} from '@/lib/notification-variables';
 import { applyFilters } from '@/lib/nunjucks-filters';
 import { zodResolver } from '@hookform/resolvers/zod';
 import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
 import nunjucks from 'nunjucks';
 import * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -38,343 +64,16 @@ import {
 const nunjucksEnv = new nunjucks.Environment();
 applyFilters(nunjucksEnv);
 
-const initialData = `<mjml>
-    <mj-body>
-      <mj-raw>
-        <!-- Company Header -->
-      </mj-raw>
-      <mj-section>
-        <mj-column>
-          <mj-image src="{{imagePath}}/logo-openstad.png" height="70px" width="99px">
-          </mj-image>
-        </mj-column>
-      </mj-section>
-      <mj-raw>
-        <!-- Image Header -->
-      </mj-raw>
-      <mj-section>
-        <mj-column width="600px">
-          <mj-image src="{{imagePath}}/mail-header.jpg"></mj-image>
-        </mj-column>
-      </mj-section>
-      <mj-raw>
-        <!-- Mail context -->
-      </mj-raw>
-      <mj-section>
-        <mj-column width="400px">
-          <mj-text font-size="20px" font-family="Helvetica Neue">Inlogmail aangevraagd</mj-text>
-          <mj-text>Beste {{name or 'bezoeker'}},</mj-text>
-          <mj-text color="#525252">Voor Admin panel is een inloglink aangevraagd voor dit emailadres. Klik op de knop hieronder om automatisch in te loggen. De knop is 10 minuten geldig. </mj-text>
-          <mj-button background-color="#12B886" href="{{loginurl}}">Log in</mj-button>
-        </mj-column>
-      </mj-section>
-      <mj-raw>
-        <!-- Alternate link -->
-      </mj-raw>
-      <mj-section>
-        <mj-column width="400px">
-          <mj-text>Of gebruik deze link in je browser:</mj-text>
-        </mj-column>
-        <mj-column>
-          <mj-text>{{loginurl}}</mj-text>
-        </mj-column>
-      </mj-section>
-    </mj-body>
-  </mjml>`;
-
-const initialDataResourceSubmission = `<mjml> 
-<mj-body> 
-<mj-section> 
-<mj-column> 
-<mj-image width="300px" src="{{imagePath}}/logo-openstad.png"></mj-image> 
-<mj-divider border-color="#666"></mj-divider> 
-
-<mj-text font-size="20px" color="#111" font-family="helvetica">Nieuwe inzending</mj-text><br>
-<mj-text font-size="16px" line-height="22px" color="#222" font-family="helvetica">Beste {{user.fullName | default('indiener')}},
-<br><br>
-Bedankt voor je inzending! Je inzending is goed ontvangen en staat nu online. Hieronder vind je een overzicht van je inzending.
-<br><br>
-</mj-text>
-<mj-text font-size="14px" line-height="22px" color="#444" font-family="helvetica">
-{{ submissionContent | safe }}
-</mj-text>
-
- </mj-column> 
- </mj-section> 
- </mj-body> 
- </mjml>`;
-
-const initialDataEnqueteSubmissionUser = `<mjml>
-  <mj-body background-color="#f6f6f7">
-    <mj-section background-color="#ffffff" padding="20px">
-      <mj-column>
-        <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">
-          Bedankt voor je Inzending
-        </mj-text>
-        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
-<mj-divider border-width="0" padding="10px" />
-
-        <mj-text font-size="16px" color="#555555" font-family="Helvetica">
-          Bedankt voor het invullen van onze enquête! Hieronder vind je een overzicht van je ingevulde gegevens.
-        </mj-text>
-<mj-divider border-width="0" padding="10px" />
-
-        {{ enqueteContent | safe }}
-<mj-divider border-width="0" padding="10px" />
-
-        <mj-text font-size="16px" color="#555555" font-family="Helvetica">
-          We nemen zo snel mogelijk contact met je op als dat nodig is.
-        </mj-text>
-<mj-divider border-width="0" padding="10px" />
-        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
-        <mj-text font-size="14px" color="#999999" font-family="Helvetica" align="center">
-          Als je vragen hebt, neem dan contact op via <a href="mailto:support@website.nl">support@website.nl</a>.
-        </mj-text>
-      </mj-column>
-    </mj-section>
-  </mj-body>
-</mjml>
-`;
-
-const initialDataCommentNotification = `<mjml>
-  <mj-body background-color="#f6f6f7">
-    <!-- Main section for the email content -->
-    <mj-section background-color="#ffffff" padding="20px">
-      <mj-column>
-
-        <!-- Title of the email -->
-        <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">
-          Je hebt een nieuwe reactie ontvangen
-        </mj-text>
-
-        <!-- Divider line -->
-        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
-        
-        <!-- Introduction text based on conditions -->
-        <mj-text font-size="16px" color="#444" font-family="Helvetica">
-          {% if comment.sentiment == 'for' %}
-            Hier zie je een positieve reactie op je inzending.
-          {% elseif comment.sentiment == 'against' %}
-            Hier zie je een negatieve reactie op je inzending.
-          {% else %}
-            Hier zie je de reactie op je inzending.
-          {% endif %}
-          
-          Geplaatst op {{ comment.createDateHumanized }} 
-          door {{ comment.userName or 'een anonieme gebruiker' }}.
-          
-          <!-- Embedded url link if Embedded url exist -->
-          {% if embeddedUrl %}
-            <a href="{{ embeddedUrl }}">Klik hier</a> om naar de inzending te gaan.    
-          {% endif %}
-        </mj-text>
-
-        <!-- Divider line -->
-        <mj-divider border-width="0" padding="10px" />
-        
-        <!-- The comment description itself -->
-        <mj-text font-size="14px" font-weight="700" color="#444" font-family="Helvetica" align="center">
-            Reactie:
-          </mj-text>
-        <mj-text font-size="14px" line-height="22px" color="#444" font-family="Helvetica">
-          {{ comment.description }}
-        </mj-text>
-
-        <!-- Divider line -->
-        <mj-divider border-width="0" padding="10px" />
-        
-        <!-- Unsubscribe link if unsubscribeUrl exist -->
-        {% if unsubscribeUrl %}
-          <mj-text font-size="14px" color="#444" font-family="Helvetica" align="center">
-            Wil je je uitschrijven? Dat kan via de volgende link:
-            <br />
-            <a href="{{ unsubscribeUrl }}">Uitschrijven</a>
-          </mj-text>
-        {% endif %}
-        
-      </mj-column>
-    </mj-section>
-  </mj-body>
-</mjml>
-`;
-
-const initialDataCommentReplyNotification = `<mjml>
-  <mj-body background-color="#f6f6f7">
-    <!-- Main section for the email content -->
-    <mj-section background-color="#ffffff" padding="20px">
-      <mj-column>
-
-        <!-- Title of the email -->
-        <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">
-          Je hebt een nieuwe reactie ontvangen
-        </mj-text>
-
-        <!-- Divider line -->
-        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
-        
-        <!-- Introduction text based on conditions -->
-        <mj-text font-size="16px" color="#444" font-family="Helvetica">
-          Hier zie je de reactie op je reactie.
-          
-          Geplaatst op {{ comment.createDateHumanized }} 
-          door {{ comment.userName or 'een anonieme gebruiker' }}.
-          
-          <!-- Embedded url link if Embedded url exist -->
-          {% if embeddedUrl %}
-            <a href="{{ embeddedUrl }}">Klik hier</a> om naar de inzending te gaan.    
-          {% endif %}
-        </mj-text>
-
-        <!-- Divider line -->
-        <mj-divider border-width="0" padding="10px" />
-        
-        <!-- The comment description itself -->
-        <mj-text font-size="14px" font-weight="700" color="#444" font-family="Helvetica" align="center">
-            Reactie:
-          </mj-text>
-        <mj-text font-size="14px" line-height="22px" color="#444" font-family="Helvetica">
-          {{ comment.description }}
-        </mj-text>
-        
-        <!-- The parent comment description -->
-        {% if comment.parentComment %}
-          <mj-text font-size="14px" font-weight="700" color="#444" font-family="Helvetica" align="center">
-              Jouw reactie:
-            </mj-text>
-          <mj-text font-size="14px" line-height="22px" color="#444" font-family="Helvetica">
-            {{ comment.parentComment }}
-          </mj-text>
-        {% endif %}
-
-        <!-- Divider line -->
-        <mj-divider border-width="0" padding="10px" />
-        
-        <!-- Unsubscribe link if unsubscribeUrl exist -->
-        {% if unsubscribeUrl %}
-          <mj-text font-size="14px" color="#444" font-family="Helvetica" align="center">
-            Wil je je uitschrijven? Dat kan via de volgende link:
-            <br />
-            <a href="{{ unsubscribeUrl }}">Uitschrijven</a>
-          </mj-text>
-        {% endif %}
-        
-      </mj-column>
-    </mj-section>
-  </mj-body>
-</mjml>
-`;
-
-const initialDataEnqueteSubmissionAdmin = `<mjml>
-  <mj-body background-color="#f6f6f7">
-    <mj-section background-color="#ffffff" padding="20px">
-      <mj-column>
-        <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">
-          Nieuwe Enquête Inzending
-        </mj-text>
-        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
-<mj-divider border-width="0" padding="10px" />
-        <mj-text font-size="16px" color="#555555" font-family="Helvetica">
-          Hallo Admin,
-        </mj-text>
-        <mj-text font-size="16px" color="#555555" font-family="Helvetica">
-          Er is een nieuwe inzending ontvangen van de enquête op de website.
-        </mj-text>
-<mj-divider border-width="0" padding="10px" />
-
-        {{ enqueteContent | safe }}
-        
-<mj-divider border-width="0" padding="10px" />
-        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
-        <mj-text font-size="14px" color="#999999" font-family="Helvetica" align="center">
-          Dit is een automatisch bericht, antwoorden op deze e-mail is niet mogelijk.
-        </mj-text>
-      </mj-column>
-    </mj-section>
-  </mj-body>
-</mjml>
-`;
-
-const initialDataAccountExpiry = `<mjml>
-        <mj-body background-color="#f6f6f7">
-            <mj-section background-color="#ffffff" padding="20px">
-                <mj-column>
-
-                    <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">
-                        We gaan je account verwijderen
-                    </mj-text>
-
-                    <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
-                    <mj-divider border-width="0" padding="10px"  ></mj-divider>
-
-                    <mj-text  line-height="1.3" font-size="16px" color="#555555" font-family="Helvetica">
-                        Beste {{user.name or 'bezoeker'}},
-                    </mj-text>
-
-                    <mj-text  line-height="1.3" font-size="16px" color="#555555" font-family="Helvetica">
-                        Je bent al een tijd niet actief geweest op de website
-                        
-                        {% if projectUrl %}
-                            <a href="{{projectUrl}}">{{projectUrl}}</a>.
-                        {% else %}
-                            {{projectName}}.
-                        {% endif %}
-                        
-                        We willen niet onnodig je gegevens blijven bewaren, en gaan die daarom verwijderen. Dat betekent dat een eventuele bijdrage die je hebt geleverd op de website, bijvoorbeeld inzendingen en/of reacties, geanonimiseerd worden.
-                    </mj-text>
-
-                    <mj-text  line-height="1.3" font-size="16px" color="#555555" font-family="Helvetica">
-                        Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website om je account actief te houden. Doe dit wel voor {{anonymizeDate}}, want anders gaan we op die dag je gegevens verwijderen.
-                    </mj-text>
-
-                    <mj-divider border-width="0" padding="10px" ></mj-divider>
-                    <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
-
-                    <mj-text  line-height="1.3" font-size="14px" color="#999999" font-family="Helvetica" align="center">
-                        Dit is een automatisch bericht, antwoorden op deze e-mail is niet mogelijk.
-                    </mj-text>
-                </mj-column>
-            </mj-section>
-        </mj-body>
-    </mjml>`;
-
 type Props = {
-  type:
-    | 'login email'
-    | 'login sms'
-    | 'new published resource - user feedback'
-    | 'new published resource - admin update'
-    | 'updated resource - user feedback'
-    | 'user account about to expire'
-    | 'new enquete - admin'
-    | 'new enquete - user'
-    | 'notification comment - user'
-    | 'notification comment reply - user';
+  type: NotificationType;
   engine?: 'email' | 'sms';
   id?: string;
   label?: string;
   subject?: string;
   body?: string;
-};
-
-const notificationTypes = {
-  'login email': 'Inloggen via e-mail',
-  'login sms': 'Inloggen via sms',
-  'new published resource - user feedback':
-    'Nieuwe resource gepubliceerd - Notificatie naar de gebruiker',
-  'new published resource - admin update':
-    'Nieuwe resource gepubliceerd - Notificatie naar de admin',
-  'updated resource - user feedback':
-    'Resource bijgewerkt - Notificatie naar de gebruiker',
-  'user account about to expire':
-    'Gebruikersaccount staat op het punt te verlopen',
-  'new enquete - admin':
-    'Nieuwe formulier inzending - Notificatie naar de admin',
-  'new enquete - user':
-    'Nieuwe formulier inzending - Notificatie naar de gebruiker',
-  'notification comment - user':
-    'Nieuwe reactie op een inzending - Notificatie naar de gebruiker',
-  'notification comment reply - user':
-    'Nieuwe reactie op een reactie - Notificatie naar de gebruiker',
+  content?: NotificationContent | null;
+  /** Unsaved brand style from the styling form, so the preview follows it. */
+  stylingOverride?: NotificationStyling;
 };
 
 const formSchema = z.object({
@@ -398,7 +97,41 @@ const formSchema = z.object({
   body: z.string().min(1, {
     message: 'De inhoud mag niet leeg zijn!',
   }),
+  heading: z.string(),
+  greeting: z.string(),
+  intro: z.string(),
+  buttonLabel: z.string(),
+  buttonUrl: z.string(),
+  footer: z.string(),
+  showLogo: z.boolean(),
 });
+
+type FormValues = z.infer<typeof formSchema>;
+
+function contentFromValues(values: FormValues): NotificationContent {
+  return normalizeContent({
+    heading: values.heading,
+    greeting: values.greeting,
+    intro: values.intro,
+    buttonLabel: values.buttonLabel,
+    buttonUrl: values.buttonUrl,
+    footer: values.footer,
+    showLogo: values.showLogo,
+  });
+}
+
+function contentToValues(type: NotificationType, content: NotificationContent) {
+  const normalized = normalizeContent(content);
+  return {
+    heading: normalized.heading || '',
+    greeting: normalized.greeting || '',
+    intro: normalized.intro || '',
+    buttonLabel: normalized.buttonLabel || '',
+    buttonUrl: normalized.buttonUrl || '',
+    footer: normalized.footer || '',
+    showLogo: showsLogo(type, normalized),
+  };
+}
 
 export function NotificationForm({
   type,
@@ -407,103 +140,192 @@ export function NotificationForm({
   label,
   subject,
   body,
+  content,
+  stylingOverride,
 }: Props) {
   const router = useRouter();
   const project = router.query.project as string;
-  const { data, create, update } = useNotificationTemplate(project as string);
-  const notificationTitle = notificationTypes[type];
-  // A stored template is updated, everything else is created. Keyed on the id
-  // so a stored template with an empty label cannot take the create path and
-  // POST a duplicate.
-  const isExistingTemplate = !!id;
+  const { create, update } = useNotificationTemplate(project as string);
+  const { data: defaultTemplates } = useNotificationTemplateDefaults(
+    project as string
+  );
+  const defaultTemplate = defaultTemplates?.find((d) => d.type === type);
+  const notificationTitle = NOTIFICATION_TYPE_LABELS[type];
+  const { data: projectData } = useProject();
+  const plainText = isPlainTextType(type);
+  const fixedBlockNotice = FIXED_BLOCKS_BY_TYPE[type];
 
-  type MailContextType = {
-    user: { name: string; fullName: string };
-    name: string;
-    loginurl: string;
-    imagePath: string;
-    resource: any;
-  };
-  const [mailContext, setMailContext] = useState<MailContextType>({
-    user: { name: 'Gebruiker', fullName: 'Gebruiker' },
-    name: 'Gebruiker',
-    loginurl: 'https://openstad.nl/login',
-    imagePath: process.env.EMAIL_ASSETS_URL || '',
-    resource: {
-      tags: [],
-    },
-  });
+  // Sample data comes from buildPreviewContext (one variable catalog for the
+  // whole app); these overrides replace a sample with the real thing wherever
+  // that's cheaply available client-side. clientName stays a sample - it is
+  // only resolvable server-side, see resolveClientName in NotificationMessage.js.
+  const [previewOverrides, setPreviewOverrides] = useState<Record<string, any>>(
+    {}
+  );
 
   useEffect(() => {
-    async function setUserNameInMailContext() {
+    async function setUserNameInPreview() {
       const user = await fetchSessionUser();
 
       if (user && user.name) {
-        setMailContext((prev: MailContextType) => {
-          return {
-            ...prev,
-            user: { name: user.name, fullName: user.name },
-            name: user.name,
-          };
-        });
+        setPreviewOverrides((prev) => ({
+          ...prev,
+          user: { name: user.name, fullName: user.name },
+          name: user.name,
+        }));
       }
     }
 
-    setUserNameInMailContext();
+    setUserNameInPreview();
   }, []);
 
-  const defaultValueBody =
-    body ||
-    (type === 'new published resource - user feedback'
-      ? initialDataResourceSubmission
-      : '') ||
-    (type === 'login email' ? initialData : '') ||
-    (type === 'new enquete - admin' ? initialDataEnqueteSubmissionAdmin : '') ||
-    (type === 'new enquete - user' ? initialDataEnqueteSubmissionUser : '') ||
-    (type === 'notification comment - user'
-      ? initialDataCommentNotification
-      : '') ||
-    (type === 'notification comment reply - user'
-      ? initialDataCommentReplyNotification
-      : '') ||
-    (type === 'user account about to expire' ? initialDataAccountExpiry : '');
+  useEffect(() => {
+    if (!projectData) return;
+    setPreviewOverrides((prev) => ({
+      ...prev,
+      logo: projectData.emailConfig?.styling?.logo || prev.logo,
+      projectName: projectData.title || projectData.name || prev.projectName,
+      projectUrl: projectData.url || prev.projectUrl,
+      project: {
+        title: projectData.title || projectData.name || '',
+        name: projectData.name || '',
+        url: projectData.url || '',
+      },
+    }));
+  }, [projectData]);
+
+  const mailContext = useMemo(
+    () => buildPreviewContext(type, previewOverrides),
+    [type, previewOverrides]
+  );
+
+  const styling = stylingOverride || projectData?.emailConfig?.styling || {};
+
+  const defaultValueBody = body || defaultTemplate?.body || '';
+  const defaultContent = useMemo(
+    () => normalizeContent(defaultTemplate?.content),
+    [defaultTemplate]
+  );
+  // A saved template with content is content-managed; one without is raw MJML
+  // someone may have edited by hand, so we do not overwrite it silently.
+  const savedContent = useMemo(() => normalizeContent(content), [content]);
+  const activeContent = id
+    ? hasContent(content)
+      ? savedContent
+      : defaultContent
+    : defaultContent;
 
   const defaults = React.useCallback(
     () => ({
       engine: engine || 'email',
-      label: label || '',
-      subject: subject || '',
+      label: label || defaultTemplate?.label || '',
+      subject: subject || defaultTemplate?.subject || '',
       body: defaultValueBody,
+      ...contentToValues(type, activeContent),
     }),
-    // `type` feeds `defaultValueBody`, so it belongs here as well.
-    [engine, label, subject, type, defaultValueBody]
+    [
+      type,
+      engine,
+      label,
+      subject,
+      defaultValueBody,
+      defaultTemplate,
+      activeContent,
+    ]
   );
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
   });
 
   const { watch } = form;
-  const fieldValue = watch('body'); // Assuming 'engine' is the name of the field you're interested in
+  const fieldValue = watch('body');
+  const subjectValue = watch('subject');
 
-  // Guarded on `id`: only an existing template gets its values from SWR and can
-  // therefore land mid-edit. A create instance never receives them, so its form
-  // keeps the `defaultValues` it mounted with and typing in it is never reset.
-  useSyncFormDefaults(form, defaults, id);
+  useEffect(() => {
+    form.reset(defaults(), { keepDirtyValues: true });
+  }, [form, defaults]);
 
-  const [templateData, setTemplateData] = useState(defaultValueBody || '');
+  const [contentManaged, setContentManaged] = useState<boolean>(
+    id ? hasContent(content) : true
+  );
+  // Which tab you look at is separate from how the template is managed:
+  // opening the HTML tab to read along must not silently change the mode.
+  const [activeTab, setActiveTab] = useState<'content' | 'html'>(
+    id && !hasContent(content) ? 'html' : 'content'
+  );
+
+  // Key on the value, not the object: the templates list refetches and hands us
+  // a fresh `content` object every time, which would otherwise reset an unsaved
+  // switch to manual HTML and regenerate over the admin's own markup.
+  const contentKey = JSON.stringify(savedContent);
+
+  useEffect(() => {
+    const managed = id ? hasContent(savedContent) : true;
+    setContentManaged(managed);
+    // Open on the tab that actually drives this template.
+    setActiveTab(managed ? 'content' : 'html');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, contentKey]);
+
+  const watchedContent = watch([
+    'heading',
+    'greeting',
+    'intro',
+    'buttonLabel',
+    'buttonUrl',
+    'footer',
+    'showLogo',
+  ]);
+
+  // In content mode the fields are the source: every keystroke regenerates the
+  // MJML in `body`, which drives both the preview and what gets saved.
+  useEffect(() => {
+    if (!contentManaged) return;
+    const rendered = renderNotificationMjml(
+      type,
+      contentFromValues(form.getValues()),
+      styling
+    );
+    if (rendered !== form.getValues('body')) {
+      form.setValue('body', rendered, { shouldDirty: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    contentManaged,
+    type,
+    JSON.stringify(watchedContent),
+    styling.logo,
+    styling.primaryColor,
+    styling.backgroundColor,
+    styling.textColor,
+  ]);
+
   const [mjmlHtml, setMjmlHtml] = useState('');
 
-  let mailTemplate: any = nunjucksEnv.renderString(templateData, mailContext);
+  function renderPreview(template: string) {
+    try {
+      return nunjucksEnv.renderString(template || '', mailContext);
+    } catch (err) {
+      return '';
+    }
+  }
+
+  let mailTemplate: any = renderPreview(fieldValue || defaultValueBody || '');
+  const subjectPreview = renderPreview(subjectValue || '');
 
   const [error, setError] = useState<string | null>(null);
 
   async function convertMJMLToHTML(data = mailTemplate) {
     if (data === '') {
       setMjmlHtml("<p style='text-align: center;'>Inhoud is leeg.</p>");
-      // Without this a render error from an earlier value would stay on screen
-      // and keep blocking this form's save.
+      setError(null);
+      return;
+    }
+
+    if (!String(data).includes('<mjml')) {
+      setMjmlHtml(String(data));
       setError(null);
       return;
     }
@@ -520,6 +342,7 @@ export function NotificationForm({
 
   useEffect(() => {
     convertMJMLToHTML();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mailContext]);
 
   const handleOnChange = (e: any, field: any) => {
@@ -536,7 +359,6 @@ export function NotificationForm({
 
   useEffect(() => {
     if (!fieldValue) {
-      // An emptied field has nothing to render; this also clears a stale error.
       convertMJMLToHTML('');
       return;
     }
@@ -545,11 +367,10 @@ export function NotificationForm({
     } catch (err) {
       setError('Er is een fout opgetreden bij het renderen van de template.');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fieldValue]);
 
   const save = useCallback(async () => {
-    // The save bar replaces `form.handleSubmit`, so the resolver has to be run
-    // here: without it invalid values would be saved without any message.
     const valid = await form.trigger();
     if (!valid) {
       throw new Error('Controleer de gemarkeerde velden.');
@@ -560,10 +381,17 @@ export function NotificationForm({
       );
     }
     const sent = cloneDeep(form.getValues());
-    const values = formSchema.parse(sent);
+    const values = formSchema.parse(sent) as FormValues;
+    const contentToSave = contentManaged ? contentFromValues(values) : null;
     try {
-      if (isExistingTemplate) {
-        await update(id as string, values.label, values.subject, values.body);
+      if (id) {
+        await update(
+          id as string,
+          values.label,
+          values.subject,
+          values.body,
+          contentToSave
+        );
       } else {
         await create(
           project,
@@ -571,22 +399,65 @@ export function NotificationForm({
           type,
           values.label,
           values.subject,
-          values.body
+          values.body,
+          contentToSave
         );
       }
     } catch (requestError) {
-      // The hook throws an English developer message; the save bar shows this
-      // text to the user, so it is replaced here.
       throw new Error('Opslaan is mislukt. Probeer het opnieuw.');
     }
     rebaselineAfterSave(form, sent);
-  }, [create, error, form, id, isExistingTemplate, project, type, update]);
+  }, [contentManaged, create, error, form, id, project, type, update]);
 
   useRegisterSave({
     isDirty: form.formState.isDirty,
     save,
     label: notificationTitle,
   });
+
+  function handleRestoreDefault() {
+    if (!defaultTemplate) return;
+    const managed = hasContent(defaultTemplate.content);
+    // With content mode on, `body` must be what the fields produce - otherwise
+    // the read-only HTML tab shows the handwritten file markup and the mail
+    // silently changes shape the next time the page regenerates it.
+    const restoredBody = managed
+      ? renderNotificationMjml(type, defaultContent, styling)
+      : defaultTemplate.body;
+    form.reset({
+      engine: engine || 'email',
+      label: defaultTemplate.label,
+      subject: defaultTemplate.subject,
+      body: restoredBody,
+      ...contentToValues(type, defaultContent),
+    });
+    setContentManaged(managed);
+    setActiveTab(managed ? 'content' : 'html');
+  }
+
+  function handleSwitchToContent() {
+    // Prefer what this template had saved; only fall back to the shipped
+    // defaults when it never had content fields.
+    const target = hasContent(savedContent) ? savedContent : defaultContent;
+    form.reset(
+      {
+        ...form.getValues(),
+        ...contentToValues(type, target),
+      },
+      { keepDirtyValues: false }
+    );
+    setContentManaged(true);
+    setActiveTab('content');
+  }
+
+  function handleSwitchToManual() {
+    setContentManaged(false);
+    setActiveTab('html');
+  }
+
+  const contentFields = plainText
+    ? NOTIFICATION_CONTENT_FIELDS.filter((field) => field.key === 'intro')
+    : NOTIFICATION_CONTENT_FIELDS;
 
   return (
     <div>
@@ -596,7 +467,7 @@ export function NotificationForm({
           <Separator className="my-4" />
           <div className="grid grid-cols-2">
             <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
-              {isExistingTemplate ? null : (
+              {id ? null : (
                 <FormField
                   control={form.control}
                   name="engine"
@@ -649,37 +520,221 @@ export function NotificationForm({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="body"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Inhoud</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Inhoud van de mail..."
-                        defaultValue={
-                          field.value.length > 0 ? field.value : body
+
+              <Tabs
+                value={activeTab}
+                onValueChange={(value) =>
+                  setActiveTab(value as 'content' | 'html')
+                }>
+                <TabsList>
+                  <TabsTrigger value="content">Inhoud</TabsTrigger>
+                  <TabsTrigger value="html">
+                    {plainText ? 'Platte tekst' : 'HTML'}
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent
+                  value="content"
+                  forceMount
+                  className="space-y-4 pt-4 data-[state=inactive]:hidden">
+                  {contentManaged ? null : (
+                    <div className="rounded-md border border-input p-4 space-y-3">
+                      <p className="text-sm text-muted-foreground">
+                        Deze e-mail wordt op dit moment als{' '}
+                        {plainText ? 'tekst' : 'HTML'} beheerd. De velden
+                        hieronder worden pas gebruikt als je overstapt.
+                      </p>
+                      <ConfirmActionDialog
+                        trigger={
+                          <Button type="button" variant="outline">
+                            Overstappen op inhoudsvelden
+                          </Button>
                         }
-                        rows={20}
-                        onKeyUpCapture={(e) => handleOnChange(e, field)}
-                        {...field}
+                        header="Overstappen op inhoudsvelden?"
+                        message={`De ${plainText ? 'tekst' : 'HTML'} van deze e-mail wordt dan opnieuw opgebouwd uit de losse velden. Handmatige aanpassingen in de ${plainText ? 'tekst' : 'HTML'} gaan verloren zodra je opslaat.`}
+                        confirmButtonText="Overstappen"
+                        cancelButtonText="Annuleren"
+                        onConfirmAccepted={handleSwitchToContent}
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    </div>
+                  )}
+                  {plainText && (
+                    <p className="text-sm text-muted-foreground">
+                      Sms versturen is nog niet beschikbaar in OpenStad. Je legt
+                      hier alleen de tekst vast.
+                    </p>
+                  )}
+                  {fixedBlockNotice && (
+                    <p className="text-sm text-muted-foreground">
+                      {fixedBlockNotice}
+                    </p>
+                  )}
+                  {!plainText && (
+                    <FormField
+                      control={form.control}
+                      name="showLogo"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center gap-2 space-y-0">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={(checked) =>
+                                field.onChange(checked === true)
+                              }
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Logo bovenaan deze e-mail tonen
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  {contentFields.map((contentField) => (
+                    <FormField
+                      key={contentField.key}
+                      control={form.control}
+                      name={contentField.key}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{contentField.label}</FormLabel>
+                          {contentField.description && (
+                            <FormDescription>
+                              {contentField.description}
+                            </FormDescription>
+                          )}
+                          <FormControl>
+                            {contentField.input === 'textarea' ? (
+                              <Textarea rows={5} {...field} />
+                            ) : (
+                              <Input {...field} />
+                            )}
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  ))}
+                  {contentManaged && form.formState.errors.body && (
+                    // The body field lives in the other panel, which is hidden.
+                    // Without this the save button would just do nothing.
+                    <p className="text-sm font-medium text-destructive">
+                      {form.formState.errors.body.message}
+                    </p>
+                  )}
+                </TabsContent>
+
+                <TabsContent
+                  value="html"
+                  forceMount
+                  className="pt-4 data-[state=inactive]:hidden">
+                  <FormField
+                    control={form.control}
+                    name="body"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Inhoud</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Inhoud van de mail..."
+                            rows={20}
+                            readOnly={contentManaged}
+                            onKeyUpCapture={(e) => handleOnChange(e, field)}
+                            {...field}
+                          />
+                        </FormControl>
+                        {contentManaged && (
+                          <div className="space-y-3 pt-2">
+                            <p className="text-sm text-muted-foreground">
+                              Deze {plainText ? 'tekst' : 'HTML'} wordt
+                              gegenereerd uit de inhoudsvelden en is daarom niet
+                              te bewerken.
+                            </p>
+                            <ConfirmActionDialog
+                              trigger={
+                                <Button type="button" variant="outline">
+                                  {plainText ? 'Tekst' : 'HTML'} zelf beheren
+                                </Button>
+                              }
+                              header={`${plainText ? 'Tekst' : 'HTML'} zelf beheren?`}
+                              message={`De inhoudsvelden sturen deze e-mail dan niet meer aan. Je beheert de ${plainText ? 'tekst' : 'HTML'} vanaf dat moment zelf.`}
+                              confirmButtonText="Zelf beheren"
+                              cancelButtonText="Annuleren"
+                              onConfirmAccepted={handleSwitchToManual}
+                            />
+                          </div>
+                        )}
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </TabsContent>
+              </Tabs>
+
+              <div className="flex items-center gap-2">
+                <ConfirmActionDialog
+                  trigger={
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={!defaultTemplate}>
+                      Herstel standaard
+                    </Button>
+                  }
+                  header="Weet je het zeker?"
+                  message="Hiermee vervang je het label, het onderwerp en de inhoud van deze template door de standaardversie. Je eigen wijzigingen gaan verloren zodra je opslaat."
+                  confirmButtonText="Herstel standaard"
+                  cancelButtonText="Annuleren"
+                  onConfirmAccepted={handleRestoreDefault}
+                />
+              </div>
               {error && <p className="text-red-500">{error}</p>}
             </form>
 
-            <div className="p-4">
+            <div className="p-4 space-y-4">
+              <div>
+                <p className="text-sm font-medium">Onderwerp</p>
+                <p className="text-sm text-muted-foreground">
+                  {subjectPreview || '—'}
+                </p>
+              </div>
               <iframe
                 className="email-iframe"
+                sandbox=""
                 srcDoc={mjmlHtml}
                 height={500}
                 width={500}></iframe>
             </div>
+          </div>
+
+          {/* Not the fixed-height preview column: the iframe's height:100%
+              otherwise locks the row height and an opened accordion overflows
+              into the next mail. Also not full width: AccordionUI's header
+              spaces the chevron to the far edge of its container. */}
+          <div className="max-w-xl mt-6">
+            <AccordionUI
+              items={[
+                {
+                  header: `Beschikbare variabelen (${variablesForType(type).length})`,
+                  content: (
+                    <table className="w-full text-sm">
+                      <tbody>
+                        {variablesForType(type).map((variable) => (
+                          <tr key={variable.key}>
+                            <td className="pr-3 pb-2 align-top whitespace-nowrap">
+                              <CopyableVar expression={variable.key} />
+                            </td>
+                            <td className="pb-2 align-top text-muted-foreground">
+                              {variable.label}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ),
+                },
+              ]}
+            />
           </div>
         </Form>
       </div>

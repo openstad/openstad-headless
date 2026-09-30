@@ -1,7 +1,53 @@
-const fs = require('fs').promises;
 const nunjucks = require('nunjucks');
 const mjml2html = require('mjml');
 const sendMessage = require('../notifications/send-engines');
+const defaultTemplatesCatalog = require('../notifications/default-templates-catalog');
+const authSettings = require('../util/auth-settings');
+
+// Elke ontvanger van elke mail levert een eigen NotificationMessage op, en die
+// vroeg tot nu toe per stuk de clientnaam op bij de auth-server. Bij een mail aan
+// honderden mensen zijn dat honderden identieke rondjes. Deze cache maakt er één
+// per project per vijf minuten van.
+const CLIENT_NAME_TTL_MS = 5 * 60 * 1000;
+const clientNameCache = new Map();
+
+async function fetchClientName(project) {
+  try {
+    const providers = await authSettings.providers({ project });
+    for (const provider of providers) {
+      if (provider === 'default') continue;
+      const authConfig = await authSettings.config({
+        project,
+        useAuth: provider,
+      });
+      if (!authConfig.clientId) continue;
+      const adapter = await authSettings.adapter({ authConfig });
+      if (!adapter || !adapter.service || !adapter.service.fetchClient)
+        continue;
+      const client = await adapter.service.fetchClient({ authConfig, project });
+      if (client && client.name) return client.name;
+    }
+  } catch (err) {
+    // best-effort only; auth server may be unreachable or unconfigured
+  }
+  return null;
+}
+
+async function resolveClientName(project, fallback) {
+  if (!project || !project.id) return fallback;
+
+  const cached = clientNameCache.get(project.id);
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.name || fallback;
+  }
+
+  const name = await fetchClientName(project);
+  clientNameCache.set(project.id, {
+    name,
+    expiresAt: Date.now() + CLIENT_NAME_TTL_MS,
+  });
+  return name || fallback;
+}
 
 let nunjucksEnv;
 
@@ -77,24 +123,43 @@ module.exports = (db, sequelize, DataTypes) => {
                 },
               });
               if (!template) {
-                let file = await fs.readFile(
-                  `src/notifications/default-templates/${instance.type}`
+                template = await defaultTemplatesCatalog.getDefaultTemplate(
+                  instance.type
                 );
-                file = file.toString();
-                let match = file.match(
-                  /<subject>((?:.|\r|\n)*)<\/subject>(?:.|\r|\n)*<body>((?:.|\r|\n)*)<\/body>/
-                );
-                let subject = match && match[1];
-                let body = match && match[2];
-                if (subject && body) template = { subject, body };
               }
               if (!template) throw new Error('Notification template not found');
+
+              // Zonder deze check rendert mjml2html een blanco body naar niets,
+              // de lege catch hieronder slikte die fout voorheen stil in, en er
+              // ging een lege mail de deur uit.
+              if (!template.body || !String(template.body).trim()) {
+                throw new Error(
+                  `Notification template '${instance.type}' is empty for project ${instance.projectId}; not sending`
+                );
+              }
 
               templateData = options.data;
               templateData.project = await db.Project.scope(
                 'includeConfig',
                 'includeEmailConfig'
               ).findByPk(instance.projectId);
+
+              templateData.imagePath = process.env.EMAIL_ASSETS_URL || '';
+              templateData.logo =
+                (templateData.project &&
+                  templateData.project.emailConfig &&
+                  templateData.project.emailConfig.styling &&
+                  templateData.project.emailConfig.styling.logo) ||
+                '';
+              templateData.projectName =
+                (templateData.project &&
+                  (templateData.project.title || templateData.project.name)) ||
+                '';
+              templateData.clientName = await resolveClientName(
+                templateData.project,
+                templateData.projectName
+              );
+
               let keys = ['resource', 'user', 'comment', 'submission'];
               for (let key of keys) {
                 let idkey = key + 'Id';
@@ -148,7 +213,15 @@ module.exports = (db, sequelize, DataTypes) => {
               // mjml2html is now async
               body = await mjml2html(body);
               instance.body = body.html;
-            } catch (err) {}
+            } catch (err) {
+              // Zonder deze melding gaat een mail met een lege body de deur uit
+              // en staat er niets in de logs; de fout blijft dan onzichtbaar.
+              console.error(
+                `Rendering notification template '${instance.type}' for project ${instance.projectId} failed:`,
+                err
+              );
+              throw err;
+            }
 
             // Carry PDF attachment as non-persisted property for email sending
             if (options.data?.pdfAttachment) {

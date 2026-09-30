@@ -1,8 +1,10 @@
 import { NotificationForm } from '@/components/notification-form';
+import { NotificationStylingForm } from '@/components/notification-styling-form';
 import AccordionUI from '@/components/ui/accordion';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Separator } from '@/components/ui/separator';
 import useNotificationTemplate from '@/hooks/use-notification-template';
+import { NotificationStyling } from '@/lib/notification-content';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 
@@ -34,6 +36,10 @@ export default function ProjectNotifications() {
 
   const router = useRouter();
   const project = router.query.project as string;
+
+  // Unsaved brand style, so every preview below follows the styling form live.
+  const [livePreviewStyling, setLivePreviewStyling] =
+    React.useState<NotificationStyling>();
   const { data } = useNotificationTemplate(project as string);
   const mjmlText = `<mjml>
                   <mj-body>
@@ -50,7 +56,7 @@ export default function ProjectNotifications() {
   const variableText = `Variabelen van gekoppelde onderdelen kunnen gebruikt worden binnen de mail.
   Als je bijvoorbeeld de naam van een gebruiker wilt gebruiken,
   dan wordt deze toegevoegd via de variabele {{user.name}}.
-  Hieronder worden per bruikbaar onderdeel alle variabelen opgenoemd.`;
+  Welke variabelen je kunt gebruiken verschilt per e-mail; die lijst staat bij de e-mail zelf.`;
 
   // Built from `data` on every render instead of pushed into state: the shared
   // `defaultDefinitions` arrays are the same objects on every run, so pushing
@@ -86,132 +92,46 @@ export default function ProjectNotifications() {
         ]}>
         <div className="container py-10">
           <div className="p-6 bg-white rounded-md">
-            <div className="space-y-4 lg:w-1/2">
-              <h2 className="font-futura font-bold tracking-tight text-2xl">
-                Stel de notificatie e-mails in
-              </h2>
-              <p>
-                De mails die worden gebruikt zijn volledig opgezet met behulp
-                van MJML. Hieronder geven we een link naar de documentatie van
-                MJML, een voorbeeld van hoe MJML is opgezet en de bruikbare
-                variabelen.
-              </p>
-              <br />
-              <p>
-                <a
-                  href="https://documentation.mjml.io"
-                  className="text-blue-600">
-                  MJML documentatie
-                </a>
-              </p>
-              <br />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="space-y-4">
+                <h2 className="font-futura font-bold tracking-tight text-2xl">
+                  Stel de notificatie e-mails in
+                </h2>
+                <p>
+                  De mails die worden gebruikt zijn volledig opgezet met behulp
+                  van MJML. Hieronder geven we een link naar de documentatie van
+                  MJML, een voorbeeld van hoe MJML is opgezet en de bruikbare
+                  variabelen.
+                </p>
+                <br />
+                <p>
+                  <a
+                    href="https://documentation.mjml.io"
+                    className="text-blue-600">
+                    MJML documentatie
+                  </a>
+                </p>
+                <br />
 
-              <AccordionUI
-                items={[
-                  {
-                    header: 'Meer uitleg over MJML',
-                    content: (
-                      <>
-                        <code>{mjmlText}</code>
-                        <br />
-                        <br />
-                        <p>{variableText}</p>
-                        <br />
-                        <p>
-                          user:
+                <AccordionUI
+                  items={[
+                    {
+                      header: 'Meer uitleg over MJML',
+                      content: (
+                        <>
+                          <code>{mjmlText}</code>
                           <br />
-                          -name
                           <br />
-                          -email
-                          <br />
-                          -nickName
-                          <br />
-                          -phoneNumber
-                          <br />
-                          -address
-                          <br />
-                          -city
-                          <br />
-                          -fullName
-                          <br />
-                          -postcode
-                        </p>
-                        <br />
-                        <p>
-                          resource:
-                          <br />
-                          -startDateHumanized
-                          <br />
-                          -title
-                          <br />
-                          -summary
-                          <br />
-                          -description
-                          <br />
-                          -budget
-                          <br />
-                          -location
-                          <br />
-                          -modBreaks
-                          <br />
-                          -publishDateHumanized
-                        </p>
-                        <br />
-                        <p>
-                          submission:
-                          <br />
-                          -status
-                          <br />
-                          -submittedData
-                        </p>
-                        <br />
-                        <p>
-                          Voor een overzicht van ingevulde waardes van een
-                          resource kan dit gebruikt worden:
-                          <br />
-                          &#123;&#123; submissionContent | safe &#125;&#125;
-                        </p>
-                        <br />
-                        <p>
-                          Voor een overzicht van ingevulde waardes van een
-                          enquete kan dit gebruikt worden:
-                          <br />
-                          &#123;&#123; enqueteContent | safe &#125;&#125;
-                        </p>
+                          <p>{variableText}</p>
+                        </>
+                      ),
+                    },
+                  ]}
+                />
+              </div>
 
-                        <br />
-                        <p>
-                          Voor het invoegen van een reactie kan dit gebruikt
-                          worden:
-                          <br />
-                        </p>
-                        <p>
-                          unsubscribeUrl
-                          <br />
-                          <br />
-                          comment:
-                          <br />
-                          -description
-                          <br />
-                          -sentiment
-                          <br />
-                          -parentId
-                          <br />
-                          -parentComment
-                          <br />
-                          -createDateHumanized
-                          <br />
-                          -userName
-                          <br />
-                          -userEmail
-                          <br />
-                        </p>
-
-                        <br />
-                      </>
-                    ),
-                  },
-                ]}
+              <NotificationStylingForm
+                onStylingChange={setLivePreviewStyling}
               />
             </div>
 
@@ -220,7 +140,10 @@ export default function ProjectNotifications() {
                 <React.Fragment key={index}>
                   {templateList.length === 0 && (
                     <div key={type}>
-                      <NotificationForm type={type as NotificationType} />
+                      <NotificationForm
+                        type={type as NotificationType}
+                        stylingOverride={livePreviewStyling}
+                      />
                       {index !== Object.entries(typeDefinitions).length - 1 && (
                         <Separator />
                       )}
@@ -235,6 +158,8 @@ export default function ProjectNotifications() {
                         label={template.label}
                         subject={template.subject}
                         body={template.body}
+                        content={template.content}
+                        stylingOverride={livePreviewStyling}
                       />
                     </div>
                   ))}

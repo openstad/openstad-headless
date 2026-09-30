@@ -1,6 +1,11 @@
 <!-- template: login sms -->
-<subject>login sms</subject>
+<subject>Je inlogcode</subject>
+<content>
+{
+  "intro": "Je code is {{code}}.\nGroeten, Team OpenStad."
+}
+</content>
 <body>
-Je code is {{code}}.
-Groeten, Team OpenStad.
+  Je code is {{code}}.
+  Groeten, Team OpenStad.
 </body>

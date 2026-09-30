@@ -1,46 +1,39 @@
 <!-- template: new published resource - admin update -->
-<subject>new published resource - admin update</subject>
 <subject>Nieuwe resource op {{project.title}}</subject>
+<content>
+{
+  "heading": "Nieuwe inzending ontvangen",
+  "greeting": "Beste beheerder,",
+  "intro": "Er is een nieuwe inzending binnengekomen. Hieronder vind je de details:",
+  "buttonLabel": "Bekijk de inzending",
+  "buttonUrl": "{{ redirectUrl }}",
+  "footer": "Dit is een automatisch bericht, antwoorden op deze e-mail is niet mogelijk."
+}
+</content>
 <body>
   <mjml>
-    <mj-body>
-      <mj-raw>
-        <!-- Company Header -->
-      </mj-raw>
-      <mj-section>
-        <mj-column width="200px">
-          <mj-image src="{{imagePath}}/logo-openstad.png">
-          </mj-image>
-        </mj-column>
-      </mj-section>
-      <mj-raw>
-        <!-- Image Header -->
-      </mj-raw>
-      <mj-section>
-        <mj-column width="600px">
-          <mj-image src="{{imagePath}}/mail-header.jpg"></mj-image>
-        </mj-column>
-      </mj-section>
-      <mj-raw>
-        <!-- Mail context -->
-      </mj-raw>
-      <mj-section>
-        <mj-column width="500px">
-          <mj-text font-size="20px" font-family="Helvetica Neue">Er is een nieuwe resource aangemaakt.</mj-text>
-          <mj-text>Beste administrator,</mj-text>
-          <mj-text color="#525252">Er is recentelijk een nieuwe resource aangemaakt. Hieronder kunt u direct de nieuwe resource bekijken in het admin-paneel.</mj-text>
-          <mj-button background-color="#12B886" href="{{redirectUrl}}">Weergeven</mj-button>
-        </mj-column>
-      </mj-section>
-      <mj-raw>
-        <!-- ALternate link -->
-      </mj-raw>
-      <mj-section>
-        <mj-column width="400px">
-          <mj-text>Of gebruik deze link in je browser:</mj-text>
-        </mj-column>
+    <mj-body background-color="#f6f6f7">
+      <mj-section background-color="#ffffff" padding="20px">
         <mj-column>
-          <mj-text>{{redirectUrl}}</mj-text>
+            <mj-image src="{{ logo or (imagePath + '/logo-openstad.png') }}" width="150px"></mj-image>
+            <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">Nieuwe inzending ontvangen</mj-text>
+            <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+            <mj-divider border-width="0" padding="10px" />
+            <mj-text line-height="1.3" font-size="16px" color="#555555" font-family="Helvetica">Beste beheerder,</mj-text>
+            <mj-text line-height="1.3" font-size="16px" color="#555555" font-family="Helvetica">Er is een nieuwe inzending binnengekomen. Hieronder vind je de details:</mj-text>
+            <mj-divider border-width="0" padding="10px" />
+            <mj-text font-size="14px" line-height="22px" color="#444" font-family="Helvetica">
+              {{ submissionContent | safe }}
+            </mj-text>
+            {% if redirectUrl %}
+            <mj-button align="left" line-height="1.3" font-size="15px" font-family="Helvetica" background-color="#00325F" href="{{ redirectUrl }}">Bekijk de inzending</mj-button>
+            <mj-divider border-width="0" padding="10px" />
+            <mj-text line-height="1.3" font-size="16px" color="#555555" font-family="Helvetica">Of gebruik deze link in je browser:</mj-text>
+            <mj-text line-height="1.3" font-size="14px" color="#00325F" font-family="Helvetica">{{ redirectUrl }}</mj-text>
+            {% endif %}
+            <mj-divider border-width="0" padding="10px" />
+            <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+            <mj-text line-height="1.3" font-size="14px" color="#999999" font-family="Helvetica" align="center">Dit is een automatisch bericht, antwoorden op deze e-mail is niet mogelijk.</mj-text>
         </mj-column>
       </mj-section>
     </mj-body>

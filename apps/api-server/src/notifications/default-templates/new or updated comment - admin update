@@ -1,3 +1,5 @@
+<!-- template: new or updated comment - admin update -->
+<subject>Nieuwe reactie op {{ resource.title }}</subject>
 <body>
   <mjml>
     <mj-body>
@@ -6,7 +8,7 @@
       </mj-raw>
       <mj-section>
         <mj-column width="200px">
-          <mj-image src="{{ imagePath }}/logo-openstad.png"> </mj-image>
+          <mj-image src="{{ logo or (imagePath + '/logo-openstad.png') }}"> </mj-image>
         </mj-column>
       </mj-section>
       <mj-raw>
@@ -27,7 +29,7 @@
           >
           <mj-text>Beste administrator,</mj-text>
           <mj-text color="#525252"
-            >Op de resource {{ resource.name }} is er recentelijk een nieuwe
+            >Op de resource {{ resource.title }} is er recentelijk een nieuwe
             reactie geplaatst, of een van de reacties op de resource is
             gewijzigd. Hieronder kunt u direct de nieuwe reactie bekijken in het
             overzicht van reacties.</mj-text

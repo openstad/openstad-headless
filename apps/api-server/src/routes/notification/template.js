@@ -4,6 +4,7 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const router = express.Router({ mergeParams: true });
 const createError = require('http-errors');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
+const defaultTemplatesCatalog = require('../../notifications/default-templates-catalog');
 
 // scopes
 // ------
@@ -62,6 +63,25 @@ router
   })
   .post(auth.useReqUser)
   .post(function (req, res, next) {
+    res.json(req.results);
+  });
+
+// list default (fallback) templates
+// ----------------------------------
+router
+  .route('/defaults')
+  .get(auth.can('NotificationTemplate', 'list'))
+  .get(function (req, res, next) {
+    defaultTemplatesCatalog
+      .getAllDefaultTemplates()
+      .then((result) => {
+        req.results = result;
+        return next();
+      })
+      .catch(next);
+  })
+  .get(auth.useReqUser)
+  .get(function (req, res, next) {
     res.json(req.results);
   });
 
