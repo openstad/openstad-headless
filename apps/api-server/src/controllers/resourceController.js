@@ -25,6 +25,7 @@ const {
   getValidStatuses,
   getOnlyIds,
 } = require('../services/resourceTagsStatuses');
+const { normalizeContributedUrl } = require('../util/normalize-url');
 
 const userhasModeratorRights = (user) => {
   return hasRole(user, 'editor');
@@ -403,6 +404,19 @@ function createResource(req, res, next) {
     }
   }
 
+  if (data.extraData && typeof data.extraData.url !== 'undefined') {
+    const urlResult = normalizeContributedUrl(data.extraData.url);
+    if (!urlResult.ok) {
+      return next(
+        createError(
+          400,
+          'De ingevulde URL is ongeldig. Controleer of de link correct is en begin met https://'
+        )
+      );
+    }
+    data.extraData.url = urlResult.value;
+  }
+
   db.Resource.authorizeData(data, 'create', req.user, null, req.project)
     .create(data)
     .then((resourceInstance) => {
@@ -624,13 +638,11 @@ function loadResource(req, res, next) {
 }
 
 function checkResourceEditable(req, res, next) {
-  if (
-    !(
-      req.project.config &&
-      req.project.config.resources &&
-      req.project.config.resources.canAddNewResources
-    )
-  ) {
+  if (!(
+    req.project.config &&
+    req.project.config.resources &&
+    req.project.config.resources.canAddNewResources
+  )) {
     if (!req.results.dataValues.publishDate) {
       return next(
         createError(
@@ -688,6 +700,19 @@ function updateResource(req, res, next) {
 
   if (!userhasModeratorRights(req.user)) {
     delete data.modBreaks;
+  }
+
+  if (data.extraData && typeof data.extraData.url !== 'undefined') {
+    const urlResult = normalizeContributedUrl(data.extraData.url);
+    if (!urlResult.ok) {
+      return next(
+        createError(
+          400,
+          'De ingevulde URL is ongeldig. Controleer of de link correct is en begin met https://'
+        )
+      );
+    }
+    data.extraData.url = urlResult.value;
   }
 
   resource
