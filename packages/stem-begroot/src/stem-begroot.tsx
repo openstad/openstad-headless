@@ -327,7 +327,9 @@ function StemBegroot({
   const [tagCounter, setTagCounter] = useState<Array<TagType>>([]);
 
   const [tags, setTags] = useState<number[]>(initTags);
-  const [userSelectedTags, setUserSelectedTags] = useState<number[]>([]);
+  const [userSelectedTags, setUserSelectedTags] = useState<number[]>(
+    urlTagIdsArray || []
+  );
 
   const [sort, setSort] = useState<string | undefined>(
     props.defaultSorting || undefined
