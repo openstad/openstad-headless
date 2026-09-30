@@ -122,7 +122,7 @@ export default function CounterDisplay(
                 <FormLabel>Label</FormLabel>
                 <FormControl>
                   <Input
-                    defaultValue={field.value}
+                    value={field.value ?? ''}
                     onChange={(e) => {
                       field.onChange(e);
                       onFieldChange(field.name, e.target.value);
@@ -141,7 +141,7 @@ export default function CounterDisplay(
                 <FormLabel>Url</FormLabel>
                 <FormControl>
                   <Input
-                    defaultValue={field.value}
+                    value={field.value ?? ''}
                     onChange={(e) => {
                       field.onChange(e);
                       onFieldChange(field.name, e.target.value);
@@ -270,7 +270,7 @@ export default function CounterDisplay(
                   <FormControl>
                     <Input
                       type="number"
-                      defaultValue={field.value}
+                      value={field.value ?? ''}
                       onChange={(e) => {
                         field.onChange(e);
                         onFieldChange(field.name, e.target.value);
