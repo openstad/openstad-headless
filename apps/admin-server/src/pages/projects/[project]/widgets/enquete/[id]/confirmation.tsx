@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -18,10 +17,11 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import * as Switch from '@radix-ui/react-switch';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -32,61 +32,32 @@ const formSchema = z.object({
   userEmailAddress: z.string().optional(),
 });
 
-export default function WidgetEnqueteConfirmation() {
+export default function WidgetEnqueteConfirmation(
+  props: EnqueteWidgetProps & EditFieldProps<EnqueteWidgetProps>
+) {
   type FormData = z.infer<typeof formSchema>;
-  const category = 'confirmation';
 
-  // TODO should use the passed props widget, this is the old way and is not advised
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
-  const defaults = useCallback(() => {
-    const confirmationUser =
-      widget?.config?.[category]?.confirmationUser !== null
-        ? widget?.config?.[category]?.confirmationUser
-        : true;
-    const confirmationAdmin =
-      widget?.config?.[category]?.confirmationAdmin !== null
-        ? widget?.config?.[category]?.confirmationAdmin
-        : true;
-    const overwriteEmailAddress =
-      widget?.config?.[category]?.overwriteEmailAddress !== null
-        ? widget?.config?.[category]?.overwriteEmailAddress
-        : '';
-    const userEmailAddress =
-      widget?.config?.[category]?.userEmailAddress !== null
-        ? widget?.config?.[category]?.userEmailAddress
-        : '';
-    return {
-      confirmationUser,
-      confirmationAdmin,
-      overwriteEmailAddress,
-      userEmailAddress,
-    };
-  }, [widget?.config]);
-
-  async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
-  }
+  const confirmation = (props as any).confirmation || {};
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      confirmationUser: confirmation.confirmationUser ?? true,
+      confirmationAdmin: confirmation.confirmationAdmin ?? true,
+      overwriteEmailAddress: confirmation.overwriteEmailAddress ?? '',
+      userEmailAddress: confirmation.userEmailAddress ?? '',
+    },
   });
 
   useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+    const subscription = form.watch((values) => {
+      props.onFieldChanged?.('confirmation', values);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, props]);
 
-  const visibility = widget?.config?.formVisibility || 'always';
-  const items = widget?.config?.items || [];
+  const visibility = props.formVisibility || 'always';
+  const items: any[] = (props.items as any[]) || [];
 
   const confirmationUserError =
     visibility === 'always' &&
@@ -103,9 +74,7 @@ export default function WidgetEnqueteConfirmation() {
       <Form {...form}>
         <Heading size="xl">Bevestiging</Heading>
         <Separator className="my-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="lg:w-2/3 grid grid-cols-1 gap-4">
+        <form className="lg:w-2/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="confirmationUser"
@@ -224,9 +193,6 @@ export default function WidgetEnqueteConfirmation() {
               )}
             />
           )}
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

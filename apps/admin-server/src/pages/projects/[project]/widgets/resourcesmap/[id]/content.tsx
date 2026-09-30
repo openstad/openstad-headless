@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,9 +9,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -22,47 +20,43 @@ const formSchema = z.object({
   showResourcesFromTheme: z.string(),
 });
 
-export default function WidgetResourcesMapContent() {
+type WidgetResourcesMapContentProps = {
+  content?: {
+    showResources?: string;
+    excludeResources?: string;
+    showResourcesFromTheme?: string;
+  };
+  onFieldChanged?: (key: string, value: any) => void;
+};
+
+export default function WidgetResourcesMapContent(
+  props: WidgetResourcesMapContentProps
+) {
   const category = 'content';
-
-  // TODO should use the passed props widget, this is the old way and is not advised
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
-  const defaults = useCallback(
-    () => ({
-      showResources: widget?.config?.[category]?.showResources || '',
-      excludeResources: widget?.config?.[category]?.excludeResources || '',
-      showResourcesFromTheme:
-        widget?.config?.[category]?.showResourcesFromTheme || '',
-    }),
-    [widget?.config]
-  );
+  const categoryConfig = props[category] || {};
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      showResources: categoryConfig.showResources || '',
+      excludeResources: categoryConfig.excludeResources || '',
+      showResourcesFromTheme: categoryConfig.showResourcesFromTheme || '',
+    },
   });
 
   useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
-
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    updateConfig({ [category]: values });
-  }
+    const subscription = form.watch((values) => {
+      props.onFieldChanged?.(category, values);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, props]);
 
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl">Content</Heading>
         <Separator className="my-4" />
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4 lg:w-1/2">
+        <form className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
             name="showResources"
@@ -117,7 +111,6 @@ export default function WidgetResourcesMapContent() {
               </FormItem>
             )}
           />
-          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

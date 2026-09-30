@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -11,12 +10,18 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  rebaselineAfterSave,
+  useRegisterSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Spacer } from '@/components/ui/spacer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { zodResolver } from '@hookform/resolvers/zod';
+import cloneDeep from 'lodash/cloneDeep';
 import { Copy, Info } from 'lucide-react';
 import { useRouter } from 'next/router';
 import * as React from 'react';
@@ -179,83 +184,116 @@ export default function ProjectAuthenticationRequiredFields() {
     defaultValues: anonymousDefaults(),
   });
 
-  useEffect(() => {
-    userForm.reset(userDefaults());
-  }, [userForm, userDefaults]);
+  // Guarded on the provider's `config` subtree, not on `data` or on the
+  // provider itself: a save strips `provider.<x>.config` from the body
+  // (api-server project.js) and answers with the raw project, so both of those
+  // stay truthy afterwards while the values these forms read are gone. Only the
+  // enriched GET carries `config`, so it is what tells the two apart.
+  useSyncFormDefaults(
+    userForm,
+    userDefaults,
+    data?.config?.auth?.provider?.openstad?.config
+  );
 
-  useEffect(() => {
-    anonymousForm.reset(anonymousDefaults());
-  }, [anonymousForm, anonymousDefaults]);
+  useSyncFormDefaults(
+    anonymousForm,
+    anonymousDefaults,
+    data?.config?.auth?.provider?.anonymous?.config
+  );
 
-  // Submit handler for user form - updates openstad provider
-  async function onUserSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const updatedConfig = {
-        auth: {
-          provider: {
-            openstad: {
-              requiredUserFields: values.requiredUserFields,
-              config: {
-                requiredFields: {
-                  title: values.title,
-                  description: values.description,
-                  buttonText: values.buttonText,
-                  info: values.info,
-                  requiredUserFieldsLabels: values.requiredUserFieldsLabels,
-                },
+  const [activeTab, setActiveTab] = useState('users');
+
+  const saveUser = useCallback(async () => {
+    const valid = await userForm.trigger();
+    if (!valid) {
+      const firstErrorField = Object.keys(userForm.formState.errors)[0];
+      throw new Error(
+        firstErrorField
+          ? `Controleer het veld "${firstErrorField}" op het tabblad "Gebruikers".`
+          : 'Controleer de gemarkeerde velden op het tabblad "Gebruikers".'
+      );
+    }
+    const values = formSchema.parse(userForm.getValues());
+    const sent = cloneDeep(userForm.getValues());
+    const updatedConfig = {
+      auth: {
+        provider: {
+          openstad: {
+            requiredUserFields: values.requiredUserFields,
+            config: {
+              requiredFields: {
+                title: values.title,
+                description: values.description,
+                buttonText: values.buttonText,
+                info: values.info,
+                requiredUserFieldsLabels: values.requiredUserFieldsLabels,
               },
             },
           },
         },
-      };
+      },
+    };
 
-      const project = await updateProject(updatedConfig);
-      const doubleSave = await updateProject(updatedConfig);
+    const result = await updateProject(updatedConfig);
+    const doubleSave = await updateProject(updatedConfig);
 
-      if (doubleSave && project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('Could not update', error);
+    if (!result || !doubleSave) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
 
-  // Submit handler for anonymous form - updates anonymous provider
-  async function onAnonymousSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const updatedConfig = {
-        auth: {
-          provider: {
-            anonymous: {
-              requiredUserFields: values.requiredUserFields,
-              config: {
-                requiredFields: {
-                  title: values.title,
-                  description: values.description,
-                  buttonText: values.buttonText,
-                  info: values.info,
-                  requiredUserFieldsLabels: values.requiredUserFieldsLabels,
-                },
+    rebaselineAfterSave(userForm, sent);
+  }, [userForm, updateProject]);
+
+  const saveAnonymous = useCallback(async () => {
+    const valid = await anonymousForm.trigger();
+    if (!valid) {
+      const firstErrorField = Object.keys(anonymousForm.formState.errors)[0];
+      throw new Error(
+        firstErrorField
+          ? `Controleer het veld "${firstErrorField}" op het tabblad "Anonieme gebruikers".`
+          : 'Controleer de gemarkeerde velden op het tabblad "Anonieme gebruikers".'
+      );
+    }
+    const values = formSchema.parse(anonymousForm.getValues());
+    const sent = cloneDeep(anonymousForm.getValues());
+    const updatedConfig = {
+      auth: {
+        provider: {
+          anonymous: {
+            requiredUserFields: values.requiredUserFields,
+            config: {
+              requiredFields: {
+                title: values.title,
+                description: values.description,
+                buttonText: values.buttonText,
+                info: values.info,
+                requiredUserFieldsLabels: values.requiredUserFieldsLabels,
               },
             },
           },
         },
-      };
+      },
+    };
 
-      const project = await updateProject(updatedConfig);
-      const doubleSave = await updateProject(updatedConfig);
+    const result = await updateProject(updatedConfig);
+    const doubleSave = await updateProject(updatedConfig);
 
-      if (doubleSave && project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('Could not update', error);
+    if (!result || !doubleSave) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+
+    rebaselineAfterSave(anonymousForm, sent);
+  }, [anonymousForm, updateProject]);
+
+  const userDirty = userForm.formState.isDirty;
+  const anonymousDirty = anonymousForm.formState.isDirty;
+
+  const save = useCallback(async () => {
+    if (userDirty) await saveUser();
+    if (anonymousDirty) await saveAnonymous();
+  }, [userDirty, anonymousDirty, saveUser, saveAnonymous]);
+
+  useRegisterSave({ isDirty: userDirty || anonymousDirty, save });
 
   const [showUserPageFields, setShowUserPageFields] = useState(false);
   const [showAnonymousPageFields, setShowAnonymousPageFields] = useState(false);
@@ -290,7 +328,7 @@ export default function ProjectAuthenticationRequiredFields() {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="users">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="users">Gebruikers</TabsTrigger>
               <TabsTrigger value="anonymous">Anonieme gebruikers</TabsTrigger>
@@ -299,9 +337,7 @@ export default function ProjectAuthenticationRequiredFields() {
               <Form {...userForm} className="p-6 bg-white rounded-md">
                 <Heading size="xl">Verplichte velden</Heading>
                 <Separator className="my-4" />
-                <form
-                  onSubmit={userForm.handleSubmit(onUserSubmit)}
-                  className="space-y-4 lg:w-1/2">
+                <div className="space-y-4 lg:w-1/2">
                   <div>
                     <FormLabel>
                       Een nieuwe gebruiker moet de volgende velden invullen:
@@ -495,9 +531,7 @@ export default function ProjectAuthenticationRequiredFields() {
                       />
                     </>
                   ) : null}
-
-                  <Button type="submit">Opslaan</Button>
-                </form>
+                </div>
               </Form>
             </TabsContent>
             <TabsContent value="anonymous" className="p-0">
@@ -506,9 +540,7 @@ export default function ProjectAuthenticationRequiredFields() {
                   Verplichte velden voor anonieme gebruikers
                 </Heading>
                 <Separator className="my-4" />
-                <form
-                  onSubmit={anonymousForm.handleSubmit(onAnonymousSubmit)}
-                  className="space-y-4 lg:w-1/2">
+                <div className="space-y-4 lg:w-1/2">
                   <div>
                     <FormLabel>
                       Een anonieme gebruiker moet de volgende velden invullen:
@@ -702,9 +734,7 @@ export default function ProjectAuthenticationRequiredFields() {
                       />
                     </>
                   ) : null}
-
-                  <Button type="submit">Opslaan</Button>
-                </form>
+                </div>
               </Form>
             </TabsContent>
           </Tabs>

@@ -1,3 +1,4 @@
+import { throwApiError } from '@/lib/api-error';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
 
@@ -8,7 +9,11 @@ export default function useArea(layerId?: string) {
 
   const datalayerSwr = useSWR(layerNumber ? url : null);
 
-  async function updateDatalayer(name: string, layer: string, icon: any) {
+  async function updateDatalayer(
+    name: string,
+    layer: string,
+    icon: any
+  ): Promise<any | null> {
     const res = await fetch(url, {
       method: 'PUT',
       headers: {
@@ -20,6 +25,10 @@ export default function useArea(layerId?: string) {
         icon: icon,
       }),
     });
+
+    if (!res.ok) {
+      await throwApiError(res, 'De kaartlaag kon niet worden opgeslagen.');
+    }
 
     return await res.json();
   }

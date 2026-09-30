@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -9,13 +8,17 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  useRegisterFormSave,
+  useSaveController,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useDatalayers from '@/hooks/use-datalayers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -35,17 +38,32 @@ export default function ProjectDatalayerCreate() {
     defaultValues: {},
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const { allowNextNavigation } = useSaveController();
+
+  const save = useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
+
     const area = await createDatalayer(values.name, values.layer);
-    if (area) {
-      toast.success('Kaartlaag aangemaakt!');
-      router.push(`/projects/${projectId}/areas`);
-    } else {
-      toast.error(
+    if (!area) {
+      throw new Error(
         'De kaartlaag die is meegegeven lijkt niet helemaal te kloppen.'
       );
     }
-  }
+
+    // A freshly created record is not an unsaved edit, so leaving this page
+    // must not prompt. useRegisterFormSave re-baselines the form afterwards,
+    // but that only reaches the controller on a later render -- the push
+    // starts now, so the guard has to be told directly.
+    allowNextNavigation();
+    toast.success('Kaartlaag aangemaakt!');
+    router.push(`/projects/${projectId}/areas`);
+  }, [form, createDatalayer, router, projectId, allowNextNavigation]);
+
+  useRegisterFormSave(form, save, { label: 'Aanmaken' });
 
   return (
     <div>
@@ -69,7 +87,7 @@ export default function ProjectDatalayerCreate() {
             <Heading size="xl">Toevoegen</Heading>
             <Separator className="my-4" />
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={(event) => event.preventDefault()}
               className="lg:w-1/2 grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
@@ -103,9 +121,6 @@ export default function ProjectDatalayerCreate() {
                   </FormItem>
                 )}
               />
-              <Button className="w-fit col-span-full" type="submit">
-                Opslaan
-              </Button>
             </form>
           </Form>
         </div>

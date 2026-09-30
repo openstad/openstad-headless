@@ -1,5 +1,4 @@
 import { CheckboxList } from '@/components/checkbox-list';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -14,6 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import {
   filterStaleTagGroups,
@@ -27,17 +27,13 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  extraFieldsTagGroups: z
-    .array(
-      z.object({
-        type: z.string(),
-        label: z.string().optional(),
-        multiple: z.boolean().default(false),
-      })
-    )
-    .refine((value) => value.some((item) => item), {
-      message: 'You have to select at least one item.',
-    }),
+  extraFieldsTagGroups: z.array(
+    z.object({
+      type: z.string(),
+      label: z.string().optional(),
+      multiple: z.boolean().default(false),
+    })
+  ),
   defaultTags: z.string().optional(),
 });
 
@@ -81,6 +77,8 @@ export default function ArgumentsExtraFields(
       defaultTags: props?.defaultTags || '',
     },
   });
+
+  useSyncDraftForm(form, props.onFieldChanged);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -283,10 +281,6 @@ export default function ArgumentsExtraFields(
               </FormItem>
             )}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

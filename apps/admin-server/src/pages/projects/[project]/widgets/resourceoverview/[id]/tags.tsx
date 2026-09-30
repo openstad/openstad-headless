@@ -1,6 +1,5 @@
 import { CheckboxList } from '@/components/checkbox-list';
 import AccordionUI from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -25,6 +24,7 @@ import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import {
@@ -36,7 +36,6 @@ import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overvie
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 const formSchema = z
@@ -107,16 +106,6 @@ export default function WidgetResourceOverviewTags(
     }
   }, [tags]);
 
-  async function onSubmit(values: FormData) {
-    props.updateConfig({ ...props, ...values });
-  }
-
-  function onError() {
-    toast.error(
-      "Selecteer minimaal één tag groep of schakel 'Filteren op tags weergeven' uit."
-    );
-  }
-
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
@@ -128,13 +117,18 @@ export default function WidgetResourceOverviewTags(
     },
   });
 
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Tags',
+  });
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl">Tags</Heading>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit, onError)}
+          onSubmit={(e) => e.preventDefault()}
           className="lg:w-full grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
@@ -447,10 +441,6 @@ export default function WidgetResourceOverviewTags(
               },
             ]}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

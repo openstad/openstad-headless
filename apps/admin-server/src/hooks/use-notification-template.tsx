@@ -8,6 +8,13 @@ export default function useNotificationTemplate(projectId?: string) {
 
   const notificationTemplateSwr = useSWR(projectNumber ? url : null);
 
+  // The list can still be loading while a form is saved, so the cache update
+  // must not spread `undefined`.
+  const currentTemplates = () =>
+    Array.isArray(notificationTemplateSwr.data)
+      ? notificationTemplateSwr.data
+      : [];
+
   async function create(
     projectId: string,
     engine: string,
@@ -35,8 +42,7 @@ export default function useNotificationTemplate(projectId?: string) {
 
     if (res.ok) {
       const data = await res.json();
-      console.log(data);
-      notificationTemplateSwr.mutate([...notificationTemplateSwr.data, data]);
+      notificationTemplateSwr.mutate([...currentTemplates(), data]);
       return data;
     } else {
       throw new Error('Could not create the template');
@@ -64,7 +70,20 @@ export default function useNotificationTemplate(projectId?: string) {
 
     if (res.ok) {
       const data = await res.json();
-      notificationTemplateSwr.mutate([...notificationTemplateSwr.data, data]);
+      // Replace the stored template instead of appending it: the page groups
+      // the list by type, so a second entry for the same id would render a
+      // duplicate form right after the save.
+      const templates = currentTemplates();
+      const index = templates.findIndex(
+        (template: any) => String(template?.id) === String(data?.id)
+      );
+      notificationTemplateSwr.mutate(
+        index === -1
+          ? [...templates, data]
+          : templates.map((template: any, i: number) =>
+              i === index ? data : template
+            )
+      );
       return data;
     } else {
       throw new Error('Could not edit the template');

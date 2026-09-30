@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -12,6 +11,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useDatalayers from '@/hooks/use-datalayers';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -55,10 +55,16 @@ export default function WidgetResourcesMapDatalayers(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      datalayer: props?.datalayer || '',
+      datalayer: props?.datalayer || [],
       enableOnOffSwitching: props?.enableOnOffSwitching || false,
     },
   });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Kaartlagen',
+  });
+
   const router = useRouter();
   const projectId = router.query.project as string;
 
@@ -69,12 +75,15 @@ export default function WidgetResourcesMapDatalayers(
 
   useEffect(() => {
     if (!form.getValues('enableOnOffSwitching')) {
-      const updatedLayers = (form.getValues('datalayer') || []).map((layer) => {
+      const current = form.getValues('datalayer') || [];
+      const updatedLayers = current.map((layer) => {
         const { activeOnInit, ...rest } = layer;
         return rest;
       });
-      form.setValue('datalayer', updatedLayers);
-      props.onFieldChanged('datalayer', updatedLayers);
+      if (JSON.stringify(updatedLayers) !== JSON.stringify(current)) {
+        form.setValue('datalayer', updatedLayers);
+        props.onFieldChanged('datalayer', updatedLayers);
+      }
     }
   }, [form.getValues('enableOnOffSwitching')]);
 
@@ -204,16 +213,6 @@ export default function WidgetResourcesMapDatalayers(
               </FormItem>
             )}
           />
-
-          <Button
-            type={props?.buttonType || 'submit'}
-            onClick={() => {
-              if (props?.buttonType === 'button') {
-                onSubmit(form.getValues());
-              }
-            }}>
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

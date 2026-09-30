@@ -1,10 +1,10 @@
 import { CheckboxList } from '@/components/checkbox-list';
-import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
@@ -44,6 +44,11 @@ export default function WidgetStemBegrootInclude(
       onlyIncludeTagIds: props?.onlyIncludeTagIds || '',
       onlyIncludeStatusIds: props?.onlyIncludeStatusIds || '',
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Inclusief/exclusief',
   });
 
   return (
@@ -109,10 +114,6 @@ export default function WidgetStemBegrootInclude(
               props.onFieldChanged('onlyIncludeStatusIds', idsToSave);
             }}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

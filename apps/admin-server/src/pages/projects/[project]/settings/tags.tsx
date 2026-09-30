@@ -1,17 +1,17 @@
 import { CheckboxList } from '@/components/checkbox-list';
-import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterFormSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import { useProject } from '@/hooks/use-project';
 import useTags from '@/hooks/use-tags';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import React, { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 const formSchema = z.object({
@@ -34,9 +34,7 @@ export default function ProjectSettingsTags() {
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  useSyncFormDefaults(form, defaults, data);
 
   const { data: loadedTags } = useTags(project as string);
   const tags = (loadedTags || []) as Array<{
@@ -45,22 +43,23 @@ export default function ProjectSettingsTags() {
     type?: string;
   }>;
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const project = await updateProject({
-        project: {
-          tags: values.tags,
-        },
-      });
-      if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('could not update', error);
+  const save = useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
     }
-  }
+    const values = formSchema.parse(form.getValues());
+    const result = await updateProject({
+      project: {
+        tags: values.tags,
+      },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+  }, [form, updateProject]);
+
+  useRegisterFormSave(form, save);
 
   return (
     <div>
@@ -97,7 +96,7 @@ export default function ProjectSettingsTags() {
 
             <Spacer />
 
-            <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
+            <div className="grid gap-4">
               <CheckboxList
                 form={form}
                 fieldName="tags"
@@ -121,14 +120,10 @@ export default function ProjectSettingsTags() {
                       : ids.filter((id) => id !== `${tag.id}`)
                   ).join(',');
 
-                  form.setValue('tags', idsToSave);
+                  form.setValue('tags', idsToSave, { shouldDirty: true });
                 }}
               />
-
-              <Button className="w-fit col-span-full" type="submit">
-                Opslaan
-              </Button>
-            </form>
+            </div>
           </Form>
         </div>
       </PageLayout>

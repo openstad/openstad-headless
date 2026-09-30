@@ -124,6 +124,11 @@ const TrixEditor: React.FC<{
   const onFocusRef = useRef(onFocus);
   const onBlurRef = useRef(onBlur);
   const valueRef = useRef(value);
+  const isFocusedRef = useRef(false);
+  // Set while a value is loaded into the editor programmatically. Trix
+  // normalises that HTML and fires a change event for it, which is not a user
+  // edit and must not be reported to the parent form.
+  const isLoadingValueRef = useRef(false);
 
   const targetBlankHrefsRef = useRef<Set<string>>(new Set());
 
@@ -247,11 +252,19 @@ const TrixEditor: React.FC<{
 
       if (valueRef.current && editorInstance.current) {
         targetBlankHrefsRef.current = getTargetBlankHrefs(valueRef.current);
+        isLoadingValueRef.current = true;
         editorInstance.current.loadHTML(valueRef.current);
+        // Trix can dispatch the change for this load asynchronously, so the
+        // flag is cleared on the next tick instead of straight after the call.
+        setTimeout(() => {
+          isLoadingValueRef.current = false;
+        }, 0);
       }
     };
 
     const handleTrixChange = () => {
+      if (isLoadingValueRef.current) return;
+
       let html = inputEl.value;
 
       if (targetBlankHrefsRef.current.size > 0) {
@@ -295,10 +308,12 @@ const TrixEditor: React.FC<{
     };
 
     const handleTrixFocus = () => {
+      isFocusedRef.current = true;
       if (onFocusRef.current) onFocusRef.current();
     };
 
     const handleTrixBlur = () => {
+      isFocusedRef.current = false;
       if (onBlurRef.current) onBlurRef.current();
     };
 
@@ -321,17 +336,19 @@ const TrixEditor: React.FC<{
     };
   }, []);
 
-  // Keep editor content in sync with external value
   useEffect(() => {
     if (!editorInstance.current || !inputRef.current) return;
-    const currentHTML = inputRef.current.value;
-    if (currentHTML !== value) {
-      const newHrefs = getTargetBlankHrefs(value || '');
-      if (newHrefs.size > 0) {
-        newHrefs.forEach((h) => targetBlankHrefsRef.current.add(h));
-      }
-      editorInstance.current.loadHTML(value || '');
+    if (isFocusedRef.current) return;
+    if (inputRef.current.value === value) return;
+    const newHrefs = getTargetBlankHrefs(value || '');
+    if (newHrefs.size > 0) {
+      newHrefs.forEach((h) => targetBlankHrefsRef.current.add(h));
     }
+    isLoadingValueRef.current = true;
+    editorInstance.current.loadHTML(value || '');
+    setTimeout(() => {
+      isLoadingValueRef.current = false;
+    }, 0);
   }, [value]);
 
   return (

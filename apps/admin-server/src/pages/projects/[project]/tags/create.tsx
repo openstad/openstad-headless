@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,6 +9,10 @@ import {
 import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  useRegisterFormSave,
+  useSaveController,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTag from '@/hooks/use-tags';
@@ -17,7 +20,7 @@ import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { getApiFetchMethodNames } from '@openstad-headless/data-store/src/api/index';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -42,20 +45,48 @@ export default function ProjectTagCreate({ preset }: { preset?: string }) {
     defaultValues: {},
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const { allowNextNavigation } = useSaveController();
+
+  const save = useCallback(async () => {
+    if (disabled) {
+      throw new Error(
+        'Deze benaming mag niet gebruikt worden wegens mogelijke conflicten.'
+      );
+    }
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
+
     const tag = await createTag(
       values.name,
       values.type,
       values.seqnr,
       values.addToNewResources || false
     );
-    if (tag?.id) {
-      toast.success('Tag aangemaakt!');
-      router.push(isGlobal ? '/settings' : `/projects/${project}/tags`);
-    } else {
-      toast.error('Er is helaas iets mis gegaan.');
+    if (!tag?.id) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+
+    // A freshly created record is not an unsaved edit, so leaving this page
+    // must not prompt. useRegisterFormSave re-baselines the form afterwards,
+    // but that only reaches the controller on a later render -- the push
+    // starts now, so the guard has to be told directly.
+    allowNextNavigation();
+    toast.success('Tag aangemaakt!');
+    router.push(isGlobal ? '/settings' : `/projects/${project}/tags`);
+  }, [
+    form,
+    createTag,
+    router,
+    project,
+    isGlobal,
+    disabled,
+    allowNextNavigation,
+  ]);
+
+  useRegisterFormSave(form, save, { label: 'Aanmaken' });
 
   const apiFetchMethodNames = getApiFetchMethodNames();
 
@@ -114,7 +145,7 @@ export default function ProjectTagCreate({ preset }: { preset?: string }) {
             <Heading size="xl">Toevoegen</Heading>
             <Separator className="my-4" />
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={(event) => event.preventDefault()}
               className="lg:w-1/2 grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
@@ -175,12 +206,6 @@ export default function ProjectTagCreate({ preset }: { preset?: string }) {
                   </FormItem>
                 )}
               />
-              <Button
-                className="w-fit col-span-full"
-                disabled={disabled}
-                type="submit">
-                Opslaan
-              </Button>
             </form>
           </Form>
         </div>

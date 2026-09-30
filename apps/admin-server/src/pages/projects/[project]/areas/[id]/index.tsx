@@ -1,5 +1,4 @@
 import { CheckboxList } from '@/components/checkbox-list';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -12,17 +11,18 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterFormSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useArea from '@/hooks/use-area';
 import useTags from '@/hooks/use-tags';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import React, { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 const formSchema = z.object({
@@ -65,7 +65,14 @@ export default function ProjectAreaEdit() {
     defaultValues: {},
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  useSyncFormDefaults(form, defaults, data);
+
+  const save = useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
     const area = await updateArea(
       values.name,
       values.geoJSON,
@@ -73,20 +80,14 @@ export default function ProjectAreaEdit() {
       values.tagIds || [],
       values.tagIdsOutside || []
     );
-
-    if (area) {
-      toast.success('Polygoon aangepast!');
-      // router.push(`/projects/${project}/areas`);
-    } else {
-      toast.error(
+    if (!area) {
+      throw new Error(
         'De polygoon die is meegegeven lijkt niet helemaal te kloppen.'
       );
     }
-  }
+  }, [form, updateArea]);
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  useRegisterFormSave(form, save);
 
   return (
     <div>
@@ -107,9 +108,7 @@ export default function ProjectAreaEdit() {
         ]}>
         <div className="container py-6">
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="grid grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               <Tabs defaultValue="general">
                 <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
                   <TabsTrigger value="general">Algemeen</TabsTrigger>
@@ -223,7 +222,9 @@ export default function ProjectAreaEdit() {
                                       ? [...ids, tag.id]
                                       : ids.filter((id) => id !== tag.id);
 
-                                    form.setValue('tagIds', idsToSave);
+                                    form.setValue('tagIds', idsToSave, {
+                                      shouldDirty: true,
+                                    });
                                   }}
                                 />
                               </div>
@@ -269,7 +270,9 @@ export default function ProjectAreaEdit() {
                                       ? [...ids, tag.id]
                                       : ids.filter((id) => id !== tag.id);
 
-                                    form.setValue('tagIdsOutside', idsToSave);
+                                    form.setValue('tagIdsOutside', idsToSave, {
+                                      shouldDirty: true,
+                                    });
                                   }}
                                 />
                               </div>
@@ -282,10 +285,7 @@ export default function ProjectAreaEdit() {
                   </Tabs>
                 </TabsContent>
               </Tabs>
-              <Button className="w-fit col-span-full" type="submit">
-                Opslaan
-              </Button>
-            </form>
+            </div>
           </Form>
         </div>
       </PageLayout>

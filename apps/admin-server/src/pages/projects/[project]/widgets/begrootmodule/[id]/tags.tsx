@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -19,6 +18,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import {
@@ -31,7 +31,6 @@ import * as Switch from '@radix-ui/react-switch';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 const formSchema = z
@@ -89,16 +88,6 @@ export default function WidgetStemBegrootOverviewTags(
     }
   }, [tags]);
 
-  async function onSubmit(values: FormData) {
-    props.updateConfig({ ...props, ...values });
-  }
-
-  function onError() {
-    toast.error(
-      "Selecteer minimaal één tag groep of schakel 'Filteren op tags weergeven' uit."
-    );
-  }
-
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
@@ -108,13 +97,18 @@ export default function WidgetStemBegrootOverviewTags(
     },
   });
 
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Tags',
+  });
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl">Tags</Heading>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit, onError)}
+          onSubmit={(e) => e.preventDefault()}
           className="lg:w-3/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
@@ -321,10 +315,6 @@ export default function WidgetStemBegrootOverviewTags(
               </FormItem>
             )}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

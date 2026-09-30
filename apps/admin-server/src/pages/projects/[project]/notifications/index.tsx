@@ -32,9 +32,6 @@ export default function ProjectNotifications() {
     'notification comment reply - user': [],
   };
 
-  const [typeDefinitions, setTypeDefinitions] =
-    React.useState<{ [type in NotificationType]: any[] }>(defaultDefinitions);
-
   const router = useRouter();
   const project = router.query.project as string;
   const { data } = useNotificationTemplate(project as string);
@@ -55,20 +52,23 @@ export default function ProjectNotifications() {
   dan wordt deze toegevoegd via de variabele {{user.name}}.
   Hieronder worden per bruikbaar onderdeel alle variabelen opgenoemd.`;
 
-  React.useEffect(() => {
-    if (Array.isArray(data)) {
-      const currentTypeDefinitions = Object.assign({}, defaultDefinitions);
+  // Built from `data` on every render instead of pushed into state: the shared
+  // `defaultDefinitions` arrays are the same objects on every run, so pushing
+  // into them duplicated every template when the effect ran twice.
+  const typeDefinitions = React.useMemo(() => {
+    const grouped = Object.fromEntries(
+      Object.keys(defaultDefinitions).map((type) => [type, [] as any[]])
+    ) as { [type in NotificationType]: any[] };
 
+    if (Array.isArray(data)) {
       data.forEach((template) => {
-        if (template.type in currentTypeDefinitions) {
-          currentTypeDefinitions[template.type as NotificationType].push(
-            template
-          );
+        if (template.type in grouped) {
+          grouped[template.type as NotificationType].push(template);
         }
       });
-
-      setTypeDefinitions(currentTypeDefinitions);
     }
+
+    return grouped;
   }, [data]);
 
   return (

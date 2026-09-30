@@ -15,17 +15,23 @@ import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  rebaselineAfterSave,
+  useRegisterSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Heading } from '@/components/ui/typography';
 import useNotificationTemplate from '@/hooks/use-notification-template';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Switch from '@radix-ui/react-switch';
+import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
 import React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -122,42 +128,69 @@ export default function ProjectSettingsUsers(
     defaultValues: emailDefaults(),
   });
 
-  useEffect(() => {
-    usersForm.reset(usersDefaults());
-  }, [usersForm, usersDefaults]);
+  // Each form waits for the section its own defaults read: a save's response
+  // carries only part of the project, so a plain `data` check would re-baseline
+  // a form to empty values right after saving. `canCreateNewUsers` defaults to
+  // true on a missing section, so an unguarded reset switches it on by itself.
+  useSyncFormDefaults(usersForm, usersDefaults, data?.config);
 
-  useEffect(() => {
-    anonymizeForm.reset(anonymizeDefaults());
-    emailForm.reset(emailDefaults());
-  }, [anonymizeForm, anonymizeDefaults, emailForm, emailDefaults]);
+  useSyncFormDefaults(anonymizeForm, anonymizeDefaults, data?.config);
 
-  async function onUsersSubmit(values: z.infer<typeof usersFormSchema>) {
-    try {
-      await updateProject({
-        users: {
-          canCreateNewUsers: values.canCreateNewUsers,
-        },
-      });
-      toast.success('Project aangepast!');
-    } catch (error) {
-      toast.error('Er is helaas iets mis gegaan.');
-      console.error('could not update', error);
+  const saveUsers = useCallback(async () => {
+    const valid = await usersForm.trigger();
+    if (!valid) {
+      const firstErrorField = Object.keys(usersForm.formState.errors)[0];
+      throw new Error(
+        firstErrorField
+          ? `Controleer het veld "${firstErrorField}" op het tabblad "Archivering".`
+          : 'Controleer de gemarkeerde velden op het tabblad "Archivering".'
+      );
     }
-  }
-
-  async function onAnonymizeSubmit(
-    values: z.infer<typeof anonymizeFormSchema>
-  ) {
-    try {
-      await updateProject({
-        [anonymizeCategory]: values,
-      });
-      toast.success('Project aangepast!');
-    } catch (error) {
-      toast.error('Er is helaas iets mis gegaan.');
-      console.error('Could not update', error);
+    const values = usersFormSchema.parse(usersForm.getValues());
+    const sent = cloneDeep(usersForm.getValues());
+    const result = await updateProject({
+      users: {
+        canCreateNewUsers: values.canCreateNewUsers,
+      },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+
+    rebaselineAfterSave(usersForm, sent);
+  }, [usersForm, updateProject]);
+
+  const saveAnonymize = useCallback(async () => {
+    const valid = await anonymizeForm.trigger();
+    if (!valid) {
+      const firstErrorField = Object.keys(anonymizeForm.formState.errors)[0];
+      throw new Error(
+        firstErrorField
+          ? `Controleer het veld "${firstErrorField}" op het tabblad "Anonimiseren".`
+          : 'Controleer de gemarkeerde velden op het tabblad "Anonimiseren".'
+      );
+    }
+    const values = anonymizeFormSchema.parse(anonymizeForm.getValues());
+    const sent = cloneDeep(anonymizeForm.getValues());
+    const result = await updateProject({
+      [anonymizeCategory]: values,
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+
+    rebaselineAfterSave(anonymizeForm, sent);
+  }, [anonymizeForm, updateProject]);
+
+  const usersDirty = usersForm.formState.isDirty;
+  const anonymizeDirty = anonymizeForm.formState.isDirty;
+
+  const save = useCallback(async () => {
+    if (usersDirty) await saveUsers();
+    if (anonymizeDirty) await saveAnonymize();
+  }, [usersDirty, anonymizeDirty, saveUsers, saveAnonymize]);
+
+  useRegisterSave({ isDirty: usersDirty || anonymizeDirty, save });
 
   async function anonymizeAllUsers() {
     try {
@@ -201,9 +234,7 @@ export default function ProjectSettingsUsers(
               <Form {...usersForm} className="p-6 bg-white rounded-md">
                 <Heading size="xl">Archivering</Heading>
                 <Separator className="my-4" />
-                <form
-                  onSubmit={usersForm.handleSubmit(onUsersSubmit)}
-                  className="w-5/6 grid grid-cols-1 lg:grid-cols-1 gap-x-4 gap-y-8">
+                <div className="w-5/6 grid grid-cols-1 lg:grid-cols-1 gap-x-4 gap-y-8">
                   <FormField
                     control={usersForm.control}
                     name="canCreateNewUsers"
@@ -226,10 +257,7 @@ export default function ProjectSettingsUsers(
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-fit col-span-full mt-4">
-                    Opslaan
-                  </Button>
-                </form>
+                </div>
               </Form>
             </TabsContent>
 
@@ -238,9 +266,7 @@ export default function ProjectSettingsUsers(
                 <Form {...anonymizeForm}>
                   <Heading size="xl">Anonimiseer gebruikers</Heading>
                   <Separator className="my-4" />
-                  <form
-                    onSubmit={anonymizeForm.handleSubmit(onAnonymizeSubmit)}
-                    className="space-y-4 lg:w-1/2">
+                  <div className="space-y-4 lg:w-1/2">
                     <FormField
                       control={anonymizeForm.control}
                       name="allowAnonymizeUsersAfterEndDate"
@@ -352,8 +378,7 @@ export default function ProjectSettingsUsers(
                         </FormItem>
                       )}
                     />
-                    <Button type="submit">Opslaan</Button>
-                  </form>
+                  </div>
                 </Form>
               </div>
 

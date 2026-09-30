@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -9,15 +8,16 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterFormSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useComment from '@/hooks/use-comment';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import * as React from 'react';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 const formSchema = z.object({
@@ -46,18 +46,21 @@ export default function ProjectCommentEdit() {
     defaultValues: {},
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    const comment = await updateComment(values.description, values.label);
-    if (comment) {
-      toast.success('Comment aangepast!');
-    } else {
-      toast.error('Er is helaas iets mis gegaan.');
-    }
-  }
+  useSyncFormDefaults(form, defaults, data);
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  const save = useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
+    const comment = await updateComment(values.description, values.label);
+    if (!comment) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+  }, [form, updateComment]);
+
+  useRegisterFormSave(form, save);
 
   return (
     <div>
@@ -81,9 +84,7 @@ export default function ProjectCommentEdit() {
             <Form {...form}>
               <Heading size="xl">Reactie aanpassen</Heading>
               <Separator className="my-4" />
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="lg:w-1/2 grid grid-cols-1 gap-4">
+              <div className="lg:w-1/2 grid grid-cols-1 gap-4">
                 <FormField
                   control={form.control}
                   name="description"
@@ -110,11 +111,7 @@ export default function ProjectCommentEdit() {
                     </FormItem>
                   )}
                 />
-
-                <Button className="w-fit col-span-full" type="submit">
-                  Opslaan
-                </Button>
-              </form>
+              </div>
             </Form>
           </div>
         </div>

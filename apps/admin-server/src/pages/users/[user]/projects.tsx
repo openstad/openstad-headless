@@ -1,7 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form } from '@/components/ui/form';
+import { useRegisterSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading, ListHeading, Paragraph } from '@/components/ui/typography';
 import UserRoleDropdownList from '@/components/user-role-dropdown-list';
@@ -10,9 +10,8 @@ import projectListSwr from '@/hooks/use-project-list';
 import useUser from '@/hooks/use-user';
 import useUsers from '@/hooks/use-users';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { toast } from 'react-hot-toast';
 import * as z from 'zod';
 
 const formSchema = z.object({});
@@ -35,7 +34,7 @@ type CombinedProjectRoleAndConsent = {
 
 export default function CreateUserProjects() {
   const { data: projects } = projectListSwr();
-  const { data: users, updateUser } = useUser();
+  const { data: users, updateUser, mutate } = useUser();
   const { createUser } = useUsers();
   const adminProjectId = useAdminProjectId();
   const [projectRoles, setProjectRoles] = useState<Array<ProjectRole>>([]);
@@ -59,7 +58,7 @@ export default function CreateUserProjects() {
         if (roleId === '') {
           updated.splice(index, 1);
         } else {
-          updated[index].roleId = roleId;
+          updated[index] = { ...updated[index], roleId };
         }
       } else if (roleId !== '') {
         updated.push({ projectId, roleId });
@@ -74,7 +73,7 @@ export default function CreateUserProjects() {
       const index = updated.findIndex((e) => e.projectId === projectId);
 
       if (index !== -1) {
-        updated[index].consent = consent;
+        updated[index] = { ...updated[index], consent };
       } else {
         updated.push({ projectId, consent });
       }
@@ -82,7 +81,7 @@ export default function CreateUserProjects() {
     });
   };
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const save = useCallback(async () => {
     let error: any;
 
     const mergedProjects: CombinedProjectRoleAndConsent[] = [
@@ -138,12 +137,49 @@ export default function CreateUserProjects() {
     }
 
     if (error) {
-      toast.error(error.message || 'User kon niet worden bijgewerkt');
-    } else {
-      toast.success('User is bijgewerkt');
-      window.location.reload();
+      throw new Error(error.message || 'User kon niet worden bijgewerkt');
     }
-  }
+
+    // Clear only the pending edits that were actually sent (this closure's
+    // `projectRoles`/`emailNotificationConsents` snapshot). An edit made
+    // while the requests were in flight was never sent, so it must survive
+    // this reset instead of being silently discarded.
+    setProjectRoles((prev) =>
+      prev.filter(
+        (pending) =>
+          !projectRoles.some(
+            (sent) =>
+              sent.projectId === pending.projectId &&
+              sent.roleId === pending.roleId
+          )
+      )
+    );
+    setEmailNotificationConsents((prev) =>
+      prev.filter(
+        (pending) =>
+          !emailNotificationConsents.some(
+            (sent) =>
+              sent.projectId === pending.projectId &&
+              sent.consent === pending.consent
+          )
+      )
+    );
+    await mutate();
+  }, [
+    projectRoles,
+    emailNotificationConsents,
+    users,
+    updateUser,
+    createUser,
+    mutate,
+  ]);
+
+  useRegisterSave({
+    // Every edit on this page lands in one of these two lists, so a
+    // non-empty list is the page's unsaved state.
+    isDirty: projectRoles.length > 0 || emailNotificationConsents.length > 0,
+    save,
+  });
 
   if (!projects || !users) return null;
 
@@ -177,7 +213,7 @@ export default function CreateUserProjects() {
         <Heading size="xl">Projectsrechten</Heading>
         <Separator className="my-4" />
 
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form onSubmit={(e) => e.preventDefault()}>
           <div className="ml-1">
             <div className="mt-4 grid grid-cols-1 lg:grid-cols-5 items-center lg:py-3 lg:border-b border-border gap-4">
               <ListHeading className="hidden lg:flex">Projectnaam</ListHeading>
@@ -290,10 +326,6 @@ export default function CreateUserProjects() {
               </AlertDescription>
             </Alert>
           )}
-
-          <Button className="col-span-full w-fit mt-4" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -21,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -91,6 +91,14 @@ export default function ArgumentsGeneral({
     } catch (err) {}
     props.updateConfig({ ...props, ...values, useSentiments });
   }
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: finalSchema,
+    label: 'Algemeen',
+    // Explicit id: this tab's label collides with resourcedetail's own
+    // "Algemeen" tab when both are mounted on the same resourcedetail page.
+    id: 'commentsWidget.general',
+  });
 
   const { data } = useResources(props.projectId);
   const resources: Array<{ id: string | number; title: string }> = data || [];
@@ -324,8 +332,6 @@ export default function ArgumentsGeneral({
               </FormItem>
             )}
           />
-
-          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

@@ -9,6 +9,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { DateCountdownBarWidgetProps } from '@openstad-headless/date-countdown-bar/src/date-countdown-bar';
@@ -18,7 +19,6 @@ import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
   FormControl,
@@ -74,6 +74,11 @@ export default function CountdownBarGeneral(
       showHours: props.showHours,
       showMinutes: props.showMinutes,
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Algemeen',
   });
 
   return (
@@ -240,8 +245,6 @@ export default function CountdownBarGeneral(
             </FormItem>
           )}
         />
-
-        <Button type="submit">Opslaan</Button>
       </form>
     </Form>
   );

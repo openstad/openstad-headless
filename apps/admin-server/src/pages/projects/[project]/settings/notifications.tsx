@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -13,6 +12,7 @@ import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterFormSave } from '@/components/ui/save-controller';
 import {
   Select,
   SelectContent,
@@ -24,6 +24,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { WhitelistedEmailSelect } from '@/components/ui/whitelisted-email-select';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import {
   WithWhitelistedEmailsProps,
   withWhitelistedEmails,
@@ -31,9 +32,8 @@ import {
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import * as React from 'react';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
@@ -82,34 +82,33 @@ export default function ProjectSettingsNotifications({
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  useSyncFormDefaults(form, defaults, data);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const project = await updateProjectEmails({
-        [category]: {
-          fromAddress: values.fromAddress,
-          projectmanagerAddress: values.projectmanagerAddress,
-          fromName: values.fromName,
-          sendUpdatedResourceAdminEmail:
-            values.sendUpdatedResourceAdminEmail || false,
-          pdfAttachmentEnabled: values.pdfAttachmentEnabled || false,
-          pdfAttachmentAdminEnabled: values.pdfAttachmentAdminEnabled || false,
-          pdfTitle: values.pdfTitle || '',
-          pdfDescription: values.pdfDescription || '',
-        },
-      });
-      if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('could not update', error);
+  const save = useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
     }
-  }
+    const values = formSchema.parse(form.getValues());
+    const result = await updateProjectEmails({
+      [category]: {
+        fromAddress: values.fromAddress,
+        projectmanagerAddress: values.projectmanagerAddress,
+        fromName: values.fromName,
+        sendUpdatedResourceAdminEmail:
+          values.sendUpdatedResourceAdminEmail || false,
+        pdfAttachmentEnabled: values.pdfAttachmentEnabled || false,
+        pdfAttachmentAdminEnabled: values.pdfAttachmentAdminEnabled || false,
+        pdfTitle: values.pdfTitle || '',
+        pdfDescription: values.pdfDescription || '',
+      },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+  }, [form, updateProjectEmails, category]);
+
+  useRegisterFormSave(form, save);
 
   return (
     <div>
@@ -132,9 +131,7 @@ export default function ProjectSettingsNotifications({
           <Form {...form} className="p-6 bg-white rounded-md">
             <Heading size="xl">E-mail instellingen</Heading>
             <Separator className="my-4" />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-fit grid grid-cols-1 gap-6">
+            <div className="lg:w-fit grid grid-cols-1 gap-6">
               <FormField
                 control={form.control}
                 name="fromAddress"
@@ -368,8 +365,7 @@ export default function ProjectSettingsNotifications({
                   </FormItem>
                 )}
               />
-              <Button type="submit">Opslaan</Button>
-            </form>
+            </div>
           </Form>
         </div>
       </PageLayout>

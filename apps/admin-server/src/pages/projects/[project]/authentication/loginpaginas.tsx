@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,15 +9,17 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterFormSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Copy, Info } from 'lucide-react';
 import { useRouter } from 'next/router';
 import * as React from 'react';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -250,70 +251,88 @@ export default function ProjectAuthentication() {
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  // Guarded on the provider's `config` subtree, not on the provider itself:
+  // every value below lives under `provider.openstad.config`, and a save both
+  // strips that subtree from the body (api-server project.js) and answers with
+  // the raw project, so the provider stays truthy while those values are gone.
+  // Only the enriched GET carries `config`, so it is what tells the two apart.
+  // Re-baselining on such a response drops the fields from the form state
+  // without changing what is on screen, which the next save then writes away.
+  const authConfig = data?.config?.auth?.provider?.openstad?.config;
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const project = await updateProject({
-        auth: {
-          provider: {
-            openstad: {
-              config: {
-                UniqueCode: {
-                  title: values.UniqueCodeTitle,
-                  description: values.UniqueCodeDescription,
-                  label: values.UniqueCodeLabel,
-                  buttonText: values.UniqueCodeButtonText,
-                  helpText: values.UniqueCodeHelpText,
-                },
-                Url: {
-                  title: values.UrlTitle,
-                  description: values.UrlDescription,
-                  label: values.UrlLabel,
-                  buttonText: values.UrlButtonText,
-                  helpText: values.UrlHelpText,
-                  confirmedTitle: values.UrlConfirmedTitle,
-                  confirmedDescription: values.UrlConfirmedDescription,
-                  confirmedHelpText: values.UrlConfirmedHelpText,
-                },
-                Phonenumber: {
-                  loginTitle: values.SMS1Title,
-                  loginSubtitle: values.SMS1Subtitle,
-                  loginDescription: values.SMS1Description,
-                  loginLabel: values.SMS1Label,
-                  loginButtonText: values.SMS1ButtonText,
-                  loginHelpText: values.SMS1HelpText,
-                  smsCodeTitle: values.SMS2Title,
-                  smsCodeSubtitle: values.SMS2Subtitle,
-                  smsCodeDescription: values.SMS2Description,
-                  smsCodeLabel: values.SMS2Label,
-                  smsCodeButtonText: values.SMS2ButtonText,
-                  smsCodeHelpText: values.SMS2HelpText,
-                },
-                Local: {
-                  title: values.LocalTitle,
-                  description: values.LocalDescription,
-                  emailLabel: values.LocalEmailLabel,
-                  passwordLabel: values.LocalPasswordLabel,
-                  buttonText: values.LocalButtonText,
-                  forgotPasswordText: values.LocalForgotPasswordText,
-                },
+  useSyncFormDefaults(form, defaults, authConfig);
+
+  const save = useCallback(async () => {
+    // Saving before the auth config has arrived would write the empty form over
+    // the stored settings and wipe them.
+    if (!authConfig) {
+      throw new Error('De instellingen zijn nog niet geladen.');
+    }
+    const valid = await form.trigger();
+    if (!valid) {
+      const firstErrorField = Object.keys(form.formState.errors)[0];
+      throw new Error(
+        firstErrorField
+          ? `Controleer het veld "${firstErrorField}".`
+          : 'Controleer de gemarkeerde velden.'
+      );
+    }
+    const values = formSchema.parse(form.getValues());
+    const result = await updateProject({
+      auth: {
+        provider: {
+          openstad: {
+            config: {
+              UniqueCode: {
+                title: values.UniqueCodeTitle,
+                description: values.UniqueCodeDescription,
+                label: values.UniqueCodeLabel,
+                buttonText: values.UniqueCodeButtonText,
+                helpText: values.UniqueCodeHelpText,
+              },
+              Url: {
+                title: values.UrlTitle,
+                description: values.UrlDescription,
+                label: values.UrlLabel,
+                buttonText: values.UrlButtonText,
+                helpText: values.UrlHelpText,
+                confirmedTitle: values.UrlConfirmedTitle,
+                confirmedDescription: values.UrlConfirmedDescription,
+                confirmedHelpText: values.UrlConfirmedHelpText,
+              },
+              Phonenumber: {
+                loginTitle: values.SMS1Title,
+                loginSubtitle: values.SMS1Subtitle,
+                loginDescription: values.SMS1Description,
+                loginLabel: values.SMS1Label,
+                loginButtonText: values.SMS1ButtonText,
+                loginHelpText: values.SMS1HelpText,
+                smsCodeTitle: values.SMS2Title,
+                smsCodeSubtitle: values.SMS2Subtitle,
+                smsCodeDescription: values.SMS2Description,
+                smsCodeLabel: values.SMS2Label,
+                smsCodeButtonText: values.SMS2ButtonText,
+                smsCodeHelpText: values.SMS2HelpText,
+              },
+              Local: {
+                title: values.LocalTitle,
+                description: values.LocalDescription,
+                emailLabel: values.LocalEmailLabel,
+                passwordLabel: values.LocalPasswordLabel,
+                buttonText: values.LocalButtonText,
+                forgotPasswordText: values.LocalForgotPasswordText,
               },
             },
           },
         },
-      });
-      if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('Could not update', error);
+      },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+  }, [authConfig, form, updateProject]);
+
+  useRegisterFormSave(form, save);
 
   return (
     <div>
@@ -352,9 +371,7 @@ export default function ProjectAuthentication() {
                       unieke code inloggen.
                     </FormLabel>
                   </div>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-4">
+                  <div className="lg:w-1/2 grid grid-cols-1 gap-4">
                     <FormField
                       control={form.control}
                       name="UniqueCodeTitle"
@@ -437,11 +454,7 @@ export default function ProjectAuthentication() {
                         </FormItem>
                       )}
                     />
-
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
-                  </form>
+                  </div>
                 </Form>
               </div>
             </TabsContent>
@@ -459,9 +472,7 @@ export default function ProjectAuthentication() {
                       dan doet die dat op een een pagina met deze teksten:
                     </FormLabel>
                   </div>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-4">
+                  <div className="lg:w-1/2 grid grid-cols-1 gap-4">
                     <FormField
                       control={form.control}
                       name="UrlTitle"
@@ -611,11 +622,7 @@ export default function ProjectAuthentication() {
                         </FormItem>
                       )}
                     />
-
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
-                  </form>
+                  </div>
                 </Form>
               </div>
             </TabsContent>
@@ -634,9 +641,7 @@ export default function ProjectAuthentication() {
                       je hebt ontvangen.
                     </FormLabel>
                   </div>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-4">
+                  <div className="lg:w-1/2 grid grid-cols-1 gap-4">
                     <div>
                       <FormLabel>
                         Teksten voor de eerste pagina (invoeren telefoonnummer):
@@ -848,11 +853,7 @@ export default function ProjectAuthentication() {
                         </FormItem>
                       )}
                     />
-
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
-                  </form>
+                  </div>
                 </Form>
               </div>
             </TabsContent>
@@ -868,9 +869,7 @@ export default function ProjectAuthentication() {
                       wachtwoord inloggen.
                     </FormLabel>
                   </div>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-4">
+                  <div className="lg:w-1/2 grid grid-cols-1 gap-4">
                     <FormField
                       control={form.control}
                       name="LocalTitle"
@@ -963,11 +962,7 @@ export default function ProjectAuthentication() {
                         </FormItem>
                       )}
                     />
-
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
-                  </form>
+                  </div>
                 </Form>
               </div>
             </TabsContent>

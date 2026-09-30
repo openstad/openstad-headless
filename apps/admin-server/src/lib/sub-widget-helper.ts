@@ -1,3 +1,6 @@
+import cloneDeep from 'lodash/cloneDeep';
+import set from 'lodash/set';
+
 type ConfigWithFunctions<ChildWidgetProps> = ChildWidgetProps & {
   updateConfig: (config: ChildWidgetProps) => void;
   onFieldChanged: (key: string, value: any) => void;
@@ -10,7 +13,11 @@ type ExtractConfigParams<
   subWidgetKey: keyof ParentWidgetProps;
   previewConfig: ParentWidgetProps | null;
   updateConfig: (config: ParentWidgetProps) => void;
-  updatePreview: (config: ParentWidgetProps) => void;
+  updatePreview: (
+    config:
+      | ParentWidgetProps
+      | ((prev: ParentWidgetProps | undefined) => ParentWidgetProps)
+  ) => void;
   extraChildConfig?: Partial<ChildWidgetProps>;
   widgetName?: string;
 };
@@ -49,15 +56,15 @@ export function extractConfig<
       updatePreview(mergedConfig);
     },
     onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [subWidgetKey]: {
-            ...previewConfig[subWidgetKey],
-            [key]: value,
-          },
-        });
-      }
+      updatePreview((prev) => {
+        const base = prev ?? previewConfig;
+        const subConfig = cloneDeep(base[subWidgetKey] ?? {});
+        set(subConfig as any, key, value);
+        return {
+          ...base,
+          [subWidgetKey]: subConfig,
+        };
+      });
     },
   };
   return extractedConfig;

@@ -8,6 +8,7 @@ import { extractConfig } from './sub-widget-helper';
 type ParentConfig = {
   commentsWidget: { title: string; emptyListText?: string };
   commentsWidget_multiple: { title: string; emptyListText?: string };
+  buttonsWidget?: { ctaButton?: { show?: boolean; href?: string } };
 };
 type ChildConfig = ParentConfig['commentsWidget'];
 
@@ -79,9 +80,67 @@ describe('extractConfig', () => {
 
     expect(updateConfig).not.toHaveBeenCalled();
     expect(updatePreview).toHaveBeenCalledTimes(1);
-    const preview = updatePreview.mock.calls[0][0] as ParentConfig;
+    const updater = updatePreview.mock.calls[0][0] as (
+      prev: ParentConfig | undefined
+    ) => ParentConfig;
+    const preview = updater(undefined);
     expect(preview.commentsWidget.title).toBe('FOR-TYPING');
     expect(preview.commentsWidget_multiple.title).toBe('AGAINST');
+  });
+
+  it('onFieldChanged writes a dotted key as a nested value, not a literal key', () => {
+    const updateConfig = vi.fn();
+    const updatePreview = vi.fn();
+    const previewConfig: ParentConfig = {
+      commentsWidget: { title: 'FOR' },
+      commentsWidget_multiple: { title: 'AGAINST' },
+      buttonsWidget: { ctaButton: { show: false, href: '' } },
+    };
+    const child = extractConfig<
+      ParentConfig,
+      NonNullable<ParentConfig['buttonsWidget']>
+    >({
+      subWidgetKey: 'buttonsWidget',
+      previewConfig,
+      updateConfig,
+      updatePreview,
+    });
+
+    child.onFieldChanged('ctaButton.show', true);
+
+    const updater = updatePreview.mock.calls[0][0] as (
+      prev: ParentConfig | undefined
+    ) => ParentConfig;
+    const preview = updater(undefined);
+    expect(preview.buttonsWidget?.ctaButton?.show).toBe(true);
+    expect((preview.buttonsWidget as any)['ctaButton.show']).toBeUndefined();
+  });
+
+  it('onFieldChanged does not throw when the sub-widget config is undefined', () => {
+    const updateConfig = vi.fn();
+    const updatePreview = vi.fn();
+    const previewConfig: ParentConfig = {
+      commentsWidget: { title: 'FOR' },
+      commentsWidget_multiple: { title: 'AGAINST' },
+      buttonsWidget: undefined,
+    };
+    const child = extractConfig<
+      ParentConfig,
+      NonNullable<ParentConfig['buttonsWidget']>
+    >({
+      subWidgetKey: 'buttonsWidget',
+      previewConfig,
+      updateConfig,
+      updatePreview,
+    });
+
+    expect(() => child.onFieldChanged('ctaButton.show', true)).not.toThrow();
+
+    const updater = updatePreview.mock.calls[0][0] as (
+      prev: ParentConfig | undefined
+    ) => ParentConfig;
+    const preview = updater(undefined);
+    expect(preview.buttonsWidget?.ctaButton?.show).toBe(true);
   });
 
   it('throws when previewConfig is missing', () => {

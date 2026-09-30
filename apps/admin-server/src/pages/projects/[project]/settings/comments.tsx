@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -11,15 +10,16 @@ import {
 import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterFormSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Switch from '@radix-ui/react-switch';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
@@ -91,39 +91,41 @@ export default function ProjectSettingsComments() {
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-    setShowCommentSettings(data?.config?.comments?.canComment);
-  }, [form, defaults]);
+  useSyncFormDefaults(form, defaults, data);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const project = await updateProject({
-        comments: {
-          canComment: values.canComment,
-          closedText: values.closedText,
-          canReply: values.canReply,
-          canLike: values.canLike,
-          canDislike: values.canDislike,
-          descriptionMinLength: values.descriptionMinLength,
-          descriptionMaxLength: values.descriptionMaxLength,
-          adminLabel: values.adminLabel,
-          editorLabel: values.editorLabel,
-          minCharactersWarning: values.minCharactersWarning,
-          maxCharactersWarning: values.maxCharactersWarning,
-          minCharactersError: values.minCharactersError,
-          maxCharactersError: values.maxCharactersError,
-        },
-      });
-      if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('could not update', error);
+  useEffect(() => {
+    setShowCommentSettings(data?.config?.comments?.canComment);
+  }, [data?.config?.comments?.canComment]);
+
+  const save = useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
     }
-  }
+    const values = formSchema.parse(form.getValues());
+    const result = await updateProject({
+      comments: {
+        canComment: values.canComment,
+        closedText: values.closedText,
+        canReply: values.canReply,
+        canLike: values.canLike,
+        canDislike: values.canDislike,
+        descriptionMinLength: values.descriptionMinLength,
+        descriptionMaxLength: values.descriptionMaxLength,
+        adminLabel: values.adminLabel,
+        editorLabel: values.editorLabel,
+        minCharactersWarning: values.minCharactersWarning,
+        maxCharactersWarning: values.maxCharactersWarning,
+        minCharactersError: values.minCharactersError,
+        maxCharactersError: values.maxCharactersError,
+      },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+  }, [form, updateProject]);
+
+  useRegisterFormSave(form, save);
 
   return (
     <div>
@@ -146,9 +148,7 @@ export default function ProjectSettingsComments() {
           <Form {...form} className="p-6 bg-white rounded-md">
             <Heading size="xl">Reacties</Heading>
             <Separator className="my-4" />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="w-5/6 grid grid-cols-1 lg:grid-cols-1 gap-x-4 gap-y-8">
+            <div className="w-5/6 grid grid-cols-1 lg:grid-cols-1 gap-x-4 gap-y-8">
               <FormField
                 control={form.control}
                 name="canComment"
@@ -395,11 +395,7 @@ export default function ProjectSettingsComments() {
                   </FormItem>
                 )}
               />
-
-              <Button type="submit" className="w-fit col-span-full">
-                Opslaan
-              </Button>
-            </form>
+            </div>
           </Form>
         </div>
       </PageLayout>

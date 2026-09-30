@@ -10,16 +10,17 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import { useRegisterFormSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useDatalayer from '@/hooks/use-datalayer';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import { useRouter } from 'next/router';
-import React, { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 const formSchema = z.object({
@@ -53,26 +54,27 @@ export default function ProjectDatalayerEdit() {
     defaultValues: {},
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  useSyncFormDefaults(form, defaults, data);
+
+  const save = useCallback(async () => {
+    const valid = await form.trigger();
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
     const datalayer = await updateDatalayer(
       values.name,
       values.layer,
       values.icon
     );
-
-    if (datalayer) {
-      toast.success('Kaartlaag aangepast!');
-      // router.push(`/projects/${project}/areas`);
-    } else {
-      toast.error(
+    if (!datalayer) {
+      throw new Error(
         'De kaartlaag die is meegegeven lijkt niet helemaal te kloppen.'
       );
     }
-  }
+  }, [form, updateDatalayer]);
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  useRegisterFormSave(form, save);
 
   const { fields: iconField, remove: removeImage } = useFieldArray({
     control: form.control,
@@ -100,9 +102,7 @@ export default function ProjectDatalayerEdit() {
           <Form {...form}>
             <Heading size="xl">Aanpassen</Heading>
             <Separator className="my-4" />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-1/2 grid grid-cols-1 gap-4">
+            <div className="lg:w-1/2 grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
                 name="name"
@@ -124,7 +124,7 @@ export default function ProjectDatalayerEdit() {
                 description="De ideale afmetingen voor een icoon zijn 30x40 pixels."
                 allowedTypes={['image/*']}
                 onImageUploaded={(imageResult) => {
-                  form.setValue('icon', [imageResult]);
+                  form.setValue('icon', [imageResult], { shouldDirty: true });
                   form.resetField('iconUploader');
                   form.trigger('icon');
                 }}
@@ -170,10 +170,7 @@ export default function ProjectDatalayerEdit() {
                   </FormItem>
                 )}
               />
-              <Button className="w-fit col-span-full" type="submit">
-                Opslaan
-              </Button>
-            </form>
+            </div>
           </Form>
         </div>
       </PageLayout>

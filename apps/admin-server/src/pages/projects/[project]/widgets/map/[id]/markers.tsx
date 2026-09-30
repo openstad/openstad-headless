@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -19,10 +18,11 @@ import { Separator } from '@/components/ui/separator';
 import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import useMarkers from '@/hooks/use-markers';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -43,41 +43,33 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function WidgetMapMarkers() {
-  const { data: widget, updateConfig } = useWidgetConfig<any>();
-
+export default function WidgetMapMarkers(
+  props: { [key: string]: any } & EditFieldProps<any> & {
+      markerSets?: any;
+      markerInteractionType?: 'default' | 'direct';
+    }
+) {
   const router = useRouter();
   const projectId = router.query.project as string;
 
   const { data: availableMarkerSets } =
     (useMarkers(projectId) as { data: { id: number; name: string }[] }) ?? [];
 
-  const defaults = useCallback(
-    () => ({
-      markerSets: widget?.config?.markerSets || [],
-      markerInteractionType: widget?.config?.markerInteractionType || 'default',
-    }),
-    [widget?.config]
-  );
-
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      markerSets: props?.markerSets || [],
+      markerInteractionType: props?.markerInteractionType || 'default',
+    },
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Markers',
+  });
 
   async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({
-        markerSets: values.markerSets,
-        markerInteractionType: values.markerInteractionType,
-      });
-    } catch (error) {
-      console.error('could not update', error);
-    }
+    props.updateConfig({ ...props, ...values });
   }
 
   return (
@@ -172,8 +164,6 @@ export default function WidgetMapMarkers() {
               </FormItem>
             )}
           />
-
-          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

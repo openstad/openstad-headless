@@ -7,13 +7,9 @@ export function YesNoSelect(
   field: ControllerRenderProps<any, any>,
   props: { onFieldChanged?: (key: string, value: any) => void }
 ) {
-  // Init value
   useEffect(() => {
     if (field.value === undefined || field.value === null) {
       field.onChange(false);
-      if (props.onFieldChanged && field.name) {
-        props.onFieldChanged(field.name, false);
-      }
     }
   }, []);
 
