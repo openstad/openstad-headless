@@ -795,7 +795,7 @@ router
           return {
             id: p.id,
             createdAt: p.createdAt,
-            tags: p?.config?.project?.tags || '',
+            tags: p?.safeConfig?.project?.tags || '',
           };
         });
       }
