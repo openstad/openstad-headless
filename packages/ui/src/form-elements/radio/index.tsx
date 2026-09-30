@@ -134,7 +134,12 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
           parsed!.some((stored) => stored.value === choice.value)
         );
       if (storedMatchesChoices) {
-        setDisplayChoices(parsed as typeof normalizedChoices);
+        const ordered = parsed!.map(
+          (stored) =>
+            normalizedChoices.find((choice) => choice.value === stored.value)!
+        );
+        setDisplayChoices(ordered);
+        sessionStorage.setItem(storageKey, JSON.stringify(ordered));
       } else if (normalizedChoices.length > 0) {
         const shuffled = shuffleArray(normalizedChoices);
         setDisplayChoices(shuffled);
