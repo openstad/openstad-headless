@@ -44,6 +44,7 @@ var allSafeTags = {
     'nav',
     'section',
     // Text content
+    'article',
     'center',
     'dd',
     'div',
@@ -104,7 +105,9 @@ var allSafeTags = {
       'center',
       'class',
       'data-*',
+      'id',
       'name',
+      'style',
       'title',
     ],
     a: ['href', 'name', 'rel', 'target'],
