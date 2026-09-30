@@ -303,9 +303,11 @@ const ImageUploadField: FC<ImageUploadProps> = ({
             process: {
               url: props?.imageUrl + '/images',
               method: 'POST',
-              headers: {
-                Authorization: 'Bearer ' + datastore.api?.currentUserJWT,
-              },
+              headers: datastore.api?.currentUserJWT
+                ? {
+                    Authorization: 'Bearer ' + datastore.api.currentUserJWT,
+                  }
+                : {},
               onload: (response: any) => {
                 const currentImages = [...uploadedImages];
                 currentImages.push(JSON.parse(response)[0]);
