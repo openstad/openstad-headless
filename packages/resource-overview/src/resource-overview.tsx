@@ -99,6 +99,10 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displaySearch?: boolean;
     displaySearchText?: boolean;
     textActiveSearch?: string;
+    searchLabel?: string;
+    displaySearchHint?: boolean;
+    searchHint?: string;
+    displaySearchPlaceholder?: boolean;
     searchPlaceholder?: string;
     itemLink?: string;
     sorting: Array<{ value: string; label: string }>;
@@ -167,6 +171,10 @@ export type ResourceOverviewWidgetProps = BaseProps &
     includeOrExcludeStatusIds?: string;
     includeProjectsInOverview?: boolean;
     displayLocationFilter?: boolean;
+    locationLabel?: string;
+    displayLocationHint?: boolean;
+    locationHint?: string;
+    locationPlaceholder?: string;
     excludeResourcesInOverview?: boolean;
     filterBehavior?: string;
     filterBehaviorInclude?: string;
