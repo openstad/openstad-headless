@@ -91,6 +91,13 @@ spec:
                 name: {{ template "openstad.auth.databaseSecret.fullname" . }}
                 key: {{ .Values.secrets.auth.dbNameKey | default "database" }}
 
+          - name: DB_MAX_POOL_SIZE
+            valueFrom:
+              secretKeyRef:
+                name: {{ template "openstad.database.credentialsSecret.fullname" . }}
+                key: maxPoolSize
+                optional: true
+
           - name: MAIL_TRANSPORTER_TYPE
             valueFrom:
               secretKeyRef:

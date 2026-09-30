@@ -69,6 +69,7 @@ spec:
               secretKeyRef:
                 name: {{ template "openstad.database.credentialsSecret.fullname" . }}
                 key: maxPoolSize
+                optional: true
 
           - name: DB_NAME
             valueFrom:
