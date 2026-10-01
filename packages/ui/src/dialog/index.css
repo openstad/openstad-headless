@@ -43,9 +43,17 @@
 
 .osc-DialogTitle {
   margin: 0;
-  font-weight: 500;
-  color: var(--mauve-12);
-  font-size: 17px;
+  color: var(--utrecht-heading-3-color, var(--utrecht-heading-color, inherit));
+  font-family: var(
+    --utrecht-heading-3-font-family,
+    var(--utrecht-heading-font-family, inherit)
+  );
+  font-size: var(--utrecht-heading-3-font-size, 1.25rem);
+  font-weight: var(
+    --utrecht-heading-3-font-weight,
+    var(--utrecht-heading-font-weight, bold)
+  );
+  line-height: var(--utrecht-heading-3-line-height, 1.3);
 }
 
 .osc-DialogDescription {

@@ -7,6 +7,21 @@
   gap: 1rem;
 }
 
+.osc-link-confirm-list > li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.osc-link-confirm-list .utrecht-heading-6 {
+  margin: 0;
+}
+
+.osc-link-confirm-dialog-body .utrecht-textarea {
+  max-inline-size: 100%;
+  inline-size: 100%;
+}
+
 .osc-link-confirm-actions {
   display: flex;
   flex-wrap: wrap;

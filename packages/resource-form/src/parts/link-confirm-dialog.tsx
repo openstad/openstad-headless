@@ -90,28 +90,30 @@ export function LinkConfirmDialog({
                 const textareaId = `osc-link-message-${key.replace(/[^a-z0-9-]/gi, '-')}`;
                 return (
                   <li key={key}>
-                    <Paragraph>
-                      <strong>{item.label}</strong>
-                    </Paragraph>
+                    <Heading level={4} appearance="utrecht-heading-6">
+                      {item.label}
+                    </Heading>
                     <FormField type="text">
                       <Paragraph className="utrecht-form-field__label">
                         <FormLabel htmlFor={textareaId}>
                           {messageLabel}
                         </FormLabel>
                       </Paragraph>
-                      <Textarea
-                        id={textareaId}
-                        maxLength={MAX_MESSAGE_LENGTH}
-                        value={messages[key] || ''}
-                        onChange={(
-                          event: React.ChangeEvent<HTMLTextAreaElement>
-                        ) =>
-                          setMessages({
-                            ...messages,
-                            [key]: event.target.value,
-                          })
-                        }
-                      />
+                      <div className="utrecht-form-field__input">
+                        <Textarea
+                          id={textareaId}
+                          maxLength={MAX_MESSAGE_LENGTH}
+                          value={messages[key] || ''}
+                          onChange={(
+                            event: React.ChangeEvent<HTMLTextAreaElement>
+                          ) =>
+                            setMessages({
+                              ...messages,
+                              [key]: event.target.value,
+                            })
+                          }
+                        />
+                      </div>
                     </FormField>
                   </li>
                 );
