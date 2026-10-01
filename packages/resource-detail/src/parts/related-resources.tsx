@@ -1,4 +1,5 @@
 import DataStore from '@openstad-headless/data-store/src';
+import { Icon } from '@openstad-headless/ui/src';
 import { Heading, Paragraph } from '@utrecht/component-library-react';
 import React, { useEffect, useState } from 'react';
 
@@ -108,6 +109,11 @@ export function RelatedResources({
                 src={item.image}
                 alt=""
               />
+            ) : null}
+            {displayImage && !item.image ? (
+              <div className="osc-related-resources-image --placeholder">
+                <Icon icon="ri-image-line" iconOnly={true} variant="big" />
+              </div>
             ) : null}
             <Heading
               level={itemHeadingLevel}
