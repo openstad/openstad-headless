@@ -10,6 +10,7 @@ const searchInResults = require('../../middleware/search-in-results');
 const merge = require('merge');
 const authSettings = require('../../util/auth-settings');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const { applyUserSearchFilter } = require('../../lib/user-search-filter');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const crypto = require('crypto');
 
@@ -249,18 +250,8 @@ router
       delete dbQuery.pageSize;
     }
 
-    const q =
-      req.query.q && typeof req.query.q === 'string' ? req.query.q.trim() : '';
-    if (q) {
-      const like =
-        '%' +
-        String(q).replace(/[\\%_]/g, (m) => (m === '\\' ? '\\\\' : '\\' + m)) +
-        '%';
-      dbQuery.where[Op.or] = [
-        { name: { [Op.like]: like } },
-        { email: { [Op.like]: like } },
-        { postcode: { [Op.like]: like } },
-      ];
+    if (hasRole(req.user, 'moderator')) {
+      applyUserSearchFilter(dbQuery.where, req.query.q);
     }
 
     db.User.scope(...req.scope)
