@@ -29,8 +29,11 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 1rem;
   padding: 0;
+}
+
+.osc-contact-block-dialog-body .utrecht-form-field + .utrecht-form-field {
+  margin-block-start: 0.75rem;
 }
 
 .osc-contact-block-dialog-body .utrecht-select,
@@ -43,6 +46,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
+  margin-block-start: 1.5rem;
 }
 
 .osc-contact-block-error {
