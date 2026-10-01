@@ -4,11 +4,12 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
+  Paragraph,
 } from '@utrecht/component-library-react';
 import React, { FC, useEffect, useState } from 'react';
 
 import { Combobox, ComboboxOption } from '../../combobox';
-import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
+import RteContent from '../../rte-formatting/rte-content';
 import { Spacer } from '../../spacer';
 
 export type ResourceLinkValue = {
@@ -110,14 +111,15 @@ const ResourceLinkField: FC<ResourceLinkFieldProps> = ({
   return (
     <FormField type="text">
       {title && (
-        <FormLabel htmlFor={fieldKey} id={labelId}>
-          <RteContent
-            content={title}
-            unwrapSingleRootDiv={true}
-            forceInline={true}
-            inlineComponent={InlineParagraph}
-          />
-        </FormLabel>
+        <Paragraph className="utrecht-form-field__label">
+          <FormLabel htmlFor={fieldKey} id={labelId}>
+            <RteContent
+              content={title}
+              unwrapSingleRootDiv={true}
+              forceInline={true}
+            />
+          </FormLabel>
+        </Paragraph>
       )}
       {description && (
         <>
@@ -127,16 +129,19 @@ const ResourceLinkField: FC<ResourceLinkFieldProps> = ({
           <Spacer size={0.5} />
         </>
       )}
-      <Combobox
-        id={fieldKey}
-        labelledBy={title ? labelId : undefined}
-        describedBy={[descriptionId, errorId].filter(Boolean).join(' ')}
-        invalid={fieldInvalid}
-        placeholder={placeholder || undefined}
-        selected={selected}
-        onChange={handleChange}
-        loadOptions={loadOptions}
-      />
+      <div className="utrecht-form-field__input">
+        <Combobox
+          id={fieldKey}
+          labelledBy={title ? labelId : undefined}
+          describedBy={[descriptionId, errorId].filter(Boolean).join(' ')}
+          invalid={fieldInvalid}
+          placeholder={placeholder || undefined}
+          selected={selected}
+          onChange={handleChange}
+          loadOptions={loadOptions}
+        />
+      </div>
+      <Spacer size={1.25} />
     </FormField>
   );
 };
