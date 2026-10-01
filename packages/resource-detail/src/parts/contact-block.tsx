@@ -267,20 +267,24 @@ export function ContactBlock({
                   {ownResourceEmptyText}
                 </FormFieldDescription>
               ) : (
-                <Select
-                  id={ownResourceFieldId}
-                  value={ownResourceId}
-                  disabled={!ownResources}
-                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                    setOwnResourceId(e.target.value)
-                  }>
-                  <SelectOption value="">Selecteer een inzending</SelectOption>
-                  {(ownResources || []).map((option) => (
-                    <SelectOption key={option.id} value={option.id}>
-                      {option.label}
+                <div className="utrecht-form-field__input">
+                  <Select
+                    id={ownResourceFieldId}
+                    value={ownResourceId}
+                    disabled={!ownResources}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      setOwnResourceId(e.target.value)
+                    }>
+                    <SelectOption value="">
+                      Selecteer een inzending
                     </SelectOption>
-                  ))}
-                </Select>
+                    {(ownResources || []).map((option) => (
+                      <SelectOption key={option.id} value={option.id}>
+                        {option.label}
+                      </SelectOption>
+                    ))}
+                  </Select>
+                </div>
               )}
             </FormField>
           ) : null}
@@ -290,14 +294,16 @@ export function ContactBlock({
               <Paragraph className="utrecht-form-field__label">
                 <FormLabel htmlFor={messageId}>{messageLabel}</FormLabel>
               </Paragraph>
-              <Textarea
-                id={messageId}
-                maxLength={MAX_MESSAGE_LENGTH}
-                value={message}
-                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
-                  setMessage(e.target.value)
-                }
-              />
+              <div className="utrecht-form-field__input">
+                <Textarea
+                  id={messageId}
+                  maxLength={MAX_MESSAGE_LENGTH}
+                  value={message}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setMessage(e.target.value)
+                  }
+                />
+              </div>
             </FormField>
           ) : null}
 

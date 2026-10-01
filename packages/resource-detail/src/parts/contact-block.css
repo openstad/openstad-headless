@@ -33,6 +33,12 @@
   padding: 0;
 }
 
+.osc-contact-block-dialog-body .utrecht-select,
+.osc-contact-block-dialog-body .utrecht-textarea {
+  max-inline-size: 100%;
+  inline-size: 100%;
+}
+
 .osc-contact-block-actions {
   display: flex;
   flex-wrap: wrap;
