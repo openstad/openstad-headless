@@ -82,6 +82,9 @@ const initializeApp = async () => {
       password: await getDbPassword(),
       connectionLimit:
         parseInt(process.env.DB_MAX_POOL_SIZE || process.env.maxPoolSize) || 5,
+      // maxIdle must be lower than connectionLimit, otherwise mysql2 never closes idle connections
+      maxIdle: parseInt(process.env.DB_POOL_MAX_IDLE ?? '1'),
+      idleTimeout: parseInt(process.env.DB_POOL_IDLE_TIMEOUT) || 60000,
       ssl,
       enableCleartextPlugin:
         process.env.DB_ENABLE_CLEARTEXT_PLUGIN === 'true' ? true : false,

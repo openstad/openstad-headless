@@ -1,8 +1,16 @@
 const config = require('config');
 const jwt = require('jsonwebtoken');
 const merge = require('merge');
+const createError = require('http-errors');
 const db = require('../db');
 const authSettings = require('../util/auth-settings');
+
+const INVALID_TOKEN_ERRORS = [
+  'TokenExpiredError',
+  'JsonWebTokenError',
+  'NotBeforeError',
+];
+const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
 
 let adapters = {};
 
@@ -36,9 +44,18 @@ module.exports = async function getUser(req, res, next) {
         req.headers['authorization'] = `Bearer ${uploadJwt}`;
       }
     }
-    let { userId, isFixed, authProvider } = parseAuthHeader(
-      req.headers['authorization']
-    );
+    let parsedAuthHeader;
+    try {
+      parsedAuthHeader = parseAuthHeader(req.headers['authorization']);
+    } catch (err) {
+      if (!INVALID_TOKEN_ERRORS.includes(err?.name)) throw err;
+      if (SAFE_METHODS.includes(req.method)) {
+        res.set('WWW-Authenticate', 'Bearer error="invalid_token"');
+        return nextWithEmptyUser(req, res, next);
+      }
+      return next(createError(401, 'Invalid or expired token'));
+    }
+    let { userId, isFixed, authProvider } = parsedAuthHeader;
     let authConfig = await authSettings.config({
       project: req.project,
       useAuth: authProvider,

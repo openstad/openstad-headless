@@ -245,14 +245,14 @@ const MapField: FC<MapProps> = ({
   return (
     <FormField type="text">
       {title && (
-        // ponytail: geen <label for> naar een verborgen input die niet bestaat
-        // (WCAG 1.3.1). De kaart is geen labelbaar formulierveld; titel als tekst met id.
         <Paragraph className="utrecht-form-field__label" id={randomID}>
-          <RteContent
-            content={title}
-            unwrapSingleRootDiv={true}
-            forceInline={true}
-          />
+          <span className="utrecht-form-label">
+            <RteContent
+              content={title}
+              unwrapSingleRootDiv={true}
+              forceInline={true}
+            />
+          </span>
         </Paragraph>
       )}
 
