@@ -953,7 +953,7 @@ function ResourceDetail({
         <RelatedResources
           {...props.relatedResources}
           projectId={props.projectId}
-          resourceId={resourceId}
+          resourceId={resource?.id ? String(resource.id) : undefined}
           api={props.api}
           headingLevel={hSection}
           itemHeadingLevel={hSub}
@@ -964,7 +964,7 @@ function ResourceDetail({
         <ContactBlock
           {...props.contactBlock}
           projectId={props.projectId}
-          resourceId={resourceId}
+          resourceId={resource?.id ? String(resource.id) : undefined}
           api={props.api}
           login={props.login}
           headingLevel={hSection}
