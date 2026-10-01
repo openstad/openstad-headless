@@ -779,6 +779,9 @@ function DocumentMap({
               }
               setSelectedMarkerIndex(index);
               setSelectedCommentIndex(index);
+              if (!isPopupMarkerBehavior) {
+                scrollToComment(index);
+              }
             }
           },
           keydown: (e: L.LeafletKeyboardEvent) => {
@@ -793,6 +796,9 @@ function DocumentMap({
                 }
                 setSelectedMarkerIndex(index);
                 setSelectedCommentIndex(index);
+                if (!isPopupMarkerBehavior) {
+                  scrollToComment(index);
+                }
               }
             }
           },
