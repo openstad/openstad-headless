@@ -54,6 +54,7 @@ type Props = ContactBlockProps & {
   login?: { url?: string };
   headingLevel: number;
   currentUserProps: any;
+  ownerId?: number;
 };
 
 type OwnResource = { id: string; label: string };
@@ -65,6 +66,7 @@ export function ContactBlock({
   login,
   headingLevel,
   currentUserProps,
+  ownerId,
   title = 'Wil je contact opnemen met de indiener?',
   description,
   buttonText = 'Stuur een bericht',
@@ -193,6 +195,8 @@ export function ContactBlock({
   const consentId = `${fieldId}-consent`;
   const ownResourceFieldId = `${fieldId}-own-resource`;
   const errorId = `${fieldId}-error`;
+
+  if (isLoggedIn && ownerId && currentUser.id === ownerId) return null;
 
   return (
     <section className="osc-contact-block">
