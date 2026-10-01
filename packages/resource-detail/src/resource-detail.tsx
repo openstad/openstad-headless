@@ -969,6 +969,7 @@ function ResourceDetail({
           login={props.login}
           headingLevel={hSection}
           currentUserProps={props}
+          ownerId={resource?.userId}
         />
       ) : null}
 
