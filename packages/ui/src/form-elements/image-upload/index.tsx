@@ -391,16 +391,16 @@ const ImageUploadField: FC<ImageUploadProps> = ({
   return (
     <FormField type="text">
       {title && (
-        // ponytail: FilePond-wrapper is geen labelbaar input; <label for> wees nergens heen
-        // (WCAG 1.3.1). Titel als tekst met id; FilePond levert zelf zijn instructielabel.
         <Paragraph
           className="utrecht-form-field__label"
           id={`${randomId}_label`}>
-          <RteContent
-            content={title}
-            unwrapSingleRootDiv={true}
-            forceInline={true}
-          />
+          <span className="utrecht-form-label">
+            <RteContent
+              content={title}
+              unwrapSingleRootDiv={true}
+              forceInline={true}
+            />
+          </span>
         </Paragraph>
       )}
 

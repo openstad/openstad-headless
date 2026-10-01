@@ -19,7 +19,7 @@
   cursor: not-allowed;
 }
 
-.osc-distribution-modules-item-content label.utrecht-form-label {
+.osc-distribution-modules-item-content .utrecht-form-label {
   margin-block-end: 6px;
 }
 
