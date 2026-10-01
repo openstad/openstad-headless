@@ -1,5 +1,9 @@
 .osc-combobox-input-wrapper {
   position: relative;
+  max-inline-size: var(
+    --utrecht-textbox-max-inline-size,
+    var(--utrecht-form-control-max-inline-size, 100%)
+  );
 }
 
 .osc-combobox-listbox {
@@ -81,4 +85,6 @@
   min-height: revert;
   height: 30px;
   width: 30px;
+  border-color: transparent;
+  background: transparent;
 }

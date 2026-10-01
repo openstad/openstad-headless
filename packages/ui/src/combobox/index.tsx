@@ -234,6 +234,7 @@ export function Combobox({
               <span>{option.label}</span>
               <IconButton
                 type="button"
+                className="subtle-button"
                 icon="ri-close-line"
                 iconOnly={true}
                 aria-label={removeText.replace('{label}', option.label)}
