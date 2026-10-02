@@ -65,6 +65,18 @@ export function externalIdsBySource(
   return bySource;
 }
 
+export function withoutLinked<T extends { id: string }>(
+  options: T[],
+  links: ResourceLink[]
+): T[] {
+  const linkedIds = new Set(
+    links
+      .filter((link) => link.source === OPENSTAD_SOURCE)
+      .map((link) => String(link.resource ? link.resource.id : link.targetId))
+  );
+  return options.filter((option) => !linkedIds.has(String(option.id)));
+}
+
 export function toRelatedItems(
   links: ResourceLink[],
   {
