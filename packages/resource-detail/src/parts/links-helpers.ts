@@ -42,6 +42,40 @@ export function isHttpUrl(url?: string): boolean {
   return typeof url === 'string' && /^https?:\/\//i.test(url);
 }
 
+const PRIVACY_WORD = 'privacyverklaring';
+
+export type ConsentLabelParts = {
+  before: string;
+  linkText: string;
+  after: string;
+};
+
+export function consentLabelPlain(label: string): string {
+  return label.split('{link}').join(PRIVACY_WORD);
+}
+
+export function consentLabelParts(
+  label: string,
+  privacyUrl?: string
+): ConsentLabelParts | null {
+  if (!isHttpUrl(privacyUrl)) return null;
+  const placeholder = label.indexOf('{link}');
+  if (placeholder >= 0) {
+    return {
+      before: label.slice(0, placeholder),
+      linkText: PRIVACY_WORD,
+      after: consentLabelPlain(label.slice(placeholder + '{link}'.length)),
+    };
+  }
+  const word = label.toLowerCase().indexOf(PRIVACY_WORD);
+  if (word < 0) return null;
+  return {
+    before: label.slice(0, word),
+    linkText: label.slice(word, word + PRIVACY_WORD.length),
+    after: label.slice(word + PRIVACY_WORD.length),
+  };
+}
+
 export function buildItemLink(
   itemLink: string | undefined,
   id: string

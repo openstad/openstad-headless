@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   type ResourceLink,
   buildItemLink,
+  consentLabelParts,
+  consentLabelPlain,
   contactTextDefaults,
   externalIdsBySource,
   toRelatedItems,
@@ -197,5 +199,43 @@ describe('withoutLinked', () => {
     expect(withoutLinked(options, linked).map((option) => option.id)).toEqual([
       '12',
     ]);
+  });
+});
+
+describe('consentLabelParts', () => {
+  const url = 'https://example.nl/privacy';
+
+  it('puts the link at the {link} placeholder', () => {
+    expect(
+      consentLabelParts('Ik ga akkoord met de {link} van de gemeente', url)
+    ).toEqual({
+      before: 'Ik ga akkoord met de ',
+      linkText: 'privacyverklaring',
+      after: ' van de gemeente',
+    });
+  });
+
+  it('turns the word privacyverklaring into the link without a placeholder', () => {
+    expect(
+      consentLabelParts('Ik ga akkoord met de Privacyverklaring', url)
+    ).toEqual({
+      before: 'Ik ga akkoord met de ',
+      linkText: 'Privacyverklaring',
+      after: '',
+    });
+  });
+
+  it('gives no link without a valid url or without a place for the link', () => {
+    expect(consentLabelParts('Ik ga akkoord met de {link}', '')).toBeNull();
+    expect(
+      consentLabelParts('Ik ga akkoord met de {link}', 'javascript:alert(1)')
+    ).toBeNull();
+    expect(consentLabelParts('Ik ga akkoord', url)).toBeNull();
+  });
+
+  it('shows the placeholder as plain text when there is no link', () => {
+    expect(consentLabelPlain('Ik ga akkoord met de {link}')).toBe(
+      'Ik ga akkoord met de privacyverklaring'
+    );
   });
 });

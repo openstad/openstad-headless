@@ -22,6 +22,8 @@ import React, { useEffect, useId, useState } from 'react';
 
 import './contact-block.css';
 import {
+  consentLabelParts,
+  consentLabelPlain,
   contactTextDefaults,
   validateContact,
   withoutLinked,
@@ -41,6 +43,7 @@ export type ContactBlockProps = {
   messageLabel?: string;
   showConsent?: boolean;
   consentLabel?: string;
+  privacyUrl?: string;
   showOwnResource?: boolean;
   ownResourceLabel?: string;
   ownResourceTags?: string;
@@ -63,6 +66,27 @@ type Props = ContactBlockProps & {
 
 type OwnResource = { id: string; label: string };
 
+function ConsentLabel({
+  label,
+  privacyUrl,
+}: {
+  label: string;
+  privacyUrl?: string;
+}) {
+  const parts = consentLabelParts(label, privacyUrl);
+  if (!parts) return <>{consentLabelPlain(label)}</>;
+  return (
+    <>
+      {parts.before}
+      <a href={privacyUrl} target="_blank" rel="noreferrer noopener">
+        {parts.linkText}
+        <span className="sr-only"> (opent in nieuw tabblad)</span>
+      </a>
+      {parts.after}
+    </>
+  );
+}
+
 export function ContactBlock({
   projectId,
   resourceId,
@@ -81,6 +105,7 @@ export function ContactBlock({
   messageLabel = 'Typ je bericht',
   showConsent = true,
   consentLabel,
+  privacyUrl,
   showOwnResource = false,
   ownResourceLabel = 'Kies je inzending',
   ownResourceTags,
@@ -341,7 +366,10 @@ export function ContactBlock({
                 }
               />
               <FormLabel htmlFor={consentId} type="checkbox">
-                {consentLabelText}
+                <ConsentLabel
+                  label={consentLabelText}
+                  privacyUrl={privacyUrl}
+                />
               </FormLabel>
             </FormField>
           ) : null}
