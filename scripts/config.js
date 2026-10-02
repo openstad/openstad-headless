@@ -280,8 +280,6 @@ async function setupEnvVars() {
     process.env.IMAGE_HQ_ORIGINAL_MAX_PIXELS || 160000;
   process.env.DISABLE_WEBP_CONVERSION =
     process.env.DISABLE_WEBP_CONVERSION || false;
-  // Shared by the image server (upload cap) and the admin server (proxy body
-  // size limit) -- both read the same env var name so they cannot drift apart.
   process.env.MAX_FILE_UPLOAD_SIZE_MB =
     process.env.MAX_FILE_UPLOAD_SIZE_MB || 25;
 
