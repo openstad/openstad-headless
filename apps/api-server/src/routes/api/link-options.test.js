@@ -78,6 +78,24 @@ describe('link options', () => {
     expect(res.status).toBe(422);
   });
 
+  it('lists the first ten resources without a search', async () => {
+    const res = await request(createApp()).get(
+      '/project/1/link-options/openstad?tags=3'
+    );
+
+    expect(res.status).toBe(200);
+    expect(queries[0].limit).toBe(10);
+    expect(queries[0].order).toEqual([['title', 'ASC']]);
+    expect(queries[0].where[Op.and]).toEqual([]);
+  });
+
+  it('keeps the minimum search length for plugin sources', async () => {
+    const res = await request(createApp()).get(
+      '/project/1/link-options/fixture-source'
+    );
+    expect(res.status).toBe(422);
+  });
+
   it('searches visible published resources by every word', async () => {
     const res = await request(createApp()).get(
       '/project/1/link-options/openstad?search=Stad%20ma_ker&exclude=5'

@@ -10,6 +10,7 @@ const router = express.Router({ mergeParams: true });
 
 const MIN_SEARCH_LENGTH = 2;
 const DEFAULT_LIMIT = 20;
+const BROWSE_LIMIT = 10;
 const MAX_LIMIT = 50;
 const MAX_IDS = 50;
 
@@ -21,9 +22,9 @@ function parseIdList(value) {
     .filter(Boolean);
 }
 
-function parseLimit(value) {
+function parseLimit(value, fallback = DEFAULT_LIMIT) {
   const limit = parseInt(value, 10);
-  if (!Number.isFinite(limit)) return DEFAULT_LIMIT;
+  if (!Number.isFinite(limit)) return fallback;
   return Math.min(Math.max(limit, 1), MAX_LIMIT);
 }
 
@@ -69,13 +70,18 @@ router.get('/:source', rateLimiter(), async function (req, res, next) {
     if (onlyMine && !req.user.id) {
       throw createError(401, 'You must be logged in to list your submissions');
     }
-    if (!onlyMine && search.length < MIN_SEARCH_LENGTH) {
+    const browsing =
+      req.params.source === OPENSTAD_SOURCE && search.length === 0;
+    if (!onlyMine && !browsing && search.length < MIN_SEARCH_LENGTH) {
       throw createError(
         422,
         `search must contain at least ${MIN_SEARCH_LENGTH} characters`
       );
     }
-    const limit = parseLimit(req.query.limit);
+    const limit = parseLimit(
+      req.query.limit,
+      browsing && !onlyMine ? BROWSE_LIMIT : DEFAULT_LIMIT
+    );
     const projectId = parseInt(req.params.projectId, 10);
 
     if (req.params.source !== OPENSTAD_SOURCE) {
