@@ -1,4 +1,4 @@
-const DUTCH_MONTHS = [
+export const DUTCH_MONTHS = [
   'januari',
   'februari',
   'maart',
@@ -74,4 +74,41 @@ export function fillTimelineEndDates<T extends DateRangeItem>(items: T[]): T[] {
 
     return { ...item, activeTo: subtractOneDay(nextStart) };
   });
+}
+
+/**
+ * Normalize a date value to a YYYY-MM-DD key. Accepts date-only strings as-is
+ * and falls back to parsing full date strings. Returns null when the value is
+ * empty or not a valid date.
+ */
+export function toDateKey(value: string | undefined | null): string | null {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+  const date = new Date(trimmed);
+  if (isNaN(date.getTime())) return null;
+  return date.toISOString().slice(0, 10);
+}
+
+export type TimelineItemStatus = {
+  /** The start date has been reached; stays true after the item has ended. */
+  passed: boolean;
+  /** Today falls within the item's range (the current phase). */
+  current: boolean;
+};
+
+/**
+ * Determine whether an item has been reached and whether it is the current
+ * phase, given today's date as a YYYY-MM-DD key. An item without a start date
+ * counts as started.
+ */
+export function getTimelineItemStatus(
+  item: DateRangeItem,
+  todayKey: string
+): TimelineItemStatus {
+  const fromKey = toDateKey(item.activeFrom);
+  const toKey = toDateKey(item.activeTo);
+  const passed = !fromKey || todayKey >= fromKey;
+  const current = passed && (!toKey || todayKey <= toKey);
+  return { passed, current };
 }

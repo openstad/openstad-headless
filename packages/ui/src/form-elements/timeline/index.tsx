@@ -3,9 +3,17 @@ import { FormValue } from '@openstad-headless/form/src/form';
 import NotificationProvider from '@openstad-headless/lib/NotificationProvider/notification-provider';
 import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
 import {
-  fillTimelineEndDates,
-  formatDutchDate,
-} from '@openstad-headless/lib/timeline-dates';
+  DATE_LABEL_MAX_LENGTH,
+  DATE_PRECISIONS,
+  DATE_PRECISION_LABELS,
+  DatePrecision,
+  TimelineDateInput,
+  capitalizeFirst,
+  formatTimelineDate,
+  fromTimelineDateInput,
+  toTimelineDateInput,
+} from '@openstad-headless/lib/timeline-date-precision';
+import { DUTCH_MONTHS } from '@openstad-headless/lib/timeline-dates';
 import * as RadixDialog from '@radix-ui/react-dialog';
 import {
   FormField,
@@ -21,6 +29,7 @@ import { Button, SecondaryButton } from '../../button';
 import { Dialog } from '../../dialog';
 import { formatFileSize, getFileFormat } from '../../lib/format-file-size';
 import RteContent from '../../rte-formatting/rte-content';
+import { getCustomTitle, getItemLabel, normalizeItems } from './timeline-items';
 import './timeline.css';
 
 type LinkKind = 'link' | 'document';
@@ -31,6 +40,8 @@ export type TimelineItem = {
   description?: string;
   activeFrom: string;
   activeTo?: string;
+  datePrecision?: string;
+  dateLabel?: string;
   links?: {
     trigger: string;
     title: string;
@@ -76,31 +87,18 @@ type LinkItem = {
 };
 
 type ItemFormState = {
-  activeFrom: string;
+  date: TimelineDateInput;
   title: string;
   description: string;
   links: LinkItem[];
 };
 
 const emptyForm = (): ItemFormState => ({
-  activeFrom: '',
+  date: toTimelineDateInput(),
   title: '',
   description: '',
   links: [],
 });
-
-const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-
-function normalizeItems(items: TimelineItem[]): TimelineItem[] {
-  const sorted = [...items].sort((a, b) =>
-    a.activeFrom < b.activeFrom ? -1 : a.activeFrom > b.activeFrom ? 1 : 0
-  );
-  const renumbered = sorted.map((item, idx) => ({
-    ...item,
-    trigger: String(idx),
-  }));
-  return fillTimelineEndDates(renumbered);
-}
 
 const TimelineField: FC<TimelineFieldProps> = ({
   fieldKey,
@@ -151,6 +149,13 @@ const TimelineField: FC<TimelineFieldProps> = ({
   const baseId = useId();
   const titleId = `${baseId}-title`;
   const dateId = `${baseId}-date`;
+  const precisionId = `${baseId}-precision`;
+  const weekId = `${baseId}-week`;
+  const monthId = `${baseId}-month`;
+  const quarterId = `${baseId}-quarter`;
+  const yearId = `${baseId}-year`;
+  const dateLabelId = `${baseId}-date-label`;
+  const dateHelpId = `${baseId}-date-help`;
   const descriptionId = `${baseId}-description`;
   const warningId = `${baseId}-warning`;
 
@@ -179,8 +184,8 @@ const TimelineField: FC<TimelineFieldProps> = ({
     setEditingTrigger(item.trigger);
     setFormError(null);
     setForm({
-      activeFrom: item.activeFrom,
-      title: item.title && !DATE_ONLY_REGEX.test(item.title) ? item.title : '',
+      date: toTimelineDateInput(item),
+      title: getCustomTitle(item),
       description: item.description || '',
       links: (item.links || []).map((l) => ({
         trigger: l.trigger,
@@ -204,17 +209,18 @@ const TimelineField: FC<TimelineFieldProps> = ({
   };
 
   const saveItem = () => {
-    if (!DATE_ONLY_REGEX.test(form.activeFrom)) {
-      setFormError('Vul een geldige datum in (jjjj-mm-dd).');
+    const date = fromTimelineDateInput(form.date);
+    if (!date.ok) {
+      setFormError(date.error);
       return;
     }
     setFormError(null);
 
     const trimmedTitle = form.title.trim();
     const newItem: TimelineItem = {
-      trigger: editingTrigger ?? '0',
-      activeFrom: form.activeFrom,
-      title: trimmedTitle || form.activeFrom,
+      trigger: editingTrigger ?? String(items.length),
+      ...date.fields,
+      title: trimmedTitle,
       description: form.description,
       links: form.links,
     };
@@ -235,6 +241,15 @@ const TimelineField: FC<TimelineFieldProps> = ({
   const deleteItem = (trigger: string) => {
     setItems(normalizeItems(items.filter((it) => it.trigger !== trigger)));
   };
+
+  const setDate = (patch: Partial<TimelineDateInput>) =>
+    setForm((f) => ({ ...f, date: { ...f.date, ...patch } }));
+
+  const precision = form.date.precision;
+  const datePreviewResult = fromTimelineDateInput(form.date);
+  const datePreview = datePreviewResult.ok
+    ? formatTimelineDate(datePreviewResult.fields)
+    : '';
 
   const addLink = () => {
     const newTrigger = String(
@@ -360,34 +375,35 @@ const TimelineField: FC<TimelineFieldProps> = ({
         {items.length === 0 && (
           <li className="timeline-empty">Nog geen items toegevoegd.</li>
         )}
-        {items.map((item) => (
-          <li key={item.trigger} className="timeline-item-row">
-            <div className="timeline-item-info">
-              <span className="timeline-item-date">
-                {formatDutchDate(item.activeFrom)}
-              </span>
-              {item.description && (
-                <span className="timeline-item-desc">{item.description}</span>
-              )}
-            </div>
-            <div className="timeline-item-actions">
-              <button
-                type="button"
-                className="timeline-action-btn"
-                aria-label="Bewerk item"
-                onClick={() => openEditDialog(item)}>
-                <i className="ri-pencil-line" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className="timeline-action-btn"
-                aria-label="Verwijder item"
-                onClick={() => deleteItem(item.trigger)}>
-                <i className="ri-close-line" aria-hidden="true" />
-              </button>
-            </div>
-          </li>
-        ))}
+        {items.map((item) => {
+          const label = getItemLabel(item);
+          return (
+            <li key={item.trigger} className="timeline-item-row">
+              <div className="timeline-item-info">
+                <span className="timeline-item-date">{label}</span>
+                {item.description && (
+                  <span className="timeline-item-desc">{item.description}</span>
+                )}
+              </div>
+              <div className="timeline-item-actions">
+                <button
+                  type="button"
+                  className="timeline-action-btn"
+                  aria-label={`Bewerk item: ${label}`}
+                  onClick={() => openEditDialog(item)}>
+                  <i className="ri-pencil-line" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className="timeline-action-btn"
+                  aria-label={`Verwijder item: ${label}`}
+                  onClick={() => deleteItem(item.trigger)}>
+                  <i className="ri-close-line" aria-hidden="true" />
+                </button>
+              </div>
+            </li>
+          );
+        })}
       </ul>
 
       <SecondaryButton
@@ -414,19 +430,151 @@ const TimelineField: FC<TimelineFieldProps> = ({
               ? 'Tijdlijn-item bewerken'
               : 'Tijdlijn-item toevoegen'}
           </RadixDialog.Title>
-          <FormField type="text">
-            <Paragraph className="utrecht-form-field__label">
-              <FormLabel htmlFor={dateId}>Datum</FormLabel>
-            </Paragraph>
-            <Textbox
-              id={dateId}
-              type="date"
-              value={form.activeFrom}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setForm((f) => ({ ...f, activeFrom: e.target.value }))
-              }
-            />
-          </FormField>
+          <fieldset className="timeline-date-fieldset">
+            <legend className="timeline-section-label">Datum</legend>
+            <div className="timeline-date-fields">
+              <div className="timeline-date-field timeline-date-field--small">
+                <FormLabel htmlFor={precisionId}>Notatie</FormLabel>
+                <select
+                  id={precisionId}
+                  className="timeline-link-kind-select"
+                  value={precision}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                    setDate({ precision: e.target.value as DatePrecision })
+                  }>
+                  {DATE_PRECISIONS.map((option) => (
+                    <option key={option} value={option}>
+                      {DATE_PRECISION_LABELS[option]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {precision === 'day' && (
+                <div className="timeline-date-field">
+                  <FormLabel htmlFor={dateId}>Datum</FormLabel>
+                  <Textbox
+                    id={dateId}
+                    type="date"
+                    value={form.date.date}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setDate({ date: e.target.value })
+                    }
+                  />
+                </div>
+              )}
+
+              {precision === 'week' && (
+                <div className="timeline-date-field">
+                  <FormLabel htmlFor={weekId}>Weeknummer</FormLabel>
+                  <Textbox
+                    id={weekId}
+                    type="number"
+                    min={1}
+                    max={53}
+                    value={form.date.week}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setDate({ week: e.target.value })
+                    }
+                  />
+                </div>
+              )}
+
+              {precision === 'month' && (
+                <div className="timeline-date-field">
+                  <FormLabel htmlFor={monthId}>Maand</FormLabel>
+                  <select
+                    id={monthId}
+                    className="timeline-link-kind-select"
+                    value={form.date.month}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      setDate({ month: e.target.value })
+                    }>
+                    {DUTCH_MONTHS.map((month, index) => (
+                      <option key={month} value={String(index + 1)}>
+                        {capitalizeFirst(month)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {precision === 'quarter' && (
+                <div className="timeline-date-field">
+                  <FormLabel htmlFor={quarterId}>Kwartaal</FormLabel>
+                  <select
+                    id={quarterId}
+                    className="timeline-link-kind-select"
+                    value={form.date.quarter}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                      setDate({ quarter: e.target.value })
+                    }>
+                    {['1', '2', '3', '4'].map((quarter) => (
+                      <option key={quarter} value={quarter}>
+                        Q{quarter}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {precision === 'text' && (
+                <>
+                  <div className="timeline-date-field">
+                    <FormLabel htmlFor={dateLabelId}>Tekst</FormLabel>
+                    <Textbox
+                      id={dateLabelId}
+                      value={form.date.label}
+                      maxLength={DATE_LABEL_MAX_LENGTH}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setDate({ label: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div className="timeline-date-field timeline-date-field--small">
+                    <FormLabel htmlFor={dateId}>Verwachte datum</FormLabel>
+                    <Textbox
+                      id={dateId}
+                      type="date"
+                      aria-describedby={dateHelpId}
+                      value={form.date.date}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        setDate({ date: e.target.value })
+                      }
+                    />
+                  </div>
+                </>
+              )}
+
+              {precision !== 'day' && precision !== 'text' && (
+                <div className="timeline-date-field timeline-date-field--small">
+                  <FormLabel htmlFor={yearId}>Jaar</FormLabel>
+                  <Textbox
+                    id={yearId}
+                    type="number"
+                    min={1900}
+                    max={2200}
+                    value={form.date.year}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setDate({ year: e.target.value })
+                    }
+                  />
+                </div>
+              )}
+            </div>
+
+            {precision === 'text' && (
+              <p id={dateHelpId} className="timeline-date-note">
+                Vul bij Verwachte datum een geschatte datum in. Bezoekers zien
+                alleen de tekst.
+              </p>
+            )}
+            {datePreview && (
+              <p className="timeline-date-note">
+                Wordt getoond als: <strong>{datePreview}</strong>
+              </p>
+            )}
+          </fieldset>
 
           <FormField type="text">
             <Paragraph className="utrecht-form-field__label">
@@ -435,7 +583,6 @@ const TimelineField: FC<TimelineFieldProps> = ({
             <Textbox
               id={titleId}
               value={form.title}
-              placeholder="Laat leeg om de datum te tonen"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setForm((f) => ({ ...f, title: e.target.value }))
               }
@@ -457,7 +604,7 @@ const TimelineField: FC<TimelineFieldProps> = ({
           </FormField>
 
           <div className="timeline-links-section">
-            <p className="timeline-section-label">Externe links</p>
+            <p className="timeline-section-label">Links en documenten</p>
             {form.links.map((link) => {
               const kind = link.kind ?? 'link';
               const isUploading = uploadingTrigger === link.trigger;
@@ -563,7 +710,7 @@ const TimelineField: FC<TimelineFieldProps> = ({
               className="timeline-add-link-btn"
               onClick={addLink}>
               <i className="ri-add-line" aria-hidden="true" />
-              Voeg een link toe
+              Voeg een link of document toe
             </SecondaryButton>
           </div>
 
@@ -582,10 +729,7 @@ const TimelineField: FC<TimelineFieldProps> = ({
           )}
 
           <div className="timeline-dialog-actions">
-            <Button
-              type="button"
-              disabled={!form.activeFrom}
-              onClick={saveItem}>
+            <Button type="button" onClick={saveItem}>
               Opslaan
             </Button>
           </div>
