@@ -137,6 +137,6 @@ proxy (sized above the cap so an oversized upload reaches the image server and g
 "file too large" error, instead of being silently cut off by the proxy itself).
 
 The admin UI's own client-side size check is a separate constant
-(`apps/admin-server/src/lib/upload-limits.ts`) and does **not** read this env var -- it is
+(`apps/admin-server/src/lib/upload-limits.ts`) and does **not** read this env var. It is
 inlined into the browser bundle at build time, so raising `MAX_FILE_UPLOAD_SIZE_MB` on a
 deployment does not raise the UI's limit; update both if you change the cap.

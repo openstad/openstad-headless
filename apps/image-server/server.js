@@ -85,11 +85,6 @@ console.log('S3 enabled:', s3.isEnabled());
 // overridden via the MAX_FILE_UPLOAD_SIZE_MB env var. This is independent of any
 // per-widget client-side limit and protects the server from oversized uploads
 // that would otherwise stream until a socket timeout and hang without feedback.
-// Validation mirrors apps/admin-server/next.config.js's resolveProxyBodyLimit:
-// only a positive integer within a sane bound is accepted, so a malformed value
-// (e.g. "Infinity", scientific notation, negative) can't disable or invert the
-// cap -- otherwise this side could silently disagree with the admin proxy's
-// own (correctly-validated) reading of the same env var.
 const MAX_SANE_FILE_UPLOAD_SIZE_MB = 1000;
 const parsedMaxFileUploadSizeMB = Number(process.env.MAX_FILE_UPLOAD_SIZE_MB);
 const maxFileUploadSizeMB =
@@ -98,6 +93,17 @@ const maxFileUploadSizeMB =
   parsedMaxFileUploadSizeMB <= MAX_SANE_FILE_UPLOAD_SIZE_MB
     ? parsedMaxFileUploadSizeMB
     : 25;
+const rawMaxFileUploadSizeMB = process.env.MAX_FILE_UPLOAD_SIZE_MB;
+if (
+  rawMaxFileUploadSizeMB !== undefined &&
+  rawMaxFileUploadSizeMB.trim() !== '' &&
+  maxFileUploadSizeMB === 25 &&
+  parsedMaxFileUploadSizeMB !== 25
+) {
+  console.warn(
+    `MAX_FILE_UPLOAD_SIZE_MB=${rawMaxFileUploadSizeMB} is invalid (allowed 1-${MAX_SANE_FILE_UPLOAD_SIZE_MB}), using 25`
+  );
+}
 const maxFileUploadBytes = maxFileUploadSizeMB * 1024 * 1024;
 
 const getPublicS3BaseUrl = () =>
