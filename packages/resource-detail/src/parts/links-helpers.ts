@@ -10,7 +10,7 @@ export type ResourceLink = {
     title: string;
     summary?: string;
     images?: Array<{ url?: string }>;
-    tags?: Array<{ id: number }>;
+    tags?: Array<{ id: number; name?: string; type?: string }>;
   };
 };
 
@@ -21,6 +21,12 @@ export type ExternalItem = {
   url?: string;
 };
 
+export type RelatedTag = {
+  id: string;
+  name: string;
+  type?: string;
+};
+
 export type RelatedItem = {
   key: string;
   source: string;
@@ -29,6 +35,7 @@ export type RelatedItem = {
   summary?: string;
   image?: string;
   url?: string;
+  tags?: RelatedTag[];
 };
 
 export function parseTagIds(tagIds?: string): string[] {
@@ -150,6 +157,11 @@ export function toRelatedItems(
         summary: link.resource.summary,
         image: link.resource.images?.[0]?.url,
         url: buildItemLink(itemLink, id),
+        tags: (link.resource.tags || []).map((tag) => ({
+          id: String(tag.id),
+          name: tag.name || '',
+          type: tag.type,
+        })),
       });
     } else if (link.source !== OPENSTAD_SOURCE) {
       const key = `${link.source}:${link.targetId}`;
@@ -168,6 +180,34 @@ export function toRelatedItems(
   }
 
   return items;
+}
+
+export function relatedTagOptions(
+  items: RelatedItem[],
+  tagTypes?: string
+): RelatedTag[] {
+  const allowedTypes = parseTagIds(tagTypes);
+  const byId = new Map<string, RelatedTag>();
+  for (const item of items) {
+    for (const tag of item.tags || []) {
+      if (!tag.name) continue;
+      if (allowedTypes.length && !allowedTypes.includes(tag.type || '')) {
+        continue;
+      }
+      byId.set(tag.id, tag);
+    }
+  }
+  return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name, 'nl'));
+}
+
+export function filterByTags(
+  items: RelatedItem[],
+  selectedTagIds: string[]
+): RelatedItem[] {
+  if (!selectedTagIds.length) return items;
+  return items.filter((item) =>
+    (item.tags || []).some((tag) => selectedTagIds.includes(tag.id))
+  );
 }
 
 export function validateContact({

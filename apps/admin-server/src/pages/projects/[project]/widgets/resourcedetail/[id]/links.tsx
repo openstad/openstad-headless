@@ -58,6 +58,8 @@ const formSchema = z.object({
     linkToDetail: z.boolean(),
     itemLink: z.string().optional(),
     tagIds: z.string().optional(),
+    showTagFilter: z.boolean(),
+    filterTagTypes: z.string().optional(),
   }),
   contactBlock: z.object({
     display: z.boolean(),
@@ -100,6 +102,13 @@ export default function WidgetResourceDetailLinks(
   const { capabilities, error: capabilitiesError } = usePluginCapabilities();
 
   const related = props.relatedResources || {};
+  const tagTypes = Array.from(
+    new Set<string>(
+      (allTags || []).map((tag: { type?: string }) => tag.type).filter(Boolean)
+    )
+  )
+    .sort()
+    .map((type) => ({ id: type }));
   const contact = props.contactBlock || {};
 
   const form = useForm<FormData>({
@@ -115,6 +124,8 @@ export default function WidgetResourceDetailLinks(
         linkToDetail: related.linkToDetail !== false,
         itemLink: related.itemLink || '',
         tagIds: related.tagIds || '',
+        showTagFilter: related.showTagFilter || false,
+        filterTagTypes: related.filterTagTypes || '',
       },
       contactBlock: {
         display: contact.display || false,
@@ -292,6 +303,43 @@ export default function WidgetResourceDetailLinks(
                 'Alleen inzendingen met tag',
                 'Laat leeg om alle gekoppelde inzendingen te tonen.'
               )}
+              {toggleField(
+                'relatedResources.showTagFilter',
+                'Tagfilter tonen',
+                'Bezoekers kunnen de inzendingen filteren op tag. Het filter is standaard ingeklapt.'
+              )}
+              {form.watch('relatedResources.showTagFilter') ? (
+                <div>
+                  <FormLabel>Tagtypes in het filter</FormLabel>
+                  <p className="text-sm text-muted-foreground">
+                    Laat leeg om de tags van alle types te tonen.
+                  </p>
+                  <CheckboxList
+                    form={form}
+                    fieldName="relatedResources.filterTagTypes"
+                    fieldLabel=""
+                    layout="vertical"
+                    label={(tagType: { id: string }) => tagType.id}
+                    keyPerItem={(tagType: { id: string }) => tagType.id}
+                    items={tagTypes}
+                    selectedPredicate={(tagType: { id: string }) =>
+                      fromCsvIds(
+                        form.getValues('relatedResources.filterTagTypes')
+                      ).includes(tagType.id)
+                    }
+                    onValueChange={(tagType: { id: string }, checked) =>
+                      form.setValue(
+                        'relatedResources.filterTagTypes',
+                        toggleCsvId(
+                          form.getValues('relatedResources.filterTagTypes'),
+                          tagType.id,
+                          checked
+                        )
+                      )
+                    }
+                  />
+                </div>
+              ) : null}
             </div>
           ) : null}
 

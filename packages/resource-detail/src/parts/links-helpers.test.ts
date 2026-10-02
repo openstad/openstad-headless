@@ -7,6 +7,8 @@ import {
   consentLabelPlain,
   contactTextDefaults,
   externalIdsBySource,
+  filterByTags,
+  relatedTagOptions,
   toRelatedItems,
   validateContact,
   withoutLinked,
@@ -75,6 +77,7 @@ describe('toRelatedItems', () => {
         summary: 'Stadmaker',
         image: 'https://img/2',
         url: '/inzending/2',
+        tags: [{ id: '10', name: '', type: undefined }],
       },
       {
         key: 'openstad:9',
@@ -84,6 +87,7 @@ describe('toRelatedItems', () => {
         summary: undefined,
         image: undefined,
         url: '/inzending/9',
+        tags: [{ id: '20', name: '', type: undefined }],
       },
       {
         key: 'metkoos:k1',
@@ -116,6 +120,80 @@ describe('toRelatedItems', () => {
 
   it('leaves out external links whose item could not be loaded', () => {
     expect(toRelatedItems([links[2]], {}).map((item) => item.key)).toEqual([]);
+  });
+});
+
+describe('related tag filter', () => {
+  const tagged = toRelatedItems(
+    [
+      {
+        id: 1,
+        direction: 'outgoing',
+        source: 'openstad',
+        targetId: '2',
+        resource: {
+          id: 2,
+          title: 'Arno',
+          tags: [
+            { id: 10, name: 'Stadmaker', type: 'soort' },
+            { id: 30, name: 'Noord', type: 'gebied' },
+          ],
+        },
+      },
+      {
+        id: 2,
+        direction: 'outgoing',
+        source: 'openstad',
+        targetId: '3',
+        resource: {
+          id: 3,
+          title: 'Binnentuin',
+          tags: [
+            { id: 11, name: 'Initiatief', type: 'soort' },
+            { id: 30, name: 'Noord', type: 'gebied' },
+          ],
+        },
+      },
+      {
+        id: 3,
+        direction: 'outgoing',
+        source: 'openstad',
+        targetId: '4',
+        resource: { id: 4, title: 'Zonder tag', tags: [{ id: 12 }] },
+      },
+    ],
+    {}
+  );
+
+  it('lists each named tag once, sorted by name', () => {
+    expect(relatedTagOptions(tagged).map((tag) => tag.name)).toEqual([
+      'Initiatief',
+      'Noord',
+      'Stadmaker',
+    ]);
+  });
+
+  it('limits the tags to the chosen types', () => {
+    expect(relatedTagOptions(tagged, 'soort').map((tag) => tag.id)).toEqual([
+      '11',
+      '10',
+    ]);
+  });
+
+  it('keeps the items with at least one selected tag', () => {
+    expect(filterByTags(tagged, []).map((item) => item.id)).toEqual([
+      '2',
+      '3',
+      '4',
+    ]);
+    expect(filterByTags(tagged, ['10', '11']).map((item) => item.id)).toEqual([
+      '2',
+      '3',
+    ]);
+    expect(filterByTags(tagged, ['30']).map((item) => item.id)).toEqual([
+      '2',
+      '3',
+    ]);
   });
 });
 

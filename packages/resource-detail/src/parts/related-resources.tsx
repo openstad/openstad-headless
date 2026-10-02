@@ -1,11 +1,13 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { Icon, IconButton } from '@openstad-headless/ui/src';
-import { Heading, Paragraph } from '@utrecht/component-library-react';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Button, Heading, Paragraph } from '@utrecht/component-library-react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 
 import {
   type ExternalItem,
   externalIdsBySource,
+  filterByTags,
+  relatedTagOptions,
   toRelatedItems,
 } from './links-helpers';
 import './related-resources.css';
@@ -20,6 +22,8 @@ export type RelatedResourcesProps = {
   linkToDetail?: boolean;
   itemLink?: string;
   tagIds?: string;
+  showTagFilter?: boolean;
+  filterTagTypes?: string;
 };
 
 type Props = RelatedResourcesProps & {
@@ -44,6 +48,8 @@ export function RelatedResources({
   linkToDetail = true,
   itemLink,
   tagIds,
+  showTagFilter = false,
+  filterTagTypes,
 }: Props) {
   const datastore: any = new DataStore({ projectId, api });
   const { data: links } = datastore.useResourceLinks({
@@ -83,11 +89,30 @@ export function RelatedResources({
     };
   }, [externalKey, projectId]);
 
-  const items = toRelatedItems(links, {
+  const allItems = toRelatedItems(links, {
     tagIds,
     itemLink: linkToDetail ? itemLink : undefined,
     externalItems,
   });
+
+  const filterId = useId();
+  const filterToggleRef = useRef<HTMLButtonElement>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const tagOptions = showTagFilter
+    ? relatedTagOptions(allItems, filterTagTypes)
+    : [];
+  const activeTagIds = selectedTagIds.filter((id) =>
+    tagOptions.some((tag) => tag.id === id)
+  );
+  const items = filterByTags(allItems, activeTagIds);
+
+  const toggleTag = (id: string) =>
+    setSelectedTagIds((current) =>
+      current.includes(id)
+        ? current.filter((tagId) => tagId !== id)
+        : [...current, id]
+    );
 
   const listRef = useRef<HTMLUListElement>(null);
   const [scroll, setScroll] = useState({ canPrevious: false, canNext: false });
@@ -110,13 +135,18 @@ export function RelatedResources({
     return () => observer.disconnect();
   }, [items.length, updateScroll]);
 
+  useEffect(() => {
+    listRef.current?.scrollTo({ left: 0 });
+    updateScroll();
+  }, [activeTagIds.join(','), updateScroll]);
+
   const scrollBy = (direction: 1 | -1) => {
     const list = listRef.current;
     if (!list) return;
     list.scrollBy({ left: direction * list.clientWidth, behavior: 'smooth' });
   };
 
-  if (!items.length) return null;
+  if (!allItems.length) return null;
 
   const hasOverflow = scroll.canPrevious || scroll.canNext;
 
@@ -153,6 +183,58 @@ export function RelatedResources({
           </div>
         ) : null}
       </div>
+      {tagOptions.length ? (
+        <div className="osc-related-resources-filter">
+          <Button
+            ref={filterToggleRef}
+            appearance="subtle-button"
+            className="osc-related-resources-filter-toggle"
+            aria-expanded={filterOpen}
+            aria-controls={filterId}
+            onClick={() => setFilterOpen((open) => !open)}>
+            {activeTagIds.length
+              ? `Filter op tag (${activeTagIds.length})`
+              : 'Filter op tag'}
+            <i
+              className={`ri-arrow-${filterOpen ? 'up' : 'down'}-s-line`}
+              aria-hidden="true"
+            />
+          </Button>
+          <div
+            id={filterId}
+            className="osc-related-resources-filter-panel"
+            hidden={!filterOpen}>
+            <ul className="osc-related-resources-filter-tags">
+              {tagOptions.map((tag) => (
+                <li key={tag.id}>
+                  <Button
+                    appearance="secondary-action-button"
+                    className="osc-related-resources-filter-tag"
+                    pressed={activeTagIds.includes(tag.id)}
+                    onClick={() => toggleTag(tag.id)}>
+                    {tag.name}
+                  </Button>
+                </li>
+              ))}
+            </ul>
+            {activeTagIds.length ? (
+              <Button
+                appearance="subtle-button"
+                onClick={() => {
+                  setSelectedTagIds([]);
+                  filterToggleRef.current?.focus();
+                }}>
+                Wis filter
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+      <p className="sr-only" role="status">
+        {activeTagIds.length
+          ? `${items.length} van ${allItems.length} inzendingen getoond`
+          : ''}
+      </p>
       <ul
         ref={listRef}
         className="osc-related-resources-list"
