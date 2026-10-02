@@ -2,10 +2,6 @@ import DataStore from '@openstad-headless/data-store/src';
 import { FormValue } from '@openstad-headless/form/src/form';
 import NotificationProvider from '@openstad-headless/lib/NotificationProvider/notification-provider';
 import NotificationService from '@openstad-headless/lib/NotificationProvider/notification-service';
-import {
-  fillTimelineEndDates,
-  formatDutchDate,
-} from '@openstad-headless/lib/timeline-dates';
 import * as RadixDialog from '@radix-ui/react-dialog';
 import {
   FormField,
@@ -21,6 +17,7 @@ import { Button, SecondaryButton } from '../../button';
 import { Dialog } from '../../dialog';
 import { formatFileSize, getFileFormat } from '../../lib/format-file-size';
 import RteContent from '../../rte-formatting/rte-content';
+import { getCustomTitle, getItemLabel, normalizeItems } from './timeline-items';
 import './timeline.css';
 
 type LinkKind = 'link' | 'document';
@@ -90,17 +87,6 @@ const emptyForm = (): ItemFormState => ({
 });
 
 const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-
-function normalizeItems(items: TimelineItem[]): TimelineItem[] {
-  const sorted = [...items].sort((a, b) =>
-    a.activeFrom < b.activeFrom ? -1 : a.activeFrom > b.activeFrom ? 1 : 0
-  );
-  const renumbered = sorted.map((item, idx) => ({
-    ...item,
-    trigger: String(idx),
-  }));
-  return fillTimelineEndDates(renumbered);
-}
 
 const TimelineField: FC<TimelineFieldProps> = ({
   fieldKey,
@@ -180,7 +166,7 @@ const TimelineField: FC<TimelineFieldProps> = ({
     setFormError(null);
     setForm({
       activeFrom: item.activeFrom,
-      title: item.title && !DATE_ONLY_REGEX.test(item.title) ? item.title : '',
+      title: getCustomTitle(item),
       description: item.description || '',
       links: (item.links || []).map((l) => ({
         trigger: l.trigger,
@@ -212,9 +198,9 @@ const TimelineField: FC<TimelineFieldProps> = ({
 
     const trimmedTitle = form.title.trim();
     const newItem: TimelineItem = {
-      trigger: editingTrigger ?? '0',
+      trigger: editingTrigger ?? String(items.length),
       activeFrom: form.activeFrom,
-      title: trimmedTitle || form.activeFrom,
+      title: trimmedTitle,
       description: form.description,
       links: form.links,
     };
@@ -360,34 +346,35 @@ const TimelineField: FC<TimelineFieldProps> = ({
         {items.length === 0 && (
           <li className="timeline-empty">Nog geen items toegevoegd.</li>
         )}
-        {items.map((item) => (
-          <li key={item.trigger} className="timeline-item-row">
-            <div className="timeline-item-info">
-              <span className="timeline-item-date">
-                {formatDutchDate(item.activeFrom)}
-              </span>
-              {item.description && (
-                <span className="timeline-item-desc">{item.description}</span>
-              )}
-            </div>
-            <div className="timeline-item-actions">
-              <button
-                type="button"
-                className="timeline-action-btn"
-                aria-label="Bewerk item"
-                onClick={() => openEditDialog(item)}>
-                <i className="ri-pencil-line" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className="timeline-action-btn"
-                aria-label="Verwijder item"
-                onClick={() => deleteItem(item.trigger)}>
-                <i className="ri-close-line" aria-hidden="true" />
-              </button>
-            </div>
-          </li>
-        ))}
+        {items.map((item) => {
+          const label = getItemLabel(item);
+          return (
+            <li key={item.trigger} className="timeline-item-row">
+              <div className="timeline-item-info">
+                <span className="timeline-item-date">{label}</span>
+                {item.description && (
+                  <span className="timeline-item-desc">{item.description}</span>
+                )}
+              </div>
+              <div className="timeline-item-actions">
+                <button
+                  type="button"
+                  className="timeline-action-btn"
+                  aria-label={`Bewerk item: ${label}`}
+                  onClick={() => openEditDialog(item)}>
+                  <i className="ri-pencil-line" aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  className="timeline-action-btn"
+                  aria-label={`Verwijder item: ${label}`}
+                  onClick={() => deleteItem(item.trigger)}>
+                  <i className="ri-close-line" aria-hidden="true" />
+                </button>
+              </div>
+            </li>
+          );
+        })}
       </ul>
 
       <SecondaryButton
