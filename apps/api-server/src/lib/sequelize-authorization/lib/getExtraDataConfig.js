@@ -3,9 +3,6 @@
 const userHasRole = require('./hasRole');
 var sanitize = require('../../../util/sanitize');
 
-// keyAuth: optional per-key auth defaults, e.g.
-// { partnerLogo: { updateableBy: 'editor' } }. Project config per-key auth
-// still wins; the whole-field and model defaults apply when neither is set.
 module.exports = function (dataTypeJSON, projectConfigKey, keyAuth = {}) {
   return {
     type: dataTypeJSON,

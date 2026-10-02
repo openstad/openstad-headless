@@ -3,9 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { EDITOR_PUBLIC_EXTRA_DATA_KEY_AUTH } from '../../../models/lib/filter-public-extra-data.js';
 import getExtraDataConfig from './getExtraDataConfig.js';
 
-// Mirrors how Resource.js wires extraData: the resource model itself allows
-// the owner to update, so without per-key auth every extraData key is
-// writable by the owner.
 function makeResource(extraDataConfig, userId = 42) {
   return {
     userId,

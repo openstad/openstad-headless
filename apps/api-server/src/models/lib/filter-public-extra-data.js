@@ -1,16 +1,7 @@
-// Keys that stay in extraData for every role, even when a resourceform config
-// or a moderator-only field of the same name would otherwise strip them.
 const ALWAYS_PUBLIC_EXTRA_DATA_KEYS = ['originalId', 'ranking'];
 
-// Keys an editor sets outside the resourceform (e.g. in a dedicated admin
-// field) that must survive the resourceform field-key filter below, but that
-// a resourceform field marked onlyForModerator may still hide. Unlike
-// ALWAYS_PUBLIC_EXTRA_DATA_KEYS, these do NOT win over moderatorOnlyExtraDataKeys.
 const EDITOR_PUBLIC_EXTRA_DATA_KEYS = ['partnerLogo'];
 
-// Because these keys are public, only an editor may write them; otherwise a
-// participant could set one on their own resource. Passed to
-// getExtraDataConfig as per-key auth defaults.
 const EDITOR_PUBLIC_EXTRA_DATA_KEY_AUTH = Object.fromEntries(
   EDITOR_PUBLIC_EXTRA_DATA_KEYS.map((key) => [
     key,
