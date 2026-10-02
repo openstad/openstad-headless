@@ -422,7 +422,6 @@ const TimelineField: FC<TimelineFieldProps> = ({
             <Textbox
               id={titleId}
               value={form.title}
-              placeholder="Laat leeg om de datum te tonen"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 setForm((f) => ({ ...f, title: e.target.value }))
               }
@@ -444,7 +443,7 @@ const TimelineField: FC<TimelineFieldProps> = ({
           </FormField>
 
           <div className="timeline-links-section">
-            <p className="timeline-section-label">Externe links</p>
+            <p className="timeline-section-label">Links en documenten</p>
             {form.links.map((link) => {
               const kind = link.kind ?? 'link';
               const isUploading = uploadingTrigger === link.trigger;
@@ -550,7 +549,7 @@ const TimelineField: FC<TimelineFieldProps> = ({
               className="timeline-add-link-btn"
               onClick={addLink}>
               <i className="ri-add-line" aria-hidden="true" />
-              Voeg een link toe
+              Voeg een link of document toe
             </SecondaryButton>
           </div>
 
