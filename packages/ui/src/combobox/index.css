@@ -17,8 +17,15 @@
   margin: 0.25rem 0 0;
   padding: 0;
   list-style: none;
-  background: var(--nlds-default-background-color, #fff);
-  border: 1px solid var(--utrecht-textbox-border-color, #333);
+  background: var(
+    --nlds-combobox-listbox-background-color,
+    var(--nlds-default-background-color, #fff)
+  );
+  border: 1px solid
+    var(
+      --nlds-combobox-listbox-border-color,
+      var(--utrecht-textbox-border-color, #333)
+    );
 }
 
 .osc-combobox-option {
@@ -32,8 +39,11 @@
 .osc-combobox-option.--active,
 .osc-combobox-option:hover {
   background: var(
-    --nlds-budget-resources-filter-background-color,
-    var(--nlds-default-background-color, #f0f4f8)
+    --nlds-combobox-option-active-background-color,
+    var(
+      --nlds-budget-resources-filter-background-color,
+      var(--nlds-default-background-color, #f0f4f8)
+    )
   );
   outline: 2px solid var(--utrecht-focus-outline-color, currentColor);
   outline-offset: -2px;
@@ -71,8 +81,11 @@
 
 .osc-combobox-chip {
   background: var(
-    --nlds-budget-resources-filter-background-color,
-    var(--nlds-default-background-color, #f0f4f8)
+    --nlds-combobox-chip-background-color,
+    var(
+      --nlds-budget-resources-filter-background-color,
+      var(--nlds-default-background-color, #f0f4f8)
+    )
   );
   display: flex;
   align-items: center;

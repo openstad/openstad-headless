@@ -51,5 +51,8 @@
 
 .osc-contact-block-error {
   margin: 0;
-  color: var(--utrecht-form-field-invalid-color, #d52b1e);
+  color: var(
+    --nlds-resource-detail-contact-error-color,
+    var(--utrecht-form-field-invalid-color, #d52b1e)
+  );
 }

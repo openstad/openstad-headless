@@ -27,7 +27,10 @@
   background: none;
   font: inherit;
   font-style: italic;
-  color: var(--utrecht-link-color, currentColor);
+  color: var(
+    --nlds-link-confirm-toggle-color,
+    var(--utrecht-link-color, currentColor)
+  );
   cursor: pointer;
 }
 
