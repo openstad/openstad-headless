@@ -39,6 +39,7 @@ const {
   filterPublicExtraData,
   EDITOR_PUBLIC_EXTRA_DATA_KEY_AUTH,
 } = require('./lib/filter-public-extra-data');
+const isSafeImageUrl = require('../lib/is-safe-image-url');
 
 function hideEmailsForNormalUsers(comments) {
   return comments.map((comment) => {
@@ -602,6 +603,12 @@ module.exports = function (db, sequelize, DataTypes) {
           }
 
           checkValue(value, configExtraData);
+
+          if (value.partnerLogo && !isSafeImageUrl(value.partnerLogo)) {
+            errors.push(
+              'De waarde van partnerLogo is geen geldige afbeeldings-URL'
+            );
+          }
 
           if (errors.length) {
             console.log('Resource validation error:', errors);

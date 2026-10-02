@@ -112,8 +112,6 @@ const baseSchema = z.object({
   location: z.string().optional(),
   image: z.string().optional(),
   imageDescription: z.string().optional(),
-  // Scratch field for the partner-logo upload; merged into extraData.partnerLogo
-  // in onSubmit, same pattern as the `image` field above.
   partnerLogo: z.string().optional(),
   images: z
     .array(
@@ -368,13 +366,10 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     // Re-apply the location-independent flag so it survives the JSON overwrite.
     if (values.extraData && typeof values.extraData === 'object') {
       values.extraData.locationIndependent = locationIndependent;
-      // Merge the partner-logo scratch field into extraData. Only write the key
-      // when there is a logo, or an existing one must be cleared with ''.
       if (values.partnerLogo || existingData?.extraData?.partnerLogo) {
         values.extraData.partnerLogo = values.partnerLogo || '';
       }
     }
-    // Never post the scratch field as a top-level resource column.
     delete values.partnerLogo;
 
     onFormSubmit(values)
