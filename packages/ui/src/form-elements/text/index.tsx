@@ -100,13 +100,14 @@ export type TextInputProps = {
 };
 
 const TrixEditor: React.FC<{
+  id?: string;
   value: string;
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
   onFocus?: () => void;
   onBlur?: () => void;
-}> = ({ value, onChange, onFocus, onBlur }) => {
+}> = ({ id, value, onChange, onFocus, onBlur }) => {
   const editorRef = useRef<HTMLElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const editorInstance = useRef<any>(null);
@@ -161,12 +162,6 @@ const TrixEditor: React.FC<{
     const inputEl = inputRef.current;
     if (!editorEl || !inputEl) return;
 
-    // In React Strict Mode (dev), this effect mounts/cleans up/mounts again,
-    // but the underlying <trix-editor> custom element is a real DOM node that
-    // only ever fires 'trix-initialize' once. On the second mount that event
-    // never refires, so grab an already-upgraded editor synchronously here —
-    // otherwise editorInstance.current stays null forever and the value-sync
-    // effect below can never load the real content.
     if ((editorEl as any).editor) {
       editorInstance.current = (editorEl as any).editor;
       targetBlankHrefsRef.current = getTargetBlankHrefs(valueRef.current || '');
@@ -345,7 +340,10 @@ const TrixEditor: React.FC<{
   return (
     <div>
       <input ref={inputRef} type="hidden" id={idRef.current} />
-      <trix-editor ref={editorRef} input={idRef.current}></trix-editor>
+      <trix-editor
+        ref={editorRef}
+        id={id || undefined}
+        input={idRef.current}></trix-editor>
     </div>
   );
 };

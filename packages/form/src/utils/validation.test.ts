@@ -127,14 +127,31 @@ describe('getSchemaForField: text/email variant', () => {
 });
 
 describe('getSchemaForField: modbreak', () => {
-  test('modbreak never yields a schema (the field can never be required)', () => {
-    const field: any = {
-      type: 'modbreak',
-      title: 'Modbreak',
-      fieldKey: 'modBreaks',
-      fieldRequired: true,
-    };
-    expect(getSchemaForField(field)).toBeUndefined();
+  const field: any = {
+    type: 'modbreak',
+    title: 'Modbreak',
+    fieldKey: 'modBreaks',
+  };
+
+  test('accepts no modbreaks and modbreaks with content', () => {
+    const schema = getSchemaForField(field)!;
+    expect(schema.safeParse(undefined).success).toBe(true);
+    expect(schema.safeParse([]).success).toBe(true);
+    expect(
+      schema.safeParse([{ description: '<div>Let op</div>' }]).success
+    ).toBe(true);
+  });
+
+  test('rejects a modbreak without content', () => {
+    const schema = getSchemaForField(field)!;
+    const result = schema.safeParse([
+      { description: '<div>Let op</div>' },
+      { description: '<ul><li><br></li></ul>' },
+    ]);
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0].message).toBe(
+      'Vul de inhoud in of verwijder de lege modbreak.'
+    );
   });
 });
 

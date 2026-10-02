@@ -1,7 +1,5 @@
 type ConfiguredItem = { type?: string; fieldKey?: string };
 
-// Moves a field's value out of extraData into its own resource column (e.g. timeline -> resource.timeline).
-// Mutates both objects in place, matching configureFormData's existing mutation style.
 export function moveFieldToColumn(
   extraData: Record<string, any>,
   configuredFormData: Record<string, any>,

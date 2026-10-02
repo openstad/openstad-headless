@@ -52,7 +52,6 @@ const ModbreakField: FC<ModbreakFieldProps> = ({
   defaultValue = [],
   overrideDefaultValue,
   onChange,
-  randomId = '',
   fieldInvalid = false,
   requiredWarning,
   resources,
@@ -89,6 +88,7 @@ const ModbreakField: FC<ModbreakFieldProps> = ({
 
   const baseId = useId();
   const warningId = `${baseId}-warning`;
+  const titleId = `${baseId}-title`;
   const modbreakTitle = resources?.modbreakTitle || '';
 
   const onChangeRef = useRef(onChange);
@@ -131,12 +131,14 @@ const ModbreakField: FC<ModbreakFieldProps> = ({
   return (
     <div
       className="modbreak-field-container"
+      role="group"
+      aria-labelledby={title ? titleId : undefined}
       aria-invalid={fieldInvalid || undefined}
       aria-describedby={fieldInvalid ? warningId : undefined}>
       <div className="modbreak-header">
         {title && (
           <Paragraph className="utrecht-form-field__label">
-            <FormLabel htmlFor={randomId}>
+            <FormLabel id={titleId}>
               <RteContent
                 content={title}
                 unwrapSingleRootDiv={true}
@@ -180,6 +182,7 @@ const ModbreakField: FC<ModbreakFieldProps> = ({
                   <FormLabel htmlFor={descriptionId}>Inhoud</FormLabel>
                 </Paragraph>
                 <TrixEditor
+                  id={descriptionId}
                   value={item.description}
                   onChange={(
                     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

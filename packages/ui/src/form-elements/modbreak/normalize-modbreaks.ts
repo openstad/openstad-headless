@@ -9,7 +9,6 @@ export type ModbreakItem = {
 const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const DATETIME_LOCAL_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
 
-// Slice-based, no timezone conversion: mirrors resource-form.tsx so admin and frontend render the same stored value identically.
 export function normalizeModBreakDate(value?: string | null): string {
   if (!value) return '';
 
@@ -25,6 +24,22 @@ export function normalizeModBreakDate(value?: string | null): string {
   return '';
 }
 
+export const EMPTY_MODBREAK_MESSAGE =
+  'Vul de inhoud in of verwijder de lege modbreak.';
+
+const INVISIBLE_CHARACTERS = /[\u200B-\u200D\uFEFF]/g;
+
+export function hasModBreakContent(description?: string | null): boolean {
+  if (!description) return false;
+  return (
+    description
+      .replace(/<[^>]*>/g, '')
+      .replace(/&nbsp;|&#160;|&#xa0;/gi, ' ')
+      .replace(INVISIBLE_CHARACTERS, '')
+      .trim().length > 0
+  );
+}
+
 export function sortModBreaksDescending<T extends { modBreakDate: string }>(
   items: T[]
 ): T[] {
@@ -33,7 +48,6 @@ export function sortModBreaksDescending<T extends { modBreakDate: string }>(
   );
 }
 
-// Single entry point used before every state update: keeps items normalized and sorted at all times.
 export function normalizeModBreaks(items: ModbreakItem[]): ModbreakItem[] {
   return sortModBreaksDescending(
     items.map((item) => ({

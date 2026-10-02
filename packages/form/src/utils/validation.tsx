@@ -1,4 +1,8 @@
 import { stripHtmlTags } from '@openstad-headless/lib/strip-html-tags';
+import {
+  EMPTY_MODBREAK_MESSAGE,
+  hasModBreakContent,
+} from '@openstad-headless/ui/src/form-elements/modbreak/normalize-modbreaks';
 import { z } from 'zod';
 
 import { CombinedFieldPropsWithType } from '../props';
@@ -282,7 +286,14 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
       return undefined;
 
     case 'modbreak':
-      return undefined;
+      return z
+        .any()
+        .refine(
+          (items) =>
+            !Array.isArray(items) ||
+            items.every((item) => hasModBreakContent(item?.description)),
+          EMPTY_MODBREAK_MESSAGE
+        );
 
     default:
       return undefined;
