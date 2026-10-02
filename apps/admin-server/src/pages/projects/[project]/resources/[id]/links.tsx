@@ -36,6 +36,15 @@ export default function ProjectResourceLinks() {
   const [externalSource, setExternalSource] = useState('');
   const [externalId, setExternalId] = useState('');
 
+  const linkedIds = new Set(
+    (links || [])
+      .filter((link) => link.source === 'openstad')
+      .map((link) => String(link.resource ? link.resource.id : link.targetId))
+  );
+  const visibleResults = results.filter(
+    (result) => String(result.id) !== String(id)
+  );
+
   async function handleSearch(event: React.FormEvent) {
     event.preventDefault();
     if (search.trim().length < MIN_SEARCH_LENGTH) {
@@ -155,22 +164,28 @@ export default function ProjectResourceLinks() {
       </form>
 
       {searched ? (
-        results.length === 0 ? (
+        visibleResults.length === 0 ? (
           <Paragraph>Geen inzendingen gevonden.</Paragraph>
         ) : (
           <ul className="grid grid-cols-1 gap-2 lg:w-2/3">
-            {results.map((result) => (
+            {visibleResults.map((result) => (
               <li
                 key={result.id}
                 className="flex justify-between items-center border rounded-md p-2">
                 <span>
                   {result.label} ({result.id})
                 </span>
-                <Button
-                  type="button"
-                  onClick={() => handleLink('openstad', result.id)}>
-                  Koppelen
-                </Button>
+                {linkedIds.has(String(result.id)) ? (
+                  <Button type="button" variant="secondary" disabled>
+                    Gekoppeld
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={() => handleLink('openstad', result.id)}>
+                    Koppelen
+                  </Button>
+                )}
               </li>
             ))}
           </ul>
