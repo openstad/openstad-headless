@@ -41,6 +41,11 @@ export default function ProjectResourceLinks() {
       .filter((link) => link.source === 'openstad')
       .map((link) => String(link.resource ? link.resource.id : link.targetId))
   );
+  const sourceLabel = (source: string) =>
+    source === 'openstad'
+      ? 'Inzending'
+      : capabilities.sources.find((item) => item.key === source)?.label ||
+        source;
   const visibleResults = results.filter(
     (result) => String(result.id) !== String(id)
   );
@@ -95,10 +100,7 @@ export default function ProjectResourceLinks() {
               Gekoppeld aan
             </th>
             <th scope="col" className="py-2">
-              Bron
-            </th>
-            <th scope="col" className="py-2">
-              Richting
+              Type
             </th>
             <th scope="col" className="py-2">
               <span className="sr-only">Acties</span>
@@ -108,7 +110,7 @@ export default function ProjectResourceLinks() {
         <tbody>
           {(links || []).length === 0 ? (
             <tr>
-              <td colSpan={4} className="py-3">
+              <td colSpan={3} className="py-3">
                 Deze inzending heeft nog geen koppelingen.
               </td>
             </tr>
@@ -120,12 +122,7 @@ export default function ProjectResourceLinks() {
                     ? `${link.resource.title} (${link.resource.id})`
                     : link.targetId}
                 </td>
-                <td className="py-2">{link.source}</td>
-                <td className="py-2">
-                  {link.direction === 'outgoing'
-                    ? 'Van deze inzending'
-                    : 'Naar deze inzending'}
-                </td>
+                <td className="py-2">{sourceLabel(link.source)}</td>
                 <td className="py-2 text-right">
                   <Button
                     type="button"
