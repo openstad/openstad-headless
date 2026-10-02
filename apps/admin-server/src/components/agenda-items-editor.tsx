@@ -8,9 +8,11 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { UploadDocument } from '@/hooks/upload-document';
+import { cleanLinks, getCustomTitle, moveEntry } from '@/lib/timeline-items';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { formatDutchDate } from '@openstad-headless/lib/timeline-dates';
@@ -19,7 +21,7 @@ import {
   getFileFormat,
 } from '@openstad-headless/ui/src/lib/format-file-size';
 import * as Switch from '@radix-ui/react-switch';
-import { ArrowDown, ArrowUp, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Plus, X } from 'lucide-react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -66,20 +68,6 @@ const formSchema = z.object({
   highlighted: z.boolean().optional(),
   activeFrom: z.string().optional(),
   activeTo: z.string().optional(),
-  links: z
-    .array(
-      z.object({
-        trigger: z.string(),
-        title: z.string(),
-        url: z.string(),
-        openInNewWindow: z.boolean(),
-        kind: z.enum(['link', 'document']).optional(),
-        documentName: z.string().optional(),
-        fileFormat: z.string().optional(),
-        fileSize: z.string().optional(),
-      })
-    )
-    .optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -95,7 +83,7 @@ function toDateInputValue(value?: string) {
 }
 
 function handleMovementOrDeletion(
-  list: Array<AgendaItem | AgendaLink>,
+  list: AgendaItem[],
   actionType: 'moveUp' | 'moveDown' | 'delete',
   trigger: string
 ) {
@@ -137,7 +125,6 @@ const defaults = (): FormData => ({
   highlighted: false,
   activeFrom: '',
   activeTo: '',
-  links: [],
 });
 
 export function AgendaItemsEditor({
@@ -159,8 +146,6 @@ export function AgendaItemsEditor({
     (a.activeFrom ?? '').localeCompare(b.activeFrom ?? '')
   )[items.length - 1]?.id;
   const isLastItemSelected = !!selectedItem && selectedItem.id === lastItemId;
-  const [selectedLink, setLink] = useState<AgendaLink | null>(null);
-  const [settingLinks, setSettingLinks] = useState<boolean>(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
@@ -169,45 +154,43 @@ export function AgendaItemsEditor({
 
   useEffect(() => {
     if (selectedItem) {
-      const normalizedLinks = (selectedItem.links || []).map((link) => ({
-        ...link,
-        kind: link.kind ?? link.soort,
-      }));
+      const itemLinks = [...(selectedItem.links || [])]
+        .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger))
+        .map((link) => ({
+          ...link,
+          kind: link.kind ?? link.soort ?? 'link',
+        }));
       form.reset({
         trigger: selectedItem.trigger,
-        title: selectedItem.title || '',
-        description: selectedItem.description,
+        // In timeline mode a date stored as title counts as an empty title.
+        title: timelineMode
+          ? getCustomTitle(selectedItem.title)
+          : selectedItem.title || '',
+        description: selectedItem.description || '',
         active: selectedItem.active ?? true,
         highlighted: selectedItem.highlighted || false,
         activeFrom: toDateInputValue(selectedItem.activeFrom),
         activeTo: toDateInputValue(selectedItem.activeTo),
-        links: normalizedLinks,
       });
-      setLinks(normalizedLinks.map(withId));
+      setLinks(itemLinks.map(withId));
     }
   }, [selectedItemId, form]);
 
-  useEffect(() => {
-    if (selectedLink) {
-      const updatedLinks = [...links];
-      const index = links.findIndex((link) => link.id === selectedLink.id);
-      updatedLinks[index] = { ...selectedLink };
-
-      form.reset({
-        ...form.getValues(),
-        links: updatedLinks,
-      });
-    }
-  }, [selectedLink, form, links]);
-
   function onSubmit(values: FormData) {
+    if (timelineMode && !values.activeFrom) {
+      form.setError('activeFrom', { message: 'Vul een datum in.' });
+      return;
+    }
+
+    const itemLinks = cleanLinks(links).map(({ id, ...link }) => link);
+
     if (selectedItem) {
       const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
 
       onItemsChange(
         items.map((item) =>
           item.id === selectedItem.id
-            ? { ...item, ...valuesWithoutTrigger }
+            ? { ...item, ...valuesWithoutTrigger, links: itemLinks }
             : item
         )
       );
@@ -228,7 +211,7 @@ export function AgendaItemsEditor({
           highlighted: values.highlighted,
           activeFrom: values.activeFrom,
           activeTo: values.activeTo,
-          links: values.links || [],
+          links: itemLinks,
         },
       ]);
     }
@@ -236,69 +219,55 @@ export function AgendaItemsEditor({
     setLinks([]);
   }
 
-  function handleAddLink(values: FormData) {
-    if (selectedLink) {
-      setLinks((currentLinks) =>
-        currentLinks.map((link) => {
-          if (link.id !== selectedLink.id) return link;
-          const v = values.links?.find((l) => l.trigger === link.trigger);
-          return {
-            ...link,
-            title: v?.title || '',
-            url: v?.url || '',
-            openInNewWindow: v?.openInNewWindow || false,
-            kind: v?.kind || link.kind || link.soort || 'link',
-            documentName: v?.documentName ?? link.documentName,
-            fileFormat: v?.fileFormat ?? link.fileFormat,
-            fileSize: v?.fileSize ?? link.fileSize,
-          };
-        })
-      );
-      setLink(null);
-    } else {
-      const maxLinkTrigger = links.reduce(
-        (max, l) => Math.max(max, parseInt(l.trigger) || 0),
-        -1
-      );
-      const last = values.links?.[values.links.length - 1];
-      const newLink: AgendaLink = {
+  function addLink() {
+    setLinks((current) => [
+      ...current,
+      {
         id: generateId(),
-        trigger: `${maxLinkTrigger + 1}`,
-        title: last?.title || '',
-        url: last?.url || '',
-        openInNewWindow: last?.openInNewWindow || false,
-        kind: last?.kind || 'link',
-        documentName: last?.documentName,
-        fileFormat: last?.fileFormat,
-        fileSize: last?.fileSize,
-      };
-      setLinks((currentLinks) => [...currentLinks, newLink]);
+        trigger: `${current.length}`,
+        title: '',
+        url: '',
+        openInNewWindow: false,
+        kind: 'link',
+      },
+    ]);
+  }
+
+  function updateLink(id: string | undefined, patch: Partial<AgendaLink>) {
+    setLinks((current) =>
+      current.map((link) => (link.id === id ? { ...link, ...patch } : link))
+    );
+  }
+
+  function removeLink(id: string | undefined) {
+    setLinks((current) => current.filter((link) => link.id !== id));
+  }
+
+  function moveLink(index: number, direction: 'up' | 'down') {
+    setLinks((current) => moveEntry(current, index, direction));
+  }
+
+  async function uploadLinkDocument(id: string | undefined, file: File) {
+    try {
+      const uploaded = await UploadDocument(file, project as string);
+      if (uploaded?.url) {
+        updateLink(id, {
+          url: uploaded.url,
+          documentName: uploaded.name || file.name,
+          fileFormat: getFileFormat(file.name),
+          fileSize: file.size > 0 ? formatFileSize(file.size) : undefined,
+        });
+      }
+    } catch {
+      toast.error('Document uploaden mislukt. Probeer het opnieuw.');
     }
   }
 
   function handleAction(
     actionType: 'moveUp' | 'moveDown' | 'delete',
-    clickedTrigger: string,
-    isItemAction: boolean
+    clickedTrigger: string
   ) {
-    if (isItemAction) {
-      onItemsChange(
-        handleMovementOrDeletion(
-          items,
-          actionType,
-          clickedTrigger
-        ) as AgendaItem[]
-      );
-    } else {
-      setLinks(
-        (currentLinks) =>
-          handleMovementOrDeletion(
-            currentLinks,
-            actionType,
-            clickedTrigger
-          ) as AgendaLink[]
-      );
-    }
+    onItemsChange(handleMovementOrDeletion(items, actionType, clickedTrigger));
   }
 
   function resetForm() {
@@ -306,17 +275,6 @@ export function AgendaItemsEditor({
     setLinks([]);
     setSelectedItemId(null);
   }
-
-  function handleSaveLinks() {
-    form.setValue('links', links);
-    setSettingLinks(false);
-  }
-
-  const selectedLinkIndex = selectedLink
-    ? links.findIndex((l) => l.id === selectedLink.id)
-    : -1;
-  const activeLinkIndex =
-    selectedLinkIndex >= 0 ? selectedLinkIndex : links.length - 1;
 
   return (
     <Form {...form}>
@@ -330,185 +288,122 @@ export function AgendaItemsEditor({
                 {items.length > 0
                   ? [...items]
                       .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger))
-                      .map((item, index) => (
-                        <div
-                          key={index}
-                          className={`flex cursor-pointer justify-between border border-secondary ${
-                            item.id === selectedItem?.id && 'bg-secondary'
-                          }`}>
-                          <span className="flex gap-2 py-3 px-2">
-                            <ArrowUp
-                              className="cursor-pointer"
-                              onClick={() =>
-                                handleAction('moveUp', item.trigger, true)
-                              }
-                            />
-                            <ArrowDown
-                              className="cursor-pointer"
-                              onClick={() =>
-                                handleAction('moveDown', item.trigger, true)
-                              }
-                            />
-                          </span>
-                          <span
-                            className="gap-2 py-3 px-2 w-full"
-                            onClick={() => setSelectedItemId(item.id ?? null)}>
-                            {item.title || item.description || '(geen titel)'}
-                            {item.activeFrom && (
-                              <span className="block text-sm text-muted-foreground">
-                                {formatDutchDate(
-                                  toDateInputValue(item.activeFrom)
-                                )}
+                      .map((item, index) => {
+                        const itemLabel =
+                          (timelineMode
+                            ? getCustomTitle(item.title)
+                            : item.title) ||
+                          item.description ||
+                          '(geen titel)';
+                        return (
+                          <div
+                            key={item.id ?? index}
+                            className={`flex justify-between border border-secondary ${
+                              item.id === selectedItem?.id && 'bg-secondary'
+                            }`}>
+                            {/* Timeline items are ordered by date automatically. */}
+                            {!timelineMode && (
+                              <span className="flex gap-2 py-3 px-2">
+                                <button
+                                  type="button"
+                                  aria-label={`Verplaats omhoog: ${itemLabel}`}
+                                  onClick={() =>
+                                    handleAction('moveUp', item.trigger)
+                                  }>
+                                  <ArrowUp aria-hidden="true" />
+                                </button>
+                                <button
+                                  type="button"
+                                  aria-label={`Verplaats omlaag: ${itemLabel}`}
+                                  onClick={() =>
+                                    handleAction('moveDown', item.trigger)
+                                  }>
+                                  <ArrowDown aria-hidden="true" />
+                                </button>
                               </span>
                             )}
-                          </span>
-                          <span className="gap-2 py-3 px-2">
-                            <X
-                              className="cursor-pointer"
-                              onClick={() =>
-                                handleAction('delete', item.trigger, true)
+                            <button
+                              type="button"
+                              className="py-3 px-2 w-full min-w-0 text-left break-words"
+                              aria-current={
+                                item.id === selectedItem?.id
+                                  ? 'true'
+                                  : undefined
                               }
-                            />
-                          </span>
-                        </div>
-                      ))
+                              onClick={() =>
+                                setSelectedItemId(item.id ?? null)
+                              }>
+                              {itemLabel}
+                              {item.activeFrom && (
+                                <span className="block text-sm text-muted-foreground">
+                                  {formatDutchDate(
+                                    toDateInputValue(item.activeFrom)
+                                  )}
+                                </span>
+                              )}
+                            </button>
+                            <span className="py-3 px-2">
+                              <button
+                                type="button"
+                                aria-label={`Verwijder item: ${itemLabel}`}
+                                onClick={() =>
+                                  handleAction('delete', item.trigger)
+                                }>
+                                <X aria-hidden="true" />
+                              </button>
+                            </span>
+                          </div>
+                        );
+                      })
                   : 'Geen items'}
               </div>
             </div>
           </div>
 
-          {settingLinks ? (
-            <div className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
-              <div className="flex flex-col justify-between">
-                <div className="flex flex-col gap-y-2">
-                  <Heading size="xl">Links</Heading>
-                  <Separator className="mt-2" />
-                  <FormField
-                    control={form.control}
-                    name={`links.${activeLinkIndex}.kind`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Soort</FormLabel>
-                        <select
-                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                          value={field.value || 'link'}
-                          onChange={(e) => {
-                            field.onChange(e.target.value);
-                            form.setValue(`links.${activeLinkIndex}.url`, '');
-                            form.setValue(
-                              `links.${activeLinkIndex}.documentName`,
-                              undefined
-                            );
-                          }}>
-                          <option value="link">Link</option>
-                          <option value="document">Document</option>
-                        </select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name={`links.${activeLinkIndex}.title`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Link titel</FormLabel>
-                        <Input {...field} />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {form.watch(`links.${activeLinkIndex}.kind`) ===
-                  'document' ? (
+          <div className="p-6 bg-white rounded-md flex flex-col col-span-2">
+            <div>
+              <Heading size="xl">Items</Heading>
+              <Separator className="my-4" />
+              <FormField
+                control={form.control}
+                name="trigger"
+                render={({ field }) => (
+                  <FormItem>
+                    <Input type="hidden" {...field} />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="w-full lg:w-2/3 flex flex-col gap-y-2">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Document</FormLabel>
-                      <Input
-                        type="file"
-                        accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (!file) return;
-                          try {
-                            const uploaded = await UploadDocument(
-                              file,
-                              project as string
-                            );
-                            if (uploaded?.url) {
-                              form.setValue(
-                                `links.${activeLinkIndex}.url`,
-                                uploaded.url
-                              );
-                              form.setValue(
-                                `links.${activeLinkIndex}.documentName`,
-                                uploaded.name || file.name
-                              );
-                              form.setValue(
-                                `links.${activeLinkIndex}.fileFormat`,
-                                getFileFormat(file.name)
-                              );
-                              form.setValue(
-                                `links.${activeLinkIndex}.fileSize`,
-                                file.size > 0
-                                  ? formatFileSize(file.size)
-                                  : undefined
-                              );
-                            }
-                          } catch {
-                            toast.error(
-                              'Document uploaden mislukt. Probeer het opnieuw.'
-                            );
-                          }
-                        }}
-                      />
-                      {form.watch(`links.${activeLinkIndex}.documentName`) ? (
-                        <div className="flex items-center gap-2 mt-1 text-sm">
-                          <span className="text-muted-foreground">
-                            Huidig bestand:
-                          </span>
-                          <a
-                            href={form.watch(`links.${activeLinkIndex}.url`)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary underline">
-                            {form.watch(
-                              `links.${activeLinkIndex}.documentName`
-                            )}
-                          </a>
-                          <button
-                            type="button"
-                            className="text-destructive underline"
-                            onClick={() => {
-                              form.setValue(`links.${activeLinkIndex}.url`, '');
-                              form.setValue(
-                                `links.${activeLinkIndex}.documentName`,
-                                ''
-                              );
-                            }}>
-                            Verwijder
-                          </button>
-                        </div>
-                      ) : null}
+                      <FormLabel>Titel</FormLabel>
+                      <Input {...field} />
                       <FormMessage />
                     </FormItem>
-                  ) : (
-                    <FormField
-                      control={form.control}
-                      name={`links.${activeLinkIndex}.url`}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Link URL</FormLabel>
-                          <Input {...field} />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                   )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Beschrijving</FormLabel>
+                      <Input {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {!showActiveDates && (
                   <FormField
                     control={form.control}
-                    name={`links.${activeLinkIndex}.openInNewWindow`}
+                    name="active"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Open in nieuw venster</FormLabel>
+                        <FormLabel>Markeer item</FormLabel>
                         <Switch.Root
                           className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                           onCheckedChange={(e: boolean) => {
@@ -521,245 +416,236 @@ export function AgendaItemsEditor({
                       </FormItem>
                     )}
                   />
-                  <Button
-                    className="w-full bg-secondary text-black hover:text-white mt-4"
-                    type="button"
-                    onClick={() => handleAddLink(form.getValues())}>
-                    {selectedLink
-                      ? 'Sla wijzigingen op'
-                      : 'Voeg link toe aan lijst'}
-                  </Button>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                    type="button"
-                    onClick={() => {
-                      setSettingLinks(false);
-                      setLink(null);
-                      setLinks([]);
-                    }}>
-                    Annuleer
-                  </Button>
-                  <Button
-                    className="w-fit mt-4"
-                    type="button"
-                    onClick={() => handleSaveLinks()}>
-                    Sla links op
-                  </Button>
-                </div>
-              </div>
-              <div>
-                <Heading size="xl">Lijst van huidige links</Heading>
-                <Separator className="my-4" />
-                <div className="flex flex-col gap-1">
-                  {links.length > 0
-                    ? links
-                        .sort(
-                          (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
-                        )
-                        .map((link, index) => (
-                          <div
-                            key={index}
-                            className={`flex cursor-pointer justify-between border border-secondary ${
-                              link.id === selectedLink?.id && 'bg-secondary'
-                            }`}>
-                            <span className="flex gap-2 py-3 px-2">
-                              <ArrowUp
-                                className="cursor-pointer"
-                                onClick={() =>
-                                  handleAction('moveUp', link.trigger, false)
-                                }
-                              />
-                              <ArrowDown
-                                className="cursor-pointer"
-                                onClick={() =>
-                                  handleAction('moveDown', link.trigger, false)
-                                }
-                              />
-                            </span>
-                            <span
-                              className="py-3 px-2 w-full"
-                              onClick={() => setLink(link)}>
-                              {link.title}
-                            </span>
-                            <span className="py-3 px-2">
-                              <X
-                                className="cursor-pointer"
-                                onClick={() =>
-                                  handleAction('delete', link.trigger, false)
-                                }
-                              />
-                            </span>
-                          </div>
-                        ))
-                    : 'Geen links'}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="p-6 bg-white rounded-md flex flex-col col-span-2">
-              <div>
-                <Heading size="xl">Items</Heading>
-                <Separator className="my-4" />
-                <FormField
-                  control={form.control}
-                  name="trigger"
-                  render={({ field }) => (
-                    <FormItem>
-                      <Input type="hidden" {...field} />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="w-full lg:w-2/3 flex flex-col gap-y-2">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Titel</FormLabel>
-                        <Input {...field} />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Beschrijving</FormLabel>
-                        <Input {...field} />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {!showActiveDates && (
-                    <FormField
-                      control={form.control}
-                      name="active"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Markeer item</FormLabel>
-                          <Switch.Root
-                            className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                            onCheckedChange={(e: boolean) => {
-                              field.onChange(e);
-                            }}
-                            checked={field.value}>
-                            <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                          </Switch.Root>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-                  {!timelineMode && (
-                    <FormField
-                      control={form.control}
-                      name="highlighted"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Extra uitlichten</FormLabel>
-                          <FormDescription>
-                            Dit item wordt weergegeven als een gekleurd blok met
-                            de primaire kleuren.
-                          </FormDescription>
-                          <Switch.Root
-                            className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                            onCheckedChange={(e: boolean) => {
-                              field.onChange(e);
-                            }}
-                            checked={field.value}>
-                            <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                          </Switch.Root>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
-                  {showActiveDates && (
-                    <>
-                      <FormField
-                        control={form.control}
-                        name="activeFrom"
-                        render={({ field }) => (
-                          <FormItem className="items-start md:col-span-full">
-                            <FormLabel>
-                              Actief vanaf (hele dag) - laat leeg om direct te
-                              starten
-                            </FormLabel>
-                            <Input
-                              type="date"
-                              {...field}
-                              className="inline-block !w-auto"
-                            />
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="activeTo"
-                        render={({ field }) => (
-                          <FormItem className="items-start md:col-span-full">
-                            <FormLabel>
-                              {timelineMode && !isLastItemSelected
-                                ? 'Actief t/m (hele dag)'
-                                : 'Actief t/m (hele dag) - laat leeg voor geen einddatum'}
-                            </FormLabel>
-                            {timelineMode && !isLastItemSelected && (
-                              <FormDescription>
-                                Wordt automatisch berekend uit de startdatum van
-                                het volgende item.
-                              </FormDescription>
-                            )}
-                            <Input
-                              type="date"
-                              {...field}
-                              readOnly={timelineMode && !isLastItemSelected}
-                              disabled={timelineMode && !isLastItemSelected}
-                              className="inline-block !w-auto"
-                            />
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </>
-                  )}
-
-                  <FormItem>
-                    <Button
-                      className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                      type="button"
-                      onClick={() => setSettingLinks(!settingLinks)}>
-                      {`Pas website links (${links.length}) aan`}
-                    </Button>
-                    <FormMessage />
-                  </FormItem>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                {selectedItem && (
-                  <Button
-                    className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                    type="button"
-                    onClick={() => resetForm()}>
-                    Annuleer
-                  </Button>
                 )}
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={form.handleSubmit(onSubmit)}>
-                  {selectedItem
-                    ? 'Sla wijzigingen op'
-                    : 'Voeg item toe aan lijst'}
-                </Button>
+                {!timelineMode && (
+                  <FormField
+                    control={form.control}
+                    name="highlighted"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Extra uitlichten</FormLabel>
+                        <FormDescription>
+                          Dit item wordt weergegeven als een gekleurd blok met
+                          de primaire kleuren.
+                        </FormDescription>
+                        <Switch.Root
+                          className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                          onCheckedChange={(e: boolean) => {
+                            field.onChange(e);
+                          }}
+                          checked={field.value}>
+                          <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                        </Switch.Root>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                {showActiveDates && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="activeFrom"
+                      render={({ field }) => (
+                        <FormItem className="items-start md:col-span-full">
+                          <FormLabel>
+                            {timelineMode
+                              ? 'Datum (hele dag)'
+                              : 'Actief vanaf (hele dag) - laat leeg om direct te starten'}
+                          </FormLabel>
+                          <Input
+                            type="date"
+                            {...field}
+                            className="inline-block !w-auto"
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="activeTo"
+                      render={({ field }) => (
+                        <FormItem className="items-start md:col-span-full">
+                          <FormLabel>
+                            {timelineMode && !isLastItemSelected
+                              ? 'Actief t/m (hele dag)'
+                              : 'Actief t/m (hele dag) - laat leeg voor geen einddatum'}
+                          </FormLabel>
+                          {timelineMode && !isLastItemSelected && (
+                            <FormDescription>
+                              Wordt automatisch berekend uit de startdatum van
+                              het volgende item.
+                            </FormDescription>
+                          )}
+                          <Input
+                            type="date"
+                            {...field}
+                            readOnly={timelineMode && !isLastItemSelected}
+                            disabled={timelineMode && !isLastItemSelected}
+                            className="inline-block !w-auto"
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
               </div>
+
+              <fieldset className="mt-6 flex flex-col gap-y-3">
+                <legend className="mb-3 text-sm font-medium">
+                  {`Links en documenten (${links.length})`}
+                </legend>
+                {links.map((link, index) => {
+                  const kind = link.kind ?? 'link';
+                  const fieldId = `agenda-link-${link.id}`;
+                  const linkLabel = link.title || `link ${index + 1}`;
+                  return (
+                    <div
+                      key={link.id}
+                      className="flex flex-col gap-3 rounded-md border border-secondary p-3">
+                      <div className="grid grid-cols-1 gap-3 lg:grid-cols-[140px_minmax(0,1fr)_minmax(0,1fr)]">
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor={`${fieldId}-kind`}>Soort</Label>
+                          <select
+                            id={`${fieldId}-kind`}
+                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                            value={kind}
+                            onChange={(e) =>
+                              updateLink(link.id, {
+                                kind: e.target.value as 'link' | 'document',
+                                url: '',
+                                documentName: undefined,
+                                fileFormat: undefined,
+                                fileSize: undefined,
+                              })
+                            }>
+                            <option value="link">Link</option>
+                            <option value="document">Document</option>
+                          </select>
+                        </div>
+                        {kind === 'document' ? (
+                          <div className="flex flex-col gap-2">
+                            <Label htmlFor={`${fieldId}-file`}>Document</Label>
+                            <Input
+                              id={`${fieldId}-file`}
+                              type="file"
+                              accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) uploadLinkDocument(link.id, file);
+                              }}
+                            />
+                            {link.documentName ? (
+                              <span className="text-sm">
+                                <span className="text-muted-foreground">
+                                  Huidig bestand:{' '}
+                                </span>
+                                <a
+                                  href={link.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary underline break-all">
+                                  {link.documentName}
+                                </a>
+                              </span>
+                            ) : null}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col gap-2">
+                            <Label htmlFor={`${fieldId}-url`}>Link URL</Label>
+                            <Input
+                              id={`${fieldId}-url`}
+                              value={link.url}
+                              onChange={(e) =>
+                                updateLink(link.id, { url: e.target.value })
+                              }
+                            />
+                          </div>
+                        )}
+                        <div className="flex flex-col gap-2">
+                          <Label htmlFor={`${fieldId}-title`}>Link titel</Label>
+                          <Input
+                            id={`${fieldId}-title`}
+                            value={link.title}
+                            onChange={(e) =>
+                              updateLink(link.id, { title: e.target.value })
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <Switch.Root
+                            id={`${fieldId}-new-window`}
+                            className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                            onCheckedChange={(checked: boolean) =>
+                              updateLink(link.id, { openInNewWindow: checked })
+                            }
+                            checked={!!link.openInNewWindow}>
+                            <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                          </Switch.Root>
+                          <Label htmlFor={`${fieldId}-new-window`}>
+                            Open in nieuw venster
+                          </Label>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            className="disabled:opacity-30"
+                            aria-label={`Verplaats omhoog: ${linkLabel}`}
+                            disabled={index === 0}
+                            onClick={() => moveLink(index, 'up')}>
+                            <ArrowUp aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            className="disabled:opacity-30"
+                            aria-label={`Verplaats omlaag: ${linkLabel}`}
+                            disabled={index === links.length - 1}
+                            onClick={() => moveLink(index, 'down')}>
+                            <ArrowDown aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={`Verwijder link: ${linkLabel}`}
+                            onClick={() => removeLink(link.id)}>
+                            <X aria-hidden="true" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+                <Button
+                  className="w-fit bg-secondary text-black hover:text-white"
+                  type="button"
+                  onClick={() => addLink()}>
+                  <Plus className="mr-1 h-4 w-4" aria-hidden="true" />
+                  Voeg link of document toe
+                </Button>
+              </fieldset>
             </div>
-          )}
+            <div className="flex gap-2">
+              {selectedItem && (
+                <Button
+                  className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                  type="button"
+                  onClick={() => resetForm()}>
+                  Annuleer
+                </Button>
+              )}
+              <Button
+                className="w-fit mt-4"
+                type="button"
+                onClick={form.handleSubmit(onSubmit)}>
+                {selectedItem
+                  ? 'Sla wijzigingen op'
+                  : 'Voeg item toe aan lijst'}
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     </Form>
