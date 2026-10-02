@@ -6,6 +6,7 @@ import DocumentUploadField from '../../src/form-elements/document-upload';
 import HiddenInput from '../../src/form-elements/hidden';
 import ImageChoiceField from '../../src/form-elements/image-choice';
 import ImageUploadField from '../../src/form-elements/image-upload';
+import { toUploadedImageName } from '../../src/form-elements/image-upload/value';
 import InfoField from '../../src/form-elements/info';
 import MapField from '../../src/form-elements/map';
 import NumberField from '../../src/form-elements/number';
@@ -57,15 +58,11 @@ describe('<ImageUploadField />', () => {
 });
 
 describe('<ImageUploadField /> remark order', () => {
-  // The image server sanitizes the returned file name (dots -> underscores),
-  // while FilePond's thumbnail keeps the original browsed name. Applying the
-  // same transform here keeps the intercept's response comparable to the
-  // thumbnail text instead of two unrelated strings.
   let nextUploadFileName = '';
 
   beforeEach(() => {
     cy.intercept('POST', '**/images', (req) => {
-      const sanitizedName = nextUploadFileName.replace(/\./g, '_');
+      const sanitizedName = toUploadedImageName(nextUploadFileName);
       req.reply([
         {
           name: sanitizedName,
@@ -92,9 +89,6 @@ describe('<ImageUploadField /> remark order', () => {
   }
 
   function selectFile(target: string, fileName: string, dragDrop = false) {
-    // Set via cy.then so it's queued in order with the earlier selectFile's
-    // upload -- a plain assignment here runs immediately and would let a
-    // second call overwrite the name before the first upload used it.
     cy.then(() => {
       nextUploadFileName = fileName;
     });
@@ -105,9 +99,6 @@ describe('<ImageUploadField /> remark order', () => {
     cy.wait('@uploadImage');
   }
 
-  // .should(callback) retries until FilePond's own status update ("Afbeelding
-  // geladen") settles, which lands a moment after cy.wait('@uploadImage')
-  // resolves -- reading immediately can catch a stale item list mid-transition.
   function assertOrdersMatch(expectedThumbnailCount: number) {
     cy.get('.filepond--file-status-main').should(($statusEls) => {
       const stillUploading = Cypress._.some($statusEls, (el) =>
@@ -120,13 +111,9 @@ describe('<ImageUploadField /> remark order', () => {
       expect($thumbEls, 'all thumbnails rendered').to.have.length(
         expectedThumbnailCount
       );
-      const thumbs = Cypress._.map($thumbEls, (el) =>
-        el.textContent?.trim().replace(/\./g, '_')
-      );
+      const thumbs = Cypress._.map($thumbEls, (el) => el.textContent?.trim());
 
       const $remarkEls = Cypress.$('.openstad-image-descriptions label');
-      // Each label reads "Opmerking bij deze afbeelding (<name>)"; pull out
-      // the name to compare against the thumbnail name.
       const remarks = Cypress._.map($remarkEls, (el) => {
         const match = el.textContent?.match(/\(([^)]+)\)$/);
         return match ? match[1] : el.textContent?.trim();
@@ -156,12 +143,21 @@ describe('<ImageUploadField /> remark order', () => {
     assertOrdersMatch(3);
   });
 
+  it('labels a new upload with its local file name, not the server name', () => {
+    mountField();
+
+    selectFile('input[type=file]', 'foto met spaties.png');
+
+    assertOrdersMatch(2);
+    cy.get('.openstad-image-descriptions label')
+      .first()
+      .should(
+        'have.text',
+        'Opmerking bij deze afbeelding (foto met spaties.png)'
+      );
+  });
+
   it('still shows one correctly-named remark box per photo after a drag-and-drop upload, even out of order', () => {
-    // A drag-and-drop upload lands in the opposite order from a browsed one
-    // (existing image first, dropped file last). toDescriptionEntries can't
-    // also match this positionally with no record of how an image was added,
-    // so the accepted fallback is the file name in the label -- checked here
-    // as a set, not by position.
     mountField();
 
     selectFile('.filepond--drop-label', 'dropped_1.png', true);
@@ -176,7 +172,7 @@ describe('<ImageUploadField /> remark order', () => {
     cy.get('.filepond--file-info-main').should(($thumbEls) => {
       expect($thumbEls, 'all thumbnails rendered').to.have.length(2);
       const thumbs = Cypress._.map($thumbEls, (el) =>
-        el.textContent?.trim().replace(/\./g, '_')
+        el.textContent?.trim()
       ).sort();
 
       const $remarkEls = Cypress.$('.openstad-image-descriptions label');

@@ -159,6 +159,28 @@ describe('toDescriptionEntries', () => {
       { url: 'https://x/first.jpg', name: 'first_jpg' },
     ]);
   });
+  it('shows the local file name for a new upload instead of the server name', () => {
+    const result = toDescriptionEntries(
+      [mockImage('https://x/existing.jpg', 'existing_jpg')],
+      [{ name: 'foto_met_spaties_png', url: 'https://x/foto.png' }],
+      ['foto met spaties.png']
+    );
+
+    expect(result).toEqual([
+      { url: 'https://x/foto.png', name: 'foto met spaties.png' },
+      { url: 'https://x/existing.jpg', name: 'existing_jpg' },
+    ]);
+  });
+
+  it('falls back to the server name when no local file matches', () => {
+    const result = toDescriptionEntries(
+      [],
+      [{ name: 'photo_png', url: 'https://x/photo.png' }],
+      ['other.png']
+    );
+
+    expect(result).toEqual([{ url: 'https://x/photo.png', name: 'photo_png' }]);
+  });
 });
 
 describe('removeDescription', () => {
@@ -203,9 +225,6 @@ describe('toMockImages', () => {
 });
 
 describe('toUploadedImageName', () => {
-  // Mirrors sanitizeFileName in apps/image-server/utils.js, which sets the
-  // `name` the upload endpoint returns. A mismatch here means removing a
-  // photo in FilePond never finds it in uploadedImages.
   it('replaces dots with underscores', () => {
     expect(toUploadedImageName('a.png')).toBe('a_png');
   });
