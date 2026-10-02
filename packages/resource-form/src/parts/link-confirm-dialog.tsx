@@ -9,11 +9,10 @@ import RteContent from '@openstad-headless/ui/src/rte-formatting/rte-content';
 import {
   FormField,
   FormLabel,
-  Heading,
   Paragraph,
   Textarea,
 } from '@utrecht/component-library-react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import './link-confirm-dialog.css';
 import { type LinkValue, linkKey, splitAddedLinks } from './link-selection';
@@ -45,7 +44,7 @@ export function LinkConfirmDialog({
   removed,
   title = 'Je gaat uitnodiging(en) versturen',
   description = 'Je hebt één of meerdere inzendingen gekozen om te tonen op jouw pagina. Daarom wordt er een uitnodiging verstuurd, zodat we zeker weten dat dat klopt. Als de ander de uitnodiging accepteert, wordt de koppeling getoond. Jij blijft de auteur van jouw inzending; niemand anders kan deze bewerken of verwijderen. Via jouw accountpagina kun je de status van je uitnodigingen bekijken.',
-  messageLabel = 'Schrijf een toelichting',
+  messageLabel = 'schrijf een toelichting',
   chosenHeading = 'Jouw keuze:',
   removedHeading = 'Deze koppelingen worden ingetrokken:',
   ownHeading = 'Deze eigen inzendingen worden direct gekoppeld:',
@@ -58,12 +57,30 @@ export function LinkConfirmDialog({
   onCancel,
 }: LinkConfirmDialogProps) {
   const [messages, setMessages] = useState<Record<string, string>>({});
+  const [openMessages, setOpenMessages] = useState<Record<string, boolean>>({});
+  const focusKey = useRef<string | null>(null);
+  const textareas = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const { others, own } = splitAddedLinks(added);
   const onlyRevoking = added.length === 0;
 
   useEffect(() => {
-    if (open) setMessages({});
+    if (open) {
+      setMessages({});
+      setOpenMessages({});
+    }
   }, [open]);
+
+  useEffect(() => {
+    if (!focusKey.current) return;
+    textareas.current[focusKey.current]?.focus();
+    focusKey.current = null;
+  }, [openMessages]);
+
+  const toggleMessage = (key: string) => {
+    const opening = !openMessages[key];
+    if (opening) focusKey.current = key;
+    setOpenMessages({ ...openMessages, [key]: opening });
+  };
 
   return (
     <Dialog
@@ -81,40 +98,53 @@ export function LinkConfirmDialog({
 
         {others.length > 0 ? (
           <>
-            <Heading level={3} appearance="utrecht-heading-6">
-              {chosenHeading}
-            </Heading>
+            <Paragraph className="osc-link-confirm-heading">
+              <strong>{chosenHeading}</strong>
+            </Paragraph>
             <ul className="osc-link-confirm-list">
               {others.map((item) => {
                 const key = linkKey(item);
                 const textareaId = `osc-link-message-${key.replace(/[^a-z0-9-]/gi, '-')}`;
+                const isOpen = !!openMessages[key];
                 return (
                   <li key={key}>
-                    <Heading level={4} appearance="utrecht-heading-6">
-                      {item.label}
-                    </Heading>
-                    <FormField type="text">
-                      <Paragraph className="utrecht-form-field__label">
-                        <FormLabel htmlFor={textareaId}>
-                          {messageLabel}
-                        </FormLabel>
-                      </Paragraph>
-                      <div className="utrecht-form-field__input">
-                        <Textarea
-                          id={textareaId}
-                          maxLength={MAX_MESSAGE_LENGTH}
-                          value={messages[key] || ''}
-                          onChange={(
-                            event: React.ChangeEvent<HTMLTextAreaElement>
-                          ) =>
-                            setMessages({
-                              ...messages,
-                              [key]: event.target.value,
-                            })
-                          }
-                        />
-                      </div>
-                    </FormField>
+                    <span className="osc-link-confirm-name">{item.label}</span>
+                    <button
+                      type="button"
+                      className="osc-link-confirm-toggle"
+                      aria-expanded={isOpen}
+                      aria-controls={textareaId}
+                      onClick={() => toggleMessage(key)}>
+                      <i className="ri-pencil-fill" aria-hidden="true"></i>
+                      {messageLabel}
+                    </button>
+                    {isOpen ? (
+                      <FormField type="text" className="osc-link-confirm-field">
+                        <Paragraph className="utrecht-form-field__label sr-only">
+                          <FormLabel htmlFor={textareaId}>
+                            {`${messageLabel}: ${item.label}`}
+                          </FormLabel>
+                        </Paragraph>
+                        <div className="utrecht-form-field__input">
+                          <Textarea
+                            id={textareaId}
+                            ref={(element: HTMLTextAreaElement | null) => {
+                              textareas.current[key] = element;
+                            }}
+                            maxLength={MAX_MESSAGE_LENGTH}
+                            value={messages[key] || ''}
+                            onChange={(
+                              event: React.ChangeEvent<HTMLTextAreaElement>
+                            ) =>
+                              setMessages({
+                                ...messages,
+                                [key]: event.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </FormField>
+                    ) : null}
                   </li>
                 );
               })}
@@ -124,15 +154,13 @@ export function LinkConfirmDialog({
 
         {own.length > 0 ? (
           <>
-            <Heading level={3} appearance="utrecht-heading-6">
-              {ownHeading}
-            </Heading>
+            <Paragraph className="osc-link-confirm-heading">
+              <strong>{ownHeading}</strong>
+            </Paragraph>
             <ul className="osc-link-confirm-list">
               {own.map((item) => (
                 <li key={linkKey(item)}>
-                  <Paragraph>
-                    <strong>{item.label}</strong>
-                  </Paragraph>
+                  <span className="osc-link-confirm-name">{item.label}</span>
                 </li>
               ))}
             </ul>
@@ -141,13 +169,13 @@ export function LinkConfirmDialog({
 
         {removed.length > 0 ? (
           <>
-            <Heading level={3} appearance="utrecht-heading-6">
-              {removedHeading}
-            </Heading>
+            <Paragraph className="osc-link-confirm-heading">
+              <strong>{removedHeading}</strong>
+            </Paragraph>
             <ul className="osc-link-confirm-list">
               {removed.map((item) => (
                 <li key={linkKey(item)}>
-                  <Paragraph>{item.label}</Paragraph>
+                  <span className="osc-link-confirm-name">{item.label}</span>
                 </li>
               ))}
             </ul>

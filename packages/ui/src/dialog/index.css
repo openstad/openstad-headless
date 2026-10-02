@@ -43,24 +43,24 @@
 
 .osc-DialogTitle {
   margin: 0;
-  color: var(--utrecht-heading-3-color, var(--utrecht-heading-color, inherit));
+  color: var(--utrecht-heading-2-color, var(--utrecht-heading-color, inherit));
   font-family: var(
-    --utrecht-heading-3-font-family,
+    --utrecht-heading-2-font-family,
     var(--utrecht-heading-font-family, inherit)
   );
-  font-size: var(--utrecht-heading-3-font-size, 1.25rem);
+  font-size: var(--utrecht-heading-2-font-size, 1.5rem);
   font-weight: var(
-    --utrecht-heading-3-font-weight,
+    --utrecht-heading-2-font-weight,
     var(--utrecht-heading-font-weight, bold)
   );
-  line-height: var(--utrecht-heading-3-line-height, 1.3);
+  line-height: var(--utrecht-heading-2-line-height, 1.3);
 }
 
 .osc-DialogDescription {
-  margin: 10px 0 20px;
-  color: var(--mauve-11);
-  font-size: 15px;
-  line-height: 1.5;
+  margin: 0.75rem 0 1.25rem;
+  color: var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit));
+  font-size: var(--utrecht-paragraph-font-size, inherit);
+  line-height: var(--utrecht-paragraph-line-height, 1.5);
 }
 
 @keyframes overlayShow {

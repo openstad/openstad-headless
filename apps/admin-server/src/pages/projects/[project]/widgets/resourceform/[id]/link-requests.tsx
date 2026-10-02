@@ -39,6 +39,7 @@ const formSchema = z.object({
   confirmDescription: z.string().optional(),
   revokeTitle: z.string().optional(),
   revokeDescription: z.string().optional(),
+  messageLabel: z.string().optional(),
 });
 
 export default function WidgetResourceFormLinkRequests() {
@@ -54,6 +55,7 @@ export default function WidgetResourceFormLinkRequests() {
       confirmDescription: widget?.config?.[category]?.confirmDescription || '',
       revokeTitle: widget?.config?.[category]?.revokeTitle || '',
       revokeDescription: widget?.config?.[category]?.revokeDescription || '',
+      messageLabel: widget?.config?.[category]?.messageLabel || '',
     }),
     [widget?.config]
   );
@@ -136,6 +138,23 @@ export default function WidgetResourceFormLinkRequests() {
                     value={field.value || ''}
                     onChange={(e: any) => field.onChange(e.target.value)}
                   />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="messageLabel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Label toelichting</FormLabel>
+                <FormDescription>
+                  De link per gekozen koppeling waarmee de indiener een
+                  toelichting schrijft.
+                </FormDescription>
+                <FormControl>
+                  <Input placeholder="schrijf een toelichting" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
