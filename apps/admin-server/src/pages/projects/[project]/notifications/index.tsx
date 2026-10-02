@@ -185,6 +185,11 @@ export default function ProjectNotifications() {
                         </p>
                         <br />
                         <p>
+                          isResourceOwner (alleen bij modbreak-meldingen: true
+                          voor de indiener, false voor een reageerder)
+                        </p>
+                        <br />
+                        <p>
                           submission:
                           <br />
                           -status

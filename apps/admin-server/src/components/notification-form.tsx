@@ -408,13 +408,13 @@ const initialDataModBreakNotification = `<mjml>
         <mj-text font-size="20px" font-family="Helvetica Neue">{% if newModBreaks and newModBreaks.length %}Er is een modbreak geplaatst.{% else %}Een modbreak is aangepast.{% endif %}</mj-text>
         <mj-text>Beste {{ user.name }},</mj-text>
         {% if newModBreaks and newModBreaks.length %}
-        <mj-text color="#525252">De redactie heeft een bericht geplaatst bij uw inzending "{{ resource.title }}":</mj-text>
+        <mj-text color="#525252">De redactie heeft een bericht geplaatst bij {% if isResourceOwner === false %}de inzending "{{ resource.title }}" waarop u heeft gereageerd{% else %}uw inzending "{{ resource.title }}"{% endif %}:</mj-text>
         {% for mb in newModBreaks %}
         <mj-text color="#525252" font-style="italic">{{ mb.description | safe }} &mdash; {{ mb.authorName }}</mj-text>
         {% endfor %}
         {% endif %}
         {% if changedModBreaks and changedModBreaks.length %}
-        <mj-text color="#525252">De redactie heeft een bericht bij uw inzending "{{ resource.title }}" aangepast:</mj-text>
+        <mj-text color="#525252">De redactie heeft een bericht bij {% if isResourceOwner === false %}de inzending "{{ resource.title }}" waarop u heeft gereageerd{% else %}uw inzending "{{ resource.title }}"{% endif %} aangepast:</mj-text>
         {% for mb in changedModBreaks %}
         <mj-text color="#525252" font-style="italic">{{ mb.description | safe }} &mdash; {{ mb.authorName }}</mj-text>
         {% endfor %}
