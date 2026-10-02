@@ -43,7 +43,10 @@
 
 .osc-DialogTitle {
   margin: 0;
-  color: var(--utrecht-heading-2-color, var(--utrecht-heading-color, inherit));
+  color: var(
+    --nlds-dialog-title-color,
+    var(--utrecht-heading-2-color, var(--utrecht-heading-color, inherit))
+  );
   font-family: var(
     --utrecht-heading-2-font-family,
     var(--utrecht-heading-font-family, inherit)
@@ -58,7 +61,10 @@
 
 .osc-DialogDescription {
   margin: 0.75rem 0 1.25rem;
-  color: var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit));
+  color: var(
+    --nlds-dialog-description-color,
+    var(--utrecht-paragraph-color, var(--utrecht-document-color, inherit))
+  );
   font-size: var(--utrecht-paragraph-font-size, inherit);
   line-height: var(--utrecht-paragraph-line-height, 1.5);
 }
