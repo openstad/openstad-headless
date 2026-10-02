@@ -1,7 +1,6 @@
 const crypto = require('crypto');
+const { Op } = require('sequelize');
 
-// Builds a Set of ids from a modBreaks array, tolerating a missing/invalid
-// array and entries that have no id.
 function snapshotModBreakIds(modBreaks) {
   if (!Array.isArray(modBreaks)) return new Set();
   return new Set(
@@ -11,10 +10,6 @@ function snapshotModBreakIds(modBreaks) {
   );
 }
 
-// Returns the entries of the saved modBreaks array whose id was not present
-// before the save (and that carry a real description). Comparing against the
-// SAVED array (not req.body) means an entry can only be "new" once, because
-// the model mints a stable uuid for it on first save.
 function findNewModBreaks(previousIds, savedModBreaks) {
   if (!Array.isArray(savedModBreaks)) return [];
   return savedModBreaks.filter((modBreak) => {
@@ -26,8 +21,6 @@ function findNewModBreaks(previousIds, savedModBreaks) {
   });
 }
 
-// Builds a Map of id -> description from a modBreaks array, tolerating a
-// missing/invalid array and entries that have no id.
 function snapshotModBreakDescriptions(modBreaks) {
   const map = new Map();
   if (!Array.isArray(modBreaks)) return map;
@@ -39,10 +32,6 @@ function snapshotModBreakDescriptions(modBreaks) {
   return map;
 }
 
-// Returns the entries of the saved modBreaks array that already existed
-// before the save (same id) but whose description text changed. An edit to
-// an existing modbreak -- e.g. via the admin resource form -- lands here
-// rather than in findNewModBreaks.
 function findChangedModBreaks(previousDescriptions, savedModBreaks) {
   if (!Array.isArray(savedModBreaks)) return [];
   return savedModBreaks.filter((modBreak) => {
@@ -61,20 +50,57 @@ function findChangedModBreaks(previousDescriptions, savedModBreaks) {
   });
 }
 
-// Resolves who should receive a modbreak notification: only the resource
-// owner. Returns an empty array unless the owner has an email address and
-// explicit notification consent, and is not the editor who placed the
-// modbreak. Still returns an array (0 or 1 entries) so the send loop that
-// consumes it stays unchanged.
-async function resolveModBreakRecipients({ db, resource, excludeUserId }) {
-  const owner = await db.User.findByPk(resource.userId);
-  if (!owner || !owner.email || !owner.emailNotificationConsent) return [];
-  if (excludeUserId && owner.id === excludeUserId) return [];
+async function resolveModBreakRecipients({
+  db,
+  resource,
+  notifyOwner = true,
+  notifyCommenters = false,
+  excludeUserId,
+}) {
+  const candidates = [];
 
-  return [{ userId: owner.id, email: owner.email }];
+  if (notifyOwner) {
+    const owner = await db.User.findByPk(resource.userId);
+    if (owner) candidates.push({ user: owner, isResourceOwner: true });
+  }
+
+  if (notifyCommenters) {
+    const comments = await db.Comment.findAll({
+      where: { resourceId: resource.id },
+      attributes: ['userId'],
+      raw: true,
+    });
+    const commenterIds = [
+      ...new Set(comments.map((comment) => comment.userId).filter(Boolean)),
+    ].filter((id) => id !== resource.userId);
+
+    if (commenterIds.length) {
+      const commenters = await db.User.findAll({
+        where: { id: { [Op.in]: commenterIds } },
+        attributes: ['id', 'email', 'emailNotificationConsent'],
+      });
+      for (const user of commenters) {
+        candidates.push({ user, isResourceOwner: false });
+      }
+    }
+  }
+
+  const seenEmails = new Set();
+  const recipients = [];
+  for (const { user, isResourceOwner } of candidates) {
+    if (!user || !user.email || !user.emailNotificationConsent) continue;
+    if (excludeUserId && user.id === excludeUserId) continue;
+
+    const normalizedEmail = user.email.trim().toLowerCase();
+    if (seenEmails.has(normalizedEmail)) continue;
+    seenEmails.add(normalizedEmail);
+
+    recipients.push({ userId: user.id, email: user.email, isResourceOwner });
+  }
+
+  return recipients;
 }
 
-// Same unsubscribe-link shape as apps/api-server/src/routes/api/comment.js.
 function buildUnsubscribeUrl({ userId, projectId }) {
   if (!userId) return '';
   const hash = crypto.createHash('md5');
@@ -82,9 +108,6 @@ function buildUnsubscribeUrl({ userId, projectId }) {
   return `${process.env.URL}/api/project/${projectId}/user/unsubscribe/${userId}/${hash.digest('hex')}`;
 }
 
-// Builds a public link to the resource from the project's own configured
-// URL only. A URL from the request body is never used here, since that
-// would let a caller point an official notification email at any address.
 function buildResourceRedirectUrl(project) {
   if (!project || !project.url) return '';
   let url = project.url.trim();
@@ -92,31 +115,25 @@ function buildResourceRedirectUrl(project) {
   return url.replace(/\/+$/, '');
 }
 
-// Reads the modbreak-notification toggles for a project. Returns the loaded
-// project too, so the send step does not have to query it again.
 async function readModBreakNotificationSettings(db, projectId) {
   try {
     const project =
       await db.Project.scope('includeEmailConfig').findByPk(projectId);
-    const notifyAuthor =
-      project?.emailConfig?.notifications?.sendModBreakNotification === true;
+    const notifications = project?.emailConfig?.notifications;
+    const notifyAuthor = notifications?.sendModBreakNotification === true;
+    const notifyCommenters =
+      notifications?.sendModBreakNotificationToCommenters === true;
 
-    return { notifyAuthor, project };
+    return { notifyAuthor, notifyCommenters, project };
   } catch (err) {
     console.error(
       `Failed to read sendModBreakNotification for project ${projectId}:`,
       err
     );
-    return { notifyAuthor: false, project: null };
+    return { notifyAuthor: false, notifyCommenters: false, project: null };
   }
 }
 
-// Sends the 'new modbreak - user feedback' mail for `resource` (defaults to
-// req.results), shared by the resource create (POST) and update (PUT) routes.
-// Never throws: a missing resource or a failed lookup is a silent no-op or a
-// log line, so a mail problem can never break, hang or crash the request.
-// Resolves once the recipients are known; the sends themselves run in the
-// background. The returned promise of those sends is exposed for tests only.
 async function sendModBreakNotifications({
   db,
   req,
@@ -129,25 +146,20 @@ async function sendModBreakNotifications({
 
   try {
     const projectId = req.project?.id || Number(req.params?.projectId);
-    const { notifyAuthor, project } = await readModBreakNotificationSettings(
-      db,
-      projectId
-    );
+    const { notifyAuthor, notifyCommenters, project } =
+      await readModBreakNotificationSettings(db, projectId);
 
-    if (!notifyAuthor) return;
+    if (!notifyAuthor && !notifyCommenters) return;
 
     const redirectUrl = buildResourceRedirectUrl(project);
     const recipients = await resolveModBreakRecipients({
       db,
       resource,
+      notifyOwner: notifyAuthor,
+      notifyCommenters,
       excludeUserId: req.user?.id,
     });
 
-    // Fire-and-forget: matches the existing non-awaited Notification.create
-    // calls in the resource route, so the response is not slowed down by mail
-    // sending. Recipients are processed sequentially (not in parallel)
-    // because each immediate notification re-queries the resource and widget,
-    // and a parallel burst would hammer the database.
     const sending = (async () => {
       console.log(
         `Sending modbreak notification for resource ${resource.id} to ${recipients.length} recipient(s)`
@@ -161,6 +173,7 @@ async function sendModBreakNotifications({
             data: {
               userId: recipient.userId,
               resourceId: resource.id,
+              isResourceOwner: recipient.isResourceOwner,
               newModBreaks,
               changedModBreaks,
               redirectUrl,
@@ -171,8 +184,6 @@ async function sendModBreakNotifications({
             },
           });
         } catch (err) {
-          // There is no retry for a failed send, so this log is the only
-          // trace that this recipient did not get their notification.
           console.error(
             `Failed to send modbreak notification for resource ${resource.id} to ${recipient.email}:`,
             err

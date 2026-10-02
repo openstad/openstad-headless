@@ -87,12 +87,7 @@ describe('findNewModBreaks', () => {
   });
 
   it('treats existing entries that arrive without ids as new (stable-id contract)', () => {
-    // This locks in the stable-id contract documented in the plan: a client
-    // that omits ids on entries that already existed gets those entries
-    // treated as brand new, because the model mints a fresh uuid for any
-    // entry without one on every save. There is no reliable way to tell
-    // "existing, id dropped" apart from "genuinely new" without ids.
-    const previousIds = new Set(); // nothing seen yet, since no ids were ever returned
+    const previousIds = new Set();
     const saved = [
       { id: 'freshly-minted-uuid', description: 'was already there' },
     ];
@@ -202,7 +197,9 @@ describe('resolveModBreakRecipients', () => {
       resource: { id: 1, userId: 10 },
       excludeUserId: null,
     });
-    expect(recipients).toEqual([{ userId: 10, email: 'author@example.org' }]);
+    expect(recipients).toEqual([
+      { userId: 10, email: 'author@example.org', isResourceOwner: true },
+    ]);
   });
 
   it('skips the owner when emailNotificationConsent is false', async () => {
@@ -249,6 +246,124 @@ describe('resolveModBreakRecipients', () => {
     });
     expect(recipients).toEqual([]);
   });
+
+  it('does not look up the owner when notifyOwner is false', async () => {
+    const db = {
+      User: {
+        findByPk: vi.fn(async () =>
+          fakeUser({ id: 10, email: 'author@example.org' })
+        ),
+        findAll: async () => [
+          fakeUser({ id: 20, email: 'commenter@example.org' }),
+        ],
+      },
+      Comment: { findAll: async () => [{ userId: 20 }] },
+    };
+    const recipients = await resolveModBreakRecipients({
+      db,
+      resource: { id: 1, userId: 10 },
+      notifyOwner: false,
+      notifyCommenters: true,
+      excludeUserId: null,
+    });
+    expect(db.User.findByPk).not.toHaveBeenCalled();
+    expect(recipients).toEqual([
+      { userId: 20, email: 'commenter@example.org', isResourceOwner: false },
+    ]);
+  });
+
+  it('does not look up commenters when notifyCommenters is false', async () => {
+    const db = {
+      User: {
+        findByPk: async () => fakeUser({ id: 10, email: 'author@example.org' }),
+      },
+      Comment: {
+        findAll: vi.fn(async () => []),
+      },
+    };
+    await resolveModBreakRecipients({
+      db,
+      resource: { id: 1, userId: 10 },
+      notifyCommenters: false,
+      excludeUserId: null,
+    });
+    expect(db.Comment.findAll).not.toHaveBeenCalled();
+  });
+
+  it('adds consenting commenters once, without the editor or a duplicate email', async () => {
+    const commenters = [
+      fakeUser({ id: 20, email: 'commenter@example.org' }),
+      fakeUser({
+        id: 21,
+        email: 'no-consent@example.org',
+        emailNotificationConsent: false,
+      }),
+      fakeUser({ id: 22, email: null }),
+      fakeUser({ id: 23, email: ' Author@Example.org ' }),
+      fakeUser({ id: 30, email: 'editor@example.org' }),
+    ];
+    const db = {
+      User: {
+        findByPk: async () => fakeUser({ id: 10, email: 'author@example.org' }),
+        findAll: vi.fn(async () => commenters),
+      },
+      Comment: {
+        findAll: vi.fn(async () => [
+          { userId: 20 },
+          { userId: 20 },
+          { userId: 21 },
+          { userId: 22 },
+          { userId: 23 },
+          { userId: 30 },
+          { userId: 10 },
+          { userId: null },
+        ]),
+      },
+    };
+    const recipients = await resolveModBreakRecipients({
+      db,
+      resource: { id: 1, userId: 10 },
+      notifyCommenters: true,
+      excludeUserId: 30,
+    });
+    expect(db.Comment.findAll.mock.calls[0][0].where).toEqual({
+      resourceId: 1,
+    });
+    const lookedUpIds = db.User.findAll.mock.calls[0][0].where.id;
+    expect(
+      Object.getOwnPropertySymbols(lookedUpIds).map((key) => lookedUpIds[key])
+    ).toEqual([[20, 21, 22, 23, 30]]);
+    expect(recipients).toEqual([
+      { userId: 10, email: 'author@example.org', isResourceOwner: true },
+      { userId: 20, email: 'commenter@example.org', isResourceOwner: false },
+    ]);
+  });
+
+  it('still mails commenters when the owner has no consent', async () => {
+    const db = {
+      User: {
+        findByPk: async () =>
+          fakeUser({
+            id: 10,
+            email: 'author@example.org',
+            emailNotificationConsent: false,
+          }),
+        findAll: async () => [
+          fakeUser({ id: 20, email: 'commenter@example.org' }),
+        ],
+      },
+      Comment: { findAll: async () => [{ userId: 20 }] },
+    };
+    const recipients = await resolveModBreakRecipients({
+      db,
+      resource: { id: 1, userId: 10 },
+      notifyCommenters: true,
+      excludeUserId: null,
+    });
+    expect(recipients).toEqual([
+      { userId: 20, email: 'commenter@example.org', isResourceOwner: false },
+    ]);
+  });
 });
 
 describe('buildResourceRedirectUrl', () => {
@@ -276,18 +391,11 @@ describe('buildUnsubscribeUrl', () => {
   });
 
   it('builds a link for userId 0 (falsy but valid... treated as absent here)', () => {
-    // userId 0 does not occur in this system (ids start at 1), but the
-    // helper follows the same falsy-check shape as the rest of the code:
-    // a userId of 0 is treated the same as "no userId".
     expect(buildUnsubscribeUrl({ userId: 0, projectId: 2 })).toBe('');
   });
 });
 
-// A fake db for sendModBreakNotifications: one project with the given
-// toggles, an owner, and a spy on Notification.create. Comment.findAll
-// throws so a leftover commenter query would fail loudly instead of
-// silently passing.
-function fakeSendDb({ notifications = {}, author } = {}) {
+function fakeSendDb({ notifications = {}, author, commenters = [] } = {}) {
   return {
     Project: {
       scope: () => ({
@@ -299,11 +407,10 @@ function fakeSendDb({ notifications = {}, author } = {}) {
     },
     User: {
       findByPk: async () => author,
+      findAll: async () => commenters,
     },
     Comment: {
-      findAll: async () => {
-        throw new Error('Comment.findAll should not be called anymore');
-      },
+      findAll: async () => commenters.map((user) => ({ userId: user.id })),
     },
     Notification: {
       create: vi.fn(async () => ({})),
@@ -353,13 +460,10 @@ describe('sendModBreakNotifications', () => {
     expect(db.Notification.create).not.toHaveBeenCalled();
   });
 
-  it('creates exactly one notification, to the owner, even with a stale commenters toggle', async () => {
+  it('creates exactly one notification, to the owner', async () => {
     const db = fakeSendDb({
       notifications: {
         sendModBreakNotification: true,
-        // Stale key from a project that saved it before this option was
-        // removed; nothing reads it anymore, so it must have no effect.
-        sendModBreakNotificationToCommenters: true,
       },
       author: fakeUser({ id: 10, email: 'author@example.org' }),
     });
@@ -387,8 +491,75 @@ describe('sendModBreakNotifications', () => {
     });
   });
 
+  it('mails only the commenters when only the commenters toggle is on', async () => {
+    const db = fakeSendDb({
+      notifications: {
+        sendModBreakNotification: false,
+        sendModBreakNotificationToCommenters: true,
+      },
+      author: fakeUser({ id: 10, email: 'author@example.org' }),
+      commenters: [fakeUser({ id: 20, email: 'commenter@example.org' })],
+    });
+    const { sending } = await sendModBreakNotifications({
+      db,
+      req: fakeReq(),
+      newModBreaks,
+      changedModBreaks: [],
+    });
+    await sending;
+    expect(db.Notification.create).toHaveBeenCalledTimes(1);
+    expect(db.Notification.create.mock.calls[0][0]).toMatchObject({
+      to: 'commenter@example.org',
+      data: { userId: 20, isResourceOwner: false },
+    });
+  });
+
+  it('does not mail commenters when only the main toggle is on', async () => {
+    const db = fakeSendDb({
+      notifications: { sendModBreakNotification: true },
+      author: fakeUser({ id: 10, email: 'author@example.org' }),
+      commenters: [fakeUser({ id: 20, email: 'commenter@example.org' })],
+    });
+    const { sending } = await sendModBreakNotifications({
+      db,
+      req: fakeReq(),
+      newModBreaks,
+      changedModBreaks: [],
+    });
+    await sending;
+    expect(db.Notification.create).toHaveBeenCalledTimes(1);
+    expect(db.Notification.create.mock.calls[0][0].to).toBe(
+      'author@example.org'
+    );
+  });
+
+  it('mails the owner and the commenters when both toggles are on', async () => {
+    const db = fakeSendDb({
+      notifications: {
+        sendModBreakNotification: true,
+        sendModBreakNotificationToCommenters: true,
+      },
+      author: fakeUser({ id: 10, email: 'author@example.org' }),
+      commenters: [fakeUser({ id: 20, email: 'commenter@example.org' })],
+    });
+    const { sending } = await sendModBreakNotifications({
+      db,
+      req: fakeReq(),
+      newModBreaks,
+      changedModBreaks: [],
+    });
+    await sending;
+    const sent = db.Notification.create.mock.calls.map(([call]) => ({
+      to: call.to,
+      isResourceOwner: call.data.isResourceOwner,
+    }));
+    expect(sent).toEqual([
+      { to: 'author@example.org', isResourceOwner: true },
+      { to: 'commenter@example.org', isResourceOwner: false },
+    ]);
+  });
+
   it('does not mail the creator of a new resource (create route usage)', async () => {
-    // On create the author is normally the admin who placed the modbreak.
     const db = fakeSendDb({
       notifications: { sendModBreakNotification: true },
       author: fakeUser({ id: 1, email: 'admin@example.org' }),
@@ -483,7 +654,6 @@ describe("default template 'new modbreak - user feedback'", () => {
   const body = fs
     .readFileSync(templatePath, 'utf8')
     .match(/<body>((?:.|\r|\n)*)<\/body>/)[1];
-  // Same environment as NotificationMessage.js: autoescape is on by default.
   const render = (data) => new nunjucks.Environment().renderString(body, data);
 
   it('renders the (already sanitized) modbreak HTML, not escaped markup', () => {
@@ -503,6 +673,25 @@ describe("default template 'new modbreak - user feedback'", () => {
     expect(html).toContain('<p><strong>Let op</strong></p>');
     expect(html).toContain('<p>Aangepast</p>');
     expect(html).not.toContain('&lt;strong&gt;');
+  });
+
+  it('tells a commenter it is a submission they reacted to', () => {
+    const data = {
+      resource: { title: 'Plan' },
+      newModBreaks: [{ description: 'x', authorName: 'Redactie' }],
+      changedModBreaks: [{ description: 'y', authorName: 'Redactie' }],
+    };
+    const ownerHtml = render({ ...data, isResourceOwner: true });
+    const commenterHtml = render({ ...data, isResourceOwner: false });
+    const legacyHtml = render(data);
+
+    expect(ownerHtml).toContain('uw inzending "Plan"');
+    expect(ownerHtml).not.toContain('waarop u heeft gereageerd');
+    expect(legacyHtml).toContain('uw inzending "Plan"');
+    expect(commenterHtml).not.toContain('uw inzending');
+    expect(
+      commenterHtml.match(/de inzending "Plan" waarop u heeft gereageerd/g)
+    ).toHaveLength(2);
   });
 
   it('still escapes the author name', () => {
