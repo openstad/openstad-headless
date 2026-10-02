@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useNotificationTemplate from '@/hooks/use-notification-template';
 import { applyFilters } from '@/lib/nunjucks-filters';
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import nunjucks from 'nunjucks';
@@ -21,6 +22,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import useSWR from 'swr';
 import * as z from 'zod';
 
 import {
@@ -464,6 +466,17 @@ export function NotificationForm({
   const project = router.query.project as string;
   const { data, create, update } = useNotificationTemplate(project as string);
   const notificationTitle = typeLabel || notificationTypes[type] || type;
+  const isExisting = !!(label && subject && body !== undefined);
+  const projectNumber = validateProjectNumber(project);
+  const { data: defaultTemplate } = useSWR<{
+    subject?: string;
+    body?: string;
+  }>(
+    !isExisting && projectNumber && type
+      ? `/api/openstad/notification/project/${projectNumber}/template/default/${encodeURIComponent(type)}`
+      : null,
+    { shouldRetryOnError: false }
+  );
 
   type MailContextType = {
     user: { name: string; fullName: string };
@@ -502,6 +515,7 @@ export function NotificationForm({
 
   const defaultValueBody =
     body ||
+    defaultTemplate?.body ||
     (type === 'new published resource - user feedback'
       ? initialDataResourceSubmission
       : '') ||
@@ -522,11 +536,11 @@ export function NotificationForm({
   const defaults = React.useCallback(
     () => ({
       engine: engine || 'email',
-      label: label || '',
-      subject: subject || '',
+      label: label || (isExisting ? '' : notificationTitle),
+      subject: subject || defaultTemplate?.subject || '',
       body: defaultValueBody,
     }),
-    [engine, label, subject, body]
+    [engine, label, subject, body, defaultTemplate, notificationTitle]
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
