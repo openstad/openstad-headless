@@ -152,3 +152,67 @@
 .osc-related-resources.--compact .osc-related-resources-image.--placeholder i {
   font-size: 2rem;
 }
+
+.osc-related-resources-filter {
+  margin-block-start: 1rem;
+}
+
+.osc-related-resources .osc-related-resources-filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-height: auto;
+  padding-inline: 0;
+}
+
+.osc-related-resources-filter-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-block-start: 0.5rem;
+}
+
+.osc-related-resources-filter-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.osc-related-resources .osc-related-resources-filter-tag {
+  min-height: auto;
+  padding-block: 0.375rem;
+  padding-inline: 0.75rem;
+  border-radius: var(
+    --nlds-resource-detail-related-filter-tag-border-radius,
+    999px
+  );
+}
+
+.osc-related-resources .osc-related-resources-filter-tag[aria-pressed='true'] {
+  background-color: var(
+    --nlds-resource-detail-related-filter-tag-active-background-color,
+    var(
+      --utrecht-button-primary-action-background-color,
+      var(--utrecht-color-blue-40, #1a5fb4)
+    )
+  );
+  border-color: var(
+    --nlds-resource-detail-related-filter-tag-active-background-color,
+    var(
+      --utrecht-button-primary-action-background-color,
+      var(--utrecht-color-blue-40, #1a5fb4)
+    )
+  );
+  color: var(
+    --nlds-resource-detail-related-filter-tag-active-color,
+    var(--utrecht-button-primary-action-color, #fff)
+  );
+}
+
+.osc-related-resources-filter-panel[hidden] {
+  display: none;
+}
