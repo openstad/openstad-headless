@@ -23,6 +23,7 @@ export type ComboboxProps = {
   onChange: (selected: ComboboxOption[]) => void;
   loadOptions: (query: string) => Promise<ComboboxOption[]>;
   minQueryLength?: number;
+  loadOnFocus?: boolean;
   debounceMs?: number;
   minQueryText?: string;
   loadingText?: string;
@@ -44,6 +45,7 @@ export function Combobox({
   onChange,
   loadOptions,
   minQueryLength = 2,
+  loadOnFocus = false,
   debounceMs = 300,
   minQueryText = 'Typ minimaal {minQueryLength} tekens om te zoeken',
   loadingText = 'Laden...',
@@ -73,9 +75,10 @@ export function Combobox({
   const trimmedQuery = query.trim();
   const queryTooShort =
     trimmedQuery.length > 0 && trimmedQuery.length < minQueryLength;
+  const browsing = loadOnFocus && isOpen && trimmedQuery.length === 0;
 
   useEffect(() => {
-    if (trimmedQuery.length < minQueryLength) {
+    if (!browsing && trimmedQuery.length < minQueryLength) {
       requestCounter.current += 1;
       setOptions([]);
       setSearchState('idle');
@@ -100,7 +103,7 @@ export function Combobox({
     }, debounceMs);
 
     return () => clearTimeout(timeout);
-  }, [trimmedQuery, minQueryLength, debounceMs]);
+  }, [trimmedQuery, minQueryLength, debounceMs, browsing]);
 
   const selectOption = (option: ComboboxOption) => {
     onChange([...selected, option]);

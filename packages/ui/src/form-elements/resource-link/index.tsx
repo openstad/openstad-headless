@@ -139,6 +139,7 @@ const ResourceLinkField: FC<ResourceLinkFieldProps> = ({
           selected={selected}
           onChange={handleChange}
           loadOptions={loadOptions}
+          loadOnFocus={linkSource === 'openstad'}
         />
       </div>
       <Spacer size={1.25} />
