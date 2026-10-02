@@ -40,7 +40,6 @@ describe('imageUpload field: extra description key on file objects', () => {
     );
 
     expect(result.firstErrorKey).toBeNull();
-    // No error is recorded for a field that parses successfully.
     expect(capturedErrors).toEqual({});
     expect(submittedValues).toEqual({ images: filesWithDescription });
     expect((submittedValues as any).images[0].description).toBe('AI-generated');

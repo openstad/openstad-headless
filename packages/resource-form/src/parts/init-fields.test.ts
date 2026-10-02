@@ -5,11 +5,6 @@ import { beforeAll, describe, expect, it } from 'vitest';
 import { defaultFormValues } from './default-values';
 import { InitializeFormFields } from './init-fields';
 
-// InitializeFormFields calls React hooks (via DataStore) and reads
-// window.location.search, so it can only run inside a real render. There is
-// no jsdom/@testing-library in this repo, so a server-side render is used
-// as the lightest available React render context, and only the one browser
-// global the function touches is stubbed.
 function runInitializeFormFields(items: any[], data: any) {
   let result: ReturnType<typeof InitializeFormFields> = [];
   function Harness() {

@@ -315,8 +315,6 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     advanceCropQueue();
   };
 
-  // Prefill remarks already saved on this resource (e.g. one an admin wrote),
-  // keyed by image url so the submitter sees them and can edit or clear them.
   const initialDescriptions: Record<string, string> = {};
   for (const mockImage of initialValue) {
     if (mockImage.description !== undefined) {
@@ -385,10 +383,11 @@ const ImageUploadField: FC<ImageUploadProps> = ({
 
   const finalImages = Array.from(new Set([...mockImages, ...files]));
 
-  // Display order for the remark boxes -- see toDescriptionEntries in
-  // value.ts for how this was measured against FilePond's own thumbnail
-  // order (newest upload on top, existing images below).
-  const imageEntries = toDescriptionEntries(mockImages, uploadedImages);
+  const imageEntries = toDescriptionEntries(
+    mockImages,
+    uploadedImages,
+    files.map((item) => item.file.name)
+  );
 
   return (
     <FormField type="text">
