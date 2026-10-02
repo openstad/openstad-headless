@@ -55,6 +55,31 @@ describe('<TimelineField />', () => {
       .should('be.visible');
   });
 
+  it('adds an item with a quarter as date', () => {
+    cy.get('.timeline-add-item-btn').click();
+    cy.contains('label', 'Notatie')
+      .invoke('attr', 'for')
+      .then((id) => cy.get(`[id="${id}"]`).select('Kwartaal'));
+    cy.contains('label', 'Kwartaal')
+      .invoke('attr', 'for')
+      .then((id) => cy.get(`[id="${id}"]`).select('Q3'));
+    cy.contains('label', 'Jaar')
+      .invoke('attr', 'for')
+      .then((id) => cy.get(`[id="${id}"]`).clear().type('2027'));
+    cy.contains('.timeline-date-note', 'Wordt getoond als: Q3 2027');
+    cy.get('.timeline-dialog-actions button').first().click();
+    cy.get('.timeline-item-date').last().should('have.text', 'Q3 2027');
+  });
+
+  it('explains what is missing when the date is empty', () => {
+    cy.get('.timeline-add-item-btn').click();
+    cy.get('.timeline-dialog-actions button').first().click();
+    cy.get('.timeline-dialog-error').should(
+      'have.text',
+      'Vul een geldige datum in.'
+    );
+  });
+
   it('removes an item', () => {
     cy.get('.timeline-item-row')
       .eq(1)

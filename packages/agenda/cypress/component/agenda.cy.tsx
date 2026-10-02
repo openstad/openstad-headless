@@ -95,6 +95,72 @@ describe('<Agenda />', () => {
     });
   });
 
+  describe('with date notations', () => {
+    beforeEach(() => {
+      cy.mount(
+        <Agenda
+          {...({
+            items: [
+              {
+                trigger: '0',
+                title: 'Terugkoppeling',
+                description: '',
+                active: false,
+                activeFrom: '2026-11-09',
+                datePrecision: 'week',
+              },
+              {
+                trigger: '1',
+                title: 'Start uitvoering',
+                description: '',
+                active: false,
+                activeFrom: '2027-07-01',
+                datePrecision: 'quarter',
+              },
+              {
+                trigger: '2',
+                title: 'Oplevering',
+                description: '',
+                active: false,
+                activeFrom: '2027-12-01',
+                datePrecision: 'text',
+                dateLabel: 'eind 2027',
+              },
+            ],
+            useActiveDates: true,
+            serverTime: '2026-11-10T10:00:00.000Z',
+          } as any)}
+        />
+      );
+    });
+
+    it('shows the date in the chosen notation', () => {
+      cy.get('.osc-agenda-item')
+        .eq(0)
+        .find('h4')
+        .should('have.text', 'Week 46, 2026 – Terugkoppeling');
+      cy.get('.osc-agenda-item')
+        .eq(0)
+        .find('time')
+        .should('have.attr', 'datetime', '2026-W46');
+      cy.get('.osc-agenda-item')
+        .eq(1)
+        .find('h4')
+        .should('have.text', 'Q3 2027 – Start uitvoering');
+      cy.get('.osc-agenda-item')
+        .eq(2)
+        .find('h4')
+        .should('have.text', 'eind 2027 – Oplevering');
+    });
+
+    it('marks a period as passed from its first day', () => {
+      cy.get('.osc-agenda-item').eq(0).should('have.class', '--passed-item');
+      cy.get('.osc-agenda-item')
+        .eq(1)
+        .should('not.have.class', '--passed-item');
+    });
+  });
+
   describe('without active dates', () => {
     it('marks only the manually activated item', () => {
       cy.mount(

@@ -66,6 +66,23 @@ describe('getItemLabel', () => {
     ).toBe('28 september 2026 – Publicatie');
   });
 
+  it('uses the date notation of the item', () => {
+    expect(
+      getItemLabel({
+        activeFrom: '2027-07-01',
+        datePrecision: 'quarter',
+        title: 'Start uitvoering',
+      })
+    ).toBe('Q3 2027 – Start uitvoering');
+    expect(
+      getItemLabel({
+        activeFrom: '2027-06-15',
+        datePrecision: 'text',
+        dateLabel: 'medio 2027',
+      })
+    ).toBe('medio 2027');
+  });
+
   it('shows only the date when there is no custom title', () => {
     expect(
       getItemLabel({ activeFrom: '2026-10-03', title: '2026-10-03' })

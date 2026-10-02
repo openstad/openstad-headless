@@ -15,7 +15,21 @@ import { UploadDocument } from '@/hooks/upload-document';
 import { cleanLinks, getCustomTitle, moveEntry } from '@/lib/timeline-items';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { formatDutchDate } from '@openstad-headless/lib/timeline-dates';
+import {
+  DATE_LABEL_MAX_LENGTH,
+  DATE_PRECISIONS,
+  DATE_PRECISION_LABELS,
+  DatePrecision,
+  TimelineDateInput,
+  capitalizeFirst,
+  formatTimelineDate,
+  fromTimelineDateInput,
+  toTimelineDateInput,
+} from '@openstad-headless/lib/timeline-date-precision';
+import {
+  DUTCH_MONTHS,
+  formatDutchDate,
+} from '@openstad-headless/lib/timeline-dates';
 import {
   formatFileSize,
   getFileFormat,
@@ -37,6 +51,8 @@ export interface AgendaItem {
   highlighted?: boolean;
   activeFrom?: string;
   activeTo?: string;
+  datePrecision?: string;
+  dateLabel?: string;
   links?: AgendaLink[];
 }
 
@@ -117,6 +133,9 @@ function handleMovementOrDeletion(
   return sorted;
 }
 
+const selectClassName =
+  'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2';
+
 const defaults = (): FormData => ({
   trigger: '0',
   title: '',
@@ -136,6 +155,12 @@ export function AgendaItemsEditor({
   const router = useRouter();
   const { project } = router.query;
   const [links, setLinks] = useState<AgendaLink[]>([]);
+  // Timeline items pick a date notation (day, week, month, ...); the controls
+  // for it live outside react-hook-form, like the links.
+  const [dateInput, setDateInput] = useState<TimelineDateInput>(() =>
+    toTimelineDateInput()
+  );
+  const [dateError, setDateError] = useState<string | null>(null);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
     ? items.find((i) => i.id === selectedItemId) || null
@@ -173,14 +198,30 @@ export function AgendaItemsEditor({
         activeTo: toDateInputValue(selectedItem.activeTo),
       });
       setLinks(itemLinks.map(withId));
+      setDateInput(toTimelineDateInput(selectedItem));
+      setDateError(null);
     }
   }, [selectedItemId, form]);
 
   function onSubmit(values: FormData) {
-    if (timelineMode && !values.activeFrom) {
-      form.setError('activeFrom', { message: 'Vul een datum in.' });
-      return;
+    // In timeline mode the date fields come from the notation controls.
+    let dateFields: Pick<
+      AgendaItem,
+      'activeFrom' | 'datePrecision' | 'dateLabel'
+    > = { activeFrom: values.activeFrom };
+    if (timelineMode) {
+      const date = fromTimelineDateInput(dateInput);
+      if (!date.ok) {
+        setDateError(date.error);
+        return;
+      }
+      dateFields = {
+        activeFrom: date.fields.activeFrom,
+        datePrecision: date.fields.datePrecision,
+        dateLabel: date.fields.dateLabel,
+      };
     }
+    setDateError(null);
 
     const itemLinks = cleanLinks(links).map(({ id, ...link }) => link);
 
@@ -190,7 +231,12 @@ export function AgendaItemsEditor({
       onItemsChange(
         items.map((item) =>
           item.id === selectedItem.id
-            ? { ...item, ...valuesWithoutTrigger, links: itemLinks }
+            ? {
+                ...item,
+                ...valuesWithoutTrigger,
+                ...dateFields,
+                links: itemLinks,
+              }
             : item
         )
       );
@@ -209,15 +255,26 @@ export function AgendaItemsEditor({
           description: values.description,
           active: values.active,
           highlighted: values.highlighted,
-          activeFrom: values.activeFrom,
           activeTo: values.activeTo,
+          ...dateFields,
           links: itemLinks,
         },
       ]);
     }
     form.reset(defaults());
     setLinks([]);
+    setDateInput(toTimelineDateInput());
+    setDateError(null);
   }
+
+  function updateDateInput(patch: Partial<TimelineDateInput>) {
+    setDateInput((current) => ({ ...current, ...patch }));
+  }
+
+  const datePreviewResult = fromTimelineDateInput(dateInput);
+  const datePreview = datePreviewResult.ok
+    ? formatTimelineDate(datePreviewResult.fields)
+    : '';
 
   function addLink() {
     setLinks((current) => [
@@ -273,6 +330,8 @@ export function AgendaItemsEditor({
   function resetForm() {
     form.reset(defaults());
     setLinks([]);
+    setDateInput(toTimelineDateInput());
+    setDateError(null);
     setSelectedItemId(null);
   }
 
@@ -295,6 +354,11 @@ export function AgendaItemsEditor({
                             : item.title) ||
                           item.description ||
                           '(geen titel)';
+                        const itemDate = timelineMode
+                          ? formatTimelineDate(item)
+                          : item.activeFrom
+                            ? formatDutchDate(toDateInputValue(item.activeFrom))
+                            : '';
                         return (
                           <div
                             key={item.id ?? index}
@@ -334,11 +398,9 @@ export function AgendaItemsEditor({
                                 setSelectedItemId(item.id ?? null)
                               }>
                               {itemLabel}
-                              {item.activeFrom && (
+                              {itemDate && (
                                 <span className="block text-sm text-muted-foreground">
-                                  {formatDutchDate(
-                                    toDateInputValue(item.activeFrom)
-                                  )}
+                                  {itemDate}
                                 </span>
                               )}
                             </button>
@@ -443,25 +505,202 @@ export function AgendaItemsEditor({
                 )}
                 {showActiveDates && (
                   <>
-                    <FormField
-                      control={form.control}
-                      name="activeFrom"
-                      render={({ field }) => (
-                        <FormItem className="items-start md:col-span-full">
-                          <FormLabel>
-                            {timelineMode
-                              ? 'Datum (hele dag)'
-                              : 'Actief vanaf (hele dag) - laat leeg om direct te starten'}
-                          </FormLabel>
-                          <Input
-                            type="date"
-                            {...field}
-                            className="inline-block !w-auto"
-                          />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    {timelineMode ? (
+                      <fieldset className="flex flex-col gap-y-2">
+                        <legend className="mb-2 text-sm font-medium">
+                          Datum
+                        </legend>
+                        <div className="flex flex-wrap items-end gap-3">
+                          <div className="flex flex-col gap-2">
+                            <Label htmlFor="timeline-date-precision">
+                              Notatie
+                            </Label>
+                            <select
+                              id="timeline-date-precision"
+                              className={selectClassName}
+                              value={dateInput.precision}
+                              onChange={(e) =>
+                                updateDateInput({
+                                  precision: e.target.value as DatePrecision,
+                                })
+                              }>
+                              {DATE_PRECISIONS.map((option) => (
+                                <option key={option} value={option}>
+                                  {DATE_PRECISION_LABELS[option]}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {dateInput.precision === 'day' && (
+                            <div className="flex flex-col gap-2">
+                              <Label htmlFor="timeline-date-day">Datum</Label>
+                              <Input
+                                id="timeline-date-day"
+                                type="date"
+                                value={dateInput.date}
+                                onChange={(e) =>
+                                  updateDateInput({ date: e.target.value })
+                                }
+                              />
+                            </div>
+                          )}
+
+                          {dateInput.precision === 'week' && (
+                            <div className="flex flex-col gap-2">
+                              <Label htmlFor="timeline-date-week">
+                                Weeknummer
+                              </Label>
+                              <Input
+                                id="timeline-date-week"
+                                type="number"
+                                min={1}
+                                max={53}
+                                className="w-28"
+                                value={dateInput.week}
+                                onChange={(e) =>
+                                  updateDateInput({ week: e.target.value })
+                                }
+                              />
+                            </div>
+                          )}
+
+                          {dateInput.precision === 'month' && (
+                            <div className="flex flex-col gap-2">
+                              <Label htmlFor="timeline-date-month">Maand</Label>
+                              <select
+                                id="timeline-date-month"
+                                className={selectClassName}
+                                value={dateInput.month}
+                                onChange={(e) =>
+                                  updateDateInput({ month: e.target.value })
+                                }>
+                                {DUTCH_MONTHS.map((month, monthIndex) => (
+                                  <option
+                                    key={month}
+                                    value={String(monthIndex + 1)}>
+                                    {capitalizeFirst(month)}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+
+                          {dateInput.precision === 'quarter' && (
+                            <div className="flex flex-col gap-2">
+                              <Label htmlFor="timeline-date-quarter">
+                                Kwartaal
+                              </Label>
+                              <select
+                                id="timeline-date-quarter"
+                                className={selectClassName}
+                                value={dateInput.quarter}
+                                onChange={(e) =>
+                                  updateDateInput({ quarter: e.target.value })
+                                }>
+                                {['1', '2', '3', '4'].map((quarter) => (
+                                  <option key={quarter} value={quarter}>
+                                    Q{quarter}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+
+                          {dateInput.precision === 'text' && (
+                            <>
+                              <div className="flex flex-col gap-2">
+                                <Label htmlFor="timeline-date-label">
+                                  Tekst
+                                </Label>
+                                <Input
+                                  id="timeline-date-label"
+                                  maxLength={DATE_LABEL_MAX_LENGTH}
+                                  value={dateInput.label}
+                                  onChange={(e) =>
+                                    updateDateInput({ label: e.target.value })
+                                  }
+                                />
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <Label htmlFor="timeline-date-expected">
+                                  Verwachte datum
+                                </Label>
+                                <Input
+                                  id="timeline-date-expected"
+                                  type="date"
+                                  aria-describedby="timeline-date-help"
+                                  value={dateInput.date}
+                                  onChange={(e) =>
+                                    updateDateInput({ date: e.target.value })
+                                  }
+                                />
+                              </div>
+                            </>
+                          )}
+
+                          {dateInput.precision !== 'day' &&
+                            dateInput.precision !== 'text' && (
+                              <div className="flex flex-col gap-2">
+                                <Label htmlFor="timeline-date-year">Jaar</Label>
+                                <Input
+                                  id="timeline-date-year"
+                                  type="number"
+                                  min={1900}
+                                  max={2200}
+                                  className="w-28"
+                                  value={dateInput.year}
+                                  onChange={(e) =>
+                                    updateDateInput({ year: e.target.value })
+                                  }
+                                />
+                              </div>
+                            )}
+                        </div>
+                        {dateInput.precision === 'text' && (
+                          <p
+                            id="timeline-date-help"
+                            className="text-sm text-muted-foreground">
+                            Vul bij Verwachte datum een geschatte datum in.
+                            Bezoekers zien alleen de tekst.
+                          </p>
+                        )}
+                        {datePreview && (
+                          <p className="text-sm text-muted-foreground">
+                            Wordt getoond als:{' '}
+                            <strong className="text-foreground">
+                              {datePreview}
+                            </strong>
+                          </p>
+                        )}
+                        {dateError && (
+                          <p
+                            className="text-sm font-medium text-destructive"
+                            role="alert">
+                            {dateError}
+                          </p>
+                        )}
+                      </fieldset>
+                    ) : (
+                      <FormField
+                        control={form.control}
+                        name="activeFrom"
+                        render={({ field }) => (
+                          <FormItem className="items-start md:col-span-full">
+                            <FormLabel>
+                              Actief vanaf (hele dag) - laat leeg om direct te
+                              starten
+                            </FormLabel>
+                            <Input
+                              type="date"
+                              {...field}
+                              className="inline-block !w-auto"
+                            />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
                     <FormField
                       control={form.control}
                       name="activeTo"

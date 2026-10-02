@@ -169,6 +169,50 @@
   margin: 0;
 }
 
+.timeline-date-fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.timeline-date-fieldset legend {
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+.timeline-date-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.timeline-date-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+.timeline-date-field--small {
+  flex: 0 1 170px;
+}
+
+.timeline-date-note {
+  margin: 0;
+  color: var(--tl-muted);
+  font-size: 0.9375rem;
+}
+
+.timeline-date-note strong {
+  color: var(--tl-text);
+}
+
 .timeline-links-section {
   display: flex;
   flex-direction: column;

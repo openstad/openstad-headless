@@ -2,6 +2,10 @@
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { sanitizeUrl } from '@openstad-headless/lib/sanitize-url';
 import {
+  formatTimelineDate,
+  getTimelineDateTime,
+} from '@openstad-headless/lib/timeline-date-precision';
+import {
   formatDutchDate,
   getTimelineItemStatus,
 } from '@openstad-headless/lib/timeline-dates';
@@ -37,6 +41,8 @@ export type AgendaWidgetProps = BaseProps &
       highlighted?: boolean;
       activeFrom?: string;
       activeTo?: string;
+      datePrecision?: string;
+      dateLabel?: string;
       links?: Array<{
         trigger: string;
         title: string;
@@ -120,17 +126,19 @@ function Agenda({
           <div className="osc-agenda-content">
             {(() => {
               const isoRegex = /^\d{4}-\d{2}-\d{2}$/;
-              const dateLabel =
-                item.activeFrom && isoRegex.test(item.activeFrom)
-                  ? formatDutchDate(item.activeFrom)
-                  : null;
+              // The date as an editor chose to show it: an exact day, a
+              // week, month, quarter or year, or free text.
+              const dateLabel = formatTimelineDate(item) || null;
+              const dateTime = getTimelineDateTime(item);
               const titleIsDate = !!item.title && isoRegex.test(item.title);
               const customTitle = titleIsDate ? null : item.title || null;
               // One heading per item: "date – title", or whichever is set.
               return (
                 <Heading4>
-                  {dateLabel ? (
-                    <time dateTime={item.activeFrom}>{dateLabel}</time>
+                  {dateLabel && dateTime ? (
+                    <time dateTime={dateTime}>{dateLabel}</time>
+                  ) : dateLabel ? (
+                    dateLabel
                   ) : titleIsDate ? (
                     <time dateTime={item.title as string}>
                       {formatDutchDate(item.title as string)}

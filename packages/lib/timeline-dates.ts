@@ -1,4 +1,4 @@
-const DUTCH_MONTHS = [
+export const DUTCH_MONTHS = [
   'januari',
   'februari',
   'maart',

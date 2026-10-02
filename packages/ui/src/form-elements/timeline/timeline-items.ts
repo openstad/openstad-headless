@@ -1,7 +1,5 @@
-import {
-  fillTimelineEndDates,
-  formatDutchDate,
-} from '@openstad-headless/lib/timeline-dates';
+import { formatTimelineDate } from '@openstad-headless/lib/timeline-date-precision';
+import { fillTimelineEndDates } from '@openstad-headless/lib/timeline-dates';
 
 const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -10,6 +8,8 @@ type TimelineListItem = {
   title?: string;
   activeFrom: string;
   activeTo?: string;
+  datePrecision?: string;
+  dateLabel?: string;
 };
 
 /**
@@ -39,9 +39,12 @@ export function getCustomTitle(item: Pick<TimelineListItem, 'title'>): string {
 
 /** Label for an item in the list: "date – title", or just the date. */
 export function getItemLabel(
-  item: Pick<TimelineListItem, 'title' | 'activeFrom'>
+  item: Pick<
+    TimelineListItem,
+    'title' | 'activeFrom' | 'datePrecision' | 'dateLabel'
+  >
 ): string {
-  const date = formatDutchDate(item.activeFrom);
+  const date = formatTimelineDate(item);
   const title = getCustomTitle(item);
   if (date && title) return `${date} – ${title}`;
   return date || title;

@@ -12,6 +12,7 @@ const {
   normalizeImages,
   normalizeDocuments,
 } = require('../lib/resource-media-fields');
+const { normalizeTimelineDateFields } = require('../lib/timeline-date-fields');
 
 const merge = require('merge');
 
@@ -329,6 +330,7 @@ module.exports = function (db, sequelize, DataTypes) {
               if (/^\d{4}-\d{2}-\d{2}$/.test(asString(item.activeTo))) {
                 cleanedItem.activeTo = item.activeTo;
               }
+              Object.assign(cleanedItem, normalizeTimelineDateFields(item));
               return cleanedItem;
             });
 
