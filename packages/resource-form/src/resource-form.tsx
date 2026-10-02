@@ -216,8 +216,6 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
         type FieldsWithMultiple = FieldProps & { multiple?: boolean };
         const fieldWithMultiple = field as FieldsWithMultiple;
 
-        // Timeline and modbreak are always persisted in their own resource
-        // column (regardless of the configured fieldKey), so read them directly.
         const existingValue =
           field.type === 'timeline'
             ? existingResource?.timeline
@@ -379,9 +377,6 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
       }
     }
 
-    // A timeline- or modbreak-type field is stored in its own dedicated
-    // resource column instead of in extraData, regardless of the fieldKey
-    // the editor configured for it.
     moveFieldToColumn(
       extraData,
       configuredFormData,

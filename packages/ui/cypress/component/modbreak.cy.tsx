@@ -8,6 +8,41 @@ describe('<ModbreakField />', () => {
     cy.contains('Nog geen modbreaks toegevoegd.').should('be.visible');
   });
 
+  it('links the field title and the content label to their controls', () => {
+    cy.mount(<ModbreakField fieldKey="modBreaks" title="Moderatie" />);
+
+    cy.get('.modbreak-field-container')
+      .should('have.attr', 'role', 'group')
+      .invoke('attr', 'aria-labelledby')
+      .then((titleId) => {
+        cy.get(`[id="${titleId}"]`).should('contain.text', 'Moderatie');
+      });
+
+    cy.contains('Modbreak toevoegen').click();
+    cy.contains('label', 'Inhoud')
+      .invoke('attr', 'for')
+      .then((editorId) => {
+        cy.get('trix-editor').should('have.attr', 'id', editorId);
+      });
+
+    cy.contains('label', 'Inhoud').click();
+    cy.focused().should('match', 'trix-editor');
+  });
+
+  it('keeps an empty modbreak in the value so the form can block the save', () => {
+    const onChange = cy.stub().as('onChange');
+    cy.mount(<ModbreakField fieldKey="modBreaks" onChange={onChange} />);
+
+    cy.contains('Modbreak toevoegen').click();
+    cy.get('input[placeholder="Naam van de auteur"]').type('Gemeente');
+
+    cy.get('@onChange').should((stub: any) => {
+      const lastCall = stub.args[stub.args.length - 1];
+      expect(lastCall[0].value).to.have.length(1);
+      expect(lastCall[0].value[0].description).to.eq('');
+    });
+  });
+
   it('adds, edits, reads back the Trix value, and removes a modbreak', () => {
     const onChange = cy.stub().as('onChange');
     cy.mount(<ModbreakField fieldKey="modBreaks" onChange={onChange} />);

@@ -30,6 +30,10 @@ import {
 } from '@openstad-headless/lib/address-search-texts';
 import { buildImagePreviewUrl } from '@openstad-headless/lib/image-crop/crop-url';
 import {
+  EMPTY_MODBREAK_MESSAGE,
+  hasModBreakContent,
+} from '@openstad-headless/ui/src/form-elements/modbreak/normalize-modbreaks';
+import {
   ArrowDown,
   ArrowLeft,
   ArrowRight,
@@ -41,7 +45,7 @@ import {
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { FieldErrors, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
 
@@ -94,7 +98,10 @@ const baseSchema = z.object({
     .array(
       z.object({
         id: z.string(),
-        description: z.string().default(''),
+        description: z
+          .string()
+          .default('')
+          .refine(hasModBreakContent, EMPTY_MODBREAK_MESSAGE),
         authorName: z.string().optional().default(''),
         modBreakDate: z.string().optional().default(''),
       })
@@ -453,6 +460,14 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     (modBreakPage + 1) * modBreaksPerPage
   );
 
+  const onInvalid = (errors: FieldErrors<FormType>) => {
+    if (!Array.isArray(errors.modBreaks)) return;
+    const firstInvalidIndex = errors.modBreaks.findIndex(Boolean);
+    if (firstInvalidIndex < 0) return;
+    setModBreakPage(Math.floor(firstInvalidIndex / modBreaksPerPage));
+    toast.error(EMPTY_MODBREAK_MESSAGE);
+  };
+
   const moveUpModBreak = (index: number) => {
     if (index <= 0) return;
     swapModBreak(index, index - 1);
@@ -569,7 +584,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         <Heading size="xl">{id ? 'Aanpassen' : 'Toevoegen'}</Heading>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(onSubmit, onInvalid)}
           className="lg:w-3/3 grid grid-cols-2 lg:auto-rows-fit gap-10">
           <FormField
             control={form.control}

@@ -6,10 +6,6 @@
   --mb-gap: 8px;
   --mb-pad: 12px;
 }
-/*
- * NOTE: the widget build auto-prepends ".openstad " to every selector for
- * scoping. Do NOT write ".openstad" yourself, see timeline.css.
- */
 .modbreak-field-container {
   display: flex;
   flex-direction: column;
