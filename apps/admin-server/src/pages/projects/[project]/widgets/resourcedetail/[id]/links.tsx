@@ -71,6 +71,7 @@ const formSchema = z.object({
     messageLabel: z.string().optional(),
     showConsent: z.boolean(),
     consentLabel: z.string().optional(),
+    privacyUrl: z.string().optional(),
     showOwnResource: z.boolean(),
     ownResourceLabel: z.string().optional(),
     ownResourceTags: z.string().optional(),
@@ -127,6 +128,7 @@ export default function WidgetResourceDetailLinks(
         messageLabel: contact.messageLabel || '',
         showConsent: contact.showConsent !== false,
         consentLabel: contact.consentLabel || '',
+        privacyUrl: contact.privacyUrl || '',
         showOwnResource: contact.showOwnResource || false,
         ownResourceLabel: contact.ownResourceLabel || '',
         ownResourceTags: contact.ownResourceTags || '',
@@ -377,8 +379,13 @@ export default function WidgetResourceDetailLinks(
               )}
               {textField(
                 'contactBlock.consentLabel',
-                'Label toestemmingsveld',
-                'Ik ga akkoord met het delen van mijn e-mailadres volgens de privacyverklaring'
+                'Label toestemmingsveld (gebruik {link} voor de plek van de link)',
+                'Ik ga akkoord met het delen van mijn e-mailadres volgens de {link}'
+              )}
+              {textField(
+                'contactBlock.privacyUrl',
+                'Link naar privacyverklaring',
+                'https://www.voorbeeld.nl/privacy'
               )}
               {toggleField(
                 'contactBlock.showOwnResource',
