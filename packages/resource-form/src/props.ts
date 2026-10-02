@@ -30,6 +30,7 @@ export type LinkRequests = {
   confirmDescription?: string;
   revokeTitle?: string;
   revokeDescription?: string;
+  messageLabel?: string;
 };
 
 export type General = {

@@ -1,20 +1,47 @@
-.osc-link-confirm-list {
-  list-style: none;
-  padding: 0;
-  margin: 0.5rem 0 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.osc-link-confirm-heading {
+  margin: 1rem 0 0.25rem;
 }
 
-.osc-link-confirm-list > li {
+.osc-link-confirm-list {
+  margin: 0 0 1.5rem;
+  padding-inline-start: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.osc-link-confirm-list .utrecht-heading-6 {
-  margin: 0;
+.osc-link-confirm-list > li {
+  line-height: 1.5;
+}
+
+.osc-link-confirm-name {
+  margin-inline-end: 0.75rem;
+}
+
+.osc-link-confirm-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-style: italic;
+  color: var(--utrecht-link-color, currentColor);
+  cursor: pointer;
+}
+
+.osc-link-confirm-toggle:hover {
+  text-decoration: underline;
+}
+
+.osc-link-confirm-toggle:focus-visible {
+  outline: 2px solid var(--utrecht-focus-outline-color, currentColor);
+  outline-offset: 2px;
+}
+
+.osc-link-confirm-field {
+  margin-block: 0.5rem 0.25rem;
 }
 
 .osc-link-confirm-dialog-body .utrecht-textarea {
