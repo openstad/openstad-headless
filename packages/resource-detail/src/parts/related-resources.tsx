@@ -1,7 +1,7 @@
 import DataStore from '@openstad-headless/data-store/src';
-import { Icon } from '@openstad-headless/ui/src';
+import { Icon, IconButton } from '@openstad-headless/ui/src';
 import { Heading, Paragraph } from '@utrecht/component-library-react';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   type ExternalItem,
@@ -89,20 +89,78 @@ export function RelatedResources({
     externalItems,
   });
 
+  const listRef = useRef<HTMLUListElement>(null);
+  const [scroll, setScroll] = useState({ canPrevious: false, canNext: false });
+
+  const updateScroll = useCallback(() => {
+    const list = listRef.current;
+    if (!list) return;
+    setScroll({
+      canPrevious: list.scrollLeft > 1,
+      canNext: list.scrollLeft + list.clientWidth < list.scrollWidth - 1,
+    });
+  }, []);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    updateScroll();
+    const observer = new ResizeObserver(updateScroll);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [items.length, updateScroll]);
+
+  const scrollBy = (direction: 1 | -1) => {
+    const list = listRef.current;
+    if (!list) return;
+    list.scrollBy({ left: direction * list.clientWidth, behavior: 'smooth' });
+  };
+
   if (!items.length) return null;
+
+  const hasOverflow = scroll.canPrevious || scroll.canNext;
 
   return (
     <section
       className={`osc-related-resources --${layout}`}
       aria-label={displayTitle ? undefined : title}>
-      {displayTitle ? (
-        <Heading level={headingLevel} appearance="utrecht-heading-2">
-          {title}
-        </Heading>
-      ) : null}
-      <ul className="osc-related-resources-list">
+      <div className="osc-related-resources-header">
+        {displayTitle ? (
+          <Heading level={headingLevel} appearance="utrecht-heading-2">
+            {title}
+          </Heading>
+        ) : null}
+        {hasOverflow ? (
+          <div className="osc-related-resources-nav">
+            <IconButton
+              type="button"
+              className="secondary-action-button"
+              icon="ri-arrow-left-line"
+              iconOnly={true}
+              aria-label="Vorige"
+              disabled={!scroll.canPrevious}
+              onClick={() => scrollBy(-1)}
+            />
+            <IconButton
+              type="button"
+              className="primary-action-button"
+              icon="ri-arrow-right-line"
+              iconOnly={true}
+              aria-label="Volgende"
+              disabled={!scroll.canNext}
+              onClick={() => scrollBy(1)}
+            />
+          </div>
+        ) : null}
+      </div>
+      <ul
+        ref={listRef}
+        className="osc-related-resources-list"
+        onScroll={updateScroll}>
         {items.map((item) => (
-          <li key={item.key} className="osc-related-resources-item">
+          <li
+            key={item.key}
+            className={`osc-related-resources-item${item.url ? ' --link' : ''}`}>
             {displayImage && item.image ? (
               <img
                 className="osc-related-resources-image"
@@ -117,9 +175,15 @@ export function RelatedResources({
             ) : null}
             <Heading
               level={itemHeadingLevel}
-              appearance="utrecht-heading-5"
+              appearance="utrecht-heading-4"
               className="osc-related-resources-title">
-              {item.url ? <a href={item.url}>{item.title}</a> : item.title}
+              {item.url ? (
+                <a className="osc-related-resources-link" href={item.url}>
+                  {item.title}
+                </a>
+              ) : (
+                item.title
+              )}
             </Heading>
             {displaySummary && item.summary && layout !== 'compact' ? (
               <Paragraph className="osc-related-resources-summary">
