@@ -7,6 +7,7 @@ import {
   externalIdsBySource,
   toRelatedItems,
   validateContact,
+  withoutLinked,
 } from './links-helpers';
 
 const links: ResourceLink[] = [
@@ -165,5 +166,36 @@ describe('contactTextDefaults', () => {
   it('does not promise to share the e-mail address for a plugin handler', () => {
     const defaults = contactTextDefaults('link-request');
     expect(Object.values(defaults).join(' ')).not.toMatch(/e-mail/);
+  });
+});
+
+describe('withoutLinked', () => {
+  it('leaves out own submissions that are already linked in either direction', () => {
+    const options = [
+      { id: '10', label: 'Gekoppeld uitgaand' },
+      { id: '11', label: 'Gekoppeld inkomend' },
+      { id: '12', label: 'Nog niet gekoppeld' },
+    ];
+    const linked: ResourceLink[] = [
+      {
+        id: 1,
+        direction: 'outgoing',
+        source: 'openstad',
+        targetId: '10',
+        resource: { id: 10, title: 'A' },
+      },
+      {
+        id: 2,
+        direction: 'incoming',
+        source: 'openstad',
+        targetId: '99',
+        resource: { id: 11, title: 'B' },
+      },
+      { id: 3, direction: 'outgoing', source: 'metkoos', targetId: '12' },
+    ];
+
+    expect(withoutLinked(options, linked).map((option) => option.id)).toEqual([
+      '12',
+    ]);
   });
 });

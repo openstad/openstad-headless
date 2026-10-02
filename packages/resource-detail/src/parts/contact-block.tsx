@@ -21,7 +21,11 @@ import {
 import React, { useEffect, useId, useState } from 'react';
 
 import './contact-block.css';
-import { contactTextDefaults, validateContact } from './links-helpers';
+import {
+  contactTextDefaults,
+  validateContact,
+  withoutLinked,
+} from './links-helpers';
 
 const MAX_MESSAGE_LENGTH = 2000;
 
@@ -95,6 +99,10 @@ export function ContactBlock({
   const { data: currentUser } = datastore.useCurrentUser({
     ...currentUserProps,
   });
+  const { data: viewedLinks } = datastore.useResourceLinks({
+    projectId,
+    resourceId,
+  });
 
   const fieldId = useId();
   const [loginOpen, setLoginOpen] = useState(false);
@@ -122,9 +130,7 @@ export function ContactBlock({
       })
       .then((options: OwnResource[]) => {
         if (cancelled) return;
-        const list = Array.isArray(options) ? options : [];
-        setOwnResources(list);
-        setOwnResourceId(list.length === 1 ? list[0].id : '');
+        setOwnResources(Array.isArray(options) ? options : []);
       })
       .catch((err: Error) => {
         if (cancelled) return;
@@ -135,6 +141,20 @@ export function ContactBlock({
       cancelled = true;
     };
   }, [formOpen, showOwnResource, ownResourceTags, projectId]);
+
+  const choosableResources = ownResources
+    ? withoutLinked(ownResources, viewedLinks || [])
+    : null;
+  const choosableKey = (choosableResources || [])
+    .map((option) => option.id)
+    .join(',');
+
+  useEffect(() => {
+    if (!choosableResources) return;
+    setOwnResourceId(
+      choosableResources.length === 1 ? choosableResources[0].id : ''
+    );
+  }, [choosableKey]);
 
   const openForm = () => {
     setStatus('');
@@ -258,7 +278,7 @@ export function ContactBlock({
           {showOwnResource ? (
             <FormField type="select">
               <Paragraph className="utrecht-form-field__label">
-                {ownResources && ownResources.length === 0 ? (
+                {choosableResources && choosableResources.length === 0 ? (
                   <strong>{ownResourceLabel}</strong>
                 ) : (
                   <FormLabel htmlFor={ownResourceFieldId}>
@@ -266,7 +286,7 @@ export function ContactBlock({
                   </FormLabel>
                 )}
               </Paragraph>
-              {ownResources && ownResources.length === 0 ? (
+              {choosableResources && choosableResources.length === 0 ? (
                 <FormFieldDescription>
                   {ownResourceEmptyText}
                 </FormFieldDescription>
@@ -275,14 +295,14 @@ export function ContactBlock({
                   <Select
                     id={ownResourceFieldId}
                     value={ownResourceId}
-                    disabled={!ownResources}
+                    disabled={!choosableResources}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                       setOwnResourceId(e.target.value)
                     }>
                     <SelectOption value="">
                       Selecteer een inzending
                     </SelectOption>
-                    {(ownResources || []).map((option) => (
+                    {(choosableResources || []).map((option) => (
                       <SelectOption key={option.id} value={option.id}>
                         {option.label}
                       </SelectOption>
