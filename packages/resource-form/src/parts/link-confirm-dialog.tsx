@@ -16,6 +16,7 @@ import {
 import React, { useEffect, useRef, useState } from 'react';
 
 import './link-confirm-dialog.css';
+import { LINK_CONFIRM_TEXTS } from './link-confirm-texts';
 import { type LinkValue, linkKey, splitAddedLinks } from './link-selection';
 
 const MAX_MESSAGE_LENGTH = 1000;
@@ -43,14 +44,14 @@ export function LinkConfirmDialog({
   open,
   added,
   removed,
-  title = 'Uitnodiging(en) versturen',
-  description = 'Er zijn een of meer inzendingen gekozen om op deze pagina te tonen. Daarom gaat er een uitnodiging naar de eigenaar, om zeker te weten dat dat klopt. Na acceptatie wordt de koppeling getoond. De eigen inzending blijft van de auteur; niemand anders kan die bewerken of verwijderen. Op de accountpagina staat de status van de uitnodigingen.',
-  messageLabel = 'schrijf een toelichting',
+  title = LINK_CONFIRM_TEXTS.title,
+  description = LINK_CONFIRM_TEXTS.description,
+  messageLabel = LINK_CONFIRM_TEXTS.messageLabel,
   chosenHeading = 'Gekozen:',
   removedHeading = 'Deze koppelingen worden ingetrokken:',
   ownHeading = 'Deze eigen inzendingen worden direct gekoppeld:',
-  revokeTitle = 'Koppelingen intrekken',
-  revokeDescription = 'De gekozen koppelingen worden verwijderd. De eigenaren van de andere inzendingen krijgen daarvan bericht.',
+  revokeTitle = LINK_CONFIRM_TEXTS.revokeTitle,
+  revokeDescription = LINK_CONFIRM_TEXTS.revokeDescription,
   revokeConfirmText = 'Bevestigen',
   confirmText = 'Versturen',
   cancelText = 'Annuleren',

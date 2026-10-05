@@ -25,6 +25,7 @@ import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { fromCsvIds, toggleCsvId } from '@/lib/link-settings';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { contactTextDefaults } from '@openstad-headless/resource-detail/src/parts/links-helpers';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
@@ -154,6 +155,12 @@ export default function WidgetResourceDetailLinks(
     },
   });
 
+  const selectedHandler = form.watch('contactBlock.handler');
+  const isContactMessage = selectedHandler === DEFAULT_HANDLER;
+  const contactDefaults = contactTextDefaults(
+    isContactMessage ? '' : selectedHandler
+  );
+
   function onSubmit(values: FormData) {
     const { handler, ...contactValues } = values.contactBlock;
     props.updateConfig({
@@ -207,13 +214,16 @@ export default function WidgetResourceDetailLinks(
     />
   );
 
-  const richTextField = (name: any, label: string) => (
+  const richTextField = (name: any, label: string, description?: string) => (
     <FormField
       control={form.control}
       name={name}
       render={({ field }) => (
         <FormItem>
           <FormLabel>{label}</FormLabel>
+          {description ? (
+            <FormDescription>{description}</FormDescription>
+          ) : null}
           <FormControl>
             <TrixEditor
               value={field.value || ''}
@@ -266,6 +276,9 @@ export default function WidgetResourceDetailLinks(
           )}
           {form.watch('relatedResources.display') ? (
             <div className="bg-stone-100 p-4 rounded-md border grid grid-cols-1 gap-4">
+              <Heading size="lg" className="mt-2">
+                Weergave
+              </Heading>
               {textField(
                 'relatedResources.title',
                 'Titel',
@@ -303,11 +316,18 @@ export default function WidgetResourceDetailLinks(
                 'relatedResources.linkToDetail',
                 'Link naar de detailpagina'
               )}
-              {textField(
-                'relatedResources.itemLink',
-                'Adres van de detailpagina (gebruik [id] voor het nummer)',
-                '/resources/[id]'
-              )}
+              {form.watch('relatedResources.linkToDetail')
+                ? textField(
+                    'relatedResources.itemLink',
+                    'Adres van de detailpagina',
+                    '/resources/[id]',
+                    'Gebruik [id] voor het nummer van de inzending.'
+                  )
+                : null}
+
+              <Heading size="lg" className="mt-2">
+                Filteren
+              </Heading>
               {tagField(
                 'relatedResources.tagIds',
                 'Alleen inzendingen met tag',
@@ -404,17 +424,28 @@ export default function WidgetResourceDetailLinks(
                   </FormItem>
                 )}
               />
+              <Heading size="lg" className="mt-2">
+                Blok en knop
+              </Heading>
               {textField(
                 'contactBlock.title',
                 'Titel',
                 'Contact opnemen met de indiener'
               )}
-              {richTextField('contactBlock.description', 'Beschrijving')}
+              {richTextField(
+                'contactBlock.description',
+                'Beschrijving',
+                `Leeg = standaardtekst: "${contactDefaults.description}"`
+              )}
               {textField(
                 'contactBlock.buttonText',
                 'Tekst op de knop',
                 'Stuur een bericht'
               )}
+
+              <Heading size="lg" className="mt-2">
+                Pop-up
+              </Heading>
               {textField(
                 'contactBlock.popupTitle',
                 'Titel pop-up',
@@ -422,55 +453,83 @@ export default function WidgetResourceDetailLinks(
               )}
               {richTextField(
                 'contactBlock.popupDescription',
-                'Beschrijving pop-up'
+                'Beschrijving pop-up',
+                `Leeg = standaardtekst: "${contactDefaults.popupDescription}"`
               )}
               {toggleField('contactBlock.showMessage', 'Berichtveld tonen')}
-              {textField(
-                'contactBlock.messageLabel',
-                'Label berichtveld',
-                'Bericht'
-              )}
-              {toggleField(
-                'contactBlock.showConsent',
-                'Toestemmingsveld tonen',
-                'Verplicht voor een contactbericht naar de indiener, omdat het e-mailadres gedeeld wordt.'
-              )}
-              {textField(
-                'contactBlock.consentLabel',
-                'Label toestemmingsveld (gebruik {link} voor de plek van de link)',
-                'Ik ga akkoord met het delen van mijn e-mailadres volgens de {link}',
-                'Laat leeg voor de standaardtekst. Bij een koppelverzoek is dat het label "Privacy toestemming (AVG)" uit Authenticatie.'
-              )}
-              {textField(
-                'contactBlock.privacyUrl',
-                'Link naar privacyverklaring',
-                'https://www.voorbeeld.nl/privacy',
-                'Laat leeg om de privacyverklaring URL en linktekst uit Authenticatie te gebruiken.'
-              )}
+              {form.watch('contactBlock.showMessage')
+                ? textField(
+                    'contactBlock.messageLabel',
+                    'Label berichtveld',
+                    'Bericht'
+                  )
+                : null}
+
+              <Heading size="lg" className="mt-2">
+                Eigen inzending
+              </Heading>
               {toggleField(
                 'contactBlock.showOwnResource',
                 'Eigen inzending laten kiezen',
-                'De bezoeker kiest een van de eigen inzendingen, bijvoorbeeld het eigen stadmakerprofiel. Is er maar één, dan staat die al geselecteerd.'
+                'De bezoeker kiest een of meer eigen inzendingen, bijvoorbeeld het eigen stadmakerprofiel. Is er maar één, dan staat die al aangevinkt.'
               )}
-              {textField(
-                'contactBlock.ownResourceLabel',
-                'Label eigen inzending',
-                'Kies een eigen inzending'
+              {form.watch('contactBlock.showOwnResource') ? (
+                <>
+                  {textField(
+                    'contactBlock.ownResourceLabel',
+                    'Label eigen inzending',
+                    'Kies een eigen inzending'
+                  )}
+                  {richTextField(
+                    'contactBlock.ownResourceDescription',
+                    'Uitleg bij eigen inzending',
+                    'Optioneel. Staat onder het label, bijvoorbeeld met een link om je aan te melden.'
+                  )}
+                  {tagField(
+                    'contactBlock.ownResourceTags',
+                    'Alleen eigen inzendingen met tag',
+                    'Laat leeg om alle eigen inzendingen te tonen.'
+                  )}
+                  {textField(
+                    'contactBlock.ownResourceEmptyText',
+                    'Tekst als er geen eigen inzending is',
+                    'Er is nog geen eigen inzending die hiervoor gekozen kan worden.'
+                  )}
+                </>
+              ) : null}
+
+              <Heading size="lg" className="mt-2">
+                Toestemming
+              </Heading>
+              {toggleField(
+                'contactBlock.showConsent',
+                'Toestemmingsveld tonen',
+                isContactMessage
+                  ? 'Verplicht voor een contactbericht naar de indiener, omdat het e-mailadres gedeeld wordt.'
+                  : undefined
               )}
-              {richTextField(
-                'contactBlock.ownResourceDescription',
-                'Uitleg bij eigen inzending'
-              )}
-              {tagField(
-                'contactBlock.ownResourceTags',
-                'Alleen eigen inzendingen met tag',
-                'Laat leeg om alle eigen inzendingen te tonen.'
-              )}
-              {textField(
-                'contactBlock.ownResourceEmptyText',
-                'Tekst als er geen eigen inzending is',
-                'Er is nog geen eigen inzending die hiervoor gekozen kan worden.'
-              )}
+              {form.watch('contactBlock.showConsent') ? (
+                <>
+                  {textField(
+                    'contactBlock.consentLabel',
+                    'Label toestemmingsveld (gebruik {link} voor de plek van de link)',
+                    contactDefaults.consentLabel,
+                    isContactMessage
+                      ? 'Laat leeg voor de standaardtekst.'
+                      : 'Laat leeg voor het label "Privacy toestemming (AVG)" uit Authenticatie.'
+                  )}
+                  {textField(
+                    'contactBlock.privacyUrl',
+                    'Link naar privacyverklaring',
+                    'https://www.voorbeeld.nl/privacy',
+                    'Laat leeg om de privacyverklaring URL en linktekst uit Authenticatie te gebruiken.'
+                  )}
+                </>
+              ) : null}
+
+              <Heading size="lg" className="mt-2">
+                Inloggen
+              </Heading>
               {textField(
                 'contactBlock.loginTitle',
                 'Titel login pop-up',
@@ -479,13 +538,17 @@ export default function WidgetResourceDetailLinks(
               {textField(
                 'contactBlock.loginDescription',
                 'Beschrijving login pop-up',
-                'Na inloggen is het e-mailadres bekend, zodat de indiener kan reageren.'
+                contactDefaults.loginDescription
               )}
               {textField(
                 'contactBlock.loginButtonText',
                 'Tekst login-knop',
                 'Inloggen'
               )}
+
+              <Heading size="lg" className="mt-2">
+                Na versturen
+              </Heading>
               {textField(
                 'contactBlock.successMessage',
                 'Melding na versturen',
