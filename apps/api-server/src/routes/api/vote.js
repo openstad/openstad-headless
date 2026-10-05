@@ -17,6 +17,14 @@ const userhasModeratorRights = (user) => {
   return hasRole(user, 'admin');
 };
 
+const PUBLIC_SORT_FIELDS = ['id', 'createdAt', 'resourceId', 'opinion'];
+const MODERATOR_SORT_FIELDS = [
+  ...PUBLIC_SORT_FIELDS,
+  'userId',
+  'ip',
+  'checked',
+];
+
 const isDeadlockError = (err) => {
   const code = err?.parent?.code || err?.original?.code || err?.code;
   const errno = err?.parent?.errno || err?.original?.errno || err?.errno;
@@ -115,6 +123,7 @@ router
   .get(pagination.init)
   .get(function (req, res, next) {
     let { dbQuery } = req;
+    const hasModeratorRights = userhasModeratorRights(req.user);
 
     let where = { ...dbQuery.where };
     let voteId = parseInt(req.query.id);
@@ -128,6 +137,12 @@ router
     }
     let userId = parseInt(req.query.userId);
     if (userId) {
+      // Filtering on another user's id would expose their voting behaviour
+      if (!hasModeratorRights && userId !== req.user?.id) {
+        return next(
+          createError(403, 'Geen toegang tot stemmen van deze gebruiker')
+        );
+      }
       where.userId = userId;
     }
     let opinion = req.query.opinion;
@@ -138,7 +153,7 @@ router
 
     const ip =
       typeof req.query.ip === 'string' ? req.query.ip.trim() : undefined;
-    if (ip) {
+    if (ip && hasModeratorRights) {
       where.ip = { [Op.like]: `%${ip}%` };
     }
 
@@ -167,11 +182,16 @@ router
     }
 
     const order = [];
-    if (req.query.sortBy) {
-      order.push([req.query.sortBy, req.query.orderBy || 'ASC']);
+    const sortFields = hasModeratorRights
+      ? MODERATOR_SORT_FIELDS
+      : PUBLIC_SORT_FIELDS;
+    if (sortFields.includes(req.query.sortBy)) {
+      const direction =
+        String(req.query.orderBy).toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+      order.push([req.query.sortBy, direction]);
     }
 
-    if (req.user && userhasModeratorRights(req.user)) {
+    if (hasModeratorRights) {
       req.scope.push('includeUser');
     }
 
@@ -199,6 +219,7 @@ router
   .get(pagination.paginateResults)
   .get(function (req, res, next) {
     let records = req.results.records || req.results;
+    const hasModeratorRights = userhasModeratorRights(req.user);
     records.forEach((entry, i) => {
       let vote = {
         id: entry.id,
@@ -208,7 +229,7 @@ router
         createdAt: entry.createdAt,
       };
 
-      if (req.user && userhasModeratorRights(req.user)) {
+      if (hasModeratorRights) {
         vote.ip = entry.ip;
         vote.createdAt = entry.createdAt;
         vote.checked = entry.checked;
@@ -218,7 +239,13 @@ router
           vote.user.auth = { ...vote.user.auth, user: req.user };
         }
       }
-      vote.userId = entry.userId;
+      // userId links votes to public comment authors; only expose it to moderators or the voter
+      if (
+        hasModeratorRights ||
+        (req.user?.id && entry.userId === req.user.id)
+      ) {
+        vote.userId = entry.userId;
+      }
 
       if (entry.resource) {
         vote.resource = entry.resource;
