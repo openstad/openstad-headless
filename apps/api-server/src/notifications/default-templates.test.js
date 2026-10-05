@@ -45,3 +45,25 @@ describe('default template: user account about to expire', () => {
     expect(result.html).not.toContain('\\"');
   });
 });
+
+describe('default template: contact message - user', () => {
+  it('renders the message, the reply address and the footer', async () => {
+    const template = extractTemplate('contact message - user');
+    const nunjucksEnv = new nunjucks.Environment();
+    const body = nunjucksEnv.renderString(template.body, {
+      user: { name: 'Bram' },
+      resource: { title: 'Bram de Bouwer' },
+      senderName: 'Cees',
+      senderEmail: 'cees@example.nl',
+      message: 'Zullen we samenwerken?',
+    });
+
+    const result = await mjml2html(body);
+
+    expect(result.errors).toEqual([]);
+    expect(template.subject).toBe('Bericht ontvangen over een inzending');
+    expect(result.html).toContain('Zullen we samenwerken?');
+    expect(result.html).toContain('mailto:cees@example.nl');
+    expect(result.html).toContain('Dit is een automatisch bericht.');
+  });
+});
