@@ -22,8 +22,10 @@ import React, { useEffect, useId, useState } from 'react';
 
 import './contact-block.css';
 import {
+  type PrivacyConsent,
   consentLabelParts,
   consentLabelPlain,
+  contactConsent,
   contactTextDefaults,
   validateContact,
   withoutLinked,
@@ -44,6 +46,7 @@ export type ContactBlockProps = {
   showConsent?: boolean;
   consentLabel?: string;
   privacyUrl?: string;
+  privacyConsent?: PrivacyConsent | null;
   showOwnResource?: boolean;
   ownResourceLabel?: string;
   ownResourceTags?: string;
@@ -69,12 +72,14 @@ type OwnResource = { id: string; label: string };
 function ConsentLabel({
   label,
   privacyUrl,
+  linkText,
 }: {
   label: string;
   privacyUrl?: string;
+  linkText?: string;
 }) {
-  const parts = consentLabelParts(label, privacyUrl);
-  if (!parts) return <>{consentLabelPlain(label)}</>;
+  const parts = consentLabelParts(label, privacyUrl, linkText);
+  if (!parts) return <>{consentLabelPlain(label, linkText)}</>;
   return (
     <>
       {parts.before}
@@ -106,6 +111,7 @@ export function ContactBlock({
   showConsent = true,
   consentLabel,
   privacyUrl,
+  privacyConsent,
   showOwnResource = false,
   ownResourceLabel = 'Kies je inzending',
   ownResourceTags,
@@ -118,7 +124,12 @@ export function ContactBlock({
   const defaults = contactTextDefaults(handler);
   const descriptionText = description ?? defaults.description;
   const popupDescriptionText = popupDescription ?? defaults.popupDescription;
-  const consentLabelText = consentLabel ?? defaults.consentLabel;
+  const consentText = contactConsent({
+    handler,
+    consentLabel,
+    privacyUrl,
+    privacyConsent,
+  });
   const loginDescriptionText = loginDescription ?? defaults.loginDescription;
   const datastore: any = new DataStore({ projectId, api });
   const { data: currentUser } = datastore.useCurrentUser({
@@ -367,8 +378,9 @@ export function ContactBlock({
               />
               <FormLabel htmlFor={consentId} type="checkbox">
                 <ConsentLabel
-                  label={consentLabelText}
-                  privacyUrl={privacyUrl}
+                  label={consentText.label}
+                  privacyUrl={consentText.url}
+                  linkText={consentText.linkText}
                 />
               </FormLabel>
             </FormField>

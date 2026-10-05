@@ -5,6 +5,7 @@ import {
   buildItemLink,
   consentLabelParts,
   consentLabelPlain,
+  contactConsent,
   contactTextDefaults,
   externalIdsBySource,
   filterByTags,
@@ -315,5 +316,72 @@ describe('consentLabelParts', () => {
     expect(consentLabelPlain('Ik ga akkoord met de {link}')).toBe(
       'Ik ga akkoord met de privacyverklaring'
     );
+  });
+
+  it('uses the link text of the authentication settings', () => {
+    expect(
+      consentLabelParts('Ik ga akkoord met het {link}', url, 'Privacybeleid')
+    ).toEqual({
+      before: 'Ik ga akkoord met het ',
+      linkText: 'privacybeleid',
+      after: '',
+    });
+    expect(
+      consentLabelParts('Lees ons privacybeleid', url, 'privacybeleid')
+    ).toEqual({ before: 'Lees ons ', linkText: 'privacybeleid', after: '' });
+    expect(
+      consentLabelParts('Volgens de privacyverklaring', url, 'privacybeleid')
+    ).toEqual({
+      before: 'Volgens de ',
+      linkText: 'privacyverklaring',
+      after: '',
+    });
+  });
+});
+
+describe('contactConsent', () => {
+  const privacyConsent = {
+    url: 'https://gemeente.nl/privacy',
+    linkText: 'privacybeleid',
+    label: 'Ik ga akkoord met het {link}',
+  };
+
+  it('uses the label and link of the authentication settings for a request', () => {
+    expect(contactConsent({ handler: 'linkRequest', privacyConsent })).toEqual({
+      label: 'Ik ga akkoord met het {link}',
+      url: 'https://gemeente.nl/privacy',
+      linkText: 'privacybeleid',
+    });
+  });
+
+  it('keeps the e-mail consent sentence for a contact message', () => {
+    expect(contactConsent({ privacyConsent })).toEqual({
+      label: contactTextDefaults().consentLabel,
+      url: 'https://gemeente.nl/privacy',
+      linkText: 'privacybeleid',
+    });
+  });
+
+  it('lets the widget settings win', () => {
+    expect(
+      contactConsent({
+        handler: 'linkRequest',
+        consentLabel: 'Eigen tekst met {link}',
+        privacyUrl: 'https://eigen.nl/privacy',
+        privacyConsent,
+      })
+    ).toEqual({
+      label: 'Eigen tekst met {link}',
+      url: 'https://eigen.nl/privacy',
+      linkText: undefined,
+    });
+  });
+
+  it('falls back to the default label without authentication settings', () => {
+    expect(contactConsent({ handler: 'linkRequest' })).toEqual({
+      label: contactTextDefaults('linkRequest').consentLabel,
+      url: undefined,
+      linkText: undefined,
+    });
   });
 });
