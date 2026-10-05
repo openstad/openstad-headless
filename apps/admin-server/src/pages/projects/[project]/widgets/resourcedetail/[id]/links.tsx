@@ -76,6 +76,7 @@ const formSchema = z.object({
     privacyUrl: z.string().optional(),
     showOwnResource: z.boolean(),
     ownResourceLabel: z.string().optional(),
+    ownResourceDescription: z.string().optional(),
     ownResourceTags: z.string().optional(),
     ownResourceEmptyText: z.string().optional(),
     loginTitle: z.string().optional(),
@@ -142,6 +143,7 @@ export default function WidgetResourceDetailLinks(
         privacyUrl: contact.privacyUrl || '',
         showOwnResource: contact.showOwnResource || false,
         ownResourceLabel: contact.ownResourceLabel || '',
+        ownResourceDescription: contact.ownResourceDescription || '',
         ownResourceTags: contact.ownResourceTags || '',
         ownResourceEmptyText: contact.ownResourceEmptyText || '',
         loginTitle: contact.loginTitle || '',
@@ -454,6 +456,10 @@ export default function WidgetResourceDetailLinks(
                 'contactBlock.ownResourceLabel',
                 'Label eigen inzending',
                 'Kies een eigen inzending'
+              )}
+              {richTextField(
+                'contactBlock.ownResourceDescription',
+                'Uitleg bij eigen inzending'
               )}
               {tagField(
                 'contactBlock.ownResourceTags',

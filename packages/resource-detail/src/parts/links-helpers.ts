@@ -261,7 +261,7 @@ export function validateContact({
   showOwnResource,
   message,
   consent,
-  ownResourceId,
+  ownResourceIds,
   messageRequiredText,
   consentRequiredText,
   ownResourceRequiredText,
@@ -272,12 +272,12 @@ export function validateContact({
   showOwnResource: boolean;
   message: string;
   consent: boolean;
-  ownResourceId: string;
+  ownResourceIds: string[];
   messageRequiredText: string;
   consentRequiredText: string;
   ownResourceRequiredText: string;
 }): string | null {
-  if (showOwnResource && !ownResourceId) return ownResourceRequiredText;
+  if (showOwnResource && !ownResourceIds.length) return ownResourceRequiredText;
   if (showMessage && isDefaultHandler && !message.trim()) {
     return messageRequiredText;
   }
