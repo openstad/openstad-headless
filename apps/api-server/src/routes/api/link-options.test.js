@@ -193,7 +193,7 @@ describe('link options', () => {
     expect(res.status).toBe(401);
   });
 
-  it('marks the own submissions of the logged in user', async () => {
+  it('does not mark own submissions, so they are invited like any other', async () => {
     const app = createApp({ role: 'member', id: 10 });
     const search = await request(app).get(
       '/project/1/link-options/openstad?search=stad'
@@ -202,8 +202,14 @@ describe('link options', () => {
       '/project/1/link-options/openstad/items?ids=2,3'
     );
 
-    expect(search.body.map((option) => option.own)).toEqual([true, undefined]);
-    expect(items.body.map((option) => option.own)).toEqual([true, undefined]);
+    expect(search.body.map((option) => option.own)).toEqual([
+      undefined,
+      undefined,
+    ]);
+    expect(items.body.map((option) => option.own)).toEqual([
+      undefined,
+      undefined,
+    ]);
     expect(queries[0].attributes).toContain('userId');
     expect(search.body[0]).not.toHaveProperty('userId');
   });
