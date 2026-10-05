@@ -701,7 +701,7 @@ export default function WidgetResourceFormItems(
       // Only suggest the default key when none is set yet, so a custom key
       // (e.g. a second image field stored in extraData) survives reopening
       // the item. Same guard as the timeline type below.
-      if (form.watch('fieldKey') === '') {
+      if (['', 'images', 'documents'].includes(form.watch('fieldKey'))) {
         form.setValue(
           'fieldKey',
           form.watch('type') === 'documentUpload' ? 'documents' : 'images'
