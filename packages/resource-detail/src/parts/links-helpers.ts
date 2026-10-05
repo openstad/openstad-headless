@@ -294,19 +294,19 @@ export type ContactTextDefaults = {
 
 const EMAIL_CONTACT_DEFAULTS: ContactTextDefaults = {
   description:
-    'Via de contactknop stuur je een bericht dat alleen de indiener kan zien. De indiener kan op jouw bericht reageren via e-mail.',
+    'Via de contactknop gaat een bericht naar de indiener; alleen de indiener ziet het. De indiener kan per e-mail reageren.',
   popupDescription:
-    'Via het onderstaande berichtenveld kun je een bericht versturen naar de indiener. Je bericht wordt verstuurd met een vermelding van jouw e-mailadres.',
+    'Het bericht gaat naar de indiener, samen met het e-mailadres van de afzender.',
   consentLabel:
     'Ik ga akkoord met het delen van mijn e-mailadres volgens de privacyverklaring',
   loginDescription:
-    'Door in te loggen weten we zeker dat jouw e-mailadres gebruikt kan worden om jou te bereiken.',
+    'Na inloggen is het e-mailadres bekend, zodat de indiener kan reageren.',
 };
 
 const HANDLER_CONTACT_DEFAULTS: ContactTextDefaults = {
-  description: 'Via deze knop stuur je een verzoek naar de indiener.',
+  description: 'Via deze knop gaat een verzoek naar de indiener.',
   popupDescription:
-    'Je kunt een bericht toevoegen. De indiener ziet dit bij je verzoek.',
+    'Een bericht toevoegen kan. De indiener ziet het bij het verzoek.',
   consentLabel: 'Ik ga akkoord met de privacyverklaring',
   loginDescription: 'Log in zodat de indiener weet van wie het verzoek komt.',
 };

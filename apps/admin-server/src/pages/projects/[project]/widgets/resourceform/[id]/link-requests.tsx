@@ -118,10 +118,7 @@ export default function WidgetResourceFormLinkRequests() {
               <FormItem>
                 <FormLabel>Titel van de pop-up</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Je gaat uitnodiging(en) versturen"
-                    {...field}
-                  />
+                  <Input placeholder="Uitnodiging(en) versturen" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -170,10 +167,7 @@ export default function WidgetResourceFormLinkRequests() {
                   Wordt gebruikt als de indiener alleen koppelingen verwijdert.
                 </FormDescription>
                 <FormControl>
-                  <Input
-                    placeholder="Je gaat koppelingen intrekken"
-                    {...field}
-                  />
+                  <Input placeholder="Koppelingen intrekken" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
