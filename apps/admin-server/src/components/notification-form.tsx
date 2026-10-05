@@ -468,7 +468,7 @@ export function NotificationForm({
   const notificationTitle = typeLabel || notificationTypes[type] || type;
   const isExisting = !!(label && subject && body !== undefined);
   const projectNumber = validateProjectNumber(project);
-  const { data: defaultTemplate } = useSWR<{
+  const { data: defaultTemplate, isLoading: loadingDefaultTemplate } = useSWR<{
     subject?: string;
     body?: string;
   }>(
@@ -633,6 +633,10 @@ export function NotificationForm({
       }
     }
   }, [fieldValue]);
+
+  if (loadingDefaultTemplate) {
+    return <p className="py-6 text-muted-foreground">Laden...</p>;
+  }
 
   return (
     <div>
