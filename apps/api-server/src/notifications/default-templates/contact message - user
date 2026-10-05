@@ -2,22 +2,34 @@
 <subject>Bericht ontvangen over een inzending</subject>
 <body>
 <mjml>
-  <mj-body>
-    <mj-section>
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Helvetica, Arial, sans-serif" />
+      <mj-text font-size="15px" line-height="1.6" color="#333333" />
+      <mj-divider border-width="1px" border-color="#dddddd" />
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#f4f4f4">
+    <mj-section background-color="#ffffff" padding="32px 24px">
       <mj-column>
+        <mj-text align="center"><h1 style="font-size:22px;font-weight:normal;line-height:1.3;margin:0">Bericht ontvangen over een inzending</h1></mj-text>
+        <mj-divider />
         <mj-text>
-          <h1>Bericht ontvangen over een inzending</h1>
           Beste {{user.name}},<br/>
           <br/>
-          {{senderName}} heeft een bericht gestuurd over de inzending "{{resource.title}}".<br/>
+          {{senderName}} heeft een bericht gestuurd over de inzending "{{resource.title}}".
         </mj-text>
+        {% if message %}
         <mj-text>
           <strong>{{senderName}}</strong><br/>
           "{{message}}"
         </mj-text>
+        {% endif %}
         <mj-text>
           Reageren kan met een e-mail naar <a href="mailto:{{senderEmail}}">{{senderEmail}}</a>.
         </mj-text>
+        <mj-divider />
+        <mj-text align="center" font-size="13px" color="#777777">Dit is een automatisch bericht. Antwoorden op deze e-mail is niet mogelijk.</mj-text>
       </mj-column>
     </mj-section>
   </mj-body>
