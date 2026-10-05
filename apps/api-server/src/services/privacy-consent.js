@@ -1,6 +1,7 @@
 const authSettings = require('../util/auth-settings');
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
+const TIMEOUT_MS = 3000;
 
 function httpUrl(value) {
   try {
@@ -30,6 +31,7 @@ function fromClient(client) {
 function createPrivacyConsent({
   settings = authSettings,
   ttlMs = CACHE_TTL_MS,
+  timeoutMs = TIMEOUT_MS,
   now = Date.now,
 } = {}) {
   const cache = new Map();
@@ -43,13 +45,24 @@ function createPrivacyConsent({
     return client ? fromClient(client) : null;
   }
 
+  function withTimeout(promise) {
+    let timer;
+    const timeout = new Promise((resolve, reject) => {
+      timer = setTimeout(
+        () => reject(new Error(`no answer within ${timeoutMs}ms`)),
+        timeoutMs
+      );
+    });
+    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+  }
+
   return async function privacyConsentFor(project) {
     const cached = cache.get(project.id);
     if (cached && cached.expiresAt > now()) return cached.value;
 
     let value = null;
     try {
-      value = await load(project);
+      value = await withTimeout(load(project));
     } catch (err) {
       console.error(
         `[privacy-consent] loading the privacy statement failed: projectId=${project.id} error=${err.message}`

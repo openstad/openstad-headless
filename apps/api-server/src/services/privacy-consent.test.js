@@ -6,10 +6,17 @@ const { createPrivacyConsent } = require('./privacy-consent');
 
 const project = { id: 7 };
 
-function setup({ authConfig = { clientId: 'abc' }, client, error } = {}) {
-  const fetchClient = error
-    ? vi.fn().mockRejectedValue(error)
-    : vi.fn().mockResolvedValue(client);
+function setup({
+  authConfig = { clientId: 'abc' },
+  client,
+  error,
+  hang = false,
+} = {}) {
+  const fetchClient = hang
+    ? vi.fn(() => new Promise(() => {}))
+    : error
+      ? vi.fn().mockRejectedValue(error)
+      : vi.fn().mockResolvedValue(client);
   const settings = {
     config: vi.fn().mockResolvedValue(authConfig),
     adapter: vi.fn().mockResolvedValue({ service: { fetchClient } }),
@@ -18,6 +25,7 @@ function setup({ authConfig = { clientId: 'abc' }, client, error } = {}) {
   const privacyConsentFor = createPrivacyConsent({
     settings,
     ttlMs: 1000,
+    timeoutMs: 20,
     now: () => time,
   });
   return {
@@ -87,6 +95,19 @@ describe('privacyConsentFor', () => {
     expect(await privacyConsentFor(project)).toBeNull();
     expect(consoleError).toHaveBeenCalledWith(
       '[privacy-consent] loading the privacy statement failed: projectId=7 error=Cannot connect to auth server'
+    );
+    consoleError.mockRestore();
+  });
+
+  it('gives up on an auth server that does not answer', async () => {
+    const consoleError = vi
+      .spyOn(console, 'error')
+      .mockImplementation(() => {});
+    const { privacyConsentFor } = setup({ hang: true });
+
+    expect(await privacyConsentFor(project)).toBeNull();
+    expect(consoleError).toHaveBeenCalledWith(
+      '[privacy-consent] loading the privacy statement failed: projectId=7 error=no answer within 20ms'
     );
     consoleError.mockRestore();
   });
