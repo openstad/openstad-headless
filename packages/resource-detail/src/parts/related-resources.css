@@ -20,6 +20,21 @@
   margin-inline-start: auto;
 }
 
+.osc-related-resources-nav button:disabled {
+  background-color: var(
+    --nlds-resource-detail-related-nav-disabled-background-color,
+    var(--utrecht-color-grey-95, #eeeeee)
+  );
+  border-color: var(
+    --nlds-resource-detail-related-nav-disabled-background-color,
+    var(--utrecht-color-grey-95, #eeeeee)
+  );
+  color: var(
+    --nlds-resource-detail-related-nav-disabled-color,
+    var(--utrecht-color-grey-40, #595959)
+  );
+}
+
 .osc-related-resources-nav button {
   aspect-ratio: 1;
   min-width: auto;
@@ -143,8 +158,8 @@
 }
 
 .osc-related-resources.--compact .osc-related-resources-image {
-  width: 6rem;
-  height: 6rem;
+  width: var(--nlds-resource-detail-related-compact-image-size, 8rem);
+  height: var(--nlds-resource-detail-related-compact-image-size, 8rem);
   aspect-ratio: 1;
   border-radius: 50%;
 }
