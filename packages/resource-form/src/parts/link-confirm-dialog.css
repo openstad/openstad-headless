@@ -1,5 +1,16 @@
 .osc-link-confirm-heading {
   margin: 1rem 0 0.25rem;
+  color: var(--nlds-link-confirm-heading-color, inherit);
+  font-family: inherit;
+  font-size: var(
+    --nlds-link-confirm-heading-font-size,
+    var(--utrecht-paragraph-font-size, inherit)
+  );
+  font-weight: var(--nlds-link-confirm-heading-font-weight, bold);
+  line-height: var(
+    --nlds-link-confirm-heading-line-height,
+    var(--utrecht-paragraph-line-height, inherit)
+  );
 }
 
 .osc-link-confirm-list {

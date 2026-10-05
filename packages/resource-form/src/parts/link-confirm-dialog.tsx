@@ -9,6 +9,7 @@ import RteContent from '@openstad-headless/ui/src/rte-formatting/rte-content';
 import {
   FormField,
   FormLabel,
+  Heading,
   Paragraph,
   Textarea,
 } from '@utrecht/component-library-react';
@@ -98,9 +99,9 @@ export function LinkConfirmDialog({
 
         {others.length > 0 ? (
           <>
-            <Paragraph className="osc-link-confirm-heading">
-              <strong>{chosenHeading}</strong>
-            </Paragraph>
+            <Heading level={3} className="osc-link-confirm-heading">
+              {chosenHeading}
+            </Heading>
             <ul className="osc-link-confirm-list">
               {others.map((item) => {
                 const key = linkKey(item);
@@ -154,9 +155,9 @@ export function LinkConfirmDialog({
 
         {own.length > 0 ? (
           <>
-            <Paragraph className="osc-link-confirm-heading">
-              <strong>{ownHeading}</strong>
-            </Paragraph>
+            <Heading level={3} className="osc-link-confirm-heading">
+              {ownHeading}
+            </Heading>
             <ul className="osc-link-confirm-list">
               {own.map((item) => (
                 <li key={linkKey(item)}>
@@ -169,9 +170,9 @@ export function LinkConfirmDialog({
 
         {removed.length > 0 ? (
           <>
-            <Paragraph className="osc-link-confirm-heading">
-              <strong>{removedHeading}</strong>
-            </Paragraph>
+            <Heading level={3} className="osc-link-confirm-heading">
+              {removedHeading}
+            </Heading>
             <ul className="osc-link-confirm-list">
               {removed.map((item) => (
                 <li key={linkKey(item)}>
