@@ -15,6 +15,7 @@ import usePluginCapabilities from '@/hooks/use-plugin-capabilities';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { LINK_CONFIRM_TEXTS } from '@openstad-headless/resource-form/src/parts/link-confirm-texts';
 import dynamic from 'next/dynamic';
 import React, { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -111,86 +112,108 @@ export default function WidgetResourceFormLinkRequests() {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="confirmTitle"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Titel van de pop-up</FormLabel>
-                <FormControl>
-                  <Input placeholder="Uitnodiging(en) versturen" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="confirmDescription"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Beschrijving van de pop-up</FormLabel>
-                <FormControl>
-                  <TrixEditor
-                    value={field.value || ''}
-                    onChange={(e: any) => field.onChange(e.target.value)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="messageLabel"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Label toelichting</FormLabel>
-                <FormDescription>
-                  De link per gekozen koppeling waarmee de indiener een
-                  toelichting schrijft.
-                </FormDescription>
-                <FormControl>
-                  <Input placeholder="schrijf een toelichting" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="revokeTitle"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Titel van de pop-up bij alleen intrekken</FormLabel>
-                <FormDescription>
-                  Wordt gebruikt als de indiener alleen koppelingen verwijdert.
-                </FormDescription>
-                <FormControl>
-                  <Input placeholder="Koppelingen intrekken" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="revokeDescription"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Beschrijving van de pop-up bij alleen intrekken
-                </FormLabel>
-                <FormControl>
-                  <TrixEditor
-                    value={field.value || ''}
-                    onChange={(e: any) => field.onChange(e.target.value)}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {form.watch('confirmEnabled') ? (
+            <>
+              <FormField
+                control={form.control}
+                name="confirmTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Titel van de pop-up</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={LINK_CONFIRM_TEXTS.title}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Beschrijving van de pop-up</FormLabel>
+                    <FormDescription>
+                      {`Leeg = standaardtekst: "${LINK_CONFIRM_TEXTS.description}"`}
+                    </FormDescription>
+                    <FormControl>
+                      <TrixEditor
+                        value={field.value || ''}
+                        onChange={(e: any) => field.onChange(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="messageLabel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Label toelichting</FormLabel>
+                    <FormDescription>
+                      De link per gekozen koppeling waarmee de indiener een
+                      toelichting schrijft.
+                    </FormDescription>
+                    <FormControl>
+                      <Input
+                        placeholder={LINK_CONFIRM_TEXTS.messageLabel}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="revokeTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Titel van de pop-up bij alleen intrekken
+                    </FormLabel>
+                    <FormDescription>
+                      Wordt gebruikt als de indiener alleen koppelingen
+                      verwijdert.
+                    </FormDescription>
+                    <FormControl>
+                      <Input
+                        placeholder={LINK_CONFIRM_TEXTS.revokeTitle}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="revokeDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Beschrijving van de pop-up bij alleen intrekken
+                    </FormLabel>
+                    <FormDescription>
+                      {`Leeg = standaardtekst: "${LINK_CONFIRM_TEXTS.revokeDescription}"`}
+                    </FormDescription>
+                    <FormControl>
+                      <TrixEditor
+                        value={field.value || ''}
+                        onChange={(e: any) => field.onChange(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          ) : null}
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>
