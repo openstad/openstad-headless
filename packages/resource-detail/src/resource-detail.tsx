@@ -43,6 +43,7 @@ import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links
 import { canLikeResource, hasRole } from '../../lib';
 import { buildPageTitle } from './page-title';
 import { ContactBlock, type ContactBlockProps } from './parts/contact-block';
+import { type PrivacyConsent } from './parts/links-helpers';
 import {
   RelatedResources,
   type RelatedResourcesProps,
@@ -126,6 +127,7 @@ export type ResourceDetailWidgetProps = {
     >;
     relatedResources?: RelatedResourcesProps;
     contactBlock?: ContactBlockProps;
+    privacyConsent?: PrivacyConsent | null;
   };
 
 type DocumentType = {
@@ -963,6 +965,7 @@ function ResourceDetail({
       {props.contactBlock?.display ? (
         <ContactBlock
           {...props.contactBlock}
+          privacyConsent={props.privacyConsent}
           projectId={props.projectId}
           resourceId={resource?.id ? String(resource.id) : undefined}
           api={props.api}

@@ -57,29 +57,73 @@ export type ConsentLabelParts = {
   after: string;
 };
 
-export function consentLabelPlain(label: string): string {
-  return label.split('{link}').join(PRIVACY_WORD);
+export type PrivacyConsent = {
+  url?: string;
+  linkText?: string;
+  label?: string;
+};
+
+function privacyWord(linkText?: string): string {
+  const text = (linkText || '').trim();
+  return text ? text.charAt(0).toLowerCase() + text.slice(1) : PRIVACY_WORD;
+}
+
+export function consentLabelPlain(label: string, linkText?: string): string {
+  return label.split('{link}').join(privacyWord(linkText));
 }
 
 export function consentLabelParts(
   label: string,
-  privacyUrl?: string
+  privacyUrl?: string,
+  linkText?: string
 ): ConsentLabelParts | null {
   if (!isHttpUrl(privacyUrl)) return null;
+  const word = privacyWord(linkText);
   const placeholder = label.indexOf('{link}');
   if (placeholder >= 0) {
     return {
       before: label.slice(0, placeholder),
-      linkText: PRIVACY_WORD,
-      after: consentLabelPlain(label.slice(placeholder + '{link}'.length)),
+      linkText: word,
+      after: consentLabelPlain(
+        label.slice(placeholder + '{link}'.length),
+        linkText
+      ),
     };
   }
-  const word = label.toLowerCase().indexOf(PRIVACY_WORD);
-  if (word < 0) return null;
+  const lowerLabel = label.toLowerCase();
+  const found = [word, PRIVACY_WORD]
+    .map((candidate) => ({
+      candidate,
+      index: lowerLabel.indexOf(candidate.toLowerCase()),
+    }))
+    .find(({ index }) => index >= 0);
+  if (!found) return null;
+  const end = found.index + found.candidate.length;
   return {
-    before: label.slice(0, word),
-    linkText: label.slice(word, word + PRIVACY_WORD.length),
-    after: label.slice(word + PRIVACY_WORD.length),
+    before: label.slice(0, found.index),
+    linkText: label.slice(found.index, end),
+    after: label.slice(end),
+  };
+}
+
+export function contactConsent({
+  handler,
+  consentLabel,
+  privacyUrl,
+  privacyConsent,
+}: {
+  handler?: string;
+  consentLabel?: string;
+  privacyUrl?: string;
+  privacyConsent?: PrivacyConsent | null;
+}): { label: string; url?: string; linkText?: string } {
+  const ownUrl = isHttpUrl(privacyUrl) ? privacyUrl : undefined;
+  const authLabel = handler ? privacyConsent?.label : undefined;
+  return {
+    label:
+      consentLabel ?? (authLabel || contactTextDefaults(handler).consentLabel),
+    url: ownUrl || privacyConsent?.url || undefined,
+    linkText: ownUrl ? undefined : privacyConsent?.linkText,
   };
 }
 

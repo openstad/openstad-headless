@@ -181,13 +181,21 @@ export default function WidgetResourceDetailLinks(
     />
   );
 
-  const textField = (name: any, label: string, placeholder?: string) => (
+  const textField = (
+    name: any,
+    label: string,
+    placeholder?: string,
+    description?: string
+  ) => (
     <FormField
       control={form.control}
       name={name}
       render={({ field }) => (
         <FormItem>
           <FormLabel>{label}</FormLabel>
+          {description ? (
+            <FormDescription>{description}</FormDescription>
+          ) : null}
           <FormControl>
             <Input placeholder={placeholder} {...field} />
           </FormControl>
@@ -428,12 +436,14 @@ export default function WidgetResourceDetailLinks(
               {textField(
                 'contactBlock.consentLabel',
                 'Label toestemmingsveld (gebruik {link} voor de plek van de link)',
-                'Ik ga akkoord met het delen van mijn e-mailadres volgens de {link}'
+                'Ik ga akkoord met het delen van mijn e-mailadres volgens de {link}',
+                'Laat leeg voor de standaardtekst. Bij een koppelverzoek is dat het label "Privacy toestemming (AVG)" uit Authenticatie.'
               )}
               {textField(
                 'contactBlock.privacyUrl',
                 'Link naar privacyverklaring',
-                'https://www.voorbeeld.nl/privacy'
+                'https://www.voorbeeld.nl/privacy',
+                'Laat leeg om de privacyverklaring URL en linktekst uit Authenticatie te gebruiken.'
               )}
               {toggleField(
                 'contactBlock.showOwnResource',
