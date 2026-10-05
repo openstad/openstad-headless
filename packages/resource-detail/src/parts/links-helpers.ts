@@ -241,7 +241,9 @@ export function relatedTagOptions(
       byId.set(tag.id, tag);
     }
   }
-  return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name, 'nl'));
+  return Array.from(byId.values()).sort((a, b) =>
+    a.name.localeCompare(b.name, 'nl')
+  );
 }
 
 export function filterByTags(
