@@ -9,13 +9,13 @@ import {
 import RteContent from '@openstad-headless/ui/src/rte-formatting/rte-content';
 import {
   Checkbox,
+  Fieldset,
+  FieldsetLegend,
   FormField,
   FormFieldDescription,
   FormLabel,
   Heading,
   Paragraph,
-  Select,
-  SelectOption,
   Textarea,
 } from '@utrecht/component-library-react';
 import React, { useEffect, useId, useState } from 'react';
@@ -49,6 +49,7 @@ export type ContactBlockProps = {
   privacyConsent?: PrivacyConsent | null;
   showOwnResource?: boolean;
   ownResourceLabel?: string;
+  ownResourceDescription?: string;
   ownResourceTags?: string;
   ownResourceEmptyText?: string;
   loginTitle?: string;
@@ -114,6 +115,7 @@ export function ContactBlock({
   privacyConsent,
   showOwnResource = false,
   ownResourceLabel = 'Kies een eigen inzending',
+  ownResourceDescription,
   ownResourceTags,
   ownResourceEmptyText = 'Er is nog geen eigen inzending die hiervoor gekozen kan worden.',
   loginTitle = 'Log in om een bericht te versturen',
@@ -146,7 +148,7 @@ export function ContactBlock({
   const [message, setMessage] = useState('');
   const [consent, setConsent] = useState(false);
   const [ownResources, setOwnResources] = useState<OwnResource[] | null>(null);
-  const [ownResourceId, setOwnResourceId] = useState('');
+  const [ownResourceIds, setOwnResourceIds] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState('');
   const [sending, setSending] = useState(false);
@@ -189,8 +191,8 @@ export function ContactBlock({
 
   useEffect(() => {
     if (!choosableResources) return;
-    setOwnResourceId(
-      choosableResources.length === 1 ? choosableResources[0].id : ''
+    setOwnResourceIds(
+      choosableResources.length === 1 ? [choosableResources[0].id] : []
     );
   }, [choosableKey]);
 
@@ -204,7 +206,7 @@ export function ContactBlock({
     setConsent(false);
     setError(null);
     setOwnResources(null);
-    setOwnResourceId('');
+    setOwnResourceIds([]);
     setFormOpen(true);
   };
 
@@ -217,7 +219,7 @@ export function ContactBlock({
       showOwnResource,
       message,
       consent,
-      ownResourceId,
+      ownResourceIds,
       messageRequiredText: 'Vul een bericht in.',
       consentRequiredText:
         'Geef toestemming voor het delen van het e-mailadres.',
@@ -237,7 +239,7 @@ export function ContactBlock({
           message: showMessage ? message : '',
           consent: showConsent ? consent : false,
           ...(handler ? { handler } : {}),
-          fields: showOwnResource ? { resourceId: ownResourceId } : {},
+          fields: showOwnResource ? { resourceIds: ownResourceIds } : {},
         }
       );
       setFormOpen(false);
@@ -314,41 +316,47 @@ export function ContactBlock({
           </DialogDescription>
 
           {showOwnResource ? (
-            <FormField type="select">
-              <Paragraph className="utrecht-form-field__label">
-                {choosableResources && choosableResources.length === 0 ? (
-                  <strong>{ownResourceLabel}</strong>
-                ) : (
-                  <FormLabel htmlFor={ownResourceFieldId}>
-                    {ownResourceLabel}
-                  </FormLabel>
-                )}
-              </Paragraph>
-              {choosableResources && choosableResources.length === 0 ? (
+            <Fieldset className="osc-contact-block-own-resources">
+              <FieldsetLegend>{ownResourceLabel}</FieldsetLegend>
+              {ownResourceDescription &&
+              !(choosableResources && choosableResources.length === 0) ? (
+                <div className="osc-contact-block-own-resources-description">
+                  <RteContent
+                    content={ownResourceDescription}
+                    unwrapSingleRootDiv={true}
+                  />
+                </div>
+              ) : null}
+              {!choosableResources ? (
+                <Paragraph>Laden...</Paragraph>
+              ) : choosableResources.length === 0 ? (
                 <FormFieldDescription>
                   {ownResourceEmptyText}
                 </FormFieldDescription>
               ) : (
-                <div className="utrecht-form-field__input">
-                  <Select
-                    id={ownResourceFieldId}
-                    value={ownResourceId}
-                    disabled={!choosableResources}
-                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-                      setOwnResourceId(e.target.value)
-                    }>
-                    <SelectOption value="">
-                      Selecteer een inzending
-                    </SelectOption>
-                    {(choosableResources || []).map((option) => (
-                      <SelectOption key={option.id} value={option.id}>
+                choosableResources.map((option) => {
+                  const optionId = `${ownResourceFieldId}-${option.id}`;
+                  return (
+                    <FormField type="checkbox" key={option.id}>
+                      <Checkbox
+                        id={optionId}
+                        checked={ownResourceIds.includes(option.id)}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setOwnResourceIds((current) =>
+                            e.target.checked
+                              ? [...current, option.id]
+                              : current.filter((id) => id !== option.id)
+                          )
+                        }
+                      />
+                      <FormLabel htmlFor={optionId} type="checkbox">
                         {option.label}
-                      </SelectOption>
-                    ))}
-                  </Select>
-                </div>
+                      </FormLabel>
+                    </FormField>
+                  );
+                })
               )}
-            </FormField>
+            </Fieldset>
           ) : null}
 
           {showMessage ? (

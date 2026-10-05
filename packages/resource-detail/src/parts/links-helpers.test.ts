@@ -206,7 +206,7 @@ describe('validateContact', () => {
     showOwnResource: false,
     message: 'Hallo',
     consent: true,
-    ownResourceId: '',
+    ownResourceIds: [],
     messageRequiredText: 'bericht',
     consentRequiredText: 'toestemming',
     ownResourceRequiredText: 'inzending',
@@ -234,6 +234,13 @@ describe('validateContact', () => {
     expect(validateContact({ ...base, showOwnResource: true })).toBe(
       'inzending'
     );
+    expect(
+      validateContact({
+        ...base,
+        showOwnResource: true,
+        ownResourceIds: ['3', '4'],
+      })
+    ).toBeNull();
   });
 });
 
