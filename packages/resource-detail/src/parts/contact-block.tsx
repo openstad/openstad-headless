@@ -100,26 +100,26 @@ export function ContactBlock({
   headingLevel,
   currentUserProps,
   ownerId,
-  title = 'Wil je contact opnemen met de indiener?',
+  title = 'Contact opnemen met de indiener',
   description,
   buttonText = 'Stuur een bericht',
   handler = '',
-  popupTitle = 'Je gaat een bericht versturen',
+  popupTitle = 'Bericht versturen',
   popupDescription,
   showMessage = true,
-  messageLabel = 'Typ je bericht',
+  messageLabel = 'Bericht',
   showConsent = true,
   consentLabel,
   privacyUrl,
   privacyConsent,
   showOwnResource = false,
-  ownResourceLabel = 'Kies je inzending',
+  ownResourceLabel = 'Kies een eigen inzending',
   ownResourceTags,
-  ownResourceEmptyText = 'Je hebt nog geen inzending die je hiervoor kunt kiezen.',
+  ownResourceEmptyText = 'Er is nog geen eigen inzending die hiervoor gekozen kan worden.',
   loginTitle = 'Log in om een bericht te versturen',
   loginDescription,
   loginButtonText = 'Inloggen',
-  successMessage = 'Je bericht is verstuurd.',
+  successMessage = 'Het bericht is verstuurd.',
 }: Props) {
   const defaults = contactTextDefaults(handler);
   const descriptionText = description ?? defaults.description;
@@ -171,7 +171,9 @@ export function ContactBlock({
       .catch((err: Error) => {
         if (cancelled) return;
         setOwnResources([]);
-        setError(err?.message || 'Je inzendingen konden niet worden geladen');
+        setError(
+          err?.message || 'De eigen inzendingen konden niet worden geladen'
+        );
       });
     return () => {
       cancelled = true;
@@ -218,7 +220,7 @@ export function ContactBlock({
       ownResourceId,
       messageRequiredText: 'Vul een bericht in.',
       consentRequiredText:
-        'Geef toestemming voor het delen van je e-mailadres.',
+        'Geef toestemming voor het delen van het e-mailadres.',
       ownResourceRequiredText: 'Kies een inzending.',
     });
     if (validationError) {

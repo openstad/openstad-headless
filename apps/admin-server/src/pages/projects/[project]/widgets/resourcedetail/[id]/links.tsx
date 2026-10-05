@@ -405,7 +405,7 @@ export default function WidgetResourceDetailLinks(
               {textField(
                 'contactBlock.title',
                 'Titel',
-                'Wil je contact opnemen met de indiener?'
+                'Contact opnemen met de indiener'
               )}
               {richTextField('contactBlock.description', 'Beschrijving')}
               {textField(
@@ -416,7 +416,7 @@ export default function WidgetResourceDetailLinks(
               {textField(
                 'contactBlock.popupTitle',
                 'Titel pop-up',
-                'Je gaat een bericht versturen'
+                'Bericht versturen'
               )}
               {richTextField(
                 'contactBlock.popupDescription',
@@ -426,7 +426,7 @@ export default function WidgetResourceDetailLinks(
               {textField(
                 'contactBlock.messageLabel',
                 'Label berichtveld',
-                'Typ je bericht'
+                'Bericht'
               )}
               {toggleField(
                 'contactBlock.showConsent',
@@ -453,7 +453,7 @@ export default function WidgetResourceDetailLinks(
               {textField(
                 'contactBlock.ownResourceLabel',
                 'Label eigen inzending',
-                'Kies je inzending'
+                'Kies een eigen inzending'
               )}
               {tagField(
                 'contactBlock.ownResourceTags',
@@ -463,7 +463,7 @@ export default function WidgetResourceDetailLinks(
               {textField(
                 'contactBlock.ownResourceEmptyText',
                 'Tekst als er geen eigen inzending is',
-                'Je hebt nog geen inzending die je hiervoor kunt kiezen.'
+                'Er is nog geen eigen inzending die hiervoor gekozen kan worden.'
               )}
               {textField(
                 'contactBlock.loginTitle',
@@ -473,7 +473,7 @@ export default function WidgetResourceDetailLinks(
               {textField(
                 'contactBlock.loginDescription',
                 'Beschrijving login pop-up',
-                'Door in te loggen weten we zeker dat jouw e-mailadres gebruikt kan worden om jou te bereiken.'
+                'Na inloggen is het e-mailadres bekend, zodat de indiener kan reageren.'
               )}
               {textField(
                 'contactBlock.loginButtonText',
@@ -483,7 +483,7 @@ export default function WidgetResourceDetailLinks(
               {textField(
                 'contactBlock.successMessage',
                 'Melding na versturen',
-                'Je bericht is verstuurd.'
+                'Het bericht is verstuurd.'
               )}
             </div>
           ) : null}
