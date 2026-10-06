@@ -74,6 +74,7 @@ const formSchema = z.object({
     messageLabel: z.string().optional(),
     showConsent: z.boolean(),
     consentLabel: z.string().optional(),
+    consentDescription: z.string().optional(),
     privacyUrl: z.string().optional(),
     showOwnResource: z.boolean(),
     ownResourceLabel: z.string().optional(),
@@ -142,6 +143,7 @@ export default function WidgetResourceDetailLinks(
         messageLabel: contact.messageLabel || '',
         showConsent: contact.showConsent !== false,
         consentLabel: contact.consentLabel || '',
+        consentDescription: contact.consentDescription || '',
         privacyUrl: contact.privacyUrl || '',
         showOwnResource: contact.showOwnResource || false,
         ownResourceLabel: contact.ownResourceLabel || '',
@@ -512,6 +514,11 @@ export default function WidgetResourceDetailLinks(
               )}
               {form.watch('contactBlock.showConsent') ? (
                 <>
+                  {richTextField(
+                    'contactBlock.consentDescription',
+                    'Uitleg bij toestemming',
+                    'Optioneel. Staat boven het vinkje, bijvoorbeeld met een link naar het privacybeleid.'
+                  )}
                   {textField(
                     'contactBlock.consentLabel',
                     'Label toestemmingsveld (gebruik {link} voor de plek van de link)',

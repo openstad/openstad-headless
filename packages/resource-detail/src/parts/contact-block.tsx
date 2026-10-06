@@ -45,6 +45,7 @@ export type ContactBlockProps = {
   showMessage?: boolean;
   messageLabel?: string;
   showConsent?: boolean;
+  consentDescription?: string;
   consentLabel?: string;
   privacyUrl?: string;
   privacyConsent?: PrivacyConsent | null;
@@ -112,6 +113,7 @@ export function ContactBlock({
   showMessage = true,
   messageLabel = 'Bericht',
   showConsent = true,
+  consentDescription,
   consentLabel,
   privacyUrl,
   privacyConsent,
@@ -260,6 +262,7 @@ export function ContactBlock({
 
   const messageId = `${fieldId}-message`;
   const consentId = `${fieldId}-consent`;
+  const consentDescriptionId = `${fieldId}-consent-description`;
   const ownResourceFieldId = `${fieldId}-own-resource`;
   const errorId = `${fieldId}-error`;
 
@@ -385,10 +388,23 @@ export function ContactBlock({
             </FormField>
           ) : null}
 
+          {showConsent && consentDescription ? (
+            <div
+              id={consentDescriptionId}
+              className="osc-contact-block-consent-description">
+              <RteContent
+                content={consentDescription}
+                unwrapSingleRootDiv={true}
+              />
+            </div>
+          ) : null}
           {showConsent ? (
             <FormField type="checkbox">
               <Checkbox
                 id={consentId}
+                aria-describedby={
+                  consentDescription ? consentDescriptionId : undefined
+                }
                 checked={consent}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   setConsent(e.target.checked)
