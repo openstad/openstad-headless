@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -41,6 +42,7 @@ const formSchema = z.object({
   image: z.string().optional(),
   defaultResourceImage: z.string().optional(),
   documentMapIconColor: z.string().optional(),
+  detailPageUrl: z.string().optional(),
   newSubmitAddress: z.string().optional(),
   emails: z.array(z.object({ address: z.string() })).optional(),
 });
@@ -76,6 +78,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
         : [{ address: '' }],
       defaultResourceImage: data?.defaultResourceImage || '',
       documentMapIconColor: data?.documentMapIconColor || '#555588',
+      detailPageUrl: data?.detailPageUrl || '',
     }),
     [data]
   );
@@ -109,7 +112,8 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
       values.useDifferentSubmitAddress,
       values.newSubmitAddress,
       values.defaultResourceImage,
-      values.documentMapIconColor
+      values.documentMapIconColor,
+      values.detailPageUrl
     );
     if (tag) {
       toast.success('Tag aangepast!');
@@ -350,6 +354,29 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                           <FormLabel>Resource overview icon</FormLabel>
                           <FormControl>
                             <Input placeholder="" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="detailPageUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Adres van de detailpagina</FormLabel>
+                          <FormDescription>
+                            Waar inzendingen met deze tag naartoe linken.
+                            Gebruik [id] voor het nummer, bijvoorbeeld
+                            /stadmaker?openstadResourceId=[id], of een volledige
+                            URL. Heeft een inzending meer tags met een adres,
+                            dan geldt de eerste in de volgorde van tags.
+                          </FormDescription>
+                          <FormControl>
+                            <Input
+                              placeholder="/inzending?openstadResourceId=[id]"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
