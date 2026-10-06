@@ -367,10 +367,11 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                           <FormLabel>Adres van de detailpagina</FormLabel>
                           <FormDescription>
                             Waar inzendingen met deze tag naartoe linken.
-                            Gebruik [id] voor het nummer, bijvoorbeeld
-                            /stadmaker?openstadResourceId=[id], of een volledige
-                            URL. Heeft een inzending meer tags met een adres,
-                            dan geldt de eerste in de volgorde van tags.
+                            Gebruik [id] voor het nummer. Een pad zoals
+                            /stadmaker?openstadResourceId=[id] komt achter de
+                            project-URL; een volledige URL wordt zo gebruikt.
+                            Heeft een inzending meer tags met een adres, dan
+                            geldt de eerste in de volgorde van tags.
                           </FormDescription>
                           <FormControl>
                             <Input

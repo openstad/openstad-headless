@@ -102,6 +102,28 @@ describe('toRelatedItems', () => {
     ]);
   });
 
+  it('links to the detail page of the tag before the widget link', () => {
+    const withDetailUrl: ResourceLink[] = [
+      {
+        ...links[0],
+        resource: { ...links[0].resource!, detailUrl: '/stadmaker/2' },
+      },
+      links[1],
+    ];
+
+    expect(
+      toRelatedItems(withDetailUrl, { itemLink: '/inzending/[id]' }).map(
+        (item) => item.url
+      )
+    ).toEqual(['/stadmaker/2', '/inzending/9']);
+    expect(
+      toRelatedItems(withDetailUrl, {
+        itemLink: '/inzending/[id]',
+        linkToDetail: false,
+      }).map((item) => item.url)
+    ).toEqual([undefined, undefined]);
+  });
+
   it('filters OpenStad resources by tag', () => {
     const items = toRelatedItems(links, { tagIds: '10' });
     expect(items.map((item) => item.key)).toEqual(['openstad:2']);

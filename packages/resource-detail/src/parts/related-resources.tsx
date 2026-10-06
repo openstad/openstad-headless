@@ -91,7 +91,8 @@ export function RelatedResources({
 
   const allItems = toRelatedItems(links, {
     tagIds,
-    itemLink: linkToDetail ? itemLink : undefined,
+    itemLink,
+    linkToDetail,
     externalItems,
   });
 
