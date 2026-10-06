@@ -262,14 +262,32 @@ export function filterByTags(
 }
 
 export function contactStatus(
-  result: { linked?: unknown[]; requested?: unknown[] } | undefined,
+  result:
+    | {
+        linked?: unknown[];
+        requested?: unknown[];
+        accepted?: unknown[];
+        skipped?: unknown[];
+        invalid?: unknown[];
+        unsupported?: unknown[];
+      }
+    | undefined,
   linkedMessage: string,
-  successMessage: string
+  successMessage: string,
+  notSentMessage: string
 ): string {
-  const linked = (result?.linked || []).length > 0;
-  const requested = (result?.requested || []).length > 0;
+  const count = (items?: unknown[]) => (items || []).length;
+  const linked = count(result?.linked) + count(result?.accepted) > 0;
+  const requested = count(result?.requested) > 0;
+  const notSent =
+    count(result?.skipped) +
+      count(result?.invalid) +
+      count(result?.unsupported) >
+    0;
   if (linked && requested) return `${linkedMessage} ${successMessage}`;
-  return linked ? linkedMessage : successMessage;
+  if (linked) return linkedMessage;
+  if (notSent && !requested) return notSentMessage;
+  return successMessage;
 }
 
 export function validateContact({

@@ -428,22 +428,58 @@ describe('contactConsent', () => {
 describe('contactStatus', () => {
   const linked = 'De koppeling is gemaakt.';
   const sent = 'Het bericht is verstuurd.';
+  const notSent = 'Er is geen nieuwe uitnodiging verstuurd.';
 
   it('confirms a link that was made directly', () => {
-    expect(contactStatus({ linked: [{}], requested: [] }, linked, sent)).toBe(
-      linked
-    );
+    expect(
+      contactStatus({ linked: [{}], requested: [] }, linked, sent, notSent)
+    ).toBe(linked);
   });
 
   it('mentions both a direct link and a sent request', () => {
-    expect(contactStatus({ linked: [{}], requested: [{}] }, linked, sent)).toBe(
-      `${linked} ${sent}`
-    );
+    expect(
+      contactStatus({ linked: [{}], requested: [{}] }, linked, sent, notSent)
+    ).toBe(`${linked} ${sent}`);
   });
 
   it('falls back to the sent message', () => {
-    expect(contactStatus({ requested: [{}] }, linked, sent)).toBe(sent);
-    expect(contactStatus(undefined, linked, sent)).toBe(sent);
+    expect(contactStatus({ requested: [{}] }, linked, sent, notSent)).toBe(
+      sent
+    );
+    expect(contactStatus(undefined, linked, sent, notSent)).toBe(sent);
+  });
+
+  it('says nothing was sent when the request was skipped', () => {
+    expect(
+      contactStatus(
+        { requested: [], linked: [], skipped: [{}] },
+        linked,
+        sent,
+        notSent
+      )
+    ).toBe(notSent);
+  });
+
+  it('says nothing was sent when the request was invalid', () => {
+    expect(
+      contactStatus(
+        { requested: [], linked: [], invalid: [{}] },
+        linked,
+        sent,
+        notSent
+      )
+    ).toBe(notSent);
+  });
+
+  it('confirms a link when an open request the other way was accepted', () => {
+    expect(
+      contactStatus(
+        { requested: [], linked: [], accepted: [{}] },
+        linked,
+        sent,
+        notSent
+      )
+    ).toBe(linked);
   });
 });
 
