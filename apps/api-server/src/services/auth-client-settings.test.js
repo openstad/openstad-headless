@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import { describe, expect, it, vi } from 'vitest';
 
 const require = createRequire(import.meta.url);
-const { createPrivacyConsent } = require('./privacy-consent');
+const { createAuthClientSettings } = require('./auth-client-settings');
 
 const project = { id: 7 };
 
@@ -22,14 +22,14 @@ function setup({
     adapter: vi.fn().mockResolvedValue({ service: { fetchClient } }),
   };
   let time = 0;
-  const privacyConsentFor = createPrivacyConsent({
+  const authClientSettingsFor = createAuthClientSettings({
     settings,
     ttlMs: 1000,
     timeoutMs: 20,
     now: () => time,
   });
   return {
-    privacyConsentFor,
+    authClientSettingsFor,
     fetchClient,
     settings,
     advance: (ms) => {
@@ -38,13 +38,14 @@ function setup({
   };
 }
 
-describe('privacyConsentFor', () => {
+describe('authClientSettingsFor', () => {
   it('reads the url, link text and consent label of the auth client', async () => {
-    const { privacyConsentFor, settings } = setup({
+    const { authClientSettingsFor, settings } = setup({
       client: {
         config: {
           clientDisclaimerUrl: 'https://gemeente.nl/privacy',
           clientDisclaimerText: 'privacybeleid',
+          styling: { logo: 'https://gemeente.nl/logo.png' },
           requiredFields: {
             requiredUserFieldsLabels: {
               privacyConsent: 'Ik ga akkoord met het {link}',
@@ -54,10 +55,11 @@ describe('privacyConsentFor', () => {
       },
     });
 
-    expect(await privacyConsentFor(project)).toEqual({
+    expect(await authClientSettingsFor(project)).toEqual({
       url: 'https://gemeente.nl/privacy',
       linkText: 'privacybeleid',
       label: 'Ik ga akkoord met het {link}',
+      logo: 'https://gemeente.nl/logo.png',
     });
     expect(settings.config).toHaveBeenCalledWith({
       project,
@@ -66,21 +68,27 @@ describe('privacyConsentFor', () => {
   });
 
   it('drops a url that is not http or https', async () => {
-    const { privacyConsentFor } = setup({
-      client: { config: { clientDisclaimerUrl: 'javascript:alert(1)' } },
+    const { authClientSettingsFor } = setup({
+      client: {
+        config: {
+          clientDisclaimerUrl: 'javascript:alert(1)',
+          styling: { logo: 'javascript:alert(1)' },
+        },
+      },
     });
 
-    expect(await privacyConsentFor(project)).toEqual({
+    expect(await authClientSettingsFor(project)).toEqual({
       url: '',
       linkText: '',
       label: '',
+      logo: '',
     });
   });
 
   it('returns nothing for a provider without a client', async () => {
-    const { privacyConsentFor, fetchClient } = setup({ authConfig: {} });
+    const { authClientSettingsFor, fetchClient } = setup({ authConfig: {} });
 
-    expect(await privacyConsentFor(project)).toBeNull();
+    expect(await authClientSettingsFor(project)).toBeNull();
     expect(fetchClient).not.toHaveBeenCalled();
   });
 
@@ -88,13 +96,13 @@ describe('privacyConsentFor', () => {
     const consoleError = vi
       .spyOn(console, 'error')
       .mockImplementation(() => {});
-    const { privacyConsentFor } = setup({
+    const { authClientSettingsFor } = setup({
       error: new Error('Cannot connect to auth server'),
     });
 
-    expect(await privacyConsentFor(project)).toBeNull();
+    expect(await authClientSettingsFor(project)).toBeNull();
     expect(consoleError).toHaveBeenCalledWith(
-      '[privacy-consent] loading the privacy statement failed: projectId=7 error=Cannot connect to auth server'
+      '[auth-client-settings] loading the authentication settings failed: projectId=7 error=Cannot connect to auth server'
     );
     consoleError.mockRestore();
   });
@@ -103,26 +111,26 @@ describe('privacyConsentFor', () => {
     const consoleError = vi
       .spyOn(console, 'error')
       .mockImplementation(() => {});
-    const { privacyConsentFor } = setup({ hang: true });
+    const { authClientSettingsFor } = setup({ hang: true });
 
-    expect(await privacyConsentFor(project)).toBeNull();
+    expect(await authClientSettingsFor(project)).toBeNull();
     expect(consoleError).toHaveBeenCalledWith(
-      '[privacy-consent] loading the privacy statement failed: projectId=7 error=no answer within 20ms'
+      '[auth-client-settings] loading the authentication settings failed: projectId=7 error=no answer within 20ms'
     );
     consoleError.mockRestore();
   });
 
   it('caches the result per project until it expires', async () => {
-    const { privacyConsentFor, fetchClient, advance } = setup({
+    const { authClientSettingsFor, fetchClient, advance } = setup({
       client: { config: { clientDisclaimerUrl: 'https://gemeente.nl/p' } },
     });
 
-    await privacyConsentFor(project);
-    await privacyConsentFor(project);
+    await authClientSettingsFor(project);
+    await authClientSettingsFor(project);
     expect(fetchClient).toHaveBeenCalledTimes(1);
 
     advance(1001);
-    await privacyConsentFor(project);
+    await authClientSettingsFor(project);
     expect(fetchClient).toHaveBeenCalledTimes(2);
   });
 });

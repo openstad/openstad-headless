@@ -11,7 +11,9 @@ const widgetDefinitions = getWidgetSettings();
 
 const { getWidgetJavascriptOutput } = require('./widget-output');
 const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
-const { privacyConsentFor } = require('../../services/privacy-consent');
+const {
+  authClientSettingsFor,
+} = require('../../services/auth-client-settings');
 const {
   normalizeWidgetUrl,
   hashWidgetUrl,
@@ -273,8 +275,14 @@ async function addPrivacyConsent(
 ) {
   if (widgetType !== 'resourcedetail' || !widgetConfig?.contactBlock?.display)
     return;
-  const privacyConsent = await privacyConsentFor(project);
-  if (privacyConsent) defaultConfig.privacyConsent = privacyConsent;
+  const settings = await authClientSettingsFor(project);
+  if (settings) {
+    defaultConfig.privacyConsent = {
+      url: settings.url,
+      linkText: settings.linkText,
+      label: settings.label,
+    };
+  }
 }
 
 function setConfigsToOutput(

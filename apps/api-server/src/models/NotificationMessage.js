@@ -3,6 +3,7 @@ const path = require('path');
 const nunjucks = require('nunjucks');
 const mjml2html = require('mjml');
 const sendMessage = require('../notifications/send-engines');
+const { authClientSettingsFor } = require('../services/auth-client-settings');
 
 const nunjucksEnvReady = (async () => {
   const { applyFilters } =
@@ -19,6 +20,12 @@ async function readTemplateFile(templatePath) {
   } catch (err) {
     return null;
   }
+}
+
+async function mailLogo(project) {
+  if (!project) return '';
+  const settings = await authClientSettingsFor(project);
+  return (settings && settings.logo) || project.config?.styling?.logo || '';
 }
 
 async function loadDefaultTemplate(type) {
@@ -152,6 +159,7 @@ module.exports = (db, sequelize, DataTypes) => {
                 'includeConfig',
                 'includeEmailConfig'
               ).findByPk(instance.projectId);
+              templateData.logo = await mailLogo(templateData.project);
               let keys = ['resource', 'user', 'comment', 'submission'];
               for (let key of keys) {
                 let idkey = key + 'Id';
