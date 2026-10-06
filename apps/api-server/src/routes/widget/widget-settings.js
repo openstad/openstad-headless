@@ -691,6 +691,8 @@ const requiredKeys = [
   'defaultConfig',
 ];
 
+const coreWidgetKeys = Object.keys(moduleDefinitions);
+
 const getWidgetSettings = function () {
   const badDefinitions = {};
 
@@ -718,7 +720,7 @@ const getWidgetSettings = function () {
     var pluginWidgets = pluginLoader.getWidgetDefinitions();
 
     Object.entries(pluginWidgets).forEach(function ([widgetKey, definition]) {
-      if (moduleDefinitions[widgetKey]) {
+      if (coreWidgetKeys.includes(widgetKey)) {
         console.warn(
           '[plugin-loader] Widget key "' +
             widgetKey +
