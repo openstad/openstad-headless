@@ -1,7 +1,14 @@
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { sanitizeUrl } from '@openstad-headless/lib/sanitize-url';
-import { formatDutchDate } from '@openstad-headless/lib/timeline-dates';
+import {
+  formatTimelineDate,
+  getTimelineDateTime,
+} from '@openstad-headless/lib/timeline-date-precision';
+import {
+  formatDutchDate,
+  getTimelineItemStatus,
+} from '@openstad-headless/lib/timeline-dates';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Spacer, getFileFormat } from '@openstad-headless/ui/src';
 import { Accordion } from '@openstad-headless/ui/src/accordion';
@@ -34,6 +41,8 @@ export type AgendaWidgetProps = BaseProps &
       highlighted?: boolean;
       activeFrom?: string;
       activeTo?: string;
+      datePrecision?: string;
+      dateLabel?: string;
       links?: Array<{
         trigger: string;
         title: string;
@@ -55,6 +64,10 @@ export type AgendaWidgetProps = BaseProps &
     defaultClosedFromBreakpoint?: 'not' | '480' | '640' | '768' | '1024';
   };
 
+type AgendaItem = NonNullable<AgendaWidgetProps['items']>[number] & {
+  passed?: boolean;
+};
+
 function Agenda({
   displayToggle = false,
   toggleDefaultClosed = false,
@@ -66,15 +79,6 @@ function Agenda({
   toggleEnd = '',
   ...props
 }: AgendaWidgetProps) {
-  const toDateKey = (value: string | undefined) => {
-    if (!value) return null;
-    const trimmed = value.trim();
-    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
-    const date = new Date(trimmed);
-    if (isNaN(date.getTime())) return null;
-    return date.toISOString().slice(0, 10);
-  };
-
   const isClosedByDefault = () => {
     if (toggleDefaultClosed) return true;
     if (defaultClosedFromBreakpoint === 'not') return false;
@@ -89,15 +93,15 @@ function Agenda({
     ? new Date(props.serverTime || Date.now())
     : null;
   const todayKey = now ? now.toISOString().slice(0, 10) : null;
-  const itemsSorted = [...(props.items ?? [])]
+  const itemsSorted: AgendaItem[] = [...(props.items ?? [])]
     .sort((a, b) => parseInt(a.trigger) - parseInt(b.trigger))
     .map((item) => {
-      if (!todayKey) return item;
-      const fromKey = toDateKey(item.activeFrom);
-      const toKey = toDateKey(item.activeTo);
-      const isActive =
-        (!fromKey || todayKey >= fromKey) && (!toKey || todayKey <= toKey);
-      return { ...item, active: isActive };
+      // Without active dates the editor marks items by hand.
+      if (!todayKey) return { ...item, passed: !!item.active };
+      // Every item whose start date has been reached keeps a filled marker;
+      // only the item whose range contains today is the current one.
+      const { passed, current } = getTimelineItemStatus(item, todayKey);
+      return { ...item, active: current, passed };
     });
 
   let startIdx = isNaN(parseInt(toggleStart)) ? 0 : parseInt(toggleStart);
@@ -111,50 +115,41 @@ function Agenda({
   const collapsibleItems = itemsSorted.slice(startIdx, endIdx + 1);
   const afterItems = itemsSorted.slice(endIdx + 1);
 
-  const renderItems = (items: NonNullable<typeof props.items>) => (
+  const renderItems = (items: AgendaItem[]) => (
     <>
       {items.map((item, index) => (
         <div
           key={item.trigger}
-          className={`osc-agenda-item${item.active ? ' --active-item' : ''}${item.highlighted ? ' --highlighted-item' : ''}`}
+          className={`osc-agenda-item${item.passed ? ' --passed-item' : ''}${item.active ? ' --active-item' : ''}${item.highlighted ? ' --highlighted-item' : ''}`}
           aria-current={item.active ? 'true' : undefined}>
           <div className="osc-date-circle"></div>
           <div className="osc-agenda-content">
             {(() => {
               const isoRegex = /^\d{4}-\d{2}-\d{2}$/;
-              const dateLabel =
-                item.activeFrom && isoRegex.test(item.activeFrom)
-                  ? formatDutchDate(item.activeFrom)
-                  : null;
+              // The date as an editor chose to show it: an exact day, a
+              // week, month, quarter or year, or free text.
+              const dateLabel = formatTimelineDate(item) || null;
+              const dateTime = getTimelineDateTime(item);
               const titleIsDate = !!item.title && isoRegex.test(item.title);
               const customTitle = titleIsDate ? null : item.title || null;
-              if (customTitle) {
-                return (
-                  <>
-                    {dateLabel && (
-                      <Paragraph className="osc-agenda-date-label">
-                        <time dateTime={item.activeFrom}>{dateLabel}</time>
-                      </Paragraph>
-                    )}
-                    <Heading4>{customTitle}</Heading4>
-                  </>
-                );
-              }
+              // One heading per item: "date – title", or whichever is set.
               return (
                 <Heading4>
-                  {dateLabel ? (
-                    <time dateTime={item.activeFrom}>{dateLabel}</time>
+                  {dateLabel && dateTime ? (
+                    <time dateTime={dateTime}>{dateLabel}</time>
+                  ) : dateLabel ? (
+                    dateLabel
                   ) : titleIsDate ? (
                     <time dateTime={item.title as string}>
                       {formatDutchDate(item.title as string)}
                     </time>
-                  ) : (
-                    item.title
-                  )}
+                  ) : null}
+                  {dateLabel && customTitle ? ' – ' : null}
+                  {customTitle}
                 </Heading4>
               );
             })()}
-            <Paragraph>{item.description}</Paragraph>
+            {item.description && <Paragraph>{item.description}</Paragraph>}
             {/* ponytail: één link hoort geen lijst te zijn -> losse <a>; pas bij ≥2 een lijst (1.3.1) */}
             {item.links && item.links.length > 1 && (
               <LinkList className="osc-agenda-list">

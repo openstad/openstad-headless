@@ -50,6 +50,7 @@
   outline-color: transparent;
 }
 
+.osc-agenda-item.--highlighted-item.--passed-item .osc-date-circle:before,
 .osc-agenda-item.--highlighted-item.--active-item .osc-date-circle:before {
   background-color: currentColor;
 }
@@ -97,6 +98,7 @@
   gap: 0.3rem;
 }
 
+.osc-agenda-item.--passed-item .osc-date-circle:before,
 .osc-agenda-item.--active-item .osc-date-circle:before {
   content: '';
   width: calc(var(--icon-size) / 2);
