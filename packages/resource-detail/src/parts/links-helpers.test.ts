@@ -6,6 +6,7 @@ import {
   consentLabelParts,
   consentLabelPlain,
   contactConsent,
+  contactStatus,
   contactTextDefaults,
   externalIdsBySource,
   filterByTags,
@@ -390,5 +391,27 @@ describe('contactConsent', () => {
       url: undefined,
       linkText: undefined,
     });
+  });
+});
+
+describe('contactStatus', () => {
+  const linked = 'De koppeling is gemaakt.';
+  const sent = 'Het bericht is verstuurd.';
+
+  it('confirms a link that was made directly', () => {
+    expect(contactStatus({ linked: [{}], requested: [] }, linked, sent)).toBe(
+      linked
+    );
+  });
+
+  it('mentions both a direct link and a sent request', () => {
+    expect(contactStatus({ linked: [{}], requested: [{}] }, linked, sent)).toBe(
+      `${linked} ${sent}`
+    );
+  });
+
+  it('falls back to the sent message', () => {
+    expect(contactStatus({ requested: [{}] }, linked, sent)).toBe(sent);
+    expect(contactStatus(undefined, linked, sent)).toBe(sent);
   });
 });

@@ -256,6 +256,17 @@ export function filterByTags(
   );
 }
 
+export function contactStatus(
+  result: { linked?: unknown[]; requested?: unknown[] } | undefined,
+  linkedMessage: string,
+  successMessage: string
+): string {
+  const linked = (result?.linked || []).length > 0;
+  const requested = (result?.requested || []).length > 0;
+  if (linked && requested) return `${linkedMessage} ${successMessage}`;
+  return linked ? linkedMessage : successMessage;
+}
+
 export function validateContact({
   isDefaultHandler,
   showMessage,
