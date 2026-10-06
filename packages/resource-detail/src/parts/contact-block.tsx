@@ -59,6 +59,7 @@ export type ContactBlockProps = {
   loginButtonText?: string;
   successMessage?: string;
   linkedMessage?: string;
+  notSentMessage?: string;
 };
 
 type Props = ContactBlockProps & {
@@ -127,6 +128,7 @@ export function ContactBlock({
   loginButtonText = 'Inloggen',
   successMessage = 'Het bericht is verstuurd.',
   linkedMessage = 'De koppeling is gemaakt.',
+  notSentMessage = 'Er is geen nieuwe uitnodiging verstuurd. Er staat al een uitnodiging open of de inzendingen zijn al gekoppeld.',
 }: Props) {
   const defaults = contactTextDefaults(handler);
   const descriptionText = description ?? defaults.description;
@@ -251,8 +253,19 @@ export function ContactBlock({
         }
       );
       setFormOpen(false);
-      setStatus(contactStatus(response?.result, linkedMessage, successMessage));
-      if (response?.result?.linked?.length) refreshLinks();
+      setStatus(
+        contactStatus(
+          response?.result,
+          linkedMessage,
+          successMessage,
+          notSentMessage
+        )
+      );
+      if (
+        response?.result?.linked?.length ||
+        response?.result?.accepted?.length
+      )
+        refreshLinks();
     } catch (err: any) {
       setError(err?.message || 'Het versturen is mislukt.');
     } finally {

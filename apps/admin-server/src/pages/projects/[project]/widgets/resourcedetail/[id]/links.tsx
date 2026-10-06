@@ -86,6 +86,7 @@ const formSchema = z.object({
     loginButtonText: z.string().optional(),
     successMessage: z.string().optional(),
     linkedMessage: z.string().optional(),
+    notSentMessage: z.string().optional(),
   }),
 });
 
@@ -155,6 +156,7 @@ export default function WidgetResourceDetailLinks(
         loginButtonText: contact.loginButtonText || '',
         successMessage: contact.successMessage || '',
         linkedMessage: contact.linkedMessage || '',
+        notSentMessage: contact.notSentMessage || '',
       },
     },
   });
@@ -570,6 +572,14 @@ export default function WidgetResourceDetailLinks(
                     'Melding na direct koppelen',
                     'De koppeling is gemaakt.',
                     'Als de bezoeker eigen inzendingen aan elkaar koppelt, wordt de koppeling direct gemaakt.'
+                  )}
+              {isContactMessage
+                ? null
+                : textField(
+                    'contactBlock.notSentMessage',
+                    'Melding als er niets is verstuurd',
+                    'Er is geen nieuwe uitnodiging verstuurd. Er staat al een uitnodiging open of de inzendingen zijn al gekoppeld.',
+                    'Als er al een uitnodiging openstaat of de inzendingen al gekoppeld zijn, wordt er geen nieuwe uitnodiging verstuurd.'
                   )}
             </div>
           ) : null}
