@@ -91,6 +91,11 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.TEXT,
         allowNull: true,
       },
+
+      detailPageUrl: {
+        type: DataTypes.TEXT,
+        allowNull: true,
+      },
     },
     {
       defaultScope: {
