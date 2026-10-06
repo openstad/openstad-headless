@@ -1,6 +1,6 @@
 export default function useResourceLinks({ projectId, resourceId }) {
   let self = this;
-  const { data, error, isLoading } = self.useSWR(
+  const { data, error, isLoading, mutate } = self.useSWR(
     projectId && resourceId ? { projectId, resourceId } : null,
     'links.fetchLinks'
   );
@@ -12,5 +12,10 @@ export default function useResourceLinks({ projectId, resourceId }) {
     document.dispatchEvent(event);
   }
 
-  return { data: Array.isArray(data) ? data : [], error, isLoading };
+  return {
+    data: Array.isArray(data) ? data : [],
+    error,
+    isLoading,
+    refresh: mutate,
+  };
 }

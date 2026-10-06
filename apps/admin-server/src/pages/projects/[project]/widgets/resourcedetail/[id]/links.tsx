@@ -84,6 +84,7 @@ const formSchema = z.object({
     loginDescription: z.string().optional(),
     loginButtonText: z.string().optional(),
     successMessage: z.string().optional(),
+    linkedMessage: z.string().optional(),
   }),
 });
 
@@ -151,6 +152,7 @@ export default function WidgetResourceDetailLinks(
         loginDescription: contact.loginDescription || '',
         loginButtonText: contact.loginButtonText || '',
         successMessage: contact.successMessage || '',
+        linkedMessage: contact.linkedMessage || '',
       },
     },
   });
@@ -554,6 +556,14 @@ export default function WidgetResourceDetailLinks(
                 'Melding na versturen',
                 'Het bericht is verstuurd.'
               )}
+              {isContactMessage
+                ? null
+                : textField(
+                    'contactBlock.linkedMessage',
+                    'Melding na direct koppelen',
+                    'De koppeling is gemaakt.',
+                    'Als de bezoeker eigen inzendingen aan elkaar koppelt, wordt de koppeling direct gemaakt.'
+                  )}
             </div>
           ) : null}
 

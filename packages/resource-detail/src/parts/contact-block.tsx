@@ -26,6 +26,7 @@ import {
   consentLabelParts,
   consentLabelPlain,
   contactConsent,
+  contactStatus,
   contactTextDefaults,
   validateContact,
   withoutLinked,
@@ -56,6 +57,7 @@ export type ContactBlockProps = {
   loginDescription?: string;
   loginButtonText?: string;
   successMessage?: string;
+  linkedMessage?: string;
 };
 
 type Props = ContactBlockProps & {
@@ -122,6 +124,7 @@ export function ContactBlock({
   loginDescription,
   loginButtonText = 'Inloggen',
   successMessage = 'Het bericht is verstuurd.',
+  linkedMessage = 'De koppeling is gemaakt.',
 }: Props) {
   const defaults = contactTextDefaults(handler);
   const descriptionText = description ?? defaults.description;
@@ -137,10 +140,11 @@ export function ContactBlock({
   const { data: currentUser } = datastore.useCurrentUser({
     ...currentUserProps,
   });
-  const { data: viewedLinks } = datastore.useResourceLinks({
-    projectId,
-    resourceId,
-  });
+  const { data: viewedLinks, refresh: refreshLinks } =
+    datastore.useResourceLinks({
+      projectId,
+      resourceId,
+    });
 
   const fieldId = useId();
   const [loginOpen, setLoginOpen] = useState(false);
@@ -183,7 +187,9 @@ export function ContactBlock({
   }, [formOpen, showOwnResource, ownResourceTags, projectId]);
 
   const choosableResources = ownResources
-    ? withoutLinked(ownResources, viewedLinks || [])
+    ? withoutLinked(ownResources, viewedLinks || []).filter(
+        (option) => option.id !== resourceId
+      )
     : null;
   const choosableKey = (choosableResources || [])
     .map((option) => option.id)
@@ -233,7 +239,7 @@ export function ContactBlock({
     setSending(true);
     setError(null);
     try {
-      await datastore.api.links.sendContact(
+      const response = await datastore.api.links.sendContact(
         { projectId, resourceId },
         {
           message: showMessage ? message : '',
@@ -243,7 +249,8 @@ export function ContactBlock({
         }
       );
       setFormOpen(false);
-      setStatus(successMessage);
+      setStatus(contactStatus(response?.result, linkedMessage, successMessage));
+      if (response?.result?.linked?.length) refreshLinks();
     } catch (err: any) {
       setError(err?.message || 'Het versturen is mislukt.');
     } finally {
@@ -256,7 +263,8 @@ export function ContactBlock({
   const ownResourceFieldId = `${fieldId}-own-resource`;
   const errorId = `${fieldId}-error`;
 
-  if (isLoggedIn && ownerId && currentUser.id === ownerId) return null;
+  if (isLoggedIn && ownerId && currentUser.id === ownerId && isDefaultHandler)
+    return null;
 
   return (
     <section className="osc-contact-block">
