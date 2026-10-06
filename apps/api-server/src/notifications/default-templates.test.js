@@ -56,6 +56,7 @@ describe('default template: contact message - user', () => {
       senderName: 'Cees',
       senderEmail: 'cees@example.nl',
       message: 'Zullen we samenwerken?',
+      logo: 'https://gemeente.nl/logo.png',
     });
 
     const result = await mjml2html(body);
@@ -65,5 +66,7 @@ describe('default template: contact message - user', () => {
     expect(result.html).toContain('Zullen we samenwerken?');
     expect(result.html).toContain('mailto:cees@example.nl');
     expect(result.html).toContain('Dit is een automatisch bericht.');
+    expect(result.html).toContain('https://gemeente.nl/logo.png');
+    expect(result.html).toContain('Bericht van Cees');
   });
 });
