@@ -32,8 +32,9 @@ function escapeLike(word) {
   return word.replace(/[\\%_]/g, (character) => `\\${character}`);
 }
 
-function toOption(resource) {
+function toOption(user, resource) {
   const images = Array.isArray(resource.images) ? resource.images : [];
+  const own = !!(user && user.id && resource.userId === user.id);
   return {
     id: String(resource.id),
     label: resource.title,
@@ -41,6 +42,7 @@ function toOption(resource) {
     ...(Array.isArray(resource.tags)
       ? { tagIds: resource.tags.map((tag) => String(tag.id)) }
       : {}),
+    ...(own ? { own: true } : {}),
   };
 }
 
@@ -115,7 +117,7 @@ router.get('/:source', rateLimiter(), async function (req, res, next) {
       limit,
     });
 
-    res.json(resources.map(toOption));
+    res.json(resources.map((resource) => toOption(req.user, resource)));
   } catch (err) {
     next(err);
   }
@@ -146,7 +148,7 @@ router.get('/:source/items', rateLimiter(), async function (req, res, next) {
       attributes: ['id', 'title', 'images', 'userId'],
     });
 
-    res.json(resources.map(toOption));
+    res.json(resources.map((resource) => toOption(req.user, resource)));
   } catch (err) {
     next(err);
   }
