@@ -66,6 +66,7 @@ db.ResourceLink.create = async (data, options) => {
   created = data;
   return { id: 99, ...data };
 };
+db.Project.findByPk = async (id) => ({ id, url: 'https://stad.example.nl' });
 db.Resource.findOne = async ({ where, transaction }) => {
   transactions.push(['Resource.findOne', transaction]);
   return resources.find((resource) => matches(resource, where)) || null;
@@ -88,7 +89,16 @@ describe('resource-links service', () => {
         id: 20,
         projectId: PROJECT_ID,
         title: 'Stadmaker',
-        tags: [{ id: 3, name: 'Stadmaker', type: 'soort', extra: 'x' }],
+        tags: [
+          {
+            id: 3,
+            name: 'Stadmaker',
+            type: 'soort',
+            extra: 'x',
+            seqnr: 1,
+            detailPageUrl: '/stadmaker/[id]',
+          },
+        ],
       },
       { id: 30, projectId: PROJECT_ID, title: 'Concept', tags: [] },
     ];
@@ -250,6 +260,7 @@ describe('resource-links service', () => {
           targetId: '20',
           resource: {
             id: 20,
+            detailUrl: 'https://stad.example.nl/stadmaker/20',
             title: 'Stadmaker',
             summary: undefined,
             images: undefined,

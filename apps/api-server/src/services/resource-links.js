@@ -1,6 +1,7 @@
 const createError = require('http-errors');
 const { Op } = require('sequelize');
 const db = require('../db');
+const { resolvedDetailUrl } = require('./resource-detail-urls');
 
 const OPENSTAD_SOURCE = 'openstad';
 const SOURCE_PATTERN = /^[a-z0-9-]{1,64}$/;
@@ -21,9 +22,10 @@ function incomingWhere(projectId, resourceId) {
   };
 }
 
-function toLinkedResource(resource) {
+function toLinkedResource(resource, project) {
   return {
     id: resource.id,
+    detailUrl: resolvedDetailUrl(resource.id, resource.tags, project),
     title: resource.title,
     summary: resource.summary,
     images: resource.images,
@@ -59,6 +61,9 @@ async function listLinks({ projectId, resourceId, user }) {
   const resourcesById = new Map(
     visibleResources.map((resource) => [resource.id, resource])
   );
+  const project = visibleResources.length
+    ? await db.Project.findByPk(projectId, { attributes: ['id', 'url'] })
+    : null;
 
   const outgoingLinks = outgoing.flatMap((link) => {
     if (link.targetSource !== OPENSTAD_SOURCE) {
@@ -79,7 +84,7 @@ async function listLinks({ projectId, resourceId, user }) {
             direction: 'outgoing',
             source: OPENSTAD_SOURCE,
             targetId: link.targetId,
-            resource: toLinkedResource(resource),
+            resource: toLinkedResource(resource, project),
           },
         ]
       : [];
@@ -94,7 +99,7 @@ async function listLinks({ projectId, resourceId, user }) {
             direction: 'incoming',
             source: OPENSTAD_SOURCE,
             targetId: String(link.resourceId),
-            resource: toLinkedResource(resource),
+            resource: toLinkedResource(resource, project),
           },
         ]
       : [];

@@ -54,6 +54,7 @@ function getPluginServices() {
   return {
     db: require('../db'),
     resourceLinks: require('./resource-links'),
+    resourceDetailUrls: require('./resource-detail-urls'),
   };
 }
 

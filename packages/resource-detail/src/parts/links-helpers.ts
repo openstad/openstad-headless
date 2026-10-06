@@ -7,6 +7,7 @@ export type ResourceLink = {
   targetId: string;
   resource?: {
     id: number;
+    detailUrl?: string | null;
     title: string;
     summary?: string;
     images?: Array<{ url?: string }>;
@@ -167,10 +168,12 @@ export function toRelatedItems(
   {
     tagIds,
     itemLink,
+    linkToDetail = true,
     externalItems = {},
   }: {
     tagIds?: string;
     itemLink?: string;
+    linkToDetail?: boolean;
     externalItems?: Record<string, ExternalItem>;
   }
 ): RelatedItem[] {
@@ -200,7 +203,9 @@ export function toRelatedItems(
         title: link.resource.title,
         summary: link.resource.summary,
         image: link.resource.images?.[0]?.url,
-        url: buildItemLink(itemLink, id),
+        url: linkToDetail
+          ? link.resource.detailUrl || buildItemLink(itemLink, id)
+          : undefined,
         tags: (link.resource.tags || []).map((tag) => ({
           id: String(tag.id),
           name: tag.name || '',
