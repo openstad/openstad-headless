@@ -25,10 +25,11 @@ function fromClient(client) {
     label:
       clientConfig.requiredFields?.requiredUserFieldsLabels?.privacyConsent ||
       '',
+    logo: httpUrl(clientConfig.styling?.logo),
   };
 }
 
-function createPrivacyConsent({
+function createAuthClientSettings({
   settings = authSettings,
   ttlMs = CACHE_TTL_MS,
   timeoutMs = TIMEOUT_MS,
@@ -56,7 +57,7 @@ function createPrivacyConsent({
     return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
   }
 
-  return async function privacyConsentFor(project) {
+  return async function authClientSettingsFor(project) {
     const cached = cache.get(project.id);
     if (cached && cached.expiresAt > now()) return cached.value;
 
@@ -65,7 +66,7 @@ function createPrivacyConsent({
       value = await withTimeout(load(project));
     } catch (err) {
       console.error(
-        `[privacy-consent] loading the privacy statement failed: projectId=${project.id} error=${err.message}`
+        `[auth-client-settings] loading the authentication settings failed: projectId=${project.id} error=${err.message}`
       );
     }
     cache.set(project.id, { value, expiresAt: now() + ttlMs });
@@ -74,6 +75,6 @@ function createPrivacyConsent({
 }
 
 module.exports = {
-  createPrivacyConsent,
-  privacyConsentFor: createPrivacyConsent(),
+  createAuthClientSettings,
+  authClientSettingsFor: createAuthClientSettings(),
 };
