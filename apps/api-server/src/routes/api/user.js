@@ -74,8 +74,6 @@ const filterBody = (req, res, next) => {
     'detailsViewableByRole',
     'firstname',
     'lastname',
-    'twoFactorToken',
-    'twoFactorConfigured',
     'emailNotificationConsent',
   ];
 
@@ -96,6 +94,43 @@ const filterBody = (req, res, next) => {
 
   next();
 };
+
+// The auth server identity (password, email, 2FA) is shared by every project
+// the person is in, so changing it requires update rights on all of their
+// user records, or being that person.
+async function canManageIdentity(req, target) {
+  const identifier = target?.idpUser?.identifier;
+  if (!identifier) return true;
+  if (hasRole(req.user, 'superuser')) return true;
+  if (req.user?.idpUser?.identifier === identifier) return true;
+
+  const linkedUsers = await db.User.findAll({
+    where: {
+      idpUser: { identifier, provider: target.idpUser.provider },
+      projectId: { [Op.not]: 0 },
+    },
+  });
+  const existingProjects = await db.Project.findAll({
+    where: { id: { [Op.in]: linkedUsers.map((u) => u.projectId) } },
+    attributes: ['id'],
+  });
+  const existingProjectIds = new Set(existingProjects.map((p) => p.id));
+
+  return linkedUsers
+    .filter((u) => existingProjectIds.has(u.projectId))
+    .every((u) => u.can('update', req.user));
+}
+
+// Only send fields the caller may change on the target record itself.
+async function authorizeIdentityData(req, target, userData) {
+  const data = merge.recursive(true, userData);
+  target.authorizeData(data, 'update', req.user);
+  if (!(await canManageIdentity(req, target))) {
+    delete data.email;
+    delete data.password;
+  }
+  return data;
+}
 
 const router = express.Router({ mergeParams: true });
 
@@ -293,7 +328,10 @@ router
   .post(function (req, res, next) {
     // check config
     if (!(
-      ['admin', 'editor'].includes(req.body?.role) || // Allow admin/editor creation for projects that have ended
+      // Allow admin/editor creation for projects that have ended, but only by
+      // callers who hold that role themselves (filterBody drops it otherwise)
+      (['admin', 'editor'].includes(req.body?.role) &&
+        hasRole(req.user, req.body.role)) ||
       (req.project.config &&
         req.project.config.users &&
         req.project.config.users.canCreateNewUsers)
@@ -418,7 +456,8 @@ router
             authConfig: req.authConfig,
             userData: {
               id: req.oAuthUser.idpUser.identifier,
-              role: req.body.role,
+              // the role as authorized for this project, not the requested one
+              role: req.body.role ? result.role : undefined,
             },
           });
         return next();
@@ -465,10 +504,19 @@ function withTwoFactorTarget(req, res, next) {
     .catch(next);
 }
 
-function canManageTwoFactor(req, res, next) {
-  if (!(req.results && req.results.can && req.results.can('update')))
-    return next(createError(403, 'You cannot manage two factor for this User'));
-  return next();
+async function canManageTwoFactor(req, res, next) {
+  try {
+    if (
+      !(req.results && req.results.can && req.results.can('update')) ||
+      !(await canManageIdentity(req, req.results))
+    )
+      return next(
+        createError(403, 'You cannot manage two factor for this User')
+      );
+    return next();
+  } catch (err) {
+    return next(err);
+  }
 }
 
 router
@@ -633,6 +681,14 @@ router
       req.targetUser.can('update', req.user)
     ))
       return next(createError(403, 'You cannot update this User'));
+    // check every linked user before anonymizing anything
+    if (req.params.all) {
+      const selected = (req.linkedUsers || []).filter(
+        (user) => !req.onlyUserIds || req.onlyUserIds.includes(user.id)
+      );
+      if (!selected.every((user) => user.can && user.can('update', req.user)))
+        return next(createError(403, 'You cannot update this User'));
+    }
     if (req.onlyUserIds && !req.onlyUserIds.includes(req.targetUser.id)) {
       req.results = {
         resources: [],
@@ -826,9 +882,10 @@ router
           req.results.idpUser.provider == req.authConfig.provider &&
           req.adapter.service.updateUser
         ) {
+          const identityData = await authorizeIdentityData(req, user, userData);
           updatedUserData = await req.adapter.service.updateUser({
             authConfig: req.authConfig,
-            userData: merge(true, userData, {
+            userData: merge(true, identityData, {
               id: user.idpUser && user.idpUser.identifier,
             }),
           });
@@ -885,14 +942,8 @@ router
                 : synchronizedUpdatedUserData
             );
 
-            if (!apiUser.can('update', req.user)) {
-              syncErrors.push(
-                new Error(
-                  `Not authorized to update user ${apiUser.id} in project ${apiUser.projectId}`
-                )
-              );
-              return;
-            }
+            // records in projects where the caller has no rights are left alone
+            if (!apiUser.can('update', req.user)) return;
 
             if (
               data?.idpUser &&
@@ -917,6 +968,7 @@ router
             `User update: one or more user records failed to update (${syncErrors.length}):`,
             syncErrors.map((e) => e.message)
           );
+          return next(createError(500, 'User update failed'));
         }
       } else {
         let apiUser = await db.User.scope(['includeProject']).findOne({

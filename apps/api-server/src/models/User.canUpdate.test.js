@@ -74,3 +74,43 @@ describe('User.can("update")', () => {
     expect(!!self.can('update')).toBe(true);
   });
 });
+
+describe('User.can("update"/"delete") across projects', () => {
+  const inProject = (u, projectId) => Object.assign(u, { projectId });
+
+  it('denies a moderator of project A acting on a member row in project B', () => {
+    const victim = inProject(target('member'), 2);
+    expect(!!victim.can('update', inProject(user('moderator', 8), 1))).toBe(
+      false
+    );
+  });
+
+  it('denies an admin of project A deleting a member row in project B', () => {
+    const victim = inProject(target('member'), 2);
+    expect(!!victim.can('delete', inProject(user('admin', 8), 1))).toBe(false);
+  });
+
+  it('still allows a moderator acting on a member in their own project', () => {
+    const member = inProject(target('member'), 1);
+    expect(!!member.can('update', inProject(user('moderator', 8), 1))).toBe(
+      true
+    );
+  });
+
+  it('still allows a superuser acting on another project', () => {
+    const member = inProject(target('member'), 2);
+    expect(!!member.can('update', inProject(user('superuser', 1), 1))).toBe(
+      true
+    );
+    expect(!!member.can('delete', inProject(user('superuser', 1), 1))).toBe(
+      true
+    );
+  });
+
+  it('still allows the same person through their idp identity on another project', () => {
+    const own = inProject(target('member'), 2);
+    expect(
+      !!own.can('update', inProject(user('member', 500, 'idp-93'), 1))
+    ).toBe(true);
+  });
+});

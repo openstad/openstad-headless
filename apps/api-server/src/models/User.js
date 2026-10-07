@@ -101,7 +101,8 @@ module.exports = function (db, sequelize, DataTypes) {
               ) {
                 roleToReturn = actionUserRole;
               } else {
-                roleToReturn = fallBackRole;
+                // not allowed: leave the role unchanged instead of demoting
+                roleToReturn = undefined;
               }
             } else {
               // view/list: only privileged callers or the user themselves see the real role;
@@ -720,6 +721,9 @@ module.exports = function (db, sequelize, DataTypes) {
         self.id
       );
 
+      // roles are project-local: only superusers act on users of other projects
+      valid = valid && isSameProjectOrSuperuser(user, self);
+
       // extra: isOwner through user on different project
       valid =
         valid ||
@@ -750,6 +754,8 @@ module.exports = function (db, sequelize, DataTypes) {
       // extra: admin on different project
       valid = valid && userHasRole(user, 'admin');
 
+      valid = valid && isSameProjectOrSuperuser(user, self);
+
       // extra: geen acties op users met meer rechten dan je zelf hebt
       valid = valid && userHasRole(user, self.role);
 
@@ -758,6 +764,12 @@ module.exports = function (db, sequelize, DataTypes) {
   };
 
   return User;
+
+  function isSameProjectOrSuperuser(user, self) {
+    if (userHasRole(user, 'superuser')) return true;
+    if (user.projectId == null || self.projectId == null) return true;
+    return user.projectId == self.projectId;
+  }
 
   function beforeValidateHook(instance, options) {
     return new Promise((resolve, reject) => {

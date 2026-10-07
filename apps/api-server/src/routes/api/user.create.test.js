@@ -42,12 +42,12 @@ db.User.create = async (data) => {
   return createdUser();
 };
 
-function createApp(user) {
+function createApp(user, canCreateNewUsers = true) {
   const app = express();
   app.use(express.json());
   app.use((req, res, next) => {
     req.user = user;
-    req.project = { id: 1, config: { users: { canCreateNewUsers: true } } };
+    req.project = { id: 1, config: { users: { canCreateNewUsers } } };
     req.oAuthUser = { idpUser: oAuthIdentity, role: 'member' };
     next();
   });
@@ -73,6 +73,23 @@ describe('POST create user serializes the response for the requester', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.idpUser).toEqual(oAuthIdentity);
+  });
+
+  it('does not let a moderator bypass canCreateNewUsers by requesting a higher role', async () => {
+    const res = await request(createApp({ role: 'moderator', id: 8 }, false))
+      .post(url)
+      .send({ email: 'nieuw@example.com', role: 'admin' });
+
+    expect(res.status).toBe(401);
+    expect(created).toBeNull();
+  });
+
+  it('still lets an admin create an admin when canCreateNewUsers is off', async () => {
+    const res = await request(createApp(admin, false))
+      .post(url)
+      .send({ email: 'nieuw@example.com', role: 'admin' });
+
+    expect(res.status).toBe(200);
   });
 
   it('still strips idpUser for an unprivileged viewer (hardening intact)', () => {

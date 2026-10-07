@@ -43,6 +43,9 @@ function targetUser() {
 db.User.scope = () => ({
   findOne: async () => (found ? targetUser() : null),
 });
+// The target identity has no user records in other projects.
+db.User.findAll = async () => [targetUser()];
+db.Project.findAll = async () => [];
 
 authSettings.config = async () => ({});
 authSettings.adapter = async () => ({ service: { updateUser, fetchUserData } });
