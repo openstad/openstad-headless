@@ -79,7 +79,9 @@ RUN npm cache clean --force
 
 # Remove all folders from ./apps except the one specified by APP
 RUN find ./apps -mindepth 1 -maxdepth 1 -type d ! -name "${APP}" -exec rm -rf {} +
-RUN npm prune --ws
+# Prune reinstalls from the reviewed lock file; like npm ci it may skip the
+# safe-chain minimum-age check when it needs to re-download tarballs.
+RUN npm prune --ws --safe-chain-skip-minimum-package-age
 RUN if [ "${APP}" = "image-server" ]; then \
       SHARP_VERSION="$(node -p "const p=require('./package-lock.json').packages; const s=p['node_modules/image-steam/node_modules/sharp']||p['node_modules/sharp']; if(!s||!s.version) throw new Error('sharp not in lockfile'); s.version")" && \
       [ -n "${SHARP_VERSION}" ] && \
@@ -124,7 +126,7 @@ ARG OPENSTAD_VERSION
 ENV OPENSTAD_VERSION=$OPENSTAD_VERSION
 ENV NEXT_PUBLIC_OPENSTAD_VERSION=$OPENSTAD_VERSION
 RUN npm run build --if-present -w $WORKSPACE
-RUN npm prune --ws --production
+RUN npm prune --ws --production --safe-chain-skip-minimum-package-age
 RUN if [ "${APP}" = "image-server" ]; then \
       SHARP_VERSION="$(node -p "const p=require('./package-lock.json').packages; const s=p['node_modules/image-steam/node_modules/sharp']||p['node_modules/sharp']; if(!s||!s.version) throw new Error('sharp not in lockfile'); s.version")" && \
       [ -n "${SHARP_VERSION}" ] && \

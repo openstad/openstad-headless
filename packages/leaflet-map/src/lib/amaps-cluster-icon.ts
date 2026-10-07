@@ -66,6 +66,7 @@ export default function amapsCreateClusterIcon(
     '</text>';
 
   html += '</svg>';
+  html += `<span class="sr-only">${count} locaties gegroepeerd</span>`;
 
   let className = 'osc-map-marker-cluster';
   if (isFaded) className += ' osc-map-marker-cluster-faded';

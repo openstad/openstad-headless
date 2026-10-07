@@ -355,6 +355,10 @@ module.exports = function (db, sequelize, DataTypes) {
       // do not anonymize admins
       result.admins = users.filter((user) => userHasRole(user, 'admin'));
       result.users = users.filter((user) => !userHasRole(user, 'admin'));
+
+      result.externalUserIds = result.users
+        .filter((user) => user.idpUser && user.idpUser.identifier)
+        .map((user) => user.idpUser.identifier);
     } catch (err) {
       console.log(err);
       throw err;
@@ -365,6 +369,7 @@ module.exports = function (db, sequelize, DataTypes) {
 
   Project.prototype.doAnonymizeAllUsers = async function (
     usersToAnonymize,
+    externalUserIds,
     useAuth = 'default'
   ) {
     // anonymize all users for this project

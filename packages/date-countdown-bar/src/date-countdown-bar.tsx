@@ -118,8 +118,15 @@ function DateCountdownBar({
         </Paragraph>
       ) : null}
 
-      <div className="osc-countdown-bar-nr-container">
-        <div className="osc-countdown-bar-nr-left">
+      <div
+        className="osc-countdown-bar-nr-container"
+        role="timer"
+        aria-live="polite"
+        aria-atomic="true">
+        <span className="sr-only">
+          {`Resterende tijd: ${timeLeft.days} dagen${showHours ? `, ${timeLeft.hours} uren` : ''}${showMinutes && timeLeft.minutes > 0 ? `, ${timeLeft.minutes} minuten` : ''}`}
+        </span>
+        <div className="osc-countdown-bar-nr-left" aria-hidden="true">
           <Paragraph>
             <span className="nr-left-title amount">
               {renderAmount(padNumber(timeLeft.days))}
@@ -128,7 +135,7 @@ function DateCountdownBar({
           </Paragraph>
         </div>
         {showHours && (
-          <div className="osc-countdown-bar-nr-left">
+          <div className="osc-countdown-bar-nr-left" aria-hidden="true">
             <Paragraph>
               <span className="nr-left-title amount">
                 {renderAmount(padNumber(timeLeft.hours))}
@@ -139,7 +146,7 @@ function DateCountdownBar({
         )}
         {showMinutes &&
           (timeLeft.minutes > 0 ? (
-            <div className="osc-countdown-bar-nr-left">
+            <div className="osc-countdown-bar-nr-left" aria-hidden="true">
               <Paragraph>
                 <span className="nr-left-title amount">
                   {renderAmount(padNumber(timeLeft.minutes))}

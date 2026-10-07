@@ -34,6 +34,12 @@ module.exports = {
                 },
               ],
             },
+            current: {
+              type: 'boolean',
+              label: 'Mark as current phase',
+              help: 'Marks this item as the current phase (adds aria-current for screen readers)',
+              def: false,
+            },
             links: {
               name: 'links',
               type: 'array',

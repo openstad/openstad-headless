@@ -47,8 +47,18 @@ module.exports = {
         }
 
         if (req.query.openstadlogout) {
-          req.session.destroy(() => {});
-          return next();
+          // Redirect instead of rendering: req.user (Apostrophe admin) is
+          // already deserialized for this request, and rendering with a
+          // destroyed session crashes settings.getBrowserData
+          let target = removeURLParameter(req.url, 'openstadlogout');
+          // Guard against open redirect: only allow local paths,
+          // reject protocol-relative (//host) and backslash (/\host) forms
+          if (!/^\/(?![/\\])/.test(target)) {
+            target = '/';
+          }
+          return req.session.destroy(() => {
+            res.redirect(target);
+          });
         }
 
         const thisHost = req.headers['x-forwarded-host'] || req.get('host');

@@ -41,7 +41,7 @@ type CombinedProjectRoleAndConsent = {
 
 export default function CreateUserProjects() {
   const { data: projects } = projectListSwr();
-  const { data: users, updateUser } = useUser();
+  const { data: users, updateUser, mutate } = useUser();
   const { createUser } = useUsers();
   const [projectRoles, setProjectRoles] = useState<Array<ProjectRole>>([]);
   const [emailNotificationConsents, setEmailNotificationConsents] = useState<
@@ -105,7 +105,12 @@ export default function CreateUserProjects() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    let error: any;
+    let savedCount = 0;
+    const failures: Array<{ project: string; message: string }> = [];
+
+    const projectLabel = (projectId: string) =>
+      projects?.find((p: any) => p.id == projectId)?.name ||
+      `project ${projectId}`;
 
     const combinedByProject = new Map<string, CombinedProjectRoleAndConsent>();
     for (const entry of [
@@ -128,63 +133,91 @@ export default function CreateUserProjects() {
         );
       }
       if (user) {
-        try {
-          const updatedUser = user;
-          if (
-            typeof updateValue.consent !== 'undefined' &&
-            user.emailNotificationConsent !== updateValue.consent
-          ) {
-            updatedUser.emailNotificationConsent = updateValue.consent;
-          }
-          if (
-            typeof updateValue.displayName !== 'undefined' &&
-            user.projectDisplayName !== (updateValue.displayName || null)
-          ) {
-            updatedUser.projectDisplayName = updateValue.displayName || null;
-          }
-          if (
-            typeof updateValue.roleId !== 'undefined' &&
-            user.role !== updateValue.roleId
-          ) {
-            updatedUser.role = updateValue.roleId;
-          }
-
-          await updateUser(updatedUser);
-        } catch (err) {
-          error = err;
+        const changes: Record<string, any> = {};
+        if (
+          typeof updateValue.consent !== 'undefined' &&
+          user.emailNotificationConsent !== updateValue.consent
+        ) {
+          changes.emailNotificationConsent = updateValue.consent;
         }
-      } else {
-        user = users[0];
-        if (user.idpUser?.identifier && user.idpUser?.provider) {
-          try {
-            const newUser = {
-              ...user,
-              projectId: updateValue.projectId,
-              role: updateValue.roleId || 'member',
-              nickName: null,
-              projectDisplayName: updateValue.displayName || null,
-              emailNotificationConsent:
-                typeof updateValue.consent !== 'undefined'
-                  ? updateValue.consent
-                  : null,
-              privacyConsentAt: null,
-              listableByRole: null,
-              detailsViewableByRole: null,
-            };
+        if (
+          typeof updateValue.displayName !== 'undefined' &&
+          user.projectDisplayName !== (updateValue.displayName || null)
+        ) {
+          changes.projectDisplayName = updateValue.displayName || null;
+        }
+        if (
+          typeof updateValue.roleId !== 'undefined' &&
+          user.role !== updateValue.roleId
+        ) {
+          changes.role = updateValue.roleId;
+        }
 
-            await createUser(newUser);
-          } catch (err) {
-            error = err;
-          }
+        // Nothing changed for this project: skip the update.
+        if (Object.keys(changes).length === 0) continue;
+
+        try {
+          await updateUser({ ...user, ...changes });
+          savedCount++;
+        } catch (err: any) {
+          failures.push({
+            project: projectLabel(updateValue.projectId),
+            message: err?.message || 'onbekende fout',
+          });
+        }
+      } else if (updateValue.roleId) {
+        // Only create an account when a role was actually assigned.
+        const source = Array.isArray(users) ? users[0] : users;
+        if (!source?.idpUser?.identifier || !source?.idpUser?.provider) {
+          failures.push({
+            project: projectLabel(updateValue.projectId),
+            message: 'geen gekoppeld inlogaccount',
+          });
+          continue;
+        }
+        try {
+          const newUser = {
+            ...source,
+            projectId: updateValue.projectId,
+            role: updateValue.roleId,
+            nickName: null,
+            projectDisplayName: updateValue.displayName || null,
+            emailNotificationConsent:
+              typeof updateValue.consent !== 'undefined'
+                ? updateValue.consent
+                : null,
+            privacyConsentAt: null,
+            listableByRole: null,
+            detailsViewableByRole: null,
+          };
+
+          await createUser(newUser);
+          savedCount++;
+        } catch (err: any) {
+          failures.push({
+            project: projectLabel(updateValue.projectId),
+            message: err?.message || 'onbekende fout',
+          });
         }
       }
     }
 
-    if (error) {
-      toast.error(error.message || 'User kon niet worden bijgewerkt');
-    } else {
+    // Refresh even on partial success so saved values are visible.
+    if (savedCount) await mutate();
+
+    if (failures.length) {
+      const details = failures
+        .map((f) => `${f.project} (${f.message})`)
+        .join('; ');
+      toast.error(
+        savedCount
+          ? `Opgeslagen, behalve voor: ${details}`
+          : `Bijwerken mislukt voor: ${details}`
+      );
+    } else if (savedCount) {
       toast.success('User is bijgewerkt');
-      window.location.reload();
+    } else {
+      toast.success('Er waren geen wijzigingen om op te slaan');
     }
   }
 

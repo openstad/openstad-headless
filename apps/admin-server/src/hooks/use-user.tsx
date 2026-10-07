@@ -42,7 +42,10 @@ export default function useUser() {
       },
       body: JSON.stringify({ ...body }),
     });
-    if (!res.ok) throw new Error('User update failed');
+    if (!res.ok) {
+      const errorBody = await res.json().catch(() => null);
+      throw new Error(errorBody?.message || 'User update failed');
+    }
 
     return await res.json();
   }

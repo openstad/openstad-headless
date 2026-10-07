@@ -1,7 +1,6 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Spacer } from '@openstad-headless/ui/src';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
@@ -72,12 +71,13 @@ function RawResource(props: RawResourceWidgetProps) {
       <Spacer size={2} />
       <section className="osc-raw-resource-container">
         {render && (
-          // this sets innerHTML, input is sanitized in widget.js
+          // Raw templates are admin-authored widget config (trusted, may
+          // contain iframes/scripts on purpose). Untrusted variable values are
+          // sanitized inside renderRawTemplate.
+          // eslint-disable-next-line react/no-danger
           <div
             className={stylingClasses}
-            dangerouslySetInnerHTML={{
-              __html: sanitizeHtml(render),
-            }}></div>
+            dangerouslySetInnerHTML={{ __html: render }}></div>
         )}
       </section>
     </div>

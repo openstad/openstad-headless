@@ -14,8 +14,9 @@ import {
 } from '@utrecht/component-library-react';
 import React, { FC, useEffect, useRef, useState } from 'react';
 
+import { ClickableImage } from '../../clickable-image';
 import { InfoImage } from '../../infoImage';
-import RteContent from '../../rte-formatting/rte-content';
+import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
 import { Spacer } from '../../spacer';
 
 export type ImageChoiceFieldProps = {
@@ -158,13 +159,14 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     <div className={`question`}>
       <Fieldset
         aria-invalid={checkInvalid}
-        aria-describedby={`${randomId}_error`}>
+        aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}>
         {title && (
           <FieldsetLegend>
             <RteContent
               content={title}
               unwrapSingleRootDiv={true}
               forceInline={true}
+              inlineComponent={InlineParagraph}
             />
           </FieldsetLegend>
         )}
@@ -213,7 +215,13 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                     type="radio"
                     className={isSelected ? 'selected' : ''}>
                     <figure>
-                      <img src={choice.imageSrc} alt={choice.imageAlt} />
+                      <ClickableImage
+                        clickable={imageClickable}
+                        src={choice.imageSrc}
+                        alt={choice.imageAlt}
+                        variant="overlay">
+                        <img src={choice.imageSrc} alt={choice.imageAlt} />
+                      </ClickableImage>
                       <figcaption>
                         <ChoiceComponent
                           className="radio-field-input"
@@ -251,6 +259,11 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                               />
                             </>
                           )}
+                        {/* ponytail: hier stond een "✓ Gekozen"-badge voor 1.4.1.
+                            Die hoorde bij de beeldkiezer (het dilemma-vraagtype)
+                            en staat daar nu; hier was hij dubbelop, want de
+                            gekozen afbeelding krijgt al een rand van 3px waar de
+                            andere er geen heeft — dat is geen kleurverschil. */}
                       </figcaption>
                     </figure>
                   </FormLabel>
@@ -284,6 +297,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
 
               <Button
                 appearance="primary-action-button"
+                tabIndex={!isInfoVisible ? -1 : undefined}
                 onClick={() => {
                   setIsInfoVisible(false);
                 }}>

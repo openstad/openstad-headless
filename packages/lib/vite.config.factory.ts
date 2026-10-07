@@ -56,7 +56,7 @@ export function createWidgetConfig(options: WidgetConfigOptions) {
 
     const external: string[] = bundleReact
       ? []
-      : ['react', 'react-dom', 'react-dom/client'];
+      : ['react', 'react-dom', 'react-dom/client', 'react-dom/server'];
     if (externalRemixicon) {
       external.push('remixicon/fonts/remixicon.css');
     }
@@ -68,6 +68,7 @@ export function createWidgetConfig(options: WidgetConfigOptions) {
             react: 'OpenStadReact',
             'react-dom': 'OpenStadReactDOM',
             'react-dom/client': 'OpenStadReactDOM',
+            'react-dom/server': 'OpenStadReactDOMServer',
           },
           ...outputOverrides,
         };

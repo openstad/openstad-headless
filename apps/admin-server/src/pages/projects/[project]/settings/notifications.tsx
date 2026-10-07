@@ -45,6 +45,7 @@ const formSchema = z.object({
   projectmanagerAddress: z.string().email(),
   fromName: z.string().optional(),
   sendUpdatedResourceAdminEmail: z.boolean().optional(),
+  sendCommentAdminEmail: z.boolean().optional(),
   pdfAttachmentEnabled: z.boolean().optional(),
   pdfAttachmentAdminEnabled: z.boolean().optional(),
   pdfTitle: z.string().optional(),
@@ -67,6 +68,8 @@ export default function ProjectSettingsNotifications({
         data?.emailConfig?.[category]?.projectmanagerAddress || null,
       sendUpdatedResourceAdminEmail:
         data?.emailConfig?.[category]?.sendUpdatedResourceAdminEmail || false,
+      sendCommentAdminEmail:
+        data?.emailConfig?.[category]?.sendCommentAdminEmail || false,
       pdfAttachmentEnabled:
         data?.emailConfig?.[category]?.pdfAttachmentEnabled || false,
       pdfAttachmentAdminEnabled:
@@ -95,6 +98,7 @@ export default function ProjectSettingsNotifications({
           fromName: values.fromName,
           sendUpdatedResourceAdminEmail:
             values.sendUpdatedResourceAdminEmail || false,
+          sendCommentAdminEmail: values.sendCommentAdminEmail || false,
           pdfAttachmentEnabled: values.pdfAttachmentEnabled || false,
           pdfAttachmentAdminEnabled: values.pdfAttachmentAdminEnabled || false,
           pdfTitle: values.pdfTitle || '',
@@ -221,15 +225,44 @@ export default function ProjectSettingsNotifications({
               />
               <FormField
                 control={form.control}
+                name="sendCommentAdminEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notificatie bij nieuwe reactie</FormLabel>
+                    <FormDescription>
+                      Standaard uitgeschakeld. Schakel dit in om een e-mail te
+                      ontvangen bij elke nieuwe reactie of reactie op een
+                      reactie.
+                    </FormDescription>
+                    <FormControl>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={field.name}
+                          checked={field.value}
+                          onCheckedChange={(checked) =>
+                            field.onChange(Boolean(checked))
+                          }
+                        />
+                        <Label htmlFor={field.name} className="cursor-pointer">
+                          E-mail sturen naar beheerder bij een nieuwe reactie
+                        </Label>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
                 name="projectmanagerAddress"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Naar welk e-mailadres moeten de reacties op de
-                      notificaties gestuurd worden?
+                      Naar welk e-mailadres worden beheerder-notificaties
+                      verstuurd?
                       <InfoDialog
                         content={
-                          'Dit is het e-mailadres waarop reacties op automatische e-mails van OpenStad binnenkomen. Denk aan: inlogmails en bevestigingsmails na indienen resource. Dit e-mailadres wordt ook getoond op de loginpagina van OpenStad.'
+                          'Dit is het adres waar automatische beheerder-notificaties naartoe gaan, zoals nieuwe formulier-inzendingen, bewerkte inzendingen en nieuwe reacties. Zonder een geldig adres hier worden er geen beheerder-notificaties verzonden.'
                         }
                       />
                     </FormLabel>

@@ -2,6 +2,19 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.validateManifest = validateManifest;
 /**
+ * True when a manifest-supplied file path is absolute or contains a `..`
+ * segment, i.e. could point outside the plugin's own directory.
+ */
+function isUnsafeFilePath(value) {
+    if (typeof value !== 'string')
+        return false;
+    if (value.startsWith('/') || value.startsWith('\\'))
+        return true;
+    if (/^[a-zA-Z]:[\\/]/.test(value))
+        return true;
+    return value.split(/[\\/]/).includes('..');
+}
+/**
  * Validates a plugin manifest object.
  *
  * Checks required top-level fields and validates nested sections
@@ -30,6 +43,9 @@ function validateManifest(manifest) {
                 if (!model.path) {
                     errors.push(`api.models[${i}]: missing required field "path"`);
                 }
+                else if (isUnsafeFilePath(model.path)) {
+                    errors.push(`api.models[${i}]: "path" must be a relative path inside the plugin (got "${model.path}")`);
+                }
             });
         }
         if (Array.isArray(api.routes)) {
@@ -43,12 +59,18 @@ function validateManifest(manifest) {
                 if (!route.handler) {
                     errors.push(`api.routes[${i}]: missing required field "handler"`);
                 }
+                else if (isUnsafeFilePath(route.handler)) {
+                    errors.push(`api.routes[${i}]: "handler" must be a relative path inside the plugin (got "${route.handler}")`);
+                }
             });
         }
         if (Array.isArray(api.middleware)) {
             api.middleware.forEach((mw, i) => {
                 if (!mw.path) {
                     errors.push(`api.middleware[${i}]: missing required field "path"`);
+                }
+                else if (isUnsafeFilePath(mw.path)) {
+                    errors.push(`api.middleware[${i}]: "path" must be a relative path inside the plugin (got "${mw.path}")`);
                 }
             });
         }

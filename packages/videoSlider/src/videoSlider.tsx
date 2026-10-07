@@ -243,18 +243,22 @@ function Swipe({
                           </>
                         ) as any)
                       : '1',
+                    ariaValueText: 'Heel slecht',
                   },
                   {
                     value: '2',
                     label: slide.showSmileys ? ((<div>🙁</div>) as any) : '2',
+                    ariaValueText: 'Slecht',
                   },
                   {
                     value: '3',
                     label: slide.showSmileys ? ((<div>😐</div>) as any) : '3',
+                    ariaValueText: 'Neutraal',
                   },
                   {
                     value: '4',
                     label: slide.showSmileys ? ((<div>😀</div>) as any) : '4',
+                    ariaValueText: 'Goed',
                   },
                   {
                     value: '5',
@@ -266,6 +270,7 @@ function Swipe({
                           </>
                         ) as any)
                       : '5',
+                    ariaValueText: 'Heel goed',
                   },
                 ]}
                 fieldRequired={false}

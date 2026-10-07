@@ -38,6 +38,7 @@ router
   })
 
   // Create widget
+  .post(auth.can('Widget', 'create'))
   .post(auth.useReqUser)
   .post(rateLimiter(), async function (req, res, next) {
     const widget = req.body;
@@ -103,7 +104,7 @@ router
 
     try {
       const widgets = await db.Widget.scope(...req.scope).findAll({
-        where: { id: ids },
+        where: { id: ids, projectId: req.params.projectId },
       });
 
       if (widgets.length === 0) {
@@ -113,15 +114,15 @@ router
       }
 
       for (const widget of widgets) {
-        if (!widget.can || !widget.can('delete')) {
+        if (!widget.can || !widget.can('delete', req.user)) {
           return next(
-            new Error(`You cannot delete widget with ID ${widget.id}`)
+            createError(403, `You cannot delete widget with ID ${widget.id}`)
           );
         }
       }
 
       await db.Widget.destroy({
-        where: { id: ids },
+        where: { id: widgets.map((widget) => widget.id) },
       });
 
       res.json({ message: 'Widgets deleted successfully' });
@@ -149,7 +150,7 @@ router
 
     try {
       const widgets = await db.Widget.scope(...req.scope).findAll({
-        where: { id: ids },
+        where: { id: ids, projectId: req.params.projectId },
       });
 
       if (widgets.length === 0) {
@@ -159,9 +160,9 @@ router
       }
 
       for (const widget of widgets) {
-        if (!widget.can || !widget.can('create')) {
+        if (!widget.can || !widget.can('create', req.user)) {
           return next(
-            new Error(`You cannot duplicate widget with ID ${widget.id}`)
+            createError(403, `You cannot duplicate widget with ID ${widget.id}`)
           );
         }
       }
@@ -189,7 +190,8 @@ router
   .route('/:id') //(\\d+)
   .all(function (req, res, next) {
     const id = req.params.id;
-    let query = { where: { id } };
+    // Roles are resolved per project, so scope the lookup
+    let query = { where: { id, projectId: req.params.projectId } };
 
     db.Widget.scope(...req.scope)
       .findOne(query)
@@ -212,22 +214,24 @@ router
 
   // Update widget
   .put(auth.useReqUser)
-  .put(rateLimiter(), async function (req, res, next) {
+  .put(rateLimiter(), function (req, res, next) {
     const widget = req.widget;
+    if (!(widget && widget.can && widget.can('update', req.user)))
+      return next(createError(403, 'You cannot update this widget'));
+
     const config = { ...widget.config, ...(req.body?.config || {}) };
     const description = req.body?.description ?? widget.description;
     const typesToSanitize = ['rawresource', 'resourceoverview'];
 
-    if (config) {
-      // sanitize rawInput by user
-
-      if (typesToSanitize.includes(widget.dataValues.type)) {
-        widget.dataValues.config.rawInput = sanitize.content(
-          widget.dataValues.config.rawInput
-        );
-      }
-      widget.update({ config, description }).then((result) => res.json(result));
+    // Sanitize the incoming value, not the stored one
+    if (typesToSanitize.includes(widget.type) && config.rawInput) {
+      config.rawInput = sanitize.content(config.rawInput);
     }
+
+    widget
+      .update({ config, description })
+      .then((result) => res.json(result))
+      .catch(next);
   })
 
   // delete widget
@@ -235,8 +239,8 @@ router
   .delete(auth.useReqUser)
   .delete(function (req, res, next) {
     const widget = req.results;
-    if (!(widget && widget.can && widget.can('delete')))
-      return next(new Error('You cannot delete this widget'));
+    if (!(widget && widget.can && widget.can('delete', req.user)))
+      return next(createError(403, 'You cannot delete this widget'));
 
     widget
       .destroy()

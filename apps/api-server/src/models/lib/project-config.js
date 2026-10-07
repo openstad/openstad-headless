@@ -19,6 +19,14 @@ module.exports = {
         type: 'boolean',
         default: false,
       },
+      imageCropRatioWidth: {
+        type: 'int',
+        default: 16,
+      },
+      imageCropRatioHeight: {
+        type: 'int',
+        default: 9,
+      },
     },
   },
 
@@ -32,6 +40,10 @@ module.exports = {
       anonymizeUsersXDaysAfterEndDate: {
         type: 'int',
         default: 60,
+      },
+      allowAnonymizeUsersAfterInactivity: {
+        type: 'boolean',
+        default: false,
       },
       warnUsersAfterXDaysOfInactivity: {
         type: 'int',

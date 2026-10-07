@@ -160,6 +160,69 @@ describe('validateManifest', () => {
     );
   });
 
+  it('rejects api.models with a traversing path', () => {
+    const result = validateManifest({
+      name: 'test',
+      version: '1.0.0',
+      api: { models: [{ name: 'Vote', path: '../../../evil.js' }] },
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.stringContaining('api.models[0]: "path" must be a relative path')
+    );
+  });
+
+  it('rejects api.models with an absolute path', () => {
+    const result = validateManifest({
+      name: 'test',
+      version: '1.0.0',
+      api: { models: [{ name: 'Vote', path: '/etc/passwd' }] },
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.stringContaining('api.models[0]: "path" must be a relative path')
+    );
+  });
+
+  it('rejects api.routes with a traversing handler', () => {
+    const result = validateManifest({
+      name: 'test',
+      version: '1.0.0',
+      api: {
+        routes: [{ method: 'GET', path: '/votes', handler: '../../evil.js' }],
+      },
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.stringContaining(
+        'api.routes[0]: "handler" must be a relative path'
+      )
+    );
+  });
+
+  it('rejects api.middleware with an absolute path', () => {
+    const result = validateManifest({
+      name: 'test',
+      version: '1.0.0',
+      api: { middleware: [{ path: '/tmp/evil.js' }] },
+    });
+    expect(result.valid).toBe(false);
+    expect(result.errors).toContainEqual(
+      expect.stringContaining(
+        'api.middleware[0]: "path" must be a relative path'
+      )
+    );
+  });
+
+  it('accepts a nested relative path containing ".."-like names', () => {
+    const result = validateManifest({
+      name: 'test',
+      version: '1.0.0',
+      api: { models: [{ name: 'Vote', path: './models/..hidden/Vote.js' }] },
+    });
+    expect(result).toEqual({ valid: true });
+  });
+
   it('rejects widgets missing required keys', () => {
     const result = validateManifest({
       name: 'test',

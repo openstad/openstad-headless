@@ -104,7 +104,7 @@
   outline-width: var(--utrecht-focus-outline-width, revert);
   border-radius: 50%;
 }
-label.utrecht-form-label {
+.utrecht-form-label {
   -webkit-margin-after: 6px;
   margin-block-end: 6px;
 }

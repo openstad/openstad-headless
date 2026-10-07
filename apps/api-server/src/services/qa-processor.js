@@ -1,20 +1,68 @@
 /**
  * Q&A processor service.
  * Extracts questions and answers from widget items + data source (resource or submission).
- * Applies HTML escaping at the source to prevent XSS in email and PDF output.
+ * Sanitizes user values at the source to prevent XSS in email and PDF output,
+ * while keeping safe rich text formatting intact.
  */
 
+const sanitizeHtml = require('sanitize-html');
+
 const { escapeHtml, escapeAttr, stripHtml } = require('./pdf-service');
+
+const SKIPPED_ANSWER = 'skipped';
+const SKIPPED_LABEL = 'Overgeslagen';
+
+function choiceLabel(id, index) {
+  const number = Number(id);
+  return `Keuze ${Number.isFinite(number) ? number + 1 : index + 1}`;
+}
+
+/**
+ * Sanitize a user-submitted answer that may contain rich text HTML.
+ * Keeps safe formatting tags, strips everything else, and normalizes
+ * non-breaking spaces so no literal entities end up in emails.
+ */
+function sanitizeAnswerHtml(str) {
+  const cleaned = String(str).replace(/&nbsp;|\u00a0/gi, ' ');
+  return sanitizeHtml(cleaned, {
+    allowedTags: [
+      'p',
+      'br',
+      'strong',
+      'em',
+      'b',
+      'i',
+      'u',
+      's',
+      'ul',
+      'ol',
+      'li',
+      'a',
+      'h1',
+      'h2',
+      'h3',
+      'h4',
+      'h5',
+      'h6',
+    ],
+    allowedAttributes: { a: ['href', 'target', 'rel'] },
+    transformTags: {
+      h1: 'h3',
+      h2: 'h4',
+      a: sanitizeHtml.simpleTransform('a', { rel: 'noopener noreferrer' }),
+    },
+  }).trim();
+}
 
 /**
  * Transform a raw answer value into a safe, display-ready string.
  * Handles: strings, JSON-encoded arrays, object arrays with URLs,
  * plain arrays, and plain objects.
  *
- * All user-submitted values are HTML-escaped at this level so that
- * the returned string is safe to embed in HTML templates.
+ * All user-submitted values are sanitized or escaped at this level so
+ * that the returned string is safe to embed in HTML templates.
  */
-function transformAnswer(answer, fieldKey, tags) {
+function transformAnswer(answer, fieldKey, tags, questionType) {
   // Handle tag fields like tags[type]
   if (fieldKey.includes('[') && fieldKey.includes(']') && tags) {
     const [mainKey, subKey] = fieldKey.split(/[\[\]]/).filter(Boolean);
@@ -60,6 +108,31 @@ function transformAnswer(answer, fieldKey, tags) {
         })
         .join(', ');
     }
+
+    if (questionType === 'swipe' || questionType === 'dilemma') {
+      const isSwipe = questionType === 'swipe';
+      return answer
+        .map((item, index) => {
+          const fallback = choiceLabel(
+            isSwipe ? item.cardId : item.dilemmaId,
+            index
+          );
+          const label = isSwipe ? item.title || fallback : fallback;
+          const value =
+            item.answer === SKIPPED_ANSWER
+              ? SKIPPED_LABEL
+              : isSwipe
+                ? item.answer
+                : item.title;
+          let line = `${escapeHtml(String(label))}: ${escapeHtml(String(value || ''))}`;
+          if (item.explanation) {
+            line += `: ${escapeHtml(String(item.explanation))}`;
+          }
+          return line;
+        })
+        .join('<br/>');
+    }
+
     // Plain array
     return answer.map((v) => escapeHtml(String(v))).join(', ');
   }
@@ -76,10 +149,10 @@ function transformAnswer(answer, fieldKey, tags) {
 
   // Plain string (or anything else)
   if (typeof answer === 'string') {
-    return escapeHtml(answer);
+    return sanitizeAnswerHtml(answer);
   }
 
-  return escapeHtml(String(answer || ''));
+  return sanitizeAnswerHtml(String(answer || ''));
 }
 
 /**
@@ -149,7 +222,12 @@ async function processResourceQA(instance, db) {
     const rawAnswer =
       resource[fieldKey] || resource.extraData?.[fieldKey] || '';
 
-    const answer = transformAnswer(rawAnswer, fieldKey, resource.tags);
+    const answer = transformAnswer(
+      rawAnswer,
+      fieldKey,
+      resource.tags,
+      item.questionType
+    );
 
     return { question, answer };
   });
@@ -198,7 +276,12 @@ async function processSubmissionQA(instance, db) {
     const fieldKey = item.fieldKey;
     const rawAnswer = submittedData[fieldKey] || '';
 
-    const answer = transformAnswer(rawAnswer, fieldKey);
+    const answer = transformAnswer(
+      rawAnswer,
+      fieldKey,
+      undefined,
+      item.questionType
+    );
 
     return { question, answer };
   });
@@ -208,4 +291,4 @@ async function processSubmissionQA(instance, db) {
   return result;
 }
 
-module.exports = { processResourceQA, processSubmissionQA };
+module.exports = { processResourceQA, processSubmissionQA, transformAnswer };

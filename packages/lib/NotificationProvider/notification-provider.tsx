@@ -35,7 +35,11 @@ const NotificationProvider = () => {
   }, []);
 
   return (
-    <div className="notification-container openstad">
+    <div
+      className="notification-container openstad"
+      role="status"
+      aria-live="polite"
+      aria-atomic="false">
       {notifications.map(({ id, message, type, fadeOut }) => (
         <div
           key={id}

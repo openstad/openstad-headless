@@ -43,6 +43,7 @@ export const InitializeFormFields = (
         showMoreInfo: item.showMoreInfo || false,
         moreInfoButton: item.moreInfoButton || '',
         moreInfoContent: item.moreInfoContent || '',
+        headingLevel: item.headingLevel || 3,
         titleA: item.labelA || '',
         titleB: item.labelB || '',
         descriptionA: item.sliderTitleUnderA || '',
@@ -61,10 +62,10 @@ export const InitializeFormFields = (
           'Nog minimaal {minCharacters} tekens',
         minCharactersError:
           data?.choiceGuide?.minCharactersError ||
-          'Tekst moet minimaal {minCharacters} karakters bevatten',
+          'De tekst mag niet korter zijn dan {minCharacters} tekens',
         maxCharactersError:
           data?.choiceGuide?.maxCharactersError ||
-          'Tekst moet maximaal {maxCharacters} karakters bevatten',
+          'De tekst mag niet langer zijn dan {maxCharacters} tekens',
         maxCharactersOverWarning:
           data?.choiceGuide?.maxCharactersOverWarning ||
           'Je hebt {overCharacters} tekens teveel',
@@ -157,6 +158,14 @@ export const InitializeFormFields = (
         case 'imageUpload':
           fieldData['allowedTypes'] = item.allowedTypes || ['image/*'];
           fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
+          fieldData['imageCropEnabled'] = item.imageCropEnabled || false;
+          fieldData['imageCropRequired'] = item.imageCropRequired || false;
+          fieldData['imageCropRatioWidth'] =
+            item.imageCropRatioWidth || data.project?.imageCropRatioWidth || 16;
+          fieldData['imageCropRatioHeight'] =
+            item.imageCropRatioHeight ||
+            data.project?.imageCropRatioHeight ||
+            9;
           break;
         case 'documentUpload':
           fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
@@ -191,6 +200,8 @@ export const InitializeFormFields = (
           if (Array.isArray(data?.allowedPolygons)) {
             fieldData['allowedPolygons'] = data.allowedPolygons;
           }
+
+          fieldData['enableAddressSearch'] = !!item.enableAddressSearch;
 
           break;
         case 'matrix':

@@ -6,7 +6,7 @@
 
 function stripHtml(str) {
   if (typeof str !== 'string') return '';
-  let result = str;
+  let result = str.replace(/&nbsp;|\u00a0/gi, ' ');
   let prev;
   do {
     prev = result;
@@ -42,12 +42,14 @@ function sanitizeAnswer(str) {
     preserved.push(match);
     return `%%LINK${preserved.length - 1}%%`;
   });
+  result = result.replace(/<\/(p|li|h[1-6])>|<br\s*\/?>/gi, '\n');
   let prev;
   do {
     prev = result;
     result = result.replace(/<[^>]*>/g, '');
   } while (result !== prev);
   result = result.trim();
+  result = result.replace(/[ \t]*\n+[ \t]*/g, '<br/>');
   preserved.forEach((link, i) => {
     result = result.replace(`%%LINK${i}%%`, link);
   });

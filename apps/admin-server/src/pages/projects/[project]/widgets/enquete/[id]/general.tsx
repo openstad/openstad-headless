@@ -49,11 +49,11 @@ const formSchema = z.object({
   minCharactersError: z
     .string()
     .optional()
-    .default('Tekst moet minimaal {minCharacters} karakters bevatten'),
+    .default('De tekst mag niet korter zijn dan {minCharacters} tekens'),
   maxCharactersError: z
     .string()
     .optional()
-    .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
+    .default('De tekst mag niet langer zijn dan {maxCharacters} tekens'),
   isQuiz: z.boolean().optional(),
   confirmAnswerMessage: z
     .string()
@@ -88,10 +88,10 @@ export default function WidgetEnqueteGeneral(
         props.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
       minCharactersError:
         props.minCharactersError ||
-        'Tekst moet minimaal {minCharacters} karakters bevatten',
+        'De tekst mag niet korter zijn dan {minCharacters} tekens',
       maxCharactersError:
         props.maxCharactersError ||
-        'Tekst moet maximaal {maxCharacters} karakters bevatten',
+        'De tekst mag niet langer zijn dan {maxCharacters} tekens',
       isQuiz: props?.isQuiz ?? false,
       confirmAnswerMessage:
         props.confirmAnswerMessage ||
@@ -183,7 +183,7 @@ export default function WidgetEnqueteGeneral(
             name="isQuiz"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Is dit een quiz?</FormLabel>
+                <FormLabel>Quizmodus inschakelen</FormLabel>
                 <FormDescription>
                   Zet quiz- en feedbackopties aan. Per vraag kun je daarna
                   instellen welke feedback bezoekers zien nadat ze een antwoord
