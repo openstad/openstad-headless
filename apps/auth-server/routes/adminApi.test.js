@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 const adminMw = require('../middleware/admin');
+const userMw = require('../middleware/user');
 const adminApi = require('./adminApi');
 
 const collectRoutes = () => {
@@ -30,18 +31,19 @@ describe('admin api route guards', () => {
     expect(routes[route]).toContain(adminMw.ensureOwnClient);
   });
 
-  test('GET /api/admin/clients is limited to the admin client', () => {
-    expect(routes['GET /api/admin/clients']).toContain(
-      adminMw.ensureAdminClient
-    );
-  });
+  test.each(['GET /api/admin/clients', 'POST /api/admin/client'])(
+    '%s is limited to the admin client',
+    (route) => {
+      expect(routes[route]).toContain(adminMw.ensureAdminClient);
+    }
+  );
 
-  test('POST /api/admin/client (create) stays unguarded', () => {
-    expect(routes['POST /api/admin/client']).not.toContain(
-      adminMw.ensureOwnClient
+  test('user update and delete check identity write rights', () => {
+    expect(routes['POST /api/admin/user/:userId']).toContain(
+      userMw.ensureIdentityWriteAllowed
     );
-    expect(routes['POST /api/admin/client']).not.toContain(
-      adminMw.ensureAdminClient
+    expect(routes['POST /api/admin/user/:userId/delete']).toContain(
+      userMw.ensureDeleteAllowed
     );
   });
 });

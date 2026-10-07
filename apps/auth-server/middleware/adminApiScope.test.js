@@ -114,8 +114,16 @@ describe('user.saveRoles client scoping', () => {
     },
   });
 
-  test('a non-admin client only writes the role for its own client', async () => {
+  test('a non-admin client may not write roles for other clients (403)', async () => {
     const err = await run(userMw.saveRoles, req(ownClient));
+    expect(err?.status).toBe(403);
+    expect(saved).toEqual([]);
+  });
+
+  test('a non-admin client writes the role for its own client', async () => {
+    const r = req(ownClient);
+    r.body.roles = { [ownClient.clientId]: 'member' };
+    const err = await run(userMw.saveRoles, r);
     expect(err).toBeUndefined();
     expect(saved).toEqual([{ clientId: 5, roleId: 2, userId: 42 }]);
   });
@@ -123,6 +131,75 @@ describe('user.saveRoles client scoping', () => {
   test('the admin client writes roles for every client', async () => {
     await run(userMw.saveRoles, req(adminClient));
     expect(saved.map((r) => r.clientId).sort()).toEqual([1, 5, 7]);
+  });
+});
+
+describe('user.ensureIdentityWriteAllowed', () => {
+  const target = (...clientIds) => ({
+    id: 42,
+    roles: clientIds.map((clientId) => ({ clientId })),
+  });
+  const req = (user, userObject, body = {}) => ({ user, userObject, body });
+
+  test.each([
+    ['email', 'new@example.nl'],
+    ['password', 'secret123'],
+    ['twoFactorToken', null],
+    ['twoFactorConfigured', false],
+  ])(
+    'non-admin client may not change %s of a user with roles on other clients',
+    async (key, value) => {
+      const err = await run(
+        userMw.ensureIdentityWriteAllowed,
+        req(ownClient, target(5, 7), { [key]: value })
+      );
+      expect(err?.status).toBe(403);
+    }
+  );
+
+  test('non-admin client may change identity of a user only known to itself', async () => {
+    const err = await run(
+      userMw.ensureIdentityWriteAllowed,
+      req(ownClient, target(5), { email: 'new@example.nl' })
+    );
+    expect(err).toBeUndefined();
+  });
+
+  test('non-identity updates stay allowed for a shared user', async () => {
+    const err = await run(
+      userMw.ensureIdentityWriteAllowed,
+      req(ownClient, target(5, 7), {
+        name: 'New name',
+        email: '',
+        roles: { 'own-client-id': 'member' },
+      })
+    );
+    expect(err).toBeUndefined();
+  });
+
+  test('admin client may change identity of any user', async () => {
+    const err = await run(
+      userMw.ensureIdentityWriteAllowed,
+      req(adminClient, target(5, 7), { password: 'secret123' })
+    );
+    expect(err).toBeUndefined();
+  });
+
+  test('delete of a shared user by a non-admin client is rejected', async () => {
+    const err = await run(
+      userMw.ensureDeleteAllowed,
+      req(ownClient, target(5, 1))
+    );
+    expect(err?.status).toBe(403);
+  });
+
+  test('delete of a user only known to the calling client is allowed', async () => {
+    expect(
+      await run(userMw.ensureDeleteAllowed, req(ownClient, target(5)))
+    ).toBeUndefined();
+    expect(
+      await run(userMw.ensureDeleteAllowed, req(adminClient, target(5, 7)))
+    ).toBeUndefined();
   });
 });
 
@@ -180,7 +257,7 @@ describe('access code scoping', () => {
       params: { codeId: '3' },
     });
     expect(lastWhere).toEqual({ id: '3', clientId: 5 });
-    expect(err).toBeInstanceOf(Error);
+    expect(err?.status).toBe(404);
   });
 
   test('withAll always filters on the resolved client', async () => {

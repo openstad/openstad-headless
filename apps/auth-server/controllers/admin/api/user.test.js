@@ -2,7 +2,12 @@ import { describe, expect, test } from 'vitest';
 
 const userController = require('./user');
 
-const SENSITIVE = ['password', 'hashedPhoneNumber', 'twoFactorToken'];
+const SENSITIVE = [
+  'password',
+  'hashedPhoneNumber',
+  'twoFactorToken',
+  'resetPasswordToken',
+];
 
 const fakeUser = () => {
   const dataValues = {
@@ -11,6 +16,7 @@ const fakeUser = () => {
     password: 'hash',
     hashedPhoneNumber: 'phonehash',
     twoFactorToken: 'secret',
+    resetPasswordToken: 'reset',
     twoFactorConfigured: 1,
   };
   return { dataValues, toJSON: () => ({ ...dataValues }) };

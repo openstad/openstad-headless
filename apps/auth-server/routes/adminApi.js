@@ -54,6 +54,7 @@ module.exports = (app) => {
     clientMw.withAll,
     roleMw.withAll,
     userMw.withOne,
+    userMw.ensureIdentityWriteAllowed,
     userMw.update,
     userMw.saveRoles,
     adminApiUserController.update
@@ -62,6 +63,7 @@ module.exports = (app) => {
   app.post(
     '/api/admin/user/:userId/delete',
     userMw.withOne,
+    userMw.ensureDeleteAllowed,
     userMw.deleteOne,
     adminApiUserController.delete
   );
@@ -90,6 +92,7 @@ module.exports = (app) => {
   );
   app.post(
     '/api/admin/client',
+    adminMiddleware.ensureAdminClient,
     clientMw.create,
     adminApiClientController.create
   );

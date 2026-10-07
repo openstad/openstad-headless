@@ -7,6 +7,7 @@ const stripSensitive = (user) => {
   delete user.password;
   delete user.hashedPhoneNumber;
   delete user.twoFactorToken;
+  delete user.resetPasswordToken;
   return user;
 };
 

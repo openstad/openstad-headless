@@ -69,7 +69,9 @@ exports.deleteOne = (req, res, next) => {
   db.AccessCode.findOne({ where })
     .then((code) => {
       if (!code) {
-        throw new Error('Access code not found');
+        const err = new Error('Access code not found');
+        err.status = 404;
+        throw err;
       }
 
       code.update({ deletedAt: new Date() });
