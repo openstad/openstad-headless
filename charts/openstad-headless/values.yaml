@@ -76,6 +76,9 @@ rateLimit:
   windowMs: 60000
   limit: 100
 randomSortRotationMs: 0
+# Multi-project login (opt-in): one login for all projects of this installation.
+# Sets MULTI_PROJECT_LOGIN on both the api-server and the auth-server.
+multiProjectLogin: false
 # Settings
 
 ##

@@ -20,12 +20,13 @@ import {
 } from './fields';
 import './index.css';
 
-export type LoginDialogStep = 'uniquecode' | 'fields';
+export type LoginDialogStep = 'uniquecode' | 'fields' | 'blocked';
 export type LoginDialogError =
   | 'code_required'
   | 'invalid_code'
   | 'too_many_attempts'
-  | 'invalid_access_code';
+  | 'invalid_access_code'
+  | 'invalid_fields';
 
 export type LoginDialogTexts = {
   codeTitle: string;
@@ -35,6 +36,9 @@ export type LoginDialogTexts = {
   fieldsTitle: string;
   fieldsIntro: string;
   fieldsSubmit: string;
+  blockedTitle: string;
+  blockedIntro: string;
+  blockedSubmit: string;
   newTabHint: string;
   errors: Record<LoginDialogError, string>;
 };
@@ -48,6 +52,10 @@ export const loginDialogTexts: LoginDialogTexts = {
   fieldsIntro:
     'Voor dit project hebben we nog de volgende gegevens van je nodig.',
   fieldsSubmit: 'Opslaan',
+  blockedTitle: 'Inloggen',
+  blockedIntro:
+    'Het inlogvenster kon niet worden geopend. Mogelijk blokkeert je browser pop-upvensters.',
+  blockedSubmit: 'Inloggen in dit venster',
   newTabHint: '(opent in nieuw tabblad)',
   errors: {
     code_required: 'Vul je stemcode in.',
@@ -55,6 +63,7 @@ export const loginDialogTexts: LoginDialogTexts = {
     too_many_attempts:
       'Te veel pogingen. Probeer het over een kwartier opnieuw.',
     invalid_access_code: 'Deze toegangscode is niet geldig.',
+    invalid_fields: 'Controleer de gemarkeerde velden.',
   },
 };
 
@@ -65,10 +74,12 @@ export type LoginDialogContentProps = {
   labels?: Record<string, string>;
   privacy?: { url: string; text: string } | null;
   error?: LoginDialogError;
+  invalidFields?: string[];
   busy?: boolean;
   texts: LoginDialogTexts;
   onSubmitCode: (code: string) => void;
   onSubmitFields: (values: Record<string, string | boolean>) => void;
+  onRedirect?: () => void;
 };
 
 export function LoginDialogContent({
@@ -78,10 +89,12 @@ export function LoginDialogContent({
   labels = {},
   privacy = null,
   error,
+  invalidFields = [],
   busy = false,
   texts,
   onSubmitCode,
   onSubmitFields,
+  onRedirect,
 }: LoginDialogContentProps) {
   const baseId = useId();
   const errorId = `${baseId}-error`;
@@ -91,6 +104,26 @@ export function LoginDialogContent({
       {texts.errors[error]}
     </Paragraph>
   ) : null;
+
+  if (step === 'blocked') {
+    return (
+      <div className="osc-login-dialog">
+        <Heading level={2} id={titleId}>
+          {texts.blockedTitle}
+        </Heading>
+        <Paragraph id={`${titleId}-description`} role="status">
+          {texts.blockedIntro}
+        </Paragraph>
+        <Button
+          type="button"
+          appearance="primary-action-button"
+          autoFocus
+          onClick={onRedirect}>
+          {texts.blockedSubmit}
+        </Button>
+      </div>
+    );
+  }
 
   if (step === 'uniquecode') {
     const codeId = `${baseId}-code`;
@@ -197,7 +230,7 @@ export function LoginDialogContent({
               autoFocus={autoFocus}
               required={required}
               inputRequired={required}
-              invalid={error === 'invalid_access_code' && key === 'accessCode'}
+              invalid={!!error && invalidFields.includes(key)}
               aria-describedby={describedBy}
             />
           </FormField>
@@ -243,6 +276,10 @@ export function LoginDialog({
       open={open}
       onOpenChange={onOpenChange}
       aria-labelledby={titleId}
+      // Text present on open is not announced as status, so describe the dialog with it
+      aria-describedby={
+        content.step === 'blocked' ? `${titleId}-description` : undefined
+      }
       className="osc-login-dialog-content">
       <LoginDialogContent titleId={titleId} {...content} />
     </Dialog>

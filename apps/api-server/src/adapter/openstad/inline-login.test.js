@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   applyClientConsents,
@@ -9,6 +9,7 @@ import {
   pickAllowedFields,
   privacyLinkFor,
   resolveTargetRole,
+  shouldForceNewLogin,
   upsertProjectUser,
 } from './inline-login.js';
 
@@ -29,6 +30,76 @@ const gates = (overrides = {}) =>
     hasUniqueCode: false,
     ...overrides,
   });
+
+describe('shouldForceNewLogin', () => {
+  const force = ({ query = {}, auth = {}, authTypes = ['UniqueCode'] } = {}) => {
+    const fetchClient = vi.fn(async () => client({ authTypes }));
+    const result = shouldForceNewLogin({
+      query,
+      project: { config: { auth } },
+      fetchClient,
+    });
+    return { result, fetchClient };
+  };
+
+  beforeEach(() => {
+    process.env.MULTI_PROJECT_LOGIN = 'true';
+  });
+
+  afterEach(() => {
+    delete process.env.MULTI_PROJECT_LOGIN;
+  });
+
+  it('honours an explicit forceNewLogin query', async () => {
+    const { result, fetchClient } = force({
+      query: { forceNewLogin: '1' },
+      authTypes: ['Url'],
+    });
+    expect(await result).toBe(true);
+    expect(fetchClient).not.toHaveBeenCalled();
+  });
+
+  it('forces a new login for a UniqueCode-only client', async () => {
+    expect(await force().result).toBe(true);
+  });
+
+  it('keeps the shared session for other clients', async () => {
+    expect(await force({ authTypes: ['Url'] }).result).toBe(false);
+    expect(await force({ authTypes: ['UniqueCode', 'Url'] }).result).toBe(
+      false
+    );
+  });
+
+  it('stops after the forced logout to prevent a redirect loop', async () => {
+    const { result, fetchClient } = force({ query: { newLoginDone: '1' } });
+    expect(await result).toBe(false);
+    expect(fetchClient).not.toHaveBeenCalled();
+  });
+
+  it('lets an explicit project setting win', async () => {
+    const { result, fetchClient } = force({
+      auth: { forceNewLoginOnWidgets: false },
+    });
+    expect(await result).toBe(false);
+    expect(fetchClient).not.toHaveBeenCalled();
+  });
+
+  it('does nothing extra without multi-project login', async () => {
+    delete process.env.MULTI_PROJECT_LOGIN;
+    const { result, fetchClient } = force();
+    expect(await result).toBe(false);
+    expect(fetchClient).not.toHaveBeenCalled();
+  });
+
+  it('keeps the shared session when the client cannot be fetched', async () => {
+    const fetchClient = vi.fn(async () => {
+      throw new Error('down');
+    });
+    expect(
+      await shouldForceNewLogin({ query: {}, project: {}, fetchClient })
+    ).toBe(false);
+  });
+});
 
 describe('evaluateClientGates', () => {
   it('passes a plain member on a plain project', () => {

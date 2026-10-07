@@ -75,6 +75,27 @@ describe('LoginDialogContent', () => {
 
     expect(markup).not.toContain('<a ');
   });
+
+  it('marks only the fields the server rejected', () => {
+    const markup = render({
+      step: 'fields',
+      missingFields: ['name', 'postcode'],
+      error: 'invalid_fields',
+      invalidFields: ['postcode'],
+    });
+
+    expect(markup).toContain('role="alert"');
+    expect(inputTag(markup, 'postcode')).toContain('aria-invalid="true"');
+    expect(inputTag(markup, 'name')).not.toContain('aria-invalid="true"');
+  });
+
+  it('explains a blocked popup and offers a same-window login', () => {
+    const markup = render({ step: 'blocked' });
+
+    expect(markup).toContain('id="title"');
+    expect(markup).toMatch(/role="status"[^>]*>[^<]*venster/);
+    expect(markup).toMatch(/<button[^>]*autofocus=""[^>]*>Inloggen in dit venster/i);
+  });
 });
 
 describe('login dialog fields', () => {

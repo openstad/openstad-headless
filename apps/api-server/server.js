@@ -37,19 +37,12 @@ externalCertificates.validateInfrastructure().catch((err) => {
   );
 });
 
-// Refuse to start when a project overrides the global jwtSecret
-const projectAuthConfig = require('./src/services/validateProjectAuthConfig');
-projectAuthConfig
-  .findProjectsWithJwtSecretOverride(require('./src/db'))
-  .then((offendingProjectIds) => {
-    if (offendingProjectIds.length === 0) return;
-    console.error(
-      `[auth-settings] Startup validation failed: project(s) ${offendingProjectIds.join(', ')} override config.auth.jwtSecret. Tokens are verified with the global secret, so per-project overrides break login. Remove the jwtSecret from these project configs before starting the server.`
-    );
-    process.exit(1);
-  })
+// Refuse to start when a project overrides the global jwtSecret, or when that
+// cannot be checked; only listen once the check passed
+require('./src/services/validateProjectAuthConfig')
+  .assertNoJwtSecretOverrides(require('./src/db'))
+  .then(() => Server.start(config.get('express.port')))
   .catch((err) => {
-    console.error('[auth-settings] Startup validation error:', err.message);
+    console.error('[auth-settings] Startup validation failed:', err.message);
+    process.exit(1);
   });
-
-Server.start(config.get('express.port'));

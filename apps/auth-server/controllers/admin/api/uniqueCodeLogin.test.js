@@ -34,7 +34,7 @@ const call = async (body, requestClient = client) => {
 };
 
 beforeEach(() => {
-  vi.spyOn(lockout, 'isLocked').mockResolvedValue(false);
+  vi.spyOn(lockout, 'lockScope').mockResolvedValue(null);
   vi.spyOn(lockout, 'registerFailure').mockResolvedValue({});
   vi.spyOn(auditLog, 'logAuthEvent').mockImplementation(() => {});
 });
@@ -50,14 +50,18 @@ describe('POST /api/admin/unique-code-login', () => {
   });
 
   it('returns 429 when locked and does not look up the code', async () => {
-    lockout.isLocked.mockResolvedValue(true);
+    lockout.lockScope.mockResolvedValue('client');
     const findOne = vi.spyOn(db.UniqueCode, 'findOne');
 
     const { res } = await call({ code: 'ABC', ip: '1.2.3.4' });
 
     expect(res.status).toHaveBeenCalledWith(429);
+    expect(res.json).toHaveBeenCalledWith({
+      error: 'too_many_attempts',
+      scope: 'client',
+    });
     expect(findOne).not.toHaveBeenCalled();
-    expect(lockout.isLocked).toHaveBeenCalledWith({
+    expect(lockout.lockScope).toHaveBeenCalledWith({
       clientId: 7,
       ip: '1.2.3.4',
     });
@@ -89,18 +93,21 @@ describe('POST /api/admin/unique-code-login', () => {
   });
 
   it('creates and links a user for a fresh code and assigns the default role', async () => {
-    const update = vi.fn().mockResolvedValue({});
     vi.spyOn(db.UniqueCode, 'findOne').mockResolvedValue({
+      id: 3,
       userId: null,
-      update,
     });
+    const update = vi.spyOn(db.UniqueCode, 'update').mockResolvedValue([1]);
     vi.spyOn(db.User, 'create').mockResolvedValue(fakeUser(11));
     vi.spyOn(db.UserRole, 'findOne').mockResolvedValue(null);
     const createRole = vi.spyOn(db.UserRole, 'create').mockResolvedValue({});
 
     const { res } = await call({ code: 'NEW' });
 
-    expect(update).toHaveBeenCalledWith({ userId: 11 });
+    expect(update).toHaveBeenCalledWith(
+      { userId: 11 },
+      { where: { id: 3, userId: null } }
+    );
     expect(createRole).toHaveBeenCalledWith({
       clientId: 7,
       roleId: 5,
@@ -112,6 +119,24 @@ describe('POST /api/admin/unique-code-login', () => {
     expect(body.user).toEqual({ id: 11, name: 'x' });
     expect(auditLog.logAuthEvent.mock.calls[0][0].user.id).toBe(11);
     expect(auditLog.logAuthEvent.mock.calls[0][1]).toBe('login');
+  });
+
+  it('joins the winner when a concurrent first use claimed the code', async () => {
+    vi.spyOn(db.UniqueCode, 'findOne')
+      .mockResolvedValueOnce({ id: 3, userId: null })
+      .mockResolvedValueOnce({ id: 3, userId: 12 });
+    vi.spyOn(db.UniqueCode, 'update').mockResolvedValue([0]);
+    const loser = { ...fakeUser(11), destroy: vi.fn().mockResolvedValue() };
+    vi.spyOn(db.User, 'create').mockResolvedValue(loser);
+    vi.spyOn(db.User, 'findOne').mockResolvedValue(fakeUser(12));
+    vi.spyOn(db.UserRole, 'findOne').mockResolvedValue({ roleId: 2 });
+
+    const { res } = await call({ code: 'RACE' });
+
+    expect(loser.destroy).toHaveBeenCalled();
+    const body = res.json.mock.calls[0][0];
+    expect(body.user.id).toBe(12);
+    expect(body.isNew).toBe(false);
   });
 
   it('logs in as the linked user for a code that is already linked', async () => {

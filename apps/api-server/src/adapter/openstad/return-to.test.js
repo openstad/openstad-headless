@@ -1,6 +1,28 @@
 import { describe, expect, it } from 'vitest';
 
-import { setQueryParam } from './return-to.js';
+import { canSendJwtTo, setQueryParam } from './return-to.js';
+
+describe('canSendJwtTo', () => {
+  const env = (vars) => ({ NODE_ENV: 'production', ...vars });
+
+  it('only sends a jwt to https urls in production', () => {
+    expect(canSendJwtTo('https://site.example.com/page?a=1', env())).toBe(true);
+    expect(canSendJwtTo('http://site.example.com/page', env())).toBe(false);
+  });
+
+  it('allows http outside production or with FORCE_HTTP', () => {
+    expect(
+      canSendJwtTo('http://localhost:8090/', { NODE_ENV: 'development' })
+    ).toBe(true);
+    expect(
+      canSendJwtTo('http://site.example.com/', env({ FORCE_HTTP: 'yes' }))
+    ).toBe(true);
+  });
+
+  it('refuses urls it cannot parse', () => {
+    expect(canSendJwtTo('/relative', env())).toBe(false);
+  });
+});
 
 describe('setQueryParam', () => {
   it('appends the param to a url without a query string', () => {

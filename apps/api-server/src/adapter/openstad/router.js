@@ -9,11 +9,12 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const isRedirectAllowed = require('../../services/isRedirectAllowed');
 const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
 const sessionDuration = require('../../util/session-duration');
-const { setQueryParam } = require('./return-to');
+const { canSendJwtTo, setQueryParam } = require('./return-to');
 const {
   applyClientConsents,
   upsertProjectUser,
   mintJwt,
+  shouldForceNewLogin,
 } = require('./inline-login');
 const inlineLoginRoutes = require('./inline-login-routes');
 const { popupLoginPage } = require('./popup-login-page');
@@ -114,7 +115,16 @@ router
   .route('(/project/:projectId)?/login')
   .get(async function (req, res, next) {
     // logout first?
-    if (!req.query.forceNewLogin) return next();
+    const forceNewLogin = await shouldForceNewLogin({
+      query: req.query,
+      project: req.project,
+      fetchClient: () =>
+        service.fetchClient({
+          authConfig: req.authConfig,
+          project: req.project,
+        }),
+    });
+    if (!forceNewLogin) return next();
 
     const projectId = req.params.projectId;
     if (
@@ -130,7 +140,7 @@ router
         '/login?useAuth=' +
         req.authConfig.provider +
         popupParam(req) +
-        '&redirectUri=' +
+        '&newLoginDone=1&redirectUri=' +
         encodeURIComponent(req.query.redirectUri);
       backToHereUrl = encodeURIComponent(backToHereUrl);
       let url =
@@ -230,7 +240,10 @@ router
     };
 
     // check if redirect domain is allowed
-    if (isAllowedRedirectDomain(redirectUrl, req.project)) {
+    if (
+      isAllowedRedirectDomain(redirectUrl, req.project) &&
+      canSendJwtTo(redirectUrl)
+    ) {
       req.redirectUrl = redirectUrl;
       return next();
     } else {
@@ -248,7 +261,8 @@ router
       console.log(
         `[${new Date().toISOString()}][digest-login] no auth code in request: projectId=${req.project?.id}`
       );
-      throw createError(403, 'Je bent niet ingelogd');
+      // next(), not throw: express 4 does not catch async errors
+      return next(createError(403, 'Je bent niet ingelogd'));
     }
 
     let url = `${req.authConfig.serverUrlInternal}/oauth/token`;

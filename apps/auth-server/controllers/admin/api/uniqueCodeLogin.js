@@ -29,8 +29,9 @@ exports.post = async (req, res, next) => {
   }
 
   try {
-    if (await lockout.isLocked({ clientId: client.id, ip })) {
-      return res.status(429).json({ error: 'too_many_attempts' });
+    const scope = await lockout.lockScope({ clientId: client.id, ip });
+    if (scope) {
+      return res.status(429).json({ error: 'too_many_attempts', scope });
     }
 
     const uniqueCode = await db.UniqueCode.findOne({
@@ -45,14 +46,31 @@ exports.post = async (req, res, next) => {
       return res.status(404).json({ error: 'invalid_code' });
     }
 
-    const isNew = !uniqueCode.userId;
+    let isNew = !uniqueCode.userId;
+    let userId = uniqueCode.userId;
     let user;
 
     if (isNew) {
-      user = await db.User.create({});
-      await uniqueCode.update({ userId: user.id });
-    } else {
-      user = await db.User.findOne({ where: { id: uniqueCode.userId } });
+      const created = await db.User.create({});
+      // Claim only an unused code, so concurrent first uses share one user
+      const [claimed] = await db.UniqueCode.update(
+        { userId: created.id },
+        { where: { id: uniqueCode.id, userId: null } }
+      );
+      if (claimed) {
+        user = created;
+      } else {
+        await created.destroy();
+        const current = await db.UniqueCode.findOne({
+          where: { id: uniqueCode.id },
+        });
+        userId = current && current.userId;
+        isNew = false;
+      }
+    }
+
+    if (!user) {
+      user = userId && (await db.User.findOne({ where: { id: userId } }));
       if (!user) {
         auditLog.logAuthEvent(auditRequest(req), 'login_failed', {
           data: { method: auditMethod },

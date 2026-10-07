@@ -303,6 +303,9 @@ spec:
           - name: RANDOM_SORT_ROTATION_MS
             value: {{ .Values.randomSortRotationMs | default "0" | quote }}
 
+          - name: MULTI_PROJECT_LOGIN
+            value: {{ .Values.multiProjectLogin | default false | toString | quote }}
+
           - name: OTEL_SERVICE_NAME
             value: {{ .Values.api.otelServiceName | quote }}
 
