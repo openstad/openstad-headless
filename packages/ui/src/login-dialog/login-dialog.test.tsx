@@ -94,7 +94,9 @@ describe('LoginDialogContent', () => {
 
     expect(markup).toContain('id="title"');
     expect(markup).toMatch(/role="status"[^>]*>[^<]*venster/);
-    expect(markup).toMatch(/<button[^>]*autofocus=""[^>]*>Inloggen in dit venster/i);
+    expect(markup).toMatch(
+      /<button[^>]*autofocus=""[^>]*>Inloggen in dit venster/i
+    );
   });
 });
 

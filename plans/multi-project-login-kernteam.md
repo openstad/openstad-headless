@@ -28,14 +28,14 @@ Daarnaast wordt **uitloggen per project**: wie uitlogt bij project A, blijft ing
 
 ## Opt-in: standaard uit
 
-De uitbreiding staat **standaard uit** en wordt per installatie bewust aangezet met een instelling op de server (een zogeheten *environment-flag*, `MULTI_PROJECT_LOGIN`). Zolang die instelling uit staat, gedraagt OpenStad zich precies zoals vandaag. Beheerders van bestaande installaties merken dus niets totdat zij er zelf voor kiezen. Ook terugdraaien is simpel: de instelling weer uitzetten.
+De uitbreiding staat **standaard uit** en wordt per installatie bewust aangezet met een instelling op de server (een zogeheten _environment-flag_, `MULTI_PROJECT_LOGIN`). Zolang die instelling uit staat, gedraagt OpenStad zich precies zoals vandaag. Beheerders van bestaande installaties merken dus niets totdat zij er zelf voor kiezen. Ook terugdraaien is simpel: de instelling weer uitzetten.
 
 ## Samengevat
 
-| Nu | Straks (met de flag aan) |
-| --- | --- |
-| Inloggen bij project B logt je uit bij project A | Tegelijk ingelogd in meerdere projecten |
-| Inloggen = omleiding naar aparte pagina, pagina-inhoud kwijt | Popup in de widget, pagina blijft staan |
+| Nu                                                                | Straks (met de flag aan)                             |
+| ----------------------------------------------------------------- | ---------------------------------------------------- |
+| Inloggen bij project B logt je uit bij project A                  | Tegelijk ingelogd in meerdere projecten              |
+| Inloggen = omleiding naar aparte pagina, pagina-inhoud kwijt      | Popup in de widget, pagina blijft staan              |
 | Extra gegevens invullen = volledig formulier op een andere pagina | Alleen de ontbrekende gegevens, in hetzelfde venster |
-| Uitloggen logt je overal uit | Uitloggen per project |
-| Beheerder logt per project opnieuw in | Beheerder is overal ingelogd na één login |
+| Uitloggen logt je overal uit                                      | Uitloggen per project                                |
+| Beheerder logt per project opnieuw in                             | Beheerder is overal ingelogd na één login            |

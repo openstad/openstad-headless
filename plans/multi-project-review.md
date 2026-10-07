@@ -11,6 +11,7 @@
 > Alle regels die beginnen met `💬 **REVIEW-OPMERKING**` zijn **commentaar van de reviewer**, NIET van de oorspronkelijke auteur en NIET onderdeel van het plan. Ze zijn nog **niet toegepast**. Het is aan de uitvoerder (mens of Claude) om per opmerking te beslissen of die wordt overgenomen; overleg bij twijfel met de auteur.
 >
 > **Context/framing:** de feature is prima bouwbaar. Deze opmerkingen zijn bouwhulp, geen bezwaar tegen de feature. Ze vallen in drie soorten:
+>
 > - **CRITICAL/HIGH**: moet je oplossen tijdens het bouwen, anders introduceer je een beveiligings- of correctheidsgat.
 > - **MEDIUM/LOW**: correcties en verbeteringen aan het plan zelf (verkeerde aanname, verkeerd pad, verkeerde tool).
 > - **SCOPE**: bestaand probleem los van deze feature; benoemd zodat het niet per ongeluk in dit plan belandt of onopgemerkt blijft.
@@ -33,15 +34,15 @@
 
 **Betrokken apps/packages:**
 
-| App/package | Rol in dit plan |
-|---|---|
-| `apps/auth-server` | 1 nieuw admin-API endpoint (uniquecode-login) |
-| `apps/api-server` | Nieuwe AJAX-auth-endpoints, project-scoped token handoff, JWT-hardening |
-| `packages/lib` | Auth-broker (cross-project identity-index) |
-| `packages/data-store` | Nieuwe API-calls, project-scoped token pickup, login-flow hook |
-| `packages/ui` | `LoginDialog` component (WCAG) |
-| `packages/likes`, `packages/stem-begroot` | Eerste integraties (rest volgt) |
-| `apps/admin-server` | Alleen verificatie; geen codewijziging voorzien |
+| App/package                               | Rol in dit plan                                                         |
+| ----------------------------------------- | ----------------------------------------------------------------------- |
+| `apps/auth-server`                        | 1 nieuw admin-API endpoint (uniquecode-login)                           |
+| `apps/api-server`                         | Nieuwe AJAX-auth-endpoints, project-scoped token handoff, JWT-hardening |
+| `packages/lib`                            | Auth-broker (cross-project identity-index)                              |
+| `packages/data-store`                     | Nieuwe API-calls, project-scoped token pickup, login-flow hook          |
+| `packages/ui`                             | `LoginDialog` component (WCAG)                                          |
+| `packages/likes`, `packages/stem-begroot` | Eerste integraties (rest volgt)                                         |
+| `apps/admin-server`                       | Alleen verificatie; geen codewijziging voorzien                         |
 
 ---
 
@@ -59,6 +60,7 @@ De kern-ontdekking: **de auth-server is al een SSO-server** en de widget-opslag 
 - **Er is al een AJAX-loginpad als voorbeeldpatroon**: `connect-user` (`apps/api-server/src/adapter/openstad/router.js:18-81`) accepteert JSON en geeft `{ jwt }` terug.
 
 > 💬 **REVIEW-OPMERKING, LOW (bewijs-paden kloppen niet overal).** Voor de uitvoerder die deze bestanden gaat openen: (1) passport `serializeUser`/`deserializeUser` en de uniqueCode TokenStrategy staan in `apps/auth-server/auth.js` (regels 272-283 en 87-144), NIET in `config/auth.js`; het plan verwijst op sommige plekken naar `config/auth.js`. De uitgecommentarieerde DigiD staat wél in `config/auth.js:107-116`. (2) Het model heet `apps/auth-server/model/unique~code.js` (tilde). (3) De accessCode-validatie heeft een trailing slash: `POST /api/validation/code/` (`apps/auth-server/routes/routes.js:336`). (4) De auth-server logout-handler zit op `router.js:437-486` (regel :456), niet op `:88-119` (dat is de login/force-logout-handler).
+
 - **Popup-bouwsteen bestaat**: Radix `Dialog` in `packages/ui/src/dialog/index.tsx`.
 
 ### Wat multi-project login nu blokkeert
@@ -83,7 +85,7 @@ Verwijder `forceNewLogin=1`, maak token-pickup project-scoped, en open de bestaa
 
 ### Steelman — "AJAX-auth-API + broker + in-widget dialog"
 
-Nieuwe JSON-endpoints op de api-server (uniquecode-login, exchange, complete-fields) die server-to-server met de auth-server praten (Basic client auth — cookies zijn dan irrelevant), een cross-project identity-broker in de frontend, en een herbruikbare `LoginDialog`. Popup-venster alleen als fallback voor *initiële* logins (Url/Local vereisen nu eenmaal e-mail-roundtrip of wachtwoordscherm).
+Nieuwe JSON-endpoints op de api-server (uniquecode-login, exchange, complete-fields) die server-to-server met de auth-server praten (Basic client auth — cookies zijn dan irrelevant), een cross-project identity-broker in de frontend, en een herbruikbare `LoginDialog`. Popup-venster alleen als fallback voor _initiële_ logins (Url/Local vereisen nu eenmaal e-mail-roundtrip of wachtwoordscherm).
 
 - ✅ Exact de gevraagde UX: stemcode/velden-popup op het interactiemoment, AJAX, geen refresh, auth-state live bijgewerkt.
 - ✅ Omzeilt third-party-cookie-problematiek volledig voor de exchange-flows.
@@ -134,10 +136,12 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
 > 💬 **REVIEW-OPMERKING, CRITICAL (beveiliging).** Deze beleidsregel claimt de auth-server gates "exact" te spiegelen, maar spiegelt er maar twee van de vier. Het echte inlogscherm draait vier gates in serie: `checkRequiredUserFields`, `check2FA`, `checkPhonenumberAuth`, `checkUniqueCodeAuth` (bewijs: `apps/auth-server/routes/routes.js:457-460`). De regel hieronder dekt alleen UniqueCode en fields. Gevolg: een gebruiker die op project A met alleen e-mail inlogde, krijgt via stille exchange een geldig token voor een project B dat 2FA of een bevestigd telefoonnummer vereist. De codecomment op `apps/auth-server/middleware/client.js:141-147` beschrijft exact dit scenario als reden dat die gates bestaan.
 > **Wat ik zou toevoegen:**
+>
 > - Phonenumber-gate: target-client heeft `Phonenumber` in `authTypes` en bron-user heeft geen `phoneNumberConfirmed` en geen privileged rol -> nieuwe status `phonenumber_required` (spiegelt `client.js:195-221`).
 > - 2FA-gate: 2FA-validiteit is sessie-gebonden (`req.currentClientAuth.twoFactorValid`, `client.js:226-263`) en is stateless in de exchange NIET te reproduceren. Voor een 2FA-plichtige rol op de target-client mag exchange daarom nooit stil een JWT minten -> forceer de popup/redirect naar `/dialog/authorize` waar de echte 2FA-flow draait. Leg dit vast als harde uitzondering op "stille exchange".
 
 **Beleidsregel voor stille exchange (spiegelt de auth-server gates exact, zie P1):**
+
 - Target-client heeft `UniqueCode` als **enige** authType (`authTypes.length === 1`) en de gebruiker heeft voor die client geen gekoppelde `unique_codes`-rij én geen geprivilegieerde rol → `uniquecode_required` (spiegelt `apps/auth-server/middleware/client.js:152-193`).
 - `requiredUserFields` van de target-client onvolledig (incl. per-client velden `privacyConsent`/`emailNotificationConsent` en `accessCode`) → `fields_required`.
 - Bron-identiteit is `anonymous` → exchange geweigerd (`not_allowed`); anonieme users hebben geen overdraagbare identiteit.
@@ -149,36 +153,36 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
 **Nieuw:**
 
-| Bestand | Verantwoordelijkheid |
-|---|---|
-| `apps/api-server/src/adapter/openstad/inline-login.js` | Route-handlers voor `uniquecode-login`, `exchange`, `complete-fields` + gedeelde gate-check en user-upsert helpers |
-| `apps/api-server/src/adapter/openstad/inline-login.test.js` | Unit tests (vitest) |
-| `apps/auth-server/controllers/admin/api/uniqueCodeLogin.js` | Admin-API: code → user (logica gespiegeld van de passport-strategy) |
-| `apps/auth-server/controllers/admin/api/uniqueCodeLogin.test.js` | Unit tests |
-| `packages/lib/auth-broker.ts` | Cross-project identity-index + change-events |
-| `packages/lib/auth-broker.test.ts` | Unit tests |
-| `packages/data-store/src/hooks/use-login-flow.js` | Orchestratie: exchange → dialogstappen → state-update |
-| `packages/data-store/src/hooks/use-login-flow.test.js` | Unit tests |
-| `packages/ui/src/login-dialog/index.tsx` (+ `index.css`) | Toegankelijke dialog met stappen: stemcode / velden / accesscode |
-| `packages/ui/src/login-dialog/login-dialog.test.tsx` | Unit tests |
+| Bestand                                                          | Verantwoordelijkheid                                                                                               |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `apps/api-server/src/adapter/openstad/inline-login.js`           | Route-handlers voor `uniquecode-login`, `exchange`, `complete-fields` + gedeelde gate-check en user-upsert helpers |
+| `apps/api-server/src/adapter/openstad/inline-login.test.js`      | Unit tests (vitest)                                                                                                |
+| `apps/auth-server/controllers/admin/api/uniqueCodeLogin.js`      | Admin-API: code → user (logica gespiegeld van de passport-strategy)                                                |
+| `apps/auth-server/controllers/admin/api/uniqueCodeLogin.test.js` | Unit tests                                                                                                         |
+| `packages/lib/auth-broker.ts`                                    | Cross-project identity-index + change-events                                                                       |
+| `packages/lib/auth-broker.test.ts`                               | Unit tests                                                                                                         |
+| `packages/data-store/src/hooks/use-login-flow.js`                | Orchestratie: exchange → dialogstappen → state-update                                                              |
+| `packages/data-store/src/hooks/use-login-flow.test.js`           | Unit tests                                                                                                         |
+| `packages/ui/src/login-dialog/index.tsx` (+ `index.css`)         | Toegankelijke dialog met stappen: stemcode / velden / accesscode                                                   |
+| `packages/ui/src/login-dialog/login-dialog.test.tsx`             | Unit tests                                                                                                         |
 
 **Gewijzigd:**
 
-| Bestand | Wijziging |
-|---|---|
-| `apps/api-server/src/adapter/openstad/router.js` | `openstadprojectid` in redirect (digest-login :157-168); routes registreren; upsert-logica (:274-372) extraheren naar helper |
-| `apps/api-server/src/adapter/openstad/service.js` | `loginWithUniqueCode()`, `fetchUniqueCodesForUser()` (server-to-server) |
-| `apps/api-server/src/middleware/user.js` | `pending`-tokens weigeren in `parseJwt`; optionele `projectId`-claim-check |
-| `apps/api-server/src/routes/widget/widget.js:207` | `forceNewLogin` configureerbaar i.p.v. hardcoded `1` |
-| `apps/auth-server/routes/adminApi.js` | Route voor `POST /api/admin/unique-code-login` |
-| `apps/auth-server/middleware/code.js:34-40` | `userId`-queryparam-filter in `withAll` |
-| `packages/lib/index.ts` (of bestaande export-barrel) | Export `auth-broker` |
-| `packages/data-store/src/api/user.js` | `exchangeLogin`, `loginWithUniqueCode`, `completeFields` API-calls |
-| `packages/data-store/src/hooks/use-current-user.js` | Project-scoped token-pickup; `notifyAuthChange` na login/logout; luisteren op broker-events |
-| `packages/data-store/src/index.js` | `useLoginFlow` binden |
-| `packages/ui/src/index.tsx` | Export `LoginDialog` |
-| `packages/likes/src/likes.tsx:125-136` | Redirect vervangen door `useLoginFlow` |
-| `packages/stem-begroot/src/stem-begroot.tsx` + `src/step-3/index.tsx` | Idem |
+| Bestand                                                               | Wijziging                                                                                                                    |
+| --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `apps/api-server/src/adapter/openstad/router.js`                      | `openstadprojectid` in redirect (digest-login :157-168); routes registreren; upsert-logica (:274-372) extraheren naar helper |
+| `apps/api-server/src/adapter/openstad/service.js`                     | `loginWithUniqueCode()`, `fetchUniqueCodesForUser()` (server-to-server)                                                      |
+| `apps/api-server/src/middleware/user.js`                              | `pending`-tokens weigeren in `parseJwt`; optionele `projectId`-claim-check                                                   |
+| `apps/api-server/src/routes/widget/widget.js:207`                     | `forceNewLogin` configureerbaar i.p.v. hardcoded `1`                                                                         |
+| `apps/auth-server/routes/adminApi.js`                                 | Route voor `POST /api/admin/unique-code-login`                                                                               |
+| `apps/auth-server/middleware/code.js:34-40`                           | `userId`-queryparam-filter in `withAll`                                                                                      |
+| `packages/lib/index.ts` (of bestaande export-barrel)                  | Export `auth-broker`                                                                                                         |
+| `packages/data-store/src/api/user.js`                                 | `exchangeLogin`, `loginWithUniqueCode`, `completeFields` API-calls                                                           |
+| `packages/data-store/src/hooks/use-current-user.js`                   | Project-scoped token-pickup; `notifyAuthChange` na login/logout; luisteren op broker-events                                  |
+| `packages/data-store/src/index.js`                                    | `useLoginFlow` binden                                                                                                        |
+| `packages/ui/src/index.tsx`                                           | Export `LoginDialog`                                                                                                         |
+| `packages/likes/src/likes.tsx:125-136`                                | Redirect vervangen door `useLoginFlow`                                                                                       |
+| `packages/stem-begroot/src/stem-begroot.tsx` + `src/step-3/index.tsx` | Idem                                                                                                                         |
 
 **Geen databasemigraties nodig** — alle benodigde modellen (unique_codes, user_roles, users.accessCode, per-client consent-maps) bestaan al.
 
@@ -191,8 +195,10 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 - **P3 — `jwtSecret`: OPGELOST (bevestigd door opdrachtgever).** Staat alleen globaal ingesteld; `exchange` kan elk bron-JWT tegen het globale secret verifiëren.
 
   > 💬 **REVIEW-OPMERKING, HIGH.** "Staat alleen globaal ingesteld" is een deployment-feit, geen code-invariant. `getConfig` bouwt `jwtSecret: projectConfig.jwtSecret` waarbij `project.config.auth` over de defaults heen wordt gemerged (`apps/api-server/src/util/auth-settings.js:14-16,42`), dus een project KAN in code een eigen `jwtSecret` zetten. Twee gevolgen:
+  >
   > 1. Taak 6 stap 1 verifieert `sourceJwt` tegen het target-`authConfig.jwtSecret`. Dat werkt alleen zolang alle projecten hetzelfde secret delen. Verifieer in plaats daarvan tegen het globale `config.auth['jwtSecret']` (net als `parseJwt`, `apps/api-server/src/middleware/user.js:121`).
   > 2. Voeg een startup-assertie toe die faalt als een project `config.auth.jwtSecret` overschrijft, zodat P3 een afgedwongen invariant wordt i.p.v. een aanname. Let ook op de bestaande latente mismatch: digest-login mint met `req.authConfig.jwtSecret` (`router.js:407`) terwijl `parseJwt` verifieert met de globale (`user.js:121`); die zijn vandaag gelijk, maar breken zodra een project afwijkt.
+
 - **P4 — CORS: OPGELOST, geen wijziging nodig.** `security-headers.js` zet `Access-Control-Allow-Origin` op de request-origin als die in de `allowedDomains` van het project staat (`apps/api-server/src/middleware/security-headers.js:13-25`), met POST/OPTIONS, `Authorization`- en `Content-Type`-headers toegestaan en preflight-afhandeling (`:84-86`). Volgorde klopt: project-middleware (`src/Server.js:154`) draait vóór security-headers (`:156`). Precedent: `connect-user` wordt vandaag al via AJAX vanuit widgets aangeroepen. Enige vereiste: de embed-site moet in de `allowedDomains` van élk gebruikt project staan — dat is nu al zo voor widgets.
 - **P5 — `forceNewLogin`-default: BESLIST.** Default uit, per project configureerbaar via `project.config.auth.forceNewLoginOnWidgets` (Taak 2).
 - **P6 — Rolbepaling: OPGELOST.** Rollen zijn `user_roles`-rijen per client; `resolveRoleForClient` valt terug op de default-rol als er geen rij is (`apps/auth-server/utils/clientAuth.js:75-94`). De interactieve UniqueCode-login maakt bij eerste login een `UserRole`-rij aan met `client.config.defaultRoleId`, met fallback naar de authType-config (`apps/auth-server/controllers/auth/code.js:111-136`). Het nieuwe uniquecode-login endpoint (Taak 4) repliceert precies dit; de exchange-flow gebruikt dezelfde default-rol-fallback als er geen rol-rij bestaat.
@@ -206,6 +212,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 #### Taak 1: Project-scoped token handoff
 
 **Files:**
+
 - Modify: `apps/api-server/src/adapter/openstad/router.js:157-168` (digest-login redirect-URL-opbouw)
 - Modify: `packages/data-store/src/hooks/use-current-user.js:61-69`
 - Create: test in `packages/data-store/src/hooks/use-current-user.test.js`
@@ -227,14 +234,22 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
   const tokenProjectId = params.get('openstadprojectid');
   let jwtFromUrl = params.get('openstadlogintoken');
   // BC: oude redirects zonder openstadprojectid blijven werken
-  if (jwtFromUrl && tokenProjectId && tokenProjectId !== String(props.projectId)) {
+  if (
+    jwtFromUrl &&
+    tokenProjectId &&
+    tokenProjectId !== String(props.projectId)
+  ) {
     jwtFromUrl = null;
   }
   if (jwtFromUrl) {
     storage.set('openStadUser', { jwt: jwtFromUrl });
     params.delete('openstadlogintoken');
     params.delete('openstadprojectid');
-    history.replaceState(null, '', `${document.location.pathname}?${params.toString()}`);
+    history.replaceState(
+      null,
+      '',
+      `${document.location.pathname}?${params.toString()}`
+    );
   }
   ```
 
@@ -253,12 +268,15 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 **Preconditie:** geen — P5 is beslist: default uit, per project aan te zetten.
 
 **Files:**
+
 - Modify: `apps/api-server/src/routes/widget/widget.js:206-209`
 
 - [ ] **Stap 1: lees de flag uit projectconfig**
 
   ```js
-  const forceNewLogin = project.config?.auth?.forceNewLoginOnWidgets ? '&forceNewLogin=1' : '';
+  const forceNewLogin = project.config?.auth?.forceNewLoginOnWidgets
+    ? '&forceNewLogin=1'
+    : '';
   const loginUrl = `${config.url}/auth/project/${project.id}/login?useAuth=default${forceNewLogin}&redirectUri=[[REDIRECT_URI]]`;
   const loginAnonymousUrl = `${config.url}/auth/project/${project.id}/login?useAuth=anonymous${forceNewLogin}&redirectUri=[[REDIRECT_URI]]`;
   ```
@@ -272,6 +290,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 #### Taak 3: JWT-hardening (pending-tokens + projectId-claim)
 
 **Files:**
+
 - Modify: `apps/api-server/src/adapter/openstad/router.js:403-429` en `:62-67` (JWT-mint plekken)
 - Modify: `apps/api-server/src/middleware/user.js:118-134` (`parseJwt`)
 
@@ -285,7 +304,8 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
   ```js
   const claims = jwt.verify(token, config.auth['jwtSecret']);
-  if (claims.pending) throw new Error('Pending auth token not valid for API access');
+  if (claims.pending)
+    throw new Error('Pending auth token not valid for API access');
   return claims;
   ```
 
@@ -302,6 +322,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 #### Taak 4: auth-server endpoint `POST /api/admin/unique-code-login` + `userId`-filter
 
 **Files:**
+
 - Create: `apps/auth-server/controllers/admin/api/uniqueCodeLogin.js` (+ test)
 - Modify: `apps/auth-server/routes/adminApi.js` (registreren naast de bestaande unique-code-routes, `:112-141`)
 - Modify: `apps/auth-server/middleware/code.js:34-40` (`userId`-filter in `withAll`)
@@ -327,19 +348,31 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
   ```js
   exports.post = async (req, res, next) => {
     const { code } = req.body;
-    const uniqueCode = await db.UniqueCode.findOne({ where: { code, clientId: req.client.id } });
-    if (!uniqueCode || uniqueCode.isUsed) return res.status(404).json({ error: 'invalid_code' });
+    const uniqueCode = await db.UniqueCode.findOne({
+      where: { code, clientId: req.client.id },
+    });
+    if (!uniqueCode || uniqueCode.isUsed)
+      return res.status(404).json({ error: 'invalid_code' });
     const isNew = !uniqueCode.userId;
-    let user = uniqueCode.userId ? await db.User.findByPk(uniqueCode.userId) : null;
+    let user = uniqueCode.userId
+      ? await db.User.findByPk(uniqueCode.userId)
+      : null;
     if (!user) {
       user = await db.User.create({});
       await uniqueCode.update({ userId: user.id });
     }
     // rol-toekenning: zelfde logica als controllers/auth/code.js:111-136
-    let userRole = await db.UserRole.findOne({ where: { userId: user.id, clientId: req.client.id } });
+    let userRole = await db.UserRole.findOne({
+      where: { userId: user.id, clientId: req.client.id },
+    });
     if (!userRole) {
-      const defaultRoleId = req.client.config.defaultRoleId || authCodeConfig.defaultRoleId;
-      userRole = await db.UserRole.create({ userId: user.id, clientId: req.client.id, roleId: defaultRoleId });
+      const defaultRoleId =
+        req.client.config.defaultRoleId || authCodeConfig.defaultRoleId;
+      userRole = await db.UserRole.create({
+        userId: user.id,
+        clientId: req.client.id,
+        roleId: defaultRoleId,
+      });
     }
     const role = await user.getRoleForClient(req.client.id);
     return res.json({ user, role, isNew });
@@ -367,6 +400,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 **Precondities:** geen — P1, P2 en P6 zijn opgelost (zie §6); Taak 4 (auth-server endpoint + `userId`-filter) moet af zijn.
 
 **Files:**
+
 - Create: `apps/api-server/src/adapter/openstad/inline-login.js`
 - Modify: `apps/api-server/src/adapter/openstad/router.js:274-372` (upsert extraheren)
 - Modify: `apps/api-server/src/adapter/openstad/service.js` (nieuwe server-to-server calls)
@@ -412,6 +446,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 #### Taak 6: api-server routes `exchange`, `uniquecode-login`, `complete-fields`
 
 **Files:**
+
 - Modify: `apps/api-server/src/adapter/openstad/router.js` (routes registreren)
 - Modify: `apps/api-server/src/adapter/openstad/inline-login.js` (handlers)
 
@@ -471,12 +506,20 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
   export type KnownIdentity = { projectId: string; jwt: string };
 
-  export function getKnownIdentities(excludeProjectId?: string | number): KnownIdentity[] {
+  export function getKnownIdentities(
+    excludeProjectId?: string | number
+  ): KnownIdentity[] {
     try {
       const data = JSON.parse(localStorage.getItem(KEY) || '{}');
       return Object.entries(data)
-        .filter(([pid, v]: [string, any]) => v?.openStadUser?.jwt && pid !== String(excludeProjectId))
-        .map(([projectId, v]: [string, any]) => ({ projectId, jwt: v.openStadUser.jwt }));
+        .filter(
+          ([pid, v]: [string, any]) =>
+            v?.openStadUser?.jwt && pid !== String(excludeProjectId)
+        )
+        .map(([projectId, v]: [string, any]) => ({
+          projectId,
+          jwt: v.openStadUser.jwt,
+        }));
     } catch {
       return [];
     }
@@ -487,7 +530,9 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
   }
 
   export function onAuthChange(cb: () => void): () => void {
-    const onStorage = (e: StorageEvent) => { if (e.key === KEY) cb(); };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === KEY) cb();
+    };
     window.addEventListener('osc-auth-changed', cb);
     window.addEventListener('storage', onStorage);
     return () => {
@@ -506,6 +551,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 #### Taak 8: data-store — API-calls + auth-state live bijwerken
 
 **Files:**
+
 - Modify: `packages/data-store/src/api/user.js`
 - Modify: `packages/data-store/src/hooks/use-current-user.js`
 
@@ -554,8 +600,12 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
     open: boolean;
     onOpenChange(open: boolean): void;
     step: 'uniquecode' | 'fields';
-    missingFields?: Array<{ key: string; label: string; type: 'text' | 'checkbox' }>;
-    labels?: Record<string, string>;   // per-project copy uit clientconfig
+    missingFields?: Array<{
+      key: string;
+      label: string;
+      type: 'text' | 'checkbox';
+    }>;
+    labels?: Record<string, string>; // per-project copy uit clientconfig
     error?: string;
     busy?: boolean;
     onSubmitCode(code: string): void;
@@ -595,6 +645,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 #### Taak 11: integratie in `likes` en `stem-begroot`
 
 **Files:**
+
 - Modify: `packages/likes/src/likes.tsx:125-136`
 - Modify: `packages/stem-begroot/src/stem-begroot.tsx:1354-1355` en `packages/stem-begroot/src/step-3/index.tsx:41-96`
 
@@ -605,7 +656,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
   // in doVote():
   if (!hasRole(currentUser, props.votes.requiredUserRole)) {
     const user = await requireLogin();
-    if (!user) return;            // geannuleerd
+    if (!user) return; // geannuleerd
   }
   // render: <LoginDialog {...dialogProps} />
   ```
@@ -627,6 +678,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 #### Taak 12: popup-login voor initiële login (geen identiteit bekend)
 
 **Files:**
+
 - Create: `apps/api-server/src/adapter/openstad/popup-callback.js` (mini-HTML-response), route in `router.js`
 - Modify: `packages/data-store/src/hooks/use-login-flow.js` (fallback-stap 3)
 
@@ -636,10 +688,15 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
   ```html
   <script>
-    window.opener && window.opener.postMessage(
-      { type: 'openstad-login', projectId: '<%= projectId %>', jwt: '<%= jwt %>' },
-      '<%= validatedOrigin %>'
-    );
+    window.opener &&
+      window.opener.postMessage(
+        {
+          type: 'openstad-login',
+          projectId: '<%= projectId %>',
+          jwt: '<%= jwt %>',
+        },
+        '<%= validatedOrigin %>'
+      );
     window.close();
   </script>
   ```
@@ -695,12 +752,14 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 - [ ] **Extra taak D, MEDIUM: `pseudoRandomSortSeed` namespacen.** `packages/data-store/src/api/resources.js:2-3,15-19` gebruikt globale localStorage-keys (`pseudoRandomSortSeed`, `pseudoRandomSortSeedTimestamp`) buiten de `LocalStorage`-class om. Twee random-gesorteerde overzichten van verschillende projecten delen zo één seed/rotatie. Namespacen per `projectId`.
 
 > 💬 **SCOPE-notities (bestaand probleem, NIET in dit plan oplossen, wel benoemen):**
+>
 > - **Vote DELETE/TOGGLE is niet project-scoped.** `apps/api-server/src/routes/api/vote.js:549-551` en `:579-581` doen `db.Vote.findOne({ where: { id: voteId } })` zonder `projectId`; delete is alleen gated door `vote.can('delete')` (editor/owner). Een editor in project A kan votes van project B verwijderen/togglen op numeriek id. Bestaat vandaag al; multi-login maakt editor-coexistentie waarschijnlijker. Los apart op.
 > - **CORS path-exceptie reflecteert elke origin + `Allow-Credentials: true`** voor projectloze paden (`apps/api-server/src/middleware/security-headers.js:32-43,66`), incl. `GET /api/user`. Afgezwakt: de api-server auth leest geen cookies (puur Bearer, geverifieerd), dus dit is een misconfig zonder direct exploiteerbaar lek. Opruimen is netjes, geen blocker voor deze feature.
 
 ## 8. Validatiechecklist (gates)
 
 **CLI:**
+
 - `npm run test:unit:api` — groen (nieuwe inline-login tests + regressie digest-login)
 - `npm run test:unit:auth` — groen (uniquecode-login endpoint)
 - `cd packages/lib && npx vitest run` / idem `packages/data-store`, `packages/ui`
@@ -708,6 +767,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 - Curl: pendingJwt als Bearer op `GET /api/project/2/resource` → 401
 
 **Browser (docker-stack draaiend):**
+
 - Testpagina met widgets van 2 projecten: login A → inline stemcode-login B → beide ingelogd, geen reload
 - requiredFields-dialog (project met adres verplicht) → na invullen direct ingelogd
 - accessCode als required field → dialog vraagt code → foute code toont fout, goede code logt in
