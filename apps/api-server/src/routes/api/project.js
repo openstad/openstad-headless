@@ -1394,6 +1394,7 @@ router
       req.pendingMessages.push({ key: `project-urls-update`, value: 'event' });
 
     let updateBody = req.body;
+    const prevCanCreateNewUsers = project.config?.users?.canCreateNewUsers;
 
     if (req.body.url && req.body.url !== project.url) {
       try {
@@ -1425,6 +1426,33 @@ router
       .update(updateBody)
       .then(async (result) => {
         req.results = result;
+
+        // canCreateNewUsers is enforced by the auth server, so sync it after save;
+        // this also covers the automatic disable when projectHasEnded is set
+        if (result.config?.users?.canCreateNewUsers !== prevCanCreateNewUsers) {
+          try {
+            let providers = await authSettings.providers({ project: result });
+            for (let provider of providers) {
+              let authConfig = await authSettings.config({
+                project: result,
+                useAuth: provider,
+              });
+              let adapter = await authSettings.adapter({ authConfig });
+              if (adapter.service.updateClient) {
+                await adapter.service.updateClient({
+                  authConfig,
+                  project: result,
+                });
+              }
+            }
+          } catch (err) {
+            console.log(
+              '[canCreateNewUsers] Could not sync auth client:',
+              err.message
+            );
+          }
+        }
+
         try {
           await checkHostStatus({ id: result.id });
         } catch (err) {
