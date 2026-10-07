@@ -1,5 +1,7 @@
 const hasRole = require('../lib/hasRole');
 
+const IMMUTABLE_ON_UPDATE = ['projectId', 'resourceId'];
+
 module.exports = function authorizeData(data, action, user, self, project) {
   self = self || this;
   project = project || self.project;
@@ -21,6 +23,16 @@ module.exports = function authorizeData(data, action, user, self, project) {
 
     let result = {};
     keys.forEach((key) => {
+      // records may not be moved to another project or resource on update
+      if (
+        action === 'update' &&
+        IMMUTABLE_ON_UPDATE.includes(key) &&
+        data[key] != self[key]
+      ) {
+        data[key] = undefined;
+        return;
+      }
+
       let testRole;
       if (self.rawAttributes[key] && self.rawAttributes[key].auth) {
         if (self.rawAttributes[key].auth.authorizeData) {
