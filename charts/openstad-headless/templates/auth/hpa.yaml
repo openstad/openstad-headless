@@ -1,0 +1,1 @@
+{{- include "openstad.hpa" (dict "Values" .Values "Release" .Release "fullname" (include "openstad.auth.fullname" .) "serviceAutoscaling" .Values.auth.autoscaling) -}}
