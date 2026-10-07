@@ -857,10 +857,7 @@ export default function ProjectAuthentication() {
                         <FormItem>
                           <FormLabel>SMS-tekst</FormLabel>
                           <FormControl>
-                            <Textarea
-                              placeholder="Code: [[code]]"
-                              {...field}
-                            />
+                            <Textarea placeholder="Code: [[code]]" {...field} />
                           </FormControl>
                           <FormDescription>
                             De tekst van de sms met de inlogcode. [[code]] is
