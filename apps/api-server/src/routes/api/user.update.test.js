@@ -176,6 +176,21 @@ describe('PUT /user/:userId identity fields', () => {
       expect(projectData.twoFactorToken).toBeUndefined();
     });
 
+    it('does not treat a user of another auth provider with the same identifier as the same person', async () => {
+      const lookalike = {
+        role: 'member',
+        id: 500,
+        projectId: 1,
+        idpUser: { identifier: 'idp-93', provider: 'oidc' },
+      };
+      const res = await request(createApp(lookalike))
+        .put('/project/1/user/93')
+        .send({ email: 'new@example.com' });
+
+      expect(res.status).not.toBe(200);
+      expect(sentWith('admin-client')).toEqual([]);
+    });
+
     it('rejects anonymize-all by a project admin before anonymizing anything', async () => {
       for (const row of rows) row.doAnonymize = vi.fn(async () => ({}));
 

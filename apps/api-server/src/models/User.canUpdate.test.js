@@ -65,6 +65,12 @@ describe('User.can("update")', () => {
     expect(!!target('member', 93).can('update', other)).toBe(true);
   });
 
+  it('denies a user of another auth provider with the same identifier', () => {
+    const lookalike = user('member', 500);
+    lookalike.idpUser = { identifier: 'idp-93', provider: 'oidc' };
+    expect(!!target('member', 93).can('update', lookalike)).toBe(false);
+  });
+
   it('falls back to the user attached by auth.useReqUser', () => {
     const self = target('admin');
     self.auth.user = { role: 'anonymous', id: null };

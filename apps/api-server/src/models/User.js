@@ -730,7 +730,8 @@ module.exports = function (db, sequelize, DataTypes) {
         (self.idpUser &&
           user.idpUser &&
           self.idpUser.identifier &&
-          self.idpUser.identifier == user.idpUser.identifier);
+          self.idpUser.identifier == user.idpUser.identifier &&
+          self.idpUser.provider == user.idpUser.provider);
 
       // extra: geen acties op users met meer rechten dan je zelf hebt
       valid = valid && userHasRole(user, self.role);

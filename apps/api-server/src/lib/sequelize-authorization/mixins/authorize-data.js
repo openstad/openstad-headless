@@ -72,7 +72,8 @@ module.exports = function authorizeData(data, action, user, self, project) {
         self.idpUser &&
         user.idpUser &&
         self.idpUser.identifier &&
-        self.idpUser.identifier === user.idpUser.identifier
+        self.idpUser.identifier === user.idpUser.identifier &&
+        self.idpUser.provider === user.idpUser.provider
       ) {
         // special case: users are owner on their users on other projects
         ownerId = user.id;

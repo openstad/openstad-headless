@@ -102,7 +102,7 @@ async function canManageIdentity(req, target) {
   const identifier = target?.idpUser?.identifier;
   if (!identifier) return true;
   if (hasRole(req.user, 'superuser')) return true;
-  if (req.user?.idpUser?.identifier === identifier) return true;
+  if (isSameIdentity(req.user?.idpUser, target.idpUser)) return true;
 
   const linkedUsers = await db.User.findAll({
     where: {
@@ -125,11 +125,19 @@ async function canManageIdentity(req, target) {
 // a project client change them for users without roles on other clients.
 const IDENTITY_FIELDS = ['email', 'password', 'name', 'phoneNumber'];
 
+// Identifiers are only unique per auth provider.
+function isSameIdentity(a, b) {
+  return !!(
+    a?.identifier &&
+    a.identifier === b?.identifier &&
+    a.provider === b?.provider
+  );
+}
+
 function isSamePerson(req, target) {
   return !!(
     (req.user?.id && req.user.id === target.id) ||
-    (req.user?.idpUser?.identifier &&
-      req.user.idpUser.identifier === target.idpUser?.identifier)
+    isSameIdentity(req.user?.idpUser, target.idpUser)
   );
 }
 
