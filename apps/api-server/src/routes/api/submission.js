@@ -127,7 +127,6 @@ router
     req.sendConfirmationToUser = data.submittedData.confirmationUser || false;
     req.userEmailAddress = data.submittedData.userEmailAddress || '';
     req.sendConfirmationToAdmin = data.submittedData.confirmationAdmin || false;
-    req.overwriteEmailAddress = data.submittedData.overwriteEmailAddress || '';
     req.widgetId = data.widgetId;
 
     delete data.submittedData.confirmationUser;
@@ -161,9 +160,16 @@ router
     const sendConfirmationToUser = req.sendConfirmationToUser;
     const userEmailAddress = req.userEmailAddress;
     const sendConfirmationToAdmin = req.sendConfirmationToAdmin;
-    const overwriteEmailAddress = req.overwriteEmailAddress;
 
     if (sendConfirmationToAdmin) {
+      // recipients come from the widget config; the request must not pick them
+      const widget = req.widgetId
+        ? await db.Widget.findOne({
+            where: { id: req.widgetId, projectId: req.project.id },
+          })
+        : null;
+      const overwriteEmailAddress =
+        widget?.config?.confirmation?.overwriteEmailAddress || '';
       const emailReceivers = overwriteEmailAddress
         .split(',')
         .map((email) => email.trim())

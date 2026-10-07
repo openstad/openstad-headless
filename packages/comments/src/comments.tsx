@@ -78,6 +78,7 @@ export type CommentsWidgetProps = BaseProps &
     confirmation?: boolean;
     overwriteEmailAddress?: string;
     confirmationReplies?: boolean;
+    widgetId?: number;
     searchTerm?: string;
     autoApply?: boolean;
     displayCollapsibleFilter?: boolean;
@@ -365,6 +366,8 @@ function CommentsInner({
     formDataCopy.confirmationReplies = confirmationReplies || false;
     formDataCopy.overwriteEmailAddress =
       confirmation && overwriteEmailAddress ? overwriteEmailAddress : '';
+    // the api resolves the notification recipient from this widget's config
+    formDataCopy.widgetId = props.widgetId;
     formDataCopy.embeddedUrl = window.location.href;
 
     try {

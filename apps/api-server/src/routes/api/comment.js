@@ -195,12 +195,13 @@ router
 
     req.confirmation = data.confirmation || false;
     req.confirmationReplies = data.confirmationReplies || false;
-    req.overwriteEmailAddress = data.overwriteEmailAddress || '';
+    req.widgetId = parseInt(data.widgetId) || null;
     req.embeddedUrl = data.embeddedUrl || '';
 
     delete data.confirmation;
     delete data.confirmationReplies;
     delete data.overwriteEmailAddress;
+    delete data.widgetId;
     delete data.embeddedUrl;
 
     db.Comment.authorizeData(data, 'create', req.user)
@@ -236,7 +237,17 @@ router
   .post(async function (req, res, next) {
     const confirmation = req.confirmation;
     const confirmationReplies = req.confirmationReplies;
-    const overwriteEmailAddress = req.overwriteEmailAddress;
+
+    // the recipient comes from the widget config; the request must not pick it
+    const widget = req.widgetId
+      ? await db.Widget.findOne({
+          where: { id: req.widgetId, projectId: req.project.id },
+        })
+      : null;
+    const overwriteEmailAddress =
+      widget?.config?.overwriteEmailAddress ||
+      widget?.config?.commentsWidget?.overwriteEmailAddress ||
+      '';
 
     let receiver = '';
     let receiverUserId = 0;
