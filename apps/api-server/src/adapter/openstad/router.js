@@ -7,6 +7,7 @@ const db = require('../../db');
 const service = require('./service');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const isRedirectAllowed = require('../../services/isRedirectAllowed');
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
 const sessionDuration = require('../../util/session-duration');
 const { canSendJwtTo, setQueryParam } = require('./return-to');
@@ -99,13 +100,15 @@ router
   });
 
 if (process.env.MULTI_PROJECT_LOGIN === 'true') {
-  router.route('/project/:projectId/exchange').post(inlineLoginRoutes.exchange);
+  router
+    .route('/project/:projectId/exchange')
+    .post(rateLimiter(), inlineLoginRoutes.exchange);
   router
     .route('/project/:projectId/uniquecode-login')
-    .post(inlineLoginRoutes.uniqueCodeLogin);
+    .post(rateLimiter(), inlineLoginRoutes.uniqueCodeLogin);
   router
     .route('/project/:projectId/complete-fields')
-    .post(inlineLoginRoutes.completeFields);
+    .post(rateLimiter(), inlineLoginRoutes.completeFields);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -113,7 +116,7 @@ if (process.env.MULTI_PROJECT_LOGIN === 'true') {
 
 router
   .route('(/project/:projectId)?/login')
-  .get(async function (req, res, next) {
+  .get(rateLimiter(), async function (req, res, next) {
     // logout first?
     const forceNewLogin = await shouldForceNewLogin({
       query: req.query,
@@ -189,7 +192,7 @@ router
 
 router
   .route('(/project/:projectId)?/digest-login')
-  .get(async function (req, res, next) {
+  .get(rateLimiter(), async function (req, res, next) {
     // check redirect first
     let returnTo = req.query.returnTo;
     returnTo = decodeURIComponent(returnTo);
