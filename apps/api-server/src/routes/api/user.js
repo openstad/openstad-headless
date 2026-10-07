@@ -125,11 +125,55 @@ async function canManageIdentity(req, target) {
 async function authorizeIdentityData(req, target, userData) {
   const data = merge.recursive(true, userData);
   target.authorizeData(data, 'update', req.user);
+  // password has no api column; it follows the email rule (editor or owner)
+  const isOwner =
+    (req.user?.id && req.user.id === target.id) ||
+    (req.user?.idpUser?.identifier &&
+      req.user.idpUser.identifier === target.idpUser?.identifier);
+  if (!hasRole(req.user, 'editor') && !isOwner) delete data.password;
   if (!(await canManageIdentity(req, target))) {
     delete data.email;
     delete data.password;
   }
   return data;
+}
+
+// Identity fields (email, password, 2FA) are written with the admin client:
+// the auth server does not let project clients change identities that are
+// shared with other clients.
+async function getAdminAuthConfig(req) {
+  const adminProject = await db.Project.findByPk(config.admin.projectId);
+  return authSettings.config({
+    project: adminProject,
+    useAuth: req.query.useAuth || 'default',
+  });
+}
+
+// Reject real email/password changes the caller may not make, instead of
+// silently applying them to only part of the identity.
+async function guardIdentityChanges(req, res, next) {
+  try {
+    const target = req.results;
+    if (
+      typeof req.body.email !== 'undefined' &&
+      (req.body.email || null) === (target.email || null)
+    )
+      delete req.body.email;
+    if (!req.body.password) delete req.body.password;
+
+    const changesIdentity =
+      typeof req.body.email !== 'undefined' || !!req.body.password;
+    if (changesIdentity && !(await canManageIdentity(req, target)))
+      return next(
+        createError(
+          403,
+          'Only a superuser can change the email or password of a user in multiple projects'
+        )
+      );
+    return next();
+  } catch (err) {
+    return next(err);
+  }
 }
 
 const router = express.Router({ mergeParams: true });
@@ -566,7 +610,7 @@ router
       // Reset two-factor authentication in the auth database
       if (user.idpUser?.identifier && req.adapter.service.updateUser) {
         await req.adapter.service.updateUser({
-          authConfig: req.authConfig,
+          authConfig: await getAdminAuthConfig(req),
           userData: {
             id: user.idpUser.identifier,
             twoFactorToken: null,
@@ -858,6 +902,7 @@ router
       throw createError(400, 'You cannot update this User');
     return next();
   })
+  .put(guardIdentityChanges)
   .put(async function (req, res, next) {
     // auth server settings
     req.authConfig = await authSettings.config({
@@ -882,13 +927,19 @@ router
           req.results.idpUser.provider == req.authConfig.provider &&
           req.adapter.service.updateUser
         ) {
-          const identityData = await authorizeIdentityData(req, user, userData);
+          const { email, password, ...profileData } =
+            await authorizeIdentityData(req, user, userData);
+          const id = user.idpUser.identifier;
           updatedUserData = await req.adapter.service.updateUser({
             authConfig: req.authConfig,
-            userData: merge(true, identityData, {
-              id: user.idpUser && user.idpUser.identifier,
-            }),
+            userData: merge(true, profileData, { id }),
           });
+          if (typeof email !== 'undefined' || password) {
+            updatedUserData = await req.adapter.service.updateUser({
+              authConfig: await getAdminAuthConfig(req),
+              userData: { id, email, password },
+            });
+          }
         }
 
         // user updates should not be done on certain project specific fields
@@ -968,7 +1019,6 @@ router
             `User update: one or more user records failed to update (${syncErrors.length}):`,
             syncErrors.map((e) => e.message)
           );
-          return next(createError(500, 'User update failed'));
         }
       } else {
         let apiUser = await db.User.scope(['includeProject']).findOne({

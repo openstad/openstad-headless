@@ -196,6 +196,9 @@ router
     req.confirmation = data.confirmation || false;
     req.confirmationReplies = data.confirmationReplies || false;
     req.widgetId = parseInt(data.widgetId) || null;
+    // the widget signals that an address is configured; never fall back to the
+    // resource owner then, even if the widget config cannot be resolved
+    req.expectsOverwriteAddress = !!data.overwriteEmailAddress;
     req.embeddedUrl = data.embeddedUrl || '';
 
     delete data.confirmation;
@@ -259,6 +262,8 @@ router
     if (confirmation && !req?.results?.parentId) {
       if (overwriteEmailAddress) {
         receiver = overwriteEmailAddress;
+      } else if (req.expectsOverwriteAddress) {
+        confirmationSent = false;
       } else if (req.results && req.results.resourceId) {
         const resource = await db.Resource.findByPk(req.results.resourceId);
         if (resource && resource.userId) {

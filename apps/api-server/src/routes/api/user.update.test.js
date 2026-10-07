@@ -21,7 +21,14 @@ const idpUser = { identifier: 'idp-93', provider: 'openstad' };
 
 // Real User instances, so the real can() and authorizeData() mixins run.
 function userRow(id, projectId, role) {
-  const row = db.User.build({ id, projectId, role, idpUser, name: 'Old' });
+  const row = db.User.build({
+    id,
+    projectId,
+    role,
+    idpUser,
+    name: 'Old',
+    email: 'old@example.com',
+  });
   row.update = vi.fn(async () => row);
   return row;
 }
@@ -40,8 +47,14 @@ db.User.findAll = async () => rows;
 db.User.findOne = async ({ where }) =>
   rows.find((r) => r.id == where.id && r.projectId == where.projectId) || null;
 db.Project.findAll = async () => [{ id: 1 }, { id: 2 }];
+// Only the admin project lookup goes through findByPk here.
+db.Project.findByPk = async (id) => ({ id, config: {}, isAdminProject: true });
 
-authSettings.config = async () => ({ provider: 'openstad' });
+// The admin project's auth config carries the admin client credentials.
+authSettings.config = async ({ project }) => ({
+  provider: 'openstad',
+  clientId: project?.isAdminProject ? 'admin-client' : 'project-client',
+});
 authSettings.adapter = async () => ({ service: { updateUser } });
 
 function createApp(user) {
@@ -65,14 +78,17 @@ const superuser = { role: 'superuser', id: 1, projectId: 1 };
 
 const identityBody = {
   name: 'New',
-  email: 'attacker@example.com',
+  email: 'new@example.com',
   password: 'secret',
   twoFactorToken: 'known-seed',
   twoFactorConfigured: 1,
   role: 'moderator',
 };
 
-const sentUserData = () => updateUser.mock.calls[0][0].userData;
+const sentWith = (clientId) =>
+  updateUser.mock.calls
+    .filter(([args]) => args.authConfig.clientId === clientId)
+    .map(([args]) => args.userData);
 
 describe('PUT /user/:userId identity fields', () => {
   beforeEach(() => {
@@ -84,46 +100,62 @@ describe('PUT /user/:userId identity fields', () => {
       rows = [userRow(93, 1, 'member'), userRow(193, 2, 'admin')];
     });
 
-    it('does not send password, email or 2FA to the auth server for a moderator', async () => {
-      const res = await request(createApp(moderator))
+    for (const [label, user] of [
+      ['a moderator', moderator],
+      ['a project admin', admin],
+    ]) {
+      it(`rejects an email or password change by ${label} without writing anything`, async () => {
+        const res = await request(createApp(user))
+          .put('/project/1/user/93')
+          .send(identityBody);
+
+        expect(res.status).toBe(403);
+        expect(updateUser).not.toHaveBeenCalled();
+        expect(rows[0].update).not.toHaveBeenCalled();
+      });
+    }
+
+    it('accepts an unchanged email and empty password from the admin form', async () => {
+      const res = await request(createApp(admin))
         .put('/project/1/user/93')
-        .send(identityBody);
+        .send({ name: 'New', email: 'old@example.com', password: '' });
 
       expect(res.status).toBe(200);
-      const data = sentUserData();
+      expect(sentWith('admin-client')).toEqual([]);
+      const [data] = sentWith('project-client');
       expect(data.name).toBe('New');
-      expect(data.password).toBeUndefined();
       expect(data.email).toBeUndefined();
-      expect(data.twoFactorToken).toBeUndefined();
-      expect(data.twoFactorConfigured).toBeUndefined();
-      expect(data.role).toBeUndefined();
-    });
-
-    it('does not let a project admin change the shared identity either', async () => {
-      await request(createApp(admin))
-        .put('/project/1/user/93')
-        .send(identityBody);
-
-      expect(sentUserData().email).toBeUndefined();
-      expect(sentUserData().password).toBeUndefined();
+      expect(data.password).toBeUndefined();
     });
 
     it('does not touch the record in the other project', async () => {
       await request(createApp(admin))
         .put('/project/1/user/93')
-        .send(identityBody);
+        .send({ name: 'New' });
 
       expect(rows[1].update).not.toHaveBeenCalled();
     });
 
-    it('lets a superuser change the shared identity', async () => {
-      await request(createApp(superuser))
+    it('lets a superuser change the shared identity through the admin client', async () => {
+      const res = await request(createApp(superuser))
         .put('/project/1/user/93')
         .send(identityBody);
 
-      expect(sentUserData().email).toBe('attacker@example.com');
-      expect(sentUserData().password).toBe('secret');
-      expect(sentUserData().twoFactorToken).toBeUndefined();
+      expect(res.status).toBe(200);
+      expect(sentWith('admin-client')).toEqual([
+        expect.objectContaining({
+          email: 'new@example.com',
+          password: 'secret',
+        }),
+      ]);
+      expect(sentWith('admin-client')[0].role).toBeUndefined();
+
+      const [projectData] = sentWith('project-client');
+      expect(projectData.name).toBe('New');
+      expect(projectData.role).toBe('moderator');
+      expect(projectData.email).toBeUndefined();
+      expect(projectData.password).toBeUndefined();
+      expect(projectData.twoFactorToken).toBeUndefined();
     });
 
     it('rejects anonymize-all by a project admin before anonymizing anything', async () => {
@@ -146,6 +178,21 @@ describe('PUT /user/:userId identity fields', () => {
       expect(res.status).toBe(403);
       expect(updateUser).not.toHaveBeenCalled();
     });
+
+    it('lets a superuser reset 2FA through the admin client', async () => {
+      const res = await request(createApp(superuser)).put(
+        '/project/1/user/93/reset-two-factor'
+      );
+
+      expect(res.status).toBe(200);
+      expect(sentWith('admin-client')).toEqual([
+        expect.objectContaining({
+          twoFactorToken: null,
+          twoFactorConfigured: null,
+        }),
+      ]);
+      expect(sentWith('project-client')).toEqual([]);
+    });
   });
 
   describe('target only exists in this project', () => {
@@ -153,23 +200,31 @@ describe('PUT /user/:userId identity fields', () => {
       rows = [userRow(93, 1, 'member')];
     });
 
-    it('lets a project admin change email and password', async () => {
-      await request(createApp(admin))
+    it('lets a project admin change email and password through the admin client', async () => {
+      const res = await request(createApp(admin))
         .put('/project/1/user/93')
         .send(identityBody);
 
-      expect(sentUserData().email).toBe('attacker@example.com');
-      expect(sentUserData().password).toBe('secret');
-      expect(sentUserData().role).toBe('moderator');
+      expect(res.status).toBe(200);
+      expect(sentWith('admin-client')).toEqual([
+        expect.objectContaining({
+          email: 'new@example.com',
+          password: 'secret',
+        }),
+      ]);
+      expect(sentWith('project-client')[0].role).toBe('moderator');
     });
 
-    it('does not let a moderator change email or promote', async () => {
+    it('does not let a moderator change email, password or promote', async () => {
       await request(createApp(moderator))
         .put('/project/1/user/93')
         .send(identityBody);
 
-      expect(sentUserData().email).toBeUndefined();
-      expect(sentUserData().role).toBeUndefined();
+      expect(sentWith('admin-client')).toEqual([]);
+      const [data] = sentWith('project-client');
+      expect(data.email).toBeUndefined();
+      expect(data.password).toBeUndefined();
+      expect(data.role).toBeUndefined();
     });
 
     it('lets the person edit their own profile (account widget)', async () => {
@@ -179,7 +234,7 @@ describe('PUT /user/:userId identity fields', () => {
         .send({ name: 'New', address: 'Straat 1', city: 'Utrecht' });
 
       expect(res.status).toBe(200);
-      expect(sentUserData()).toMatchObject({
+      expect(sentWith('project-client')[0]).toMatchObject({
         name: 'New',
         address: 'Straat 1',
         city: 'Utrecht',
@@ -189,13 +244,31 @@ describe('PUT /user/:userId identity fields', () => {
       );
     });
 
-    it('lets a project admin reset 2FA', async () => {
+    it('lets a project admin reset 2FA through the admin client', async () => {
       const res = await request(createApp(admin)).put(
         '/project/1/user/93/reset-two-factor'
       );
 
       expect(res.status).toBe(200);
-      expect(updateUser).toHaveBeenCalled();
+      expect(sentWith('admin-client')).toHaveLength(1);
+    });
+  });
+
+  describe('a linked record fails to update', () => {
+    beforeEach(() => {
+      rows = [userRow(93, 1, 'member'), userRow(193, 2, 'member')];
+      rows[1].update = vi.fn(async () => {
+        throw new Error('db down');
+      });
+    });
+
+    it('still reports success for the records that were saved', async () => {
+      const res = await request(createApp(superuser))
+        .put('/project/1/user/93')
+        .send({ name: 'New' });
+
+      expect(res.status).toBe(200);
+      expect(rows[0].update).toHaveBeenCalled();
     });
   });
 });

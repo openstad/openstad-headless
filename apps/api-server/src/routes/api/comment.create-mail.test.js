@@ -104,6 +104,19 @@ describe('POST comment confirmation recipient', () => {
     await vi.waitFor(() => expect(receivers()).toEqual(['b@example.nl']));
   });
 
+  it('sends nothing (no owner fallback) when an address was configured but the widget is unknown', async () => {
+    db.User.findByPk = vi.fn(async () => ({
+      id: 3,
+      email: 'owner@example.com',
+      emailNotificationConsent: true,
+    }));
+
+    await post({ overwriteEmailAddress: 'beheer@example.nl' });
+
+    expect(db.User.findByPk).not.toHaveBeenCalled();
+    expect(notificationCreate).not.toHaveBeenCalled();
+  });
+
   it('ignores widgets of other projects', async () => {
     await post({ widgetId: 8 });
 
