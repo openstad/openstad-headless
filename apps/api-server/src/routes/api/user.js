@@ -121,52 +121,64 @@ async function canManageIdentity(req, target) {
     .every((u) => u.can('update', req.user));
 }
 
+// Fields stored on the shared auth server identity; the auth server only lets
+// a project client change them for users without roles on other clients.
+const IDENTITY_FIELDS = ['email', 'password', 'name', 'phoneNumber'];
+
+function isSamePerson(req, target) {
+  return !!(
+    (req.user?.id && req.user.id === target.id) ||
+    (req.user?.idpUser?.identifier &&
+      req.user.idpUser.identifier === target.idpUser?.identifier)
+  );
+}
+
 // Only send fields the caller may change on the target record itself.
 async function authorizeIdentityData(req, target, userData) {
   const data = merge.recursive(true, userData);
   target.authorizeData(data, 'update', req.user);
   // password has no api column; it follows the email rule (editor or owner)
-  const isOwner =
-    (req.user?.id && req.user.id === target.id) ||
-    (req.user?.idpUser?.identifier &&
-      req.user.idpUser.identifier === target.idpUser?.identifier);
-  if (!hasRole(req.user, 'editor') && !isOwner) delete data.password;
-  if (!(await canManageIdentity(req, target))) {
-    delete data.email;
+  if (!hasRole(req.user, 'editor') && !isSamePerson(req, target))
     delete data.password;
+  if (!(await canManageIdentity(req, target))) {
+    for (const field of IDENTITY_FIELDS) delete data[field];
   }
   return data;
 }
 
-// Identity fields (email, password, 2FA) of users shared with other clients
-// can only be written by the admin client. Only superusers use it; everyone
-// else goes through the project client, so the auth server can still reject
-// identities with roles on other clients that the api does not know about.
-async function getIdentityAuthConfig(req) {
-  if (!hasRole(req.user, 'superuser')) return req.authConfig;
+// Superusers and the person themselves write identity fields with the admin
+// client. Everyone else goes through the project client, so the auth server
+// can still reject identities with roles on other clients that the api does
+// not know about (for example clients of deleted projects).
+async function getIdentityAuthConfig(req, target) {
+  if (!hasRole(req.user, 'superuser') && !isSamePerson(req, target))
+    return req.authConfig;
   const adminProject = await db.Project.findByPk(config.admin.projectId);
   return authSettings.config({ project: adminProject, useAuth: 'default' });
 }
 
-// Reject real email/password changes the caller may not make, instead of
-// silently applying them to only part of the identity.
+// Reject real identity changes the caller may not make, instead of silently
+// applying them to only part of the identity.
 async function guardIdentityChanges(req, res, next) {
   try {
     const target = req.results;
-    if (
-      typeof req.body.email !== 'undefined' &&
-      (req.body.email || null) === (target.email || null)
-    )
-      delete req.body.email;
+    for (const field of IDENTITY_FIELDS) {
+      if (
+        typeof req.body[field] !== 'undefined' &&
+        (req.body[field] || null) === (target[field] || null)
+      )
+        delete req.body[field];
+    }
     if (!req.body.password) delete req.body.password;
 
-    const changesIdentity =
-      typeof req.body.email !== 'undefined' || !!req.body.password;
+    const changesIdentity = IDENTITY_FIELDS.some(
+      (field) => typeof req.body[field] !== 'undefined'
+    );
     if (changesIdentity && !(await canManageIdentity(req, target)))
       return next(
         createError(
           403,
-          'Only a superuser can change the email or password of a user in multiple projects'
+          'Only a superuser can change the name, email, phone number or password of a user in multiple projects'
         )
       );
     return next();
@@ -609,7 +621,7 @@ router
       // Reset two-factor authentication in the auth database
       if (user.idpUser?.identifier && req.adapter.service.updateUser) {
         await req.adapter.service.updateUser({
-          authConfig: await getIdentityAuthConfig(req),
+          authConfig: await getIdentityAuthConfig(req, user),
           userData: {
             id: user.idpUser.identifier,
             twoFactorToken: null,
@@ -926,19 +938,29 @@ router
           req.results.idpUser.provider == req.authConfig.provider &&
           req.adapter.service.updateUser
         ) {
-          const { email, password, ...profileData } =
-            await authorizeIdentityData(req, user, userData);
+          const authorizedData = await authorizeIdentityData(
+            req,
+            user,
+            userData
+          );
           const id = user.idpUser.identifier;
-          updatedUserData = await req.adapter.service.updateUser({
-            authConfig: req.authConfig,
-            userData: merge(true, profileData, { id }),
-          });
-          if (typeof email !== 'undefined' || password) {
-            updatedUserData = await req.adapter.service.updateUser({
-              authConfig: await getIdentityAuthConfig(req),
-              userData: { id, email, password },
+          const identityData = { id };
+          for (const field of IDENTITY_FIELDS) {
+            if (typeof authorizedData[field] !== 'undefined')
+              identityData[field] = authorizedData[field];
+            delete authorizedData[field];
+          }
+          // identity first: if the auth server refuses it, nothing is saved
+          if (Object.keys(identityData).length > 1) {
+            await req.adapter.service.updateUser({
+              authConfig: await getIdentityAuthConfig(req, user),
+              userData: identityData,
             });
           }
+          updatedUserData = await req.adapter.service.updateUser({
+            authConfig: req.authConfig,
+            userData: merge(true, authorizedData, { id }),
+          });
         }
 
         // user updates should not be done on certain project specific fields
@@ -1034,6 +1056,13 @@ router
       return next();
     } catch (err) {
       console.log(err);
+      if (err.status === 403)
+        return next(
+          createError(
+            403,
+            'The auth server did not allow changing the name, email, phone number or password of this user'
+          )
+        );
       return next(createError(500, 'User update failed'));
     }
   })

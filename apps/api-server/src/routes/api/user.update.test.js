@@ -115,15 +115,32 @@ describe('PUT /user/:userId identity fields', () => {
       });
     }
 
-    it('accepts an unchanged email and empty password from the admin form', async () => {
+    it('rejects a name or phone number change by a project admin', async () => {
+      for (const body of [{ name: 'New' }, { phoneNumber: '0612345678' }]) {
+        const res = await request(createApp(admin))
+          .put('/project/1/user/93')
+          .send(body);
+
+        expect(res.status).toBe(403);
+      }
+      expect(updateUser).not.toHaveBeenCalled();
+    });
+
+    it('accepts unchanged identity fields and an empty password from the admin form', async () => {
       const res = await request(createApp(admin))
         .put('/project/1/user/93')
-        .send({ name: 'New', email: 'old@example.com', password: '' });
+        .send({
+          name: 'Old',
+          email: 'old@example.com',
+          password: '',
+          address: 'Straat 1',
+        });
 
       expect(res.status).toBe(200);
       expect(sentWith('admin-client')).toEqual([]);
       const [data] = sentWith('project-client');
-      expect(data.name).toBe('New');
+      expect(data.address).toBe('Straat 1');
+      expect(data.name).toBeUndefined();
       expect(data.email).toBeUndefined();
       expect(data.password).toBeUndefined();
     });
@@ -131,7 +148,7 @@ describe('PUT /user/:userId identity fields', () => {
     it('does not touch the record in the other project', async () => {
       await request(createApp(admin))
         .put('/project/1/user/93')
-        .send({ name: 'New' });
+        .send({ address: 'Straat 1' });
 
       expect(rows[1].update).not.toHaveBeenCalled();
     });
@@ -144,6 +161,7 @@ describe('PUT /user/:userId identity fields', () => {
       expect(res.status).toBe(200);
       expect(sentWith('admin-client')).toEqual([
         expect.objectContaining({
+          name: 'New',
           email: 'new@example.com',
           password: 'secret',
         }),
@@ -151,7 +169,7 @@ describe('PUT /user/:userId identity fields', () => {
       expect(sentWith('admin-client')[0].role).toBeUndefined();
 
       const [projectData] = sentWith('project-client');
-      expect(projectData.name).toBe('New');
+      expect(projectData.name).toBeUndefined();
       expect(projectData.role).toBe('moderator');
       expect(projectData.email).toBeUndefined();
       expect(projectData.password).toBeUndefined();
@@ -209,13 +227,31 @@ describe('PUT /user/:userId identity fields', () => {
 
       expect(res.status).toBe(200);
       expect(sentWith('admin-client')).toEqual([]);
+      // identity first, so a refusal by the auth server leaves nothing half saved
       expect(sentWith('project-client')).toEqual([
-        expect.objectContaining({ role: 'moderator' }),
         expect.objectContaining({
+          name: 'New',
           email: 'new@example.com',
           password: 'secret',
         }),
+        expect.objectContaining({ role: 'moderator' }),
       ]);
+    });
+
+    it('returns 403 and saves nothing when the auth server refuses the identity change', async () => {
+      updateUser.mockImplementationOnce(async () => {
+        const err = new Error('Fetch failed');
+        err.status = 403;
+        throw err;
+      });
+
+      const res = await request(createApp(admin))
+        .put('/project/1/user/93')
+        .send(identityBody);
+
+      expect(res.status).toBe(403);
+      expect(updateUser).toHaveBeenCalledTimes(1);
+      expect(rows[0].update).not.toHaveBeenCalled();
     });
 
     it('does not let a moderator change email, password or promote', async () => {
@@ -237,8 +273,11 @@ describe('PUT /user/:userId identity fields', () => {
         .send({ name: 'New', address: 'Straat 1', city: 'Utrecht' });
 
       expect(res.status).toBe(200);
+      // the person themselves may write their identity through the admin client
+      expect(sentWith('admin-client')).toEqual([
+        expect.objectContaining({ name: 'New' }),
+      ]);
       expect(sentWith('project-client')[0]).toMatchObject({
-        name: 'New',
         address: 'Straat 1',
         city: 'Utrecht',
       });
