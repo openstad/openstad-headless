@@ -32,7 +32,11 @@ const gates = (overrides = {}) =>
   });
 
 describe('shouldForceNewLogin', () => {
-  const force = ({ query = {}, auth = {}, authTypes = ['UniqueCode'] } = {}) => {
+  const force = ({
+    query = {},
+    auth = {},
+    authTypes = ['UniqueCode'],
+  } = {}) => {
     const fetchClient = vi.fn(async () => client({ authTypes }));
     const result = shouldForceNewLogin({
       query,
