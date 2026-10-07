@@ -1,6 +1,6 @@
 # Plan: Multi-project login (tegelijk ingelogd zijn in meerdere projecten)
 
-> Status: **gereed voor uitvoering — review van 2026-07-07 verwerkt (alle CRITICAL/HIGH/MEDIUM/LOW-punten en extra taken A-D)**
+> Status: **in uitvoering — fase 1–4 gebouwd; fixes na browsertest in `plans/multi-project-login-fixes.md`** (review van 2026-07-07 verwerkt)
 > Formaat: volledig (multi-app, architectureel)
 > Scope-bron: deep-search over auth-server, api-server, widget-packages en admin-server (juli 2026); plan-review 2026-07-07
 
@@ -16,7 +16,7 @@
 
 **Buiten scope:** SSO / externe providers (oidc-adapter, `apps/api-server/src/adapter/oidc/`) — expliciet uitgesloten door de opdrachtgever. DigiD bestaat niet (uitgecommentarieerd in `apps/auth-server/config/auth.js:107-116`). CMS `connect-user`-flow blijft ongewijzigd. **Let op (kernteam-Q&A):** externe SSO-gebruikers worden vandaag per project als aparte user aangemaakt (upsert keyed op `projectId` + `idpUser.identifier` + `provider`, geen match op e-mail; `apps/api-server/src/adapter/oidc/router.js:32-55,227-278`) en dus níet samengevoegd met een bestaande OpenStad-gebruiker. Cross-SSO-identiteiten samenvoegen is een taak voor de latere SSO-plugin, niet voor dit plan; de exchange-broker (§4) is provider-neutraal en kan daar later op aanhaken.
 
-**Opt-in via env-flag:** de hele uitbreiding staat standaard **uit** en wordt geactiveerd met `MULTI_PROJECT_LOGIN=1` (env-var, te zetten op api-server én auth-server):
+**Opt-in via env-flag:** de hele uitbreiding staat standaard **uit** en wordt geactiveerd met `MULTI_PROJECT_LOGIN=true` (de code controleert op exact `'true'`) (env-var, te zetten op api-server én auth-server):
 
 - **api-server**: de nieuwe routes (`exchange`, `uniquecode-login`, `complete-fields`) worden alleen geregistreerd als de flag aan staat, de popup-modus van digest-login (`popup=1`) werkt alleen met de flag aan, en de flag wordt meegegeven in de widget-config zodat `useLoginFlow` zonder flag direct het bestaande redirect-pad kiest (geen kansloze AJAX-calls).
 - **auth-server**: het nieuwe admin-endpoint (Taak 5) en de per-project logout (Taak 8) staan alleen aan mét de flag; zonder flag blijft logout `session.destroy()` (huidig gedrag).
@@ -217,7 +217,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 - Modify (optioneel): `apps/admin-server/src/components/widget-preview.tsx:25`
 - Create: test in `packages/data-store/src/hooks/use-current-user.test.js`
 
-- [ ] **Stap 1: voeg `openstadprojectid` toe aan de redirect-URL in digest-login**
+- [x] **Stap 1: voeg `openstadprojectid` toe aan de redirect-URL in digest-login**
 
   In `router.js` waar `openstadlogintoken=[[jwt]]` aan de returnTo-URL wordt geplakt (rond :157-168):
 
@@ -225,7 +225,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
   url = `${url}${url.includes('?') ? '&' : '?'}openstadlogintoken=[[jwt]]&openstadprojectid=${req.params.projectId}`;
   ```
 
-- [ ] **Stap 2: consumeer het token alleen voor het eigen project in `use-current-user.js`**
+- [x] **Stap 2: consumeer het token alleen voor het eigen project in `use-current-user.js`**
 
   Vervang het blok rond regel 62-69:
 
@@ -255,17 +255,17 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
   Let op: verwijder de params alléén wanneer het token daadwerkelijk geconsumeerd is; een widget van een ander project moet ze laten staan.
 
-- [ ] **Stap 3: maak `globalOpenStadUser`-pickup project-scoped**
+- [x] **Stap 3: maak `globalOpenStadUser`-pickup project-scoped** (`pickInitialUser`; CMS geeft `data-project-id` mee)
 
   De global (`use-current-user.js:48,95-97`) is page-breed; op een multi-project pagina lekt zo de JWT van project A naar de API van project B. Laat de CMS-setter (`apps/cms-server/modules/openstad-auth/index.js:102`) een `projectId` meegeven op het object, en gebruik in de hook de global alleen als `globalOpenStadUser.projectId` ontbreekt (BC: bestaande single-project pagina's en admin-preview) óf gelijk is aan `props.projectId`.
 
-- [ ] **Stap 4: admin-preview** — de admin-preview (`widget-preview.tsx:25`) injecteert bewust een superadmin-JWT die via de superuser-elevatie cross-project werkt; die mag zónder `projectId` blijven (valt onder de BC-tak van stap 3). Optioneel: `projectId` van de preview-widget meegeven voor uniformiteit.
+- [x] **Stap 4: admin-preview** — niet gewijzigd, valt onder de BC-tak (zie hieronder) — de admin-preview (`widget-preview.tsx:25`) injecteert bewust een superadmin-JWT die via de superuser-elevatie cross-project werkt; die mag zónder `projectId` blijven (valt onder de BC-tak van stap 3). Optioneel: `projectId` van de preview-widget meegeven voor uniformiteit.
 
-- [ ] **Stap 5: unit test**
+- [x] **Stap 5: unit test** (`use-current-user.test.js`)
 
   Test: twee storage-instanties (projectId 1 en 2), URL met `openstadlogintoken=X&openstadprojectid=2` → alleen namespace 2 krijgt het token; zonder `openstadprojectid` → huidig gedrag. Global met `projectId: 1` → alleen widget 1 seedt eruit; global zonder `projectId` → beide (BC).
 
-- [ ] **Stap 6: verifieer**
+- [x] **Stap 6: verifieer**
 
   Run: `cd packages/data-store && npx vitest run src/hooks/use-current-user.test.js` — groen.
 
@@ -277,7 +277,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
 - Modify: `apps/api-server/src/routes/widget/widget.js:206-209`
 
-- [ ] **Stap 1: lees de flag uit projectconfig**
+- [x] **Stap 1: lees de flag uit projectconfig** (default na fix F1: `forceNewLoginOnWidgets ?? MULTI_PROJECT_LOGIN !== 'true'`)
 
   ```js
   const forceNewLogin = project.config?.auth?.forceNewLoginOnWidgets
@@ -287,9 +287,9 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
   const loginAnonymousUrl = `${config.url}/auth/project/${project.id}/login?useAuth=anonymous${forceNewLogin}&redirectUri=[[REDIRECT_URI]]`;
   ```
 
-- [ ] **Stap 2: unit test** (jest) in `apps/api-server` op `getDefaultConfig`-output met/zonder de config-flag.
+- [x] **Stap 2: unit test** (vitest, niet jest) in `apps/api-server` op `getDefaultConfig`-output met/zonder de config-flag.
 
-- [ ] **Stap 3: verifieer**
+- [x] **Stap 3: verifieer** (curl op `/widget/9`, 2026-10-07)
 
   Run: `cd apps/api-server && npm test` — groen. Browser: widgetbundel opvragen (`/widget/...`) en controleren dat `forceNewLogin` afwezig is zonder flag.
 
@@ -301,23 +301,23 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 - Modify: `apps/api-server/src/middleware/user.js:85-112` (`parseAuthHeader`)
 - Modify: `apps/api-server/src/util/auth-settings.js` (assertie)
 
-- [ ] **Stap 1: voeg `projectId` toe aan geminte JWT's**
+- [x] **Stap 1: voeg `projectId` toe aan geminte JWT's** (`mintJwt`)
 
   Op beide mint-plekken: `jwt.sign({ userId, authProvider, projectId: parseInt(req.params.projectId, 10) }, ...)`.
 
-- [ ] **Stap 2: behandel `pending`-tokens als geen-auth in `parseAuthHeader`**
+- [x] **Stap 2: behandel `pending`-tokens als geen-auth in `parseAuthHeader`** (`parse-auth-header.test.js`)
 
   Niet throwen in `parseJwt` — een throw propageert via de getUser-catch (`user.js:65-70`) als request-error (500), niet als anonieme fallback. Vang de claim af in `parseAuthHeader` (`user.js:85-112`): decodeer, en bij `claims.pending` het token behandelen alsof er geen Authorization-header is (anoniem). Beschermde routes geven dan netjes 401, conform de validatiechecklist (§8).
 
-- [ ] **Stap 3: géén harde `projectId === req.project.id`-afwijzing**
+- [x] **Stap 3: géén harde `projectId === req.project.id`-afwijzing** (geen afwijzing; comment in `parse-auth-header.js`)
 
   De bestaande cross-project admin-fallback (`user.js:175-196`) moet blijven werken; de claim is nu alleen defense-in-depth/observability. Documenteer dit met een comment bij de claim-extractie (`user.js:92-94`).
 
-- [ ] **Stap 4: startup-assertie op `jwtSecret`-overrides (P3)**
+- [x] **Stap 4: startup-assertie op `jwtSecret`-overrides (P3)** (`assertNoJwtSecretOverrides` vóór `Server.start()`, fix F8d)
 
   In `auth-settings.js` (naast de bestaande sanity-check op `:50`): als `project.config.auth.jwtSecret` gezet is en afwijkt van het globale `config.auth.jwtSecret` → error loggen en de config-load hard laten falen. Daarmee wordt P3 een afgedwongen invariant en is ook de latente mismatch tussen mint (`router.js:407`, per-project) en verify (`user.js:121`, globaal) afgedekt.
 
-- [ ] **Stap 5: verifieer** — `cd apps/api-server && npm test` groen; handmatig: bestaand token zonder claims blijft werken (BC); pendingJwt als Bearer op beschermde route → 401.
+- [x] **Stap 5: verifieer** — `cd apps/api-server && npm test` groen; pendingJwt-checks met curl bevestigd in de browsertest van 2026-10-06; handmatig: bestaand token zonder claims blijft werken (BC); pendingJwt als Bearer op beschermde route → 401.
 
 #### Taak 4: auth-server sessie-hardening
 
@@ -326,17 +326,17 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 - Modify: `apps/auth-server/middleware/client.js:228-229`
 - Modify: auth-server login-succespaden (o.a. `controllers/auth/local.js`, `code.js`, `phonenumber.js`, url-login)
 
-- [ ] **Stap 1: verwijder de inerte globale 2FA-fallback**
+- [x] **Stap 1: verwijder de inerte globale 2FA-fallback**
 
   `check2FA` leest `req.currentClientAuth?.twoFactorValid || req.session?.twoFactorValid` (`client.js:228-229`). De tweede tak is een globale sessie-vlag die nergens wordt gezet (2FA-validiteit staat alleen per client in `session.clientAuth[clientId]`) en dus inert is — maar zodra iemand tijdens dit multi-project werk per ongeluk een top-level `session.twoFactorValid` zet, is het een directe globale 2FA-bypass over alle projecten. Verwijder de fallback.
 
-- [ ] **Stap 2: session-regeneration bij login (session fixation)**
+- [x] **Stap 2: session-regeneration bij login (session fixation)** (`regenerateSession` in `utils/clientAuth.js`)
 
   De auth-server roept nergens `req.session.regenerate()` aan, en `saveUninitialized: true` (`app-init.js:112`) mint al een sessie voor anonieme bezoekers. Bij een gedeelde, lang-levende SSO-sessie (tot 7 dagen, `utils/clientAuth.js:7-8`) over meerdere projecten geeft één gefixeerde `openstad-authorization.sid` toegang tot elk project waar het slachtoffer daarna op inlogt. Regenereer de sessie-id op de login-succespaden vlak vóór `req.logIn(...)`; kopieer bestaande `clientAuth`-context over de regeneratie heen (een al-ingelogde SSO-gebruiker die bij een extra client inlogt mag zijn andere client-logins niet verliezen).
 
-- [ ] **Stap 3: unit tests** (jest) — 2FA vereist zonder `currentClientAuth.twoFactorValid` → geblokkeerd, ook met een handmatig gezette `session.twoFactorValid`; sessie-id verandert na login, `clientAuth` van andere clients blijft behouden.
+- [x] **Stap 3: unit tests** (vitest: `middleware/client.test.js`, `utils/clientAuth.test.js`) — 2FA vereist zonder `currentClientAuth.twoFactorValid` → geblokkeerd, ook met een handmatig gezette `session.twoFactorValid`; sessie-id verandert na login, `clientAuth` van andere clients blijft behouden.
 
-- [ ] **Stap 4: verifieer** — `cd apps/auth-server && npm test` groen; browser: login-flow werkt, cookie-waarde vóór/na login verschilt.
+- [x] **Stap 4: verifieer** — `cd apps/auth-server && npm test` groen; browser: login-flow werkt (2026-10-07). Cookie vóór/na login (2026-10-07, Chrome, project 6, stemcodescherm; lokaal is `httpOnly` uit door `COOKIE_SECURE_OFF=yes`, dus leesbaar via `document.cookie`): vóór `piM0xPt0…`, na de code `V5FpXgvK…`. In `sessions` is de oude rij weg en heeft de nieuwe `passport.user` 16 (de user van de gebruikte code).
 
 ### Fase 2 — AJAX-auth-API (backend)
 
@@ -670,7 +670,7 @@ De AJAX-flows dekken de kerncase (identiteit bestaat al ergens → alleen aanvul
 
   `api/resources.js:2-3,15-19` gebruikt globale localStorage-keys (`pseudoRandomSortSeed`, `pseudoRandomSortSeedTimestamp`) buiten de `LocalStorage`-class om; twee random-gesorteerde overzichten van verschillende projecten delen zo één seed/rotatie. Maak de keys project-scoped (bijv. `pseudoRandomSortSeed:${projectId}`).
 
-- [x] **Stap 4: unit tests** — `applyJwt` zet storage + JWT + triggert `self.refresh`; 409-responses komen als data terug, niet als exception; seed-keys per project gescheiden.
+- [x] **Stap 4: unit tests** — `applyJwt` zet storage + JWT + triggert `self.refresh`; 409-responses komen als data terug, niet als exception. (Seed-keys per project: hoort bij stap 3, die is uitgesteld; dus niet getest.)
 
 - [x] **Stap 5: verifieer** — `cd packages/data-store && npx vitest run`.
 
@@ -878,6 +878,8 @@ _Raming: 1-2 uur incl. verificatie._
 
 **Files:** Create spec in root `cypress/e2e/` (bestaande root-level Cypress-setup: `cypress.config.ts` + `cypress/e2e/1-smoke-test/admin.cy.js`, gedraaid met `npm run test:e2e`; `apps/admin-server/cypress/` bestaat niet).
 
+> **Status 2026-10-07:** eerste spec `cypress/e2e/2-multi-project-login/popup-login.cy.js` (popup synchroon in de klik, `openstad-login`-bericht leidt tot een like; zie fix F10e). Stap 1–3 hieronder staan nog open.
+
 - [ ] **Stap 1:** E2E-scenario "multi-project pagina": twee widgets, login project A, inline stemcode-login project B, assert beide ingelogd + geen page reload (`cy.window()`-referentie blijft gelijk).
 - [ ] **Stap 2:** E2E-scenario requiredFields: project B vereist adres → dialog toont adres-veld → submit → ingelogd.
 - [ ] **Stap 3:** E2E-scenario per-project logout: ingelogd bij A en B, logout A → B blijft ingelogd.
@@ -885,9 +887,11 @@ _Raming: 1-2 uur incl. verificatie._
 
 #### Taak 17: documentatie
 
-- [ ] **Stap 1:** beschrijf de nieuwe endpoints (request/response-contract incl. `two_factor_required`/`phonenumber_required`/429, rate limits + lockout), de `MULTI_PROJECT_LOGIN`-env-flag (opt-in, op api-server én auth-server; wat wel/niet onder de flag valt — zie §1) en de `forceNewLoginOnWidgets`-flag in de bestaande docs-structuur van de repo.
-- [ ] **Stap 2:** beschrijf de beperking uit Taak 15 stap 4 en het beleid uit §4 (wanneer stille exchange wel/niet mag; 2FA nooit stil).
-- [ ] **Stap 3:** documenteer P7: unique codes zijn herbruikbare credentials (bewuste keuze), beschermd door lockout + rate limiting; en de nieuwe per-project logout-semantiek (Taak 8).
+> **Status 2026-10-07: uitgevoerd.** `doc/setup-options.md` (vlag, `TRUST_PROXY`, https-eis) en `doc/multi-project-login.md` (contracten, exchange-beleid, lockout en rate limiting, P7, logout, bekende gaten). Per-project logout is als "uitgesteld" gedocumenteerd: taak 8 is niet gebouwd.
+
+- [x] **Stap 1:** beschrijf de nieuwe endpoints (request/response-contract incl. `two_factor_required`/`phonenumber_required`/429, rate limits + lockout), de `MULTI_PROJECT_LOGIN`-env-flag (opt-in, op api-server én auth-server; wat wel/niet onder de flag valt — zie §1) en de `forceNewLoginOnWidgets`-flag in de bestaande docs-structuur van de repo.
+- [x] **Stap 2:** beschrijf de beperking uit Taak 15 stap 4 en het beleid uit §4 (wanneer stille exchange wel/niet mag; 2FA nooit stil).
+- [x] **Stap 3:** documenteer P7: unique codes zijn herbruikbare credentials (bewuste keuze), beschermd door lockout + rate limiting; en de nieuwe per-project logout-semantiek (Taak 8).
 
 ---
 

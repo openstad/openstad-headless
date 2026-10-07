@@ -127,3 +127,34 @@ Preferably this should be a string of at least 32 characters. You can generate i
 The salt should be kept secret and not shared with anyone, to ensure the security of the phone number hashing process.
 
 This `AUTH_PHONE_HASH_SALT` variable is generated automatically during the setup process, but you can also set it manually in your `.env` file if needed.
+
+## Multi-project login (`MULTI_PROJECT_LOGIN`) (2026-10-07)
+
+Opt-in: set `MULTI_PROJECT_LOGIN=true` on both the api-server and the auth-server. Only the exact value `true` enables it. Without it, login behaves as before. In the Helm chart, set `multiProjectLogin: true`; it is passed to both.
+
+With the flag on:
+
+- A visitor who is logged in on one project is logged in on another project of the same installation with one click (no redirect). Missing data is asked for in a dialog in the widget; a vote code is asked for in that dialog too.
+- The first login opens the auth server in a popup window. When the browser blocks the popup, the widget offers a button to log in in the same window. Logging in automatically without any click on another domain is not possible because browsers block third-party cookies.
+- A magic link opened in another tab also completes the login in the original tab.
+- Widgets no longer force a new login by default (`forceNewLogin=1`). Exceptions:
+  - projects whose auth client only allows `UniqueCode` always force a new login, so the next person on a shared device does not continue as the previous voter;
+  - "Vul een andere stemcode in" always forces a new login;
+  - `config.auth.forceNewLoginOnWidgets` on a project overrides the default (`true` or `false`).
+- After voting, the budgeting widget also ends the auth-server session.
+- A vote code login creates its own identity. It is never linked to the visitor's e-mail identity, so votes cannot be traced back to an e-mail address and profile data is not shared with vote code projects.
+
+Endpoints, the exchange policy, the vote code lockout and known gaps are described in [multi-project login](./multi-project-login.md).
+
+Independent of the flag: in production (`NODE_ENV=production` without `FORCE_HTTP`) the api-server only sends a login token back to an `https:` URL.
+
+## Trusted proxies (`TRUST_PROXY`) (2026-10-07)
+
+Sets Express' `trust proxy` on the api-server and the auth-server, which decides how `req.ip` is read from `X-Forwarded-For`. Rate limiting, brute-force protection and the vote code lockout use `req.ip`.
+
+- Unset (default): every proxy is trusted. This is the previous behaviour, but clients can then spoof their IP address.
+- A number: the number of proxy hops in front of the app. Behind a single ingress controller use `1`.
+- An address or subnet list, for example `10.0.0.0/8, loopback`.
+- `false`: ignore `X-Forwarded-For`.
+
+In the Helm chart, set it through `api.extraEnvVars` and `auth.extraEnvVars`.
