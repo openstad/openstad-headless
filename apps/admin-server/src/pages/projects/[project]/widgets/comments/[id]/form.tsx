@@ -90,7 +90,7 @@ export default function ArgumentsForm(
             name="loginText"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Placeholder tekst</FormLabel>
+                <FormLabel>Inlogtekst</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Dit wordt weergegeven wanneer de gebruiker nog niet is ingelogd."

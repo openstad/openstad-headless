@@ -285,7 +285,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                           subWidgetKey: 'commentsWidget',
                           previewConfig: previewConfig,
                           updateConfig,
-                          updatePreview: (config) => console.log(config),
+                          updatePreview,
                           extraChildConfig: {
                             resourceId: previewConfig.resourceId,
                           },
@@ -301,7 +301,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                           subWidgetKey: 'commentsWidget_multiple',
                           previewConfig: previewConfig,
                           updateConfig,
-                          updatePreview: (config) => console.log(config),
+                          updatePreview,
                           extraChildConfig: {
                             resourceId: previewConfig.resourceId,
                           },

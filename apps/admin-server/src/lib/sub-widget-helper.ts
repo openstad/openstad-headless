@@ -34,14 +34,17 @@ export function extractConfig<
   const extractedConfig: ConfigWithFunctions<ChildWidgetProps> = {
     ...extraChildConfig,
     ...(previewConfig[subWidgetKey] as ChildWidgetProps),
-    updateConfig: (config: ChildWidgetProps) =>
-      updateConfig({
+    updateConfig: (config: ChildWidgetProps) => {
+      const next = {
         ...previewConfig,
         [subWidgetKey]: {
           ...previewConfig[subWidgetKey],
           ...config,
         },
-      }),
+      };
+      updateConfig(next);
+      updatePreview(next);
+    },
     onFieldChanged: (key: string, value: any) => {
       if (previewConfig) {
         updatePreview({
