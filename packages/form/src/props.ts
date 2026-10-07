@@ -21,7 +21,10 @@ export type FormProps = {
   fields: Array<FieldWithOptionalFields>;
   fieldKey?: any;
   submitText?: string;
-  submitHandler: (values: { [p: string]: FormValue }) => void;
+  submitHandler: (values: {
+    [p: string]: FormValue;
+  }) => void | boolean | Promise<void | boolean>;
+  navigateAfterSubmitSuccess?: boolean;
   getValuesOnChange?: (
     values: { [p: string]: FormValue },
     hiddenFields?: string[],

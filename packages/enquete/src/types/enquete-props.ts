@@ -24,6 +24,8 @@ export type EnqueteProps = {
   infoBlockStyle?: string;
   allowedPolygons?: Array<{ id: number; name: string }>;
   enableDraftPersistence?: boolean;
+  closeFormAfterSubmit?: boolean;
+  closedFormMessage?: string;
   draftRetentionHours?: number;
   gtmEnvironment?: string;
   isQuiz?: boolean;

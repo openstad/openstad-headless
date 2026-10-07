@@ -30,6 +30,8 @@ const formSchema = z.object({
   confirmationAdmin: z.boolean().optional(),
   overwriteEmailAddress: z.string().optional(),
   userEmailAddress: z.string().optional(),
+  closeFormAfterSubmit: z.boolean().optional(),
+  closedFormMessage: z.string().optional(),
 });
 
 export default function WidgetEnqueteConfirmation() {
@@ -65,12 +67,19 @@ export default function WidgetEnqueteConfirmation() {
       confirmationAdmin,
       overwriteEmailAddress,
       userEmailAddress,
+      closeFormAfterSubmit: widget?.config?.closeFormAfterSubmit ?? false,
+      closedFormMessage: widget?.config?.closedFormMessage ?? '',
     };
   }, [widget?.config]);
 
   async function onSubmit(values: FormData) {
+    const { closeFormAfterSubmit, closedFormMessage, ...confirmation } = values;
     try {
-      await updateConfig({ [category]: values });
+      await updateConfig({
+        [category]: confirmation,
+        closeFormAfterSubmit: !!closeFormAfterSubmit,
+        closedFormMessage: closedFormMessage ?? '',
+      });
     } catch (error) {
       console.error('could not update', error);
     }
@@ -224,6 +233,51 @@ export default function WidgetEnqueteConfirmation() {
               )}
             />
           )}
+
+          <FormField
+            control={form.control}
+            name="closeFormAfterSubmit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Formulier sluiten na inzending</FormLabel>
+                <FormDescription>
+                  Na een inzending vervangt een bevestiging het formulier. Dit
+                  wordt onthouden in de browser van de bezoeker. Beheerders en
+                  redacteuren zien het formulier altijd.
+                </FormDescription>
+                <Switch.Root
+                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                  onCheckedChange={(e: boolean) => {
+                    field.onChange(e);
+                  }}
+                  checked={!!field.value}>
+                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                </Switch.Root>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.watch('closeFormAfterSubmit') && (
+            <FormField
+              control={form.control}
+              name="closedFormMessage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bevestigingstekst na inzending</FormLabel>
+                  <FormDescription>
+                    Onder deze tekst staan de datum en tijd van de inzending.
+                    Laat leeg voor de standaardtekst: &quot;Je antwoord is
+                    ontvangen. Je kunt deze enquête maar één keer
+                    invullen.&quot;
+                  </FormDescription>
+                  <Input {...field} value={field.value ?? ''} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>
