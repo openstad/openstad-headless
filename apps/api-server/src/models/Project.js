@@ -6,6 +6,71 @@ const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 const authSettings = require('../util/auth-settings');
 const { getSafeConfig } = require('./lib/safe-config');
 
+// Auth provider settings that non-superusers may change (the admin UI ones).
+// Everything else under config.auth (clientSecret, serverUrl*, userMapping,
+// modulePath, adapter, jwtSecret) is evaluated or trusted by the api-server.
+const EDITOR_AUTH_PROVIDER_KEYS = [
+  'authTypes',
+  'requiredUserFields',
+  'requiredUserFieldsLabels',
+  'config',
+];
+const ADMIN_AUTH_PROVIDER_KEYS = [
+  ...EDITOR_AUTH_PROVIDER_KEYS,
+  'twoFactorRoles',
+];
+const UNSAFE_KEYS = ['__proto__', 'constructor', 'prototype'];
+
+function stripAuthSecrets(auth) {
+  delete auth.jwtSecret;
+  for (const group of ['provider', 'adapter']) {
+    for (const entry of Object.values(auth[group] || {})) {
+      if (!entry || typeof entry !== 'object') continue;
+      delete entry.clientSecret;
+      for (const nested of ['config', 'client']) {
+        if (entry[nested] && typeof entry[nested] === 'object')
+          delete entry[nested].clientSecret;
+      }
+    }
+  }
+}
+
+function sanitizeAuthWrite(auth, user) {
+  const allowedKeys = userHasRole(user, 'admin')
+    ? ADMIN_AUTH_PROVIDER_KEYS
+    : EDITOR_AUTH_PROVIDER_KEYS;
+  const provider = {};
+  for (const [name, settings] of Object.entries(auth?.provider || {})) {
+    if (UNSAFE_KEYS.includes(name) || !settings || typeof settings !== 'object')
+      continue;
+    provider[name] = {};
+    for (const key of allowedKeys) {
+      if (key in settings) provider[name][key] = settings[key];
+    }
+    if (provider[name].config && typeof provider[name].config === 'object') {
+      delete provider[name].config.clientId;
+      delete provider[name].config.clientSecret;
+    }
+  }
+  return { provider };
+}
+
+function authorizeConfig(value, action, user, self) {
+  if (!userHasRole(user, 'editor')) return undefined;
+  const isSuperuser = userHasRole(user, 'superuser');
+
+  if (action === 'view') {
+    if (isSuperuser) return self.config;
+    const config = JSON.parse(JSON.stringify(self.config || {}));
+    if (config.auth) stripAuthSecrets(config.auth);
+    return config;
+  }
+
+  if (isSuperuser || !value || typeof value !== 'object' || !value.auth)
+    return value;
+  return { ...value, auth: sanitizeAuthWrite(value.auth, user) };
+}
+
 module.exports = function (db, sequelize, DataTypes) {
   var Project = sequelize.define(
     'project',
@@ -51,6 +116,7 @@ module.exports = function (db, sequelize, DataTypes) {
         auth: {
           viewableBy: 'editor',
           updateableBy: 'editor',
+          authorizeData: authorizeConfig,
         },
       },
 
