@@ -64,6 +64,15 @@ type valueObject = Array<{
   explanation?: string;
 }>;
 
+const hasInfoContent = (value?: string): boolean => {
+  if (!value || !value.trim()) return false;
+
+  const doc = new DOMParser().parseFromString(sanitizeHtml(value), 'text/html');
+  const text = (doc.body.textContent || '').trim();
+
+  return text.length > 0 || !!doc.body.querySelector('img, video');
+};
+
 const DilemmaField: FC<DilemmaFieldProps> = ({
   title,
   infoField,
@@ -127,6 +136,14 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
   const unansweredDilemmas = getUnansweredDilemmas();
   const currentDilemma = unansweredDilemmas[currentDilemmaIndex] || null;
+  const showInfo = useMemo(
+    () => hasInfoContent(currentDilemma?.infoField),
+    [currentDilemma?.infoField]
+  );
+
+  useEffect(() => {
+    setInfoDialog(false);
+  }, [currentDilemma?.id]);
 
   const handleOptionSelect = useCallback(
     (option: 'a' | 'b') => {
@@ -655,16 +672,17 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           <span>Overslaan</span>
         </button>
 
-        <button
-          className="more-info-btn dilemma-info-button"
-          onClick={(e) => (e.preventDefault(), setInfoDialog(true))}
-          type="button"
-          disabled={!currentDilemma?.infoField}
-          aria-expanded={infoDialog}
-          aria-controls={`${instanceId}-dilemma-info-panel`}
-          aria-label="Meer informatie over deze vraag">
-          <span aria-hidden="true">Info</span>
-        </button>
+        {showInfo && (
+          <button
+            className="more-info-btn dilemma-info-button"
+            onClick={(e) => (e.preventDefault(), setInfoDialog(true))}
+            type="button"
+            aria-expanded={infoDialog}
+            aria-controls={`${instanceId}-dilemma-info-panel`}
+            aria-label="Meer informatie over deze vraag">
+            <span aria-hidden="true">Info</span>
+          </button>
+        )}
 
         <div className="dilemma-navigation-buttons">
           <button
@@ -729,25 +747,30 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         </div>
       )}
 
-      <div
-        id={`${instanceId}-dilemma-info-panel`}
-        className="info-card dilemma-info-field"
-        aria-hidden={!infoDialog ? 'true' : undefined}
-        {...(!infoDialog ? { inert: 'true' as any } : {})}>
-        <div className="info-card-container">
-          <Paragraph
-            dangerouslySetInnerHTML={{
-              __html: sanitizeHtml(currentDilemma?.infoField || ''),
-            }}
-          />
-          <button
-            className="utrecht-button utrecht-button--primary-action"
-            type="button"
-            onClick={(e) => (e.preventDefault(), setInfoDialog(false))}>
-            Snap ik
-          </button>
+      {showInfo && (
+        <div
+          id={`${instanceId}-dilemma-info-panel`}
+          className="info-card dilemma-info-field"
+          aria-hidden={infoDialog ? 'false' : 'true'}
+          {...(!infoDialog ? { inert: 'true' as any } : {})}
+          onClick={() => setInfoDialog(false)}>
+          <div
+            className="info-card-container"
+            onClick={(e) => e.stopPropagation()}>
+            <Paragraph
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(currentDilemma?.infoField || ''),
+              }}
+            />
+            <button
+              className="utrecht-button utrecht-button--primary-action"
+              type="button"
+              onClick={(e) => (e.preventDefault(), setInfoDialog(false))}>
+              Snap ik
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
