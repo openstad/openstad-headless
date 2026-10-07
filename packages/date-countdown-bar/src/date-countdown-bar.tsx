@@ -3,16 +3,12 @@ import useInterval from '@rooks/use-interval';
 import '@utrecht/component-library-css';
 import { Paragraph } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import {
-  differenceInDays,
-  differenceInHours,
-  differenceInMinutes,
-  parseISO,
-} from 'date-fns';
+import { parseISO } from 'date-fns';
 import { useEffect, useState } from 'react';
 import React from 'react';
 
 import './date-countdown-bar.css';
+import { type TimeLeft, getTimeLeft } from './get-time-left';
 
 export type DateCountdownBarWidgetProps = {
   beforeText?: string;
@@ -33,13 +29,11 @@ function DateCountdownBar({
   showHours = true,
   showMinutes = true,
 }: DateCountdownBarWidgetProps) {
-  const zone = 'Europe/Amsterdam';
-
-  const [timeLeft, setTimeLeft] = useState<{
-    days: number;
-    hours: number;
-    minutes: number;
-  }>({ days: 0, hours: 0, minutes: 0 });
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+  });
 
   const [selectedDateISO, setDateISO] = useState<string>(date || '');
 
@@ -70,7 +64,6 @@ function DateCountdownBar({
     }
   }, [selectedDateISO]);
 
-  // Every second update the calculated days, hours and minutes
   useInterval(
     () => {
       if (selectedDateISO) {
@@ -83,19 +76,7 @@ function DateCountdownBar({
 
   // Calculate the time left for the day/hour/minutes until the given date
   const calculateTime = (eventDate: string): void => {
-    // const today = new Date().toISOString().replace();
-    const startDate: Date = new Date();
-    const endDate: Date = parseISO(eventDate);
-
-    const daysDifference = differenceInDays(endDate, startDate);
-    const hoursDifference = differenceInHours(endDate, startDate) % 24;
-    const minutesDifference = differenceInMinutes(endDate, startDate) % 60;
-
-    setTimeLeft({
-      days: Math.max(0, daysDifference),
-      hours: Math.max(0, hoursDifference),
-      minutes: Math.max(0, minutesDifference),
-    });
+    setTimeLeft(getTimeLeft(new Date(), parseISO(eventDate)));
   };
 
   const padNumber = (nr: number): string => {

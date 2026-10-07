@@ -13,7 +13,7 @@ import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { DateCountdownBarWidgetProps } from '@openstad-headless/date-countdown-bar/src/date-countdown-bar';
 import * as Switch from '@radix-ui/react-switch';
-import { parseISO } from 'date-fns';
+import { format, parseISO, startOfDay } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -22,6 +22,7 @@ import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -51,7 +52,7 @@ export default function CountdownBarGeneral(
     if (!selectedDate && props.date) {
       setSelectedDate(parseISO(props.date));
     } else if (props && !props.date && !selectedDate) {
-      setSelectedDate(new Date());
+      setSelectedDate(startOfDay(new Date()));
     }
   }, [selectedDate, props.date, props]);
 
@@ -218,27 +219,68 @@ export default function CountdownBarGeneral(
         <FormField
           control={form.control}
           name="date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Einddatum</FormLabel>
-              <FormControl>
-                <>
-                  {selectedDate ? (
-                    <Calendar
-                      selected={selectedDate}
-                      fromDate={new Date()}
-                      defaultMonth={selectedDate}
-                      onDayClick={(day) => {
-                        setSelectedDate(day);
-                        field.onChange(day.toISOString());
-                        onFieldChange(field.name, day.toISOString());
+          render={({ field }) => {
+            const commit = (next: Date) => {
+              const iso = next.toISOString();
+              setSelectedDate(next);
+              field.onChange(iso);
+              onFieldChange(field.name, iso);
+            };
+            return (
+              <>
+                <FormItem>
+                  <FormLabel>Einddatum</FormLabel>
+                  <FormControl>
+                    <>
+                      {selectedDate ? (
+                        <Calendar
+                          selected={selectedDate}
+                          fromDate={new Date()}
+                          defaultMonth={selectedDate}
+                          onDayClick={(day) => {
+                            const next = new Date(day);
+                            next.setHours(
+                              selectedDate.getHours(),
+                              selectedDate.getMinutes(),
+                              0,
+                              0
+                            );
+                            commit(next);
+                          }}
+                        />
+                      ) : null}
+                    </>
+                  </FormControl>
+                </FormItem>
+                <FormItem>
+                  <FormLabel>Eindtijd</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="time"
+                      value={
+                        selectedDate ? format(selectedDate, 'HH:mm') : '00:00'
+                      }
+                      onChange={(e) => {
+                        if (!e.target.value) return;
+                        const [hours, minutes] = e.target.value
+                          .split(':')
+                          .map(Number);
+                        const next = new Date(
+                          selectedDate ?? startOfDay(new Date())
+                        );
+                        next.setHours(hours, minutes, 0, 0);
+                        commit(next);
                       }}
                     />
-                  ) : null}
-                </>
-              </FormControl>
-            </FormItem>
-          )}
+                  </FormControl>
+                  <FormDescription>
+                    De aftelbalk telt af tot deze tijd op de gekozen dag (tijd
+                    volgens de klok van je computer). 00:00 = middernacht.
+                  </FormDescription>
+                </FormItem>
+              </>
+            );
+          }}
         />
 
         <Button type="submit">Opslaan</Button>
