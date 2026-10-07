@@ -186,6 +186,9 @@ const identityKeys = [
   'password',
   'twoFactorToken',
   'twoFactorConfigured',
+  'name',
+  'phoneNumber',
+  'hashedPhoneNumber',
 ];
 
 // A non-admin client may only touch the identity of a user without roles on

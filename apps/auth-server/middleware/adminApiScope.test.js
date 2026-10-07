@@ -146,6 +146,9 @@ describe('user.ensureIdentityWriteAllowed', () => {
     ['password', 'secret123'],
     ['twoFactorToken', null],
     ['twoFactorConfigured', false],
+    ['name', 'New name'],
+    ['phoneNumber', '0612345678'],
+    ['hashedPhoneNumber', 'newhash'],
   ])(
     'non-admin client may not change %s of a user with roles on other clients',
     async (key, value) => {
@@ -169,7 +172,7 @@ describe('user.ensureIdentityWriteAllowed', () => {
     const err = await run(
       userMw.ensureIdentityWriteAllowed,
       req(ownClient, target(5, 7), {
-        name: 'New name',
+        city: 'Amsterdam',
         email: '',
         roles: { 'own-client-id': 'member' },
       })
