@@ -13,10 +13,12 @@ export const InitializeWeights = (
     choiceOptions = [{ id: 'plane' }];
   }
 
-  if (choiceOptions.length < 1) return {};
+  if (!Array.isArray(choiceOptions) || choiceOptions.length < 1) return {};
 
   choiceOptions.forEach((choiceOption) => {
-    const id = choiceOption.id;
+    const id = choiceOption?.id;
+    if (id === undefined || id === null) return; // ponytail: skip empty/half-configured option entries
+
     // Prevent prototype pollution. Needed for security warning #216.
     if (id === '__proto__' || id === 'constructor' || id === 'prototype')
       return;

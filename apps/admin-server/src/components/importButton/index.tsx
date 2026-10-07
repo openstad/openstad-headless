@@ -365,10 +365,23 @@ export const ImportButton = ({ project }: { project: string }) => {
     if (!match) throw new Error('File type not recognized');
     let ext = match[1];
 
-    const values = await processXlsFile(file, {});
+    try {
+      const values = await processXlsFile(file, {});
 
-    setValues(values);
-    setFileValidationNotifications(await validateFileData(values, ideaSchema));
+      setValues(values);
+      setFileValidationNotifications(
+        await validateFileData(values, ideaSchema)
+      );
+    } catch (err: any) {
+      setValues([]);
+      setFileValidationNotifications([
+        {
+          messageType: 'fileProcessingError',
+          color: 'red',
+          message: `Het bestand kon niet worden verwerkt: ${err?.message || 'onbekende fout'}`,
+        },
+      ]);
+    }
 
     target.value = '';
   };

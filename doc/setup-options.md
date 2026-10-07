@@ -41,6 +41,8 @@ DB_AUTH_METHOD = ''
 
 WHITELISTED_EMAILS=''
 
+VERBOSE_LOGGING = false
+
 // api server
 API_DOMAIN = 'api.' + process.env.BASE_DOMAIN
 API_URL = 'http://' + API_DOMAIN

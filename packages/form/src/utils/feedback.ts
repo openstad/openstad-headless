@@ -21,12 +21,6 @@ export type FeedbackField = {
   }>;
 };
 
-const emptyResult: FeedbackResult = {
-  isFullyCorrect: false,
-  textToShow: [],
-  optionStates: {},
-};
-
 function parseSelectedValues(
   field: FeedbackField,
   rawValue: unknown
@@ -51,44 +45,36 @@ function parseSelectedValues(
   return rawValue && rawValue !== '' ? [String(rawValue)] : [];
 }
 
+export function isGraded(field: FeedbackField): boolean {
+  return (
+    Array.isArray(field.choices) &&
+    field.choices.some((choice) => choice.isCorrect === true)
+  );
+}
+
 export function evaluateFeedback(
   field: FeedbackField,
   rawValue: unknown
 ): FeedbackResult {
   const mode = field.feedbackMode;
-
-  if (!mode || mode === 'none') {
-    return { isFullyCorrect: false, textToShow: [], optionStates: {} };
-  }
-
-  if (mode === 'static') {
-    return {
-      isFullyCorrect: false,
-      textToShow: field.feedbackText ? [field.feedbackText] : [],
-      optionStates: {},
-    };
-  }
-
+  const choices = field.choices || [];
   const selected = parseSelectedValues(field, rawValue);
 
-  if (selected.length === 0) {
-    return { isFullyCorrect: false, textToShow: [], optionStates: {} };
-  }
+  const optionStates: Record<string, OptionState> = {};
+  let isFullyCorrect = false;
+  const textToShow: string[] = [];
 
-  const choices = field.choices || [];
-
-  if (mode === 'correctIncorrect') {
+  if (isGraded(field) && selected.length > 0) {
     const correctValues = choices
       .filter((choice) => choice.isCorrect === true)
       .map((choice) => choice.value);
 
     const selectedSet = new Set(selected);
     const correctSet = new Set(correctValues);
-    const isFullyCorrect =
+    isFullyCorrect =
       selectedSet.size === correctSet.size &&
       Array.from(selectedSet).every((value) => correctSet.has(value));
 
-    const optionStates: Record<string, OptionState> = {};
     for (const value of selected) {
       const choice = choices.find((item) => item.value === value);
       optionStates[value] =
@@ -103,43 +89,37 @@ export function evaluateFeedback(
       }
     }
 
-    const text = isFullyCorrect
+    const resultText = isFullyCorrect
       ? field.feedbackCorrect
       : field.feedbackIncorrect;
-
-    return {
-      isFullyCorrect,
-      textToShow: text ? [text] : [],
-      optionStates,
-    };
+    if (resultText) {
+      textToShow.push(resultText);
+    }
   }
 
-  if (mode === 'perAnswer') {
+  if (mode === 'static') {
+    if (field.feedbackText) {
+      textToShow.push(field.feedbackText);
+    }
+  } else if (mode === 'perAnswer') {
     if (field.type === 'tickmark-slider') {
       const index = Number(rawValue) - 1;
       const entry =
         index >= 0 && index < (field.scaleFeedback?.length || 0)
           ? field.scaleFeedback?.[index]
           : undefined;
-
-      return {
-        isFullyCorrect: false,
-        textToShow: entry ? [entry] : [],
-        optionStates: {},
-      };
+      if (entry) {
+        textToShow.push(entry);
+      }
+    } else if (selected.length > 0) {
+      const selectedSet = new Set(selected);
+      for (const choice of choices) {
+        if (selectedSet.has(choice.value) && choice.feedbackText) {
+          textToShow.push(choice.feedbackText);
+        }
+      }
     }
-
-    const selectedSet = new Set(selected);
-    const textToShow = choices
-      .filter((choice) => selectedSet.has(choice.value) && choice.feedbackText)
-      .map((choice) => choice.feedbackText as string);
-
-    return {
-      isFullyCorrect: false,
-      textToShow,
-      optionStates: {},
-    };
   }
 
-  return { ...emptyResult };
+  return { isFullyCorrect, textToShow, optionStates };
 }

@@ -133,7 +133,7 @@ function Agenda({
                   <>
                     {dateLabel && (
                       <Paragraph className="osc-agenda-date-label">
-                        {dateLabel}
+                        <time dateTime={item.activeFrom}>{dateLabel}</time>
                       </Paragraph>
                     )}
                     <Heading4>{customTitle}</Heading4>
@@ -142,15 +142,21 @@ function Agenda({
               }
               return (
                 <Heading4>
-                  {dateLabel ||
-                    (titleIsDate
-                      ? formatDutchDate(item.title as string)
-                      : item.title)}
+                  {dateLabel ? (
+                    <time dateTime={item.activeFrom}>{dateLabel}</time>
+                  ) : titleIsDate ? (
+                    <time dateTime={item.title as string}>
+                      {formatDutchDate(item.title as string)}
+                    </time>
+                  ) : (
+                    item.title
+                  )}
                 </Heading4>
               );
             })()}
             <Paragraph>{item.description}</Paragraph>
-            {item.links && item.links?.length > 0 && (
+            {/* ponytail: één link hoort geen lijst te zijn -> losse <a>; pas bij ≥2 een lijst (1.3.1) */}
+            {item.links && item.links.length > 1 && (
               <LinkList className="osc-agenda-list">
                 {item.links?.map((link, index) => {
                   const linkKind = link.kind ?? link.soort;
@@ -172,10 +178,32 @@ function Agenda({
                       }>
                       {link.title || link.url}
                       {meta}
+                      {link.openInNewWindow && (
+                        <span className="sr-only">
+                          {' '}
+                          (opent in nieuw tabblad)
+                        </span>
+                      )}
                     </LinkListLink>
                   );
                 })}
               </LinkList>
+            )}
+            {item.links && item.links.length === 1 && (
+              <a
+                className="osc-agenda-single-link"
+                href={sanitizeUrl(item.links[0].url)}
+                target={item.links[0].openInNewWindow ? '_blank' : '_self'}
+                rel={
+                  item.links[0].openInNewWindow
+                    ? 'noopener noreferrer'
+                    : undefined
+                }>
+                {item.links[0].title}
+                {item.links[0].openInNewWindow && (
+                  <span className="sr-only"> (opent in nieuw tabblad)</span>
+                )}
+              </a>
             )}
           </div>
         </div>
@@ -184,7 +212,7 @@ function Agenda({
   );
 
   const ItemsSection = (
-    <section className="osc-agenda">
+    <section className="osc-agenda" aria-label="Agenda">
       {displayToggle && toggleType === 'items' ? (
         <>
           {renderItems(beforeItems)}

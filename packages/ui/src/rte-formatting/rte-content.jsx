@@ -44,6 +44,16 @@ function flattenToInlineHtml(html) {
   return template.innerHTML;
 }
 
+export function InlineParagraph(props) {
+  return (
+    <span
+      className="utrecht-paragraph"
+      style={{ display: 'inline-block' }}
+      {...props}
+    />
+  );
+}
+
 export default function RteContent({
   content,
   inlineComponent: InlineComponent,
@@ -53,13 +63,16 @@ export default function RteContent({
   const html = RenderContent(content, { unwrapSingleRootDiv });
   const hasBlock = hasBlockLevelContent(html);
 
-  if (InlineComponent && (forceInline || !hasBlock)) {
+  if (forceInline || (InlineComponent && !hasBlock)) {
     const inlineHtml = forceInline ? flattenToInlineHtml(html) : html;
-    return (
-      <InlineComponent
-        dangerouslySetInnerHTML={{ __html: sanitizeHtml(inlineHtml) }}
-      />
-    );
+    if (InlineComponent) {
+      return (
+        <InlineComponent
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(inlineHtml) }}
+        />
+      );
+    }
+    return <>{parseChildren(inlineHtml)}</>;
   }
 
   return <>{parseChildren(html)}</>;

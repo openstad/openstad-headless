@@ -11,6 +11,7 @@ interface Item {
   home?: string;
   content: string;
   prefix?: string;
+  parentBehavior?: string;
 }
 
 function parseJSON<T>(value: unknown, fallback: T): T {
@@ -23,7 +24,7 @@ function parseJSON<T>(value: unknown, fallback: T): T {
   }
 }
 
-function NavBar({ home, content, prefix = '' }: Item) {
+function NavBar({ home, content, prefix = '', parentBehavior }: Item) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const homeItems = parseJSON<any[]>(home, []);
   const menuItems = parseJSON<any[]>(content, []);
@@ -41,7 +42,7 @@ function NavBar({ home, content, prefix = '' }: Item) {
 
   return (
     <div className="container">
-      <nav id="main-menu">
+      <nav id="main-menu" aria-label="Hoofdnavigatie">
         {homeItems.map((item: any, index: number) => {
           return (
             <div key={index} className="item-container">
@@ -64,6 +65,7 @@ function NavBar({ home, content, prefix = '' }: Item) {
               prefix={prefix}
               open={openIndex === index}
               setOpenIndex={setOpenIndex}
+              parentBehavior={parentBehavior}
             />
           );
         })}

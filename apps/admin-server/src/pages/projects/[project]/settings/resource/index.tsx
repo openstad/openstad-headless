@@ -78,6 +78,18 @@ const formSchema = z.object({
   tagGroups: z.number().array().optional().default([]),
   statusGroups: z.number().array().optional().default([]),
   canEditAfterFirstLikeOrComment: z.boolean().optional(),
+  imageCropRatioWidth: z.coerce
+    .number()
+    .int('De verhouding moet een geheel getal zijn.')
+    .min(1, {
+      message: 'De verhouding moet minimaal 1 zijn.',
+    }),
+  imageCropRatioHeight: z.coerce
+    .number()
+    .int('De verhouding moet een geheel getal zijn.')
+    .min(1, {
+      message: 'De verhouding moet minimaal 1 zijn.',
+    }),
 });
 
 export default function ProjectSettingsResource() {
@@ -114,6 +126,8 @@ export default function ProjectSettingsResource() {
       statusGroups: data?.config?.resources?.defaultStatusIds || [],
       canEditAfterFirstLikeOrComment:
         data?.config?.resources?.canEditAfterFirstLikeOrComment || false,
+      imageCropRatioWidth: data?.config?.project?.imageCropRatioWidth || 16,
+      imageCropRatioHeight: data?.config?.project?.imageCropRatioHeight || 9,
     }),
     [data?.config]
   );
@@ -126,6 +140,11 @@ export default function ProjectSettingsResource() {
   React.useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
+
+  const previewRatio =
+    (form.watch('imageCropRatioWidth') || 16) /
+    (form.watch('imageCropRatioHeight') || 9);
+  const previewHeight = Math.min(40, 160 / previewRatio);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
@@ -147,6 +166,10 @@ export default function ProjectSettingsResource() {
           defaultTagIds: values.tagGroups || [],
           defaultStatusIds: values.statusGroups || [],
           canEditAfterFirstLikeOrComment: values.canEditAfterFirstLikeOrComment,
+        },
+        project: {
+          imageCropRatioWidth: values.imageCropRatioWidth,
+          imageCropRatioHeight: values.imageCropRatioHeight,
         },
       });
       if (project) {
@@ -353,6 +376,65 @@ export default function ProjectSettingsResource() {
                   </FormItem>
                 )}
               />
+
+              <div className="col-span-full md:col-span-1 flex flex-col gap-2">
+                <p className="text-sm font-medium leading-none">
+                  Standaard beeldverhouding voor bijsnijden
+                </p>
+                <em className="text-xs">
+                  Deze verhouding wordt gebruikt bij het bijsnijden van
+                  afbeeldingen.
+                </em>
+                <div className="flex items-end gap-2">
+                  <FormField
+                    control={form.control}
+                    name="imageCropRatioWidth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Breedte</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min={1}
+                            className="w-20"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <span className="pb-2" aria-hidden="true">
+                    x
+                  </span>
+                  <FormField
+                    control={form.control}
+                    name="imageCropRatioHeight"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Hoogte</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min={1}
+                            className="w-20"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div
+                    aria-hidden="true"
+                    className="border border-stone-400 bg-stone-100"
+                    style={{
+                      width: previewHeight * previewRatio,
+                      height: previewHeight,
+                    }}
+                  />
+                </div>
+              </div>
 
               <CheckboxList
                 form={form}

@@ -69,4 +69,11 @@ export interface PluginEntry {
     enabled: boolean;
     config?: Record<string, unknown>;
 }
+/**
+ * Resolves a manifest-supplied relative path against a plugin's own directory.
+ *
+ * @returns The resolved absolute path, or `null` when `relPath` is absolute or
+ *   escapes `pluginDir`.
+ */
+export declare function resolvePluginFile(pluginDir: string, relPath: string): string | null;
 //# sourceMappingURL=index.d.ts.map

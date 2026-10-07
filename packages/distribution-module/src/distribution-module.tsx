@@ -146,7 +146,10 @@ function DistributionModule(props: DistributionModuleProps) {
                     <span className={'append'}>{props.appendText}</span>
                   </Paragraph>
                 </div>
-                <div className={`osc-distribution-modules-content__leftover`}>
+                <div
+                  className={`osc-distribution-modules-content__leftover`}
+                  aria-live="polite"
+                  aria-atomic="true">
                   <Paragraph>{props.pointsLeftoverText}</Paragraph>
                   <Paragraph>
                     {formatNumber(distributeLeft)}{' '}
@@ -160,10 +163,15 @@ function DistributionModule(props: DistributionModuleProps) {
                   className={`osc-distribution-modules-content__progress`}
                   value={props.total - distributeLeft}
                   max={props.total}
+                  aria-label="Verdeelde punten"
                 />
               )}
 
-              <div className={`osc-distribution-modules-content__error`}>
+              <div
+                className={`osc-distribution-modules-content__error`}
+                role="status"
+                aria-live="assertive"
+                aria-atomic="true">
                 {distributeLeft < 0 &&
                   (props.pointsErrorTitle || props.pointsErrorMessage) && (
                     <Banner big={true}>
@@ -188,14 +196,21 @@ function DistributionModule(props: DistributionModuleProps) {
                 <div className={`osc-distribution-modules-content__remaining`}>
                   <Paragraph>{props.budgetTotalText}</Paragraph>
                   <Paragraph>
-                    <span className={'prepend'}>{props.prependText}</span>{' '}
+                    <span className={'prepend'} aria-hidden="true">
+                      {props.prependText}
+                    </span>{' '}
                     {formatNumber(props.total || 0)}
                   </Paragraph>
                 </div>
-                <div className={`osc-distribution-modules-content__leftover`}>
+                <div
+                  className={`osc-distribution-modules-content__leftover`}
+                  aria-live="polite"
+                  aria-atomic="true">
                   <Paragraph>{props.budgetLeftoverText}</Paragraph>
                   <Paragraph>
-                    <span className={'prepend'}>{props.prependText}</span>{' '}
+                    <span className={'prepend'} aria-hidden="true">
+                      {props.prependText}
+                    </span>{' '}
                     {formatNumber(distributeLeft)}
                   </Paragraph>
                 </div>
@@ -206,10 +221,15 @@ function DistributionModule(props: DistributionModuleProps) {
                   className={`osc-distribution-modules-content__progress`}
                   value={props.total - distributeLeft}
                   max={props.total}
+                  aria-label="Verdeeld budget"
                 />
               )}
 
-              <div className={`osc-distribution-modules-content__error`}>
+              <div
+                className={`osc-distribution-modules-content__error`}
+                role="status"
+                aria-live="assertive"
+                aria-atomic="true">
                 {distributeLeft < 0 &&
                   (props.budgetErrorTitle || props.budgetErrorMessage) && (
                     <Banner big={true}>

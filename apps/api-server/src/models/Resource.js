@@ -8,6 +8,10 @@ const co = require('co'),
   pick = require('lodash/pick');
 
 const sanitize = require('../util/sanitize');
+const {
+  normalizeImages,
+  normalizeDocuments,
+} = require('../lib/resource-media-fields');
 
 const merge = require('merge');
 
@@ -224,12 +228,18 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.JSON,
         allowNull: null,
         defaultValue: [],
+        set: function (value) {
+          this.setDataValue('images', normalizeImages(value));
+        },
       },
 
       documents: {
         type: DataTypes.JSON,
         allowNull: null,
         defaultValue: [],
+        set: function (value) {
+          this.setDataValue('documents', normalizeDocuments(value));
+        },
       },
 
       budget: {
@@ -1311,10 +1321,10 @@ module.exports = function (db, sequelize, DataTypes) {
         ? self.resourceFormFieldKeys
         : [];
       const hasResourceFormConfig = !!self.hasResourceFormConfig;
+      // {role:'all'} is the unidentified viewer; strip hardest, not skip
       if (
         user &&
         user.role &&
-        user.role !== 'all' &&
         !canViewModeratorOnlyExtraData(user, self) &&
         data.extraData &&
         typeof data.extraData === 'object'

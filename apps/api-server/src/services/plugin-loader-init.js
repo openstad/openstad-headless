@@ -21,6 +21,7 @@ function initPluginLoader() {
 
   try {
     var PluginLoader = require('@openstad-headless/plugin-loader');
+    var resolvePluginFile = PluginLoader.resolvePluginFile;
     var pluginLoader = PluginLoader.getInstance();
     pluginLoader.load();
 
@@ -32,9 +33,20 @@ function initPluginLoader() {
       if (plugin.api.middleware) {
         for (var mw of plugin.api.middleware) {
           var position = mw.position || 'before:routes';
+          var mwFile = resolvePluginFile(pluginDir, mw.path);
+          if (!mwFile) {
+            console.error(
+              '[plugin-loader] Skipping middleware of plugin "' +
+                plugin.name +
+                '": path escapes the plugin directory (' +
+                mw.path +
+                ')'
+            );
+            continue;
+          }
           if (pluginMiddleware[position]) {
             pluginMiddleware[position].push({
-              handler: require(path.join(pluginDir, mw.path)),
+              handler: require(mwFile),
               priority: mw.priority || 100,
               pluginName: plugin.name,
             });
@@ -46,7 +58,18 @@ function initPluginLoader() {
         var pluginContext = { config: plugin.config, pluginName: plugin.name };
 
         for (var route of plugin.api.routes) {
-          var handlerModule = require(path.join(pluginDir, route.handler));
+          var handlerFile = resolvePluginFile(pluginDir, route.handler);
+          if (!handlerFile) {
+            console.error(
+              '[plugin-loader] Skipping route of plugin "' +
+                plugin.name +
+                '": handler escapes the plugin directory (' +
+                route.handler +
+                ')'
+            );
+            continue;
+          }
+          var handlerModule = require(handlerFile);
 
           // Convention: if a handler module sets `module.exports.createHandler`,
           // it is a factory that receives the plugin context (config, name).

@@ -64,11 +64,16 @@ export type Item = {
   fieldKey: string;
   fieldRequired?: boolean;
   onlyForModerator?: boolean;
+  enableAddressSearch?: boolean;
   minCharacters?: string;
   maxCharacters?: string;
   variant?: string;
   multiple?: boolean;
   maxUploadSizeMB?: number;
+  imageCropEnabled?: boolean;
+  imageCropRequired?: boolean;
+  imageCropRatioWidth?: number;
+  imageCropRatioHeight?: number;
   images?: Array<{
     image?: never;
     src: string;

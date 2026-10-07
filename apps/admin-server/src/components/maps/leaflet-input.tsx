@@ -63,12 +63,18 @@ const MapInput: React.FC<MapComponentProps> = ({
 
   useEffect(() => {
     import('leaflet').then((L) => {
-      if (dynamicMarkerIcon !== null && markerPosition === null) {
+      if (dynamicMarkerIcon !== null) {
         // Check if field value has saved coordinates and set marker position
         if (field && field.value) {
           try {
             const { lat, lng } = JSON.parse(field.value);
-            if (!isNaN(lat) && !isNaN(lng)) {
+            if (
+              !isNaN(lat) &&
+              !isNaN(lng) &&
+              (!markerPosition ||
+                markerPosition.lat !== lat ||
+                markerPosition.lng !== lng)
+            ) {
               setMarkerPosition(L.latLng(lat, lng));
             }
           } catch (e) {

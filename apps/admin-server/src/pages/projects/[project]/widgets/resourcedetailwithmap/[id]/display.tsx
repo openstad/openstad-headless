@@ -1,11 +1,20 @@
 import { Button } from '@/components/ui/button';
 import {
   Form,
+  FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
@@ -16,6 +25,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
+  headingLevel: z.coerce.number().optional(),
   displayImage: z.boolean(),
   displayTitle: z.boolean(),
   displayDescription: z.boolean(),
@@ -29,6 +39,7 @@ const formSchema = z.object({
   displaySocials: z.boolean(),
   displayStatus: z.boolean(),
   displayLikes: z.boolean(),
+  descriptionHeadingLevel: z.string().optional(),
 });
 
 export default function WidgetResourceDetailDisplay(
@@ -43,6 +54,7 @@ export default function WidgetResourceDetailDisplay(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
+      headingLevel: props?.headingLevel || 2,
       displayImage: undefinedToTrueOrProp(props?.displayImage),
       displayTitle: undefinedToTrueOrProp(props?.displayTitle),
       displayDescription: undefinedToTrueOrProp(props?.displayDescription),
@@ -58,6 +70,7 @@ export default function WidgetResourceDetailDisplay(
       displaySocials: undefinedToTrueOrProp(props?.displaySocials),
       displayStatus: undefinedToTrueOrProp(props?.displayStatus),
       displayLikes: undefinedToTrueOrProp(props?.displayLikes),
+      descriptionHeadingLevel: props?.descriptionHeadingLevel || '3',
     },
   });
 
@@ -69,6 +82,34 @@ export default function WidgetResourceDetailDisplay(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="headingLevel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Kopniveau van de titel</FormLabel>
+                <Select
+                  value={String(field.value ?? 2)}
+                  onValueChange={(e) => field.onChange(Number(e))}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Kies kopniveau" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="2">Kop 2 (h2)</SelectItem>
+                    <SelectItem value="3">Kop 3 (h3)</SelectItem>
+                    <SelectItem value="4">Kop 4 (h4)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Kies zo dat de titel aansluit op de koppen eromheen. De widget
+                  produceert nooit een h1; die hoort bij de pagina zelf.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="displayImage"
@@ -158,6 +199,39 @@ export default function WidgetResourceDetailDisplay(
               </FormItem>
             )}
           />
+          {form.watch('displayDescription') && (
+            <FormField
+              control={form.control}
+              name="descriptionHeadingLevel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Heading-niveau opmaak in beschrijving</FormLabel>
+                  <FormDescription>
+                    Bepaalt als welk kopniveau een &apos;Heading&apos; uit de
+                    tekstopmaak van de inzender wordt weergegeven.
+                  </FormDescription>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value);
+                      props.onFieldChanged(field.name, value);
+                    }}
+                    value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecteer een optie" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={'2'}>Heading 2 (H2)</SelectItem>
+                      <SelectItem value={'3'}>Heading 3 (H3)</SelectItem>
+                      <SelectItem value={'4'}>Heading 4 (H4)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
           <FormField
             control={form.control}
             name="displayLocation"

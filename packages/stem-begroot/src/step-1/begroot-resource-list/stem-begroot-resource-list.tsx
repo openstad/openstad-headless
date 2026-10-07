@@ -3,6 +3,7 @@ import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { elipsizeHTML } from '@openstad-headless/lib/ui-helpers';
 import {
   Carousel,
+  ClickableImage,
   Icon,
   Image,
   List,
@@ -41,6 +42,7 @@ export const StemBegrootResourceList = ({
   showOriginalResource = true,
   displayTitle = true,
   displaySummary = true,
+  clickableImage = false,
   header,
 }: {
   resourceListColumns?: number;
@@ -66,6 +68,7 @@ export const StemBegrootResourceList = ({
   hideReadMore?: boolean;
   displayTitle?: boolean;
   displaySummary?: boolean;
+  clickableImage?: boolean;
 }) => {
   const filtered = useMemo(() => {
     if (!resources) return [];
@@ -151,7 +154,11 @@ export const StemBegrootResourceList = ({
                   next: 'Volgende afbeelding',
                   previous: 'Vorige afbeelding',
                 }}
-                itemRenderer={(i) => <Image src={i.url} />}
+                itemRenderer={(i) => (
+                  <ClickableImage clickable={clickableImage} src={i.url}>
+                    <Image src={i.url} />
+                  </ClickableImage>
+                )}
               />
               {!hideTagsForResources && (
                 <section className="stembegroot-content-item-header">
@@ -159,7 +166,7 @@ export const StemBegrootResourceList = ({
                     <Heading level={2} appearance="utrecht-heading-6">
                       Tags
                     </Heading>
-                    <div className="pill-grid stembegroot">
+                    <div className="pill-grid stembegroot" role="list">
                       {(
                         resource.tags as Array<{
                           type: string;
@@ -178,7 +185,9 @@ export const StemBegrootResourceList = ({
                           }
                         )
                         ?.map((t) => (
-                          <span>{t.name || 'Geen thema'}</span>
+                          <span key={`${t.type}-${t.name}`} role="listitem">
+                            {t.name || 'Geen thema'}
+                          </span>
                         ))}
                     </div>
                   </div>
@@ -219,17 +228,20 @@ export const StemBegrootResourceList = ({
                     <>
                       <Icon
                         icon="ri-thumb-up-line"
+                        description="Stemmen voor"
                         variant="regular"
                         text={resource.yes}
                       />
                       <Icon
                         icon="ri-thumb-down-line"
+                        description="Stemmen tegen"
                         variant="regular"
                         text={resource.no}
                       />
                       {displayRanking && resource.extraData?.ranking ? (
                         <Icon
                           icon="ri-trophy-line"
+                          description="Positie in de ranglijst"
                           variant="regular"
                           text={resource.extraData?.ranking}
                         />
@@ -245,6 +257,7 @@ export const StemBegrootResourceList = ({
                   <Button
                     appearance="secondary-action-button"
                     className="osc-stem-begroot-item-action-btn"
+                    aria-label={`Lees meer over ${resource.title}`}
                     onClick={(e) => {
                       onResourcePlainClicked(resource, index);
                       e.currentTarget.classList.add('active-resource');
@@ -255,6 +268,7 @@ export const StemBegrootResourceList = ({
                 <Button
                   disabled={primaryBtnDisabled}
                   className="osc-stem-begroot-item-action-btn"
+                  aria-label={`${primaryBtnText}: ${resource.title}`}
                   onClick={() => {
                     onResourcePrimaryClicked(resource);
                   }}

@@ -26,6 +26,7 @@ function deriveNotificationTemplateData(instance) {
   const isAdminResourceNotification = [
     'new published resource - admin update',
     'updated resource - admin update',
+    'new comment - admin',
   ].includes(instance.type);
 
   const redirectUrl =
@@ -116,7 +117,7 @@ module.exports = (db, sequelize, DataTypes) => {
               'updated resource - admin update',
               'new enquete - admin',
               'project issues warning',
-              'new or updated comment - admin update',
+              'new comment - admin',
               'submission',
               'action',
               'message by carrier pigeon',
@@ -126,7 +127,7 @@ module.exports = (db, sequelize, DataTypes) => {
               let defaultRecipient =
                 project.emailConfig?.notifications?.projectmanagerAddress;
 
-              if (defaultRecipient === 'email@not.set') {
+              if (defaultRecipient === 'EMAIL@NOT.DEFINED') {
                 defaultRecipient = '';
               }
 
@@ -169,6 +170,7 @@ module.exports = (db, sequelize, DataTypes) => {
               'updated resource - admin update',
               'notification comment - user',
               'notification comment reply - user',
+              'new comment - admin',
               'login email',
               'login sms',
               'user account about to expire',

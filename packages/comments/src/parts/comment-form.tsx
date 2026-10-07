@@ -21,8 +21,8 @@ function CommentForm({
   disableSubmit = false,
   maxCharactersWarning = 'Je hebt nog {maxCharacters} tekens over',
   minCharactersWarning = 'Nog minimaal {minCharacters} tekens',
-  minCharactersError = 'Tekst moet minimaal {minCharacters} karakters bevatten',
-  maxCharactersError = 'Tekst moet maximaal {maxCharacters} karakters bevatten',
+  minCharactersError = 'De tekst mag niet korter zijn dan {minCharacters} tekens',
+  maxCharactersError = 'De tekst mag niet langer zijn dan {maxCharacters} tekens',
   extraFieldsTagGroups = [],
   ...props
 }: CommentFormProps) {
@@ -43,7 +43,8 @@ function CommentForm({
 
   formFields.push({
     type: 'text',
-    title: '',
+    // ponytail: zichtbaar label i.p.v. alleen placeholder (WCAG 3.3.2); placeholder telt niet als label
+    title: 'Uw reactie',
     variant: 'textarea',
     minCharacters: descriptionMinLength,
     maxCharacters: descriptionMaxLength,
@@ -58,10 +59,10 @@ function CommentForm({
       minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
     minCharactersError:
       minCharactersError ||
-      'Tekst moet minimaal {minCharacters} karakters bevatten',
+      'De tekst mag niet korter zijn dan {minCharacters} tekens',
     maxCharactersError:
       maxCharactersError ||
-      'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      'De tekst mag niet langer zijn dan {maxCharacters} tekens',
   });
 
   if (

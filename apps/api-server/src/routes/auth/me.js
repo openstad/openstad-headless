@@ -1,5 +1,6 @@
 const express = require('express');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const sessionDuration = require('../../util/session-duration');
 const db = require('../../db');
 
 let router = express.Router({ mergeParams: true });
@@ -52,6 +53,7 @@ router.route('(/project/:projectId)?/me').get(async function (req, res, next) {
     deletedAt: req.user.deletedAt,
     emailNotificationConsent: req.user.emailNotificationConsent || false,
     privacyConsentAt: req.user.privacyConsentAt || null,
+    expireOnClose: sessionDuration.shouldExpireOnClose(req.user.role),
   };
   res.json(data);
 });

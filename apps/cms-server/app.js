@@ -11,6 +11,9 @@ telemetryManager.initialize();
 setupGracefulShutdown(telemetryManager);
 
 const apostrophe = require('apostrophe');
+const dayjs = require('dayjs');
+require('dayjs/locale/nl');
+dayjs.locale('nl');
 const express = require('express');
 const app = express();
 const _ = require('lodash');
@@ -23,7 +26,6 @@ const Url = require('node:url');
 const messageStreaming = require('./services/message-streaming');
 
 const compression = require('compression');
-const basicAuth = require('express-basic-auth');
 const path = require('node:path');
 
 let projects = {};
@@ -253,6 +255,9 @@ async function run(id, projectData, options, callback) {
     const dbName = (dbPrefix + project.shortName).substring(0, 63);
 
     project.mongo.uri = process.env.MONGODB_URI.replace('{database}', dbName);
+    project.modules['@apostrophecms/db'] = {
+      options: { uri: project.mongo.uri },
+    };
   }
 
   const config = project;
@@ -456,24 +461,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use((req, res, next) => {
-  if (
-    req.site &&
-    req.site.config?.basicAuth?.active &&
-    req.site.config?.basicAuth?.username &&
-    req.site.config?.basicAuth?.password
-  ) {
-    return basicAuth({
-      users: {
-        [req.site.config.basicAuth.username]:
-          req.site.config.basicAuth.password,
-      },
-      challenge: true,
-    })(req, res, next);
-  }
+const { escapeHtml, createSiteAccessGate } = require('./lib/site-access-gate');
 
-  next();
-});
+const parseSiteAccessBody = express.urlencoded({ extended: false });
+
+app.use(createSiteAccessGate({ parseBody: parseSiteAccessBody }));
 
 app.use('/:privileged(admin)?/login', function (req, res, next) {
   const domainAndPath =
@@ -548,16 +540,6 @@ app.use(async function (req, res, next) {
       projects[completeDomain],
       req.forceRestart
     );
-  }
-
-  function escapeHtml(input) {
-    return String(input)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;')
-      .replace(/`/g, '&#96;');
   }
 
   // fallback to generic 404

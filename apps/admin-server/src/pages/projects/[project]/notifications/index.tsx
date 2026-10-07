@@ -17,7 +17,8 @@ export default function ProjectNotifications() {
     | 'new enquete - admin'
     | 'new enquete - user'
     | 'notification comment - user'
-    | 'notification comment reply - user';
+    | 'notification comment reply - user'
+    | 'new comment - admin';
 
   const defaultDefinitions: { [type in NotificationType]: any[] } = {
     'login email': [],
@@ -30,6 +31,7 @@ export default function ProjectNotifications() {
     'new enquete - user': [],
     'notification comment - user': [],
     'notification comment reply - user': [],
+    'new comment - admin': [],
   };
 
   const [typeDefinitions, setTypeDefinitions] =
@@ -205,6 +207,19 @@ export default function ProjectNotifications() {
                           <br />
                           -userEmail
                           <br />
+                        </p>
+
+                        <br />
+                        <p>
+                          Alleen bij{' '}
+                          <em>Nieuwe reactie - Notificatie naar de admin</em>:
+                          <br />
+                          redirectUrl (link naar de inzending in de admin)
+                          <br />
+                          parentComment.description (de reactie waarop
+                          gereageerd is)
+                          <br />
+                          resource.title (de titel van de inzending)
                         </p>
 
                         <br />

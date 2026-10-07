@@ -1,6 +1,7 @@
-import { Heading4 } from '@utrecht/component-library-react';
+import { Heading4, Paragraph } from '@utrecht/component-library-react';
 import React, { useEffect, useRef, useState } from 'react';
 
+import { ClickableImage } from '../../../ui/src/clickable-image';
 import RteContent from '../../../ui/src/rte-formatting/rte-content';
 import { calculateColor, calculateScoreForItem } from '../parts/scoreUtils';
 import { ChoiceOptions, Item, Score } from '../props';
@@ -21,6 +22,7 @@ type ChoiceItemProps = {
   showPageCountAndCurrentPageInButton?: boolean;
   hiddenFields?: string[];
   items?: Array<Item>;
+  imageClickable?: boolean;
 };
 
 const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
@@ -31,6 +33,7 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
     displayScore = true,
     displayDescription = false,
     displayImage = false,
+    imageClickable = false,
   } = props || {};
 
   // Calculate score for this item
@@ -79,13 +82,18 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
         <div
           className="osc-choice-default minus-to-plus"
           data-score={Math.round(percentageValue)}>
-          <h4>{props.choiceOption?.title}</h4>
-          <div className="osc-choice-bar osc-from-center">
+          {props.choiceOption?.title && <h4>{props.choiceOption.title}</h4>}
+          <div className="osc-choice-bar osc-from-center osc-with-percentage">
             <div
               className={`osc-choice-bar-progress ${getClass(
                 percentage
               )}`}></div>
           </div>
+          {/* ponytail: tekstueel scorealternatief -> niet alleen kleur (1.4.1) + voorleesbaar (1.3.1) */}
+          <span className="osc-percentage">
+            {percentage > 0 ? '+' : ''}
+            {Math.round(percentage)}%
+          </span>
         </div>
       );
     } else {
@@ -98,7 +106,9 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
 
       return (
         <div className="osc-choice-default not-minus-to-plus">
-          {displayTitle && <Heading4>{props.choiceOption?.title}</Heading4>}
+          {displayTitle && props.choiceOption?.title && (
+            <Heading4>{props.choiceOption.title}</Heading4>
+          )}
           {displayDescription && props.choiceOption?.description && (
             <div className="osc-choice-description">
               <RteContent
@@ -109,20 +119,31 @@ const ChoiceItem: React.FC<ChoiceItemProps> = (props) => {
             </div>
           )}
           {displayScore && (
-            <div className="osc-choice-bar">
-              <div className="osc-choice-bar-mask"></div>
-              <div
-                className="osc-choice-bar-progress"
-                data-score={Math.round(percentageValue)}></div>
-            </div>
+            <>
+              <div className="osc-choice-bar osc-with-percentage">
+                <div className="osc-choice-bar-mask"></div>
+                <div
+                  className="osc-choice-bar-progress"
+                  data-score={Math.round(percentageValue)}></div>
+              </div>
+              {/* ponytail: tekstueel scorealternatief -> niet alleen kleur (1.4.1) + voorleesbaar (1.3.1) */}
+              <span className="osc-percentage">
+                {Math.round(percentageValue)}%
+              </span>
+            </>
           )}
           {displayImage && props.choiceOption?.image && (
             <div className="osc-choice-image-container">
-              <img
+              <ClickableImage
+                clickable={imageClickable}
                 src={props.choiceOption.image}
-                alt={props.choiceOption.title}
-                className="osc-choice-image"
-              />
+                alt={props.choiceOption.title}>
+                <img
+                  src={props.choiceOption.image}
+                  alt={props.choiceOption.title}
+                  className="osc-choice-image"
+                />
+              </ClickableImage>
             </div>
           )}
         </div>

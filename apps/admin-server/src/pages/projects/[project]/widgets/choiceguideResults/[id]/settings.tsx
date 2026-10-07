@@ -34,6 +34,7 @@ const formSchema = z.object({
   displayTitle: z.boolean().optional(),
   displayDescription: z.boolean().optional(),
   displayImage: z.boolean().optional(),
+  imageClickable: z.boolean().optional(),
   displayAsFeaturedOnly: z.boolean().optional(),
   hideScores: z.boolean().optional(),
 });
@@ -56,6 +57,7 @@ export default function ChoiceGuideResultSettings(
       displayTitle: undefinedToTrueOrProp(props?.displayTitle),
       displayDescription: props?.displayDescription || false,
       displayImage: props?.displayImage || false,
+      imageClickable: props?.imageClickable || false,
       displayAsFeaturedOnly: props?.displayAsFeaturedOnly || false,
       hideScores: props?.hideScores || false,
     },
@@ -159,6 +161,25 @@ export default function ChoiceGuideResultSettings(
               </FormItem>
             )}
           />
+          {!!form.watch('displayImage') && (
+            <>
+              <Spacer size={1} />
+              <FormField
+                control={form.control}
+                name="imageClickable"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Moeten de afbeeldingen uitvergroot worden als erop geklikt
+                      wordt?
+                    </FormLabel>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
           <Spacer size={1} />
           <FormField
             control={form.control}

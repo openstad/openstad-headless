@@ -9,6 +9,7 @@ module.exports = {
     '@apostrophecms/global': {},
     asset: {},
     'default-page': {},
+    'sitemap-page': {},
     '@apostrophecms/blog': {},
     '@apostrophecms/blog-page': {},
     '@apostrophecms/import-export': {},
@@ -38,5 +39,6 @@ module.exports = {
     'openstad-carousel-widget': {},
     'openstad-blog-post-widget': {},
     'openstad-breadcrumbs-widget': {},
+    'openstad-iframe-widget': {},
   },
 };

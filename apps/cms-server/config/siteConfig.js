@@ -28,6 +28,7 @@ module.exports = {
         asset: {},
         // The project's first custom page type.
         'default-page': {},
+        'sitemap-page': {},
       },
     };
 

@@ -8,6 +8,7 @@ const bruteForce = require('../../middleware/brute-force');
 const { Op, Sequelize } = require('sequelize');
 const pagination = require('../../middleware/pagination');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const { buildLikeActions } = require('../../lib/vote-actions');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
 const router = express.Router({ mergeParams: true });
@@ -15,6 +16,14 @@ const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
   return hasRole(user, 'admin');
 };
+
+const PUBLIC_SORT_FIELDS = ['id', 'createdAt', 'resourceId', 'opinion'];
+const MODERATOR_SORT_FIELDS = [
+  ...PUBLIC_SORT_FIELDS,
+  'userId',
+  'ip',
+  'checked',
+];
 
 const isDeadlockError = (err) => {
   const code = err?.parent?.code || err?.original?.code || err?.code;
@@ -114,6 +123,7 @@ router
   .get(pagination.init)
   .get(function (req, res, next) {
     let { dbQuery } = req;
+    const hasModeratorRights = userhasModeratorRights(req.user);
 
     let where = { ...dbQuery.where };
     let voteId = parseInt(req.query.id);
@@ -127,6 +137,12 @@ router
     }
     let userId = parseInt(req.query.userId);
     if (userId) {
+      // Filtering on another user's id would expose their voting behaviour
+      if (!hasModeratorRights && userId !== req.user?.id) {
+        return next(
+          createError(403, 'Geen toegang tot stemmen van deze gebruiker')
+        );
+      }
       where.userId = userId;
     }
     let opinion = req.query.opinion;
@@ -137,7 +153,7 @@ router
 
     const ip =
       typeof req.query.ip === 'string' ? req.query.ip.trim() : undefined;
-    if (ip) {
+    if (ip && hasModeratorRights) {
       where.ip = { [Op.like]: `%${ip}%` };
     }
 
@@ -166,11 +182,16 @@ router
     }
 
     const order = [];
-    if (req.query.sortBy) {
-      order.push([req.query.sortBy, req.query.orderBy || 'ASC']);
+    const sortFields = hasModeratorRights
+      ? MODERATOR_SORT_FIELDS
+      : PUBLIC_SORT_FIELDS;
+    if (sortFields.includes(req.query.sortBy)) {
+      const direction =
+        String(req.query.orderBy).toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+      order.push([req.query.sortBy, direction]);
     }
 
-    if (req.user && userhasModeratorRights(req.user)) {
+    if (hasModeratorRights) {
       req.scope.push('includeUser');
     }
 
@@ -198,6 +219,7 @@ router
   .get(pagination.paginateResults)
   .get(function (req, res, next) {
     let records = req.results.records || req.results;
+    const hasModeratorRights = userhasModeratorRights(req.user);
     records.forEach((entry, i) => {
       let vote = {
         id: entry.id,
@@ -207,17 +229,23 @@ router
         createdAt: entry.createdAt,
       };
 
-      if (req.user && userhasModeratorRights(req.user)) {
+      if (hasModeratorRights) {
         vote.ip = entry.ip;
         vote.createdAt = entry.createdAt;
         vote.checked = entry.checked;
         vote.user = entry.user;
 
         if (vote.user && vote.user.auth && typeof vote.user.auth === 'object') {
-          vote.user.auth.user = req.user;
+          vote.user.auth = { ...vote.user.auth, user: req.user };
         }
       }
-      vote.userId = entry.userId;
+      // userId links votes to public comment authors; only expose it to moderators or the voter
+      if (
+        hasModeratorRights ||
+        (req.user?.id && entry.userId === req.user.id)
+      ) {
+        vote.userId = entry.userId;
+      }
 
       if (entry.resource) {
         vote.resource = entry.resource;
@@ -377,41 +405,7 @@ router.route('/*').post(rateLimiter(), async function (req, res, next) {
         let actions = [];
         switch (req.project.config.votes.voteType) {
           case 'likes':
-            votes.forEach((vote) => {
-              const existingVote = existingVotes.find(
-                (entry) => entry.resourceId == vote.resourceId
-              );
-              const otherExisting = existingVotes.filter(
-                (entry) => entry.resourceId != vote.resourceId
-              );
-
-              if (existingVote) {
-                if (existingVote.opinion == vote.opinion) {
-                  actions.push({ action: 'delete', vote: existingVote });
-                } else {
-                  existingVote.opinion = vote.opinion;
-                  actions.push({ action: 'update', vote: existingVote });
-                }
-                if (
-                  otherExisting.length > 0 &&
-                  req.project.config.votes.withExisting === 'replace'
-                ) {
-                  otherExisting.forEach((v) =>
-                    actions.push({ action: 'delete', vote: v })
-                  );
-                }
-              } else {
-                if (otherExisting.length > 0) {
-                  if (req.project.config.votes.withExisting === 'error') {
-                    throw createError(403, 'Je hebt al gestemd');
-                  }
-                  otherExisting.forEach((v) =>
-                    actions.push({ action: 'delete', vote: v })
-                  );
-                }
-                actions.push({ action: 'create', vote: vote });
-              }
-            });
+            actions.push(...buildLikeActions(votes, existingVotes));
             break;
 
           case 'count':
@@ -544,9 +538,11 @@ router
   .all((req, res, next) => {
     var voteId = req.params.voteId;
 
-    db.Vote.findOne({
-      where: { id: voteId },
-    })
+    // Vote has no projectId column; forProjectId lives in req.scope
+    db.Vote.scope(...req.scope)
+      .findOne({
+        where: { id: voteId },
+      })
       .then(function (vote) {
         if (vote) {
           req.results = vote;
@@ -558,8 +554,8 @@ router
   .delete(auth.useReqUser)
   .delete(function (req, res, next) {
     const vote = req.results;
-    if (!(vote && vote.can && vote.can('delete')))
-      return next(new Error('You cannot delete this vote'));
+    if (!(vote && vote.can && vote.can('delete', req.user)))
+      return next(createError(403, 'You cannot delete this vote'));
 
     vote
       .destroy()
@@ -574,18 +570,26 @@ router
   .all((req, res, next) => {
     var voteId = req.params.voteId;
 
-    db.Vote.findOne({
-      where: { id: voteId },
-    })
+    // req.scope carries forProjectId; Vote has no projectId column of its own.
+    db.Vote.scope(...req.scope)
+      .findOne({
+        where: { id: voteId },
+      })
       .then(function (vote) {
-        if (vote) {
-          req.vote = vote;
+        if (!vote) {
+          return next(createError(404, 'Vote not found'));
         }
+        req.vote = vote;
         next();
       })
       .catch(next);
   })
-  .all(auth.can('Vote', 'toggle'))
+  .all(function (req, res, next) {
+    // Check the record: canToggle reads self.userId, absent on the class
+    if (!req.vote.can('toggle', req.user))
+      return next(createError(403, 'You cannot toggle this vote'));
+    return next();
+  })
   .get(function (req, res, next) {
     var resourceId = req.params.resourceId;
     var vote = req.vote;

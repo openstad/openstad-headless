@@ -81,6 +81,8 @@ router
       typeof req.query.includeOtherProjects != 'undefined'
         ? !!req.query.includeOtherProjects
         : true;
+    // admin is a role within the URL project; only superuser crosses it
+    if (!hasRole(req.user, 'superuser')) req.includeOtherProjects = false;
     req.results = {};
     next();
   })
@@ -92,9 +94,10 @@ router
     return db.User.findOne({
       where: {
         id: req.params.userId,
+        projectId: req.params.projectId,
       },
     }).then(function (user) {
-      if (!user.idpUser || !user.idpUser.identifier) return next();
+      if (!user || !user.idpUser || !user.idpUser.identifier) return next();
 
       return db.User.scope(['includeProject'])
         .findAll({
@@ -208,8 +211,7 @@ router
     req.activities.forEach((which) => {
       req.results[which] &&
         req.results[which].forEach((result) => {
-          result.auth = result.auth || {};
-          result.auth.user = req.user;
+          result.auth = { ...result.auth, user: req.user };
         });
 
       if (activityConfig[which]) {

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { FeedbackField, evaluateFeedback } from './feedback';
+import { FeedbackField, evaluateFeedback, isGraded } from './feedback';
 
 describe('evaluateFeedback: correctIncorrect radiobox', () => {
   const field: FeedbackField = {
@@ -105,6 +105,65 @@ describe('evaluateFeedback: static', () => {
     expect(result.textToShow).toEqual(['Static message']);
     expect(result.isFullyCorrect).toBe(false);
     expect(result.optionStates).toEqual({});
+  });
+});
+
+describe('evaluateFeedback: grading decoupled from feedbackMode', () => {
+  test('grades on isCorrect markings even when feedbackMode is none', () => {
+    const field: FeedbackField = {
+      type: 'radiobox',
+      feedbackMode: 'none',
+      feedbackCorrect: 'Well done!',
+      feedbackIncorrect: 'Try again.',
+      choices: [{ value: 'a', isCorrect: true }, { value: 'b' }],
+    };
+
+    const correct = evaluateFeedback(field, 'a');
+    expect(correct.isFullyCorrect).toBe(true);
+    expect(correct.optionStates).toEqual({ a: 'correct' });
+    expect(correct.textToShow).toEqual(['Well done!']);
+
+    const wrong = evaluateFeedback(field, 'b');
+    expect(wrong.isFullyCorrect).toBe(false);
+    expect(wrong.optionStates).toEqual({ b: 'incorrect', a: 'missed' });
+    expect(wrong.textToShow).toEqual(['Try again.']);
+  });
+
+  test('no isCorrect markings means not graded (default fout, no quiz)', () => {
+    const field: FeedbackField = {
+      type: 'checkbox',
+      feedbackMode: 'none',
+      choices: [{ value: 'a' }, { value: 'b' }],
+    };
+    expect(isGraded(field)).toBe(false);
+    const result = evaluateFeedback(field, JSON.stringify(['a']));
+    expect(result.optionStates).toEqual({});
+    expect(result.isFullyCorrect).toBe(false);
+    expect(result.textToShow).toEqual([]);
+  });
+
+  test('grading result and per-answer feedback combine', () => {
+    const field: FeedbackField = {
+      type: 'checkbox',
+      feedbackMode: 'perAnswer',
+      feedbackIncorrect: 'Not quite.',
+      choices: [
+        { value: 'a', isCorrect: true, feedbackText: 'about a' },
+        { value: 'b', feedbackText: 'about b' },
+      ],
+    };
+    const result = evaluateFeedback(field, JSON.stringify(['b']));
+    expect(result.isFullyCorrect).toBe(false);
+    expect(result.optionStates).toEqual({ b: 'incorrect', a: 'missed' });
+    expect(result.textToShow).toEqual(['Not quite.', 'about b']);
+  });
+
+  test('isGraded reflects presence of a correct choice', () => {
+    expect(
+      isGraded({ choices: [{ value: 'a' }, { value: 'b', isCorrect: true }] })
+    ).toBe(true);
+    expect(isGraded({ choices: [{ value: 'a' }] })).toBe(false);
+    expect(isGraded({})).toBe(false);
   });
 });
 

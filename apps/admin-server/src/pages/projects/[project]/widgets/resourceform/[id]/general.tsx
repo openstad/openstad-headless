@@ -55,11 +55,11 @@ const formSchema = z.object({
   minCharactersError: z
     .string()
     .optional()
-    .default('Tekst moet minimaal {minCharacters} karakters bevatten'),
+    .default('De tekst mag niet korter zijn dan {minCharacters} tekens'),
   maxCharactersError: z
     .string()
     .optional()
-    .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
+    .default('De tekst mag niet langer zijn dan {maxCharacters} tekens'),
   showMinMaxAfterBlur: z.boolean().optional().default(false),
   maxCharactersOverWarning: z
     .string()
@@ -92,10 +92,10 @@ export default function WidgetResourceFormGeneral() {
         'Je hebt nog {maxCharacters} tekens over',
       minCharactersError:
         widget?.config?.[category]?.minCharactersError ||
-        'Tekst moet minimaal {minCharacters} karakters bevatten',
+        'De tekst mag niet korter zijn dan {minCharacters} tekens',
       maxCharactersError:
         widget?.config?.[category]?.maxCharactersError ||
-        'Tekst moet maximaal {maxCharacters} karakters bevatten',
+        'De tekst mag niet langer zijn dan {maxCharacters} tekens',
       showMinMaxAfterBlur:
         widget?.config?.[category]?.showMinMaxAfterBlur || false,
       maxCharactersOverWarning:

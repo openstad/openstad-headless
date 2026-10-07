@@ -9,6 +9,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
@@ -19,6 +26,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
+  headingLevel: z.coerce.number().optional(),
   step1Title: z.string().optional(),
   resourceCardTitle: z.string().optional(),
   step2Title: z.string().optional(),
@@ -54,6 +62,7 @@ export default function BegrootmoduleText(
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
+      headingLevel: props?.headingLevel || 2,
       step1Tab: props.step1Tab ?? '',
       step2Tab: props.step2Tab ?? '',
       step3Tab: props.step3Tab ?? '',
@@ -85,6 +94,35 @@ export default function BegrootmoduleText(
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-full grid grid-cols-1 gap-4">
           <div className="w-full grid-cols-4 grid gap-4">
+            <FormField
+              control={form.control}
+              name="headingLevel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Kopniveau van de titel</FormLabel>
+                  <Select
+                    value={String(field.value ?? 2)}
+                    onValueChange={(e) => field.onChange(Number(e))}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Kies kopniveau" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="2">Kop 2 (h2)</SelectItem>
+                      <SelectItem value="3">Kop 3 (h3)</SelectItem>
+                      <SelectItem value="4">Kop 4 (h4)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    Kies zo dat de titel aansluit op de koppen eromheen. De
+                    widget produceert nooit een h1; die hoort bij de pagina
+                    zelf.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="step1Tab"

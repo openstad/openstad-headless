@@ -1,3 +1,5 @@
+<!-- template: new comment - admin -->
+<subject>{% if parentComment %}Nieuwe reactie op een reactie op {{ project.title }}{% else %}Nieuwe reactie op {{ project.title }}{% endif %}</subject>
 <body>
   <mjml>
     <mj-body>
@@ -22,21 +24,39 @@
       </mj-raw>
       <mj-section>
         <mj-column width="500px">
+          {% if parentComment %}
+          <mj-text font-size="20px" font-family="Helvetica Neue"
+            >Er is een nieuwe reactie op een reactie geplaatst.</mj-text
+          >
+          <mj-text>Beste administrator,</mj-text>
+          <mj-text color="#525252"
+            >Op de resource {{ resource.title }} is er zojuist gereageerd op een
+            eerdere reactie.</mj-text
+          >
+          <mj-text color="#525252"><em>Oorspronkelijke reactie:</em></mj-text>
+          <mj-text color="#525252">{{ parentComment.description }}</mj-text>
+          <mj-text color="#525252"><em>Nieuwe reactie:</em></mj-text>
+          <mj-text color="#525252">{{ comment.description }}</mj-text>
+          {% else %}
           <mj-text font-size="20px" font-family="Helvetica Neue"
             >Er is een nieuwe reactie geplaatst.</mj-text
           >
           <mj-text>Beste administrator,</mj-text>
           <mj-text color="#525252"
-            >Op de resource {{ resource.name }} is er recentelijk een nieuwe
-            reactie geplaatst, of een van de reacties op de resource is
-            gewijzigd. Hieronder kunt u direct de nieuwe reactie bekijken in het
-            overzicht van reacties.</mj-text
+            >Op de resource {{ resource.title }} is er zojuist een nieuwe reactie
+            geplaatst.</mj-text
           >
+          <mj-text color="#525252"><em>Reactie:</em></mj-text>
+          <mj-text color="#525252">{{ comment.description }}</mj-text>
+          {% endif %}
+          {% if redirectUrl %}
           <mj-button background-color="#12B886" href="{{ redirectUrl }}"
             >Weergeven</mj-button
           >
+          {% endif %}
         </mj-column>
       </mj-section>
+      {% if redirectUrl %}
       <mj-raw>
         <!-- ALternate link -->
       </mj-raw>
@@ -48,6 +68,7 @@
           <mj-text>{{ redirectUrl }}</mj-text>
         </mj-column>
       </mj-section>
+      {% endif %}
     </mj-body>
   </mjml>
 </body>

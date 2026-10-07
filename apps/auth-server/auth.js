@@ -97,7 +97,7 @@ passport.use(
       db.UniqueCode.findOne({
         where: {
           code: code,
-          clientId: client.id,
+          clientId: client && client.id,
         },
       }).then((uniqueCode) => {
         if (uniqueCode) {

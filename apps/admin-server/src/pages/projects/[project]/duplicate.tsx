@@ -166,26 +166,28 @@ export default function ProjectDuplicate() {
       delete duplicateData.config.uniqueId;
     }
 
+    const projectId = encodeURIComponent(data.id);
+
     const widgets = await fetchData(
-      `/api/openstad/api/project/${data.id}/widgets`
+      `/api/openstad/api/project/${projectId}/widgets`
     );
     duplicateData.widgets = widgets;
 
-    const tags = await fetchData(`/api/openstad/api/project/${data.id}/tag`);
+    const tags = await fetchData(`/api/openstad/api/project/${projectId}/tag`);
     duplicateData.tags = tags;
 
     const statuses = await fetchData(
-      `/api/openstad/api/project/${data.id}/status`
+      `/api/openstad/api/project/${projectId}/status`
     );
     duplicateData.statuses = statuses;
 
     const resources = await fetchData(
-      `/api/openstad/api/project/${data.id}/resource?includeTags=1&includeStatus=1`
+      `/api/openstad/api/project/${projectId}/resource?includeTags=1&includeStatus=1`
     );
     duplicateData.resources = resources;
 
     const notificationTemplates = await fetchData(
-      `/api/openstad/notification/project/${data.id}/template`
+      `/api/openstad/notification/project/${projectId}/template`
     );
     duplicateData.notificationTemplates = notificationTemplates;
 

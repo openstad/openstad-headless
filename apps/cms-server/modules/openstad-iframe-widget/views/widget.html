@@ -1,0 +1,12 @@
+{% if data.widget._src %}
+  <iframe
+    class="openstad-iframe"
+    data-openstad-iframe
+    src="{{ data.widget._src }}"
+    title="{{ data.widget.title }}"
+    height="{{ data.widget.height }}"
+    {% if data.widget.allowfullscreen %}allowfullscreen{% endif %}
+    {% if data.widget.sandbox and data.widget.sandbox.length %}sandbox="{{ data.widget.sandbox | join(' ') }}"{% endif %}
+    {% for attr in data.widget._extraAttributes %}{{ attr.name }}="{{ attr.value }}" {% endfor %}
+  ></iframe>
+{% endif %}

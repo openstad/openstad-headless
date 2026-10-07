@@ -4,7 +4,7 @@ import os from 'os';
 import path from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import PluginLoader from './index';
+import PluginLoader, { resolvePluginFile } from './index';
 
 /**
  * Builds a minimal valid plugin manifest.
@@ -25,19 +25,36 @@ const Module = require_('module') as typeof import('module') & {
 };
 const originalResolve = Module._resolveFilename;
 
-/** Set of package names registered as fake modules. */
-let fakeModules = new Set<string>();
+/** Package name -> fake resolved filename. */
+let fakeModules = new Map<string, string>();
+
+/**
+ * Fake resolved filename for a package. The loader requires plugins to resolve
+ * inside a node_modules directory, so the fixture path must contain one.
+ */
+function fakeFilename(packageName: string): string {
+  return path.join(path.sep + 'fake', 'node_modules', packageName, 'index.js');
+}
+
+/** Package directory, used as the parent for temp fixtures. */
+const packageDir = path.resolve(
+  path.dirname(new URL(import.meta.url).pathname),
+  '..'
+);
+
+/** Temp directory holding the plugins.json fixture. */
+let tmpDir: string;
 
 /** Temp file path for plugins.json */
 let tmpFile: string;
 
 beforeEach(() => {
   PluginLoader.reset();
-  fakeModules = new Set();
-  tmpFile = path.join(
-    os.tmpdir(),
-    `plugins-${Date.now()}-${Math.random()}.json`
-  );
+  fakeModules = new Map();
+  // The loader only reads plugins.json from inside the project root, so
+  // fixtures live in the package instead of os.tmpdir().
+  tmpDir = fs.mkdtempSync(path.join(packageDir, '.tmp-test-'));
+  tmpFile = path.join(tmpDir, 'plugins.json');
 
   // Patch Module._resolveFilename to intercept our fake plugin packages
   Module._resolveFilename = function (
@@ -46,8 +63,9 @@ beforeEach(() => {
     isMain: unknown,
     options: unknown
   ) {
-    if (fakeModules.has(request as string)) {
-      return request as string;
+    const fake = fakeModules.get(request as string);
+    if (fake) {
+      return fake;
     }
     return originalResolve.call(this, request, parent, isMain, options);
   };
@@ -57,19 +75,15 @@ afterEach(() => {
   Module._resolveFilename = originalResolve;
 
   // Clean up fake modules from require cache
-  for (const name of fakeModules) {
-    delete require_.cache[name];
+  for (const filename of fakeModules.values()) {
+    delete require_.cache[filename];
   }
 
   // Clean up env var
   delete process.env.PLUGIN_JSON_OVERRIDE;
 
-  // Clean up temp file
-  try {
-    fs.unlinkSync(tmpFile);
-  } catch {
-    // ignore if file doesn't exist
-  }
+  // Clean up temp fixtures
+  fs.rmSync(tmpDir, { recursive: true, force: true });
 });
 
 /**
@@ -87,10 +101,11 @@ function registerFakeModule(
   packageName: string,
   moduleExports: Record<string, unknown>
 ): void {
-  fakeModules.add(packageName);
-  require_.cache[packageName] = {
-    id: packageName,
-    filename: packageName,
+  const filename = fakeFilename(packageName);
+  fakeModules.set(packageName, filename);
+  require_.cache[filename] = {
+    id: filename,
+    filename,
     loaded: true,
     exports: moduleExports,
   } as unknown as NodeModule;
@@ -275,7 +290,7 @@ describe('PluginLoader', () => {
         .mockImplementation(() => {});
 
       const loader = PluginLoader.getInstance();
-      loader.load('/nonexistent/path/plugins.json');
+      loader.load(path.join(tmpDir, 'nonexistent', 'plugins.json'));
 
       expect(loader.getLoadedPlugins()).toEqual([]);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -284,6 +299,82 @@ describe('PluginLoader', () => {
       );
 
       consoleSpy.mockRestore();
+    });
+
+    it('refuses a plugins.json outside the project root', () => {
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      const manifest = validManifest({ name: 'outside-plugin' });
+      registerFakeModule('outside-plugin', { manifest });
+
+      const outsideDir = fs.mkdtempSync(path.join(os.tmpdir(), 'plugins-'));
+      const outsideFile = path.join(outsideDir, 'plugins.json');
+      fs.writeFileSync(
+        outsideFile,
+        JSON.stringify({
+          plugins: [{ packageName: 'outside-plugin', enabled: true }],
+        })
+      );
+
+      const loader = PluginLoader.getInstance();
+      loader.load(outsideFile);
+
+      expect(loader.getLoadedPlugins()).toEqual([]);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('outside the project root')
+      );
+
+      fs.rmSync(outsideDir, { recursive: true, force: true });
+      consoleSpy.mockRestore();
+    });
+
+    it('refuses a file that is not named plugins.json', () => {
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      const otherFile = path.join(tmpDir, 'secrets.json');
+      fs.writeFileSync(otherFile, JSON.stringify({ plugins: [] }));
+
+      const loader = PluginLoader.getInstance();
+      loader.load(otherFile);
+
+      expect(loader.getLoadedPlugins()).toEqual([]);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Refusing to read non-plugins.json file')
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('skips a directory named plugins.json while walking up', () => {
+      const manifest = validManifest({ name: 'walk-plugin' });
+      registerFakeModule('walk-plugin', { manifest });
+
+      // A directory named plugins.json next to the loader source must not be
+      // picked; the walk has to continue to the real file one level up.
+      const dirCandidate = path.join(packageDir, 'src', 'plugins.json');
+      const fileCandidate = path.join(packageDir, 'plugins.json');
+      fs.mkdirSync(dirCandidate, { recursive: true });
+      fs.writeFileSync(
+        fileCandidate,
+        JSON.stringify({
+          plugins: [{ packageName: 'walk-plugin', enabled: true }],
+        })
+      );
+
+      try {
+        const loader = PluginLoader.getInstance();
+        loader.load();
+
+        expect(loader.getLoadedPlugins()).toHaveLength(1);
+        expect(loader.getLoadedPlugins()[0].name).toBe('walk-plugin');
+      } finally {
+        fs.rmSync(dirCandidate, { recursive: true, force: true });
+        fs.rmSync(fileCandidate, { force: true });
+      }
     });
 
     it('defaults config to empty object when entry has no config', () => {
@@ -317,6 +408,93 @@ describe('PluginLoader', () => {
       expect(loaded).toHaveLength(1);
       expect(loaded[0].name).toBe('alias-plugin');
       expect(loaded[0].packageName).toBe('alias-plugin');
+    });
+
+    it.each([
+      '../../../etc/passwd',
+      '/etc/passwd',
+      './evil',
+      'UPPER-CASE',
+      '_leading-underscore',
+      'has space',
+      '@scope/nested/deep',
+    ])('refuses the invalid package name %s', (packageName) => {
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      const jsonPath = writePluginsJson({
+        plugins: [{ packageName, enabled: true }],
+      });
+
+      const loader = PluginLoader.getInstance();
+      loader.load(jsonPath);
+
+      expect(loader.getLoadedPlugins()).toEqual([]);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('is not a valid npm package name')
+      );
+
+      consoleSpy.mockRestore();
+    });
+
+    it('refuses a package that resolves outside node_modules', () => {
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
+      // Register the fake module with a resolved path that has no
+      // node_modules segment.
+      const filename = path.join(packageDir, 'outside-node-modules.js');
+      fakeModules.set('local-plugin', filename);
+      require_.cache[filename] = {
+        id: filename,
+        filename,
+        loaded: true,
+        exports: { manifest: validManifest({ name: 'local-plugin' }) },
+      } as unknown as NodeModule;
+
+      const jsonPath = writePluginsJson({
+        plugins: [{ packageName: 'local-plugin', enabled: true }],
+      });
+
+      const loader = PluginLoader.getInstance();
+      loader.load(jsonPath);
+
+      expect(loader.getLoadedPlugins()).toEqual([]);
+      expect(consoleSpy).toHaveBeenCalledWith(
+        expect.stringContaining('resolved outside node_modules')
+      );
+
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('resolvePluginFile', () => {
+    const dir = path.join(path.sep, 'plugins', 'demo');
+
+    it('accepts a plain relative path', () => {
+      expect(resolvePluginFile(dir, './handler.js')).toBe(
+        path.join(dir, 'handler.js')
+      );
+    });
+
+    it('accepts a nested relative path', () => {
+      expect(resolvePluginFile(dir, 'src/models/thing.js')).toBe(
+        path.join(dir, 'src', 'models', 'thing.js')
+      );
+    });
+
+    it('rejects an absolute path', () => {
+      expect(resolvePluginFile(dir, '/etc/passwd')).toBeNull();
+    });
+
+    it('rejects a path escaping the plugin directory', () => {
+      expect(resolvePluginFile(dir, '../../etc/passwd')).toBeNull();
+    });
+
+    it('rejects an empty path', () => {
+      expect(resolvePluginFile(dir, '')).toBeNull();
     });
   });
 

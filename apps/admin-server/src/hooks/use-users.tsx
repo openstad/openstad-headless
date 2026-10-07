@@ -16,6 +16,7 @@ export type UsersPaginationOptions = {
   sort?: string;
   uniqueByIdpUser?: boolean;
   excludeAnonymous?: boolean;
+  hideMembersWithoutEmail?: boolean;
 };
 
 export type UsersPaginationMetadata = {
@@ -45,6 +46,9 @@ function buildUsersUrl(options?: UsersPaginationOptions) {
   }
   if (options?.excludeAnonymous) {
     params.set('excludeAnonymous', '1');
+  }
+  if (options?.hideMembersWithoutEmail) {
+    params.set('hideMembersWithoutEmail', '1');
   }
 
   const query = params.toString();
