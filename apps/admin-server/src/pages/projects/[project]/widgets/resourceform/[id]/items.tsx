@@ -726,14 +726,15 @@ export default function WidgetResourceFormItems(
       form.watch('type') === 'documentUpload' ||
       form.watch('type') === 'imageUpload'
     ) {
-      const recommendedFieldKey =
-        form.watch('type') === 'documentUpload'
-          ? 'documents'
-          : form.watch('type') === 'imageUpload'
-            ? 'images'
-            : '';
-
-      form.setValue('fieldKey', recommendedFieldKey);
+      // Only suggest the default key when none is set yet, so a custom key
+      // (e.g. a second image field stored in extraData) survives reopening
+      // the item. Same guard as the timeline type below.
+      if (['', 'images', 'documents'].includes(form.watch('fieldKey'))) {
+        form.setValue(
+          'fieldKey',
+          form.watch('type') === 'documentUpload' ? 'documents' : 'images'
+        );
+      }
     } else if (form.watch('type') === 'timeline') {
       if (form.watch('fieldKey') === '') {
         form.setValue('fieldKey', 'timeline');
