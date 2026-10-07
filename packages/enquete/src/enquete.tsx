@@ -48,7 +48,18 @@ import {
   getScaleDisplay,
   getScaleStepCount,
 } from './scale-steps';
+import {
+  formatSubmittedAt,
+  getSubmittedStorageKey,
+  isFormClosed,
+  readSubmittedAt,
+  readSubmittedFlag,
+  writeSubmittedFlag,
+} from './submitted-lock';
 import { EnquetePropsType } from './types/';
+
+const DEFAULT_CLOSED_FORM_MESSAGE =
+  'Je antwoord is ontvangen. Je kunt deze enquête maar één keer invullen.';
 
 // Helper types and functions for draft persistence
 
@@ -77,14 +88,14 @@ function getStorageKey(
 }
 
 function loadDraft(key: string, retentionHours: number): EnqueteDraft | null {
-  if (
-    typeof window === 'undefined' ||
-    typeof window.localStorage === 'undefined'
-  ) {
-    return null;
-  }
-
   try {
+    if (
+      typeof window === 'undefined' ||
+      typeof window.localStorage === 'undefined'
+    ) {
+      return null;
+    }
+
     const raw = window.localStorage.getItem(key);
     if (!raw) return null;
 
@@ -117,13 +128,6 @@ function saveDraft(
   data: Record<string, any>,
   fieldState?: DraftFieldState
 ): void {
-  if (
-    typeof window === 'undefined' ||
-    typeof window.localStorage === 'undefined'
-  ) {
-    return;
-  }
-
   const draft: EnqueteDraft = {
     data,
     updatedAt: Date.now(),
@@ -132,6 +136,13 @@ function saveDraft(
   };
 
   try {
+    if (
+      typeof window === 'undefined' ||
+      typeof window.localStorage === 'undefined'
+    ) {
+      return;
+    }
+
     window.localStorage.setItem(key, JSON.stringify(draft));
   } catch {
     // ignore storage failures
@@ -139,14 +150,14 @@ function saveDraft(
 }
 
 function clearDraft(key: string): void {
-  if (
-    typeof window === 'undefined' ||
-    typeof window.localStorage === 'undefined'
-  ) {
-    return;
-  }
-
   try {
+    if (
+      typeof window === 'undefined' ||
+      typeof window.localStorage === 'undefined'
+    ) {
+      return;
+    }
+
     window.localStorage.removeItem(key);
   } catch {
     // ignore
@@ -177,6 +188,25 @@ function Enquete(props: EnqueteWidgetProps) {
   // Skip the form_step when loading the first page; it only fires on
   // the first interaction (together with form_start).
   const stepMountSkippedRef = useRef(false);
+  const submittingRef = useRef(false);
+  const [formKey, setFormKey] = useState(0);
+
+  const submittedStorageKey = getSubmittedStorageKey(
+    props.projectId,
+    props.widgetId
+  );
+  const [submittedFlag, setSubmittedFlag] = useState<boolean>(() =>
+    readSubmittedFlag(submittedStorageKey)
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onPageShow = () => {
+      if (readSubmittedFlag(submittedStorageKey)) setSubmittedFlag(true);
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, [submittedStorageKey]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -188,6 +218,11 @@ function Enquete(props: EnqueteWidgetProps) {
     const storageKey = getStorageKey(props.projectId, props.widgetId, pathname);
 
     if (props.enableDraftPersistence !== true) {
+      setDraftChecked(true);
+      return;
+    }
+
+    if (props.closeFormAfterSubmit && readSubmittedFlag(submittedStorageKey)) {
       setDraftChecked(true);
       return;
     }
@@ -208,6 +243,8 @@ function Enquete(props: EnqueteWidgetProps) {
     props.widgetId,
     props.enableDraftPersistence,
     props.draftRetentionHours,
+    props.closeFormAfterSubmit,
+    submittedStorageKey,
   ]);
 
   const { create: createSubmission } = datastore.useSubmissions({
@@ -217,14 +254,26 @@ function Enquete(props: EnqueteWidgetProps) {
   const {
     data: currentUser,
     // error: currentUserError,
-    // isLoading: currentUserIsLoading,
+    isLoading: currentUserIsLoading,
   } = datastore.useCurrentUser({ ...props });
 
   const formOnlyVisibleForUsers =
     (!!props.formVisibility && props.formVisibility === 'users') ||
     !props.formVisibility;
 
-  async function onSubmit(formData: Record<string, unknown>) {
+  async function onSubmit(formData: Record<string, unknown>): Promise<boolean> {
+    if (submittingRef.current) return false;
+    submittingRef.current = true;
+    try {
+      return await submitEnquete(formData);
+    } finally {
+      submittingRef.current = false;
+    }
+  }
+
+  async function submitEnquete(
+    formData: Record<string, unknown>
+  ): Promise<boolean> {
     // Filter out pagination fields
     const nonPaginationFields = formFields.filter(
       (field) => field.type !== 'pagination'
@@ -272,7 +321,20 @@ function Enquete(props: EnqueteWidgetProps) {
       0
     );
 
-    const result = await createSubmission(formData, props.widgetId);
+    let result: any;
+    try {
+      result = await createSubmission(formData, props.widgetId);
+    } catch {
+      result = null;
+    }
+
+    if (!result) {
+      NotificationService.addNotification(
+        'Verzenden is niet gelukt. Probeer het opnieuw.',
+        'error'
+      );
+      return false;
+    }
 
     if (result) {
       pushFormSubmit(getTrackingContext());
@@ -305,6 +367,17 @@ function Enquete(props: EnqueteWidgetProps) {
         );
       }
 
+      const isYouthOutroFlow =
+        (formFields[formFields.length - 1] as any)?.infoBlockStyle ===
+        'youth-outro';
+
+      if (props.closeFormAfterSubmit) {
+        writeSubmittedFlag(submittedStorageKey);
+        if (props.afterSubmitUrl || !isYouthOutroFlow) {
+          setSubmittedFlag(true);
+        }
+      }
+
       if (props.afterSubmitUrl) {
         location.href = props.afterSubmitUrl.replace('[id]', result.id);
       } else {
@@ -315,9 +388,23 @@ function Enquete(props: EnqueteWidgetProps) {
         ) {
           // if the page is youth outro, fire confetti
           fireConfetti();
+        } else if (
+          !isYouthOutroFlow &&
+          (!props.closeFormAfterSubmit || hasRole(currentUser, 'editor'))
+        ) {
+          setSavedDraft(null);
+          setSavedFieldState(null);
+          formStartFiredRef.current = false;
+          formStartTimeRef.current = Date.now();
+          interactedFieldsRef.current = new Set();
+          if (currentPage !== 0) stepMountSkippedRef.current = false;
+          setCurrentPage(0);
+          setFormKey((key) => key + 1);
         }
       }
     }
+
+    return true;
   }
 
   const formFields: FieldProps[] = [];
@@ -934,6 +1021,18 @@ function Enquete(props: EnqueteWidgetProps) {
     };
   }, []);
 
+  const formClosed = isFormClosed({
+    flag: submittedFlag,
+    closeFormAfterSubmit: props.closeFormAfterSubmit,
+    canBypass: hasRole(currentUser, 'editor'),
+  });
+  const waitingForUser =
+    !!props.closeFormAfterSubmit && submittedFlag && currentUserIsLoading;
+  const closedMessage = (props.closedFormMessage || '').trim()
+    ? (props.closedFormMessage as string)
+    : DEFAULT_CLOSED_FORM_MESSAGE;
+  const submittedAt = formClosed ? readSubmittedAt(submittedStorageKey) : null;
+
   return (
     <div
       className={`osc${isFullscreen ? ' --fullscreen' : ''}`}
@@ -1002,17 +1101,40 @@ function Enquete(props: EnqueteWidgetProps) {
               unwrapSingleRootDiv={true}
             />
           )}
-          <div className="osc-enquete-item-description">
-            {props.displayDescription && props.description && (
-              <RteContent
-                content={props.description}
-                unwrapSingleRootDiv={true}
-              />
-            )}
-          </div>
-          {draftChecked && (
+          {formClosed ? (
+            <div className="form-container osc-enquete-closed" role="status">
+              <div>
+                <div className="osc-enquete-closed-message">
+                  <RteContent
+                    content={closedMessage}
+                    unwrapSingleRootDiv={true}
+                  />
+                </div>
+                {submittedAt && (
+                  <time
+                    className="osc-enquete-closed-date"
+                    dateTime={new Date(submittedAt).toISOString()}>
+                    {formatSubmittedAt(submittedAt)}
+                  </time>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="osc-enquete-item-description">
+              {props.displayDescription && props.description && (
+                <RteContent
+                  content={props.description}
+                  unwrapSingleRootDiv={true}
+                />
+              )}
+            </div>
+          )}
+          {draftChecked && !formClosed && !waitingForUser && (
             <Form
+              key={formKey}
               {...props}
+              allowResetAfterSubmit={false}
+              navigateAfterSubmitSuccess={!!props.closeFormAfterSubmit}
               fields={orderedFormFields}
               formStyle={props.formStyle || 'default'}
               getValuesOnChange={handleValuesChange}
