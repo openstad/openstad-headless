@@ -189,6 +189,10 @@ function Enquete(props: EnqueteWidgetProps) {
   // the first interaction (together with form_start).
   const stepMountSkippedRef = useRef(false);
   const submittingRef = useRef(false);
+  const outroSubmittedRef = useRef(false);
+  const [outroSubmitted, setOutroSubmitted] = useState(false);
+  const closedBlockRef = useRef<HTMLDivElement>(null);
+  const focusClosedBlockRef = useRef(false);
   const [formKey, setFormKey] = useState(0);
 
   const submittedStorageKey = getSubmittedStorageKey(
@@ -262,6 +266,7 @@ function Enquete(props: EnqueteWidgetProps) {
     !props.formVisibility;
 
   async function onSubmit(formData: Record<string, unknown>): Promise<boolean> {
+    if (props.closeFormAfterSubmit && outroSubmittedRef.current) return false;
     if (submittingRef.current) return false;
     submittingRef.current = true;
     try {
@@ -374,7 +379,14 @@ function Enquete(props: EnqueteWidgetProps) {
       if (props.closeFormAfterSubmit) {
         writeSubmittedFlag(submittedStorageKey);
         if (props.afterSubmitUrl || !isYouthOutroFlow) {
+          if (!props.afterSubmitUrl && !isYouthOutroFlow) {
+            focusClosedBlockRef.current = true;
+          }
           setSubmittedFlag(true);
+        }
+        if (isYouthOutroFlow && !props.afterSubmitUrl) {
+          outroSubmittedRef.current = true;
+          setOutroSubmitted(true);
         }
       }
 
@@ -1026,6 +1038,12 @@ function Enquete(props: EnqueteWidgetProps) {
     closeFormAfterSubmit: props.closeFormAfterSubmit,
     canBypass: hasRole(currentUser, 'editor'),
   });
+  useEffect(() => {
+    if (formClosed && focusClosedBlockRef.current) {
+      focusClosedBlockRef.current = false;
+      closedBlockRef.current?.focus({ preventScroll: true });
+    }
+  }, [formClosed]);
   const waitingForUser =
     !!props.closeFormAfterSubmit && submittedFlag && currentUserIsLoading;
   const closedMessage = (props.closedFormMessage || '').trim()
@@ -1093,7 +1111,10 @@ function Enquete(props: EnqueteWidgetProps) {
           </div>
         )}
 
-        <div className={`osc-enquete-item-content --${props.formStyle}`}>
+        <div
+          className={`osc-enquete-item-content --${props.formStyle}${
+            outroSubmitted ? ' --outro-submitted' : ''
+          }`}>
           {props.displayTitle && props.title && (
             <RteContent
               content={props.title}
@@ -1102,7 +1123,11 @@ function Enquete(props: EnqueteWidgetProps) {
             />
           )}
           {formClosed ? (
-            <div className="form-container osc-enquete-closed" role="status">
+            <div
+              className="form-container osc-enquete-closed"
+              role="status"
+              tabIndex={-1}
+              ref={closedBlockRef}>
               <div>
                 <div className="osc-enquete-closed-message">
                   <RteContent

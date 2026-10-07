@@ -1666,9 +1666,22 @@
   border: 0;
 }
 
+.osc-enquete-item-content.--outro-submitted
+  .form-container:has(.--youth-outro)
+  .button-group {
+  display: none;
+}
+
 .osc-enquete-closed {
   font-family: var(--utrecht-document-font-family, inherit);
   background-color: #fff;
+}
+
+.osc-enquete-closed:focus-visible {
+  outline-color: var(--utrecht-focus-outline-color, currentColor);
+  outline-offset: var(--utrecht-focus-outline-offset, 2px);
+  outline-style: var(--utrecht-focus-outline-style, solid);
+  outline-width: var(--utrecht-focus-outline-width, 3px);
 }
 
 .osc-enquete-closed > div {
