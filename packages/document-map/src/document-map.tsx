@@ -51,6 +51,7 @@ import './gesture';
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
+    widgetId?: number;
     resourceId?: string;
     resourceIdRelativePath?: string;
     documentWidth?: number;
@@ -550,6 +551,8 @@ function DocumentMap({
             props.commentsWidget?.overwriteEmailAddress
               ? props.commentsWidget.overwriteEmailAddress
               : '',
+          // the api resolves the notification recipient from this widget's config
+          widgetId: props.widgetId,
           embeddedUrl: window.location.href,
         });
 

@@ -54,6 +54,7 @@ module.exports = (app) => {
     clientMw.withAll,
     roleMw.withAll,
     userMw.withOne,
+    userMw.ensureIdentityWriteAllowed,
     userMw.update,
     userMw.saveRoles,
     adminApiUserController.update
@@ -62,6 +63,7 @@ module.exports = (app) => {
   app.post(
     '/api/admin/user/:userId/delete',
     userMw.withOne,
+    userMw.ensureDeleteAllowed,
     userMw.deleteOne,
     adminApiUserController.delete
   );
@@ -76,26 +78,35 @@ module.exports = (app) => {
   /**
    *  Simple CRUD API for clients
    */
-  app.get('/api/admin/clients', clientMw.withAll, adminApiClientController.all);
+  app.get(
+    '/api/admin/clients',
+    adminMiddleware.ensureAdminClient,
+    clientMw.withAll,
+    adminApiClientController.all
+  );
   app.get(
     '/api/admin/client/:clientId',
     clientMw.withOne,
+    adminMiddleware.ensureOwnClient,
     adminApiClientController.show
   );
   app.post(
     '/api/admin/client',
+    adminMiddleware.ensureAdminClient,
     clientMw.create,
     adminApiClientController.create
   );
   app.post(
     '/api/admin/client/:clientId',
     clientMw.withOne,
+    adminMiddleware.ensureOwnClient,
     clientMw.update,
     adminApiClientController.update
   );
   app.post(
     '/api/admin/client/:clientId/delete',
     clientMw.withOne,
+    adminMiddleware.ensureOwnClient,
     clientMw.deleteOne,
     adminApiClientController.delete
   );
@@ -111,12 +122,14 @@ module.exports = (app) => {
   app.get(
     '/api/admin/unique-codes',
     clientMw.withOne,
+    adminMiddleware.ensureOwnClient,
     codeMw.withAll,
     adminApiUniqueCodeController.all
   );
   app.get(
     '/api/admin/unique-code/generator-status',
     clientMw.withOne,
+    adminMiddleware.ensureOwnClient,
     adminApiUniqueCodeController.generatorStatus
   );
   app.get(
@@ -127,6 +140,7 @@ module.exports = (app) => {
   app.post(
     '/api/admin/unique-code',
     clientMw.withOne,
+    adminMiddleware.ensureOwnClient,
     codeMw.create,
     adminApiUniqueCodeController.created
   );
@@ -145,12 +159,14 @@ module.exports = (app) => {
   app.get(
     '/api/admin/access-code',
     clientMw.withOne,
+    adminMiddleware.ensureOwnClient,
     accessCodeMw.withAll,
     adminApiAccessCodeController.all
   );
   app.post(
     '/api/admin/access-code',
     clientMw.withOne,
+    adminMiddleware.ensureOwnClient,
     accessCodeMw.create,
     adminApiAccessCodeController.created
   );

@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const Promise = require('bluebird');
 const clientAuth = require('../utils/clientAuth');
+const { isAdminClient } = require('./admin');
 
 exports.withAll = (req, res, next) => {
   const limit = req.query.limit ? parseInt(req.query.limit, 10) : 1000;
@@ -170,6 +171,43 @@ exports.create = (req, res, next) => {
     });
 };
 
+const forbidden = () => {
+  const err = new Error('Forbidden');
+  err.status = 403;
+  return err;
+};
+
+// Same check as update() uses to decide whether a body key is written
+const isWritten = (value) =>
+  !!value || value === 0 || value === null || value === false;
+
+const identityKeys = [
+  'email',
+  'password',
+  'twoFactorToken',
+  'twoFactorConfigured',
+  'name',
+  'phoneNumber',
+  'hashedPhoneNumber',
+];
+
+// A non-admin client may only touch the identity of a user without roles on
+// other clients; otherwise it could take over accounts of other projects.
+const hasRolesOnOtherClients = (req) =>
+  !isAdminClient(req.user) &&
+  (req.userObject?.roles || []).some((role) => role.clientId !== req.user?.id);
+
+exports.ensureIdentityWriteAllowed = (req, res, next) => {
+  const touchesIdentity = identityKeys.some((key) => isWritten(req.body[key]));
+  if (touchesIdentity && hasRolesOnOtherClients(req)) return next(forbidden());
+  next();
+};
+
+exports.ensureDeleteAllowed = (req, res, next) => {
+  if (hasRolesOnOtherClients(req)) return next(forbidden());
+  next();
+};
+
 exports.update = async (req, res, next) => {
   const keysToUpdate = [
     'name',
@@ -192,12 +230,7 @@ exports.update = async (req, res, next) => {
 
   let data = {};
   keysToUpdate.forEach((key) => {
-    if (
-      req.body[key] ||
-      req.body[key] === 0 ||
-      req.body[key] === null ||
-      req.body[key] === false
-    ) {
+    if (isWritten(req.body[key])) {
       let value = req.body[key];
 
       if (key === 'password' && value) {
@@ -259,6 +292,7 @@ exports.saveRoles = (req, res, next) => {
   } else {
     const userId = req.userObject.id;
     const saveRoles = [];
+    let forbiddenRole = false;
 
     Object.keys(roles).forEach((clientId) => {
       if (clientId) {
@@ -284,12 +318,19 @@ exports.saveRoles = (req, res, next) => {
             );
             parsedClientId = found && found.id;
           }
+          // A non-admin client may only set roles for itself
+          if (!isAdminClient(req.user) && parsedClientId !== req.user?.id) {
+            forbiddenRole = true;
+            return;
+          }
           saveRoles.push(() => {
             return createOrUpdateUserRole(parsedClientId, userId, roleId);
           });
         }
       }
     });
+
+    if (forbiddenRole) return next(forbidden());
 
     Promise.map(saveRoles, (saveRole) => saveRole())
       .then(() => {

@@ -610,6 +610,11 @@ router
     let statuses = req.body.statuses || [];
     if (!Array.isArray(statuses)) statuses = [statuses];
     statuses = statuses.filter((status) => Number.isInteger(status));
+    if (statuses.length) {
+      statuses = (await getValidStatuses(req.project.id, statuses)).map(
+        (status) => status.id
+      );
+    }
     let defaultStatusses = await db.Status.findAll({
       where: { projectId: req.project.id, addToNewResources: true },
     });
@@ -632,6 +637,12 @@ router
       where: { projectId: req.project.id, addToNewResources: true },
     });
     tags = tags.map((tag) => parseInt(tag));
+    if (tags.length) {
+      // own project or global tags only
+      tags = (await getValidTags(req.project.id, tags, true)).map(
+        (tag) => tag.id
+      );
+    }
     tags = tags.concat(defaultTags.map((status) => status.id));
     tags = tags.filter((value, index) => tags.indexOf(value) === index); // unique
     if (tags.length) {
