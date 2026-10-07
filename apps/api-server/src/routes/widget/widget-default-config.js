@@ -1,7 +1,10 @@
 function getDefaultConfig(project, widgetType, apiConfig) {
-  const forceNewLogin = project.config?.auth?.forceNewLoginOnWidgets
-    ? '&forceNewLogin=1'
-    : '';
+  // Without multi-project login, widgets always force a new login (pre-existing behaviour)
+  const forceNewLoginDefault = process.env.MULTI_PROJECT_LOGIN !== 'true';
+  const forceNewLogin =
+    project.config?.auth?.forceNewLoginOnWidgets ?? forceNewLoginDefault
+      ? '&forceNewLogin=1'
+      : '';
   const loginUrl = `${apiConfig.url}/auth/project/${project.id}/login?useAuth=default${forceNewLogin}&redirectUri=[[REDIRECT_URI]]`;
   const loginUrlAnonymous = `${apiConfig.url}/auth/project/${project.id}/login?useAuth=anonymous${forceNewLogin}&redirectUri=[[REDIRECT_URI]]`;
   const logoutUrl = `${apiConfig.url}/auth/project/${project.id}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;

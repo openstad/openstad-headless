@@ -33,7 +33,7 @@ initializeApp().then((app) => {
   // through request header 'X-Forwarded-For' as
   // 'X-Forwarded-For: some.client.ip.address'
   // Insertion of the forward header is an option on most proxy software
-  app.set('trust proxy', true);
+  app.set('trust proxy', require('@openstad-headless/lib/trust-proxy')());
 
   // for dev allow http
   app.listen(app.get('port'), function () {

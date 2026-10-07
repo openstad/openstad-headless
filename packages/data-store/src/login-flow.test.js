@@ -110,6 +110,9 @@ describe('unique code and field results', () => {
       type: 'error',
       error: 'too_many_attempts',
     });
+    expect(
+      outcomeFromCodeResult({ status: 429, data: { status: 'client_locked' } })
+    ).toEqual({ type: 'redirect' });
     expect(outcomeFromCodeResult({ status: 200, data: { jwt: 'j' } })).toEqual({
       type: 'loggedIn',
       jwt: 'j',
@@ -117,9 +120,25 @@ describe('unique code and field results', () => {
   });
 
   test('keeps asking for fields that are still missing and flags a wrong access code', () => {
-    expect(outcomeFromFieldsResult({ status: 422, data: {} })).toEqual({
+    expect(
+      outcomeFromFieldsResult({
+        status: 422,
+        data: { status: 'invalid_fields', invalidFields: ['accessCode'] },
+      })
+    ).toEqual({
       type: 'error',
       error: 'invalid_access_code',
+      invalidFields: ['accessCode'],
+    });
+    expect(
+      outcomeFromFieldsResult({
+        status: 422,
+        data: { status: 'invalid_fields', invalidFields: ['postcode'] },
+      })
+    ).toEqual({
+      type: 'error',
+      error: 'invalid_fields',
+      invalidFields: ['postcode'],
     });
     expect(
       outcomeFromFieldsResult({

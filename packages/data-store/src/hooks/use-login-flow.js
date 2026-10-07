@@ -9,6 +9,10 @@ import {
   waitForPopupLogin,
 } from '../login-flow';
 
+const POPUP_NAME = 'osc-login';
+// A popup that closes this fast was most likely blocked, not cancelled
+const BLOCKED_WITHIN_MS = 1500;
+
 export default function useLoginFlow(props) {
   const self = this;
   const [dialog, setDialog] = useState(null);
@@ -21,34 +25,60 @@ export default function useLoginFlow(props) {
     return current;
   };
 
+  const openPopup = (url) =>
+    window.open(url, POPUP_NAME, 'width=480,height=640');
+
+  const readOwnJwt = () =>
+    getKnownIdentities({ apiUrl: self.api.apiUrl }).find(
+      (identity) => identity.projectId === String(self.projectId)
+    )?.jwt || null;
+
+  const navigate = (current) => {
+    if (current.onBeforeRedirect) current.onBeforeRedirect();
+    document.location.href = current.resolvedLoginUrl;
+  };
+
   const redirect = async () => {
-    const current = close();
+    const current = pending.current;
     if (!current) return;
-    const loginUrl =
+    setDialog(null);
+    current.resolvedLoginUrl =
       typeof current.loginUrl === 'function'
         ? await current.loginUrl()
         : current.loginUrl;
 
-    const popup = props.multiProjectLogin
-      ? window.open(
-          popupLoginUrl(loginUrl),
-          'osc-login',
-          'width=480,height=640'
-        )
-      : null;
-    if (popup) {
-      const jwt = await waitForPopupLogin({
-        popup,
-        apiOrigin: new URL(self.api.apiUrl).origin,
-        projectId: self.projectId,
-      });
-      if (jwt) self.applyJwt(jwt);
-      current.resolve(!!jwt);
+    if (!props.multiProjectLogin) {
+      close();
+      navigate(current);
       return;
     }
 
-    if (current.onBeforeRedirect) current.onBeforeRedirect();
-    document.location.href = loginUrl;
+    const popupUrl = popupLoginUrl(current.resolvedLoginUrl);
+    let popup = current.popup;
+    if (popup) popup.location.href = popupUrl;
+    else popup = openPopup(popupUrl);
+
+    const openedAt = Date.now();
+    const jwt = popup
+      ? await waitForPopupLogin({
+          popup,
+          apiOrigin: new URL(self.api.apiUrl).origin,
+          projectId: self.projectId,
+          readJwt: readOwnJwt,
+        })
+      : null;
+    if (jwt) {
+      handle({ type: 'loggedIn', jwt });
+      return;
+    }
+    // Blocked, or closed too fast to be a deliberate cancel: let the user
+    // choose a same-window login instead of redirecting unasked
+    if (!popup || Date.now() - openedAt < BLOCKED_WITHIN_MS) {
+      setDialog({ step: 'blocked', busy: false });
+      return;
+    }
+    close();
+    current.resolve(false);
   };
 
   const failAndRedirect = (err) => {
@@ -82,6 +112,7 @@ export default function useLoginFlow(props) {
       setDialog((current) => ({
         ...current,
         error: outcome.error,
+        invalidFields: outcome.invalidFields,
         busy: false,
       }));
       return;
@@ -107,6 +138,12 @@ export default function useLoginFlow(props) {
         apiUrl: self.api.apiUrl,
         excludeProjectId: self.projectId,
       });
+      if (identities.length === 0) {
+        // Open within the click, before any await, so popup blockers allow it
+        pending.current.popup = openPopup('about:blank');
+        redirect();
+        return;
+      }
       exchangeKnownIdentities({
         api: self.api,
         projectId: self.projectId,
@@ -136,6 +173,11 @@ export default function useLoginFlow(props) {
       .catch(failAndRedirect);
   };
 
+  const onRedirect = () => {
+    const current = close();
+    if (current) navigate(current);
+  };
+
   const onOpenChange = (open) => {
     if (open) return;
     const current = close();
@@ -151,6 +193,7 @@ export default function useLoginFlow(props) {
       onOpenChange,
       onSubmitCode,
       onSubmitFields,
+      onRedirect,
     },
   };
 }

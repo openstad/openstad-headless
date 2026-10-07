@@ -151,6 +151,7 @@ services:
       - PDF_API_KEY=${PDF_API_KEY}
       - SESSION_EXPIRE_ON_CLOSE=${SESSION_EXPIRE_ON_CLOSE:-false}
       - MULTI_PROJECT_LOGIN=${MULTI_PROJECT_LOGIN:-false}
+      - TRUST_PROXY=${TRUST_PROXY:-}
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:
@@ -241,6 +242,7 @@ services:
       - VERBOSE_LOGGING=${VERBOSE_LOGGING:-false}
       - SESSION_EXPIRE_ON_CLOSE=${SESSION_EXPIRE_ON_CLOSE:-false}
       - MULTI_PROJECT_LOGIN=${MULTI_PROJECT_LOGIN:-false}
+      - TRUST_PROXY=${TRUST_PROXY:-}
     ports:
       - '${AUTH_PORT}:${AUTH_PORT}'
     volumes:

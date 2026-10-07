@@ -6,6 +6,8 @@ function parseAuthHeader(authorizationHeader, { jwtSecret, fixedAuthTokens }) {
     if (claims && claims.pending) {
       return {};
     }
+    // The projectId claim is deliberately not enforced: the cross-project admin
+    // fallback in user.js relies on tokens of another project
     return claims && claims.userId
       ? { userId: claims.userId, authProvider: claims.authProvider }
       : {};

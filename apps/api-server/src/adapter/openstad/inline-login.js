@@ -79,7 +79,14 @@ const mintJwt = ({ authConfig, userId, role, projectId, pending = false }) => {
   });
 };
 
-const upsertProjectUser = async ({ User, project, userData }) => {
+// Digest login keeps swallowing update errors (existing behaviour); the inline
+// path throws so a half-filled project user never gets a final jwt
+const upsertProjectUser = async ({
+  User,
+  project,
+  userData,
+  throwOnUpdateError = false,
+}) => {
   const users = await User.findAll({
     where: Sequelize.and(
       {
@@ -107,6 +114,7 @@ const upsertProjectUser = async ({ User, project, userData }) => {
       console.log(
         `[${new Date().toISOString()}][digest-login] user update failed: userId=${user.id} projectId=${project?.id} error=${e?.message}`
       );
+      if (throwOnUpdateError) throw e;
     }
     return user.id;
   }
@@ -203,13 +211,46 @@ const privacyLinkFor = (client) => {
   return { url: url.href, text: text.charAt(0).toLowerCase() + text.slice(1) };
 };
 
+// Checks submitted fields against the api User model, so the project user
+// update after login cannot fail on them
+const findInvalidFields = async ({ User, fields }) => {
+  const keys = Object.keys(fields).filter((key) => User.rawAttributes[key]);
+  if (keys.length === 0) return [];
+  const values = Object.fromEntries(keys.map((key) => [key, fields[key]]));
+  try {
+    await User.build(values).validate({ fields: keys, hooks: false });
+    return [];
+  } catch (err) {
+    if (!Array.isArray(err.errors)) throw err;
+    return [...new Set(err.errors.map((error) => error.path))];
+  }
+};
+
+// Shared devices: a UniqueCode-only client must not silently reuse the
+// auth-server session of the previous voter
+const shouldForceNewLogin = async ({ query, project, fetchClient }) => {
+  if (query.forceNewLogin) return true;
+  if (process.env.MULTI_PROJECT_LOGIN !== 'true') return false;
+  // newLoginDone marks the return from the forced logout
+  if (query.newLoginDone) return false;
+  if (project?.config?.auth?.forceNewLoginOnWidgets !== undefined) return false;
+  try {
+    const authTypes = (await fetchClient()).authTypes || [];
+    return authTypes.length === 1 && authTypes[0] === 'UniqueCode';
+  } catch (err) {
+    return false;
+  }
+};
+
 module.exports = {
   applyClientConsents,
   evaluateClientGates,
   fieldLabelsFor,
+  findInvalidFields,
   mintJwt,
   pickAllowedFields,
   privacyLinkFor,
   resolveTargetRole,
+  shouldForceNewLogin,
   upsertProjectUser,
 };

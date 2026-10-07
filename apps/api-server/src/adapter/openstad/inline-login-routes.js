@@ -9,6 +9,7 @@ const {
   applyClientConsents,
   evaluateClientGates,
   fieldLabelsFor,
+  findInvalidFields,
   mintJwt,
   pickAllowedFields,
   privacyLinkFor,
@@ -96,6 +97,7 @@ const respondWithGates = async ({
       client,
       projectId,
     }),
+    throwOnUpdateError: true,
   });
 
   if (!gates.ok) {
@@ -198,7 +200,11 @@ exports.uniqueCodeLogin = async (req, res, next) => {
       return res.status(401).json({ status: 'invalid_code' });
     }
     if (result.status === 429) {
-      return res.status(429).json({ status: 'too_many_attempts' });
+      // A client-wide lock can be caused by others; the widget then falls
+      // back to the auth-server login instead of showing an error
+      const status =
+        result.data?.scope === 'client' ? 'client_locked' : 'too_many_attempts';
+      return res.status(429).json({ status });
     }
     if (result.status !== 200) {
       throw new Error(`Unique code login failed with status ${result.status}`);
@@ -270,6 +276,14 @@ exports.completeFields = async (req, res, next) => {
       fields,
       missingFields: gates.missingFields,
     });
+
+    const invalidFields = await findInvalidFields({
+      User: db.User,
+      fields: allowed,
+    });
+    if (invalidFields.length > 0) {
+      return res.status(422).json({ status: 'invalid_fields', invalidFields });
+    }
 
     if (Object.prototype.hasOwnProperty.call(allowed, 'accessCode')) {
       const valid = await service.validateAccessCode({

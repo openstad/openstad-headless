@@ -7,6 +7,7 @@ var log = require('debug')('app:http');
 const morgan = require('morgan');
 const db = require('./db');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
+const trustProxy = require('@openstad-headless/lib/trust-proxy');
 
 module.exports = {
   app: undefined,
@@ -20,7 +21,7 @@ module.exports = {
 
     this.app = express();
     this.app.disable('x-powered-by');
-    this.app.set('trust proxy', true);
+    this.app.set('trust proxy', trustProxy());
     this.app.set('view engine', 'njk');
     this.app.set('env', process.env.NODE_ENV || 'production');
     this.app.use(rateLimiter());

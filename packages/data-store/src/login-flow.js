@@ -33,6 +33,7 @@ export function outcomeFromCodeResult(result) {
   if (result.status === 400) return { type: 'error', error: 'code_required' };
   if (result.status === 401) return { type: 'error', error: 'invalid_code' };
   if (result.status === 429) {
+    if (result.data?.status === 'client_locked') return { type: 'redirect' };
     return { type: 'error', error: 'too_many_attempts' };
   }
   return outcomeFromGateResult(result);
@@ -40,7 +41,14 @@ export function outcomeFromCodeResult(result) {
 
 export function outcomeFromFieldsResult(result) {
   if (result.status === 422) {
-    return { type: 'error', error: 'invalid_access_code' };
+    const invalidFields = result.data?.invalidFields || ['accessCode'];
+    const onlyAccessCode =
+      invalidFields.length === 1 && invalidFields[0] === 'accessCode';
+    return {
+      type: 'error',
+      error: onlyAccessCode ? 'invalid_access_code' : 'invalid_fields',
+      invalidFields,
+    };
   }
   return outcomeFromGateResult(result);
 }
@@ -56,7 +64,10 @@ export function waitForPopupLogin({
   apiOrigin,
   projectId,
   win = window,
+  readJwt = () => null,
 }) {
+  // A magic link opened in another tab logs in there and stores the jwt
+  const initialJwt = readJwt();
   return new Promise((resolve) => {
     const finish = (jwt) => {
       win.removeEventListener('message', onMessage);
@@ -72,7 +83,11 @@ export function waitForPopupLogin({
       finish(data.jwt);
     };
     const timer = win.setInterval(() => {
-      if (popup.closed) finish(null);
+      const storedJwt = readJwt();
+      if (storedJwt && storedJwt !== initialJwt) {
+        popup.close();
+        finish(storedJwt);
+      } else if (popup.closed) finish(null);
     }, 500);
     win.addEventListener('message', onMessage);
   });

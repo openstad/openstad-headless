@@ -242,6 +242,18 @@ describe('uniqueCodeLogin', () => {
     expect(login.mock.calls[0][0]).toMatchObject({ code: 'X', ip: '1.2.3.4' });
   });
 
+  it('tells the widget when the whole client is locked', async () => {
+    vi.spyOn(service, 'loginWithUniqueCode').mockResolvedValue({
+      status: 429,
+      data: { error: 'too_many_attempts', scope: 'client' },
+    });
+
+    const { status, body } = await call(routes.uniqueCodeLogin, { code: 'X' });
+
+    expect(status).toBe(429);
+    expect(body).toEqual({ status: 'client_locked' });
+  });
+
   it('mints a jwt for a valid code', async () => {
     vi.spyOn(service, 'loginWithUniqueCode').mockResolvedValue({
       status: 200,
@@ -357,5 +369,43 @@ describe('completeFields', () => {
 
     expect(status).toBe(409);
     expect(body.missingFields).toEqual(['accessCode']);
+  });
+
+  it('refuses values the project user would reject, without updating', async () => {
+    vi.spyOn(service, 'validateAccessCode').mockResolvedValue(true);
+    const update = vi.spyOn(service, 'updateUser');
+
+    const { status, body } = await call(routes.completeFields, {
+      pendingJwt: pendingJwt(),
+      fields: { postcode: 'abc', accessCode: 'CODE' },
+    });
+
+    expect(status).toBe(422);
+    expect(body).toEqual({
+      status: 'invalid_fields',
+      invalidFields: ['postcode'],
+    });
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it('does not mint a jwt when the project user cannot be updated', async () => {
+    service.fetchClient.mockResolvedValue(
+      targetClient({ requiredUserFields: ['postcode'] })
+    );
+    vi.spyOn(service, 'updateUser').mockResolvedValue({});
+    service.fetchUserData
+      .mockResolvedValueOnce(rawUser())
+      .mockResolvedValueOnce(rawUser({ postcode: '1234AB' }));
+    db.User.findAll.mockResolvedValue([
+      { id: 77, update: vi.fn().mockRejectedValue(new Error('Validation')) },
+    ]);
+
+    const { body, next } = await call(routes.completeFields, {
+      pendingJwt: pendingJwt(),
+      fields: { postcode: '1234AB' },
+    });
+
+    expect(body).toBeUndefined();
+    expect(next).toHaveBeenCalledWith(expect.any(Error));
   });
 });
