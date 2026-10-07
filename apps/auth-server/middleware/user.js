@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const Promise = require('bluebird');
 const clientAuth = require('../utils/clientAuth');
+const { isAdminClient } = require('./admin');
 
 exports.withAll = (req, res, next) => {
   const limit = req.query.limit ? parseInt(req.query.limit, 10) : 1000;
@@ -283,6 +284,10 @@ exports.saveRoles = (req, res, next) => {
               (availableClient) => availableClient.clientId == clientId
             );
             parsedClientId = found && found.id;
+          }
+          // A non-admin client may only set roles for itself; other entries are ignored
+          if (!isAdminClient(req.user) && parsedClientId !== req.user?.id) {
+            return;
           }
           saveRoles.push(() => {
             return createOrUpdateUserRole(parsedClientId, userId, roleId);

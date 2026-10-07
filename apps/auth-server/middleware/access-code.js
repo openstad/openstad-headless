@@ -1,17 +1,14 @@
 const db = require('../db');
 const generateCode = require('../utils/generateCode');
 const Tasks = require('../memoryStorage/tasks');
+const { isAdminClient } = require('./admin');
 
 exports.withAll = (req, res, next) => {
   const limit = req.query.limit ? parseInt(req.query.limit, 10) : 1000;
   const offset = req.query.offset ? parseInt(req.query.offset, 10) : 0;
   const search = req.query.search ? req.query.search : false;
 
-  let where = { deletedAt: null };
-
-  if (req.query.clientId) {
-    where.clientId = req.client.id;
-  }
+  let where = { deletedAt: null, clientId: req.client.id };
 
   if (search) {
     where.code = { [db.Sequelize.Op.like]: '%' + search + '%' };
@@ -66,8 +63,10 @@ exports.create = async (req, res, next) => {
 
 exports.deleteOne = (req, res, next) => {
   const codeId = req.body.codeId ? req.body.codeId : req.params.codeId;
+  const where = { id: codeId };
+  if (!isAdminClient(req.user)) where.clientId = req.user?.id;
 
-  db.AccessCode.findOne({ where: { id: codeId } })
+  db.AccessCode.findOne({ where })
     .then((code) => {
       if (!code) {
         throw new Error('Access code not found');
