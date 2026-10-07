@@ -21,6 +21,8 @@ export default defineConfig({
     ADMIN_URL: process.env.ADMIN_URL,
     AUTH_APP_URL: process.env.AUTH_APP_URL,
     AUTH_FIRST_LOGIN_CODE: process.env.AUTH_FIRST_LOGIN_CODE,
+    API_URL: process.env.API_URL,
+    API_FIXED_AUTH_KEY: process.env.API_FIXED_AUTH_KEY,
   },
 
   component: {
