@@ -138,15 +138,14 @@ async function authorizeIdentityData(req, target, userData) {
   return data;
 }
 
-// Identity fields (email, password, 2FA) are written with the admin client:
-// the auth server does not let project clients change identities that are
-// shared with other clients.
-async function getAdminAuthConfig(req) {
+// Identity fields (email, password, 2FA) of users shared with other clients
+// can only be written by the admin client. Only superusers use it; everyone
+// else goes through the project client, so the auth server can still reject
+// identities with roles on other clients that the api does not know about.
+async function getIdentityAuthConfig(req) {
+  if (!hasRole(req.user, 'superuser')) return req.authConfig;
   const adminProject = await db.Project.findByPk(config.admin.projectId);
-  return authSettings.config({
-    project: adminProject,
-    useAuth: req.query.useAuth || 'default',
-  });
+  return authSettings.config({ project: adminProject, useAuth: 'default' });
 }
 
 // Reject real email/password changes the caller may not make, instead of
@@ -610,7 +609,7 @@ router
       // Reset two-factor authentication in the auth database
       if (user.idpUser?.identifier && req.adapter.service.updateUser) {
         await req.adapter.service.updateUser({
-          authConfig: await getAdminAuthConfig(req),
+          authConfig: await getIdentityAuthConfig(req),
           userData: {
             id: user.idpUser.identifier,
             twoFactorToken: null,
@@ -936,7 +935,7 @@ router
           });
           if (typeof email !== 'undefined' || password) {
             updatedUserData = await req.adapter.service.updateUser({
-              authConfig: await getAdminAuthConfig(req),
+              authConfig: await getIdentityAuthConfig(req),
               userData: { id, email, password },
             });
           }

@@ -200,19 +200,22 @@ describe('PUT /user/:userId identity fields', () => {
       rows = [userRow(93, 1, 'member')];
     });
 
-    it('lets a project admin change email and password through the admin client', async () => {
+    // Only superusers use the admin client: the auth server must still check
+    // that the identity has no roles on other clients (which the api cannot see).
+    it('lets a project admin change email and password through the project client', async () => {
       const res = await request(createApp(admin))
         .put('/project/1/user/93')
         .send(identityBody);
 
       expect(res.status).toBe(200);
-      expect(sentWith('admin-client')).toEqual([
+      expect(sentWith('admin-client')).toEqual([]);
+      expect(sentWith('project-client')).toEqual([
+        expect.objectContaining({ role: 'moderator' }),
         expect.objectContaining({
           email: 'new@example.com',
           password: 'secret',
         }),
       ]);
-      expect(sentWith('project-client')[0].role).toBe('moderator');
     });
 
     it('does not let a moderator change email, password or promote', async () => {
@@ -244,13 +247,14 @@ describe('PUT /user/:userId identity fields', () => {
       );
     });
 
-    it('lets a project admin reset 2FA through the admin client', async () => {
+    it('lets a project admin reset 2FA through the project client', async () => {
       const res = await request(createApp(admin)).put(
         '/project/1/user/93/reset-two-factor'
       );
 
       expect(res.status).toBe(200);
-      expect(sentWith('admin-client')).toHaveLength(1);
+      expect(sentWith('admin-client')).toEqual([]);
+      expect(sentWith('project-client')).toHaveLength(1);
     });
   });
 
