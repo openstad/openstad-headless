@@ -1,4 +1,4 @@
-const UNSAFE_CHARACTERS = /[\x00-\x1f\x7f<>"'`\\]/;
+const UNSAFE_CHARACTERS = /[\x00-\x1f\x7f<>"'`\\\s]/;
 
 function isSafeImageUrl(url) {
   if (typeof url !== 'string') return false;
