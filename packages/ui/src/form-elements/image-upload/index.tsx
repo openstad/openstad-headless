@@ -49,9 +49,6 @@ registerPlugin(
   FilePondPluginFileValidateType
 );
 
-const sanitizeFileName = (fileName: string) =>
-  fileName.replace(/[^a-z0-9_\-]/gi, '_').replace(/_+/g, '_');
-
 const THUMB_MAX_SIZE = 480;
 
 const getFileExtension = (fileName: string) =>
@@ -267,7 +264,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     const pondFile = pondRef.current
       ?.getFiles()
       ?.find(
-        (item: FilePondFile) => sanitizeFileName(item.file.name) === target.name
+        (item: FilePondFile) => toUploadedImageName(item.file.name) === target.name
       );
     if (pondFile) {
       pondRef.current.removeFile(pondFile.id);
@@ -496,7 +493,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
             const fileName = file?.file?.name;
 
             if (!!fileName) {
-              const uploadImageFileName = sanitizeFileName(fileName);
+              const uploadImageFileName = toUploadedImageName(fileName);
               const uploadedIndex = uploadedImages.findIndex(
                 (item) => item.name === uploadImageFileName
               );
