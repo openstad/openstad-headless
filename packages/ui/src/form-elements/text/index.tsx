@@ -162,12 +162,6 @@ const TrixEditor: React.FC<{
     const inputEl = inputRef.current;
     if (!editorEl || !inputEl) return;
 
-    if ((editorEl as any).editor) {
-      editorInstance.current = (editorEl as any).editor;
-      targetBlankHrefsRef.current = getTargetBlankHrefs(valueRef.current || '');
-      editorInstance.current.loadHTML(valueRef.current || '');
-    }
-
     const handleTrixInitialize = () => {
       editorInstance.current = (editorEl as any).editor;
 
@@ -306,6 +300,10 @@ const TrixEditor: React.FC<{
       isFocusedRef.current = false;
       if (onBlurRef.current) onBlurRef.current();
     };
+
+    if ((editorEl as any).editor) {
+      handleTrixInitialize();
+    }
 
     editorEl.addEventListener('trix-initialize', handleTrixInitialize);
     editorEl.addEventListener('trix-change', handleTrixChange);
