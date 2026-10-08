@@ -4,6 +4,7 @@ import {
   MockImageFile,
   buildImageValue,
   removeDescription,
+  renameDescription,
   toDescriptionEntries,
   toMockImages,
   toUploadedImageName,
@@ -242,5 +243,38 @@ describe('toUploadedImageName', () => {
 
   it('replaces non-ASCII characters like the server does', () => {
     expect(toUploadedImageName('café (1).jpg')).toBe('caf_1_jpg');
+  });
+});
+
+describe('renameDescription', () => {
+  it('moves a remark to the new url after a crop', () => {
+    const descriptions = { 'https://x/a.jpg': 'AI', 'https://x/b.jpg': 'b' };
+    expect(
+      renameDescription(
+        descriptions,
+        'https://x/a.jpg',
+        'https://x/a.jpg/:/cr=1'
+      )
+    ).toEqual({ 'https://x/a.jpg/:/cr=1': 'AI', 'https://x/b.jpg': 'b' });
+    expect(descriptions).toEqual({
+      'https://x/a.jpg': 'AI',
+      'https://x/b.jpg': 'b',
+    });
+  });
+
+  it('keeps an empty remark when moving it', () => {
+    expect(renameDescription({ a: '' }, 'a', 'b')).toEqual({ b: '' });
+  });
+
+  it('returns the same object when there is no remark for the old url', () => {
+    const descriptions = { 'https://x/b.jpg': 'b' };
+    expect(
+      renameDescription(descriptions, 'https://x/a.jpg', 'https://x/c.jpg')
+    ).toBe(descriptions);
+  });
+
+  it('returns the same object when the url does not change', () => {
+    const descriptions = { a: 'x' };
+    expect(renameDescription(descriptions, 'a', 'a')).toBe(descriptions);
   });
 });

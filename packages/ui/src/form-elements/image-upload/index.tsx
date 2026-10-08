@@ -38,6 +38,7 @@ import {
   MockImageFile,
   buildImageValue,
   removeDescription,
+  renameDescription,
   toDescriptionEntries,
   toMockImages,
   toUploadedImageName,
@@ -243,6 +244,13 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     index: number,
     newUrl: string
   ) => {
+    const oldUrl =
+      kind === 'uploaded'
+        ? uploadedImages[index]?.url
+        : mockImages[index]?.source;
+    if (oldUrl) {
+      setDescriptions((prev) => renameDescription(prev, oldUrl, newUrl));
+    }
     if (kind === 'uploaded') {
       setUploadedImages((prev) =>
         prev.map((image, i) =>
@@ -264,7 +272,8 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     const pondFile = pondRef.current
       ?.getFiles()
       ?.find(
-        (item: FilePondFile) => toUploadedImageName(item.file.name) === target.name
+        (item: FilePondFile) =>
+          toUploadedImageName(item.file.name) === target.name
       );
     if (pondFile) {
       pondRef.current.removeFile(pondFile.id);
