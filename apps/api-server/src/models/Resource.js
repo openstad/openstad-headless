@@ -40,6 +40,9 @@ const {
   EDITOR_PUBLIC_EXTRA_DATA_KEY_AUTH,
 } = require('./lib/filter-public-extra-data');
 const isSafeImageUrl = require('../lib/is-safe-image-url');
+const {
+  assertImageDescriptionsWithinLimit,
+} = require('../lib/image-description');
 
 function hideEmailsForNormalUsers(comments) {
   return comments.map((comment) => {
@@ -237,6 +240,11 @@ module.exports = function (db, sequelize, DataTypes) {
         defaultValue: [],
         set: function (value) {
           this.setDataValue('images', normalizeImages(value));
+        },
+        validate: {
+          descriptionLength(value) {
+            assertImageDescriptionsWithinLimit(value);
+          },
         },
       },
 
