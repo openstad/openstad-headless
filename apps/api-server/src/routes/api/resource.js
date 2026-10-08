@@ -111,23 +111,24 @@ async function attachModeratorOnlyExtraDataKeys(resources) {
   });
 }
 
-async function shouldSendUpdatedResourceAdminEmail(req) {
+async function getUpdatedResourceEmailFlags(req) {
   const projectId = req.project?.id || Number(req.params.projectId);
 
   try {
     const project =
       await db.Project.scope('includeEmailConfig').findByPk(projectId);
-    const value =
-      project?.emailConfig?.notifications?.sendUpdatedResourceAdminEmail ===
-      true;
+    const notifications = project?.emailConfig?.notifications;
 
-    return value;
+    return {
+      admin: notifications?.sendUpdatedResourceAdminEmail === true,
+      user: notifications?.sendUpdatedResourceUserEmail === true,
+    };
   } catch (err) {
     console.error(
-      `Failed to read sendUpdatedResourceAdminEmail for project ${projectId}:`,
+      `Failed to read updated resource email settings for project ${projectId}:`,
       err
     );
-    return false;
+    return { admin: false, user: false };
   }
 }
 
@@ -960,7 +961,8 @@ router
     });
   })
   .put(async function (req, res, next) {
-    if (await shouldSendUpdatedResourceAdminEmail(req)) {
+    const sendUpdatedResourceEmail = await getUpdatedResourceEmailFlags(req);
+    if (sendUpdatedResourceEmail.admin) {
       db.Notification.create({
         type: 'updated resource - admin update',
         projectId: req.project.id,
@@ -970,12 +972,27 @@ router
         },
       });
     }
-    if (req.changedToPublished) {
+    // Skip on concept -> published: the published notification below covers it
+    if (
+      sendUpdatedResourceEmail.user &&
+      !req.changedToPublished &&
+      req.results.userId
+    ) {
+      db.Notification.create({
+        type: 'updated resource - user feedback',
+        projectId: req.project.id,
+        data: {
+          userId: req.results.userId,
+          resourceId: req.results.id,
+        },
+      });
+    }
+    if (req.changedToPublished && req.results.userId) {
       db.Notification.create({
         type: 'new published resource - user feedback',
         projectId: req.project.id,
         data: {
-          userId: req.user.id,
+          userId: req.results.userId,
           resourceId: req.results.id,
         },
       });
