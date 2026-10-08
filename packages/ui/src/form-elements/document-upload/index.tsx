@@ -343,9 +343,11 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
             process: {
               url: props?.imageUrl + '/documents',
               method: 'POST',
-              headers: {
-                Authorization: 'Bearer ' + datastore.api?.currentUserJWT,
-              },
+              headers: datastore.api?.currentUserJWT
+                ? {
+                    Authorization: 'Bearer ' + datastore.api.currentUserJWT,
+                  }
+                : {},
               onload: (response: any) => {
                 return JSON.stringify(JSON.parse(response)[0]);
               },
