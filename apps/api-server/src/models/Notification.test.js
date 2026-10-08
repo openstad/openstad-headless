@@ -2,9 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import NotificationFactory from './Notification.js';
 
-// Notification.js takes (db, sequelize, DataTypes) as plain arguments and
-// only calls sequelize.define() once, so the hooks can be captured directly
-// without standing up a real Sequelize model.
 function buildNotificationHooks(db) {
   let hooks;
   const sequelize = {
@@ -40,9 +37,6 @@ function makeInstance(overrides = {}) {
   return instance;
 }
 
-// Pins the step-2 fix: a mail failure during afterCreate must leave the
-// notification on status 'failed', never stuck on 'pending' forever (the
-// cron only retries 'queued' rows, so 'pending' was silent permanent loss).
 describe('Notification afterCreate', () => {
   let db;
   let afterCreate;
@@ -96,5 +90,37 @@ describe('Notification afterCreate', () => {
 
     expect(instance.status).toBe('queued');
     expect(db.NotificationMessage.create).not.toHaveBeenCalled();
+  });
+
+  it('resolves before sending finishes when sendInBackground is set', async () => {
+    let finishSend;
+    const message = {
+      send: vi.fn(
+        () =>
+          new Promise((resolve) => {
+            finishSend = resolve;
+          })
+      ),
+    };
+    db.NotificationMessage.create.mockResolvedValue(message);
+    const instance = makeInstance();
+
+    await afterCreate(instance, { sendInBackground: true });
+
+    expect(instance.status).not.toBe('sent');
+
+    await vi.waitFor(() => expect(message.send).toHaveBeenCalled());
+    finishSend();
+    await vi.waitFor(() => expect(instance.status).toBe('sent'));
+  });
+
+  it('marks a background notification as failed when sending throws', async () => {
+    const message = { send: vi.fn().mockRejectedValue(new Error('smtp down')) };
+    db.NotificationMessage.create.mockResolvedValue(message);
+    const instance = makeInstance();
+
+    await afterCreate(instance, { sendInBackground: true });
+
+    await vi.waitFor(() => expect(instance.status).toBe('failed'));
   });
 });

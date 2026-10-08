@@ -102,6 +102,10 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.VIRTUAL,
       },
 
+      confirmationNotificationId: {
+        type: DataTypes.VIRTUAL,
+      },
+
       createDateHumanized: {
         type: DataTypes.VIRTUAL,
         get: function () {
