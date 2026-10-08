@@ -367,21 +367,55 @@ describe('resolveModBreakRecipients', () => {
 });
 
 describe('buildResourceRedirectUrl', () => {
+  const resourcePath = '/inzendingen/[[resourceId]]';
+
   it('returns an empty string when project.url is falsy', () => {
-    expect(buildResourceRedirectUrl({ url: '' })).toBe('');
-    expect(buildResourceRedirectUrl(null)).toBe('');
+    expect(buildResourceRedirectUrl({ url: '' }, resourcePath, 5)).toBe('');
+    expect(buildResourceRedirectUrl(null, resourcePath, 5)).toBe('');
+  });
+
+  it('returns an empty string when no resource path is configured', () => {
+    expect(
+      buildResourceRedirectUrl({ url: 'https://example.org' }, '', 5)
+    ).toBe('');
+    expect(
+      buildResourceRedirectUrl({ url: 'https://example.org' }, '   ', 5)
+    ).toBe('');
+    expect(
+      buildResourceRedirectUrl({ url: 'https://example.org' }, undefined, 5)
+    ).toBe('');
   });
 
   it('adds https:// when the url has no scheme', () => {
-    expect(buildResourceRedirectUrl({ url: 'example.org' })).toBe(
-      'https://example.org'
-    );
+    expect(
+      buildResourceRedirectUrl({ url: 'example.org' }, resourcePath, 5)
+    ).toBe('https://example.org/inzendingen/5');
   });
 
   it('strips a trailing slash from a url that already has a scheme', () => {
-    expect(buildResourceRedirectUrl({ url: 'https://example.org/' })).toBe(
-      'https://example.org'
-    );
+    expect(
+      buildResourceRedirectUrl({ url: 'https://example.org/' }, resourcePath, 5)
+    ).toBe('https://example.org/inzendingen/5');
+  });
+
+  it('adds a leading slash to the resource path when it is missing', () => {
+    expect(
+      buildResourceRedirectUrl(
+        { url: 'https://example.org' },
+        'inzendingen/[[resourceId]]',
+        5
+      )
+    ).toBe('https://example.org/inzendingen/5');
+  });
+
+  it('replaces every [[resourceId]] placeholder', () => {
+    expect(
+      buildResourceRedirectUrl(
+        { url: 'https://example.org' },
+        '/plan/[[resourceId]]?id=[[resourceId]]',
+        5
+      )
+    ).toBe('https://example.org/plan/5?id=5');
   });
 });
 
@@ -464,6 +498,7 @@ describe('sendModBreakNotifications', () => {
     const db = fakeSendDb({
       notifications: {
         sendModBreakNotification: true,
+        modBreakNotificationResourcePath: '/inzendingen/[[resourceId]]',
       },
       author: fakeUser({ id: 10, email: 'author@example.org' }),
     });
@@ -486,7 +521,7 @@ describe('sendModBreakNotifications', () => {
         resourceId: 5,
         newModBreaks,
         changedModBreaks: [],
-        redirectUrl: 'https://example.org',
+        redirectUrl: 'https://example.org/inzendingen/5',
       },
     });
   });

@@ -108,11 +108,17 @@ function buildUnsubscribeUrl({ userId, projectId }) {
   return `${process.env.URL}/api/project/${projectId}/user/unsubscribe/${userId}/${hash.digest('hex')}`;
 }
 
-function buildResourceRedirectUrl(project) {
+function buildResourceRedirectUrl(project, resourcePath, resourceId) {
   if (!project || !project.url) return '';
+  const path = typeof resourcePath === 'string' ? resourcePath.trim() : '';
+  if (!path) return '';
   let url = project.url.trim();
   if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
-  return url.replace(/\/+$/, '');
+  url = url.replace(/\/+$/, '');
+  const resourceUrlPath = path
+    .replaceAll('[[resourceId]]', String(resourceId))
+    .replace(/^\/*/, '/');
+  return `${url}${resourceUrlPath}`;
 }
 
 async function readModBreakNotificationSettings(db, projectId) {
@@ -123,14 +129,20 @@ async function readModBreakNotificationSettings(db, projectId) {
     const notifyAuthor = notifications?.sendModBreakNotification === true;
     const notifyCommenters =
       notifications?.sendModBreakNotificationToCommenters === true;
+    const resourcePath = notifications?.modBreakNotificationResourcePath || '';
 
-    return { notifyAuthor, notifyCommenters, project };
+    return { notifyAuthor, notifyCommenters, resourcePath, project };
   } catch (err) {
     console.error(
       `Failed to read sendModBreakNotification for project ${projectId}:`,
       err
     );
-    return { notifyAuthor: false, notifyCommenters: false, project: null };
+    return {
+      notifyAuthor: false,
+      notifyCommenters: false,
+      resourcePath: '',
+      project: null,
+    };
   }
 }
 
@@ -146,12 +158,16 @@ async function sendModBreakNotifications({
 
   try {
     const projectId = req.project?.id || Number(req.params?.projectId);
-    const { notifyAuthor, notifyCommenters, project } =
+    const { notifyAuthor, notifyCommenters, resourcePath, project } =
       await readModBreakNotificationSettings(db, projectId);
 
     if (!notifyAuthor && !notifyCommenters) return;
 
-    const redirectUrl = buildResourceRedirectUrl(project);
+    const redirectUrl = buildResourceRedirectUrl(
+      project,
+      resourcePath,
+      resource.id
+    );
     const recipients = await resolveModBreakRecipients({
       db,
       resource,
