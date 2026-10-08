@@ -20,6 +20,9 @@ describe('isSafeImageUrl', () => {
     'https://example.org/logo.png" onerror="alert(1)',
     'https://example.org/<script>',
     'java\tscript:alert(1)',
+    'https://x/a onerror=alert(1)',
+    'https://example.org/my logo.png',
+    'https://example.org/logo.png onerror=alert(1)',
     '',
     '   ',
   ])('rejects %j', (url) => {
