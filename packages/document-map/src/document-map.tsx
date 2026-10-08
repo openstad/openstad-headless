@@ -499,7 +499,7 @@ function DocumentMap({
         }
         setIsBoundsSet(true);
       }
-    }, [map, bounds, isBoundsSet]);
+    }, [map, bounds, entireDocumentVisible, isBoundsSet]);
 
     return null;
   };
@@ -602,7 +602,7 @@ function DocumentMap({
             : '')
       );
     }
-  }, []);
+  }, [relativePathPrepend]);
 
   let args = {
     canComment:
@@ -634,7 +634,7 @@ function DocumentMap({
     if (resource.extraData?.originalId) {
       setOriginalID(resource.extraData?.originalId);
     }
-  }, [resource]);
+  }, [resource, statusId]);
 
   if (canComment === false) args.canComment = canComment;
 
@@ -1032,7 +1032,7 @@ function DocumentMap({
     if (openInfoPopupOnInit === 'yes') {
       setIsModalOpen(true);
     }
-  }, []);
+  }, [openInfoPopupOnInit]);
 
   const [showButton, setShowButton] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);

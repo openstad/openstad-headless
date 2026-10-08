@@ -1132,7 +1132,12 @@ function ResourceOverviewInner({
     ) {
       setResources(resourcesWithPagination.records || []);
     }
-  }, [resourcesWithPagination, isLoading]);
+  }, [
+    resourcesWithPagination,
+    isLoading,
+    selectedProjects.length,
+    projectIds.length,
+  ]);
 
   useEffect(() => {
     if (listUsesAllResources) {

@@ -1,4 +1,4 @@
-import { FormValue } from '@openstad-headless/form/src/form';
+import type { FormValue } from '@openstad-headless/form/src/form';
 import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import type { BaseProps } from '@openstad-headless/types';
 import { ClickableImage } from '@openstad-headless/ui/src';
@@ -401,7 +401,14 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
     const unanswered = getUnansweredDilemmas();
     setIsFinished(unanswered.length === 0);
-  }, [dilemmas, dilemmaCards, getUnansweredDilemmas]);
+  }, [
+    dilemmas,
+    dilemmaCards,
+    getUnansweredDilemmas,
+    setCurrentDilemmaIndex,
+    setSelectedOption,
+    setIsFinished,
+  ]);
 
   if (isFinished || unansweredDilemmas.length === 0) {
     return (

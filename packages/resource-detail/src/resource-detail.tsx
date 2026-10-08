@@ -502,7 +502,7 @@ function ResourceDetail({
         originalDocumentTitleRef.current
       );
     }
-  }, [resource]);
+  }, [props.pageTitle, resource]);
 
   useEffect(() => {
     if (displayDescriptionExpandable && descriptionRef.current) {
