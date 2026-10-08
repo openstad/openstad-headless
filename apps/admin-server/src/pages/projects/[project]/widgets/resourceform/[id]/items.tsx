@@ -2020,6 +2020,18 @@ export default function WidgetResourceFormItems(
                               </em>
                             </FormDescription>
                           )}
+
+                        {form.watch('allowImageDescription') &&
+                          form.watch('fieldKey') === 'images' && (
+                            <FormDescription>
+                              <em className="text-xs text-red-600">
+                                Let op: de opmerking is openbaar. Ze wordt op de
+                                detailpagina onder de afbeelding getoond, tenzij
+                                &quot;Beschrijving van de afbeelding tonen&quot;
+                                in de detail-widget uit staat.
+                              </em>
+                            </FormDescription>
+                          )}
                       </>
                     )}
 
