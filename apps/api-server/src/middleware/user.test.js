@@ -17,6 +17,7 @@ const getUser = require('./user');
 
 afterEach(() => {
   vi.restoreAllMocks();
+  delete process.env.API_UPLOAD_LEGACY_AUTH_BYPASS;
 });
 
 function expiredToken() {
@@ -94,7 +95,17 @@ describe('user middleware with invalid tokens', () => {
     expect(next).toHaveBeenCalledWith();
   });
 
-  test('upload request with empty token is not treated as invalid', async () => {
+  test('upload request with empty token returns 401 without legacy bypass', async () => {
+    const req = createReq('POST', 'Bearer undefined');
+    req.path = '/api/project/1/upload/images';
+    const { res, next } = await run(req);
+
+    expect(res.set).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalledWith(expect.objectContaining({ status: 401 }));
+  });
+
+  test('upload request with empty token uses the upload service with legacy bypass', async () => {
+    process.env.API_UPLOAD_LEGACY_AUTH_BYPASS = 'true';
     const req = createReq('POST', 'Bearer undefined');
     req.path = '/api/project/1/upload/images';
     const { res, next } = await run(req);
