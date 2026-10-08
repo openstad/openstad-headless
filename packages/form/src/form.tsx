@@ -60,6 +60,7 @@ function Form({
   secondaryHandler = () => {},
   getValuesOnChange = () => {},
   allowResetAfterSubmit = true,
+  navigateAfterSubmitSuccess = false,
   currentPage,
   setCurrentPage,
   prevPage,
@@ -288,7 +289,8 @@ function Form({
       routingHiddenFields,
       submitHandler,
       pageHandler,
-      submitBeforeLastPage
+      submitBeforeLastPage,
+      navigateAfterSubmitSuccess
     );
 
     if (firstErrorKey && onValidationErrors) {
