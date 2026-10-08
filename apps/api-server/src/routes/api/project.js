@@ -1546,6 +1546,7 @@ router
       // Project has no Tag association (tags are linked via projectId only),
       // so tags are exported nested under Resource above.
       { model: db.Status },
+      { model: db.Widget },
     ]);
   })
 
