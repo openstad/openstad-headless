@@ -4,6 +4,7 @@ import {
   ALWAYS_PUBLIC_EXTRA_DATA_KEYS,
   EDITOR_PUBLIC_EXTRA_DATA_KEYS,
   filterPublicExtraData,
+  stripEditorOnlyExtraData,
 } from './filter-public-extra-data.js';
 
 describe('filterPublicExtraData', () => {
@@ -87,5 +88,42 @@ describe('filterPublicExtraData', () => {
   it('exports partnerLogo in the editor-public key list, not the always-public list', () => {
     expect(EDITOR_PUBLIC_EXTRA_DATA_KEYS).toContain('partnerLogo');
     expect(ALWAYS_PUBLIC_EXTRA_DATA_KEYS).not.toContain('partnerLogo');
+  });
+});
+
+describe('stripEditorOnlyExtraData', () => {
+  const extraData = {
+    partnerLogo: 'https://example.org/logo.png',
+    foo: 'bar',
+  };
+
+  it.each(['moderator', 'member', 'anonymous'])(
+    'removes partnerLogo for a %s and keeps the other keys',
+    (role) => {
+      expect(stripEditorOnlyExtraData(extraData, { role })).toEqual({
+        foo: 'bar',
+      });
+      expect(extraData.partnerLogo).toBe('https://example.org/logo.png');
+    }
+  );
+
+  it('removes partnerLogo when there is no user', () => {
+    expect(stripEditorOnlyExtraData(extraData, undefined)).toEqual({
+      foo: 'bar',
+    });
+  });
+
+  it.each(['editor', 'admin', 'superuser'])(
+    'keeps partnerLogo for a %s',
+    (role) => {
+      expect(stripEditorOnlyExtraData(extraData, { role })).toEqual(extraData);
+    }
+  );
+
+  it('returns empty or missing extraData unchanged', () => {
+    expect(stripEditorOnlyExtraData(undefined, { role: 'moderator' })).toBe(
+      undefined
+    );
+    expect(stripEditorOnlyExtraData({}, { role: 'moderator' })).toEqual({});
   });
 });

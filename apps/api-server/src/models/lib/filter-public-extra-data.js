@@ -1,3 +1,5 @@
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+
 const ALWAYS_PUBLIC_EXTRA_DATA_KEYS = ['originalId', 'ranking'];
 
 const EDITOR_PUBLIC_EXTRA_DATA_KEYS = ['partnerLogo'];
@@ -51,9 +53,21 @@ function filterPublicExtraData(
   return data;
 }
 
+function stripEditorOnlyExtraData(extraData, user) {
+  if (!extraData || typeof extraData !== 'object') return extraData;
+  if (hasRole(user, 'editor')) return extraData;
+
+  const stripped = { ...extraData };
+  EDITOR_PUBLIC_EXTRA_DATA_KEYS.forEach((key) => {
+    delete stripped[key];
+  });
+  return stripped;
+}
+
 module.exports = {
   ALWAYS_PUBLIC_EXTRA_DATA_KEYS,
   EDITOR_PUBLIC_EXTRA_DATA_KEYS,
   EDITOR_PUBLIC_EXTRA_DATA_KEY_AUTH,
   filterPublicExtraData,
+  stripEditorOnlyExtraData,
 };
