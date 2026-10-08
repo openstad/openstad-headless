@@ -26,4 +26,5 @@ export type BaseProps = {
     provider: string;
   };
   serverTime?: string;
+  multiProjectLogin?: boolean;
 };

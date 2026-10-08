@@ -1,5 +1,11 @@
-import useSWR from 'swr';
+import { useEffect } from 'react';
+import useSWR, { mutate } from 'swr';
 
+import {
+  hasActiveSessionCookie,
+  notifyAuthChange,
+  onAuthChange,
+} from '../../../lib/auth-broker';
 import { LocalStorage } from '../../../lib/local-storage';
 
 function setActiveCookie() {
@@ -8,13 +14,57 @@ function setActiveCookie() {
     (location.protocol === 'https:' ? '; Secure' : '');
 }
 
-function hasActiveCookie() {
-  return /(^|;\s*)openstad_active=1/.test(document.cookie);
-}
-
 function activateExpireOnClose(storage) {
   storage.set('expireOnClose', true);
   setActiveCookie();
+}
+
+export function consumeLoginTokenFromUrl({ search, projectId }) {
+  const params = new URLSearchParams(search);
+  const tokenProjectId = params.get('openstadprojectid');
+  let jwt = params.get('openstadlogintoken');
+  if (jwt && tokenProjectId && tokenProjectId !== String(projectId)) {
+    jwt = null;
+  }
+  if (!jwt) {
+    return { jwt: null, search };
+  }
+  params.delete('openstadlogintoken');
+  params.delete('openstadprojectid');
+  const query = params.toString();
+  return { jwt, search: query ? `?${query}` : '' };
+}
+
+export function consumeLoginToken({ storage, projectId, location, history }) {
+  const pickup = consumeLoginTokenFromUrl({
+    search: location.search,
+    projectId,
+  });
+  if (!pickup.jwt) return null;
+
+  storage.set('openStadUser', { jwt: pickup.jwt });
+  history.replaceState(
+    null,
+    '',
+    `${location.pathname}${pickup.search}${location.hash}`
+  );
+
+  return pickup.jwt;
+}
+
+export function pickInitialUser({ globalUser, propsUser, projectId }) {
+  const globalUserIsForThisProject =
+    globalUser &&
+    (!globalUser.projectId ||
+      String(globalUser.projectId) === String(projectId));
+  return (globalUserIsForThisProject ? globalUser : null) || propsUser || {};
+}
+
+export function applyJwt({ storage, api, projectId, jwt }) {
+  storage.set('openStadUser', { jwt, apiUrl: api.apiUrl });
+  api.currentUserJWT = jwt;
+  mutate({ type: 'current-user', projectId });
+  notifyAuthChange();
 }
 
 export default function useCurrentUser(props) {
@@ -25,6 +75,14 @@ export default function useCurrentUser(props) {
   const { data, error, isLoading } = useSWR(
     { type: 'current-user', projectId: self.projectId },
     getCurrentUser
+  );
+
+  useEffect(
+    () =>
+      onAuthChange(() =>
+        mutate({ type: 'current-user', projectId: self.projectId })
+      ),
+    [self.projectId]
   );
 
   async function getCurrentUser() {
@@ -46,7 +104,7 @@ export default function useCurrentUser(props) {
       return {};
     }
 
-    if (storage.get('expireOnClose') && !hasActiveCookie()) {
+    if (storage.get('expireOnClose') && !hasActiveSessionCookie()) {
       storage.remove('cmsUser');
       storage.remove('openStadUser');
       storage.remove('expireOnClose');
@@ -57,7 +115,11 @@ export default function useCurrentUser(props) {
     // get user from props
     let initialUser = {};
     try {
-      initialUser = globalOpenStadUser || props.openStadUser || {};
+      initialUser = pickInitialUser({
+        globalUser: globalOpenStadUser,
+        propsUser: props.openStadUser,
+        projectId,
+      });
     } catch (err) {}
 
     if (params.has('expireOnClose')) {
@@ -68,13 +130,15 @@ export default function useCurrentUser(props) {
     }
 
     let jwt;
-    if (params.has('openstadlogintoken')) {
-      jwt = params.get('openstadlogintoken');
+    const jwtFromUrl = consumeLoginToken({
+      storage,
+      projectId,
+      location: window.location,
+      history: window.history,
+    });
+    if (jwtFromUrl) {
+      jwt = jwtFromUrl;
       console.log('[osc-auth] login token received from URL');
-      storage.set('openStadUser', { jwt });
-      let url = window.location.href;
-      url = url.replace(new RegExp(`[?&]openstadlogintoken=${jwt}`), '');
-      history.replaceState(null, '', url);
     }
 
     let cmsUser = {};
@@ -139,7 +203,11 @@ export default function useCurrentUser(props) {
         console.log(
           `[osc-auth] user authenticated: userId=${openStadUser?.id} role=${openStadUser?.role}`
         );
-        storage.set('openStadUser', { ...openStadUser, jwt });
+        storage.set('openStadUser', {
+          ...openStadUser,
+          jwt,
+          apiUrl: self.api.apiUrl,
+        });
         if (openStadUser && openStadUser.expireOnClose) {
           activateExpireOnClose(storage);
         }

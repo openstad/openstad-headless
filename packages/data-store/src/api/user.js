@@ -87,6 +87,30 @@ export default {
     return { jwt: json.jwt, expireOnClose: json.expireOnClose || false };
   },
 
+  exchangeLogin: async function ({ projectId, sourceJwt }) {
+    return this.fetchWithStatus(
+      `/auth/project/${projectId}/exchange?useAuth=default`,
+      { method: 'POST', body: JSON.stringify({ sourceJwt }) },
+      [401, 403, 409]
+    );
+  },
+
+  loginWithUniqueCode: async function ({ projectId, code }) {
+    return this.fetchWithStatus(
+      `/auth/project/${projectId}/uniquecode-login?useAuth=default`,
+      { method: 'POST', body: JSON.stringify({ code }) },
+      [400, 401, 403, 409, 429]
+    );
+  },
+
+  completeFields: async function ({ projectId, pendingJwt, fields }) {
+    return this.fetchWithStatus(
+      `/auth/project/${projectId}/complete-fields?useAuth=default`,
+      { method: 'POST', body: JSON.stringify({ pendingJwt, fields }) },
+      [400, 401, 403, 409, 422]
+    );
+  },
+
   update: async function ({ projectId, user }) {
     let url = `/api/project/${projectId}/user/${user.id}`;
     let headers = {

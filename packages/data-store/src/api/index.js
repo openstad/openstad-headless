@@ -7,7 +7,7 @@ import comments from './comments';
 import commentsByProject from './commentsByProject';
 import datalayer from './datalayer';
 import enqueteResultCount from './enqueteResultCount';
-import fetchx from './fetch';
+import fetchx, { fetchWithStatus } from './fetch';
 import markers from './markers';
 import projectVotedUsersCount from './projectVotedUsersCount';
 import resource from './resource';
@@ -24,10 +24,14 @@ import widgets from './widgets';
 
 const windowGlobal = typeof window !== 'undefined' ? window : {};
 
-windowGlobal.OpenStadAPI = null;
+windowGlobal.OpenStadAPIs = windowGlobal.OpenStadAPIs || {};
+
 export default function singelton(props = { config: {} }) {
-  return (windowGlobal.OpenStadAPI =
-    windowGlobal.OpenStadAPI || new API(props));
+  const apiUrl = props.apiUrl || props.api?.url || null;
+  const key = `${apiUrl}|${props.projectId || 0}`;
+  windowGlobal.OpenStadAPIs[key] =
+    windowGlobal.OpenStadAPIs[key] || new API(props);
+  return windowGlobal.OpenStadAPIs[key];
 }
 
 export function getApiFetchMethodNames() {
@@ -51,6 +55,7 @@ function API(props = {}) {
   self.projectId = props.projectId || 0;
 
   self.fetch = fetchx.bind(self);
+  self.fetchWithStatus = fetchWithStatus.bind(self);
 
   self.choiceGuideResults = {
     fetch: choiceGuideResults.fetch.bind(self),
@@ -148,6 +153,9 @@ function API(props = {}) {
     fetch: user.fetch.bind(self),
     fetchMe: user.fetchMe.bind(self),
     connectUser: user.connectUser.bind(self),
+    exchangeLogin: user.exchangeLogin.bind(self),
+    loginWithUniqueCode: user.loginWithUniqueCode.bind(self),
+    completeFields: user.completeFields.bind(self),
     update: user.update.bind(self),
     logout: user.logout.bind(self),
   };

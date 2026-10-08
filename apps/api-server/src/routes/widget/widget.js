@@ -7,6 +7,7 @@ const path = require('path');
 const createError = require('http-errors');
 
 const getWidgetSettings = require('./widget-settings');
+const getDefaultConfig = require('./widget-default-config');
 const widgetDefinitions = getWidgetSettings();
 
 const { getWidgetJavascriptOutput } = require('./widget-output');
@@ -78,7 +79,7 @@ router
         } else {
           createError(404, 'Could not find the project belonging to given id');
         }
-        defaultConfig = getDefaultConfig(project, widgetType);
+        defaultConfig = getDefaultConfig(project, widgetType, config);
       } catch (e) {
         console.log(e);
         return next(createError(500, 'Could not fetch the project'));
@@ -153,7 +154,7 @@ router
       ? prefillAllowedDomains(projectDomains, widget.project.url)
       : null;
 
-    const defaultConfig = getDefaultConfig(widget.project, widget.type);
+    const defaultConfig = getDefaultConfig(widget.project, widget.type, config);
 
     try {
       const output = setConfigsToOutput(
@@ -202,55 +203,6 @@ Object.keys(widgetDefinitions).forEach((widget) => {
     );
   }
 });
-
-function getDefaultConfig(project, widgetType) {
-  const loginUrl = `${config.url}/auth/project/${project.id}/login?useAuth=default&forceNewLogin=1&redirectUri=[[REDIRECT_URI]]`;
-  const loginUrlAnonymous = `${config.url}/auth/project/${project.id}/login?useAuth=anonymous&forceNewLogin=1&redirectUri=[[REDIRECT_URI]]`;
-  const logoutUrl = `${config.url}/auth/project/${project.id}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
-
-  let url = process.env.IMAGE_APP_URL;
-  let zipCodeAutofillApiUrl = process.env.ZIPCODE_AUTOFILL_API_URL;
-  let zipCodeApiUrl = process.env.ZIPCODE_API_URL;
-
-  let protocol = '';
-
-  if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
-  }
-
-  let result = {
-    api: {
-      url: config.url,
-    },
-    login: {
-      url: loginUrl,
-      anonymous: {
-        url: loginUrlAnonymous,
-      },
-    },
-    logout: {
-      url: logoutUrl,
-    },
-    projectId: project.id,
-    imageUrl: config.url + `/api/project/${project.id}/upload`,
-    zipCodeApiUrl: zipCodeApiUrl || '',
-    zipCodeAutofillApiUrl: zipCodeAutofillApiUrl || '',
-    serverTime: new Date().toISOString(),
-    gtmEnvironment: process.env.GTM_ENVIRONMENT || 'prod',
-    randomSortRotationMs: Number(process.env.RANDOM_SORT_ROTATION_MS) || 0,
-  };
-
-  if (
-    widgetType == 'resourcedetailmap' ||
-    widgetType == 'resourcesmap' ||
-    widgetType == 'editormap' ||
-    widgetType == 'resourceform'
-  ) {
-    result.area = project.area?.polygon;
-  }
-
-  return result;
-}
 
 function setConfigsToOutput(
   widgetType,

@@ -5,11 +5,13 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import {
+  LoginDialog,
   Paginator,
   Spacer,
   Stepper,
   fireConfetti,
   headingLevels,
+  loginDialogTexts,
 } from '@openstad-headless/ui/src';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import '@utrecht/component-library-css';
@@ -293,6 +295,7 @@ function StemBegroot({
   const [currentStep, setCurrentStep] = useState<number>(startingStep);
   const [lastStep, setLastStep] = useState<number>(0);
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
+  const { requireLogin, dialogProps } = datastore.useLoginFlow(props);
   const [navAfterLogin, setNavAfterLogin] = useState<boolean>();
   // const [shouldReloadSelectedResources, setReloadSelectedResources] =
   //   useState<boolean>(false);
@@ -997,7 +1000,14 @@ function StemBegroot({
     const params = currentUrl.searchParams;
     params.delete('openstadlogintoken');
 
-    await currentUser.logout({ url: currentUrl.toString() });
+    // With multi-project login the auth-server session would otherwise log the
+    // next voter on this device in as this one
+    const logoutUrl =
+      props.multiProjectLogin && props.logout?.url
+        ? props.logout.url
+        : currentUrl.toString();
+
+    await currentUser.logout({ url: logoutUrl });
   }
 
   const computeCanAddMore = useCallback((): boolean => {
@@ -1430,6 +1440,8 @@ function StemBegroot({
               projectId={props.projectId}
               voteType={props.votes.voteType}
               apiUrl={props?.api?.url || ''}
+              requireLogin={requireLogin}
+              inlineLogin={props.votes.requiredUserRole !== 'anonymous'}
             />
           ) : null}
 
@@ -1472,6 +1484,8 @@ function StemBegroot({
                 appearance="secondary-action-button"
                 onClick={() => {
                   const loginUrl = new URL(`${props?.login?.url}`);
+                  // Switching identity must never reuse the current auth-server session
+                  loginUrl.searchParams.set('forceNewLogin', '1');
                   document.location.href = loginUrl.toString();
                 }}>
                 {props.stemCodeTitleSuccess}
@@ -1785,6 +1799,7 @@ function StemBegroot({
           </>
         ) : null}
         <NotificationProvider />
+        <LoginDialog {...dialogProps} texts={loginDialogTexts} />
       </div>
     </>
   );

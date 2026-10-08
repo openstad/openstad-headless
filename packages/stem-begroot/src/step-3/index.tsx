@@ -17,6 +17,11 @@ type Props = {
   projectId?: string | number;
   voteType?: string;
   apiUrl: string;
+  requireLogin: (options: {
+    loginUrl: string | (() => Promise<string>);
+    onBeforeRedirect?: () => void;
+  }) => Promise<boolean>;
+  inlineLogin: boolean;
 };
 export const Step3 = ({
   headingLevel = 3,
@@ -26,6 +31,8 @@ export const Step3 = ({
   projectId,
   voteType,
   apiUrl,
+  requireLogin,
+  inlineLogin,
   ...props
 }: Props) => {
   const votePendingStorage = React.useMemo(
@@ -45,59 +52,67 @@ export const Step3 = ({
       <Spacer size={2} />
       <Button
         appearance="primary-action-button"
-        onClick={async (e) => {
-          const loginUrl = new URL(props.loginUrl);
+        onClick={async () => {
+          const buildLoginUrl = async () => {
+            const loginUrl = new URL(props.loginUrl);
 
-          const redirectUri = loginUrl.searchParams.get('redirectUri');
+            const redirectUri = loginUrl.searchParams.get('redirectUri');
 
-          // Pass along the current pending vote to the API
-          let pendingVoteData = null;
+            // Pass along the current pending vote to the API
+            let pendingVoteData = null;
 
-          if (voteType === 'countPerTag' || voteType === 'budgetingPerTag') {
-            pendingVoteData = votePendingStorage.getVotePendingPerTag();
-          } else {
-            pendingVoteData = votePendingStorage.getVotePending();
-          }
+            if (voteType === 'countPerTag' || voteType === 'budgetingPerTag') {
+              pendingVoteData = votePendingStorage.getVotePendingPerTag();
+            } else {
+              pendingVoteData = votePendingStorage.getVotePending();
+            }
 
-          if (pendingVoteData) {
-            let pendingBudgetVoteApiUrl = `${apiUrl}/api/pending-budget-vote`;
-            const pendingCount = pendingVoteData
-              ? Object.keys(pendingVoteData).length
-              : 0;
+            if (pendingVoteData) {
+              let pendingBudgetVoteApiUrl = `${apiUrl}/api/pending-budget-vote`;
+              const pendingCount = pendingVoteData
+                ? Object.keys(pendingVoteData).length
+                : 0;
 
-            const response = await fetch(pendingBudgetVoteApiUrl, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                ...pendingVoteData,
-              }),
-            });
+              const response = await fetch(pendingBudgetVoteApiUrl, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  ...pendingVoteData,
+                }),
+              });
 
-            if (response.ok && redirectUri) {
-              const responseData = await response.json();
-              const { id } = responseData;
-              if (id) {
-                console.log(
-                  `[stem-begroot] pending vote saved before login: uuid=${id} resources=${pendingCount}`
-                );
-                const newRedirectUri = new URL(redirectUri);
-                newRedirectUri.searchParams.set('pendingBudgetVote', id);
+              if (response.ok && redirectUri) {
+                const responseData = await response.json();
+                const { id } = responseData;
+                if (id) {
+                  console.log(
+                    `[stem-begroot] pending vote saved before login: uuid=${id} resources=${pendingCount}`
+                  );
+                  const newRedirectUri = new URL(redirectUri);
+                  newRedirectUri.searchParams.set('pendingBudgetVote', id);
 
-                loginUrl.searchParams.set(
-                  'redirectUri',
-                  encodeURIComponent(newRedirectUri.toString())
+                  loginUrl.searchParams.set(
+                    'redirectUri',
+                    encodeURIComponent(newRedirectUri.toString())
+                  );
+                }
+              } else {
+                console.error(
+                  `[stem-begroot] pending vote save failed: status=${response.status} resources=${pendingCount}`
                 );
               }
-            } else {
-              console.error(
-                `[stem-begroot] pending vote save failed: status=${response.status} resources=${pendingCount}`
-              );
             }
-          }
 
-          document.location.href = loginUrl.toString();
+            return loginUrl.toString();
+          };
+
+          if (!inlineLogin) {
+            document.location.href = await buildLoginUrl();
+            return;
+          }
+          await requireLogin({ loginUrl: buildLoginUrl });
         }}>
         {stemCodeTitle}
       </Button>

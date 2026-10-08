@@ -14,6 +14,17 @@ export { Select } from './select';
 export { Spacer } from './spacer';
 export { Card } from './card';
 export { Dialog } from './dialog';
+export {
+  LoginDialog,
+  LoginDialogContent,
+  loginDialogTexts,
+} from './login-dialog';
+export type {
+  LoginDialogError,
+  LoginDialogProps,
+  LoginDialogStep,
+  LoginDialogTexts,
+} from './login-dialog';
 export { Carousel } from './carousel';
 export { Paginator } from './paginator';
 export { List } from './list';
