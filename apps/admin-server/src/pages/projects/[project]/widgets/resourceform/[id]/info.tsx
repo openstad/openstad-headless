@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -22,6 +23,8 @@ const formSchema = z.object({
   nameInHeader: z.boolean(),
   loginText: z.string(),
   loginButtonText: z.string(),
+  allowedEmailDomains: z.string().optional(),
+  domainRestrictionMessage: z.string().optional(),
 });
 
 export default function WidgetResourceFormInfo() {
@@ -42,6 +45,10 @@ export default function WidgetResourceFormInfo() {
       nameInHeader: widget?.config?.[category]?.nameInHeader || false,
       loginText: widget?.config?.[category]?.loginText || '',
       loginButtonText: widget?.config?.[category]?.loginButtonText || '',
+      allowedEmailDomains:
+        widget?.config?.[category]?.allowedEmailDomains || '',
+      domainRestrictionMessage:
+        widget?.config?.[category]?.domainRestrictionMessage || '',
     }),
     [widget?.config]
   );
@@ -132,6 +139,47 @@ export default function WidgetResourceFormInfo() {
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="allowedEmailDomains"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Toegestane e-maildomeinen</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="gemeente.nl, partner.nl" />
+                </FormControl>
+                <FormDescription>
+                  Als dit veld is ingevuld, kunnen alleen gebruikers die zijn
+                  ingelogd met een e-mailadres op een van deze domeinen het
+                  formulier invullen. Inloggen is dan altijd verplicht. Meerdere
+                  domeinen scheid je met een komma. Vul alleen het domein in,
+                  zonder @ (bijvoorbeeld gemeente.nl). Laat leeg om geen
+                  beperking toe te passen.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="domainRestrictionMessage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Melding bij geen toegang</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="U heeft geen toegang tot dit formulier."
+                  />
+                </FormControl>
+                <FormDescription>
+                  Wordt getoond aan ingelogde gebruikers die niet aan de
+                  domeinbeperking voldoen. Leeg = standaardtekst.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
