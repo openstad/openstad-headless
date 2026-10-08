@@ -40,6 +40,139 @@ function deriveNotificationTemplateData(instance) {
 }
 
 module.exports = (db, sequelize, DataTypes) => {
+  async function deliverNotification(instance) {
+    try {
+      await instance.update({ status: 'pending' });
+
+      // send immediately or wait for cron
+      const immediateTypes = [
+        'new concept resource - user feedback',
+        'new published resource - user feedback',
+        'updated resource - user feedback',
+        'new enquete - admin',
+        'new enquete - user',
+        'new published resource - admin update',
+        'updated resource - admin update',
+        'notification comment - user',
+        'notification comment reply - user',
+        'new comment - admin',
+        'new modbreak - user feedback',
+        'login email',
+        'login sms',
+        'user account about to expire',
+        'project issues warning',
+        'system issues warning',
+        'action',
+        'message by carrier pigeon',
+      ];
+
+      if (immediateTypes.find((type) => type == instance.type)) {
+        const derivedTemplateData = deriveNotificationTemplateData(instance);
+
+        const messageData = {
+          projectId: instance.projectId,
+          engine: instance.engine,
+          type: instance.type,
+          from: instance.from,
+          data: {
+            ...instance.data,
+            ...derivedTemplateData,
+          },
+        };
+
+        let htmlContent = '';
+        // _pdfAttachment is a non-persisted in-memory property.
+        // This works because immediateTypes are sent synchronously
+        // after .create() — never re-fetched from DB. If the send
+        // flow is ever refactored to re-fetch, this property will be lost.
+        let pdfAttachment = null;
+        let htmlContentEnquete = '';
+
+        // Process resource Q&A
+        if (instance.data.resourceId) {
+          const resourceResult = await processResourceQA(instance, db);
+          htmlContent = resourceResult.htmlContent;
+
+          if (
+            resourceResult.questionsAndAnswers.length &&
+            shouldGeneratePdf(instance.type)
+          ) {
+            const project = await db.Project.scope(
+              'includeEmailConfig'
+            ).findByPk(instance.projectId);
+            const isAdminType = [
+              'new published resource - admin update',
+              'updated resource - admin update',
+            ].includes(instance.type);
+            const toggleEnabled = isAdminType
+              ? project?.emailConfig?.notifications?.pdfAttachmentAdminEnabled
+              : project?.emailConfig?.notifications?.pdfAttachmentEnabled;
+            if (toggleEnabled) {
+              pdfAttachment = await buildPdfAttachment(
+                instance,
+                resourceResult.questionsAndAnswers,
+                resourceResult.widgetItems,
+                db,
+                project
+              );
+            }
+          }
+        }
+
+        // Process submission Q&A
+        if (instance.data.submissionId) {
+          const submissionResult = await processSubmissionQA(instance, db);
+          htmlContentEnquete = submissionResult.htmlContent;
+        }
+
+        // Create and send messages to all recipients
+        const recipients =
+          instance.to && instance.to.split(',').map((email) => email.trim());
+        if (recipients && recipients.length) {
+          await Promise.all(
+            recipients.map(async (recipient) => {
+              const message = await db.NotificationMessage.create(
+                { ...messageData, to: recipient },
+                {
+                  data: {
+                    ...messageData.data,
+                    submissionContent: htmlContent,
+                    enqueteContent: htmlContentEnquete,
+                    pdfAttachment,
+                  },
+                }
+              );
+              await message.send();
+            })
+          );
+        }
+
+        // Allow GC to reclaim PDF buffer immediately
+        if (pdfAttachment) {
+          pdfAttachment.content = null;
+          pdfAttachment = null;
+        }
+
+        await instance.update({ status: 'sent' });
+      } else {
+        await instance.update({ status: 'queued' });
+      }
+    } catch (err) {
+      console.error(
+        `Notification ${instance.id} (type: ${instance.type}, projectId: ${instance.projectId}) failed to send:`,
+        err
+      );
+      try {
+        await instance.update({ status: 'failed' });
+      } catch (updateErr) {
+        console.error(
+          `Notification ${instance.id} (type: ${instance.type}, projectId: ${instance.projectId}) could not be marked as failed:`,
+          updateErr
+        );
+      }
+    }
+  }
+
   const Notification = sequelize.define(
     'notification',
     {
@@ -156,142 +289,8 @@ module.exports = (db, sequelize, DataTypes) => {
         },
 
         afterCreate: async function (instance, options) {
-          try {
-            await instance.update({ status: 'pending' });
-
-            // send immediately or wait for cron
-            const immediateTypes = [
-              'new concept resource - user feedback',
-              'new published resource - user feedback',
-              'updated resource - user feedback',
-              'new enquete - admin',
-              'new enquete - user',
-              'new published resource - admin update',
-              'updated resource - admin update',
-              'notification comment - user',
-              'notification comment reply - user',
-              'new comment - admin',
-              'new modbreak - user feedback',
-              'login email',
-              'login sms',
-              'user account about to expire',
-              'project issues warning',
-              'system issues warning',
-              'action',
-              'message by carrier pigeon',
-            ];
-
-            if (immediateTypes.find((type) => type == instance.type)) {
-              const derivedTemplateData =
-                deriveNotificationTemplateData(instance);
-
-              const messageData = {
-                projectId: instance.projectId,
-                engine: instance.engine,
-                type: instance.type,
-                from: instance.from,
-                data: {
-                  ...instance.data,
-                  ...derivedTemplateData,
-                },
-              };
-
-              let htmlContent = '';
-              // _pdfAttachment is a non-persisted in-memory property.
-              // This works because immediateTypes are sent synchronously
-              // after .create() — never re-fetched from DB. If the send
-              // flow is ever refactored to re-fetch, this property will be lost.
-              let pdfAttachment = null;
-              let htmlContentEnquete = '';
-
-              // Process resource Q&A
-              if (instance.data.resourceId) {
-                const resourceResult = await processResourceQA(instance, db);
-                htmlContent = resourceResult.htmlContent;
-
-                if (
-                  resourceResult.questionsAndAnswers.length &&
-                  shouldGeneratePdf(instance.type)
-                ) {
-                  const project = await db.Project.scope(
-                    'includeEmailConfig'
-                  ).findByPk(instance.projectId);
-                  const isAdminType = [
-                    'new published resource - admin update',
-                    'updated resource - admin update',
-                  ].includes(instance.type);
-                  const toggleEnabled = isAdminType
-                    ? project?.emailConfig?.notifications
-                        ?.pdfAttachmentAdminEnabled
-                    : project?.emailConfig?.notifications?.pdfAttachmentEnabled;
-                  if (toggleEnabled) {
-                    pdfAttachment = await buildPdfAttachment(
-                      instance,
-                      resourceResult.questionsAndAnswers,
-                      resourceResult.widgetItems,
-                      db,
-                      project
-                    );
-                  }
-                }
-              }
-
-              // Process submission Q&A
-              if (instance.data.submissionId) {
-                const submissionResult = await processSubmissionQA(
-                  instance,
-                  db
-                );
-                htmlContentEnquete = submissionResult.htmlContent;
-              }
-
-              // Create and send messages to all recipients
-              const recipients =
-                instance.to &&
-                instance.to.split(',').map((email) => email.trim());
-              if (recipients && recipients.length) {
-                await Promise.all(
-                  recipients.map(async (recipient) => {
-                    const message = await db.NotificationMessage.create(
-                      { ...messageData, to: recipient },
-                      {
-                        data: {
-                          ...messageData.data,
-                          submissionContent: htmlContent,
-                          enqueteContent: htmlContentEnquete,
-                          pdfAttachment,
-                        },
-                      }
-                    );
-                    await message.send();
-                  })
-                );
-              }
-
-              // Allow GC to reclaim PDF buffer immediately
-              if (pdfAttachment) {
-                pdfAttachment.content = null;
-                pdfAttachment = null;
-              }
-
-              await instance.update({ status: 'sent' });
-            } else {
-              await instance.update({ status: 'queued' });
-            }
-          } catch (err) {
-            console.error(
-              `Notification ${instance.id} (type: ${instance.type}, projectId: ${instance.projectId}) failed to send:`,
-              err
-            );
-            try {
-              await instance.update({ status: 'failed' });
-            } catch (updateErr) {
-              console.error(
-                `Notification ${instance.id} (type: ${instance.type}, projectId: ${instance.projectId}) could not be marked as failed:`,
-                updateErr
-              );
-            }
-          }
+          const delivery = deliverNotification(instance);
+          if (!options?.sendInBackground) await delivery;
         },
       },
     }
