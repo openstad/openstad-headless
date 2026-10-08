@@ -48,6 +48,7 @@ const formSchema = z.object({
   sendCommentAdminEmail: z.boolean().optional(),
   sendModBreakNotification: z.boolean().optional(),
   sendModBreakNotificationToCommenters: z.boolean().optional(),
+  modBreakNotificationResourcePath: z.string().optional(),
   pdfAttachmentEnabled: z.boolean().optional(),
   pdfAttachmentAdminEnabled: z.boolean().optional(),
   pdfTitle: z.string().optional(),
@@ -77,6 +78,8 @@ export default function ProjectSettingsNotifications({
       sendModBreakNotificationToCommenters:
         data?.emailConfig?.[category]?.sendModBreakNotificationToCommenters ||
         false,
+      modBreakNotificationResourcePath:
+        data?.emailConfig?.[category]?.modBreakNotificationResourcePath ?? '',
       pdfAttachmentEnabled:
         data?.emailConfig?.[category]?.pdfAttachmentEnabled || false,
       pdfAttachmentAdminEnabled:
@@ -109,6 +112,8 @@ export default function ProjectSettingsNotifications({
           sendModBreakNotification: values.sendModBreakNotification || false,
           sendModBreakNotificationToCommenters:
             values.sendModBreakNotificationToCommenters || false,
+          modBreakNotificationResourcePath:
+            values.modBreakNotificationResourcePath || '',
           pdfAttachmentEnabled: values.pdfAttachmentEnabled || false,
           pdfAttachmentAdminEnabled: values.pdfAttachmentAdminEnabled || false,
           pdfTitle: values.pdfTitle || '',
@@ -317,6 +322,28 @@ export default function ProjectSettingsNotifications({
                           een modbreak is geplaatst of aangepast
                         </Label>
                       </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="modBreakNotificationResourcePath"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Pad naar de inzending in de modbreak-mail
+                    </FormLabel>
+                    <FormDescription>
+                      Bijvoorbeeld /inzendingen/[[resourceId]]. Wordt achter de
+                      project-URL geplakt. Leeg laten = geen knop in de mail.
+                    </FormDescription>
+                    <FormControl>
+                      <Input
+                        placeholder="/inzendingen/[[resourceId]]"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
