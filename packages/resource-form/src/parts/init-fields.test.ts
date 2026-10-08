@@ -54,4 +54,22 @@ describe('InitializeFormFields', () => {
     expect(field?.allowImageDescription).toBe(true);
     expect(field?.imageDescriptionLabel).toBe('Is dit een AI-afbeelding?');
   });
+
+  it('forwards the upload limits for the default images field', () => {
+    const imagesItem = defaultFormValues.find((item) => item.type === 'images');
+
+    const defaults = runInitializeFormFields([imagesItem], {
+      projectId: 1,
+      api: 'https://example.com',
+    }).find((f) => f.fieldKey === 'images');
+    expect(defaults?.allowedTypes).toEqual(['image/*']);
+    expect(defaults?.maxUploadSizeMB).toBe(25);
+
+    const configured = runInitializeFormFields(
+      [{ ...imagesItem, allowedTypes: ['image/png'], maxUploadSizeMB: 5 }],
+      { projectId: 1, api: 'https://example.com' }
+    ).find((f) => f.fieldKey === 'images');
+    expect(configured?.allowedTypes).toEqual(['image/png']);
+    expect(configured?.maxUploadSizeMB).toBe(5);
+  });
 });
