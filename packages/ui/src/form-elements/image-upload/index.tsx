@@ -11,6 +11,7 @@ import {
   AccordionProvider,
   FormField,
   FormFieldDescription,
+  FormLabel,
   Paragraph,
   Textbox,
 } from '@utrecht/component-library-react';
