@@ -34,7 +34,7 @@
           >
           {% for mb in newModBreaks %}
           <mj-text color="#525252" font-style="italic"
-            >{{ mb.description | safe }} &mdash; {{ mb.authorName }}</mj-text
+            >{{ mb.description | safe }} - {{ mb.authorName }}</mj-text
           >
           {% endfor %}
           {% endif %}
@@ -44,7 +44,7 @@
           >
           {% for mb in changedModBreaks %}
           <mj-text color="#525252" font-style="italic"
-            >{{ mb.description | safe }} &mdash; {{ mb.authorName }}</mj-text
+            >{{ mb.description | safe }} - {{ mb.authorName }}</mj-text
           >
           {% endfor %}
           {% endif %}
