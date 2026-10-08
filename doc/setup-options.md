@@ -136,7 +136,6 @@ Caps the size of an uploaded file, in MB. Default `25`. It is read by both the i
 proxy (sized above the cap so an oversized upload reaches the image server and gets a clean
 "file too large" error, instead of being silently cut off by the proxy itself).
 
-The admin UI's own client-side size check is a separate constant
-(`apps/admin-server/src/lib/upload-limits.ts`) and does **not** read this env var. It is
-inlined into the browser bundle at build time, so raising `MAX_FILE_UPLOAD_SIZE_MB` on a
-deployment does not raise the UI's limit; update both if you change the cap.
+The admin UI reads the same env var at runtime through `/api/upload-limit` and uses it for
+its client-side size check and the "Maximale bestandsgrootte" hint, so set it to the same
+value on the admin-server and the image server.

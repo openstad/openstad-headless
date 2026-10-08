@@ -1,9 +1,6 @@
 import { UploadDocument } from '@/hooks/upload-document';
-import {
-  GENERIC_UPLOAD_ERROR_MESSAGE,
-  MAX_UPLOAD_SIZE_MB,
-  UploadError,
-} from '@/lib/upload-limits';
+import useMaxUploadSizeMb from '@/hooks/use-max-upload-size';
+import { GENERIC_UPLOAD_ERROR_MESSAGE, UploadError } from '@/lib/upload-limits';
 import React from 'react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 
@@ -39,6 +36,8 @@ export const DocumentUploader: React.FC<{
   project,
   allowMultiple = false,
 }) => {
+  const maxUploadSizeMb = useMaxUploadSizeMb();
+
   async function doUpload(file: File) {
     const uploadedDocument = await UploadDocument(file, project);
 
@@ -78,9 +77,11 @@ export const DocumentUploader: React.FC<{
       render={({ field }) => (
         <FormItem>
           <FormLabel>{documentLabel}</FormLabel>
-          <FormDescription>
-            Maximale bestandsgrootte: {MAX_UPLOAD_SIZE_MB} MB
-          </FormDescription>
+          {maxUploadSizeMb !== null && (
+            <FormDescription>
+              Maximale bestandsgrootte: {maxUploadSizeMb} MB
+            </FormDescription>
+          )}
           <FormControl>
             <Input
               type="file"

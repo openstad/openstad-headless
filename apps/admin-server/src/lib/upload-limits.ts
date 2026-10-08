@@ -1,15 +1,40 @@
-export const MAX_UPLOAD_SIZE_MB = 25;
-export const MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024;
+export const UPLOAD_LIMIT_URL = '/api/upload-limit';
 
-const SIZE_ERROR_MESSAGE = `Het bestand is te groot. De maximale bestandsgrootte is ${MAX_UPLOAD_SIZE_MB} MB.`;
 export const GENERIC_UPLOAD_ERROR_MESSAGE =
   'Uploaden mislukt. Probeer het opnieuw.';
 
 export class UploadError extends Error {}
 
-export function assertUploadableSize(file: File): void {
-  if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-    throw new UploadError(SIZE_ERROR_MESSAGE);
+let maxUploadSizeMbCache: number | null = null;
+
+export async function getMaxUploadSizeMb(): Promise<number | null> {
+  if (maxUploadSizeMbCache !== null) return maxUploadSizeMbCache;
+
+  try {
+    const response = await fetch(UPLOAD_LIMIT_URL);
+    if (!response.ok) return null;
+
+    const body = await response.json();
+    if (typeof body?.maxUploadSizeMb !== 'number') return null;
+
+    maxUploadSizeMbCache = body.maxUploadSizeMb;
+    return maxUploadSizeMbCache;
+  } catch {
+    return null;
+  }
+}
+
+function sizeErrorMessage(maxUploadSizeMb: number | null): string {
+  if (maxUploadSizeMb === null) return 'Het bestand is te groot.';
+  return `Het bestand is te groot. De maximale bestandsgrootte is ${maxUploadSizeMb} MB.`;
+}
+
+export async function assertUploadableSize(file: File): Promise<void> {
+  const maxUploadSizeMb = await getMaxUploadSizeMb();
+  if (maxUploadSizeMb === null) return;
+
+  if (file.size > maxUploadSizeMb * 1024 * 1024) {
+    throw new UploadError(sizeErrorMessage(maxUploadSizeMb));
   }
 }
 
@@ -26,7 +51,7 @@ export async function performUpload(
 
   if (!response.ok) {
     if (response.status === 413) {
-      throw new UploadError(SIZE_ERROR_MESSAGE);
+      throw new UploadError(sizeErrorMessage(await getMaxUploadSizeMb()));
     }
     throw new UploadError(GENERIC_UPLOAD_ERROR_MESSAGE);
   }

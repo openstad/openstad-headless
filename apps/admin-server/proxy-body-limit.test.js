@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { resolveProxyBodyLimit } from './proxy-body-limit.js';
+import {
+  resolveMaxUploadSizeMb,
+  resolveProxyBodyLimit,
+} from './proxy-body-limit.js';
 
 describe('resolveProxyBodyLimit', () => {
   let warnSpy;
@@ -37,9 +40,9 @@ describe('resolveProxyBodyLimit', () => {
     expect(resolveProxyBodyLimit('1000')).toBe('1010mb');
   });
 
-  it('never lets the proxy limit drop below the client-assumed 25MB + headroom, even when the configured cap is lower', () => {
-    expect(resolveProxyBodyLimit('10')).toBe('35mb');
-    expect(resolveProxyBodyLimit('1')).toBe('35mb');
+  it('adds headroom on top of a cap below the default', () => {
+    expect(resolveProxyBodyLimit('10')).toBe('20mb');
+    expect(resolveProxyBodyLimit('1')).toBe('11mb');
   });
 
   it('accepts scientific notation that resolves to a valid integer', () => {
@@ -64,6 +67,34 @@ describe('resolveProxyBodyLimit', () => {
       const warn = spyOnWarn();
       resolveProxyBodyLimit(value);
       expect(warn).not.toHaveBeenCalled();
+    }
+  );
+});
+
+describe('resolveMaxUploadSizeMb', () => {
+  let warnSpy;
+
+  afterEach(() => {
+    warnSpy?.mockRestore();
+  });
+
+  it('returns the configured cap in MB', () => {
+    expect(resolveMaxUploadSizeMb('10')).toBe(10);
+    expect(resolveMaxUploadSizeMb('50')).toBe(50);
+    expect(resolveMaxUploadSizeMb('1000')).toBe(1000);
+  });
+
+  it('returns 25 when unset or blank', () => {
+    expect(resolveMaxUploadSizeMb(undefined)).toBe(25);
+    expect(resolveMaxUploadSizeMb('')).toBe(25);
+  });
+
+  it.each(['abc', '0', '-5', '2.5', '1001', 'Infinity'])(
+    'returns 25 and warns for invalid input %j',
+    (invalid) => {
+      warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      expect(resolveMaxUploadSizeMb(invalid)).toBe(25);
+      expect(warnSpy).toHaveBeenCalledTimes(1);
     }
   );
 });
