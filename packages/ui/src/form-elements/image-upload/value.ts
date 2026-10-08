@@ -109,6 +109,22 @@ export function removeDescription(
   return next;
 }
 
+export function renameDescription(
+  descriptions: Record<string, string>,
+  oldUrl: string,
+  newUrl: string
+): Record<string, string> {
+  if (
+    oldUrl === newUrl ||
+    !Object.prototype.hasOwnProperty.call(descriptions, oldUrl)
+  ) {
+    return descriptions;
+  }
+  const next = { ...descriptions, [newUrl]: descriptions[oldUrl] };
+  delete next[oldUrl];
+  return next;
+}
+
 export function toUploadedImageName(fileName: string): string {
   return fileName.replace(/[^a-z0-9_\-]/gi, '_').replace(/_+/g, '_');
 }
