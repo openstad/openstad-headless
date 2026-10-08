@@ -11,7 +11,7 @@ function prepareDocument(document: File) {
 }
 
 export async function UploadDocument(data: File, project?: string) {
-  assertUploadableSize(data);
+  await assertUploadableSize(data);
 
   const document = prepareDocument(data);
   const projectNumber: number | undefined = validateProjectNumber(project);

@@ -1,7 +1,7 @@
 import { UploadDocument } from '@/hooks/upload-document';
+import useMaxUploadSizeMb from '@/hooks/use-max-upload-size';
 import {
   GENERIC_UPLOAD_ERROR_MESSAGE,
-  MAX_UPLOAD_SIZE_MB,
   UploadError,
   assertUploadableSize,
   performUpload,
@@ -54,6 +54,7 @@ export const ImageUploader: React.FC<{
   const currentValue = form.watch(fieldName);
   const hasImage = typeof currentValue === 'string' && currentValue.length > 0;
   const hasCrop = hasImage ? parseImageCropUrl(currentValue).hasCrop : false;
+  const maxUploadSizeMb = useMaxUploadSizeMb();
 
   function prepareFile(image: any) {
     const formData = new FormData();
@@ -75,7 +76,7 @@ export const ImageUploader: React.FC<{
     ) {
       response = await UploadDocument(data, project);
     } else {
-      assertUploadableSize(data);
+      await assertUploadableSize(data);
 
       const image = prepareFile(data);
       const projectNumber: number | undefined = validateProjectNumber(project);
@@ -109,9 +110,11 @@ export const ImageUploader: React.FC<{
         <FormItem>
           <FormLabel>{imageLabel}</FormLabel>
           {description && <FormDescription>{description}</FormDescription>}
-          <FormDescription>
-            Maximale bestandsgrootte: {MAX_UPLOAD_SIZE_MB} MB
-          </FormDescription>
+          {maxUploadSizeMb !== null && (
+            <FormDescription>
+              Maximale bestandsgrootte: {maxUploadSizeMb} MB
+            </FormDescription>
+          )}
           <FormControl>
             <Input
               type="file"

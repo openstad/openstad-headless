@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { UploadDocument } from '@/hooks/upload-document';
-import { MAX_UPLOAD_SIZE_MB, UploadError } from '@/lib/upload-limits';
+import useMaxUploadSizeMb from '@/hooks/use-max-upload-size';
+import { UploadError } from '@/lib/upload-limits';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { formatDutchDate } from '@openstad-headless/lib/timeline-dates';
@@ -149,6 +150,7 @@ export function AgendaItemsEditor({
 }: AgendaItemsEditorProps) {
   const router = useRouter();
   const { project } = router.query;
+  const maxUploadSizeMb = useMaxUploadSizeMb();
   const [links, setLinks] = useState<AgendaLink[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
@@ -423,9 +425,11 @@ export function AgendaItemsEditor({
                   'document' ? (
                     <FormItem>
                       <FormLabel>Document</FormLabel>
-                      <FormDescription>
-                        Maximale bestandsgrootte: {MAX_UPLOAD_SIZE_MB} MB
-                      </FormDescription>
+                      {maxUploadSizeMb !== null && (
+                        <FormDescription>
+                          Maximale bestandsgrootte: {maxUploadSizeMb} MB
+                        </FormDescription>
+                      )}
                       <Input
                         type="file"
                         accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"

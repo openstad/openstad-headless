@@ -75,6 +75,7 @@ async function detectImageMimeType(response, extension) {
   const ct = response.headers.get('content-type');
   return ct && ct.startsWith('image/') ? ct : 'application/octet-stream';
 }
+const { resolveMaxUploadSizeMb } = require('./max-upload-size');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('path');
@@ -85,25 +86,9 @@ console.log('S3 enabled:', s3.isEnabled());
 // overridden via the MAX_FILE_UPLOAD_SIZE_MB env var. This is independent of any
 // per-widget client-side limit and protects the server from oversized uploads
 // that would otherwise stream until a socket timeout and hang without feedback.
-const MAX_SANE_FILE_UPLOAD_SIZE_MB = 1000;
-const parsedMaxFileUploadSizeMB = Number(process.env.MAX_FILE_UPLOAD_SIZE_MB);
-const maxFileUploadSizeMB =
-  Number.isInteger(parsedMaxFileUploadSizeMB) &&
-  parsedMaxFileUploadSizeMB > 0 &&
-  parsedMaxFileUploadSizeMB <= MAX_SANE_FILE_UPLOAD_SIZE_MB
-    ? parsedMaxFileUploadSizeMB
-    : 25;
-const rawMaxFileUploadSizeMB = process.env.MAX_FILE_UPLOAD_SIZE_MB;
-if (
-  rawMaxFileUploadSizeMB !== undefined &&
-  rawMaxFileUploadSizeMB.trim() !== '' &&
-  maxFileUploadSizeMB === 25 &&
-  parsedMaxFileUploadSizeMB !== 25
-) {
-  console.warn(
-    `MAX_FILE_UPLOAD_SIZE_MB=${rawMaxFileUploadSizeMB} is invalid (allowed 1-${MAX_SANE_FILE_UPLOAD_SIZE_MB}), using 25`
-  );
-}
+const maxFileUploadSizeMB = resolveMaxUploadSizeMb(
+  process.env.MAX_FILE_UPLOAD_SIZE_MB
+);
 const maxFileUploadBytes = maxFileUploadSizeMB * 1024 * 1024;
 
 const getPublicS3BaseUrl = () =>
