@@ -7,6 +7,7 @@ import React, { useEffect, useId, useRef, useState } from 'react';
 import { useDebounce } from 'rooks';
 
 import PostcodeAutoFill from '../../location';
+import { CascadeTagFilter } from './cascade-tag-filter';
 import './index.css';
 import { MultiSelectTagFilter } from './multiselect-tag-filter';
 import { SelectTagFilter } from './select-tag-filter';
@@ -46,6 +47,9 @@ type Props = {
     multiple: boolean;
     projectId?: any;
     inlineOptions?: boolean;
+    parentTagType?: string;
+    childTagType?: string;
+    cascade?: boolean;
   }>;
   tagsLimitation?: Array<number> | { [key: string]: number[] };
   searchLabel?: string;
@@ -467,6 +471,25 @@ export function Filters({
                 : tagsLimitation && tagsLimitation[tagGroup.type]
                   ? tagsLimitation[tagGroup.type]
                   : [];
+              if (tagGroup.cascade && tagGroup.childTagType) {
+                return (
+                  <CascadeTagFilter
+                    key={`cascade-${tagGroup.type}`}
+                    dataStore={dataStore}
+                    parentTagType={tagGroup.type}
+                    childTagType={tagGroup.childTagType}
+                    label={tagGroup.label || tagGroup.type}
+                    onUpdateFilter={(selectedIds) => {
+                      const newFilter = { ...filter, tags: selectedIds };
+                      updateFilter(newFilter);
+                      if (autoApply) {
+                        handleSubmit(undefined, newFilter, activeTags);
+                      }
+                    }}
+                  />
+                );
+              }
+              if (tagGroup.parentTagType) return null;
 
               if (tagGroup.multiple) {
                 return (
@@ -493,6 +516,13 @@ export function Filters({
                     preFilterTags={preFilterTagIds}
                     parentStopUsingDefaultValue={stopUsingDefaultValue}
                     inlineOptions={tagGroup.inlineOptions}
+                    selectedParentTagIds={
+                      tagGroup.parentTagType
+                        ? (selectedOptions[tagGroup.parentTagType] || []).map(
+                            Number
+                          )
+                        : []
+                    }
                   />
                 );
               } else {
@@ -524,6 +554,13 @@ export function Filters({
                     removeActiveTag={removeActiveTag}
                     resetCounter={resetCounter}
                     setResetCounter={setResetCounter}
+                    selectedParentTagIds={
+                      tagGroup.parentTagType
+                        ? (selectedOptions[tagGroup.parentTagType] || []).map(
+                            Number
+                          )
+                        : []
+                    }
                   />
                 );
               }
