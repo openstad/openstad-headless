@@ -735,4 +735,32 @@ describe("default template 'new modbreak - user feedback'", () => {
     });
     expect(html).toContain('&lt;b&gt;Redactie&lt;/b&gt;');
   });
+
+  it('shows the author name after the modbreak text', () => {
+    const html = render({
+      project: { config: { resources: { modbreakTitle: 'Mod' } } },
+      newModBreaks: [{ description: 'Tekst', authorName: 'Redactie' }],
+    });
+    expect(html).toContain('Tekst - Redactie');
+    expect(html).not.toContain('- Mod');
+  });
+
+  it('falls back to the project modbreak title when there is no author name', () => {
+    const html = render({
+      project: { config: { resources: { modbreakTitle: 'Mod' } } },
+      newModBreaks: [{ description: 'Tekst', authorName: null }],
+      changedModBreaks: [{ description: 'Aangepast', authorName: '' }],
+    });
+    expect(html).toContain('Tekst - Mod');
+    expect(html).toContain('Aangepast - Mod');
+  });
+
+  it('leaves out the dash when there is no author name and no modbreak title', () => {
+    const html = render({
+      project: { config: { resources: {} } },
+      newModBreaks: [{ description: 'Tekst', authorName: null }],
+    });
+    expect(html).toContain('Tekst</mj-text');
+    expect(html).not.toMatch(/Tekst\s*-/);
+  });
 });
