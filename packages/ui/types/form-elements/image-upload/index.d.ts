@@ -18,12 +18,16 @@ export type ImageUploadProps = {
     imageCropRequired?: boolean;
     imageCropRatioWidth?: number;
     imageCropRatioHeight?: number;
+    allowImageDescription?: boolean;
+    imageDescriptionLabel?: string;
+    imageDescriptionMaxLength?: number;
     type?: string;
     onChange?: (e: {
         name: string;
         value: {
             name: string;
             url: string;
+            description?: string;
         }[];
         isInitial?: boolean;
     }, triggerSetLastKey?: boolean) => void;
