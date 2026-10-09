@@ -203,6 +203,7 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: !this.publishDate,
         validate: {
           textLength(value) {
+            if (value == null) return;
             let len = value.trim().length;
             let descriptionMinLength =
               (this.config &&
