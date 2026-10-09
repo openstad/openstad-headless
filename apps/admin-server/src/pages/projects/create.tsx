@@ -82,7 +82,7 @@ export default function CreateProject() {
         data.config,
         data.emailConfig
       );
-      if (project) {
+      if (project?.id) {
         toast.success('Project aangemaakt!');
         router.push(`/projects/${project.id}/settings`);
       } else {
