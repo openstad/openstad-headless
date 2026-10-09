@@ -92,7 +92,7 @@ describe('Project beëindigen on the project settings page', () => {
       root.render(
         <SaveControllerProvider>
           <Bar />
-          <ProjectSettings />
+          <ProjectSettings cmsUrl="" />
         </SaveControllerProvider>
       )
     );

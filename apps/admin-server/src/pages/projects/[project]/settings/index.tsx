@@ -29,8 +29,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
+import {
+  type WithCmsUrlProps,
+  withCmsUrl,
+} from '@/lib/server-side-props-definition';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { slugify } from '@openstad-headless/lib/slugify';
 import * as Switch from '@radix-ui/react-switch';
 import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
@@ -85,7 +90,18 @@ const formSchema = z
 
 type SettingsField = keyof z.infer<typeof formSchema>;
 
-export default function ProjectSettings() {
+export const getServerSideProps = withCmsUrl;
+
+// Default project URL = the CMS host with the slugified name as a subdirectory,
+// e.g. "cms.openstad.nl/mijn-wijk". Falls back to a bare slug if CMS_URL is unset.
+function buildDefaultUrl(cmsUrl: string, name: string): string {
+  const slug = slugify(name);
+  if (!slug) return '';
+  const host = cmsUrl.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+  return host ? `${host}/${slug}` : slug;
+}
+
+export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
   const router = useRouter();
   let { project } = router.query;
   const { data, isLoading, updateProject } = useProject([
@@ -335,6 +351,20 @@ export default function ProjectSettings() {
                             onCheckedChange={(e: boolean) => {
                               field.onChange(e);
                               setShowUrl(e);
+                              if (e && !form.getValues('url')) {
+                                const previous = data?.config?.project?.lastUrl;
+                                const nextUrl =
+                                  previous ||
+                                  buildDefaultUrl(
+                                    cmsUrl,
+                                    form.getValues('name') || ''
+                                  );
+                                if (nextUrl) {
+                                  form.setValue('url', nextUrl, {
+                                    shouldValidate: true,
+                                  });
+                                }
+                              }
                             }}
                             checked={field.value}>
                             <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
