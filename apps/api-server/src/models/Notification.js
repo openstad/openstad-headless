@@ -135,7 +135,11 @@ module.exports = (db, sequelize, DataTypes) => {
 
         // Create and send messages to all recipients
         const recipients =
-          instance.to && instance.to.split(',').map((email) => email.trim());
+          instance.to &&
+          instance.to
+            .split(',')
+            .map((email) => email.trim())
+            .filter((email) => email.length > 0);
         if (recipients && recipients.length) {
           await Promise.all(
             recipients.map(async (recipient) => {

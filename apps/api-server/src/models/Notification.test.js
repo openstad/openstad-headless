@@ -81,6 +81,20 @@ describe('Notification afterCreate', () => {
     expect(instance.status).toBe('failed');
   });
 
+  it('creates one message per address and skips empty addresses', async () => {
+    const instance = makeInstance({
+      to: 'a@example.nl, b@example.nl,',
+    });
+
+    await afterCreate(instance, {});
+
+    const recipients = db.NotificationMessage.create.mock.calls.map(
+      ([data]) => data.to
+    );
+    expect(recipients).toEqual(['a@example.nl', 'b@example.nl']);
+    expect(instance.status).toBe('sent');
+  });
+
   it('queues non-immediate notification types instead of sending right away', async () => {
     const instance = makeInstance({
       type: 'new or updated comment - admin update',

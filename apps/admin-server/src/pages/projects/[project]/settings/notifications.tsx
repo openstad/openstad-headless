@@ -24,6 +24,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { WhitelistedEmailSelect } from '@/components/ui/whitelisted-email-select';
+import { isEmailList } from '@/lib/email-list';
 import {
   WithWhitelistedEmailsProps,
   withWhitelistedEmails,
@@ -42,7 +43,9 @@ export const getServerSideProps = withWhitelistedEmails;
 
 const formSchema = z.object({
   fromAddress: z.string().email(),
-  projectmanagerAddress: z.string().email(),
+  projectmanagerAddress: z.string().refine(isEmailList, {
+    message: 'Vul geldige e-mailadressen in, gescheiden met een komma.',
+  }),
   fromName: z.string().optional(),
   sendUpdatedResourceAdminEmail: z.boolean().optional(),
   sendCommentAdminEmail: z.boolean().optional(),
@@ -355,14 +358,18 @@ export default function ProjectSettingsNotifications({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Naar welk e-mailadres worden beheerder-notificaties
+                      Naar welke e-mailadressen worden beheerder-notificaties
                       verstuurd?
                       <InfoDialog
                         content={
-                          'Dit is het adres waar automatische beheerder-notificaties naartoe gaan, zoals nieuwe formulier-inzendingen, bewerkte inzendingen en nieuwe reacties. Zonder een geldig adres hier worden er geen beheerder-notificaties verzonden.'
+                          'Dit zijn de adressen waar automatische beheerder-notificaties naartoe gaan, zoals nieuwe formulier-inzendingen, bewerkte inzendingen en nieuwe reacties. Zonder een geldig adres hier worden er geen beheerder-notificaties verzonden.'
                         }
                       />
                     </FormLabel>
+                    <FormDescription>
+                      Meerdere e-mailadressen zijn mogelijk, mits ze gescheiden
+                      zijn met een komma.
+                    </FormDescription>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>
