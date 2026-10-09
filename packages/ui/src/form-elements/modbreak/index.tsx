@@ -135,6 +135,7 @@ const ModbreakField: FC<ModbreakFieldProps> = ({
       aria-labelledby={title ? titleId : undefined}
       aria-invalid={fieldInvalid || undefined}
       aria-describedby={fieldInvalid ? warningId : undefined}>
+      <input type="hidden" name={fieldKey} />
       <div className="modbreak-header">
         {title && (
           <Paragraph className="utrecht-form-field__label">
