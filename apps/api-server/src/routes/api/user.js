@@ -158,11 +158,15 @@ async function authorizeIdentityData(req, target, userData) {
 // client. Everyone else goes through the project client, so the auth server
 // can still reject identities with roles on other clients that the api does
 // not know about (for example clients of deleted projects).
+async function getAdminAuthConfig() {
+  const adminProject = await db.Project.findByPk(config.admin.projectId);
+  return authSettings.config({ project: adminProject, useAuth: 'default' });
+}
+
 async function getIdentityAuthConfig(req, target) {
   if (!hasRole(req.user, 'superuser') && !isSamePerson(req, target))
     return req.authConfig;
-  const adminProject = await db.Project.findByPk(config.admin.projectId);
-  return authSettings.config({ project: adminProject, useAuth: 'default' });
+  return getAdminAuthConfig();
 }
 
 // Reject real identity changes the caller may not make, instead of silently
@@ -589,22 +593,26 @@ router
   .all(canManageTwoFactor)
   .get(async (req, res, next) => {
     try {
-      // auth server settings
-      req.authConfig = await authSettings.config({
-        project: req.project,
-        useAuth: req.query.useAuth || 'default',
-      });
-      req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
+      const identifier = req.results.idpUser?.identifier;
+      if (!identifier) return res.json({ twoFactorEnabled: false });
 
-      // fetch auth user
-      const authUser = await req.adapter.service.fetchUserData({
-        authConfig: req.authConfig,
-        userId: req.results.idpUser.identifier,
-      });
+      const authConfig = await getAdminAuthConfig();
+      const adapter = await authSettings.adapter({ authConfig });
 
-      // return true if twoFactorConfigured equals 1
-      const isTwoFactorConfigured = authUser?.twoFactorConfigured === 1;
-      res.json({ twoFactorEnabled: isTwoFactorConfigured });
+      let authUser;
+      try {
+        authUser = await adapter.service.fetchUserData({
+          authConfig,
+          userId: identifier,
+        });
+      } catch (err) {
+        if (err?.message === 'Auth server user lookup returned 404') {
+          return res.json({ twoFactorEnabled: false });
+        }
+        throw err;
+      }
+
+      res.json({ twoFactorEnabled: authUser?.twoFactorConfigured === 1 });
     } catch (err) {
       next(err);
     }
