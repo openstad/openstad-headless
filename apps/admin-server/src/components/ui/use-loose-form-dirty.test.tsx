@@ -38,8 +38,6 @@ function OriginalId() {
   return null;
 }
 
-// The resource form: a code editor replaces `extraData` as a whole, while
-// `extraData.originalId` has its own field.
 function ExtraDataPage() {
   extraForm = useForm<ExtraValues>({ defaultValues: { extraData: { a: 1 } } });
   extraDirty = useLooseFormDirty(extraForm);

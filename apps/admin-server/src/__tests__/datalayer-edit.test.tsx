@@ -78,7 +78,6 @@ describe('Kaartlaag aanpassen', () => {
       );
     render();
     await settle();
-    // The layer arrives after the page has rendered, as in the browser.
     layer.data = { id: 23, name: 'Laag', layer: { type: 'FeatureCollection' } };
     render();
     await settle();

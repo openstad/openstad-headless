@@ -1,3 +1,6 @@
+import { looseFormEqual } from '@/lib/loose-equal';
+import { mergeEarlyEdits } from '@/lib/merge-early-edits';
+import cloneDeep from 'lodash/cloneDeep';
 import { useEffect, useRef } from 'react';
 
 /**
@@ -10,28 +13,52 @@ import { useEffect, useRef } from 'react';
  * visible as flickering field values. Waiting for `data` keeps the fallbacks off
  * screen, and skipping the reset while the form is dirty stops a background
  * revalidation from discarding what the user is typing.
- *
- * The first data is always taken in: an edit made before it arrived is kept,
- * every other field gets its stored value. Otherwise a save would send the
- * fallbacks of the untouched fields and overwrite what is stored.
  */
 export function useSyncFormDefaults(
   form: {
     formState: { isDirty: boolean };
+    getValues: () => any;
     reset: (values?: any, options?: any) => void;
+    watch: (callback: (values: any, info: { name?: string }) => void) => {
+      unsubscribe: () => void;
+    };
   },
   defaults: () => any,
   data: unknown
 ) {
   const loaded = useRef(false);
+  const shown = useRef<Record<string, unknown> | null>(null);
+  if (shown.current === null) shown.current = cloneDeep(form.getValues());
+  const edited = useRef<Record<string, unknown>>({});
+
+  useEffect(() => {
+    const subscription = form.watch((values, { name }) => {
+      if (loaded.current) return;
+      if (name) {
+        const key = name.split('.')[0];
+        if (!(key in edited.current)) {
+          edited.current[key] = cloneDeep(shown.current?.[key]);
+        }
+      }
+      shown.current = cloneDeep(values);
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
   useEffect(() => {
     if (!data) return;
     if (!loaded.current) {
       loaded.current = true;
-      form.reset(
-        defaults(),
-        form.formState.isDirty ? { keepDirtyValues: true } : undefined
-      );
+      const stored = defaults();
+      const current = form.getValues();
+      const merged = { ...stored };
+      Object.entries(edited.current).forEach(([key, before]) => {
+        merged[key] = mergeEarlyEdits(before, current?.[key], stored?.[key]);
+      });
+      form.reset(stored);
+      if (!looseFormEqual(merged, stored)) {
+        form.reset(merged, { keepDefaultValues: true });
+      }
       return;
     }
     if (form.formState.isDirty) return;

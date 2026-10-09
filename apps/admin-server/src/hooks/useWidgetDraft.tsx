@@ -9,6 +9,7 @@ import debounce from 'lodash/debounce';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
 import set from 'lodash/set';
+import unset from 'lodash/unset';
 import { useRouter } from 'next/router';
 import {
   useCallback,
@@ -65,11 +66,13 @@ export type ShownDefault = {
   stored: unknown;
 };
 const shownDefaults = new Map<string, ShownDefault>();
+const userChangedPaths = new Set<string>();
 let shownDefaultsGeneration = 0;
 let currentDraftState: { draft: any; saved: any } = { draft: {}, saved: {} };
 
 function clearShownDefaults() {
   shownDefaults.clear();
+  userChangedPaths.clear();
   pendingRepairs.clear();
   shownDefaultsGeneration += 1;
 }
@@ -161,11 +164,7 @@ export function asDefaultType(value: unknown, shown: unknown): unknown {
   return value;
 }
 
-/**
- * The value a field change puts in the draft. An emptied number field holds ''
- * in the draft, which has no type, so the saved value decides: retyping a
- * number after emptying it stays a number.
- */
+/** The value a field change puts in the draft, keeping the saved type of an emptied number. */
 export function draftFieldValue(
   value: unknown,
   shown: unknown,
@@ -302,7 +301,7 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
     // save. It only gets replaced once the user actually edits again below.
     const hadInheritedEntry = draftValidators.get(key)?.owner === owner;
 
-    const subscription = form.watch((values, { name }) => {
+    const subscription = form.watch((values, { name, type }) => {
       latestRef.current = values;
       if (!name) return;
       if (isDraftSyncPaused()) {
@@ -313,6 +312,11 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
           value
         );
         return;
+      }
+      if (type === 'change') {
+        userChangedPaths.add(
+          prefixRef.current ? `${prefixRef.current}.${name}` : name
+        );
       }
       if (!wasEditedRef.current && schemaRef.current) {
         installLiveValidator();
@@ -390,10 +394,12 @@ function normalize(value: any): any {
 /** The config with each unsaved key set to the default its tab showed. */
 export function withShownDefaults(
   config: any,
-  shownByKey: Map<string, ShownDefault> = shownDefaults
+  shownByKey: Map<string, ShownDefault> = shownDefaults,
+  changedByUser: Set<string> = userChangedPaths
 ): any {
   const out = cloneDeep(config ?? {});
   shownByKey.forEach(({ shown, stored }, path) => {
+    if (typeof shown === 'boolean' && changedByUser.has(path)) return;
     const value = get(out, path);
     const unchanged = value === stored || (value == null && stored == null);
     const emptiedAgain =
@@ -401,7 +407,16 @@ export function withShownDefaults(
       (value === '' ||
         value === false ||
         (Array.isArray(value) && value.length === 0));
-    if (unchanged || emptiedAgain) set(out, path, cloneDeep(shown));
+    if (!unchanged && !emptiedAgain) return;
+    set(out, path, cloneDeep(shown));
+    changedByUser.forEach((changed) => {
+      if (
+        changed.startsWith(`${path}.`) &&
+        typeof shownByKey.get(changed)?.shown === 'boolean'
+      ) {
+        unset(out, changed);
+      }
+    });
   });
   return out;
 }
@@ -410,10 +425,11 @@ export function withShownDefaults(
 export function changesToSave(
   draft: any,
   saved: any,
-  shownByKey: Map<string, ShownDefault> = shownDefaults
+  shownByKey: Map<string, ShownDefault> = shownDefaults,
+  changedByUser: Set<string> = userChangedPaths
 ): any {
-  const asShown = withShownDefaults(saved, shownByKey);
-  const draftAsShown = withShownDefaults(draft, shownByKey);
+  const asShown = withShownDefaults(saved, shownByKey, changedByUser);
+  const draftAsShown = withShownDefaults(draft, shownByKey, changedByUser);
   const out: any = {};
   Object.keys(draft ?? {}).forEach((key) => {
     if (looseEqual(draftAsShown[key], asShown[key])) return;
@@ -541,6 +557,7 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
   savedConfigRef.current = savedConfig;
 
   const draftBaseRef = useRef<{ widgetId?: string; config?: any }>({});
+  const inFlightKeysRef = useRef<string[]>([]);
   const hasDraft = !!previewConfig;
   useEffect(() => {
     if (!savedConfig || !hasDraft) return;
@@ -551,7 +568,11 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
     }
     if (isEqual(base.config, savedConfig)) return;
     draftBaseRef.current = { widgetId, config: cloneDeep(savedConfig) };
-    const keepKeys = [...PREVIEW_ONLY_KEYS, ...widgetSettingsKeys];
+    const keepKeys = [
+      ...PREVIEW_ONLY_KEYS,
+      ...widgetSettingsKeys,
+      ...inFlightKeysRef.current,
+    ];
     updatePreview(
       (prev) =>
         (prev
@@ -605,7 +626,13 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
       withRepairs(draft),
       stripPreviewOnly(savedConfigRef.current, widgetSettingsKeys)
     );
-    const saved = await updateConfig(payload as any, { silent: true });
+    inFlightKeysRef.current = Object.keys(payload);
+    let saved: Awaited<ReturnType<typeof updateConfig>>;
+    try {
+      saved = await updateConfig(payload as any, { silent: true });
+    } finally {
+      inFlightKeysRef.current = [];
+    }
     if (!saved) {
       throw new Error(
         'De configuratie kon niet worden opgeslagen. Probeer het opnieuw.'

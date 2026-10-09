@@ -255,8 +255,10 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
       startDate: existingData?.startDate
         ? new Date(existingData?.startDate)
         : new Date(),
-      publishDate: existingData?.publishDate
-        ? new Date(existingData.publishDate)
+      publishDate: existingData
+        ? existingData.publishDate
+          ? new Date(existingData.publishDate)
+          : null
         : new Date(),
 
       modBreaks:
@@ -718,13 +720,13 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
                         </div>
                         <Button
                           type="button"
-                          aria-label="Bestand verwijderen"
+                          aria-label="Afbeelding verwijderen"
                           color="red"
                           onClick={() => {
                             removeImage(index);
                           }}
                           className="absolute left-0 top-0">
-                          <X size={24} />
+                          <X size={24} aria-hidden="true" />
                         </Button>
 
                         <div
@@ -793,7 +795,7 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
                               removeFile(index);
                             }}
                             className="relative right-0 top-0 p-1">
-                            <X size={24} />
+                            <X size={24} aria-hidden="true" />
                           </Button>
                           <p>
                             <a

@@ -266,9 +266,6 @@ export default function ProjectAuthentication() {
 
   useSyncFormDefaults(form, defaults, authConfig);
 
-  // Right after a save the page holds the save's answer, without these
-  // settings, until the refresh lands. A save in that moment uses the ones
-  // the page loaded before instead of being refused.
   const loadedAuthConfig = useLastDefined(authConfig, project);
 
   const save = useCallback(async () => {

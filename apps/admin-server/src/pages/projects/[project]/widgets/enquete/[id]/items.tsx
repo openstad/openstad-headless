@@ -1840,7 +1840,7 @@ export default function WidgetEnqueteItems(
                                           removeImage(index);
                                         }}
                                         className="absolute left-0 top-0">
-                                        <X size={24} />
+                                        <X size={24} aria-hidden="true" />
                                       </Button>
 
                                       <div

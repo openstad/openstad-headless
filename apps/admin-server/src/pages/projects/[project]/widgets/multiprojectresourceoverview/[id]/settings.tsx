@@ -559,7 +559,7 @@ export default function WidgetMultiProjectSettings(
                                       );
                                     }}
                                     className="absolute left-0 top-0 p-1">
-                                    <X size={24} />
+                                    <X size={24} aria-hidden="true" />
                                   </Button>
                                 </div>
                               ) : (
@@ -609,7 +609,7 @@ export default function WidgetMultiProjectSettings(
                                       form.resetField('imageProjectUpload');
                                     }}
                                     className="absolute left-0 top-0 p-1">
-                                    <X size={24} />
+                                    <X size={24} aria-hidden="true" />
                                   </Button>
                                 </div>
                               )}

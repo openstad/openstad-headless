@@ -394,15 +394,7 @@ export function useRegisterSave(registration: SaveRegistration) {
   }, [register, key, enabled]);
 }
 
-/**
- * Validate a form before a header save.
- *
- * Runs as a submit, not a plain `trigger()`: the form only re-checks a field
- * while it is typed in after a submit, so with `trigger()` a fixed field kept
- * its error message until the next save. Like the old submit button, an
- * invalid form then moves focus to its first invalid field that is on screen,
- * after the save bar has focused its retry button.
- */
+/** Validates a form before a header save, the way its submit button did. */
 export async function validateForSave(form: {
   handleSubmit: (onValid: () => void) => () => Promise<void>;
 }): Promise<boolean> {
@@ -456,9 +448,6 @@ export function useLooseFormDirty(form: {
     const subscription = form.watch(() => setChanged(differs()));
     return () => subscription.unsubscribe();
   }, [form, differs]);
-  // A reset calls the watch callback before this render holds the new
-  // defaults, and a field that registers again afterwards can flip isDirty
-  // without a value change. So the stored answer can be stale: check it again.
   useEffect(() => {
     setChanged(differs());
   }, [rhfDirty, defaults, differs]);

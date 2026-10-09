@@ -35,6 +35,7 @@ import {
   withWhitelistedEmails,
 } from '@/lib/server-side-props-definition';
 import { zodResolver } from '@hookform/resolvers/zod';
+import pickBy from 'lodash/pickBy';
 import { X } from 'lucide-react';
 import { useRouter } from 'next/router';
 import * as React from 'react';
@@ -146,9 +147,6 @@ export default function ProjectAuthentication({
 
   useSyncFormDefaults(form, defaults, authConfig);
 
-  // Right after a save the page holds the save's answer, without these
-  // settings, until the refresh lands. A save in that moment uses the ones
-  // the page loaded before instead of being refused.
   const loadedAuthConfig = useLastDefined(authConfig, project);
 
   const save = useCallback(async () => {
@@ -166,10 +164,14 @@ export default function ProjectAuthentication({
     const checked = sendsLoginLinks
       ? values
       : { ...values, fromEmail: undefined };
-    // Right after a save the stored settings are not back yet; what this page
-    // saved last is what is stored then.
     const emptied = emptiedAuthEmail(
-      authConfig ?? form.formState.defaultValues,
+      authConfig ?? {
+        ...loadedAuthConfig,
+        ...pickBy(
+          form.formState.defaultValues,
+          (value) => value !== '' && value != null
+        ),
+      },
       checked
     );
     if (emptied) throw new Error(emptied);

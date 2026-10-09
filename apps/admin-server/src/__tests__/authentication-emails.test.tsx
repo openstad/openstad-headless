@@ -158,7 +158,6 @@ describe('login e-mail addresses on the Authenticatie page', () => {
     await save();
     expect(project.puts).toHaveLength(2);
 
-    // The save answers with the project without its auth settings.
     project.data = {
       config: { auth: { provider: { openstad: { authTypes: ['Url'] } } } },
     };
@@ -181,7 +180,6 @@ describe('login e-mail addresses on the Authenticatie page', () => {
     root = createRoot(container);
     rerender();
     await settle();
-    // The sender fields only show with login links on, which is not known yet.
     typeInto('clientDisclaimerText', 'Privacy');
     await settle();
     await save();
@@ -221,6 +219,47 @@ describe('login e-mail addresses on the Authenticatie page', () => {
     expect(sent.config.clientDisclaimerText).toBe('Privacy');
   });
 
+  it('adds a login method ticked before the stored ones loaded', async () => {
+    act(() => root.unmount());
+    project.data = undefined;
+    root = createRoot(container);
+    rerender();
+    await settle();
+    const box = (label: string) =>
+      Array.from(container.querySelectorAll('button[role="checkbox"]')).find(
+        (b) => b.closest('div')?.textContent?.includes(label)
+      ) as HTMLButtonElement;
+    act(() => box('Wachtwoord').click());
+    await settle();
+
+    project.data = {
+      config: {
+        auth: {
+          provider: {
+            openstad: { authTypes: ['UniqueCode', 'Url'], config: STORED },
+          },
+        },
+      },
+    };
+    rerender();
+    await settle();
+
+    expect(
+      ['Unieke code', 'E-mail een inloglink', 'Wachtwoord'].map((label) =>
+        box(label).getAttribute('data-state')
+      )
+    ).toEqual(['checked', 'checked', 'checked']);
+    expect(controller.state).toBe('dirty');
+    await save();
+
+    expect(controller.errorMessage).toBeNull();
+    expect(project.puts[0].auth.provider.openstad.authTypes).toEqual([
+      'UniqueCode',
+      'Url',
+      'Local',
+    ]);
+  });
+
   it('stops emptying an address right after the save that set it', async () => {
     act(() => root.unmount());
     project.data = {
@@ -243,7 +282,6 @@ describe('login e-mail addresses on the Authenticatie page', () => {
     await save();
     expect(project.puts).toHaveLength(2);
 
-    // The save answers with the project without its auth settings.
     project.data = {
       config: { auth: { provider: { openstad: { authTypes: ['Url'] } } } },
     };
@@ -259,7 +297,32 @@ describe('login e-mail addresses on the Authenticatie page', () => {
     );
   });
 
-  it('does not refuse an address that the save just before stored empty', async () => {
+  it('does not refuse an address that was never stored', async () => {
+    act(() => root.unmount());
+    project.data = {
+      config: {
+        auth: {
+          provider: {
+            openstad: {
+              authTypes: ['Url'],
+              config: { ...STORED, contactEmail: undefined },
+            },
+          },
+        },
+      },
+    };
+    root = createRoot(container);
+    rerender();
+    await settle();
+    typeInto('fromName', 'Gemeente E');
+    await settle();
+    await save();
+
+    expect(controller.errorMessage).toBeNull();
+    expect(project.puts.length).toBeGreaterThan(0);
+  });
+
+  it('refuses an emptied sender address that the server kept', async () => {
     const loginLinks = () =>
       Array.from(container.querySelectorAll('button[role="checkbox"]')).find(
         (box) =>
@@ -271,7 +334,6 @@ describe('login e-mail addresses on the Authenticatie page', () => {
     await save();
     expect(project.puts).toHaveLength(2);
 
-    // The save answers with the project without its auth settings.
     project.data = {
       config: { auth: { provider: { openstad: { authTypes: [] } } } },
     };
@@ -283,7 +345,9 @@ describe('login e-mail addresses on the Authenticatie page', () => {
     await settle();
     await save();
 
-    expect(controller.errorMessage).toBeNull();
-    expect(project.puts).toHaveLength(4);
+    expect(controller.errorMessage).toBe(
+      '"Afzender adres van login e-mails" kan niet leeg worden opgeslagen. Vul een e-mailadres in.'
+    );
+    expect(project.puts).toHaveLength(2);
   });
 });

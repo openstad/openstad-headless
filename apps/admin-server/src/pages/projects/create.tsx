@@ -161,6 +161,7 @@ export default function CreateProject() {
       const newId = await response.json();
       toast.success('Project aangemaakt!');
       if (newId) {
+        allowNextNavigation();
         router.push(`/projects/${newId}/widgets`);
       }
     } catch (error) {

@@ -40,7 +40,7 @@ import * as Switch from '@radix-ui/react-switch';
 import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
 import * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -64,9 +64,7 @@ const formSchema = z
     }),
     username: z.string().optional(),
     password: z.string().optional(),
-    endDate: z.date().min(new Date(), {
-      message: 'De datum moet nog niet geweest zijn!',
-    }),
+    endDate: z.date(),
     // We don't want to restrict this URL too much
     url: z
       .string()
@@ -89,6 +87,14 @@ const formSchema = z
   });
 
 type SettingsField = keyof z.infer<typeof formSchema>;
+
+function isNewPastEndDate(value: unknown, stored: unknown): boolean {
+  if (!(value instanceof Date)) return false;
+  if (stored && new Date(stored as string).getTime() === value.getTime()) {
+    return false;
+  }
+  return value.getTime() < Date.now();
+}
 
 export const getServerSideProps = withCmsUrl;
 
@@ -118,6 +124,7 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('general');
+  const autoFilledUrl = useRef<string | undefined>(undefined);
 
   const defaults = useCallback(() => {
     const currentDate = new Date();
@@ -165,7 +172,17 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
 
   const save = useCallback(async () => {
     const valid = await validateForSave(form);
-    if (!valid) {
+    const endDatePassed = isNewPastEndDate(
+      form.getValues('endDate'),
+      form.formState.defaultValues?.endDate
+    );
+    if (endDatePassed) {
+      form.setError('endDate', {
+        type: 'min',
+        message: 'De datum moet nog niet geweest zijn!',
+      });
+    }
+    if (!valid || endDatePassed) {
       setActiveTab(GENERAL_TAB.tab);
       const firstErrorField = Object.keys(FIELD_LABELS).find(
         (field) => form.getFieldState(field as SettingsField).invalid
@@ -349,6 +366,18 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
                           <Switch.Root
                             className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                             onCheckedChange={(e: boolean) => {
+                              if (
+                                !e &&
+                                autoFilledUrl.current !== undefined &&
+                                form.getValues('url') === autoFilledUrl.current
+                              ) {
+                                form.setValue(
+                                  'url',
+                                  form.formState.defaultValues?.url ?? '',
+                                  { shouldValidate: true }
+                                );
+                              }
+                              if (!e) autoFilledUrl.current = undefined;
                               field.onChange(e);
                               setShowUrl(e);
                               if (e && !form.getValues('url')) {
@@ -363,6 +392,7 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
                                   form.setValue('url', nextUrl, {
                                     shouldValidate: true,
                                   });
+                                  autoFilledUrl.current = nextUrl;
                                 }
                               }
                             }}

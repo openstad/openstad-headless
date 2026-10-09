@@ -1,3 +1,4 @@
+import { readJson } from '@/lib/read-json';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
@@ -52,7 +53,7 @@ export function useProject(scopes?: Array<string>) {
         },
       }),
     });
-    return await res.json();
+    return readJson(res, 'Het project kon niet worden aangemaakt.');
   }
 
   async function importProject(

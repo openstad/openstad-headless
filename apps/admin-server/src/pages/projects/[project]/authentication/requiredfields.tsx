@@ -21,6 +21,7 @@ import { Spacer } from '@/components/ui/spacer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { useLastDefined } from '@/hooks/use-last-defined';
 import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { zodResolver } from '@hookform/resolvers/zod';
 import cloneDeep from 'lodash/cloneDeep';
@@ -217,7 +218,19 @@ export default function ProjectAuthenticationRequiredFields() {
 
   const [activeTab, setActiveTab] = useState('users');
 
+  const loadedUserConfig = useLastDefined(
+    data?.config?.auth?.provider?.openstad?.config,
+    project
+  );
+  const loadedAnonymousConfig = useLastDefined(
+    data?.config?.auth?.provider?.anonymous?.config,
+    project
+  );
+
   const saveUser = useCallback(async () => {
+    if (!loadedUserConfig) {
+      throw new Error('De instellingen zijn nog niet geladen.');
+    }
     const valid = await validateForSave(userForm);
     if (!valid) {
       throw new Error(
@@ -253,9 +266,12 @@ export default function ProjectAuthenticationRequiredFields() {
     }
 
     rebaselineAfterSave(userForm, sent);
-  }, [userForm, updateProject]);
+  }, [loadedUserConfig, userForm, updateProject]);
 
   const saveAnonymous = useCallback(async () => {
+    if (!loadedAnonymousConfig) {
+      throw new Error('De instellingen zijn nog niet geladen.');
+    }
     const valid = await validateForSave(anonymousForm);
     if (!valid) {
       throw new Error(
@@ -291,7 +307,7 @@ export default function ProjectAuthenticationRequiredFields() {
     }
 
     rebaselineAfterSave(anonymousForm, sent);
-  }, [anonymousForm, updateProject]);
+  }, [loadedAnonymousConfig, anonymousForm, updateProject]);
 
   const userDirty = useLooseFormDirty(userForm);
   const anonymousDirty = useLooseFormDirty(anonymousForm);

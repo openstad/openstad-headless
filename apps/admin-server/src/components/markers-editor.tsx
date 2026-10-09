@@ -12,7 +12,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useRegisterSave } from '@/components/ui/save-controller';
+import {
+  useRegisterSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
@@ -288,7 +291,7 @@ export default function MarkersEditor({
   }
 
   async function handleSave() {
-    const isValid = await nameForm.trigger();
+    const isValid = await validateForSave(nameForm);
     if (!isValid) {
       throw new Error('Controleer de gemarkeerde velden.');
     }

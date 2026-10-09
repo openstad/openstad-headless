@@ -1743,7 +1743,7 @@ export default function WidgetChoiceGuideItems(
                                               removeImage(index);
                                             }}
                                             className="absolute left-0 top-0">
-                                            <X size={24} />
+                                            <X size={24} aria-hidden="true" />
                                           </Button>
 
                                           <div
@@ -2291,7 +2291,7 @@ export default function WidgetChoiceGuideItems(
                                             right: 0,
                                             top: 0,
                                           }}>
-                                          <X size={24} />
+                                          <X size={24} aria-hidden="true" />
                                         </Button>
                                       </div>
                                     </section>
@@ -2323,7 +2323,7 @@ export default function WidgetChoiceGuideItems(
                                             right: 0,
                                             top: 0,
                                           }}>
-                                          <X size={24} />
+                                          <X size={24} aria-hidden="true" />
                                         </Button>
                                       </div>
                                     </section>
