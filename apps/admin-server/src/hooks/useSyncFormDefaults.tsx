@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 /**
  * Keep a react-hook-form in sync with data that is fetched after the first
@@ -10,17 +10,30 @@ import { useEffect } from 'react';
  * visible as flickering field values. Waiting for `data` keeps the fallbacks off
  * screen, and skipping the reset while the form is dirty stops a background
  * revalidation from discarding what the user is typing.
+ *
+ * The first data is always taken in: an edit made before it arrived is kept,
+ * every other field gets its stored value. Otherwise a save would send the
+ * fallbacks of the untouched fields and overwrite what is stored.
  */
 export function useSyncFormDefaults(
   form: {
     formState: { isDirty: boolean };
-    reset: (values?: any) => void;
+    reset: (values?: any, options?: any) => void;
   },
   defaults: () => any,
   data: unknown
 ) {
+  const loaded = useRef(false);
   useEffect(() => {
     if (!data) return;
+    if (!loaded.current) {
+      loaded.current = true;
+      form.reset(
+        defaults(),
+        form.formState.isDirty ? { keepDirtyValues: true } : undefined
+      );
+      return;
+    }
     if (form.formState.isDirty) return;
     form.reset(defaults());
   }, [form, defaults, data]);

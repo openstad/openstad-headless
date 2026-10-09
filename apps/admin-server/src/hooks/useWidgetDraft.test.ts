@@ -7,6 +7,7 @@ import {
   changesToSave,
   collectRepair,
   collectShownDefaults,
+  draftFieldValue,
   rebaseDraft,
   withRepairs,
   withShownDefaults,
@@ -104,6 +105,15 @@ describe('number inputs without a schema', () => {
     expect(asDefaultType('abc', 1)).toBe('abc');
     expect(asDefaultType('12', '')).toBe('12');
     expect(asDefaultType('12', undefined)).toBe('12');
+  });
+
+  it('keeps a number a number when it is typed again after emptying the field', () => {
+    expect(draftFieldValue('9999', '', 0)).toBe(9999);
+    expect(draftFieldValue('9999', undefined, 20)).toBe(9999);
+    expect(draftFieldValue('12', '', 'abc')).toBe('12');
+    expect(draftFieldValue('12', '', undefined)).toBe('12');
+    expect(draftFieldValue('', '', 9999)).toBe('');
+    expect(draftFieldValue('12', 'text', 5)).toBe('12');
   });
 });
 

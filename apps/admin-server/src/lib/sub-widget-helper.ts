@@ -1,4 +1,6 @@
+import { asDefaultType } from '@/hooks/useWidgetDraft';
 import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
 import set from 'lodash/set';
 
 type ConfigWithFunctions<ChildWidgetProps> = ChildWidgetProps & {
@@ -47,7 +49,7 @@ export function extractConfig<
       updatePreview((prev) => {
         const base = prev ?? previewConfig;
         const subConfig = cloneDeep(base[subWidgetKey] ?? {});
-        set(subConfig as any, key, value);
+        set(subConfig as any, key, asDefaultType(value, get(subConfig, key)));
         return {
           ...base,
           [subWidgetKey]: subConfig,

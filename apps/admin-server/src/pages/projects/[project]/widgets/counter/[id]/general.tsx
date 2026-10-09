@@ -207,10 +207,7 @@ export default function CounterDisplay(
                     <Input
                       type="number"
                       value={field.value || '0'}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        onFieldChange(field.name, e.target.value);
-                      }}
+                      onChange={field.onChange}
                     />
                   </FormControl>
                 </FormItem>
@@ -271,10 +268,7 @@ export default function CounterDisplay(
                     <Input
                       type="number"
                       value={field.value ?? ''}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        onFieldChange(field.name, e.target.value);
-                      }}
+                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />

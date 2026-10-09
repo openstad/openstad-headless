@@ -162,6 +162,19 @@ export function asDefaultType(value: unknown, shown: unknown): unknown {
 }
 
 /**
+ * The value a field change puts in the draft. An emptied number field holds ''
+ * in the draft, which has no type, so the saved value decides: retyping a
+ * number after emptying it stays a number.
+ */
+export function draftFieldValue(
+  value: unknown,
+  shown: unknown,
+  stored: unknown
+): unknown {
+  return asDefaultType(value, shown === '' || shown == null ? stored : shown);
+}
+
+/**
  * Push every react-hook-form field of a widget config tab into the whole-widget
  * draft (previewConfig) as it changes. A single coalescing debounce per tab
  * collects the names that changed and, on flush, pushes each one's LATEST value
@@ -560,7 +573,11 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
     (key: string, raw: any) => {
       updatePreview((prev) => {
         if (!prev) return prev as any;
-        const value = asDefaultType(raw, get(prev, key));
+        const value = draftFieldValue(
+          raw,
+          get(prev, key),
+          get(savedConfigRef.current, key)
+        );
         if (typeof key === 'string' && key.includes('.')) {
           const next = cloneDeep(prev) as T;
           set(next as any, key, value);

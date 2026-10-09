@@ -140,4 +140,150 @@ describe('login e-mail addresses on the Authenticatie page', () => {
     expect(controller.errorMessage).toBeNull();
     expect(project.puts.length).toBeGreaterThan(0);
   });
+
+  function rerender() {
+    act(() =>
+      root.render(
+        <SaveControllerProvider>
+          <Bar />
+          <AuthenticationPage whitelistedEmails={[]} />
+        </SaveControllerProvider>
+      )
+    );
+  }
+
+  it('saves again before the refresh after a save has landed', async () => {
+    typeInto('fromName', 'Gemeente A');
+    await settle();
+    await save();
+    expect(project.puts).toHaveLength(2);
+
+    // The save answers with the project without its auth settings.
+    project.data = {
+      config: { auth: { provider: { openstad: { authTypes: ['Url'] } } } },
+    };
+    rerender();
+    await settle();
+    typeInto('fromName', 'Gemeente B');
+    await settle();
+    await save();
+
+    expect(controller.errorMessage).toBeNull();
+    expect(project.puts).toHaveLength(4);
+    expect(project.puts[3].auth.provider.openstad.config.fromName).toBe(
+      'Gemeente B'
+    );
+  });
+
+  it('still refuses to save before the settings have loaded', async () => {
+    act(() => root.unmount());
+    project.data = undefined;
+    root = createRoot(container);
+    rerender();
+    await settle();
+    // The sender fields only show with login links on, which is not known yet.
+    typeInto('clientDisclaimerText', 'Privacy');
+    await settle();
+    await save();
+
+    expect(project.puts).toHaveLength(0);
+    expect(controller.errorMessage).toBe(
+      'De instellingen zijn nog niet geladen.'
+    );
+  });
+
+  it('keeps the stored login methods when a field was edited before they loaded', async () => {
+    act(() => root.unmount());
+    project.data = undefined;
+    root = createRoot(container);
+    rerender();
+    await settle();
+    typeInto('clientDisclaimerText', 'Privacy');
+    await settle();
+
+    project.data = {
+      config: {
+        auth: {
+          provider: {
+            openstad: { authTypes: ['UniqueCode', 'Url'], config: STORED },
+          },
+        },
+      },
+    };
+    rerender();
+    await settle();
+    await save();
+
+    expect(controller.errorMessage).toBeNull();
+    const sent = project.puts[0].auth.provider.openstad;
+    expect(sent.authTypes).toEqual(['UniqueCode', 'Url']);
+    expect(sent.config.fromEmail).toBe('noreply@example.org');
+    expect(sent.config.clientDisclaimerText).toBe('Privacy');
+  });
+
+  it('stops emptying an address right after the save that set it', async () => {
+    act(() => root.unmount());
+    project.data = {
+      config: {
+        auth: {
+          provider: {
+            openstad: {
+              authTypes: ['Url'],
+              config: { ...STORED, contactEmail: undefined },
+            },
+          },
+        },
+      },
+    };
+    root = createRoot(container);
+    rerender();
+    await settle();
+    typeInto('contactEmail', 'nieuw@example.org');
+    await settle();
+    await save();
+    expect(project.puts).toHaveLength(2);
+
+    // The save answers with the project without its auth settings.
+    project.data = {
+      config: { auth: { provider: { openstad: { authTypes: ['Url'] } } } },
+    };
+    rerender();
+    await settle();
+    typeInto('contactEmail', '');
+    await settle();
+    await save();
+
+    expect(project.puts).toHaveLength(2);
+    expect(controller.errorMessage).toBe(
+      '"E-mailadres voor contact en hulpvragen" kan niet leeg worden opgeslagen. Vul een e-mailadres in.'
+    );
+  });
+
+  it('does not refuse an address that the save just before stored empty', async () => {
+    const loginLinks = () =>
+      Array.from(container.querySelectorAll('button[role="checkbox"]')).find(
+        (box) =>
+          box.closest('div')?.textContent?.includes('E-mail een inloglink')
+      ) as HTMLButtonElement;
+    typeInto('fromEmail', '');
+    act(() => loginLinks().click());
+    await settle();
+    await save();
+    expect(project.puts).toHaveLength(2);
+
+    // The save answers with the project without its auth settings.
+    project.data = {
+      config: { auth: { provider: { openstad: { authTypes: [] } } } },
+    };
+    rerender();
+    await settle();
+    act(() => loginLinks().click());
+    await settle();
+    typeInto('fromName', 'Gemeente D');
+    await settle();
+    await save();
+
+    expect(controller.errorMessage).toBeNull();
+    expect(project.puts).toHaveLength(4);
+  });
 });

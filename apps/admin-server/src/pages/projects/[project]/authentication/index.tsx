@@ -27,6 +27,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { WhitelistedEmailSelect } from '@/components/ui/whitelisted-email-select';
+import { useLastDefined } from '@/hooks/use-last-defined';
 import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { emptiedAuthEmail } from '@/lib/auth-email-check';
 import {
@@ -145,10 +146,15 @@ export default function ProjectAuthentication({
 
   useSyncFormDefaults(form, defaults, authConfig);
 
+  // Right after a save the page holds the save's answer, without these
+  // settings, until the refresh lands. A save in that moment uses the ones
+  // the page loaded before instead of being refused.
+  const loadedAuthConfig = useLastDefined(authConfig, project);
+
   const save = useCallback(async () => {
     // Saving before the auth config has arrived would write the empty form over
     // the stored settings and wipe them.
-    if (!authConfig) {
+    if (!loadedAuthConfig) {
       throw new Error('De instellingen zijn nog niet geladen.');
     }
     const valid = await validateForSave(form);
@@ -157,9 +163,14 @@ export default function ProjectAuthentication({
     }
     const values = formSchema.parse(form.getValues());
     const sendsLoginLinks = values.authTypes.includes('Url');
+    const checked = sendsLoginLinks
+      ? values
+      : { ...values, fromEmail: undefined };
+    // Right after a save the stored settings are not back yet; what this page
+    // saved last is what is stored then.
     const emptied = emptiedAuthEmail(
-      authConfig,
-      sendsLoginLinks ? values : { ...values, fromEmail: undefined }
+      authConfig ?? form.formState.defaultValues,
+      checked
     );
     if (emptied) throw new Error(emptied);
     let updatedConfig: {
@@ -217,7 +228,7 @@ export default function ProjectAuthentication({
     if (!doubleSave || !project) {
       throw new Error('Er is helaas iets mis gegaan.');
     }
-  }, [authConfig, form, updateProject]);
+  }, [authConfig, loadedAuthConfig, form, updateProject]);
 
   useRegisterFormSave(form, save);
 

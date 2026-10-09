@@ -17,6 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { useLastDefined } from '@/hooks/use-last-defined';
 import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Copy, Info } from 'lucide-react';
@@ -265,10 +266,15 @@ export default function ProjectAuthentication() {
 
   useSyncFormDefaults(form, defaults, authConfig);
 
+  // Right after a save the page holds the save's answer, without these
+  // settings, until the refresh lands. A save in that moment uses the ones
+  // the page loaded before instead of being refused.
+  const loadedAuthConfig = useLastDefined(authConfig, project);
+
   const save = useCallback(async () => {
     // Saving before the auth config has arrived would write the empty form over
     // the stored settings and wipe them.
-    if (!authConfig) {
+    if (!loadedAuthConfig) {
       throw new Error('De instellingen zijn nog niet geladen.');
     }
     const valid = await validateForSave(form);
@@ -328,7 +334,7 @@ export default function ProjectAuthentication() {
     if (!result) {
       throw new Error('Er is helaas iets mis gegaan.');
     }
-  }, [authConfig, form, updateProject]);
+  }, [loadedAuthConfig, form, updateProject]);
 
   useRegisterFormSave(form, save);
 

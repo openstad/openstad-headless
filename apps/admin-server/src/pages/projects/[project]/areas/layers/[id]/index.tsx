@@ -46,7 +46,7 @@ export default function ProjectDatalayerEdit() {
     () => ({
       name: data?.name || null,
       layer: JSON.stringify(data?.layer),
-      icon: data?.icon || null,
+      icon: data?.icon || [],
       iconUploader: '',
     }),
     [data]

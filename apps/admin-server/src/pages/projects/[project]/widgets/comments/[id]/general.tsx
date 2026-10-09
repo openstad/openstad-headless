@@ -19,7 +19,6 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { sentimentList } from '@/lib/comment-sentiments';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
@@ -66,8 +65,6 @@ export default function ArgumentsGeneral({
   const conditionallyRenderField = (key: SchemaKey, field: ReactNode) => {
     return key in finalSchema.shape ? field : null;
   };
-
-  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   const form = useForm<finalSchemaInfer>({
     resolver: zodResolver<any>(finalSchema),
@@ -224,10 +221,6 @@ export default function ArgumentsGeneral({
                       {...field}
                       placeholder="9999"
                       {...field}
-                      onChange={(e) => {
-                        onFieldChange(field.name, e.target.value);
-                        field.onChange(e);
-                      }}
                     />
                   </FormControl>
                   <FormMessage />

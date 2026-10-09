@@ -56,6 +56,23 @@ describe('extractConfig', () => {
     expect(preview.commentsWidget_multiple.title).toBe('AGAINST');
   });
 
+  it('onFieldChanged keeps a number a number', () => {
+    const updatePreview = vi.fn();
+    const child = extractConfig<
+      { commentsWidget: { itemsPerPage: number } },
+      { itemsPerPage: number }
+    >({
+      subWidgetKey: 'commentsWidget',
+      previewConfig: { commentsWidget: { itemsPerPage: 20 } },
+      updatePreview,
+    });
+
+    child.onFieldChanged('itemsPerPage', '30');
+
+    const preview = updatePreview.mock.calls[0][0](undefined);
+    expect(preview.commentsWidget.itemsPerPage).toBe(30);
+  });
+
   it('onFieldChanged writes a dotted key as a nested value, not a literal key', () => {
     const updatePreview = vi.fn();
     const previewConfig: ParentConfig = {

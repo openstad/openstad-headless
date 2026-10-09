@@ -473,10 +473,6 @@ export default function DocumentGeneral(
                     {...field}
                     placeholder="9999"
                     {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
                   />
                 </FormControl>
                 <FormMessage />
