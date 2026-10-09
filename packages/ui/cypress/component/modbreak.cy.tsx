@@ -19,6 +19,7 @@ describe('<ModbreakField />', () => {
       });
 
     cy.contains('Modbreak toevoegen').click();
+    cy.get('trix-toolbar').should('exist');
     cy.contains('label', 'Inhoud')
       .invoke('attr', 'for')
       .then((editorId) => {
