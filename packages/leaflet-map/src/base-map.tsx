@@ -840,6 +840,8 @@ const BaseMap = ({
               center={center}
               zoomAfterInit={zoomAfterInit}
               customPolygonIds={customPolygon?.map((p: { id: number }) => p.id)}
+              projectId={props.projectId}
+              api={props.api}
             />
 
             <TileLayer {...tileLayerProps} />
