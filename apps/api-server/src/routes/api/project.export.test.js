@@ -17,9 +17,11 @@ const db = require('../../db');
 // The guard runs before the export query, so an unauthorized request never
 // reaches the database and needs no fixtures.
 let queried = false;
+let lastQuery = null;
 db.Project.scope = () => ({
-  findOne: async () => {
+  findOne: async (query) => {
     queried = true;
+    lastQuery = query;
     return null;
   },
 });
@@ -66,5 +68,40 @@ describe('GET /project/:projectId/export', () => {
     );
 
     expect(queried).toBe(true);
+  });
+
+  it('loads votes and each comment sentiment in separate queries', async () => {
+    lastQuery = null;
+    await request(createApp({ role: 'editor', id: 10 })).get(
+      '/project/1/export'
+    );
+
+    const resourceInclude = lastQuery.include.find(
+      (include) => include.model === db.Resource
+    );
+    const byAlias = (as) =>
+      resourceInclude.include.find((include) => include.as === as);
+
+    expect(
+      resourceInclude.include.find((include) => include.model === db.Vote)
+    ).toMatchObject({ separate: true });
+    expect(byAlias('commentsFor')).toMatchObject({
+      separate: true,
+      scope: false,
+      where: { sentiment: 'for' },
+      include: [{ model: db.User }],
+    });
+    expect(byAlias('commentsAgainst')).toMatchObject({
+      separate: true,
+      scope: false,
+      where: { sentiment: 'against' },
+      include: [{ model: db.User }],
+    });
+    expect(byAlias('commentsNoSentiment')).toMatchObject({
+      separate: true,
+      scope: false,
+      where: { sentiment: 'no sentiment' },
+      include: [{ model: db.User }],
+    });
   });
 });
