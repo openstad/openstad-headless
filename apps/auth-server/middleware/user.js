@@ -54,6 +54,11 @@ exports.withOne = (req, res, next) => {
   db.User.scope(['includeUserRoles'])
     .findOne({ where: { id: userId } })
     .then((user) => {
+      if (!user) {
+        const err = new Error('User not found');
+        err.status = 404;
+        return next(err);
+      }
       req.userObject = user;
       next();
     })
