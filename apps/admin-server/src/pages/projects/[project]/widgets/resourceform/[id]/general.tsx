@@ -17,11 +17,12 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceFormWidgetProps } from '@openstad-headless/resource-form/src/props';
 import * as Switch from '@radix-ui/react-switch';
-import { useEffect } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -38,8 +39,9 @@ const formSchema = z.object({
     (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val),
     z
       .string()
-      .refine((value) => /^(\/[^\s]*)|(https?:\/\/[^\s]*)$/i.test(value), {
-        message: 'Must be a valid URL or a relative path',
+      .refine((value) => /^(\/\S*|https?:\/\/\S*)$/i.test(value), {
+        message:
+          'Vul een volledige URL (https://…) of een pad op deze site (/…) in.',
       })
       .optional()
   ),
@@ -100,19 +102,26 @@ export default function WidgetResourceFormGeneral(
     },
   });
 
-  useEffect(() => {
-    const subscription = form.watch((values) => {
-      props.onFieldChanged?.(category, values);
-    });
-    return () => subscription.unsubscribe();
-  }, [form, props]);
+  const { onFieldChanged } = props;
+  const pushToDraft = useCallback(
+    (name: string, value: any) =>
+      onFieldChanged?.(`${category}.${name}`, value),
+    [onFieldChanged, category]
+  );
+  useSyncDraftForm(form, pushToDraft, {
+    schema: formSchema,
+    prefix: category,
+    label: 'Algemeen',
+  });
 
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl">Algemeen</Heading>
         <Separator className="my-4" />
-        <form className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="resource"

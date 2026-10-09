@@ -17,8 +17,10 @@ import {
 import { Input } from '@/components/ui/input';
 import {
   rebaselineAfterSave,
+  useLooseFormDirty,
   useRegisterSave,
   useSaveController,
+  validateForSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -86,7 +88,7 @@ const baseSchema = z.object({
     .optional(),
 
   startDate: z.date(),
-  publishDate: z.date().optional(),
+  publishDate: z.date().nullable().optional(),
 
   modBreaks: z
     .array(
@@ -283,6 +285,7 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
       document: '',
       documents: existingData?.documents || [],
       extraData: {
+        ...(existingData?.extraData || {}),
         originalId: existingData?.extraData?.originalId || undefined,
         locationIndependent:
           existingData?.extraData?.locationIndependent || false,
@@ -391,7 +394,7 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
   const { allowNextNavigation } = useSaveController();
 
   const save = useCallback(async () => {
-    const valid = await form.trigger();
+    const valid = await validateForSave(form);
     if (!valid) {
       throw new Error('Controleer de gemarkeerde velden.');
     }
@@ -438,9 +441,10 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
     allowNextNavigation,
   ]);
 
+  const isDirty = useLooseFormDirty(form);
   useRegisterSave({
     enabled: !!useGlobalSave,
-    isDirty: form.formState.isDirty,
+    isDirty,
     save,
   });
 
@@ -713,6 +717,8 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
                           />
                         </div>
                         <Button
+                          type="button"
+                          aria-label="Bestand verwijderen"
                           color="red"
                           onClick={() => {
                             removeImage(index);
@@ -780,6 +786,8 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
                       <div key={id} className="relative flex flex-wrap">
                         <div className="relative flex">
                           <Button
+                            type="button"
+                            aria-label="Bestand verwijderen"
                             color="red"
                             onClick={() => {
                               removeFile(index);
@@ -1178,6 +1186,7 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
               label="Publiceer datum van de resource"
               description="Als er geen publiceer datum is zal de resource worden opgeslagen als concept. Dit houdt in dat de resource niet zichtbaar zal zijn op de site."
               withReset
+              resetValue={null}
             />
           </div>
           <div className="col-span-full lg:col-span-1">

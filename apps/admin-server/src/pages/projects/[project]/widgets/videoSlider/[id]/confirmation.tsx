@@ -17,11 +17,12 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import * as Switch from '@radix-ui/react-switch';
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -42,19 +43,30 @@ export default function WidgetEnqueteConfirmation(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      confirmationUser: confirmation.confirmationUser ?? true,
-      confirmationAdmin: confirmation.confirmationAdmin ?? true,
+      confirmationUser:
+        confirmation.confirmationUser === null
+          ? true
+          : (confirmation.confirmationUser ?? false),
+      confirmationAdmin:
+        confirmation.confirmationAdmin === null
+          ? true
+          : (confirmation.confirmationAdmin ?? false),
       overwriteEmailAddress: confirmation.overwriteEmailAddress ?? '',
       userEmailAddress: confirmation.userEmailAddress ?? '',
     },
   });
 
-  useEffect(() => {
-    const subscription = form.watch((values) => {
-      props.onFieldChanged?.('confirmation', values);
-    });
-    return () => subscription.unsubscribe();
-  }, [form, props]);
+  const { onFieldChanged } = props;
+  const pushToDraft = useCallback(
+    (name: string, value: any) =>
+      onFieldChanged?.(`confirmation.${name}`, value),
+    [onFieldChanged]
+  );
+  useSyncDraftForm(form, pushToDraft, {
+    schema: formSchema,
+    label: 'Bevestiging',
+    prefix: 'confirmation',
+  });
 
   const visibility = props.formVisibility || 'always';
   const items: any[] = (props.items as any[]) || [];
@@ -74,7 +86,9 @@ export default function WidgetEnqueteConfirmation(
       <Form {...form}>
         <Heading size="xl">Bevestiging</Heading>
         <Separator className="my-4" />
-        <form className="lg:w-2/3 grid grid-cols-1 gap-4">
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="lg:w-2/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="confirmationUser"

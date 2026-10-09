@@ -22,7 +22,12 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 type ShareOption =
-  'facebook' | 'x' | 'mail' | 'whatsapp' | 'linkedin' | 'copylink';
+  | 'facebook'
+  | 'x'
+  | 'mail'
+  | 'whatsapp'
+  | 'linkedin'
+  | 'copylink';
 const shareOptions: [ShareOption, ...ShareOption[]] = [
   'facebook',
   'x',
@@ -589,8 +594,21 @@ export default function WidgetResourceDetailDisplay(
                       const ids =
                         form.getValues('selectedSocialShareOptions') ?? [];
 
+                      const rank = (id: ShareOption) =>
+                        shareItems.findIndex(
+                          (item) => `${item.value}` === `${id}`
+                        );
+                      const insertAt = ids.findIndex(
+                        (id) => rank(id) > rank(share.value)
+                      );
                       const idsToSave = checked
-                        ? [...ids, share.value]
+                        ? insertAt === -1
+                          ? [...ids, share.value]
+                          : [
+                              ...ids.slice(0, insertAt),
+                              share.value,
+                              ...ids.slice(insertAt),
+                            ]
                         : ids.filter((id) => id !== `${share.value}`);
 
                       form.setValue('selectedSocialShareOptions', idsToSave);

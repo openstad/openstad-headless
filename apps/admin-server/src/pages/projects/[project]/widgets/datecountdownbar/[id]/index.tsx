@@ -1,7 +1,7 @@
 import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetDraft } from '@/hooks/useWidgetDraft';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -26,7 +26,7 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project;
 
-  const { previewConfig, updateConfig, onFieldChanged } =
+  const { previewConfig, onFieldChanged } =
     useWidgetDraft<DateCountdownBarWidgetProps>({});
 
   return (
@@ -57,7 +57,7 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <CountdownBarGeneral
                   {...previewConfig}
-                  updateConfig={updateConfig}
+                  updateConfig={ignoreTabSubmit}
                   onFieldChanged={onFieldChanged}
                 />
               ) : null}

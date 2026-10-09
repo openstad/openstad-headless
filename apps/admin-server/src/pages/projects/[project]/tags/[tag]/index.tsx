@@ -12,7 +12,10 @@ import {
 import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { useRegisterFormSave } from '@/components/ui/save-controller';
+import {
+  useRegisterFormSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Heading } from '@/components/ui/typography';
@@ -58,7 +61,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
   const defaults = useCallback(
     () => ({
       name: data?.name || null,
-      type: data?.type || null,
+      type: data?.type || '',
       seqnr: data?.seqnr || null,
       addToNewResources: data?.addToNewResources || false,
       backgroundColor: data?.backgroundColor || undefined,
@@ -67,9 +70,10 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
       mapIcon: data?.mapIcon || undefined,
       mapIconUploader: '',
       listIcon: data?.listIcon || undefined,
-      useDifferentSubmitAddress: undefinedToTrueOrProp(
-        data?.useDifferentSubmitAddress
-      ),
+      useDifferentSubmitAddress:
+        data?.useDifferentSubmitAddress === null
+          ? false
+          : undefinedToTrueOrProp(data?.useDifferentSubmitAddress),
       emails: data?.newSubmitAddress
         ? data.newSubmitAddress
             .split(',')
@@ -101,7 +105,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
   useSyncFormDefaults(form, defaults, data);
 
   const save = useCallback(async () => {
-    const valid = await form.trigger();
+    const valid = await validateForSave(form);
     if (!valid) {
       throw new Error('Controleer de gemarkeerde velden.');
     }

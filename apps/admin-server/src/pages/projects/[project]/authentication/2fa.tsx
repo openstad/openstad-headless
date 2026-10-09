@@ -9,7 +9,10 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { useRegisterFormSave } from '@/components/ui/save-controller';
+import {
+  useRegisterFormSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
@@ -107,7 +110,7 @@ export default function ProjectAuthentication2FA() {
     if (!authConfig) {
       throw new Error('De instellingen zijn nog niet geladen.');
     }
-    const valid = await form.trigger();
+    const valid = await validateForSave(form);
     if (!valid) {
       throw new Error('Controleer de gemarkeerde velden.');
     }

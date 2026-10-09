@@ -69,6 +69,7 @@ export default function WidgetChoiceGuideGeneralSettings(
   useSyncDraftForm(form, pushToDraft, {
     schema: formSchema,
     label: 'Algemene instellingen',
+    prefix: category,
   });
   const draftProps = { ...props, onFieldChanged: pushToDraft };
 

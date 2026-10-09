@@ -2,7 +2,7 @@ import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useProject } from '@/hooks/use-project';
-import { useWidgetDraft } from '@/hooks/useWidgetDraft';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -47,7 +47,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { widget, previewConfig, updatePreview, updateConfig, onFieldChanged } =
+  const { widget, previewConfig, updatePreview, onFieldChanged } =
     useWidgetDraft<ResourceDetailWidgetProps>({ projectId });
 
   const { data: projectConfig } = useProject(['includeConfig']);
@@ -56,8 +56,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
       'emailNotificationConsent'
     );
 
-  const tabUpdateConfig = (config: any) =>
-    updateConfig({ ...widget.config, ...config });
+  const tabUpdateConfig = ignoreTabSubmit;
 
   const totalPropPackage = {
     ...widget?.config,
@@ -129,7 +128,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                       >({
                         previewConfig,
                         subWidgetKey: 'resourceOverviewMapWidget',
-                        updateConfig,
                         updatePreview,
                       })}
                     />
@@ -142,7 +140,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                       >({
                         previewConfig,
                         subWidgetKey: 'resourceOverviewMapWidget',
-                        updateConfig,
                         updatePreview,
                       })}
                     />
@@ -155,7 +152,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                       >({
                         previewConfig,
                         subWidgetKey: 'resourceOverviewMapWidget',
-                        updateConfig,
                         updatePreview,
                       })}
                     />
@@ -168,7 +164,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                       >({
                         previewConfig,
                         subWidgetKey: 'resourceOverviewMapWidget',
-                        updateConfig,
                         updatePreview,
                       })}
                     />
@@ -181,7 +176,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                       >({
                         previewConfig,
                         subWidgetKey: 'resourceOverviewMapWidget',
-                        updateConfig,
                         updatePreview,
                       })}
                     />
@@ -194,7 +188,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                       >({
                         previewConfig,
                         subWidgetKey: 'resourceOverviewMapWidget',
-                        updateConfig,
                         updatePreview,
                       })}
                     />
@@ -226,7 +219,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                       >({
                         subWidgetKey: 'commentsWidget',
                         previewConfig: previewConfig,
-                        updateConfig,
                         updatePreview,
                       })}
                     />
@@ -242,7 +234,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                         >({
                           subWidgetKey: 'commentsWidget',
                           previewConfig: previewConfig,
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -255,7 +246,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                         >({
                           subWidgetKey: 'commentsWidget_multiple',
                           previewConfig: previewConfig,
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -271,7 +261,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                         >({
                           subWidgetKey: 'commentsWidget',
                           previewConfig: previewConfig,
-                          updateConfig,
                           updatePreview,
                           extraChildConfig: {
                             resourceId: previewConfig.resourceId,
@@ -287,7 +276,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                         >({
                           subWidgetKey: 'commentsWidget_multiple',
                           previewConfig: previewConfig,
-                          updateConfig,
                           updatePreview,
                           extraChildConfig: {
                             resourceId: previewConfig.resourceId,
@@ -305,7 +293,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                       >({
                         subWidgetKey: 'commentsWidget',
                         previewConfig: previewConfig,
-                        updateConfig,
                         updatePreview,
                       })}
                       projectId={projectId as string}
@@ -320,7 +307,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                       >({
                         subWidgetKey: 'commentsWidget',
                         previewConfig: previewConfig,
-                        updateConfig,
                         updatePreview,
                       })}
                       projectId={projectId as string}
@@ -334,7 +320,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                       >({
                         subWidgetKey: 'commentsWidget',
                         previewConfig: previewConfig,
-                        updateConfig,
                         updatePreview,
                       })}
                       projectId={projectId as string}
@@ -349,7 +334,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                       >({
                         subWidgetKey: 'commentsWidget',
                         previewConfig: previewConfig,
-                        updateConfig,
                         updatePreview,
                       })}
                       requiredFieldsIncludesEmailNotificationConsent={
@@ -371,7 +355,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   >({
                     subWidgetKey: 'likeWidget',
                     previewConfig: previewConfig,
-                    updateConfig,
                     updatePreview,
                   })}
                 />

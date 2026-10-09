@@ -20,7 +20,9 @@ import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import {
   rebaselineAfterSave,
+  useLooseFormDirty,
   useRegisterSave,
+  validateForSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -81,6 +83,8 @@ const formSchema = z
     }
   });
 
+type SettingsField = keyof z.infer<typeof formSchema>;
+
 export default function ProjectSettings() {
   const router = useRouter();
   let { project } = router.query;
@@ -138,18 +142,21 @@ export default function ProjectSettings() {
     }
   }, [data, checkboxInitial, basicAuthInitial, form]);
 
+  const formDirty = useLooseFormDirty(form);
   const savedProjectHasEnded = !!data?.config?.project?.projectHasEnded;
-  const projectHasEndedDirty = !!projectHasEnded !== savedProjectHasEnded;
+  const projectHasEndedDirty =
+    !checkboxInitial && !!projectHasEnded !== savedProjectHasEnded;
 
   const save = useCallback(async () => {
-    const valid = await form.trigger();
+    const valid = await validateForSave(form);
     if (!valid) {
-      const firstErrorField = Object.keys(form.formState.errors)[0];
-      const label = firstErrorField ? FIELD_LABELS[firstErrorField] : undefined;
-      if (label) {
-        setActiveTab(GENERAL_TAB.tab);
+      setActiveTab(GENERAL_TAB.tab);
+      const firstErrorField = Object.keys(FIELD_LABELS).find(
+        (field) => form.getFieldState(field as SettingsField).invalid
+      );
+      if (firstErrorField) {
         throw new Error(
-          `Controleer het veld "${label}" op het tabblad "${GENERAL_TAB.tabLabel}".`
+          `Controleer het veld "${FIELD_LABELS[firstErrorField]}".`
         );
       }
       throw new Error('Controleer de gemarkeerde velden.');
@@ -162,7 +169,6 @@ export default function ProjectSettings() {
           endDate: values.endDate,
           projectToggle: values.projectToggle,
           lastUrl: values.url || data?.config?.project?.lastUrl || '',
-          projectHasEnded: !!projectHasEnded,
         },
         basicAuth: {
           active: values.basicAuthActive,
@@ -178,13 +184,26 @@ export default function ProjectSettings() {
     }
 
     rebaselineAfterSave(form, sent);
-  }, [form, updateProject, data, projectHasEnded]);
+  }, [form, updateProject, data]);
 
-  // The "Project beeindigen" toggle lives outside the form, so its dirty state
-  // is tracked separately and folded into the same save.
+  const saveProjectHasEnded = useCallback(async () => {
+    const result = await updateProject({
+      project: { projectHasEnded: !!projectHasEnded },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+  }, [updateProject, projectHasEnded]);
+
   useRegisterSave({
-    isDirty: form.formState.isDirty || projectHasEndedDirty,
+    isDirty: formDirty,
     save,
+    label: GENERAL_TAB.tabLabel,
+  });
+  useRegisterSave({
+    isDirty: projectHasEndedDirty,
+    save: saveProjectHasEnded,
+    label: 'Project beëindigen',
   });
 
   async function archiveProject() {

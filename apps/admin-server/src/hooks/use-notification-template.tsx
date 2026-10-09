@@ -45,7 +45,10 @@ export default function useNotificationTemplate(projectId?: string) {
       notificationTemplateSwr.mutate([...currentTemplates(), data]);
       return data;
     } else {
-      throw new Error('Could not create the template');
+      console.error('Creating the template failed', res.status, res.statusText);
+      throw new Error(
+        'Het sjabloon kon niet worden aangemaakt. Probeer het opnieuw.'
+      );
     }
   }
 
@@ -86,7 +89,10 @@ export default function useNotificationTemplate(projectId?: string) {
       );
       return data;
     } else {
-      throw new Error('Could not edit the template');
+      console.error('Saving the template failed', res.status, res.statusText);
+      throw new Error(
+        'Het sjabloon kon niet worden opgeslagen. Probeer het opnieuw.'
+      );
     }
   }
 

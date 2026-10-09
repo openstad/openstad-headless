@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import {
   rebaselineAfterSave,
+  useLooseFormDirty,
   useRegisterSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
@@ -92,7 +93,7 @@ export default function ProjectSettingsAllowedDomains() {
       urls: configuredDomains.map((url: string) => ({ url })),
     },
   });
-  const { control, reset, getValues, trigger, formState } = form;
+  const { control, reset, getValues, trigger } = form;
 
   const domainDefaults = useCallback(
     () => ({
@@ -128,7 +129,8 @@ export default function ProjectSettingsAllowedDomains() {
     rebaselineAfterSave(form, sent);
   }, [form, getValues, trigger, updateProject]);
 
-  useRegisterSave({ isDirty: formState.isDirty, save });
+  const isDirty = useLooseFormDirty(form);
+  useRegisterSave({ isDirty, save });
 
   useSyncFormDefaults(form, domainDefaults, data?.config);
 

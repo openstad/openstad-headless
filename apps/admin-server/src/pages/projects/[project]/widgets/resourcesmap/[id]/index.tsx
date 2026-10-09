@@ -2,7 +2,7 @@ import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { flushAllFields } from '@/hooks/useFieldDebounce';
-import { useWidgetDraft } from '@/hooks/useWidgetDraft';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -37,7 +37,7 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { widget, previewConfig, updateConfig, onFieldChanged } =
+  const { widget, previewConfig, onFieldChanged } =
     useWidgetDraft<ResourceOverviewMapWidgetProps>({ projectId });
 
   const [activeTab, setActiveTab] = useState('map');
@@ -47,8 +47,7 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
     setActiveTab(value);
   };
 
-  const tabUpdateConfig = (config: any) =>
-    updateConfig({ ...widget?.config, ...config });
+  const tabUpdateConfig = ignoreTabSubmit;
 
   const totalPropPackage = {
     ...widget?.config,

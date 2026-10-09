@@ -93,7 +93,11 @@ export const SimpleCalendar: React.FC<{
                 />
                 {withReset && (
                   <Button
-                    onClick={() => form.setValue(field.name, resetValue)}
+                    onClick={() =>
+                      form.setValue(field.name, resetValue, {
+                        shouldDirty: true,
+                      })
+                    }
                     type="button"
                     variant={'ghost'}
                     className="w-full rounded-none text-xs font-normal">

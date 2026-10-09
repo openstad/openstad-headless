@@ -323,6 +323,11 @@ const TrixEditor: React.FC<{
     inputEl.addEventListener('input', handleTrixChange);
     editorEl.addEventListener('trix-focus', handleTrixFocus);
     editorEl.addEventListener('trix-blur', handleTrixBlur);
+    // Once Trix is loaded, an editor mounted later (for example a list item
+    // rebuilt after a save) can initialise before this effect runs, so the
+    // event above may never arrive and the value would never be loaded. When
+    // it does still arrive, running the handler twice is harmless.
+    if ((editorEl as any).editor) handleTrixInitialize();
     return () => {
       editorEl.removeEventListener('trix-initialize', handleTrixInitialize);
       editorEl.removeEventListener('trix-change', handleTrixChange);

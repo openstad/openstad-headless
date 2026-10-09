@@ -1,4 +1,5 @@
 import useUnsavedChanges from '@/hooks/use-unsaved-changes';
+import { looseFormEqual } from '@/lib/loose-equal';
 import cloneDeep from 'lodash/cloneDeep';
 import isEqual from 'lodash/isEqual';
 import { useRouter } from 'next/router';
@@ -86,7 +87,20 @@ function listLabels(labels: string[]): string {
   return rest > 0 ? `${shown.join(', ')} en ${rest} andere` : shown.join(', ');
 }
 
+const NETWORK_ERROR =
+  'Je wijzigingen konden niet worden opgeslagen: er is geen verbinding met de server. Controleer je internetverbinding en probeer het opnieuw.';
+
+const INVALID_JSON_ERROR =
+  'Een veld bevat geen geldige JSON (bijvoorbeeld de polygoon of de kaartlaag). Controleer de invoer en probeer het opnieuw.';
+
+const NETWORK_FAILURE =
+  /failed to fetch|networkerror|load failed|network request failed/i;
+
 function errorMessageOf(error: unknown): string {
+  if (error instanceof TypeError) {
+    return NETWORK_FAILURE.test(error.message) ? NETWORK_ERROR : GENERIC_ERROR;
+  }
+  if (error instanceof SyntaxError) return INVALID_JSON_ERROR;
   return error instanceof Error && error.message
     ? error.message
     : GENERIC_ERROR;
@@ -121,8 +135,13 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
     const active = Array.from(registrationsRef.current.values()).filter(
       (registration) => registration.enabled !== false
     );
+    const anyDirty = active.some((registration) => registration.isDirty);
     setIsRegistered(active.length > 0);
-    setIsDirty(active.some((registration) => registration.isDirty));
+    setIsDirty(anyDirty);
+    if (!anyDirty && !savingRef.current) {
+      setPhase((prev) => (prev === 'error' ? 'idle' : prev));
+      setErrorMessage(null);
+    }
   }, []);
 
   const resetFeedback = useCallback(() => {
@@ -264,8 +283,8 @@ export function SaveControllerProvider({ children }: { children: ReactNode }) {
   // next one.
   const router = useRouter();
   useEffect(() => {
-    router.events.on('routeChangeStart', resetFeedback);
-    return () => router.events.off('routeChangeStart', resetFeedback);
+    router.events.on('beforeHistoryChange', resetFeedback);
+    return () => router.events.off('beforeHistoryChange', resetFeedback);
   }, [router, resetFeedback]);
 
   const state: SaveState = useMemo(() => {
@@ -376,6 +395,25 @@ export function useRegisterSave(registration: SaveRegistration) {
 }
 
 /**
+ * Validate a form before a header save.
+ *
+ * Runs as a submit, not a plain `trigger()`: the form only re-checks a field
+ * while it is typed in after a submit, so with `trigger()` a fixed field kept
+ * its error message until the next save. Like the old submit button, an
+ * invalid form then moves focus to its first invalid field that is on screen,
+ * after the save bar has focused its retry button.
+ */
+export async function validateForSave(form: {
+  handleSubmit: (onValid: () => void) => () => Promise<void>;
+}): Promise<boolean> {
+  let valid = false;
+  await form.handleSubmit(() => {
+    valid = true;
+  })();
+  return valid;
+}
+
+/**
  * Re-baseline a form on the values that were just persisted.
  *
  * `sent` must be a deep copy taken *before* the request: `getValues()` hands
@@ -400,6 +438,33 @@ export function rebaselineAfterSave(
   );
 }
 
+/** Whether a react-hook-form form really differs from its defaults, compared loosely. */
+export function useLooseFormDirty(form: {
+  formState: { isDirty: boolean; defaultValues?: any };
+  getValues: () => any;
+  watch: (...args: any[]) => any;
+}): boolean {
+  const rhfDirty = form.formState.isDirty;
+  const defaults = form.formState.defaultValues;
+  const differs = useCallback(
+    () => !looseFormEqual(form.getValues(), form.formState.defaultValues),
+    [form]
+  );
+  const [changed, setChanged] = useState(differs);
+  useEffect(() => {
+    setChanged(differs());
+    const subscription = form.watch(() => setChanged(differs()));
+    return () => subscription.unsubscribe();
+  }, [form, differs]);
+  // A reset calls the watch callback before this render holds the new
+  // defaults, and a field that registers again afterwards can flip isDirty
+  // without a value change. So the stored answer can be stale: check it again.
+  useEffect(() => {
+    setChanged(differs());
+  }, [rhfDirty, defaults, differs]);
+  return rhfDirty && changed && differs();
+}
+
 /**
  * Register a react-hook-form page with the global save bar.
  *
@@ -409,8 +474,9 @@ export function rebaselineAfterSave(
  */
 export function useRegisterFormSave(
   form: {
-    formState: { isDirty: boolean };
+    formState: { isDirty: boolean; defaultValues?: any };
     getValues: () => any;
+    watch: (...args: any[]) => any;
     reset: (values?: any, options?: any) => void;
   },
   save: () => Promise<void>,
@@ -422,10 +488,12 @@ export function useRegisterFormSave(
     rebaselineAfterSave(form, sent);
   }, [form, save]);
 
+  const isDirty = useLooseFormDirty(form);
+
   useRegisterSave({
     enabled: options?.enabled,
     label: options?.label,
-    isDirty: form.formState.isDirty,
+    isDirty,
     save: saveAndClearDirty,
   });
 }

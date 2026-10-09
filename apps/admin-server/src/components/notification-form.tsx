@@ -10,7 +10,9 @@ import {
 import { Input } from '@/components/ui/input';
 import {
   rebaselineAfterSave,
+  useLooseFormDirty,
   useRegisterSave,
+  validateForSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -550,7 +552,7 @@ export function NotificationForm({
   const save = useCallback(async () => {
     // The save bar replaces `form.handleSubmit`, so the resolver has to be run
     // here: without it invalid values would be saved without any message.
-    const valid = await form.trigger();
+    const valid = await validateForSave(form);
     if (!valid) {
       throw new Error('Controleer de gemarkeerde velden.');
     }
@@ -575,15 +577,14 @@ export function NotificationForm({
         );
       }
     } catch (requestError) {
-      // The hook throws an English developer message; the save bar shows this
-      // text to the user, so it is replaced here.
       throw new Error('Opslaan is mislukt. Probeer het opnieuw.');
     }
     rebaselineAfterSave(form, sent);
   }, [create, error, form, id, isExistingTemplate, project, type, update]);
 
+  const formDirty = useLooseFormDirty(form);
   useRegisterSave({
-    isDirty: form.formState.isDirty,
+    isDirty: formDirty,
     save,
     label: notificationTitle,
   });

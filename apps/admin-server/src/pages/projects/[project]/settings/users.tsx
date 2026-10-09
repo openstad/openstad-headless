@@ -17,7 +17,9 @@ import { Label } from '@/components/ui/label';
 import { PageLayout } from '@/components/ui/page-layout';
 import {
   rebaselineAfterSave,
+  useLooseFormDirty,
   useRegisterSave,
+  validateForSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -137,13 +139,10 @@ export default function ProjectSettingsUsers(
   useSyncFormDefaults(anonymizeForm, anonymizeDefaults, data?.config);
 
   const saveUsers = useCallback(async () => {
-    const valid = await usersForm.trigger();
+    const valid = await validateForSave(usersForm);
     if (!valid) {
-      const firstErrorField = Object.keys(usersForm.formState.errors)[0];
       throw new Error(
-        firstErrorField
-          ? `Controleer het veld "${firstErrorField}" op het tabblad "Archivering".`
-          : 'Controleer de gemarkeerde velden op het tabblad "Archivering".'
+        'Controleer de gemarkeerde velden op het tabblad "Archivering".'
       );
     }
     const values = usersFormSchema.parse(usersForm.getValues());
@@ -161,13 +160,10 @@ export default function ProjectSettingsUsers(
   }, [usersForm, updateProject]);
 
   const saveAnonymize = useCallback(async () => {
-    const valid = await anonymizeForm.trigger();
+    const valid = await validateForSave(anonymizeForm);
     if (!valid) {
-      const firstErrorField = Object.keys(anonymizeForm.formState.errors)[0];
       throw new Error(
-        firstErrorField
-          ? `Controleer het veld "${firstErrorField}" op het tabblad "Anonimiseren".`
-          : 'Controleer de gemarkeerde velden op het tabblad "Anonimiseren".'
+        'Controleer de gemarkeerde velden op het tabblad "Anonimiseren".'
       );
     }
     const values = anonymizeFormSchema.parse(anonymizeForm.getValues());
@@ -182,8 +178,8 @@ export default function ProjectSettingsUsers(
     rebaselineAfterSave(anonymizeForm, sent);
   }, [anonymizeForm, updateProject]);
 
-  const usersDirty = usersForm.formState.isDirty;
-  const anonymizeDirty = anonymizeForm.formState.isDirty;
+  const usersDirty = useLooseFormDirty(usersForm);
+  const anonymizeDirty = useLooseFormDirty(anonymizeForm);
 
   const save = useCallback(async () => {
     if (usersDirty) await saveUsers();
@@ -230,7 +226,10 @@ export default function ProjectSettingsUsers(
               <TabsTrigger value="users">Archivering</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="users" className="p-0">
+            <TabsContent
+              value="users"
+              forceMount
+              className="p-0 data-[state=inactive]:hidden">
               <Form {...usersForm} className="p-6 bg-white rounded-md">
                 <Heading size="xl">Archivering</Heading>
                 <Separator className="my-4" />
@@ -261,7 +260,10 @@ export default function ProjectSettingsUsers(
               </Form>
             </TabsContent>
 
-            <TabsContent value="anonymize" className="p-0">
+            <TabsContent
+              value="anonymize"
+              forceMount
+              className="p-0 data-[state=inactive]:hidden">
               <div className="p-6 bg-white rounded-md">
                 <Form {...anonymizeForm}>
                   <Heading size="xl">Anonimiseer gebruikers</Heading>

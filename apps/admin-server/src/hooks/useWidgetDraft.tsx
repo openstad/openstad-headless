@@ -2,13 +2,21 @@ import {
   useRegisterSave,
   useSaveController,
 } from '@/components/ui/save-controller';
+import { isDraftSyncPaused } from '@/lib/draft-sync-pause';
+import { isPlainObject, looseEqual } from '@/lib/loose-equal';
 import cloneDeep from 'lodash/cloneDeep';
 import debounce from 'lodash/debounce';
 import get from 'lodash/get';
 import isEqual from 'lodash/isEqual';
 import set from 'lodash/set';
 import { useRouter } from 'next/router';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 
 import { useWidgetConfig } from './use-widget-config';
@@ -24,14 +32,20 @@ type DraftSchema = {
 };
 
 type DraftValidator = () => { ok: boolean; label?: string; message?: string };
-const draftValidators = new Map<string, DraftValidator>();
+const draftValidators = new Map<
+  string,
+  { owner: number; validate: DraftValidator }
+>();
+let draftOwner = 0;
+let draftOwnerSeq = 0;
 
 function clearDraftValidators() {
   draftValidators.clear();
 }
 
 function runDraftValidators(): { ok: boolean; message?: string } {
-  for (const validate of Array.from(draftValidators.values())) {
+  for (const { owner, validate } of Array.from(draftValidators.values())) {
+    if (owner !== draftOwner) continue;
     const result = validate();
     if (!result.ok) {
       const label = result.label ? `${result.label}: ` : '';
@@ -46,6 +60,107 @@ function runDraftValidators(): { ok: boolean; message?: string } {
 
 let draftValidatorSeq = 0;
 
+export type ShownDefault = {
+  shown: unknown;
+  stored: unknown;
+};
+const shownDefaults = new Map<string, ShownDefault>();
+let shownDefaultsGeneration = 0;
+let currentDraftState: { draft: any; saved: any } = { draft: {}, saved: {} };
+
+function clearShownDefaults() {
+  shownDefaults.clear();
+  pendingRepairs.clear();
+  shownDefaultsGeneration += 1;
+}
+
+export type FieldRepair = { from: unknown; to: unknown };
+const pendingRepairs = new Map<string, FieldRepair>();
+
+/** The repair for a stored value that a field corrected by itself, if any. */
+export function collectRepair(
+  path: string,
+  value: unknown,
+  draft: any,
+  saved: any
+): FieldRepair | undefined {
+  const stored = get(saved, path);
+  if (stored === undefined || stored === null) return undefined;
+  if (!looseEqual(get(draft, path), stored)) return undefined;
+  if (looseEqual(value, stored)) return undefined;
+  return { from: cloneDeep(stored), to: cloneDeep(value) };
+}
+
+function recordRepair(path: string, value: unknown) {
+  const { draft, saved } = currentDraftState;
+  const repair = collectRepair(path, value, draft, saved);
+  if (repair) pendingRepairs.set(path, repair);
+}
+
+/** The draft with every pending field repair the user did not change. */
+export function withRepairs(
+  draft: any,
+  repairs: Map<string, FieldRepair> = pendingRepairs
+): any {
+  if (!repairs.size) return draft;
+  const out = cloneDeep(draft ?? {});
+  repairs.forEach(({ from, to }, path) => {
+    if (looseEqual(get(out, path), from)) set(out, path, cloneDeep(to));
+  });
+  return out;
+}
+
+/** The defaults a tab shows for keys the widget never saved. */
+export function collectShownDefaults(
+  defaults: Record<string, unknown>,
+  prefix: string | undefined,
+  draft: any,
+  saved: any,
+  known: Map<string, ShownDefault>
+): Array<[string, ShownDefault]> {
+  const found: Array<[string, ShownDefault]> = [];
+  const visit = (path: string, shown: unknown) => {
+    const stored = get(saved, path);
+    if (
+      !known.has(path) &&
+      (stored === undefined || stored === null) &&
+      looseEqual(get(draft, path), stored)
+    ) {
+      found.push([path, { shown: cloneDeep(shown), stored }]);
+    }
+    if (isPlainObject(shown)) {
+      Object.keys(shown).forEach((key) => visit(`${path}.${key}`, shown[key]));
+    }
+  };
+  Object.keys(defaults).forEach((key) =>
+    visit(prefix ? `${prefix}.${key}` : key, defaults[key])
+  );
+  return found;
+}
+
+function recordShownDefaults(
+  values: Record<string, unknown>,
+  prefix: string | undefined
+) {
+  const { draft, saved } = currentDraftState;
+  collectShownDefaults(values, prefix, draft, saved, shownDefaults).forEach(
+    ([path, entry]) => shownDefaults.set(path, entry)
+  );
+}
+
+/** Keeps a number a number when the field default is a number. */
+export function asDefaultType(value: unknown, shown: unknown): unknown {
+  if (
+    typeof shown === 'number' &&
+    typeof value === 'string' &&
+    value.trim() !== '' &&
+    !Number.isNaN(Number(value))
+  ) {
+    return Number(value);
+  }
+  return value;
+}
+
 /**
  * Push every react-hook-form field of a widget config tab into the whole-widget
  * draft (previewConfig) as it changes. A single coalescing debounce per tab
@@ -59,7 +174,12 @@ let draftValidatorSeq = 0;
 export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
   form: UseFormReturn<TFieldValues>,
   onFieldChanged?: (name: string, value: any) => void,
-  options?: { schema?: DraftSchema; label?: string; id?: string }
+  options?: {
+    schema?: DraftSchema;
+    label?: string;
+    id?: string;
+    prefix?: string;
+  }
 ) {
   const schema = options?.schema;
   const label = options?.label;
@@ -70,6 +190,8 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
 
   const onChangedRef = useRef(onFieldChanged);
   onChangedRef.current = onFieldChanged;
+  const formRef = useRef(form);
+  formRef.current = form;
   const latestRef = useRef<any>(form.getValues());
   const pendingRef = useRef<Set<string>>(new Set());
   const wasEditedRef = useRef(false);
@@ -88,6 +210,26 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
         : `seq:${(draftValidatorSeq += 1)}`;
   }
 
+  const prefix =
+    options?.prefix ??
+    (onFieldChanged as { draftPrefix?: string } | undefined)?.draftPrefix;
+  const prefixRef = useRef(prefix);
+  prefixRef.current = prefix;
+  const generation = shownDefaultsGeneration;
+  useEffect(() => {
+    const values = form.getValues() as Record<string, unknown>;
+    recordShownDefaults(values, prefix);
+    const defaults = (form.formState.defaultValues ?? {}) as Record<
+      string,
+      unknown
+    >;
+    Object.keys(values).forEach((key) => {
+      if (!looseEqual(values[key], defaults[key])) {
+        recordRepair(prefix ? `${prefix}.${key}` : key, values[key]);
+      }
+    });
+  }, [form, prefix, generation]);
+
   const flush = useMemo(
     () =>
       debounce(() => {
@@ -103,7 +245,16 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
           if (parsed.success) values = { ...values, ...parsed.data };
         }
         pendingRef.current.forEach((name) => {
-          onChanged(name, get(values, name));
+          const value = get(values, name);
+          onChanged(
+            name,
+            currentSchema
+              ? value
+              : asDefaultType(
+                  value,
+                  get(formRef.current.formState.defaultValues, name)
+                )
+          );
         });
         pendingRef.current.clear();
       }, 300),
@@ -114,6 +265,7 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
     if (!onFieldChanged) return;
 
     const key = validatorKeyRef.current as string;
+    const owner = draftOwner;
     const validateValues = (values: any): ReturnType<DraftValidator> => {
       const result = schemaRef.current!.safeParse(values);
       if (result.success) return { ok: true };
@@ -121,9 +273,13 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
       return { ok: false, label, message: firstMessage || 'ongeldige waarde.' };
     };
     const installLiveValidator = () => {
-      draftValidators.set(key, () =>
-        wasEditedRef.current ? validateValues(form.getValues()) : { ok: true }
-      );
+      draftValidators.set(key, {
+        owner,
+        validate: () =>
+          wasEditedRef.current
+            ? validateValues(form.getValues())
+            : { ok: true },
+      });
     };
 
     // A prior mount of this same tab may have left a strict snapshot
@@ -131,18 +287,26 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
     // this remount instead of clobbering it with a fresh, permissive one —
     // otherwise switching tabs and back would silently un-block an invalid
     // save. It only gets replaced once the user actually edits again below.
-    const hadInheritedEntry = draftValidators.has(key);
+    const hadInheritedEntry = draftValidators.get(key)?.owner === owner;
 
     const subscription = form.watch((values, { name }) => {
       latestRef.current = values;
-      if (name) {
-        if (!wasEditedRef.current && schemaRef.current) {
-          installLiveValidator();
-        }
-        wasEditedRef.current = true;
-        pendingRef.current.add(name);
-        flush();
+      if (!name) return;
+      if (isDraftSyncPaused()) {
+        const value = get(values, name);
+        recordShownDefaults({ [name]: value }, prefixRef.current);
+        recordRepair(
+          prefixRef.current ? `${prefixRef.current}.${name}` : name,
+          value
+        );
+        return;
       }
+      if (!wasEditedRef.current && schemaRef.current) {
+        installLiveValidator();
+      }
+      wasEditedRef.current = true;
+      pendingRef.current.add(name);
+      flush();
     });
 
     const unregisterFlush = registerFieldFlusher(() => flush.flush());
@@ -161,8 +325,14 @@ export function useSyncDraftForm<TFieldValues extends Record<string, any>>(
       if (schemaRef.current) {
         if (label && wasEditedRef.current) {
           const snapshot = form.getValues();
-          draftValidators.set(key, () => validateValues(snapshot));
-        } else if (!hadInheritedEntry) {
+          draftValidators.set(key, {
+            owner,
+            validate: () => validateValues(snapshot),
+          });
+        } else if (
+          !hadInheritedEntry &&
+          draftValidators.get(key)?.owner === owner
+        ) {
           // We own this entry (nothing was inherited from a prior mount) and
           // the user never edited it this time round — safe to drop.
           draftValidators.delete(key);
@@ -204,6 +374,89 @@ function normalize(value: any): any {
   }
 }
 
+/** The config with each unsaved key set to the default its tab showed. */
+export function withShownDefaults(
+  config: any,
+  shownByKey: Map<string, ShownDefault> = shownDefaults
+): any {
+  const out = cloneDeep(config ?? {});
+  shownByKey.forEach(({ shown, stored }, path) => {
+    const value = get(out, path);
+    const unchanged = value === stored || (value == null && stored == null);
+    const emptiedAgain =
+      shown == null &&
+      (value === '' ||
+        value === false ||
+        (Array.isArray(value) && value.length === 0));
+    if (unchanged || emptiedAgain) set(out, path, cloneDeep(shown));
+  });
+  return out;
+}
+
+/** The top-level keys the user changed, as the PUT body. */
+export function changesToSave(
+  draft: any,
+  saved: any,
+  shownByKey: Map<string, ShownDefault> = shownDefaults
+): any {
+  const asShown = withShownDefaults(saved, shownByKey);
+  const draftAsShown = withShownDefaults(draft, shownByKey);
+  const out: any = {};
+  Object.keys(draft ?? {}).forEach((key) => {
+    if (looseEqual(draftAsShown[key], asShown[key])) return;
+    const value = draft[key];
+    if (value === undefined) {
+      out[key] = null;
+      return;
+    }
+    out[key] =
+      typeof saved?.[key] === 'number' &&
+      typeof value === 'string' &&
+      value.trim() !== '' &&
+      !Number.isNaN(Number(value))
+        ? Number(value)
+        : value;
+  });
+  return out;
+}
+
+/** The draft moved onto a newer saved config; the user's edits win. */
+export function rebaseDraft(
+  draft: any,
+  base: any,
+  next: any,
+  keepKeys: string[] = []
+): any {
+  const out: any = { ...(draft ?? {}) };
+  const keys = new Set([
+    ...Object.keys(draft ?? {}),
+    ...Object.keys(base ?? {}),
+    ...Object.keys(next ?? {}),
+  ]);
+  keys.forEach((key) => {
+    if (keepKeys.includes(key)) return;
+    const value = rebaseValue(draft?.[key], base?.[key], next?.[key]);
+    if (value === undefined) delete out[key];
+    else out[key] = value;
+  });
+  return out;
+}
+
+function rebaseValue(draft: unknown, base: unknown, next: unknown): unknown {
+  if (looseEqual(draft, base)) return cloneDeep(next);
+  if (
+    isPlainObject(draft) &&
+    isPlainObject(next) &&
+    (base == null || isPlainObject(base))
+  ) {
+    return rebaseDraft(draft, base ?? {}, next);
+  }
+  return draft;
+}
+
+/** A tab form submit must not save behind the save bar. */
+export async function ignoreTabSubmit(): Promise<void> {}
+
 /**
  * Whole-widget draft engine.
  *
@@ -241,12 +494,26 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
     ? routerWidgetId[0]
     : routerWidgetId;
   const lastWidgetIdRef = useRef(widgetId);
-  if (lastWidgetIdRef.current !== widgetId) {
+  const draftStateClearedRef = useRef(false);
+  const ownerRef = useRef(0);
+  if (!ownerRef.current) ownerRef.current = draftOwnerSeq += 1;
+  useLayoutEffect(() => {
+    draftOwner = ownerRef.current;
+  }, []);
+  if (!draftStateClearedRef.current || lastWidgetIdRef.current !== widgetId) {
+    draftStateClearedRef.current = true;
     clearDraftValidators();
+    clearShownDefaults();
     lastWidgetIdRef.current = widgetId;
   }
 
-  useEffect(() => clearDraftValidators, []);
+  useEffect(
+    () => () => {
+      clearDraftValidators();
+      clearShownDefaults();
+    },
+    []
+  );
 
   useEffect(() => {
     invalidateInFlightSave();
@@ -256,19 +523,44 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
   previewRef.current = previewConfig;
 
   const savedConfig = widget?.config as T | undefined;
+  currentDraftState = { draft: previewConfig ?? {}, saved: savedConfig ?? {} };
+  const savedConfigRef = useRef(savedConfig);
+  savedConfigRef.current = savedConfig;
+
+  const draftBaseRef = useRef<{ widgetId?: string; config?: any }>({});
+  const hasDraft = !!previewConfig;
+  useEffect(() => {
+    if (!savedConfig || !hasDraft) return;
+    const base = draftBaseRef.current;
+    if (base.widgetId !== widgetId || !base.config) {
+      draftBaseRef.current = { widgetId, config: cloneDeep(savedConfig) };
+      return;
+    }
+    if (isEqual(base.config, savedConfig)) return;
+    draftBaseRef.current = { widgetId, config: cloneDeep(savedConfig) };
+    const keepKeys = [...PREVIEW_ONLY_KEYS, ...widgetSettingsKeys];
+    updatePreview(
+      (prev) =>
+        (prev
+          ? rebaseDraft(prev, base.config, savedConfig, keepKeys)
+          : prev) as T
+    );
+  }, [savedConfig, hasDraft, widgetId, widgetSettingsKeys, updatePreview]);
 
   const isDirty = useMemo(() => {
     if (!previewConfig || !savedConfig) return false;
-    return !isEqual(
-      normalize(stripPreviewOnly(previewConfig, widgetSettingsKeys)),
-      normalize(stripPreviewOnly(savedConfig, widgetSettingsKeys))
+    const draft = normalize(
+      stripPreviewOnly(previewConfig, widgetSettingsKeys)
     );
+    const saved = normalize(stripPreviewOnly(savedConfig, widgetSettingsKeys));
+    return !looseEqual(withShownDefaults(draft), withShownDefaults(saved));
   }, [previewConfig, savedConfig, widgetSettingsKeys]);
 
   const onFieldChanged = useCallback(
-    (key: string, value: any) => {
+    (key: string, raw: any) => {
       updatePreview((prev) => {
         if (!prev) return prev as any;
+        const value = asDefaultType(raw, get(prev, key));
         if (typeof key === 'string' && key.includes('.')) {
           const next = cloneDeep(prev) as T;
           set(next as any, key, value);
@@ -292,16 +584,25 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
     }
 
     const draft = stripPreviewOnly(previewRef.current, widgetSettingsKeys);
-    const saved = await updateConfig(draft as any, { silent: true });
+    const payload = changesToSave(
+      withRepairs(draft),
+      stripPreviewOnly(savedConfigRef.current, widgetSettingsKeys)
+    );
+    const saved = await updateConfig(payload as any, { silent: true });
     if (!saved) {
       throw new Error(
         'De configuratie kon niet worden opgeslagen. Probeer het opnieuw.'
       );
     }
 
+    pendingRepairs.clear();
+    draftBaseRef.current = {
+      ...draftBaseRef.current,
+      config: cloneDeep(saved.config),
+    };
     updatePreview((prevPreview) => {
       const base: any = {
-        ...(saved.config as any),
+        ...cloneDeep(saved.config as any),
         ...widgetSettingsRef.current,
         widgetId: (prevPreview as any)?.widgetId,
         showAdminHiddenPolygonStyling: true,

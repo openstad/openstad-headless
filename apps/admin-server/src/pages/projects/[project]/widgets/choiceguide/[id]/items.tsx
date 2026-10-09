@@ -1736,6 +1736,8 @@ export default function WidgetChoiceGuideItems(
                                             />
                                           </div>
                                           <Button
+                                            type="button"
+                                            aria-label="Afbeelding verwijderen"
                                             color="red"
                                             onClick={() => {
                                               removeImage(index);
@@ -2278,6 +2280,8 @@ export default function WidgetChoiceGuideItems(
                                           alt={form.watch('imageA')}
                                         />
                                         <Button
+                                          type="button"
+                                          aria-label="Afbeelding verwijderen"
                                           color="red"
                                           onClick={() => {
                                             form.setValue('imageA', '');
@@ -2308,6 +2312,8 @@ export default function WidgetChoiceGuideItems(
                                           alt={form.watch('imageB')}
                                         />
                                         <Button
+                                          type="button"
+                                          aria-label="Afbeelding verwijderen"
                                           color="red"
                                           onClick={() => {
                                             form.setValue('imageB', '');

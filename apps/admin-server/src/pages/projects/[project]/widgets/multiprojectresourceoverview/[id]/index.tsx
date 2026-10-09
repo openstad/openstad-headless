@@ -1,7 +1,7 @@
 import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetDraft } from '@/hooks/useWidgetDraft';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -42,11 +42,10 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { widget, previewConfig, updatePreview, updateConfig, onFieldChanged } =
+  const { widget, previewConfig, updatePreview, onFieldChanged } =
     useWidgetDraft<ResourceOverviewWidgetProps>({ projectId });
 
-  const tabUpdateConfig = (config: ResourceOverviewWidgetProps) =>
-    updateConfig({ ...widget.config, ...config });
+  const tabUpdateConfig = ignoreTabSubmit;
 
   const totalPropPackage = {
     ...widget?.config,
@@ -54,7 +53,9 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
     updateConfig: tabUpdateConfig,
     onFieldChanged,
     projectId,
-    selectedProjects: previewConfig?.selectedProjects || [],
+    selectedProjects: Array.isArray(previewConfig?.selectedProjects)
+      ? previewConfig?.selectedProjects
+      : [],
     widgetName: 'multiprojectresourceoverview',
   };
 
@@ -119,7 +120,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig: previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                           widgetName: 'multiprojectresourceoverview',
                         })}
@@ -133,7 +133,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig: previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -146,7 +145,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -159,7 +157,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -172,7 +169,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -230,7 +226,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           subWidgetKey: 'resourceOverviewMapWidget',
                           previewConfig: previewConfig,
-                          updateConfig,
                           updatePreview,
                         })}
                       />

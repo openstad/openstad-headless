@@ -1,7 +1,7 @@
 import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetDraft } from '@/hooks/useWidgetDraft';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import {
   WithApiUrlProps,
@@ -34,11 +34,10 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { widget, previewConfig, updatePreview, updateConfig, onFieldChanged } =
+  const { widget, previewConfig, updatePreview, onFieldChanged } =
     useWidgetDraft<ResourceDetailWidgetProps>({ projectId });
 
-  const tabUpdateConfig = (config: any) =>
-    updateConfig({ ...widget.config, ...config });
+  const tabUpdateConfig = ignoreTabSubmit;
 
   const totalPropPackageMap: ResourceOverviewMapWidgetProps &
     EditFieldProps<ResourceOverviewMapWidgetProps> = {
@@ -50,8 +49,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
     markerIcon: {
       // provide default values for the markerIcon properties
     },
-    updateConfig: (config: ResourceOverviewMapWidgetProps) =>
-      updateConfig({ ...(widget?.config || {}), ...config }),
+    updateConfig: ignoreTabSubmit,
     onFieldChanged,
     projectId,
   };
@@ -134,7 +132,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   >({
                     subWidgetKey: 'likeWidget',
                     previewConfig: previewConfig,
-                    updateConfig,
                     updatePreview,
                   })}
                 />

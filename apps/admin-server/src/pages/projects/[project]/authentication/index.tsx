@@ -13,7 +13,10 @@ import {
 import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { useRegisterFormSave } from '@/components/ui/save-controller';
+import {
+  useRegisterFormSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import {
   Select,
   SelectContent,
@@ -25,6 +28,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { WhitelistedEmailSelect } from '@/components/ui/whitelisted-email-select';
 import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
+import { emptiedAuthEmail } from '@/lib/auth-email-check';
 import {
   WithWhitelistedEmailsProps,
   withWhitelistedEmails,
@@ -147,11 +151,17 @@ export default function ProjectAuthentication({
     if (!authConfig) {
       throw new Error('De instellingen zijn nog niet geladen.');
     }
-    const valid = await form.trigger();
+    const valid = await validateForSave(form);
     if (!valid) {
       throw new Error('Controleer de gemarkeerde velden.');
     }
     const values = formSchema.parse(form.getValues());
+    const sendsLoginLinks = values.authTypes.includes('Url');
+    const emptied = emptiedAuthEmail(
+      authConfig,
+      sendsLoginLinks ? values : { ...values, fromEmail: undefined }
+    );
+    if (emptied) throw new Error(emptied);
     let updatedConfig: {
       auth: {
         provider: {

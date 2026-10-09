@@ -151,6 +151,7 @@ export default function ChoicesSelectorForm(
   useSyncDraftForm(form, pushToDraft, {
     schema: formSchema,
     label: 'Formulier instellingen',
+    prefix: category,
   });
   const draftProps = { ...props, onFieldChanged: pushToDraft };
 

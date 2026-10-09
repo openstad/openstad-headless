@@ -56,7 +56,9 @@ export default function WidgetResourcesMapContent(
       <Form {...form}>
         <Heading size="xl">Content</Heading>
         <Separator className="my-4" />
-        <form className="space-y-4 lg:w-1/2">
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
             name="showResources"

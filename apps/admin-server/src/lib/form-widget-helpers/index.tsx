@@ -1,3 +1,4 @@
+import { withoutDraftSync } from '@/lib/draft-sync-pause';
 import * as Switch from '@radix-ui/react-switch';
 import { useEffect } from 'react';
 import { ControllerRenderProps } from 'react-hook-form';
@@ -9,7 +10,7 @@ export function YesNoSelect(
 ) {
   useEffect(() => {
     if (field.value === undefined || field.value === null) {
-      field.onChange(false);
+      withoutDraftSync(() => field.onChange(false));
     }
   }, []);
 

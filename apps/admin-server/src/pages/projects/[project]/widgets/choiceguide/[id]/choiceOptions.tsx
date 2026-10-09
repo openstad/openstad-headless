@@ -244,6 +244,8 @@ export default function WidgetChoiceGuideChoiceOptions(
                                 <div className="relative grid col-span-full grid-cols-3 gap-x-4 items-center">
                                   <img src={image} alt={image} />
                                   <Button
+                                    type="button"
+                                    aria-label="Afbeelding verwijderen"
                                     color="red"
                                     onClick={() => {
                                       form.setValue(

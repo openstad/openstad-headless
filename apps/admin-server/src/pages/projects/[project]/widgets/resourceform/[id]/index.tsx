@@ -3,7 +3,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { flushAllFields } from '@/hooks/useFieldDebounce';
-import { useWidgetDraft } from '@/hooks/useWidgetDraft';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -33,7 +33,7 @@ export default function WidgetResourceForm({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { widget, previewConfig, updateConfig, onFieldChanged } =
+  const { previewConfig, onFieldChanged } =
     useWidgetDraft<ResourceFormWidgetProps>({ projectId });
 
   const [activeTab, setActiveTab] = useState('general');
@@ -43,8 +43,7 @@ export default function WidgetResourceForm({ apiUrl }: WithApiUrlProps) {
     setActiveTab(value);
   };
 
-  const tabUpdateConfig = (config: any) =>
-    updateConfig({ ...widget.config, ...config });
+  const tabUpdateConfig = ignoreTabSubmit;
 
   return (
     <div>

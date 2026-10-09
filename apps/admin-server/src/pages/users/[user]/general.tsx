@@ -17,11 +17,15 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { useRegisterFormSave } from '@/components/ui/save-controller';
+import {
+  useRegisterFormSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useUser from '@/hooks/use-user';
 import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
+import { emptiedUserEmail } from '@/lib/auth-email-check';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -106,15 +110,23 @@ export default function CreateUserGeneral() {
   }, [user]);
 
   const save = useCallback(async () => {
-    const valid = await form.trigger();
+    const valid = await validateForSave(form);
     if (!valid) {
       throw new Error('Controleer de gemarkeerde velden.');
     }
     const values = formSchema.parse(form.getValues());
-    await updateUser({ ...values, id: user.id, projectId: user.projectId });
+    const emptied = emptiedUserEmail(user, values);
+    if (emptied) throw new Error(emptied);
+    const { email, ...rest } = values;
+    await updateUser({
+      ...rest,
+      ...(email ? { email } : {}),
+      id: user.id,
+      projectId: user.projectId,
+    });
   }, [form, updateUser, user]);
 
-  useRegisterFormSave(form, save);
+  useRegisterFormSave(form, save, { label: 'Algemene instellingen' });
 
   async function handleResetTwoFactor() {
     try {

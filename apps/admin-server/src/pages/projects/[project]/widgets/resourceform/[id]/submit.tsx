@@ -13,10 +13,11 @@ import { Separator } from '@/components/ui/separator';
 import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceFormWidgetProps } from '@openstad-headless/resource-form/src/props';
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -45,12 +46,17 @@ export default function WidgetResourceFormSubmit(
     },
   });
 
-  useEffect(() => {
-    const subscription = form.watch((values) => {
-      props.onFieldChanged?.(category, values);
-    });
-    return () => subscription.unsubscribe();
-  }, [form, props]);
+  const { onFieldChanged } = props;
+  const pushToDraft = useCallback(
+    (name: string, value: any) =>
+      onFieldChanged?.(`${category}.${name}`, value),
+    [onFieldChanged, category]
+  );
+  useSyncDraftForm(form, pushToDraft, {
+    schema: formSchema,
+    prefix: category,
+    label: 'Opleveren',
+  });
 
   const projectId = props.projectId;
   const { data: loadedTags } = useTags(projectId);
@@ -65,7 +71,9 @@ export default function WidgetResourceFormSubmit(
       <Form {...form}>
         <Heading size="xl">Opleveren</Heading>
         <Separator className="my-4" />
-        <form className="lg:w-2/3 grid grid-cols-1 gap-4 ">
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="lg:w-2/3 grid grid-cols-1 gap-4 ">
           <FormField
             control={form.control}
             name="submitButton"

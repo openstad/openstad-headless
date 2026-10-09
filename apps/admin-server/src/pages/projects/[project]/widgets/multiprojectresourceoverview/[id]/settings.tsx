@@ -21,7 +21,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
 import { Spacer } from '@openstad-headless/ui/src';
 import { X } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -73,7 +73,7 @@ export default function WidgetMultiProjectSettings(
       includeProjectsInOverview:
         props.includeProjectsInOverview === true
           ? true
-          : project.includeProjectsInOverview,
+          : (project.includeProjectsInOverview ?? true),
       excludeResourcesInOverview:
         props.excludeResourcesInOverview === true
           ? true
@@ -91,25 +91,23 @@ export default function WidgetMultiProjectSettings(
     label: 'Instellingen multi project',
   });
 
-  async function onSubmit(values: FormData) {
-    const updatedValues = {
-      ...values,
-      selectedProjects:
-        values.selectedProjects?.map((project) => ({
-          ...project,
-          id: project.id || 0,
-          overviewSortDate:
-            project.overviewSortDate instanceof Date
-              ? project.overviewSortDate.toISOString()
-              : project.overviewSortDate,
-        })) || [],
-
-      // Turn off for backwards compatibility. If the value was set, it has been set in selectedProjects
-      includeProjectsInOverview: false,
-      excludeResourcesInOverview: false,
-    };
-    props.updateConfig({ ...props, ...updatedValues });
-  }
+  const hasLegacyFlags =
+    props.includeProjectsInOverview === true ||
+    props.excludeResourcesInOverview === true;
+  const { onFieldChanged } = props;
+  const legacyFlagsMovedRef = useRef(false);
+  useEffect(() => {
+    if (!hasLegacyFlags || !onFieldChanged) return;
+    const subscription = form.watch((_values, { name }) => {
+      if (!name?.startsWith('selectedProjects')) return;
+      if (legacyFlagsMovedRef.current) return;
+      legacyFlagsMovedRef.current = true;
+      onFieldChanged('selectedProjects', form.getValues('selectedProjects'));
+      onFieldChanged('includeProjectsInOverview', false);
+      onFieldChanged('excludeResourcesInOverview', false);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, hasLegacyFlags, onFieldChanged]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -128,7 +126,7 @@ export default function WidgetMultiProjectSettings(
         </FormDescription>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(event) => event.preventDefault()}
           className="lg:w-full grid grid-cols-1 gap-4">
           {projects?.map((project: any) => (
             <FormField
@@ -180,7 +178,7 @@ export default function WidgetMultiProjectSettings(
                               field.onChange(updatedProjects);
                             },
                           },
-                          props
+                          {}
                         )}
                       </FormControl>
 
@@ -544,6 +542,8 @@ export default function WidgetMultiProjectSettings(
                                     }}
                                   />
                                   <Button
+                                    type="button"
+                                    aria-label="Afbeelding verwijderen"
                                     color="red"
                                     onClick={() => {
                                       form.setValue(
@@ -594,6 +594,8 @@ export default function WidgetMultiProjectSettings(
                                     }}
                                   />
                                   <Button
+                                    type="button"
+                                    aria-label="Afbeelding verwijderen"
                                     color="red"
                                     onClick={() => {
                                       form.setValue(

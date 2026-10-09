@@ -65,7 +65,9 @@ export default function WidgetMapMap(
       <Form {...form}>
         <Heading size="xl">Kaart</Heading>
         <Separator className="my-4" />
-        <form className="grid grid-cols-2 gap-4 lg:w-fit">
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="grid grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="variant"

@@ -9,7 +9,10 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { useRegisterFormSave } from '@/components/ui/save-controller';
+import {
+  useRegisterFormSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
@@ -268,14 +271,9 @@ export default function ProjectAuthentication() {
     if (!authConfig) {
       throw new Error('De instellingen zijn nog niet geladen.');
     }
-    const valid = await form.trigger();
+    const valid = await validateForSave(form);
     if (!valid) {
-      const firstErrorField = Object.keys(form.formState.errors)[0];
-      throw new Error(
-        firstErrorField
-          ? `Controleer het veld "${firstErrorField}".`
-          : 'Controleer de gemarkeerde velden.'
-      );
+      throw new Error('Controleer de gemarkeerde velden.');
     }
     const values = formSchema.parse(form.getValues());
     const result = await updateProject({

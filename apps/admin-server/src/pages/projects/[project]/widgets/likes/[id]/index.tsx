@@ -3,7 +3,7 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetDraft } from '@/hooks/useWidgetDraft';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -28,11 +28,11 @@ export default function WidgetLikes({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { widget, previewConfig, updateConfig, onFieldChanged } =
-    useWidgetDraft<LikeWidgetTabProps>({ projectId });
+  const { previewConfig, onFieldChanged } = useWidgetDraft<LikeWidgetTabProps>({
+    projectId,
+  });
 
-  const tabUpdateConfig = (config: any) =>
-    updateConfig({ ...widget.config, ...config });
+  const tabUpdateConfig = ignoreTabSubmit;
 
   return (
     <div>

@@ -87,32 +87,42 @@ export default function CreateUserProjects() {
       ...emailNotificationConsents,
     ];
 
+    let latest = users;
+    try {
+      latest = (await mutate()) ?? users;
+    } catch (error) {
+      console.error('Refreshing the user before saving failed', error);
+    }
+
     for (let updateValue of mergedProjects) {
-      let user = users;
-      if (Array.isArray(users)) {
-        user = users.find(
+      let user = latest;
+      if (Array.isArray(latest)) {
+        user = latest.find(
           (user: any) => user.projectId == updateValue.projectId
         );
       }
       if (user) {
         try {
-          const updatedUser = user;
-          if (user.emailNotificationConsent !== updateValue.consent) {
-            updatedUser.emailNotificationConsent = updateValue.consent;
+          const changes: any = { id: user.id, projectId: user.projectId };
+          if (
+            typeof updateValue.consent !== 'undefined' &&
+            user.emailNotificationConsent !== updateValue.consent
+          ) {
+            changes.emailNotificationConsent = updateValue.consent;
           }
           if (
             typeof updateValue.roleId !== 'undefined' &&
             user.role !== updateValue.roleId
           ) {
-            updatedUser.role = updateValue.roleId;
+            changes.role = updateValue.roleId;
           }
 
-          await updateUser(updatedUser);
+          await updateUser(changes);
         } catch (err) {
           error = err;
         }
       } else {
-        user = users[0];
+        user = Array.isArray(latest) ? latest[0] : latest;
         if (user.idpUser?.identifier && user.idpUser?.provider) {
           try {
             const newUser = {
@@ -177,6 +187,7 @@ export default function CreateUserProjects() {
     // non-empty list is the page's unsaved state.
     isDirty: projectRoles.length > 0 || emailNotificationConsents.length > 0,
     save,
+    label: 'Projectsrechten',
   });
 
   if (!projects || !users) return null;
