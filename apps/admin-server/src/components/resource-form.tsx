@@ -104,6 +104,7 @@ const baseSchema = z.object({
           .refine(hasModBreakContent, EMPTY_MODBREAK_MESSAGE),
         authorName: z.string().optional().default(''),
         modBreakDate: z.string().optional().default(''),
+        createdAt: z.string().optional(),
       })
     )
     .optional()
@@ -282,6 +283,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 ? mb.modBreakDate.slice(0, 16)
                 : mb.modBreakDate + 'T00:00'
               : '',
+            createdAt: mb.createdAt,
           }))
           .sort(
             (a: any, b: any) =>
