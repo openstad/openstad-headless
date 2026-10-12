@@ -47,7 +47,8 @@ export default function ProjectResourceLinks() {
       : capabilities.sources.find((item) => item.key === source)?.label ||
         source;
   const visibleResults = results.filter(
-    (result) => String(result.id) !== String(id)
+    (result) =>
+      String(result.id) !== String(id) && !linkedIds.has(String(result.id))
   );
 
   async function handleSearch(event: React.FormEvent) {
@@ -172,17 +173,11 @@ export default function ProjectResourceLinks() {
                 <span>
                   {result.label} ({result.id})
                 </span>
-                {linkedIds.has(String(result.id)) ? (
-                  <Button type="button" variant="secondary" disabled>
-                    Gekoppeld
-                  </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    onClick={() => handleLink('openstad', result.id)}>
-                    Koppelen
-                  </Button>
-                )}
+                <Button
+                  type="button"
+                  onClick={() => handleLink('openstad', result.id)}>
+                  Koppelen
+                </Button>
               </li>
             ))}
           </ul>
