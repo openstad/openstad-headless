@@ -757,7 +757,9 @@ router
             resourceId: req.results.id,
             emailReceivers: emailReceivers,
           },
-        });
+        }).catch((err) =>
+          console.error('Error sending admin notification for resource:', err)
+        );
       }
 
       if (sendConfirmationToAdmin) {
@@ -768,7 +770,9 @@ router
             userId: req.user.id,
             resourceId: req.results.id,
           },
-        });
+        }).catch((err) =>
+          console.error('Error sending admin notification for resource:', err)
+        );
       }
 
       if (sendConfirmationToUser) {
@@ -779,7 +783,9 @@ router
             userId: req.user.id,
             resourceId: req.results.id,
           },
-        });
+        }).catch((err) =>
+          console.error('Error sending user notification for resource:', err)
+        );
       }
     } else if (!req.query.nomail && !req.body['publishDate']) {
       if (sendConfirmationToUser) {
@@ -790,7 +796,9 @@ router
             userId: req.user.id,
             resourceId: req.results.id,
           },
-        });
+        }).catch((err) =>
+          console.error('Error sending user notification for resource:', err)
+        );
       }
     }
 
@@ -1068,7 +1076,9 @@ router
           userId: req.user.id,
           resourceId: req.results.id,
         },
-      });
+      }).catch((err) =>
+        console.error('Error sending admin notification for resource:', err)
+      );
     }
     if (req.changedToPublished) {
       db.Notification.create({
@@ -1078,7 +1088,9 @@ router
           userId: req.user.id,
           resourceId: req.results.id,
         },
-      });
+      }).catch((err) =>
+        console.error('Error sending user notification for resource:', err)
+      );
     }
 
     const newModBreaks = findNewModBreaks(

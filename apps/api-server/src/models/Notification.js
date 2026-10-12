@@ -216,7 +216,7 @@ module.exports = (db, sequelize, DataTypes) => {
       },
 
       to: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: true,
       },
 
