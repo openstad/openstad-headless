@@ -311,11 +311,12 @@ export default function WidgetResourceDetailLinks(
                 )}
               />
               {toggleField('relatedResources.displayImage', 'Afbeelding tonen')}
-              {toggleField(
-                'relatedResources.displaySummary',
-                'Samenvatting tonen',
-                'Niet zichtbaar in de compacte weergave.'
-              )}
+              {form.watch('relatedResources.layout') !== 'compact'
+                ? toggleField(
+                    'relatedResources.displaySummary',
+                    'Samenvatting tonen'
+                  )
+                : null}
               {toggleField(
                 'relatedResources.linkToDetail',
                 'Link naar de detailpagina'
