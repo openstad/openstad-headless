@@ -324,7 +324,7 @@ export default function WidgetResourceDetailLinks(
                 ? textField(
                     'relatedResources.itemLink',
                     'Adres van de detailpagina',
-                    '/resources/[id]',
+                    '/inzending?openstadResourceId=[id]',
                     'Gebruik [id] voor het nummer van de inzending.'
                   )
                 : null}
