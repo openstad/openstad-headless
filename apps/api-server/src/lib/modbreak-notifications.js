@@ -108,17 +108,36 @@ function buildUnsubscribeUrl({ userId, projectId }) {
   return `${process.env.URL}/api/project/${projectId}/user/unsubscribe/${userId}/${hash.digest('hex')}`;
 }
 
+function addResourceIdParam(url, resourceId) {
+  const hashIndex = url.indexOf('#');
+  const base = hashIndex === -1 ? url : url.slice(0, hashIndex);
+  const hash = hashIndex === -1 ? '' : url.slice(hashIndex);
+  const separator = base.includes('?') ? '&' : '?';
+  return `${base}${separator}openstadResourceId=${resourceId}${hash}`;
+}
+
+function absoluteUrl(url, project) {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  if (!project || !project.url) return null;
+  const protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+  const base = /^https?:\/\//i.test(project.url)
+    ? project.url
+    : `${protocol}${project.url}`;
+  return `${base.replace(/\/+$/, '')}${url}`;
+}
+
 function buildResourceRedirectUrl(project, resourcePath, resourceId) {
-  if (!project || !project.url) return '';
   const path = typeof resourcePath === 'string' ? resourcePath.trim() : '';
   if (!path) return '';
-  let url = project.url.trim();
-  if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
-  url = url.replace(/\/+$/, '');
-  const resourceUrlPath = path
-    .replaceAll('[[resourceId]]', String(resourceId))
-    .replace(/^\/*/, '/');
-  return `${url}${resourceUrlPath}`;
+  const encodedId = encodeURIComponent(String(resourceId));
+  const withId = path.includes('[id]')
+    ? path.split('[id]').join(encodedId)
+    : addResourceIdParam(path, encodedId);
+  const url = /^https?:\/\//i.test(withId)
+    ? withId
+    : withId.replace(/^\/*/, '/');
+  return absoluteUrl(url, project) || '';
 }
 
 async function readModBreakNotificationSettings(db, projectId) {

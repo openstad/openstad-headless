@@ -416,12 +416,15 @@ export default function ProjectSettingsNotifications({
                       Pad naar de inzending in de modbreak-mail
                     </FormLabel>
                     <FormDescription>
-                      Bijvoorbeeld /inzendingen/[[resourceId]]. Wordt achter de
-                      project-URL geplakt. Leeg laten = geen knop in de mail.
+                      Volledige URL of pad van de pagina met de inzending. Een
+                      pad wordt achter de project-URL geplakt. [id] wordt
+                      vervangen door het ID van de inzending. Zonder [id] wordt
+                      ?openstadResourceId= met het ID automatisch toegevoegd.
+                      Leeg laten = geen knop in de mail.
                     </FormDescription>
                     <FormControl>
                       <Input
-                        placeholder="/inzendingen/[[resourceId]]"
+                        placeholder="https://www.voorbeeld.nl/inzending?openstadResourceId=[id]"
                         {...field}
                       />
                     </FormControl>
