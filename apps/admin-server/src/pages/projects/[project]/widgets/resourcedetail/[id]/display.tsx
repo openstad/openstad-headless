@@ -579,8 +579,21 @@ export default function WidgetResourceDetailDisplay(
                       const ids =
                         form.getValues('selectedSocialShareOptions') ?? [];
 
+                      const rank = (id: ShareOption) =>
+                        shareItems.findIndex(
+                          (item) => `${item.value}` === `${id}`
+                        );
+                      const insertAt = ids.findIndex(
+                        (id) => rank(id) > rank(share.value)
+                      );
                       const idsToSave = checked
-                        ? [...ids, share.value]
+                        ? insertAt === -1
+                          ? [...ids, share.value]
+                          : [
+                              ...ids.slice(0, insertAt),
+                              share.value,
+                              ...ids.slice(insertAt),
+                            ]
                         : ids.filter((id) => id !== `${share.value}`);
 
                       form.setValue('selectedSocialShareOptions', idsToSave);

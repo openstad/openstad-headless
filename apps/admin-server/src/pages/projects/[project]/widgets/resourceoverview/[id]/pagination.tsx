@@ -9,7 +9,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -31,8 +30,6 @@ export default function WidgetResourceOverviewPagination(
   async function onSubmit(values: FormData) {
     props.updateConfig({ ...props, ...values });
   }
-
-  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
@@ -89,10 +86,6 @@ export default function WidgetResourceOverviewPagination(
                       {...field}
                       placeholder="30"
                       {...field}
-                      onChange={(e) => {
-                        onFieldChange(field.name, e.target.value);
-                        field.onChange(e);
-                      }}
                     />
                   </FormControl>
                   <FormMessage />

@@ -1,4 +1,6 @@
+import { asDefaultType } from '@/hooks/useWidgetDraft';
 import cloneDeep from 'lodash/cloneDeep';
+import get from 'lodash/get';
 import set from 'lodash/set';
 
 type ConfigWithFunctions<ChildWidgetProps> = ChildWidgetProps & {
@@ -12,7 +14,6 @@ type ExtractConfigParams<
 > = {
   subWidgetKey: keyof ParentWidgetProps;
   previewConfig: ParentWidgetProps | null;
-  updateConfig: (config: ParentWidgetProps) => void;
   updatePreview: (
     config:
       | ParentWidgetProps
@@ -22,50 +23,39 @@ type ExtractConfigParams<
   widgetName?: string;
 };
 
+function withDraftPrefix<F extends (key: string, value: any) => void>(
+  fn: F,
+  prefix: string
+): F & { draftPrefix: string } {
+  return Object.assign(fn, { draftPrefix: prefix });
+}
+
 export function extractConfig<
   ParentWidgetProps extends {},
   ChildWidgetProps extends {},
 >(
   params: ExtractConfigParams<ParentWidgetProps, ChildWidgetProps>
 ): ConfigWithFunctions<ChildWidgetProps> {
-  const {
-    subWidgetKey,
-    previewConfig,
-    updateConfig: persistParentConfig,
-    updatePreview,
-    extraChildConfig,
-  } = params;
+  const { subWidgetKey, previewConfig, updatePreview, extraChildConfig } =
+    params;
 
   if (!previewConfig) throw new Error();
 
   const extractedConfig: ConfigWithFunctions<ChildWidgetProps> = {
     ...extraChildConfig,
     ...(previewConfig[subWidgetKey] as ChildWidgetProps),
-    updateConfig: (config: ChildWidgetProps) => {
-      const mergedConfig = {
-        ...previewConfig,
-        [subWidgetKey]: {
-          ...previewConfig[subWidgetKey],
-          ...config,
-        },
-      };
-      persistParentConfig(mergedConfig);
-      // Keep the preview state in sync with what was just saved, so a
-      // subsequent sibling save merges against fresh config instead of a
-      // stale snapshot (prevents one column overwriting another).
-      updatePreview(mergedConfig);
-    },
-    onFieldChanged: (key: string, value: any) => {
+    updateConfig: () => {},
+    onFieldChanged: withDraftPrefix((key: string, value: any) => {
       updatePreview((prev) => {
         const base = prev ?? previewConfig;
         const subConfig = cloneDeep(base[subWidgetKey] ?? {});
-        set(subConfig as any, key, value);
+        set(subConfig as any, key, asDefaultType(value, get(subConfig, key)));
         return {
           ...base,
           [subWidgetKey]: subConfig,
         };
       });
-    },
+    }, String(subWidgetKey)),
   };
   return extractedConfig;
 }

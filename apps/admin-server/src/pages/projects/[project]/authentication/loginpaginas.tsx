@@ -9,11 +9,15 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { useRegisterFormSave } from '@/components/ui/save-controller';
+import {
+  useRegisterFormSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { useLastDefined } from '@/hooks/use-last-defined';
 import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Copy, Info } from 'lucide-react';
@@ -262,20 +266,17 @@ export default function ProjectAuthentication() {
 
   useSyncFormDefaults(form, defaults, authConfig);
 
+  const loadedAuthConfig = useLastDefined(authConfig, project);
+
   const save = useCallback(async () => {
     // Saving before the auth config has arrived would write the empty form over
     // the stored settings and wipe them.
-    if (!authConfig) {
+    if (!loadedAuthConfig) {
       throw new Error('De instellingen zijn nog niet geladen.');
     }
-    const valid = await form.trigger();
+    const valid = await validateForSave(form);
     if (!valid) {
-      const firstErrorField = Object.keys(form.formState.errors)[0];
-      throw new Error(
-        firstErrorField
-          ? `Controleer het veld "${firstErrorField}".`
-          : 'Controleer de gemarkeerde velden.'
-      );
+      throw new Error('Controleer de gemarkeerde velden.');
     }
     const values = formSchema.parse(form.getValues());
     const result = await updateProject({
@@ -330,7 +331,7 @@ export default function ProjectAuthentication() {
     if (!result) {
       throw new Error('Er is helaas iets mis gegaan.');
     }
-  }, [authConfig, form, updateProject]);
+  }, [loadedAuthConfig, form, updateProject]);
 
   useRegisterFormSave(form, save);
 

@@ -280,16 +280,17 @@ export default function WidgetResourceOverviewTags(
                                   }
                                   onChange={(e) => {
                                     const groups = field.value;
-
-                                    const groupIndex = groups.findIndex(
-                                      (g) => g.type === groupName
+                                    if (
+                                      !groups.some((g) => g.type === groupName)
+                                    )
+                                      return;
+                                    const next = groups.map((g) =>
+                                      g.type === groupName
+                                        ? { ...g, label: e.target.value }
+                                        : g
                                     );
-
-                                    const existingGroup = groups[groupIndex];
-                                    existingGroup.label = e.target.value;
-                                    groups[groupIndex] = existingGroup;
-                                    field.onChange(groups);
-                                    onFieldChange(field.name, groups);
+                                    field.onChange(next);
+                                    onFieldChange(field.name, next);
                                   }}
                                 />
                               </FormControl>

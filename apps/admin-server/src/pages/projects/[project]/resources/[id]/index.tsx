@@ -42,6 +42,7 @@ export default function ProjectResource() {
         <div className="container py-6">
           <Tabs
             value={tab}
+            activationMode="manual"
             onValueChange={(val) =>
               router.replace(
                 { query: { ...router.query, tab: val } },

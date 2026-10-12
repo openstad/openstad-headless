@@ -176,7 +176,7 @@ export default function WidgetStemBegrootOverviewTags(
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-[auto_1fr_1fr] gap-x-8 gap-y-2">
-                  {(tagGroupNames || []).map((groupName, index) => (
+                  {(tagGroupNames || []).map((groupName) => (
                     <>
                       <FormField
                         key={`parent${groupName}`}
@@ -232,7 +232,11 @@ export default function WidgetStemBegrootOverviewTags(
                                   <Input
                                     placeholder="Groep label"
                                     key={`${groupName}-label-input-field`}
-                                    defaultValue={field.value.at(index)?.label}
+                                    value={
+                                      field.value.find(
+                                        (g) => g.type === groupName
+                                      )?.label ?? ''
+                                    }
                                     disabled={
                                       field.value.find(
                                         (g) => g.type === groupName
@@ -240,17 +244,19 @@ export default function WidgetStemBegrootOverviewTags(
                                     }
                                     onChange={(e) => {
                                       const groups = field.value;
-                                      const existingGroup = groups[index];
-
-                                      if (existingGroup) {
-                                        existingGroup.label = e.target.value;
-                                        groups[index] = existingGroup;
-                                        field.onChange(groups);
-                                        props.onFieldChanged(
-                                          field.name,
-                                          groups
-                                        );
-                                      }
+                                      if (
+                                        !groups.some(
+                                          (g) => g.type === groupName
+                                        )
+                                      )
+                                        return;
+                                      const next = groups.map((g) =>
+                                        g.type === groupName
+                                          ? { ...g, label: e.target.value }
+                                          : g
+                                      );
+                                      field.onChange(next);
+                                      props.onFieldChanged(field.name, next);
                                     }}
                                   />
                                 </>

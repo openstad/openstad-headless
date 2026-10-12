@@ -52,6 +52,7 @@ export default function WidgetResourceFormSubmit(
   );
   useSyncDraftForm(form, pushToDraft, {
     schema: formSchema,
+    prefix: category,
     label: 'Opleveren',
   });
 
@@ -68,7 +69,9 @@ export default function WidgetResourceFormSubmit(
       <Form {...form}>
         <Heading size="xl">Opleveren</Heading>
         <Separator className="my-4" />
-        <form className="lg:w-2/3 grid grid-cols-1 gap-4 ">
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="lg:w-2/3 grid grid-cols-1 gap-4 ">
           <FormField
             control={form.control}
             name="submitButton"

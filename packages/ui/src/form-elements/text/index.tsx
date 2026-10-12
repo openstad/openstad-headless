@@ -317,6 +317,10 @@ const TrixEditor: React.FC<{
       if (onBlurRef.current) onBlurRef.current();
     };
 
+    if ((editorEl as any).editor) {
+      handleTrixInitialize();
+    }
+
     editorEl.addEventListener('trix-initialize', handleTrixInitialize);
     editorEl.addEventListener('trix-change', handleTrixChange);
     editorEl.addEventListener('trix-toolbar-dialog-show', handleDialogShow);

@@ -1840,12 +1840,14 @@ export default function WidgetEnqueteItems(
                                         />
                                       </div>
                                       <Button
+                                        type="button"
+                                        aria-label="Afbeelding verwijderen"
                                         color="red"
                                         onClick={() => {
                                           removeImage(index);
                                         }}
                                         className="absolute left-0 top-0">
-                                        <X size={24} />
+                                        <X size={24} aria-hidden="true" />
                                       </Button>
 
                                       <div

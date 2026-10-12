@@ -12,6 +12,7 @@ import { PageLayout } from '@/components/ui/page-layout';
 import {
   useRegisterFormSave,
   useSaveController,
+  validateForSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
@@ -44,7 +45,7 @@ export default function ProjectCodeCreate() {
   const { allowNextNavigation } = useSaveController();
 
   const save = useCallback(async () => {
-    const valid = await form.trigger();
+    const valid = await validateForSave(form);
     if (!valid) {
       throw new Error('Controleer de gemarkeerde velden.');
     }

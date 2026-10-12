@@ -532,14 +532,7 @@ export default function WidgetResourceOverviewDisplay(
                     Hoeveelheid karakters van de titel die getoond wordt
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => {
-                        onFieldChange(field.name, e.target.value);
-                        field.onChange(e);
-                      }}
-                    />
+                    <Input type="number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -632,14 +625,7 @@ export default function WidgetResourceOverviewDisplay(
                   Hoeveelheid karakters van de samenvatting die getoond wordt
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
+                  <Input type="number" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -667,14 +653,7 @@ export default function WidgetResourceOverviewDisplay(
                   Hoeveelheid karakters van de beschrijving die getoond wordt
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
+                  <Input type="number" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

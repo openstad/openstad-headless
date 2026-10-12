@@ -19,8 +19,8 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
-import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
+import { sentimentList } from '@/lib/comment-sentiments';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,7 +34,7 @@ import { ArgumentWidgetTabProps } from '.';
 const formSchema = z.object({
   resourceId: z.string().optional(),
   sentiment: z.string(),
-  useSentiments: z.string().optional(),
+  useSentiments: z.array(z.string()).optional(),
   itemsPerPage: z.coerce.number(),
   displayPagination: z.boolean().optional(),
   displaySearchBar: z.boolean().optional(),
@@ -66,14 +66,12 @@ export default function ArgumentsGeneral({
     return key in finalSchema.shape ? field : null;
   };
 
-  const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
-
   const form = useForm<finalSchemaInfer>({
     resolver: zodResolver<any>(finalSchema),
     defaultValues: {
       resourceId: props.resourceId,
       sentiment: props.sentiment || 'for',
-      useSentiments: JSON.stringify(props.useSentiments || ['for', 'against']),
+      useSentiments: sentimentList(props.useSentiments),
       itemsPerPage: props?.itemsPerPage || 9999,
       displayPagination: props?.displayPagination || false,
       displaySearchBar: props?.displaySearchBar || false,
@@ -85,11 +83,7 @@ export default function ArgumentsGeneral({
   });
 
   function onSubmit(values: finalSchemaInfer) {
-    let useSentiments;
-    try {
-      useSentiments = JSON.parse(values.useSentiments || '');
-    } catch (err) {}
-    props.updateConfig({ ...props, ...values, useSentiments });
+    props.updateConfig({ ...props, ...values });
   }
 
   useSyncDraftForm(form, props.onFieldChanged, {
@@ -166,10 +160,11 @@ export default function ArgumentsGeneral({
                 <FormItem>
                   <FormLabel>Tonen van reacties:</FormLabel>
                   <Select
-                    value={field.value}
+                    value={JSON.stringify(sentimentList(field.value))}
                     onValueChange={(value) => {
-                      field.onChange(value);
-                      props.onFieldChanged(field.name, value);
+                      const list = sentimentList(value);
+                      field.onChange(list);
+                      props.onFieldChanged(field.name, list);
                     }}>
                     <FormControl>
                       <SelectTrigger>
@@ -226,10 +221,6 @@ export default function ArgumentsGeneral({
                       {...field}
                       placeholder="9999"
                       {...field}
-                      onChange={(e) => {
-                        onFieldChange(field.name, e.target.value);
-                        field.onChange(e);
-                      }}
                     />
                   </FormControl>
                   <FormMessage />

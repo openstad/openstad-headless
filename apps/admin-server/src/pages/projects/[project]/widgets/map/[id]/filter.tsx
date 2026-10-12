@@ -59,7 +59,9 @@ export default function WidgetMapFilter(
           Filterbalk
         </Heading>
         <Separator className="mb-4" />
-        <form className="space-y-4 lg:w-1/2">
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
             name="searchLocations"

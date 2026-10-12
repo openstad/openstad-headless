@@ -1,3 +1,4 @@
+import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -36,15 +37,11 @@ export function useWidgetPreview<T extends { [key: string]: any }>(
 
     const config = widget?.config;
     if (!config) return;
-    if (typeof config === 'object') {
-      (
-        config as { showAdminHiddenPolygonStyling?: boolean }
-      ).showAdminHiddenPolygonStyling = true;
-    }
 
     seededWidgetIdRef.current = currentId;
     setPreviewConfig({
-      ...config,
+      ...cloneDeep(config),
+      showAdminHiddenPolygonStyling: true,
       ...widgetSettings,
       widgetId,
     });

@@ -161,4 +161,104 @@ describe('SaveControllerProvider', () => {
       expect(save).not.toHaveBeenCalled();
     });
   });
+
+  async function triggerAndSettle() {
+    act(() => controller.triggerSave());
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+  }
+
+  describe('feedback around a navigation', () => {
+    it('keeps the error when the leave guard cancels the navigation', async () => {
+      mount(true, vi.fn().mockRejectedValue(new Error('Opslaan mislukt.')));
+      await triggerAndSettle();
+      expect(controller.state).toBe('error');
+
+      expect(startNavigation()).toBe('blocked');
+      await act(async () => {});
+
+      expect(controller.state).toBe('error');
+      expect(controller.errorMessage).toBe('Opslaan mislukt.');
+    });
+
+    it('clears the error once a navigation goes ahead', async () => {
+      mount(true, vi.fn().mockRejectedValue(new Error('Opslaan mislukt.')));
+      await triggerAndSettle();
+
+      act(() => router.events.emit('beforeHistoryChange', '/elsewhere'));
+
+      expect(controller.errorMessage).toBeNull();
+      expect(controller.state).not.toBe('error');
+    });
+  });
+
+  describe('error that has nothing left to retry', () => {
+    it('clears once the page has no unsaved changes any more', async () => {
+      const save = vi
+        .fn()
+        .mockRejectedValue(new Error('Controleer de invoer.'));
+      mount(true, save);
+      await triggerAndSettle();
+      expect(controller.state).toBe('error');
+
+      mount(false, save);
+
+      expect(controller.state).toBe('neutral');
+      expect(controller.errorMessage).toBeNull();
+    });
+
+    it('stays while the change is still unsaved', async () => {
+      const save = vi
+        .fn()
+        .mockRejectedValue(new Error('Controleer de invoer.'));
+      mount(true, save);
+      await triggerAndSettle();
+
+      mount(true, save);
+
+      expect(controller.state).toBe('error');
+    });
+  });
+
+  describe('error messages', () => {
+    it('explains a lost connection in Dutch instead of the browser text', async () => {
+      mount(true, vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
+      await triggerAndSettle();
+
+      expect(controller.errorMessage).toMatch(/geen verbinding met de server/);
+    });
+
+    it('explains invalid JSON in Dutch instead of the parser text', async () => {
+      mount(
+        true,
+        vi
+          .fn()
+          .mockRejectedValue(
+            new SyntaxError(
+              "Expected property name or '}' in JSON at position 1"
+            )
+          )
+      );
+      await triggerAndSettle();
+
+      expect(controller.errorMessage).toMatch(/geen geldige JSON/);
+    });
+
+    it('hides the English text of an unexpected TypeError', async () => {
+      mount(
+        true,
+        vi
+          .fn()
+          .mockRejectedValue(
+            new TypeError("Cannot read properties of undefined (reading 'x')")
+          )
+      );
+      await triggerAndSettle();
+
+      expect(controller.errorMessage).toBe(
+        'Er is iets misgegaan bij het opslaan. Probeer het opnieuw.'
+      );
+    });
+  });
 });

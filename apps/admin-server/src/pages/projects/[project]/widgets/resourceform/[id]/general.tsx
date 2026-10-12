@@ -24,8 +24,9 @@ const formSchema = z.object({
     (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val),
     z
       .string()
-      .refine((value) => /^(\/[^\s]*)|(https?:\/\/[^\s]*)$/i.test(value), {
-        message: 'Must be a valid URL or a relative path',
+      .refine((value) => /^(\/\S*|https?:\/\/\S*)$/i.test(value), {
+        message:
+          'Vul een volledige URL (https://…) of een pad op deze site (/…) in.',
       })
       .optional()
   ),
@@ -90,6 +91,7 @@ export default function WidgetResourceFormGeneral(
   );
   useSyncDraftForm(form, pushToDraft, {
     schema: formSchema,
+    prefix: category,
     label: 'Algemeen',
   });
 
@@ -98,7 +100,9 @@ export default function WidgetResourceFormGeneral(
       <Form {...form}>
         <Heading size="xl">Algemeen</Heading>
         <Separator className="my-4" />
-        <form className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-6">
           <FormField
             control={form.control}
             name="redirectUrl"

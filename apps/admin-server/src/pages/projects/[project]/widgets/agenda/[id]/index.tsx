@@ -3,7 +3,7 @@ import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
 import WidgetVersionHistory from '@/components/widget-version-history';
 import { flushAllFields } from '@/hooks/useFieldDebounce';
-import { useWidgetDraft } from '@/hooks/useWidgetDraft';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -29,8 +29,9 @@ export default function WidgetAgenda({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { widget, previewConfig, updateConfig, onFieldChanged } =
-    useWidgetDraft<AgendaWidgetProps>({ projectId });
+  const { previewConfig, onFieldChanged } = useWidgetDraft<AgendaWidgetProps>({
+    projectId,
+  });
 
   const [activeTab, setActiveTab] = useState('general');
 
@@ -39,8 +40,7 @@ export default function WidgetAgenda({ apiUrl }: WithApiUrlProps) {
     setActiveTab(value);
   };
 
-  const tabUpdateConfig = (config: any) =>
-    updateConfig({ ...widget.config, ...config });
+  const tabUpdateConfig = ignoreTabSubmit;
 
   return (
     <div>

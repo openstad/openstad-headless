@@ -65,7 +65,9 @@ export default function WidgetMapReaction(
           Reacties
         </Heading>
         <Separator className="mb-4" />
-        <form className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-1/2">
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-1/2">
           <FormField
             control={form.control}
             name="displayReactions"

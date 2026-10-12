@@ -10,7 +10,7 @@ import projectListSwr from '@/hooks/use-project-list';
 import useUser from '@/hooks/use-user';
 import useUsers from '@/hooks/use-users';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -41,6 +41,7 @@ export default function CreateUserProjects() {
   const [emailNotificationConsents, setEmailNotificationConsents] = useState<
     Array<EmailNotificationConsent>
   >([]);
+  const createdUsers = useRef<Record<string, any>>({});
 
   useEffect(() => {}, [projects, users]);
 
@@ -84,37 +85,51 @@ export default function CreateUserProjects() {
   const save = useCallback(async () => {
     let error: any;
 
-    const mergedProjects: CombinedProjectRoleAndConsent[] = [
-      ...projectRoles,
-      ...emailNotificationConsents,
-    ];
+    const mergedProjects: CombinedProjectRoleAndConsent[] = [];
+    [...projectRoles, ...emailNotificationConsents].forEach((change) => {
+      const same = mergedProjects.find(
+        (entry) => entry.projectId == change.projectId
+      );
+      if (same) Object.assign(same, change);
+      else mergedProjects.push({ ...change });
+    });
+
+    let latest = users;
+    try {
+      latest = (await mutate()) ?? users;
+    } catch (error) {
+      console.error('Refreshing the user before saving failed', error);
+    }
 
     for (let updateValue of mergedProjects) {
-      let user = users;
-      if (Array.isArray(users)) {
-        user = users.find(
-          (user: any) => user.projectId == updateValue.projectId
-        );
+      let user = latest;
+      if (Array.isArray(latest)) {
+        user =
+          latest.find((user: any) => user.projectId == updateValue.projectId) ??
+          createdUsers.current[updateValue.projectId];
       }
       if (user) {
         try {
-          const updatedUser = user;
-          if (user.emailNotificationConsent !== updateValue.consent) {
-            updatedUser.emailNotificationConsent = updateValue.consent;
+          const changes: any = { id: user.id, projectId: user.projectId };
+          if (
+            typeof updateValue.consent !== 'undefined' &&
+            user.emailNotificationConsent !== updateValue.consent
+          ) {
+            changes.emailNotificationConsent = updateValue.consent;
           }
           if (
             typeof updateValue.roleId !== 'undefined' &&
             user.role !== updateValue.roleId
           ) {
-            updatedUser.role = updateValue.roleId;
+            changes.role = updateValue.roleId;
           }
 
-          await updateUser(updatedUser);
+          await updateUser(changes);
         } catch (err) {
           error = err;
         }
       } else {
-        user = users[0];
+        user = Array.isArray(latest) ? latest[0] : latest;
         if (user.idpUser?.identifier && user.idpUser?.provider) {
           try {
             const newUser = {
@@ -128,7 +143,21 @@ export default function CreateUserProjects() {
               newUser.role = updateValue.roleId;
             }
 
-            await createUser(newUser);
+            const created = await createUser(newUser);
+            if (created?.id) {
+              createdUsers.current[updateValue.projectId] = created;
+            }
+            if (
+              typeof updateValue.consent !== 'undefined' &&
+              created?.id &&
+              created.emailNotificationConsent !== updateValue.consent
+            ) {
+              await updateUser({
+                id: created.id,
+                projectId: created.projectId ?? updateValue.projectId,
+                emailNotificationConsent: updateValue.consent,
+              });
+            }
           } catch (err) {
             error = err;
           }
@@ -179,6 +208,7 @@ export default function CreateUserProjects() {
     // non-empty list is the page's unsaved state.
     isDirty: projectRoles.length > 0 || emailNotificationConsents.length > 0,
     save,
+    label: 'Projectsrechten',
   });
 
   if (!projects || !users) return null;

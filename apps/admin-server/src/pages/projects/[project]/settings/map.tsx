@@ -11,7 +11,10 @@ import { FormObjectSelectField } from '@/components/ui/form-object-select-field'
 import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { useRegisterFormSave } from '@/components/ui/save-controller';
+import {
+  useRegisterFormSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import {
   Select,
   SelectContent,
@@ -72,7 +75,7 @@ export default function ProjectSettingsMap() {
         'De minimale zoom mag niet groter zijn dan de maximale zoom.'
       );
     }
-    const valid = await form.trigger();
+    const valid = await validateForSave(form);
     if (!valid) {
       throw new Error('Controleer de gemarkeerde velden.');
     }

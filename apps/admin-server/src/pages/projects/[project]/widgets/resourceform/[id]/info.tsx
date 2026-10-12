@@ -49,6 +49,7 @@ export default function WidgetResourceFormInfo(
   );
   useSyncDraftForm(form, pushToDraft, {
     schema: formSchema,
+    prefix: category,
     label: 'Weergave',
   });
 
@@ -57,7 +58,9 @@ export default function WidgetResourceFormInfo(
       <Form {...form}>
         <Heading size="xl">Weergave</Heading>
         <Separator className="my-4" />
-        <form className="lg:w-2/3 grid grid-cols-1 gap-4">
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="lg:w-2/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
             name="allowAnonymousSubmissions"

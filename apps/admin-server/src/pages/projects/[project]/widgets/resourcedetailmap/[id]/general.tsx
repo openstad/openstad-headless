@@ -33,7 +33,7 @@ export default function WidgetResourceDetailMapGeneral(
 
   const defaults = useCallback(
     () => ({
-      resourceId: props?.resourceId || undefined,
+      resourceId: props?.resourceId ?? '',
     }),
     [props?.resourceId]
   );

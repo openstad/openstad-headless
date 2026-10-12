@@ -14,6 +14,7 @@ import { PageLayout } from '@/components/ui/page-layout';
 import {
   useRegisterFormSave,
   useSaveController,
+  validateForSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -59,7 +60,7 @@ export default function ProjectAreaCreate() {
   const { allowNextNavigation } = useSaveController();
 
   const save = useCallback(async () => {
-    const valid = await form.trigger();
+    const valid = await validateForSave(form);
     if (!valid) {
       throw new Error('Controleer de gemarkeerde velden.');
     }
@@ -224,7 +225,9 @@ export default function ProjectAreaCreate() {
                                       ? [...ids, tag.id]
                                       : ids.filter((id) => id !== tag.id);
 
-                                    form.setValue('tagIds', idsToSave);
+                                    form.setValue('tagIds', idsToSave, {
+                                      shouldDirty: true,
+                                    });
                                   }}
                                 />
                               </div>
@@ -270,7 +273,9 @@ export default function ProjectAreaCreate() {
                                       ? [...ids, tag.id]
                                       : ids.filter((id) => id !== tag.id);
 
-                                    form.setValue('tagIdsOutside', idsToSave);
+                                    form.setValue('tagIdsOutside', idsToSave, {
+                                      shouldDirty: true,
+                                    });
                                   }}
                                 />
                               </div>

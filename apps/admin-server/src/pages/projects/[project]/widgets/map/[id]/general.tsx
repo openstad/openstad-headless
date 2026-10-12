@@ -16,9 +16,10 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -49,19 +50,25 @@ export default function WidgetMapGeneral(
     },
   });
 
-  useEffect(() => {
-    const subscription = form.watch((values) => {
-      props.onFieldChanged?.(category, values);
-    });
-    return () => subscription.unsubscribe();
-  }, [form, props]);
+  const { onFieldChanged } = props;
+  const pushToDraft = useCallback(
+    (name: string, value: any) => onFieldChanged?.(`general.${name}`, value),
+    [onFieldChanged]
+  );
+  useSyncDraftForm(form, pushToDraft, {
+    schema: formSchema,
+    label: 'Algemeen',
+    prefix: 'general',
+  });
 
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl">Algemeen</Heading>
         <Separator className="my-4" />
-        <form className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="display"

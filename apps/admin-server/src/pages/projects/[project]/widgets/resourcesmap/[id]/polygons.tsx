@@ -22,6 +22,7 @@ import { Heading } from '@/components/ui/typography';
 import useAreas from '@/hooks/use-areas';
 import { registerFieldFlusher } from '@/hooks/useFieldDebounce';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { polygonUrlDefaults } from '@/lib/polygon-urls';
 import { zodResolver } from '@hookform/resolvers/zod';
 import debounce from 'lodash/debounce';
 import { useRouter } from 'next/router';
@@ -81,7 +82,10 @@ export default function WidgetResourcesMapButton(
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       customPolygon: props?.customPolygon || [],
-      customPolygonUrl: props?.customPolygonUrl || [],
+      customPolygonUrl: polygonUrlDefaults(
+        props?.customPolygon,
+        props?.customPolygonUrl
+      ),
       interactionType: props?.interactionType || 'default',
     },
   });
@@ -113,7 +117,7 @@ export default function WidgetResourcesMapButton(
   useEffect(() => {
     const unregister = registerFieldFlusher(() => debouncedSync.flush());
     return () => {
-      debouncedSync.cancel();
+      debouncedSync.flush();
       unregister();
     };
   }, [debouncedSync]);

@@ -69,7 +69,20 @@ export default function WidgetResourcesMapLegend(
     keyName: 'reactKey',
   });
 
-  useSyncDraftForm(form, props.onFieldChanged, {
+  const { onFieldChanged } = props;
+  const pushToDraft = useCallback(
+    (name: string, value: any) => {
+      if (name.endsWith('.iconUploader')) return;
+      onFieldChanged(
+        name,
+        name === 'customLegend' && Array.isArray(value)
+          ? value.map(({ iconUploader, ...rest }: any) => rest)
+          : value
+      );
+    },
+    [onFieldChanged]
+  );
+  useSyncDraftForm(form, pushToDraft, {
     schema: formSchema,
     label: 'Legenda',
   });
@@ -77,13 +90,6 @@ export default function WidgetResourcesMapLegend(
   useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
-
-  async function onSubmit(values: FormData) {
-    const cleaned = values.customLegend.map(
-      ({ iconUploader, ...rest }) => rest
-    );
-    props.updateConfig({ ...props, customLegend: cleaned });
-  }
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -95,7 +101,7 @@ export default function WidgetResourcesMapLegend(
           een label en een kleur of icoon.
         </p>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(event) => event.preventDefault()}
           className="space-y-4 lg:w-2/3">
           {fields.map((field, index) => (
             <div

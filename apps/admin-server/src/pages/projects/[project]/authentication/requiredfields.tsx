@@ -12,13 +12,16 @@ import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import {
   rebaselineAfterSave,
+  useLooseFormDirty,
   useRegisterSave,
+  validateForSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Spacer } from '@/components/ui/spacer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { useLastDefined } from '@/hooks/use-last-defined';
 import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { zodResolver } from '@hookform/resolvers/zod';
 import cloneDeep from 'lodash/cloneDeep';
@@ -124,14 +127,25 @@ export default function ProjectAuthenticationRequiredFields() {
     {}
   );
 
+  const shownLabels = (stored?: Record<string, string>) => {
+    const labels: Record<string, string> = { ...defaultLabels, ...stored };
+    requiredUserFields.forEach((field) => {
+      if (field.defaultLabel && !labels[field.id]) {
+        labels[field.id] = field.defaultLabel;
+      }
+    });
+    return labels;
+  };
+
   // User form defaults - reads from openstad provider
   const userDefaults = useCallback(
     () => ({
       requiredUserFields:
         data?.config?.auth?.provider?.openstad?.requiredUserFields || [],
-      requiredUserFieldsLabels:
+      requiredUserFieldsLabels: shownLabels(
         data?.config?.auth?.provider?.openstad?.config?.requiredFields
-          ?.requiredUserFieldsLabels || defaultLabels,
+          ?.requiredUserFieldsLabels
+      ),
       title:
         data?.config?.auth?.provider?.openstad?.config?.requiredFields?.title ||
         '',
@@ -153,9 +167,10 @@ export default function ProjectAuthenticationRequiredFields() {
     () => ({
       requiredUserFields:
         data?.config?.auth?.provider?.anonymous?.requiredUserFields || [],
-      requiredUserFieldsLabels:
+      requiredUserFieldsLabels: shownLabels(
         data?.config?.auth?.provider?.anonymous?.config?.requiredFields
-          ?.requiredUserFieldsLabels || defaultLabels,
+          ?.requiredUserFieldsLabels
+      ),
       title:
         data?.config?.auth?.provider?.anonymous?.config?.requiredFields
           ?.title || '',
@@ -203,14 +218,23 @@ export default function ProjectAuthenticationRequiredFields() {
 
   const [activeTab, setActiveTab] = useState('users');
 
+  const loadedUserConfig = useLastDefined(
+    data?.config?.auth?.provider?.openstad?.config,
+    project
+  );
+  const loadedAnonymousConfig = useLastDefined(
+    data?.config?.auth?.provider?.anonymous?.config,
+    project
+  );
+
   const saveUser = useCallback(async () => {
-    const valid = await userForm.trigger();
+    if (!loadedUserConfig) {
+      throw new Error('De instellingen zijn nog niet geladen.');
+    }
+    const valid = await validateForSave(userForm);
     if (!valid) {
-      const firstErrorField = Object.keys(userForm.formState.errors)[0];
       throw new Error(
-        firstErrorField
-          ? `Controleer het veld "${firstErrorField}" op het tabblad "Gebruikers".`
-          : 'Controleer de gemarkeerde velden op het tabblad "Gebruikers".'
+        'Controleer de gemarkeerde velden op het tabblad "Gebruikers".'
       );
     }
     const values = formSchema.parse(userForm.getValues());
@@ -242,16 +266,16 @@ export default function ProjectAuthenticationRequiredFields() {
     }
 
     rebaselineAfterSave(userForm, sent);
-  }, [userForm, updateProject]);
+  }, [loadedUserConfig, userForm, updateProject]);
 
   const saveAnonymous = useCallback(async () => {
-    const valid = await anonymousForm.trigger();
+    if (!loadedAnonymousConfig) {
+      throw new Error('De instellingen zijn nog niet geladen.');
+    }
+    const valid = await validateForSave(anonymousForm);
     if (!valid) {
-      const firstErrorField = Object.keys(anonymousForm.formState.errors)[0];
       throw new Error(
-        firstErrorField
-          ? `Controleer het veld "${firstErrorField}" op het tabblad "Anonieme gebruikers".`
-          : 'Controleer de gemarkeerde velden op het tabblad "Anonieme gebruikers".'
+        'Controleer de gemarkeerde velden op het tabblad "Anonieme gebruikers".'
       );
     }
     const values = formSchema.parse(anonymousForm.getValues());
@@ -283,10 +307,10 @@ export default function ProjectAuthenticationRequiredFields() {
     }
 
     rebaselineAfterSave(anonymousForm, sent);
-  }, [anonymousForm, updateProject]);
+  }, [loadedAnonymousConfig, anonymousForm, updateProject]);
 
-  const userDirty = userForm.formState.isDirty;
-  const anonymousDirty = anonymousForm.formState.isDirty;
+  const userDirty = useLooseFormDirty(userForm);
+  const anonymousDirty = useLooseFormDirty(anonymousForm);
 
   const save = useCallback(async () => {
     if (userDirty) await saveUser();
@@ -414,12 +438,6 @@ export default function ProjectAuthenticationRequiredFields() {
                           const defaultValue = item.defaultLabel
                             ? item.defaultLabel
                             : fieldValue;
-                          if (item.defaultLabel && !fieldValue) {
-                            userForm.setValue(
-                              `requiredUserFieldsLabels.${item.id}`,
-                              defaultValue
-                            );
-                          }
 
                           return userForm
                             .watch('requiredUserFields')
@@ -437,7 +455,11 @@ export default function ProjectAuthenticationRequiredFields() {
                                       placeholder={item.label}
                                       value={field.value || defaultValue}
                                       onChange={(e) => {
-                                        field.onChange(e);
+                                        field.onChange(
+                                          e.target.value ||
+                                            item.defaultLabel ||
+                                            ''
+                                        );
                                       }}
                                     />
                                   </FormControl>
@@ -617,12 +639,6 @@ export default function ProjectAuthenticationRequiredFields() {
                           const defaultValue = item.defaultLabel
                             ? item.defaultLabel
                             : fieldValue;
-                          if (item.defaultLabel && !fieldValue) {
-                            anonymousForm.setValue(
-                              `requiredUserFieldsLabels.${item.id}`,
-                              defaultValue
-                            );
-                          }
 
                           return anonymousForm
                             .watch('requiredUserFields')
@@ -640,7 +656,11 @@ export default function ProjectAuthenticationRequiredFields() {
                                       placeholder={item.label}
                                       value={field.value || defaultValue}
                                       onChange={(e) => {
-                                        field.onChange(e);
+                                        field.onChange(
+                                          e.target.value ||
+                                            item.defaultLabel ||
+                                            ''
+                                        );
                                       }}
                                     />
                                   </FormControl>

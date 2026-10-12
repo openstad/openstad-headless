@@ -82,7 +82,9 @@ export default function WidgetMapDetails(
       <Form {...form}>
         <Heading size="xl">Resource details</Heading>
         <Separator className="my-4" />
-        <form className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
+        <form
+          onSubmit={(event) => event.preventDefault()}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
             name="template"

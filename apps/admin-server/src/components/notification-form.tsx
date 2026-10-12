@@ -16,7 +16,9 @@ import {
 import { Input } from '@/components/ui/input';
 import {
   rebaselineAfterSave,
+  useLooseFormDirty,
   useRegisterSave,
+  validateForSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -401,7 +403,9 @@ export function NotificationForm({
   }, [fieldValue]);
 
   const save = useCallback(async () => {
-    const valid = await form.trigger();
+    // The save bar replaces `form.handleSubmit`, so the resolver has to be run
+    // here: without it invalid values would be saved without any message.
+    const valid = await validateForSave(form);
     if (!valid) {
       throw new Error('Controleer de gemarkeerde velden.');
     }
@@ -438,8 +442,9 @@ export function NotificationForm({
     rebaselineAfterSave(form, sent);
   }, [contentManaged, create, error, form, id, type, update]);
 
+  const formDirty = useLooseFormDirty(form);
   useRegisterSave({
-    isDirty: form.formState.isDirty,
+    isDirty: formDirty,
     save,
     label: notificationTitle,
   });

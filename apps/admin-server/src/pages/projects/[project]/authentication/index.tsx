@@ -13,7 +13,10 @@ import {
 import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
-import { useRegisterFormSave } from '@/components/ui/save-controller';
+import {
+  useRegisterFormSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import {
   Select,
   SelectContent,
@@ -24,12 +27,15 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { WhitelistedEmailSelect } from '@/components/ui/whitelisted-email-select';
+import { useLastDefined } from '@/hooks/use-last-defined';
 import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
+import { emptiedAuthEmail } from '@/lib/auth-email-check';
 import {
   WithWhitelistedEmailsProps,
   withWhitelistedEmails,
 } from '@/lib/server-side-props-definition';
 import { zodResolver } from '@hookform/resolvers/zod';
+import pickBy from 'lodash/pickBy';
 import { X } from 'lucide-react';
 import { useRouter } from 'next/router';
 import * as React from 'react';
@@ -151,17 +157,34 @@ export default function ProjectAuthentication({
 
   useSyncFormDefaults(form, defaults, authConfig);
 
+  const loadedAuthConfig = useLastDefined(authConfig, project);
+
   const save = useCallback(async () => {
     // Saving before the auth config has arrived would write the empty form over
     // the stored settings and wipe them.
-    if (!authConfig) {
+    if (!loadedAuthConfig) {
       throw new Error('De instellingen zijn nog niet geladen.');
     }
-    const valid = await form.trigger();
+    const valid = await validateForSave(form);
     if (!valid) {
       throw new Error('Controleer de gemarkeerde velden.');
     }
     const values = formSchema.parse(form.getValues());
+    const sendsLoginLinks = values.authTypes.includes('Url');
+    const checked = sendsLoginLinks
+      ? values
+      : { ...values, fromEmail: undefined };
+    const emptied = emptiedAuthEmail(
+      authConfig ?? {
+        ...loadedAuthConfig,
+        ...pickBy(
+          form.formState.defaultValues,
+          (value) => value !== '' && value != null
+        ),
+      },
+      checked
+    );
+    if (emptied) throw new Error(emptied);
     let updatedConfig: {
       auth: {
         provider: {
@@ -217,7 +240,7 @@ export default function ProjectAuthentication({
     if (!doubleSave || !project) {
       throw new Error('Er is helaas iets mis gegaan.');
     }
-  }, [authConfig, form, updateProject]);
+  }, [authConfig, loadedAuthConfig, form, updateProject]);
 
   useRegisterFormSave(form, save);
 

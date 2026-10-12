@@ -12,7 +12,10 @@ import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { PageLayout } from '@/components/ui/page-layout';
-import { useRegisterFormSave } from '@/components/ui/save-controller';
+import {
+  useRegisterFormSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import {
   Select,
   SelectContent,
@@ -91,7 +94,7 @@ export default function ProjectSettingsNotifications({
   useSyncFormDefaults(form, defaults, data);
 
   const save = useCallback(async () => {
-    const valid = await form.trigger();
+    const valid = await validateForSave(form);
     if (!valid) {
       throw new Error('Controleer de gemarkeerde velden.');
     }
