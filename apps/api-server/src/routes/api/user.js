@@ -853,10 +853,17 @@ router
       });
       let adapter = await authSettings.adapter({ authConfig: req.authConfig });
       if (adapter.service.deleteUser) {
-        adapter.service.deleteUser({
-          authConfig,
-          userData: { id: req.externalUserId },
-        });
+        adapter.service
+          .deleteUser({
+            authConfig,
+            userData: { id: req.externalUserId },
+          })
+          .catch((err) =>
+            console.error(
+              'Error deleting auth user after anonymizing user:',
+              err
+            )
+          );
       }
     } catch (err) {
       return next(err);
@@ -1117,13 +1124,17 @@ router
       });
       let adapter = await authSettings.adapter({ authConfig: req.authConfig });
       if (adapter.service.deleteUser) {
-        adapter.service.deleteUser({
-          authConfig,
-          userData: {
-            id: user.idpUser.identifier,
-            provider: user.idpUser.provider,
-          },
-        });
+        adapter.service
+          .deleteUser({
+            authConfig,
+            userData: {
+              id: user.idpUser.identifier,
+              provider: user.idpUser.provider,
+            },
+          })
+          .catch((err) =>
+            console.error('Error deleting auth user after deleting user:', err)
+          );
       }
     }
 
