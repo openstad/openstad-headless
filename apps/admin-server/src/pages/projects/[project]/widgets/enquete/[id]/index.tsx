@@ -116,7 +116,13 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
               )}
             </TabsContent>
             <TabsContent value="confirmation" className="p-0">
-              <WidgetEnqueteConfirmation />
+              <WidgetEnqueteConfirmation
+                onSaved={(config) => {
+                  if (previewConfig) {
+                    updatePreview({ ...previewConfig, ...config });
+                  }
+                }}
+              />
             </TabsContent>
             <TabsContent value="datalayers" className="p-0">
               {previewConfig && (

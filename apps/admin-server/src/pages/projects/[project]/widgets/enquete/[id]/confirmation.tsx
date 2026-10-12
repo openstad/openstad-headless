@@ -34,7 +34,11 @@ const formSchema = z.object({
   closedFormMessage: z.string().optional(),
 });
 
-export default function WidgetEnqueteConfirmation() {
+export default function WidgetEnqueteConfirmation({
+  onSaved,
+}: {
+  onSaved?: (config: { [key: string]: any }) => void;
+}) {
   type FormData = z.infer<typeof formSchema>;
   const category = 'confirmation';
 
@@ -74,12 +78,14 @@ export default function WidgetEnqueteConfirmation() {
 
   async function onSubmit(values: FormData) {
     const { closeFormAfterSubmit, closedFormMessage, ...confirmation } = values;
+    const savedConfig = {
+      [category]: confirmation,
+      closeFormAfterSubmit: !!closeFormAfterSubmit,
+      closedFormMessage: closedFormMessage ?? '',
+    };
     try {
-      await updateConfig({
-        [category]: confirmation,
-        closeFormAfterSubmit: !!closeFormAfterSubmit,
-        closedFormMessage: closedFormMessage ?? '',
-      });
+      const saved = await updateConfig(savedConfig);
+      if (saved) onSaved?.(savedConfig);
     } catch (error) {
       console.error('could not update', error);
     }
