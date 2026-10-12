@@ -385,67 +385,45 @@ const initialDataAccountExpiry = `<mjml>
     </mjml>`;
 
 const initialDataModBreakNotification = `<mjml>
-  <mj-body>
-    <mj-raw>
-      <!-- Company Header -->
-    </mj-raw>
-    <mj-section>
-      <mj-column width="200px">
-        <mj-image src="{{ imagePath }}/logo-openstad.png"> </mj-image>
-      </mj-column>
-    </mj-section>
-    <mj-raw>
-      <!-- Image Header -->
-    </mj-raw>
-    <mj-section>
-      <mj-column width="600px">
-        <mj-image src="{{ imagePath }}/mail-header.jpg"></mj-image>
-      </mj-column>
-    </mj-section>
-    <mj-raw>
-      <!-- Mail context -->
-    </mj-raw>
-    <mj-section>
-      <mj-column width="500px">
-        <mj-text font-size="20px" font-family="Helvetica Neue">{% if newModBreaks and newModBreaks.length %}Er is een modbreak geplaatst.{% else %}Een modbreak is aangepast.{% endif %}</mj-text>
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Helvetica Neue, Helvetica, Arial, sans-serif" />
+      <mj-text font-size="15px" line-height="1.6" color="#333333" />
+      <mj-divider border-width="1px" border-color="#dddddd" />
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#f4f4f4">
+    <mj-section background-color="#ffffff" padding="32px 24px">
+      <mj-column>
+        {% if logo %}
+        <mj-image src="{{logo}}" align="left" width="160px" alt="" padding-bottom="16px" />
+        {% endif %}
+        <mj-text><h1 style="font-size:22px;font-weight:bold;line-height:1.3;margin:0">{% if newModBreaks and newModBreaks.length %}Er is een modbreak geplaatst.{% else %}Een modbreak is aangepast.{% endif %}</h1></mj-text>
+        <mj-divider />
         <mj-text>Beste {{ user.name }},</mj-text>
         {% if newModBreaks and newModBreaks.length %}
-        <mj-text color="#525252">De redactie heeft een bericht geplaatst bij {% if isResourceOwner === false %}de inzending "{{ resource.title }}" waarop u heeft gereageerd{% else %}uw inzending "{{ resource.title }}"{% endif %}:</mj-text>
+        <mj-text padding-bottom="0">De redactie heeft een bericht geplaatst bij {% if isResourceOwner === false %}de inzending "{{ resource.title }}" waarop u heeft gereageerd{% else %}uw inzending "{{ resource.title }}"{% endif %}:</mj-text>
         {% for mb in newModBreaks %}
-        <mj-text color="#525252" font-style="italic">{{ mb.description | safe }}{% set mbAuthor = mb.authorName or project.config.resources.modbreakTitle %}{% if mbAuthor %} - {{ mbAuthor }}{% endif %}</mj-text>
+        <mj-text font-style="italic">{{ mb.description | safe }}{% set mbAuthor = mb.authorName or project.config.resources.modbreakTitle %}{% if mbAuthor %} - {{ mbAuthor }}{% endif %}</mj-text>
         {% endfor %}
         {% endif %}
         {% if changedModBreaks and changedModBreaks.length %}
-        <mj-text color="#525252">De redactie heeft een bericht bij {% if isResourceOwner === false %}de inzending "{{ resource.title }}" waarop u heeft gereageerd{% else %}uw inzending "{{ resource.title }}"{% endif %} aangepast:</mj-text>
+        <mj-text padding-bottom="0">De redactie heeft een bericht bij {% if isResourceOwner === false %}de inzending "{{ resource.title }}" waarop u heeft gereageerd{% else %}uw inzending "{{ resource.title }}"{% endif %} aangepast:</mj-text>
         {% for mb in changedModBreaks %}
-        <mj-text color="#525252" font-style="italic">{{ mb.description | safe }}{% set mbAuthor = mb.authorName or project.config.resources.modbreakTitle %}{% if mbAuthor %} - {{ mbAuthor }}{% endif %}</mj-text>
+        <mj-text font-style="italic">{{ mb.description | safe }}{% set mbAuthor = mb.authorName or project.config.resources.modbreakTitle %}{% if mbAuthor %} - {{ mbAuthor }}{% endif %}</mj-text>
         {% endfor %}
         {% endif %}
         {% if redirectUrl %}
-        <mj-button background-color="#12B886" href="{{ redirectUrl }}">Weergeven</mj-button>
+        <mj-button background-color="#12B886" href="{{ redirectUrl }}" align="left">Weergeven</mj-button>
+        <mj-text font-size="13px" color="#777777">Of gebruik deze link in je browser: <a href="{{ redirectUrl }}">{{ redirectUrl }}</a></mj-text>
+        {% endif %}
+        <mj-divider />
+        <mj-text align="center" font-size="13px" color="#777777">Dit is een automatisch bericht. Antwoorden op deze e-mail is niet mogelijk.</mj-text>
+        {% if unsubscribeUrl %}
+        <mj-text align="center" font-size="12px" color="#999999">Wilt u geen e-mails meer ontvangen? <a href="{{ unsubscribeUrl }}">Uitschrijven</a></mj-text>
         {% endif %}
       </mj-column>
     </mj-section>
-    {% if redirectUrl %}
-    <mj-raw>
-      <!-- ALternate link -->
-    </mj-raw>
-    <mj-section>
-      <mj-column width="400px">
-        <mj-text>Of gebruik deze link in je browser:</mj-text>
-      </mj-column>
-      <mj-column>
-        <mj-text>{{ redirectUrl }}</mj-text>
-      </mj-column>
-    </mj-section>
-    {% endif %}
-    {% if unsubscribeUrl %}
-    <mj-section>
-      <mj-column>
-        <mj-text font-size="12px" color="#999999">Wilt u geen e-mails meer ontvangen? <a href="{{ unsubscribeUrl }}">Uitschrijven</a></mj-text>
-      </mj-column>
-    </mj-section>
-    {% endif %}
   </mj-body>
 </mjml>`;
 
