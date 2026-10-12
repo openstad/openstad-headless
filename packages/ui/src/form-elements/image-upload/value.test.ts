@@ -4,8 +4,8 @@ import {
   MockImageFile,
   buildImageValue,
   removeDescription,
-  renameDescription,
   toDescriptionEntries,
+  toDescriptionKey,
   toMockImages,
   toUploadedImageName,
 } from './value';
@@ -129,9 +129,24 @@ describe('toDescriptionEntries', () => {
     );
 
     expect(result).toEqual([
-      { url: 'https://x/second.jpg', name: 'second_jpg' },
-      { url: 'https://x/first.jpg', name: 'first_jpg' },
-      { url: 'https://x/existing.jpg', name: 'existing_jpg' },
+      {
+        kind: 'uploaded',
+        index: 1,
+        url: 'https://x/second.jpg',
+        name: 'second_jpg',
+      },
+      {
+        kind: 'uploaded',
+        index: 0,
+        url: 'https://x/first.jpg',
+        name: 'first_jpg',
+      },
+      {
+        kind: 'mock',
+        index: 0,
+        url: 'https://x/existing.jpg',
+        name: 'existing_jpg',
+      },
     ]);
   });
 
@@ -142,7 +157,12 @@ describe('toDescriptionEntries', () => {
     );
 
     expect(result).toEqual([
-      { url: 'https://x/existing.jpg', name: 'existing_jpg' },
+      {
+        kind: 'mock',
+        index: 0,
+        url: 'https://x/existing.jpg',
+        name: 'existing_jpg',
+      },
     ]);
   });
 
@@ -156,8 +176,18 @@ describe('toDescriptionEntries', () => {
     );
 
     expect(result).toEqual([
-      { url: 'https://x/second.jpg', name: 'second_jpg' },
-      { url: 'https://x/first.jpg', name: 'first_jpg' },
+      {
+        kind: 'uploaded',
+        index: 1,
+        url: 'https://x/second.jpg',
+        name: 'second_jpg',
+      },
+      {
+        kind: 'uploaded',
+        index: 0,
+        url: 'https://x/first.jpg',
+        name: 'first_jpg',
+      },
     ]);
   });
   it('shows the local file name for a new upload instead of the server name', () => {
@@ -168,8 +198,18 @@ describe('toDescriptionEntries', () => {
     );
 
     expect(result).toEqual([
-      { url: 'https://x/foto.png', name: 'foto met spaties.png' },
-      { url: 'https://x/existing.jpg', name: 'existing_jpg' },
+      {
+        kind: 'uploaded',
+        index: 0,
+        url: 'https://x/foto.png',
+        name: 'foto met spaties.png',
+      },
+      {
+        kind: 'mock',
+        index: 0,
+        url: 'https://x/existing.jpg',
+        name: 'existing_jpg',
+      },
     ]);
   });
 
@@ -180,7 +220,14 @@ describe('toDescriptionEntries', () => {
       ['other.png']
     );
 
-    expect(result).toEqual([{ url: 'https://x/photo.png', name: 'photo_png' }]);
+    expect(result).toEqual([
+      {
+        kind: 'uploaded',
+        index: 0,
+        url: 'https://x/photo.png',
+        name: 'photo_png',
+      },
+    ]);
   });
 });
 
@@ -246,35 +293,55 @@ describe('toUploadedImageName', () => {
   });
 });
 
-describe('renameDescription', () => {
-  it('moves a remark to the new url after a crop', () => {
-    const descriptions = { 'https://x/a.jpg': 'AI', 'https://x/b.jpg': 'b' };
-    expect(
-      renameDescription(
-        descriptions,
-        'https://x/a.jpg',
-        'https://x/a.jpg/:/cr=1'
-      )
-    ).toEqual({ 'https://x/a.jpg/:/cr=1': 'AI', 'https://x/b.jpg': 'b' });
-    expect(descriptions).toEqual({
-      'https://x/a.jpg': 'AI',
-      'https://x/b.jpg': 'b',
+describe('remarks survive cropping', () => {
+  const base = 'https://x/image/a.jpg';
+  const cropped = `${base}/:/cr=l:10%25,t:10%25,w:50%25,h:50%25`;
+
+  it('uses the url without the crop part as the remark key', () => {
+    expect(toDescriptionKey(base)).toBe(base);
+    expect(toDescriptionKey(cropped)).toBe(base);
+  });
+
+  it('still emits a remark typed on the plain url after the upload is cropped', () => {
+    const result = buildImageValue({
+      uploadedImages: [{ name: 'a_jpg', url: cropped }],
+      mockImages: [],
+      descriptions: { [toDescriptionKey(base)]: 'AI generated' },
     });
+
+    expect(result).toEqual([
+      { name: 'a_jpg', url: cropped, description: 'AI generated' },
+    ]);
   });
 
-  it('keeps an empty remark when moving it', () => {
-    expect(renameDescription({ a: '' }, 'a', 'b')).toEqual({ b: '' });
+  it('still emits the remark after the crop is reset to the original', () => {
+    const result = buildImageValue({
+      uploadedImages: [{ name: 'a_jpg', url: base }],
+      mockImages: [],
+      descriptions: { [toDescriptionKey(cropped)]: 'AI generated' },
+    });
+
+    expect(result[0].description).toBe('AI generated');
   });
 
-  it('returns the same object when there is no remark for the old url', () => {
-    const descriptions = { 'https://x/b.jpg': 'b' };
-    expect(
-      renameDescription(descriptions, 'https://x/a.jpg', 'https://x/c.jpg')
-    ).toBe(descriptions);
+  it('keeps the remark of an existing image when it is cropped', () => {
+    const result = buildImageValue({
+      uploadedImages: [],
+      mockImages: [mockImage(cropped, 'a_jpg')],
+      descriptions: { [toDescriptionKey(base)]: 'Existing remark' },
+    });
+
+    expect(result[0].description).toBe('Existing remark');
   });
 
-  it('returns the same object when the url does not change', () => {
-    const descriptions = { a: 'x' };
-    expect(renameDescription(descriptions, 'a', 'a')).toBe(descriptions);
+  it('removes the remark by either the plain or the cropped url', () => {
+    const descriptions = { [base]: 'x', 'https://x/b.jpg': 'y' };
+
+    expect(removeDescription(descriptions, cropped)).toEqual({
+      'https://x/b.jpg': 'y',
+    });
+    expect(removeDescription(descriptions, base)).toEqual({
+      'https://x/b.jpg': 'y',
+    });
   });
 });

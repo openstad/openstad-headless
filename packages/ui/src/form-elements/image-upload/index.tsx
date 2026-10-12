@@ -38,8 +38,8 @@ import {
   MockImageFile,
   buildImageValue,
   removeDescription,
-  renameDescription,
   toDescriptionEntries,
+  toDescriptionKey,
   toMockImages,
   toUploadedImageName,
 } from './value';
@@ -244,13 +244,6 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     index: number,
     newUrl: string
   ) => {
-    const oldUrl =
-      kind === 'uploaded'
-        ? uploadedImages[index]?.url
-        : mockImages[index]?.source;
-    if (oldUrl) {
-      setDescriptions((prev) => renameDescription(prev, oldUrl, newUrl));
-    }
     if (kind === 'uploaded') {
       setUploadedImages((prev) =>
         prev.map((image, i) =>
@@ -282,6 +275,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
       );
     }
     setUploadedImages((prev) => prev.filter((image, i) => i !== index));
+    setDescriptions((prev) => removeDescription(prev, target.url));
   };
 
   const discardCropTarget = () => {
@@ -325,7 +319,8 @@ const ImageUploadField: FC<ImageUploadProps> = ({
   const initialDescriptions: Record<string, string> = {};
   for (const mockImage of initialValue) {
     if (mockImage.description !== undefined) {
-      initialDescriptions[mockImage.source] = mockImage.description;
+      initialDescriptions[toDescriptionKey(mockImage.source)] =
+        mockImage.description;
     }
   }
   const [descriptions, setDescriptions] =
@@ -389,6 +384,8 @@ const ImageUploadField: FC<ImageUploadProps> = ({
   }, []);
 
   const finalImages = Array.from(new Set([...mockImages, ...files]));
+
+  const showCardList = imageCropEnabled || allowImageDescription;
 
   const imageEntries = toDescriptionEntries(
     mockImages,
@@ -466,7 +463,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
             setImages(imagesExceptMockedImages);
           }}
           allowMultiple={multiple}
-          allowImagePreview={!imageCropEnabled}
+          allowImagePreview={!showCardList}
           server={{
             process: {
               url: props?.imageUrl + '/images',
@@ -512,6 +509,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
               );
 
               if (mockIndex >= 0) {
+                if (mockImages[mockIndex].source !== file.source) return;
                 pruneCropQueue('mock', mockIndex);
                 const updatedMockImages = mockImages.filter(
                   (item) => item.options.file.name !== fileName
@@ -568,64 +566,87 @@ const ImageUploadField: FC<ImageUploadProps> = ({
           aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}
           {...filePondSettings}
         />
-        {imageCropEnabled &&
-          (mockImages.length > 0 || uploadedImages.length > 0) && (
-            <div className="image-crop-list">
-              {[
-                ...mockImages.map((mockImage, index) => ({
-                  url: mockImage.source,
-                  name: mockImage.options.file.name,
-                  kind: 'mock' as const,
-                  index,
-                })),
-                ...uploadedImages.map((image, index) => ({
-                  url: image.url,
-                  name: image.name,
-                  kind: 'uploaded' as const,
-                  index,
-                })),
-              ].map((entry) => {
-                const { baseUrl, hasCrop } = parseImageCropUrl(entry.url);
-                return (
-                  <div
-                    className="image-crop-list-row"
-                    key={`${entry.kind}-${entry.url}`}>
-                    <img
-                      src={buildImagePreviewUrl(entry.url, THUMB_MAX_SIZE)}
-                      alt=""
-                      className="image-crop-list-thumb"
-                      style={{
-                        width: thumbHeight * thumbRatio,
-                        height: thumbHeight,
-                      }}
-                    />
+        {showCardList && imageEntries.length > 0 && (
+          <div className="image-crop-list">
+            {imageEntries.map((entry) => {
+              const { baseUrl, hasCrop } = parseImageCropUrl(entry.url);
+              const inputId = `${randomId}-image-description-${entry.kind}-${entry.index}`;
+              const remark = descriptions[toDescriptionKey(entry.url)] ?? '';
+              return (
+                <div
+                  className="image-crop-list-row"
+                  key={`${entry.kind}-${entry.index}-${toDescriptionKey(entry.url)}`}>
+                  <img
+                    src={buildImagePreviewUrl(entry.url, THUMB_MAX_SIZE)}
+                    alt=""
+                    className="image-crop-list-thumb"
+                    style={{
+                      width: thumbHeight * thumbRatio,
+                      height: thumbHeight,
+                    }}
+                  />
+                  <div className="image-crop-list-body">
                     <span className="image-crop-list-name">{entry.name}</span>
-                    <SecondaryButton
-                      type="button"
-                      aria-label={`Afbeelding ${entry.name} bijsnijden`}
-                      onClick={(event) => {
-                        cropOpenerRef.current = event.currentTarget;
-                        setCropQueue([
-                          { kind: entry.kind, index: entry.index },
-                        ]);
-                      }}>
-                      {hasCrop ? 'Bijsnijden aanpassen' : 'Bijsnijden'}
-                    </SecondaryButton>
-                    {hasCrop && !imageCropRequired && (
-                      <SecondaryButton
-                        type="button"
-                        aria-label={`Herstel origineel van ${entry.name}`}
-                        onClick={() =>
-                          updateImageUrl(entry.kind, entry.index, baseUrl)
-                        }>
-                        Herstel origineel
-                      </SecondaryButton>
+                    {imageCropEnabled && (
+                      <div className="image-crop-list-actions">
+                        <SecondaryButton
+                          type="button"
+                          aria-label={`Afbeelding ${entry.name} bijsnijden`}
+                          onClick={(event) => {
+                            cropOpenerRef.current = event.currentTarget;
+                            setCropQueue([
+                              { kind: entry.kind, index: entry.index },
+                            ]);
+                          }}>
+                          {hasCrop ? 'Bijsnijden aanpassen' : 'Bijsnijden'}
+                        </SecondaryButton>
+                        {hasCrop && !imageCropRequired && (
+                          <SecondaryButton
+                            type="button"
+                            aria-label={`Herstel origineel van ${entry.name}`}
+                            onClick={() =>
+                              updateImageUrl(entry.kind, entry.index, baseUrl)
+                            }>
+                            Herstel origineel
+                          </SecondaryButton>
+                        )}
+                      </div>
+                    )}
+                    {allowImageDescription && (
+                      <div className="image-crop-list-remark">
+                        <FormLabel htmlFor={inputId}>
+                          {imageDescriptionLabel} ({entry.name})
+                        </FormLabel>
+                        <Textbox
+                          id={inputId}
+                          name={`${fieldKey}-image-description-${entry.kind}-${entry.index}`}
+                          type="text"
+                          maxLength={imageDescriptionMaxLength}
+                          value={remark}
+                          aria-describedby={`${inputId}-counter`}
+                          onChange={(
+                            e: React.ChangeEvent<HTMLInputElement>
+                          ) => {
+                            const nextValue = e.target.value;
+                            setDescriptions((prev) => ({
+                              ...prev,
+                              [toDescriptionKey(entry.url)]: nextValue,
+                            }));
+                          }}
+                        />
+                        <span
+                          id={`${inputId}-counter`}
+                          className="image-crop-list-counter">
+                          {remark.length} / {imageDescriptionMaxLength}
+                        </span>
+                      </div>
                     )}
                   </div>
-                );
-              })}
-            </div>
-          )}
+                </div>
+              );
+            })}
+          </div>
+        )}
         {cropTarget &&
           (() => {
             const targetUrl =
@@ -656,37 +677,6 @@ const ImageUploadField: FC<ImageUploadProps> = ({
           })()}
         <NotificationProvider />
       </div>
-
-      {allowImageDescription && imageEntries.length > 0 && (
-        <div className="openstad-image-descriptions">
-          {imageEntries.map((image, index) => {
-            const inputId = `${randomId}-image-description-${index}`;
-            return (
-              <FormField type="text" key={image.url}>
-                <FormLabel htmlFor={inputId}>
-                  {imageDescriptionLabel} ({image.name})
-                </FormLabel>
-                <div className="utrecht-form-field__input">
-                  <Textbox
-                    id={inputId}
-                    name={`${fieldKey}-image-description-${index}`}
-                    type="text"
-                    maxLength={imageDescriptionMaxLength}
-                    value={descriptions[image.url] ?? ''}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      const nextValue = e.target.value;
-                      setDescriptions((prev) => ({
-                        ...prev,
-                        [image.url]: nextValue,
-                      }));
-                    }}
-                  />
-                </div>
-              </FormField>
-            );
-          })}
-        </div>
-      )}
     </FormField>
   );
 };
