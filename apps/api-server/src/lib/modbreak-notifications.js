@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { Op } = require('sequelize');
+const { absoluteUrl } = require('../services/resource-detail-urls');
 
 function snapshotModBreakIds(modBreaks) {
   if (!Array.isArray(modBreaks)) return new Set();
@@ -108,17 +109,25 @@ function buildUnsubscribeUrl({ userId, projectId }) {
   return `${process.env.URL}/api/project/${projectId}/user/unsubscribe/${userId}/${hash.digest('hex')}`;
 }
 
+function addResourceIdParam(url, resourceId) {
+  const hashIndex = url.indexOf('#');
+  const base = hashIndex === -1 ? url : url.slice(0, hashIndex);
+  const hash = hashIndex === -1 ? '' : url.slice(hashIndex);
+  const separator = base.includes('?') ? '&' : '?';
+  return `${base}${separator}openstadResourceId=${resourceId}${hash}`;
+}
+
 function buildResourceRedirectUrl(project, resourcePath, resourceId) {
-  if (!project || !project.url) return '';
   const path = typeof resourcePath === 'string' ? resourcePath.trim() : '';
   if (!path) return '';
-  let url = project.url.trim();
-  if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
-  url = url.replace(/\/+$/, '');
-  const resourceUrlPath = path
-    .replaceAll('[[resourceId]]', String(resourceId))
-    .replace(/^\/*/, '/');
-  return `${url}${resourceUrlPath}`;
+  const encodedId = encodeURIComponent(String(resourceId));
+  const withId = path.includes('[id]')
+    ? path.split('[id]').join(encodedId)
+    : addResourceIdParam(path, encodedId);
+  const url = /^https?:\/\//i.test(withId)
+    ? withId
+    : withId.replace(/^\/*/, '/');
+  return absoluteUrl(url, project) || '';
 }
 
 async function readModBreakNotificationSettings(db, projectId) {

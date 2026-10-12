@@ -367,7 +367,7 @@ describe('resolveModBreakRecipients', () => {
 });
 
 describe('buildResourceRedirectUrl', () => {
-  const resourcePath = '/inzendingen/[[resourceId]]';
+  const resourcePath = '/inzendingen/[id]';
 
   it('returns an empty string when project.url is falsy', () => {
     expect(buildResourceRedirectUrl({ url: '' }, resourcePath, 5)).toBe('');
@@ -402,20 +402,70 @@ describe('buildResourceRedirectUrl', () => {
     expect(
       buildResourceRedirectUrl(
         { url: 'https://example.org' },
-        'inzendingen/[[resourceId]]',
+        'inzendingen/[id]',
         5
       )
     ).toBe('https://example.org/inzendingen/5');
   });
 
-  it('replaces every [[resourceId]] placeholder', () => {
+  it('replaces every [id] placeholder', () => {
     expect(
       buildResourceRedirectUrl(
         { url: 'https://example.org' },
-        '/plan/[[resourceId]]?id=[[resourceId]]',
+        '/plan/[id]?id=[id]',
         5
       )
     ).toBe('https://example.org/plan/5?id=5');
+  });
+
+  it('adds openstadResourceId when the path has no [id] placeholder', () => {
+    expect(
+      buildResourceRedirectUrl({ url: 'https://example.org' }, '/inzending', 5)
+    ).toBe('https://example.org/inzending?openstadResourceId=5');
+  });
+
+  it('appends openstadResourceId to an existing query string', () => {
+    expect(
+      buildResourceRedirectUrl(
+        { url: 'https://example.org' },
+        '/inzending?tab=info',
+        5
+      )
+    ).toBe('https://example.org/inzending?tab=info&openstadResourceId=5');
+  });
+
+  it('adds openstadResourceId before a hash fragment', () => {
+    expect(
+      buildResourceRedirectUrl(
+        { url: 'https://example.org' },
+        '/inzending#reacties',
+        5
+      )
+    ).toBe('https://example.org/inzending?openstadResourceId=5#reacties');
+  });
+
+  it('uses a full url as is, without a project url', () => {
+    expect(
+      buildResourceRedirectUrl(
+        { url: '' },
+        'https://other.example.org/inzending?openstadResourceId=[id]',
+        5
+      )
+    ).toBe('https://other.example.org/inzending?openstadResourceId=5');
+  });
+
+  it('adds openstadResourceId to a full url without [id]', () => {
+    expect(
+      buildResourceRedirectUrl(
+        { url: 'https://example.org' },
+        'https://other.example.org/inzending',
+        5
+      )
+    ).toBe('https://other.example.org/inzending?openstadResourceId=5');
+  });
+
+  it('returns an empty string for a path when the project has no url', () => {
+    expect(buildResourceRedirectUrl(null, '/inzending', 5)).toBe('');
   });
 });
 
@@ -498,7 +548,7 @@ describe('sendModBreakNotifications', () => {
     const db = fakeSendDb({
       notifications: {
         sendModBreakNotification: true,
-        modBreakNotificationResourcePath: '/inzendingen/[[resourceId]]',
+        modBreakNotificationResourcePath: '/inzendingen/[id]',
       },
       author: fakeUser({ id: 10, email: 'author@example.org' }),
     });
