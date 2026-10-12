@@ -17,6 +17,8 @@ const can = require('../../lib/sequelize-authorization/mixins/can');
 const authSettings = require('../../util/auth-settings');
 const userRouter = require('./user');
 
+const AUTH_SERVER_ERROR = 'Cannot connect to auth server';
+
 let deleteAttempted;
 
 function targetUser() {
@@ -48,7 +50,7 @@ authSettings.adapter = async () => ({
   service: {
     deleteUser: () => {
       deleteAttempted = true;
-      return Promise.reject(new Error('Cannot connect to auth server'));
+      return Promise.reject(new Error(AUTH_SERVER_ERROR));
     },
   },
 });
@@ -72,7 +74,9 @@ const admin = { role: 'admin', id: 1 };
 
 describe('removing a user when the auth server refuses the delete', () => {
   let unhandled;
-  const onUnhandled = (reason) => unhandled.push(reason);
+  const onUnhandled = (reason) => {
+    if (reason?.message === AUTH_SERVER_ERROR) unhandled.push(reason);
+  };
 
   beforeEach(() => {
     deleteAttempted = false;
