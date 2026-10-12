@@ -31,6 +31,16 @@ function parseContactRequest(body) {
   };
 }
 
+async function assertProjectHasContactBlock(projectId) {
+  const widgets = await db.Widget.findAll({
+    where: { projectId, type: 'resourcedetail' },
+    attributes: ['config'],
+  });
+  if (!widgets.some((widget) => widget.config?.contactBlock?.display)) {
+    throw createError(404, 'Contact is not available in this project');
+  }
+}
+
 function assertDefaultContactRequest({ message, consent }) {
   if (!message) {
     throw createError(422, 'message is required');
@@ -57,6 +67,7 @@ router.post('/', rateLimiter(), async function (req, res, next) {
     if (!resource) {
       throw createError(404, 'Resource not found');
     }
+    await assertProjectHasContactBlock(resource.projectId);
 
     const { message, consent, handlerKey, fields } = parseContactRequest(
       req.body || {}
@@ -81,6 +92,13 @@ router.post('/', rateLimiter(), async function (req, res, next) {
     }
 
     assertDefaultContactRequest({ message, consent });
+
+    if (resource.userId === req.user.id) {
+      throw createError(
+        403,
+        'You cannot contact yourself about your own submission'
+      );
+    }
 
     if (!req.user.email) {
       throw createError(422, 'Your account has no email address');

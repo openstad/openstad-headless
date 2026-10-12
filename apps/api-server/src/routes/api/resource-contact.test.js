@@ -20,6 +20,7 @@ const OWNER = { id: 7, email: 'owner@example.test' };
 let resourceOwnerId = OWNER.id;
 let ownerRecord = OWNER;
 let notifications = [];
+let detailWidgets = [];
 
 let lastScopes = [];
 db.Resource.scope = (...scopes) => {
@@ -31,6 +32,11 @@ db.Resource.scope = (...scopes) => {
         : null,
   };
 };
+db.Widget.findAll = async ({ where }) =>
+  detailWidgets.filter(
+    (widget) =>
+      widget.projectId === where.projectId && widget.type === where.type
+  );
 db.User.findByPk = async (id) => (id === OWNER.id ? ownerRecord : null);
 db.Notification.create = async (data) => {
   notifications.push(data);
@@ -69,6 +75,13 @@ describe('POST contact', () => {
     notifications = [];
     resourceOwnerId = OWNER.id;
     ownerRecord = OWNER;
+    detailWidgets = [
+      {
+        projectId: 1,
+        type: 'resourcedetail',
+        config: { contactBlock: { display: true } },
+      },
+    ];
   });
 
   afterEach(() => {
@@ -112,6 +125,44 @@ describe('POST contact', () => {
     });
     const res = await request(createApp(sender)).post(url).send(body);
     expect(res.status).toBe(422);
+    expect(notifications).toEqual([]);
+  });
+
+  it('refuses a message about your own submission', async () => {
+    resourceOwnerId = sender.id;
+    const res = await request(createApp(sender)).post(url).send(validBody);
+    expect(res.status).toBe(403);
+    expect(notifications).toEqual([]);
+  });
+
+  it('lets the owner use a plugin handler on their own submission', async () => {
+    resourceOwnerId = sender.id;
+    const handle = vi.fn(async () => ({ requestId: 14 }));
+    vi.spyOn(pluginExtensions, 'get').mockReturnValue({
+      getContactHandler: (key) => (key === 'link-request' ? { handle } : null),
+    });
+    const res = await request(createApp(sender))
+      .post(url)
+      .send({ handler: 'link-request', fields: { resourceId: 9 } });
+    expect(res.status).toBe(200);
+    expect(handle).toHaveBeenCalled();
+  });
+
+  it('refuses a message in a project without a contact block', async () => {
+    detailWidgets = [
+      {
+        projectId: 1,
+        type: 'resourcedetail',
+        config: { contactBlock: { display: false } },
+      },
+      {
+        projectId: 2,
+        type: 'resourcedetail',
+        config: { contactBlock: { display: true } },
+      },
+    ];
+    const res = await request(createApp(sender)).post(url).send(validBody);
+    expect(res.status).toBe(404);
     expect(notifications).toEqual([]);
   });
 
