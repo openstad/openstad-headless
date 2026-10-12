@@ -1,3 +1,4 @@
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -24,12 +25,14 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { WhitelistedEmailSelect } from '@/components/ui/whitelisted-email-select';
+import { isEmailNotificationConsentRequired } from '@/lib/email-consent';
 import { isEmailList } from '@/lib/email-list';
 import {
   WithWhitelistedEmailsProps,
   withWhitelistedEmails,
 } from '@/lib/server-side-props-definition';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import { useCallback, useEffect } from 'react';
@@ -66,6 +69,10 @@ export default function ProjectSettingsNotifications({
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProjectEmails, pdfAvailable } = useProject();
+  const [consentExplanationOpen, setConsentExplanationOpen] =
+    React.useState(false);
+  const showConsentWarning =
+    !!data && !isEmailNotificationConsentRequired(data.config);
   const defaults = useCallback(
     () => ({
       fromAddress: data?.emailConfig?.[category]?.fromAddress || '',
@@ -270,36 +277,109 @@ export default function ProjectSettingsNotifications({
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="sendModBreakNotification"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Modbreak-melding naar de indiener</FormLabel>
-                    <FormDescription>
-                      Standaard uitgeschakeld. De indiener van de inzending
-                      ontvangt een e-mail zodra de redactie een modbreak plaatst
-                      of de tekst van een bestaande modbreak aanpast.
-                    </FormDescription>
-                    <FormControl>
-                      <div className="flex items-center gap-2">
-                        <Checkbox
-                          id={field.name}
-                          checked={field.value}
-                          onCheckedChange={(checked) =>
-                            field.onChange(Boolean(checked))
-                          }
-                        />
-                        <Label htmlFor={field.name} className="cursor-pointer">
-                          E-mail sturen naar de indiener als er een modbreak is
-                          geplaatst of aangepast
-                        </Label>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <div className="grid grid-cols-1 gap-0 mt-4">
+                {showConsentWarning && (
+                  <Alert variant="warning">
+                    <AlertTitle>Let op!</AlertTitle>
+                    <AlertDescription>
+                      <p>
+                        Het veld{' '}
+                        <b>&apos;E-mail notificatie toestemming&apos;</b> is
+                        niet opgenomen in de verplichte velden. Hierdoor krijgen
+                        inzenders en reageerders bij het inloggen niet de vraag
+                        of ze e-mails willen ontvangen. Zonder die toestemming
+                        ontvangen zij geen modbreak-mail.
+                      </p>
+                      <p className="mt-2">
+                        Voeg het veld toe op de pagina{' '}
+                        <Link
+                          href={`/projects/${project}/authentication/requiredfields`}
+                          className="underline">
+                          Authenticatie &gt; Verplichte velden
+                        </Link>
+                        .
+                      </p>
+                      <button
+                        type="button"
+                        className="mt-2 underline"
+                        aria-expanded={consentExplanationOpen}
+                        aria-controls="modbreak-consent-explanation"
+                        onClick={() =>
+                          setConsentExplanationOpen((open) => !open)
+                        }>
+                        {consentExplanationOpen
+                          ? 'Minder uitleg'
+                          : 'Waarom komt er geen mail aan?'}
+                      </button>
+                      {consentExplanationOpen && (
+                        <div id="modbreak-consent-explanation" className="mt-2">
+                          <p>
+                            Een modbreak-mail gaat alleen uit als <b>beide</b>{' '}
+                            aan staan:
+                          </p>
+                          <ol className="list-decimal pl-5 mt-1">
+                            <li>
+                              <b>Per project:</b> de modbreak-optie hieronder,
+                              op deze pagina.
+                            </li>
+                            <li>
+                              <b>Per gebruiker, per project:</b> de toestemming
+                              voor e-mailnotificaties van de ontvanger. Iemand
+                              kan in het ene project wel toestemming hebben en
+                              in een ander project niet.
+                            </li>
+                          </ol>
+                          <p className="mt-2">
+                            Een gebruiker geeft toestemming bij het inloggen
+                            (als het veld verplicht is) of op zijn accountpagina
+                            (als de account-widget het toestemmingsveld toont).
+                            Een superbeheerder kan de toestemming zien en
+                            aanpassen bij{' '}
+                            <i>
+                              Gebruikers &gt; gebruiker &gt; Projectsrechten
+                            </i>
+                            .
+                          </p>
+                        </div>
+                      )}
+                    </AlertDescription>
+                  </Alert>
                 )}
-              />
+                <FormField
+                  control={form.control}
+                  name="sendModBreakNotification"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Modbreak-melding naar de indiener</FormLabel>
+                      <FormDescription>
+                        Standaard uitgeschakeld. De indiener van de inzending
+                        ontvangt een e-mail zodra de redactie een modbreak
+                        plaatst of de tekst van een bestaande modbreak aanpast.
+                        Alleen als de indiener in dit project toestemming heeft
+                        gegeven voor e-mailnotificaties.
+                      </FormDescription>
+                      <FormControl>
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id={field.name}
+                            checked={field.value}
+                            onCheckedChange={(checked) =>
+                              field.onChange(Boolean(checked))
+                            }
+                          />
+                          <Label
+                            htmlFor={field.name}
+                            className="cursor-pointer">
+                            E-mail sturen naar de indiener als er een modbreak
+                            is geplaatst of aangepast
+                          </Label>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormField
                 control={form.control}
                 name="sendModBreakNotificationToCommenters"
@@ -308,8 +388,8 @@ export default function ProjectSettingsNotifications({
                     <FormLabel>Modbreak-melding naar reageerders</FormLabel>
                     <FormDescription>
                       Standaard uitgeschakeld. Staat los van de optie hierboven.
-                      Alleen reageerders die toestemming hebben gegeven voor
-                      e-mailnotificaties ontvangen deze mail.
+                      Alleen reageerders die in dit project toestemming hebben
+                      gegeven voor e-mailnotificaties ontvangen deze mail.
                     </FormDescription>
                     <FormControl>
                       <div className="flex items-center gap-2">
