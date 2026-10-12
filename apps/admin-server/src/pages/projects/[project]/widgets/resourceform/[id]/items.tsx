@@ -777,6 +777,19 @@ export default function WidgetResourceFormItems(
   }, [form.watch('type')]);
 
   useEffect(() => {
+    const subscription = form.watch((values, { name, type }) => {
+      if (name !== 'type' || type !== 'change') return;
+      const defaultItem = defaultFormValues.find(
+        (item) => item.type === values.type
+      );
+      if (defaultItem?.fieldType === 'text' && defaultItem.variant) {
+        form.setValue('variant', defaultItem.variant);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  useEffect(() => {
     const type = form.watch('type');
     if (type === 'pagination' || type === 'none') {
       setIsFieldKeyUnique(true);
