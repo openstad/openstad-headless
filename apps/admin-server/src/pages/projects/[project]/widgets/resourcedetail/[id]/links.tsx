@@ -470,15 +470,20 @@ export default function WidgetResourceDetailLinks(
                   )
                 : null}
 
-              <Heading size="lg" className="mt-2">
-                Eigen inzending
-              </Heading>
-              {toggleField(
-                'contactBlock.showOwnResource',
-                'Eigen inzending laten kiezen',
-                'De bezoeker kiest een of meer eigen inzendingen, bijvoorbeeld het eigen stadmakerprofiel. Is er maar één, dan staat die al aangevinkt.'
-              )}
-              {form.watch('contactBlock.showOwnResource') ? (
+              {!isContactMessage ? (
+                <>
+                  <Heading size="lg" className="mt-2">
+                    Eigen inzending
+                  </Heading>
+                  {toggleField(
+                    'contactBlock.showOwnResource',
+                    'Eigen inzending laten kiezen',
+                    'De bezoeker kiest een of meer eigen inzendingen, bijvoorbeeld het eigen stadmakerprofiel. Is er maar één, dan staat die al aangevinkt.'
+                  )}
+                </>
+              ) : null}
+              {!isContactMessage &&
+              form.watch('contactBlock.showOwnResource') ? (
                 <>
                   {textField(
                     'contactBlock.ownResourceLabel',

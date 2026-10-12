@@ -11,6 +11,7 @@ import {
   externalIdsBySource,
   filterByTags,
   relatedTagOptions,
+  showsOwnResource,
   toRelatedItems,
   validateContact,
   withoutLinked,
@@ -435,5 +436,17 @@ describe('contactStatus', () => {
   it('falls back to the sent message', () => {
     expect(contactStatus({ requested: [{}] }, linked, sent)).toBe(sent);
     expect(contactStatus(undefined, linked, sent)).toBe(sent);
+  });
+});
+
+describe('showsOwnResource', () => {
+  it('never shows the own submission field for a plain contact message', () => {
+    expect(showsOwnResource(true, '')).toBe(false);
+    expect(showsOwnResource(true, undefined)).toBe(false);
+  });
+
+  it('shows it when a plugin handler is chosen and the option is on', () => {
+    expect(showsOwnResource(true, 'link-request')).toBe(true);
+    expect(showsOwnResource(false, 'link-request')).toBe(false);
   });
 });

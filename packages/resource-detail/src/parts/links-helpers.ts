@@ -332,3 +332,10 @@ const HANDLER_CONTACT_DEFAULTS: ContactTextDefaults = {
 export function contactTextDefaults(handler?: string): ContactTextDefaults {
   return handler ? HANDLER_CONTACT_DEFAULTS : EMAIL_CONTACT_DEFAULTS;
 }
+
+export function showsOwnResource(
+  showOwnResource: boolean,
+  handler?: string
+): boolean {
+  return showOwnResource && !!handler;
+}

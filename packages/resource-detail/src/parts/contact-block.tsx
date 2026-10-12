@@ -28,6 +28,7 @@ import {
   contactConsent,
   contactStatus,
   contactTextDefaults,
+  showsOwnResource,
   validateContact,
   withoutLinked,
 } from './links-helpers';
@@ -161,9 +162,10 @@ export function ContactBlock({
 
   const isLoggedIn = !!currentUser?.id;
   const isDefaultHandler = !handler;
+  const ownResourceEnabled = showsOwnResource(showOwnResource, handler);
 
   useEffect(() => {
-    if (!formOpen || !showOwnResource) return;
+    if (!formOpen || !ownResourceEnabled) return;
     let cancelled = false;
     datastore.api.links
       .fetchOptions({
@@ -186,7 +188,7 @@ export function ContactBlock({
     return () => {
       cancelled = true;
     };
-  }, [formOpen, showOwnResource, ownResourceTags, projectId]);
+  }, [formOpen, ownResourceEnabled, ownResourceTags, projectId]);
 
   const choosableResources = ownResources
     ? withoutLinked(ownResources, viewedLinks || []).filter(
@@ -224,7 +226,7 @@ export function ContactBlock({
       isDefaultHandler,
       showMessage,
       showConsent,
-      showOwnResource,
+      showOwnResource: ownResourceEnabled,
       message,
       consent,
       ownResourceIds,
@@ -247,7 +249,7 @@ export function ContactBlock({
           message: showMessage ? message : '',
           consent: showConsent ? consent : false,
           ...(handler ? { handler } : {}),
-          fields: showOwnResource ? { resourceIds: ownResourceIds } : {},
+          fields: ownResourceEnabled ? { resourceIds: ownResourceIds } : {},
         }
       );
       setFormOpen(false);
@@ -326,7 +328,7 @@ export function ContactBlock({
             />
           </DialogDescription>
 
-          {showOwnResource ? (
+          {ownResourceEnabled ? (
             <Fieldset className="osc-contact-block-own-resources">
               <FieldsetLegend>{ownResourceLabel}</FieldsetLegend>
               {ownResourceDescription &&
