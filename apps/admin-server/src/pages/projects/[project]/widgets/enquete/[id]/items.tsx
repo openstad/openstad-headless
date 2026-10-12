@@ -29,6 +29,7 @@ import { Heading } from '@/components/ui/typography';
 import { usePanelSwitchFocus } from '@/hooks/usePanelSwitchFocus';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { isOnRandomizedPage } from '@/lib/is-on-randomized-page';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
@@ -3475,30 +3476,32 @@ export default function WidgetEnqueteItems(
 
                     {!['pagination', 'none', 'video'].includes(
                       form.watch('questionType') || ''
-                    ) && (
-                      <FormField
-                        control={form.control}
-                        name="excludeFromRandomize"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>
-                              Deze vraag op zijn plek laten staan
-                            </FormLabel>
-                            <FormDescription>
-                              <em className="text-xs">
-                                Werkt alleen op een pagina waar &quot;Vragen op
-                                deze pagina in willekeurige volgorde tonen&quot;
-                                aanstaat. Gebruik dit voor een afsluitende vraag
-                                die onder de andere vragen hoort te blijven,
-                                zoals een toelichting.
-                              </em>
-                            </FormDescription>
-                            {YesNoSelect(field, props)}
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    )}
+                    ) &&
+                      (isOnRandomizedPage(items, selectedItemId) ||
+                        form.watch('excludeFromRandomize')) && (
+                        <FormField
+                          control={form.control}
+                          name="excludeFromRandomize"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Deze vraag op zijn plek laten staan
+                              </FormLabel>
+                              <FormDescription>
+                                <em className="text-xs">
+                                  Werkt alleen op een pagina waar &quot;Vragen
+                                  op deze pagina in willekeurige volgorde
+                                  tonen&quot; aanstaat. Gebruik dit voor een
+                                  afsluitende vraag die onder de andere vragen
+                                  hoort te blijven, zoals een toelichting.
+                                </em>
+                              </FormDescription>
+                              {YesNoSelect(field, props)}
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
 
                     {props.isQuiz &&
                       ['multiplechoice', 'multiple'].includes(
