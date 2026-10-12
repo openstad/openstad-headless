@@ -1,3 +1,5 @@
+import { parseImageCropUrl } from '@openstad-headless/lib/image-crop/crop-url';
+
 export type MockImageFile = {
   source: string;
   options: {
@@ -40,6 +42,10 @@ export function toMockImages(overrideDefaultValue: unknown): MockImageFile[] {
     : [];
 }
 
+export function toDescriptionKey(url: string): string {
+  return parseImageCropUrl(url).baseUrl;
+}
+
 export function buildImageValue({
   uploadedImages,
   mockImages,
@@ -51,8 +57,9 @@ export function buildImageValue({
 }): ImageValue[] {
   const images: ImageValue[] = uploadedImages.map((image) => {
     const value: ImageValue = { name: image.name, url: image.url };
-    if (Object.prototype.hasOwnProperty.call(descriptions, image.url)) {
-      value.description = descriptions[image.url];
+    const key = toDescriptionKey(image.url);
+    if (Object.prototype.hasOwnProperty.call(descriptions, key)) {
+      value.description = descriptions[key];
     }
     return value;
   });
@@ -64,8 +71,9 @@ export function buildImageValue({
       url: mockImage.source,
     };
 
-    if (Object.prototype.hasOwnProperty.call(descriptions, mockImage.source)) {
-      value.description = descriptions[mockImage.source];
+    const key = toDescriptionKey(mockImage.source);
+    if (Object.prototype.hasOwnProperty.call(descriptions, key)) {
+      value.description = descriptions[key];
     } else if (mockImage.description !== undefined) {
       value.description = mockImage.description;
     }
@@ -76,24 +84,35 @@ export function buildImageValue({
   return images;
 }
 
-export type DescriptionEntry = { url: string; name: string };
+export type DescriptionEntry = {
+  kind: 'uploaded' | 'mock';
+  index: number;
+  url: string;
+  name: string;
+};
 
 export function toDescriptionEntries(
   mockImages: MockImageFile[],
   uploadedImages: UploadedImage[],
   localFileNames: string[] = []
 ): DescriptionEntry[] {
-  const newestUploadFirst = [...uploadedImages].reverse();
+  const newestUploadFirst = uploadedImages
+    .map((image, index) => ({ image, index }))
+    .reverse();
 
   return [
-    ...newestUploadFirst.map((image) => ({
+    ...newestUploadFirst.map(({ image, index }) => ({
+      kind: 'uploaded' as const,
+      index,
       url: image.url,
       name:
         localFileNames.find(
           (fileName) => toUploadedImageName(fileName) === image.name
         ) ?? image.name,
     })),
-    ...mockImages.map((mockImage) => ({
+    ...mockImages.map((mockImage, index) => ({
+      kind: 'mock' as const,
+      index,
       url: mockImage.source,
       name: mockImage.options.file.name,
     })),
@@ -105,23 +124,7 @@ export function removeDescription(
   url: string
 ): Record<string, string> {
   const next = { ...descriptions };
-  delete next[url];
-  return next;
-}
-
-export function renameDescription(
-  descriptions: Record<string, string>,
-  oldUrl: string,
-  newUrl: string
-): Record<string, string> {
-  if (
-    oldUrl === newUrl ||
-    !Object.prototype.hasOwnProperty.call(descriptions, oldUrl)
-  ) {
-    return descriptions;
-  }
-  const next = { ...descriptions, [newUrl]: descriptions[oldUrl] };
-  delete next[oldUrl];
+  delete next[toDescriptionKey(url)];
   return next;
 }
 
