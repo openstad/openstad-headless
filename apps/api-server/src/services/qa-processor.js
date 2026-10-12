@@ -291,4 +291,9 @@ async function processSubmissionQA(instance, db) {
   return result;
 }
 
-module.exports = { processResourceQA, processSubmissionQA, transformAnswer };
+module.exports = {
+  processResourceQA,
+  processSubmissionQA,
+  transformAnswer,
+  buildQAHtmlTable,
+};

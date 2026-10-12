@@ -1,5 +1,6 @@
 import fs from 'fs';
 import mjml2html from 'mjml';
+import { createRequire } from 'module';
 import nunjucks from 'nunjucks';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -9,6 +10,9 @@ const templatesDir = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
   'default-templates'
 );
+
+const require = createRequire(import.meta.url);
+const { buildQAHtmlTable } = require('../services/qa-processor');
 
 function extractTemplate(type) {
   const file = fs.readFileSync(path.join(templatesDir, type)).toString();
@@ -68,5 +72,59 @@ describe('default template: contact message - user', () => {
     expect(result.html).toContain('Dit is een automatisch bericht.');
     expect(result.html).toContain('https://gemeente.nl/logo.png');
     expect(result.html).toContain('Bericht van Cees');
+  });
+});
+
+describe.each([
+  [
+    'new published resource - admin update',
+    'Beste beheerder',
+    'Bekijk de inzending',
+  ],
+  [
+    'new published resource - user feedback',
+    'Beste Test',
+    'Bekijk je inzending',
+  ],
+])('default template: %s', (type, greeting, buttonLabel) => {
+  const submissionContent = buildQAHtmlTable([
+    { question: 'Wat is je idee?', answer: 'Een bankje bij de vijver' },
+    { question: 'Waarom?', answer: 'Om even te rusten' },
+  ]);
+
+  async function render(data) {
+    const template = extractTemplate(type);
+    const body = new nunjucks.Environment().renderString(template.body, {
+      user: { name: 'Test' },
+      project: { title: 'P' },
+      ...data,
+    });
+    return mjml2html(body);
+  }
+
+  it('renders the submission overview, project logo and button', async () => {
+    const result = await render({
+      submissionContent,
+      logo: 'https://example.org/logo.png',
+      redirectUrl: 'https://example.org/r',
+    });
+
+    expect(result.errors).toEqual([]);
+    expect(result.html).not.toContain('<mj-table');
+    expect(result.html).toContain('Een bankje bij de vijver');
+    expect(result.html).toContain('Om even te rusten');
+    expect(result.html).toContain('https://example.org/logo.png');
+    expect(result.html).toContain(greeting);
+    expect(result.html).toContain(buttonLabel);
+    expect(result.html).toContain('href="https://example.org/r"');
+  });
+
+  it('renders without errors, button or table when there is no overview or link', async () => {
+    const result = await render({ submissionContent: '' });
+
+    expect(result.errors).toEqual([]);
+    expect(result.html).not.toContain('undefined/');
+    expect(result.html).not.toContain(buttonLabel);
+    expect(result.html).not.toContain('background-color: #f0f0f0');
   });
 });
