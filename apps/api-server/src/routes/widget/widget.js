@@ -11,6 +11,7 @@ const widgetDefinitions = getWidgetSettings();
 
 const { getWidgetJavascriptOutput } = require('./widget-output');
 const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
+const pluginExtensions = require('../../services/plugin-extensions');
 const {
   authClientSettingsFor,
 } = require('../../services/auth-client-settings');
@@ -262,6 +263,14 @@ function getDefaultConfig(project, widgetType) {
     widgetType == 'resourceform'
   ) {
     result.area = project.area?.polygon;
+  }
+
+  const pluginCapabilities = pluginExtensions.widgetPluginCapabilities(
+    pluginExtensions.get(),
+    widgetType
+  );
+  if (pluginCapabilities) {
+    result.pluginCapabilities = pluginCapabilities;
   }
 
   return result;

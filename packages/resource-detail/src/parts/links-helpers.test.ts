@@ -6,8 +6,10 @@ import {
   consentLabelParts,
   consentLabelPlain,
   contactConsent,
+  contactFieldsShown,
   contactStatus,
   contactTextDefaults,
+  effectiveContactHandler,
   externalIdsBySource,
   filterByTags,
   relatedTagOptions,
@@ -448,5 +450,38 @@ describe('showsOwnResource', () => {
   it('shows it when a plugin handler is chosen and the option is on', () => {
     expect(showsOwnResource(true, 'link-request')).toBe(true);
     expect(showsOwnResource(false, 'link-request')).toBe(false);
+  });
+});
+
+describe('effectiveContactHandler', () => {
+  it('keeps a handler whose plugin is loaded', () => {
+    expect(effectiveContactHandler('link-request', ['link-request'])).toBe(
+      'link-request'
+    );
+  });
+
+  it('falls back to a contact message when the plugin is not loaded', () => {
+    expect(effectiveContactHandler('link-request', [])).toBe('');
+    expect(effectiveContactHandler('link-request', undefined)).toBe('');
+  });
+
+  it('keeps the contact message', () => {
+    expect(effectiveContactHandler('', ['link-request'])).toBe('');
+  });
+});
+
+describe('contactFieldsShown', () => {
+  it('always asks for a message and consent in a contact message', () => {
+    expect(contactFieldsShown('', false, false)).toEqual({
+      showMessage: true,
+      showConsent: true,
+    });
+  });
+
+  it('follows the settings for a plugin handler', () => {
+    expect(contactFieldsShown('link-request', false, true)).toEqual({
+      showMessage: false,
+      showConsent: true,
+    });
   });
 });

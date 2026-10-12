@@ -28,6 +28,7 @@ import {
   linkKey,
   needsLinkConfirmation,
   restoreLinkValues,
+  withoutUnavailableLinkFields,
 } from './parts/link-selection';
 import { moveFieldToColumn } from './parts/move-field-to-column.js';
 import type { ResourceFormWidgetProps } from './props.js';
@@ -106,15 +107,23 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     resourceId: resourceId || undefined,
   });
 
-  const initialFormFields = InitializeFormFields(props.items, props);
+  const availableItems = useMemo(
+    () =>
+      withoutUnavailableLinkFields(
+        props.items,
+        props.pluginCapabilities?.linkRequests
+      ),
+    [props.items, props.pluginCapabilities?.linkRequests]
+  );
+  const initialFormFields = InitializeFormFields(availableItems, props);
   type FormField = { fieldKey?: string; [key: string]: any };
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [fillDefaults, setFillDefaults] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(0);
 
   const linkFields = useMemo(
-    () => getLinkFields(props.items),
-    [JSON.stringify(props.items)]
+    () => getLinkFields(availableItems),
+    [JSON.stringify(availableItems)]
   );
   const [linkPrefill, setLinkPrefill] = useState<Record<string, LinkValue[]>>(
     {}

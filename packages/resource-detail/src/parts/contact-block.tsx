@@ -26,8 +26,10 @@ import {
   consentLabelParts,
   consentLabelPlain,
   contactConsent,
+  contactFieldsShown,
   contactStatus,
   contactTextDefaults,
+  effectiveContactHandler,
   showsOwnResource,
   validateContact,
   withoutLinked,
@@ -70,6 +72,7 @@ type Props = ContactBlockProps & {
   headingLevel: number;
   currentUserProps: any;
   ownerId?: number;
+  availableHandlers?: string[];
 };
 
 type OwnResource = { id: string; label: string };
@@ -105,15 +108,16 @@ export function ContactBlock({
   headingLevel,
   currentUserProps,
   ownerId,
+  availableHandlers,
   title = 'Contact opnemen met de indiener',
   description,
   buttonText = 'Stuur een bericht',
-  handler = '',
+  handler: configuredHandler = '',
   popupTitle = 'Bericht versturen',
   popupDescription,
-  showMessage = true,
+  showMessage: configuredShowMessage = true,
   messageLabel = 'Bericht',
-  showConsent = true,
+  showConsent: configuredShowConsent = true,
   consentDescription,
   consentLabel,
   privacyUrl,
@@ -129,6 +133,12 @@ export function ContactBlock({
   successMessage = 'Het bericht is verstuurd.',
   linkedMessage = 'De koppeling is gemaakt.',
 }: Props) {
+  const handler = effectiveContactHandler(configuredHandler, availableHandlers);
+  const { showMessage, showConsent } = contactFieldsShown(
+    handler,
+    configuredShowMessage,
+    configuredShowConsent
+  );
   const defaults = contactTextDefaults(handler);
   const descriptionText = description ?? defaults.description;
   const popupDescriptionText = popupDescription ?? defaults.popupDescription;

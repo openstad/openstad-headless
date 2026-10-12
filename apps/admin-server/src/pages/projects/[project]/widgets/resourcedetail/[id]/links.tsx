@@ -461,8 +461,10 @@ export default function WidgetResourceDetailLinks(
                 'Beschrijving pop-up',
                 `Leeg = standaardtekst: "${contactDefaults.popupDescription}"`
               )}
-              {toggleField('contactBlock.showMessage', 'Berichtveld tonen')}
-              {form.watch('contactBlock.showMessage')
+              {isContactMessage
+                ? null
+                : toggleField('contactBlock.showMessage', 'Berichtveld tonen')}
+              {isContactMessage || form.watch('contactBlock.showMessage')
                 ? textField(
                     'contactBlock.messageLabel',
                     'Label berichtveld',
@@ -511,14 +513,13 @@ export default function WidgetResourceDetailLinks(
               <Heading size="lg" className="mt-2">
                 Toestemming
               </Heading>
-              {toggleField(
-                'contactBlock.showConsent',
-                'Toestemmingsveld tonen',
-                isContactMessage
-                  ? 'Verplicht voor een contactbericht naar de indiener, omdat het e-mailadres gedeeld wordt.'
-                  : undefined
-              )}
-              {form.watch('contactBlock.showConsent') ? (
+              {isContactMessage
+                ? null
+                : toggleField(
+                    'contactBlock.showConsent',
+                    'Toestemmingsveld tonen'
+                  )}
+              {isContactMessage || form.watch('contactBlock.showConsent') ? (
                 <>
                   {richTextField(
                     'contactBlock.consentDescription',

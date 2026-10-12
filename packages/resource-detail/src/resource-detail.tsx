@@ -128,6 +128,7 @@ export type ResourceDetailWidgetProps = {
     relatedResources?: RelatedResourcesProps;
     contactBlock?: ContactBlockProps;
     privacyConsent?: PrivacyConsent | null;
+    pluginCapabilities?: { linkRequests?: boolean; contactHandlers?: string[] };
   };
 
 type DocumentType = {
@@ -973,6 +974,7 @@ function ResourceDetail({
           headingLevel={hSection}
           currentUserProps={props}
           ownerId={resource?.userId}
+          availableHandlers={props.pluginCapabilities?.contactHandlers}
         />
       ) : null}
 

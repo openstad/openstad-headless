@@ -233,4 +233,21 @@ function get() {
   return extensions;
 }
 
-module.exports = { buildExtensions, getPluginServices, init, get };
+const WIDGETS_WITH_PLUGIN_CAPABILITIES = ['resourcedetail', 'resourceform'];
+
+function widgetPluginCapabilities(extensions, widgetType) {
+  if (!WIDGETS_WITH_PLUGIN_CAPABILITIES.includes(widgetType)) return null;
+  const { linkRequests, contactHandlers } = extensions.getCapabilities();
+  return {
+    linkRequests,
+    contactHandlers: contactHandlers.map(({ key }) => key),
+  };
+}
+
+module.exports = {
+  buildExtensions,
+  getPluginServices,
+  init,
+  get,
+  widgetPluginCapabilities,
+};

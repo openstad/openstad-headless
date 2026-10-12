@@ -47,6 +47,15 @@ export type LinkPayload = {
 export const linkKey = (link: { source: string; id: string }) =>
   `${link.source}:${link.id}`;
 
+export function withoutUnavailableLinkFields<T extends { type?: string }>(
+  items: T[] = [],
+  linkRequests?: boolean
+): T[] {
+  return linkRequests
+    ? items
+    : items.filter((item) => item.type !== RESOURCE_LINK_TYPE);
+}
+
 export function getLinkFields(
   items: Array<{
     type?: string;

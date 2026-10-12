@@ -11,7 +11,11 @@ process.env.SUPPRESS_NO_CONFIG_WARNING = '1';
 
 const require = createRequire(import.meta.url);
 const { resolvePluginFile } = require('@openstad-headless/plugin-loader');
-const { buildExtensions, getPluginServices } = require('./plugin-extensions');
+const {
+  buildExtensions,
+  getPluginServices,
+  widgetPluginCapabilities,
+} = require('./plugin-extensions');
 
 const fixtureDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -247,5 +251,32 @@ describe('getPluginServices', () => {
 
     expect(pluginServices.db).toBe(require('../db'));
     expect(pluginServices.resourceLinks).toBe(require('./resource-links'));
+  });
+});
+
+describe('widgetPluginCapabilities', () => {
+  it('tells the detail and form widgets that no plugin is loaded', () => {
+    const extensions = build([]);
+    for (const type of ['resourcedetail', 'resourceform']) {
+      expect(widgetPluginCapabilities(extensions, type)).toEqual({
+        linkRequests: false,
+        contactHandlers: [],
+      });
+    }
+  });
+
+  it('lists the loaded contact handlers and link requests', () => {
+    const capabilities = widgetPluginCapabilities(
+      build([plugin()]),
+      'resourcedetail'
+    );
+    expect(capabilities.linkRequests).toBe(true);
+    expect(capabilities.contactHandlers).toContain('link-request');
+  });
+
+  it('adds nothing for other widgets', () => {
+    expect(
+      widgetPluginCapabilities(build([plugin()]), 'resourceoverview')
+    ).toBeNull();
   });
 });

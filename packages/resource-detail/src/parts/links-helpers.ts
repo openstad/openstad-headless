@@ -339,3 +339,20 @@ export function showsOwnResource(
 ): boolean {
   return showOwnResource && !!handler;
 }
+
+export function effectiveContactHandler(
+  handler?: string,
+  availableHandlers?: string[]
+): string {
+  return handler && availableHandlers?.includes(handler) ? handler : '';
+}
+
+export function contactFieldsShown(
+  handler: string,
+  showMessage: boolean,
+  showConsent: boolean
+): { showMessage: boolean; showConsent: boolean } {
+  return handler
+    ? { showMessage, showConsent }
+    : { showMessage: true, showConsent: true };
+}

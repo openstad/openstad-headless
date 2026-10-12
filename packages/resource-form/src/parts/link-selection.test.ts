@@ -10,6 +10,7 @@ import {
   needsLinkConfirmation,
   restoreLinkValues,
   splitAddedLinks,
+  withoutUnavailableLinkFields,
 } from './link-selection';
 
 const stadmakerField = {
@@ -207,5 +208,29 @@ describe('restoreLinkValues', () => {
       stadmakers: [arno],
       activiteiten: [],
     });
+  });
+});
+
+describe('withoutUnavailableLinkFields', () => {
+  const items = [
+    { type: 'text', fieldKey: 'title' },
+    { type: 'resourceLink', fieldKey: 'links' },
+  ];
+
+  it('removes link fields when link requests are not available', () => {
+    expect(withoutUnavailableLinkFields(items, false)).toEqual([
+      { type: 'text', fieldKey: 'title' },
+    ]);
+    expect(withoutUnavailableLinkFields(items, undefined)).toEqual([
+      { type: 'text', fieldKey: 'title' },
+    ]);
+  });
+
+  it('keeps link fields when link requests are available', () => {
+    expect(withoutUnavailableLinkFields(items, true)).toEqual(items);
+  });
+
+  it('handles missing items', () => {
+    expect(withoutUnavailableLinkFields(undefined, false)).toEqual([]);
   });
 });
