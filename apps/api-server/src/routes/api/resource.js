@@ -32,9 +32,6 @@ const {
   findChangedModBreaks,
   sendModBreakNotifications,
 } = require('../../lib/modbreak-notifications');
-const {
-  stripEditorOnlyExtraData,
-} = require('../../models/lib/filter-public-extra-data');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -1238,10 +1235,6 @@ router
           const { id, createdAt, updatedAt, deletedAt, ...newResourceData } =
             resourceData;
           newResourceData.startDate = newResourceData.publishDate = new Date();
-          newResourceData.extraData = stripEditorOnlyExtraData(
-            resource.extraData,
-            req.user
-          );
 
           let statuses = newResourceData.statuses || [];
           let tags = newResourceData.tags || [];
