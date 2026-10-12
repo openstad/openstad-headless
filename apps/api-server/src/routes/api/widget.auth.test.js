@@ -108,6 +108,17 @@ describe('PUT /project/:projectId/widgets/:id', () => {
     expect(updated.config.rawInput).not.toContain('<script>');
     expect(updated.config.rawInput).toContain('hoi');
   });
+
+  it('keeps id and style in rawInput', async () => {
+    await request(createApp(editor))
+      .put(`/project/${PROJECT_ID}/widgets/6`)
+      .send({
+        config: { rawInput: '<div id="x" style="color:red">hoi</div>' },
+      });
+
+    expect(updated.config.rawInput).toContain('id="x"');
+    expect(updated.config.rawInput).toContain('style="color:red"');
+  });
 });
 
 describe('DELETE /project/:projectId/widgets/:id', () => {

@@ -105,9 +105,7 @@ var allSafeTags = {
       'center',
       'class',
       'data-*',
-      'id',
       'name',
-      'style',
       'title',
     ],
     a: ['href', 'name', 'rel', 'target'],
@@ -125,6 +123,13 @@ var allSafeTags = {
       }
       return { tagName: tagName, attribs: attrs };
     },
+  },
+};
+var rawInputTags = {
+  ...allSafeTags,
+  allowedAttributes: {
+    ...allSafeTags.allowedAttributes,
+    '*': [...allSafeTags.allowedAttributes['*'], 'id', 'style'],
   },
 };
 
@@ -151,5 +156,8 @@ module.exports = {
   },
   noTags: function (text) {
     return sanitizeIfNotNull(text, noTags);
+  },
+  rawInput: function (text) {
+    return sanitizeIfNotNull(text, rawInputTags);
   },
 };
