@@ -2,6 +2,55 @@ import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 
+export async function waitForDuplication(
+  projectId: number | string,
+  {
+    interval = 1500,
+    timeoutMs = 15 * 60 * 1000,
+    fetcher = fetch,
+  }: { interval?: number; timeoutMs?: number; fetcher?: typeof fetch } = {}
+): Promise<{ status: string; errors: any[]; duplicatedData?: any }> {
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, interval));
+    try {
+      const res = await fetcher(
+        `/api/openstad/api/project/${projectId}/duplication-status`
+      );
+      if (res.status >= 400 && res.status < 500) {
+        return {
+          status: 'failed',
+          errors: [
+            {
+              step: 'Status ophalen',
+              error: `De voortgang kon niet worden opgehaald (status ${res.status}).`,
+            },
+          ],
+        };
+      }
+      if (!res.ok) {
+        console.error(
+          `Duplicatiestatus opvragen mislukt met status ${res.status}`
+        );
+        continue;
+      }
+      const data = await res.json();
+      if (data.status === 'done') return { status: 'done', errors: [] };
+      if (data.status === 'failed')
+        return {
+          status: 'failed',
+          errors: data.errors || [],
+          duplicatedData: data.duplicatedData,
+        };
+    } catch (e) {
+      console.error('Duplicatiestatus opvragen mislukt', e);
+    }
+  }
+
+  return { status: 'running', errors: [] };
+}
+
 export function useProject(scopes?: Array<string>) {
   const router = useRouter();
   let projectId = router.query.project;
@@ -133,40 +182,6 @@ export function useProject(scopes?: Array<string>) {
     if (!res.ok) {
       throw new Error('Could not anonymize users of the project');
     }
-  }
-
-  async function waitForDuplication(
-    projectId: number | string,
-    { interval = 1500, timeoutMs = 15 * 60 * 1000 } = {}
-  ): Promise<{ status: string; errors: any[]; duplicatedData?: any }> {
-    const deadline = Date.now() + timeoutMs;
-
-    while (Date.now() < deadline) {
-      await new Promise((resolve) => setTimeout(resolve, interval));
-      try {
-        const res = await fetch(
-          `/api/openstad/api/project/${projectId}/duplication-status`
-        );
-        if (!res.ok) {
-          console.error(
-            `Duplicatiestatus opvragen mislukt met status ${res.status}`
-          );
-          continue;
-        }
-        const data = await res.json();
-        if (data.status === 'done') return { status: 'done', errors: [] };
-        if (data.status === 'failed')
-          return {
-            status: 'failed',
-            errors: data.errors || [],
-            duplicatedData: data.duplicatedData,
-          };
-      } catch (e) {
-        console.error('Duplicatiestatus opvragen mislukt', e);
-      }
-    }
-
-    return { status: 'running', errors: [] };
   }
 
   return {
