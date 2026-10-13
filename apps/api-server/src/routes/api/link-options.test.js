@@ -71,9 +71,19 @@ describe('link options', () => {
     vi.restoreAllMocks();
   });
 
-  it('requires a search of at least two characters', async () => {
+  it('searches openstad resources from one character', async () => {
     const res = await request(createApp()).get(
       '/project/1/link-options/openstad?search=a'
+    );
+
+    expect(res.status).toBe(200);
+    expect(queries[0].limit).toBe(20);
+    expect(queries[0].where[Op.and]).toEqual([{ title: { [Op.like]: '%a%' } }]);
+  });
+
+  it('requires a search of at least two characters for plugin sources', async () => {
+    const res = await request(createApp()).get(
+      '/project/1/link-options/fixture-source?search=a'
     );
     expect(res.status).toBe(422);
   });

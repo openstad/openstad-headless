@@ -85,13 +85,24 @@ const ResourceLinkField: FC<ResourceLinkFieldProps> = ({
   const descriptionId = description ? `${fieldKey}-description` : undefined;
   const errorId = fieldInvalid ? `${randomId}_error` : undefined;
 
-  const loadOptions = async (query: string): Promise<ComboboxOption[]> => {
+  const isOpenstadSource = linkSource === 'openstad';
+
+  const loadOptions = async (
+    query: string,
+    signal: AbortSignal
+  ): Promise<ComboboxOption[]> => {
+    const exclude = isOpenstadSource
+      ? [excludeResourceId, ...selected.map((item) => item.id)]
+          .filter(Boolean)
+          .join(',')
+      : undefined;
     const results = await datastore.api.links.fetchOptions({
       projectId,
       source: linkSource,
       search: query,
       tags: linkTags,
-      exclude: linkSource === 'openstad' ? excludeResourceId : undefined,
+      exclude: exclude || undefined,
+      signal,
     });
     return Array.isArray(results) ? results : [];
   };
@@ -139,7 +150,8 @@ const ResourceLinkField: FC<ResourceLinkFieldProps> = ({
           selected={selected}
           onChange={handleChange}
           loadOptions={loadOptions}
-          loadOnFocus={linkSource === 'openstad'}
+          loadOnFocus={isOpenstadSource}
+          minQueryLength={isOpenstadSource ? 1 : undefined}
         />
       </div>
       <Spacer size={1.25} />

@@ -8,7 +8,8 @@ const { OPENSTAD_SOURCE } = require('../../services/resource-links');
 
 const router = express.Router({ mergeParams: true });
 
-const MIN_SEARCH_LENGTH = 2;
+const MIN_SEARCH_LENGTH = { [OPENSTAD_SOURCE]: 1 };
+const DEFAULT_MIN_SEARCH_LENGTH = 2;
 const DEFAULT_LIMIT = 20;
 const BROWSE_LIMIT = 10;
 const MAX_LIMIT = 50;
@@ -72,10 +73,12 @@ router.get('/:source', rateLimiter(), async function (req, res, next) {
     }
     const browsing =
       req.params.source === OPENSTAD_SOURCE && search.length === 0;
-    if (!onlyMine && !browsing && search.length < MIN_SEARCH_LENGTH) {
+    const minSearchLength =
+      MIN_SEARCH_LENGTH[req.params.source] || DEFAULT_MIN_SEARCH_LENGTH;
+    if (!onlyMine && !browsing && search.length < minSearchLength) {
       throw createError(
         422,
-        `search must contain at least ${MIN_SEARCH_LENGTH} characters`
+        `search must contain at least ${minSearchLength} characters`
       );
     }
     const limit = parseLimit(
