@@ -1,3 +1,4 @@
+import { resetWidgetPreview } from '@/hooks/useWidgetPreview';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { useMemo } from 'react';
 import toast from 'react-hot-toast';
@@ -14,6 +15,45 @@ export type WidgetVersion = {
   restoredFromId: number | null;
   createdAt: string;
 };
+
+type RestoreResult = { ok: boolean; undoVersionId: number | null };
+
+export async function restoreWidgetVersion({
+  url,
+  mutateVersions,
+  mutateWidget,
+  resetPreview,
+  fetcher = fetch,
+}: {
+  url: string;
+  mutateVersions: () => Promise<unknown>;
+  mutateWidget: () => Promise<unknown>;
+  resetPreview: () => void;
+  fetcher?: typeof fetch;
+}): Promise<RestoreResult> {
+  const failed = { ok: false, undoVersionId: null };
+
+  try {
+    const res = await fetcher(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!res.ok) {
+      toast.error('De versie kon niet worden hersteld');
+      return failed;
+    }
+
+    const data = await res.json();
+    await mutateVersions();
+    await mutateWidget();
+    resetPreview();
+    return { ok: true, undoVersionId: data?.undoVersionId ?? null };
+  } catch (error) {
+    toast.error('De versie kon niet worden hersteld');
+    return failed;
+  }
+}
 
 export function useWidgetVersions(
   widgetId?: string | number,
@@ -61,36 +101,17 @@ export function useWidgetVersions(
     }
   }
 
-  async function restore(
-    versionId: number
-  ): Promise<{ ok: boolean; undoVersionId: number | null }> {
-    const failed = { ok: false, undoVersionId: null };
-    if (!projectNumber || !widgetNumber) return failed;
+  async function restore(versionId: number): Promise<RestoreResult> {
+    if (!projectNumber || !widgetNumber)
+      return { ok: false, undoVersionId: null };
 
-    try {
-      const res = await fetch(
-        `/api/openstad/api/project/${projectNumber}/widgets/${widgetNumber}/versions/${versionId}/restore`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        }
-      );
-
-      if (!res.ok) {
-        toast.error('De versie kon niet worden hersteld');
-        return failed;
-      }
-
-      const data = await res.json();
-      await swr.mutate();
-      await globalMutate(
-        `/api/openstad/api/project/${projectNumber}/widgets/${widgetNumber}?includeType=1`
-      );
-      return { ok: true, undoVersionId: data?.undoVersionId ?? null };
-    } catch (error) {
-      toast.error('De versie kon niet worden hersteld');
-      return failed;
-    }
+    const widgetUrl = `/api/openstad/api/project/${projectNumber}/widgets/${widgetNumber}`;
+    return restoreWidgetVersion({
+      url: `${widgetUrl}/versions/${versionId}/restore`,
+      mutateVersions: () => swr.mutate(),
+      mutateWidget: () => globalMutate(`${widgetUrl}?includeType=1`),
+      resetPreview: () => resetWidgetPreview(widgetNumber),
+    });
   }
 
   async function updateVersion(
