@@ -21,7 +21,10 @@ export type ComboboxProps = {
   placeholder?: string;
   selected: ComboboxOption[];
   onChange: (selected: ComboboxOption[]) => void;
-  loadOptions: (query: string) => Promise<ComboboxOption[]>;
+  loadOptions: (
+    query: string,
+    signal: AbortSignal
+  ) => Promise<ComboboxOption[]>;
   minQueryLength?: number;
   loadOnFocus?: boolean;
   debounceMs?: number;
@@ -86,9 +89,10 @@ export function Combobox({
     }
 
     const requestId = ++requestCounter.current;
+    const controller = new AbortController();
     setSearchState('loading');
     const timeout = setTimeout(() => {
-      loadOptions(trimmedQuery)
+      loadOptions(trimmedQuery, controller.signal)
         .then((result) => {
           if (requestId !== requestCounter.current) return;
           setOptions(Array.isArray(result) ? result : []);
@@ -96,13 +100,17 @@ export function Combobox({
           setActiveIndex(-1);
         })
         .catch(() => {
+          if (controller.signal.aborted) return;
           if (requestId !== requestCounter.current) return;
           setOptions([]);
           setSearchState('error');
         });
     }, debounceMs);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
   }, [trimmedQuery, minQueryLength, debounceMs, browsing]);
 
   const selectOption = (option: ComboboxOption) => {
@@ -188,6 +196,7 @@ export function Combobox({
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
+          onClick={() => setIsOpen(true)}
           onBlur={() => setIsOpen(false)}
           onKeyDown={onKeyDown}
         />
