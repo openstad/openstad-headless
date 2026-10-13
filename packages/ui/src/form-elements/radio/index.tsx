@@ -16,15 +16,7 @@ import { useEffect } from 'react';
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
 import TextInput from '../text';
-
-const shuffleArray = <T,>(array: T[]): T[] => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
+import { getRandomizedDisplayChoices } from '../utils/randomized-choices';
 
 export type RadioboxFieldProps = {
   title: string;
@@ -118,33 +110,11 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
         )
       : [];
 
-    if (randomizeItems) {
-      const storageKey = `randomizedChoices_${fieldKey}`;
-      const stored = sessionStorage.getItem(storageKey);
-      let parsed: typeof normalizedChoices | null = null;
-      try {
-        parsed = stored ? JSON.parse(stored) : null;
-      } catch {
-        parsed = null;
-      }
-      const storedMatchesChoices =
-        Array.isArray(parsed) &&
-        parsed.length === normalizedChoices.length &&
-        normalizedChoices.every((choice) =>
-          parsed!.some((stored) => stored.value === choice.value)
-        );
-      if (storedMatchesChoices) {
-        setDisplayChoices(parsed as typeof normalizedChoices);
-      } else if (normalizedChoices.length > 0) {
-        const shuffled = shuffleArray(normalizedChoices);
-        setDisplayChoices(shuffled);
-        sessionStorage.setItem(storageKey, JSON.stringify(shuffled));
-      } else {
-        setDisplayChoices(normalizedChoices);
-      }
-    } else {
-      setDisplayChoices(normalizedChoices);
-    }
+    setDisplayChoices(
+      randomizeItems
+        ? getRandomizedDisplayChoices(normalizedChoices, fieldKey)
+        : normalizedChoices
+    );
   }, [choices, fieldKey, randomizeItems]);
 
   useEffect(() => {
