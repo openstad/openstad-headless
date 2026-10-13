@@ -4,8 +4,15 @@ import {
   isInternalField,
 } from '@/components/audit-log-field-config';
 import { fieldLabel } from '@/components/audit-log-format';
-import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -184,6 +191,7 @@ export default function WidgetVersionHistory({
   const [editingName, setEditingName] = useState(false);
   const [highlightedId, setHighlightedId] = useState<number | null>(null);
   const [previewMaxed, setPreviewMaxed] = useState(false);
+  const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
   const itemRefs = useRef<Record<number, HTMLLIElement | null>>({});
 
   const { data: tagList } = useTags(projectId);
@@ -692,23 +700,43 @@ export default function WidgetVersionHistory({
                   </div>
                   {selected.id !== newestId ? (
                     <div className="px-6 py-3 border-b border-border flex">
-                      <Button
-                        type="button"
-                        variant="default"
-                        className="flex items-center ml-auto"
-                        onClick={(e) => e.preventDefault()}>
-                        <ConfirmActionDialog
-                          buttonText="Terugzetten"
-                          header="Versie terugzetten"
-                          message={`Weet je zeker dat je "${versionLabel(
-                            selected
-                          )}" wilt terugzetten? De huidige configuratie wordt vervangen door deze versie. Dit wordt zelf ook als nieuwe versie opgeslagen, en je kunt het direct daarna ongedaan maken.`}
-                          confirmButtonText="Terugzetten"
-                          cancelButtonText="Annuleren"
-                          confirmButtonVariant="destructive"
-                          onConfirmAccepted={() => handleRestore(selected.id)}
-                        />
-                      </Button>
+                      <Dialog
+                        open={restoreDialogOpen}
+                        onOpenChange={setRestoreDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="default"
+                            className="ml-auto">
+                            Terugzetten
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogTitle>Versie terugzetten</DialogTitle>
+                          <DialogDescription>
+                            {`Weet je zeker dat je "${versionLabel(
+                              selected
+                            )}" wilt terugzetten? De huidige configuratie wordt vervangen door deze versie. Dit wordt zelf ook als nieuwe versie opgeslagen, en je kunt het direct daarna ongedaan maken.`}
+                          </DialogDescription>
+                          <DialogFooter>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={() => setRestoreDialogOpen(false)}>
+                              Annuleren
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              onClick={() => {
+                                setRestoreDialogOpen(false);
+                                handleRestore(selected.id);
+                              }}>
+                              Terugzetten
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   ) : null}
                   <div className="p-6">
