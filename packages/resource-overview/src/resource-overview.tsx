@@ -45,6 +45,7 @@ import React, {
 import { elipsizeHTML } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
 import { findResourceIndex } from './lib/find-resource-index';
+import { tagIcon } from './lib/tag-icon';
 import './resource-overview.css';
 
 export type ResourceOverviewWidgetProps = BaseProps &
@@ -375,9 +376,7 @@ const defaultItemRenderer = (
     resourceFilteredTags && resourceFilteredTags.length > 0
       ? resourceFilteredTags[0]
       : null;
-  const TagIconImage = firstTag
-    ? firstTag.listIcon || firstTag.mapIcon || false
-    : false;
+  const TagIconImage = tagIcon(firstTag);
   const selectedOpinion = resource?.userVote?.opinion;
 
   const TileFooter = ({
