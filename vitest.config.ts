@@ -10,7 +10,7 @@ export default defineConfig({
       'apps/api-server/vitest.config.ts',
       'apps/auth-server/vitest.config.ts',
       'apps/cms-server/vitest.config.ts',
-      'apps/admin-server',
+      'apps/admin-server/vitest.config.ts',
       'apps/image-server',
       'packages/*',
       'packages/apostrophe-widgets/*',
