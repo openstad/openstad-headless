@@ -184,7 +184,11 @@ export function AgendaItemsEditor({
 
   function onSubmit(values: FormData) {
     if (selectedItem) {
-      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+      const {
+        trigger: _formTrigger,
+        linkDraft: _linkDraft,
+        ...valuesWithoutTrigger
+      } = values;
 
       onItemsChange(
         items.map((item) =>
