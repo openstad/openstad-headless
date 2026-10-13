@@ -38,6 +38,7 @@ import { Step3 } from './step-3';
 import { Step3Success } from './step-3-success';
 import { Step4 } from './step-4';
 import { createSelectedResourcesStorage } from './utils/selected-resources-storage';
+import { buildTagGroups } from './utils/tag-groups';
 import { createVotePendingStorage } from './utils/vote-pending-storage';
 
 type TagTypeSingle = {
@@ -323,7 +324,9 @@ function StemBegroot({
   const [tagCounter, setTagCounter] = useState<Array<TagType>>([]);
 
   const [tags, setTags] = useState<number[]>(initTags);
-  const [userSelectedTags, setUserSelectedTags] = useState<number[]>([]);
+  const [userSelectedTags, setUserSelectedTags] = useState<number[]>(
+    urlTagIdsArray || []
+  );
 
   const [sort, setSort] = useState<string | undefined>(
     props.defaultSorting || undefined
@@ -360,36 +363,16 @@ function StemBegroot({
     return tags;
   }, [tags, activeTabTagIds, isPerTagVoting]);
 
-  const groupedTags: { [key: string]: number[] } = useMemo(() => {
-    const tagsMap: { [key: string]: number[] } = {};
-    allTags.forEach((tag: { type: string; id: number }) => {
-      if (!tagsMap[tag.type]) {
-        tagsMap[tag.type] = [];
-      }
-      tagsMap[tag.type].push(tag.id);
-    });
-    return tagsMap;
-  }, [allTags]);
-
-  const useTagGroups =
-    filterBehavior === 'and' &&
-    userSelectedTags.length > 0 &&
-    !(isPerTagVoting && activeTabTagIds.length > 0);
-
-  const apiTagGroups = useMemo(() => {
-    if (!useTagGroups) return [];
-
-    const groups: number[][] = [];
-    Object.keys(groupedTags).forEach((tagType) => {
-      const selectedOfType = userSelectedTags.filter((tagId) =>
-        groupedTags[tagType].includes(tagId)
-      );
-      if (selectedOfType.length > 0) {
-        groups.push(selectedOfType);
-      }
-    });
-    return groups;
-  }, [useTagGroups, userSelectedTags, groupedTags]);
+  const apiTagGroups = useMemo(
+    () =>
+      buildTagGroups({
+        allTags,
+        selectedTagIds: userSelectedTags,
+        filterBehavior,
+        perTagTabActive: isPerTagVoting && activeTabTagIds.length > 0,
+      }),
+    [allTags, userSelectedTags, filterBehavior, isPerTagVoting, activeTabTagIds]
+  );
 
   const flatApiTags = apiTagGroups.length > 0 ? [] : apiTags;
 
