@@ -41,6 +41,10 @@ function buildEnrichedError({
   return error;
 }
 
+function isAbortError(error) {
+  return error?.name === 'AbortError';
+}
+
 function dispatchOscError(error) {
   if (
     typeof window === 'undefined' ||
@@ -95,6 +99,7 @@ export default async function doFetch(url = '', options = {}) {
     try {
       response = await fetch(fullUrl, options);
     } catch (networkError) {
+      if (isAbortError(networkError)) throw networkError;
       const error = buildEnrichedError({
         message: networkError?.message || 'Network request failed',
         failureType: 'network_error',
@@ -136,6 +141,7 @@ export default async function doFetch(url = '', options = {}) {
     try {
       json = await response.json();
     } catch (parseError) {
+      if (isAbortError(parseError)) throw parseError;
       const error = buildEnrichedError({
         message: 'Invalid JSON response',
         failureType: 'invalid_json',

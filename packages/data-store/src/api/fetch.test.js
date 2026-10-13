@@ -134,6 +134,42 @@ describe('data-store fetch error enrichment', () => {
       referenceId: 'client-id-123',
     });
   });
+
+  test('rethrows an aborted request without reporting an error', async () => {
+    const abortError = new DOMException(
+      'The operation was aborted.',
+      'AbortError'
+    );
+    global.fetch = vi.fn().mockRejectedValue(abortError);
+
+    const api = { apiUrl: 'https://api.example.com' };
+    await expect(
+      doFetch.call(api, '/api/project/1/link-options/openstad', {
+        signal: new AbortController().signal,
+      })
+    ).rejects.toBe(abortError);
+    expect(global.document.dispatchEvent).not.toHaveBeenCalled();
+  });
+
+  test('rethrows a request aborted while reading the body without reporting an error', async () => {
+    const abortError = new DOMException(
+      'The operation was aborted.',
+      'AbortError'
+    );
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => {
+        throw abortError;
+      },
+    });
+
+    const api = { apiUrl: 'https://api.example.com' };
+    await expect(
+      doFetch.call(api, '/api/project/1/link-options/openstad')
+    ).rejects.toBe(abortError);
+    expect(global.document.dispatchEvent).not.toHaveBeenCalled();
+  });
 });
 
 describe('data-store fetch invalid token handling', () => {

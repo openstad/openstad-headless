@@ -7,6 +7,7 @@ export default {
     exclude,
     limit,
     mine,
+    signal,
   }) {
     const params = new URLSearchParams(search ? { search } : {});
     if (mine) params.append('mine', '1');
@@ -16,7 +17,7 @@ export default {
     const url = `/api/project/${projectId}/link-options/${encodeURIComponent(
       source
     )}?${params.toString()}`;
-    return this.fetch(url);
+    return this.fetch(url, { signal });
   },
 
   fetchItems: async function ({ projectId, source, ids }) {
