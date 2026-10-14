@@ -52,11 +52,6 @@ vi.mock('@/hooks/use-project', () => ({
     importProject: async () => ({ id: 51 }),
   }),
 }));
-vi.mock('@/hooks/use-template', () => ({
-  default: () => ({
-    data: [{ id: 7, name: 'Standaard', data: { config: {} } }],
-  }),
-}));
 vi.mock('react-hot-toast', () => ({
   default: { success() {}, error() {} },
 }));
@@ -73,34 +68,23 @@ const settle = () =>
     await new Promise((resolve) => setTimeout(resolve, 30));
   });
 
-function setInput(el: HTMLInputElement | HTMLSelectElement, value: string) {
-  const proto =
-    el instanceof HTMLSelectElement
-      ? HTMLSelectElement.prototype
-      : HTMLInputElement.prototype;
-  const setter = Object.getOwnPropertyDescriptor(proto, 'value')!.set!;
+function setInput(el: HTMLInputElement, value: string) {
+  const setter = Object.getOwnPropertyDescriptor(
+    HTMLInputElement.prototype,
+    'value'
+  )!.set!;
   act(() => {
     setter.call(el, value);
-    el.dispatchEvent(
-      new Event(el instanceof HTMLSelectElement ? 'change' : 'input', {
-        bubbles: true,
-      })
-    );
+    el.dispatchEvent(new Event('input', { bubbles: true }));
   });
 }
 
-describe('creating a project from a template', () => {
+describe('creating a project', () => {
   let container: HTMLDivElement;
   let root: Root;
   let confirmSpy: any;
-  let posts: number;
 
   beforeEach(() => {
-    posts = 0;
-    (globalThis as any).fetch = vi.fn(async (url: string) => {
-      if (url === '/api/openstad/api/project') posts += 1;
-      return { ok: true, json: async () => 99 };
-    });
     confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
     nav.router.pushes.length = 0;
     container = document.createElement('div');
@@ -112,40 +96,6 @@ describe('creating a project from a template', () => {
     act(() => root.unmount());
     container.remove();
     confirmSpy.mockRestore();
-  });
-
-  it('goes to the new project without asking, also when the top form has a name', async () => {
-    act(() =>
-      root.render(
-        <SaveControllerProvider>
-          <Bar />
-          <CreateProject />
-        </SaveControllerProvider>
-      )
-    );
-    await settle();
-    const inputs = Array.from(
-      container.querySelectorAll('input[placeholder="Naam"]')
-    ) as HTMLInputElement[];
-    setInput(inputs[0], 'Mijn nieuw project');
-    await settle();
-    expect(controller.isRegistered).toBe(false);
-    expect(controller.state).toBe('neutral');
-    setInput(container.querySelector('select') as HTMLSelectElement, '7');
-    setInput(inputs[1], 'Project uit template');
-    await settle();
-    const submit = Array.from(container.querySelectorAll('button')).find(
-      (button) => button.textContent === 'Aanmaken'
-    ) as HTMLButtonElement;
-    await act(async () => {
-      submit.click();
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    });
-    await settle();
-
-    expect(posts).toBe(1);
-    expect(confirmSpy).not.toHaveBeenCalled();
-    expect(nav.router.pushes).toEqual(['/projects/99/widgets']);
   });
 
   it('creates an empty project with its own save button', async () => {

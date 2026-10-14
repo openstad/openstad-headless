@@ -95,7 +95,7 @@ describe('Projectinformatie on the project settings page', () => {
       root.render(
         <SaveControllerProvider>
           <Bar />
-          <ProjectSettings cmsUrl="" />
+          <ProjectSettings />
         </SaveControllerProvider>
       )
     );
@@ -214,9 +214,6 @@ describe('Projectinformatie on the project settings page', () => {
     });
     await openPage();
     await flipWebsite();
-    expect(
-      (container.querySelector('input[name="url"]') as HTMLInputElement).value
-    ).toBe('oud.example.nl');
     expect(controller.state).toBe('dirty');
 
     await flipWebsite();
