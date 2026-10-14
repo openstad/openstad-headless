@@ -118,6 +118,7 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
 
   const [checkboxInitial, setCheckboxInitial] = useState(true);
   const [showUrl, setShowUrl] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [projectHasEnded, setProjectHasEnded] = useState(false);
   const [basicAuthActive, setBasicAuthActive] = useState(false);
   const [basicAuthInitial, setBasicAuthInitial] = useState(true);
@@ -196,24 +197,32 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
     }
     const values = formSchema.parse(form.getValues());
     const sent = cloneDeep(form.getValues());
-    const result = await updateProject(
-      {
-        project: {
-          endDate: values.endDate,
-          projectToggle: values.projectToggle,
-          lastUrl: values.url || data?.config?.project?.lastUrl || '',
+    setIsSubmitting(true);
+    try {
+      const result = await updateProject(
+        {
+          project: {
+            endDate: values.endDate,
+            projectToggle: values.projectToggle,
+            lastUrl: values.url || data?.config?.project?.lastUrl || '',
+          },
+          basicAuth: {
+            active: values.basicAuthActive,
+            username: values.username,
+            password: values.password,
+          },
         },
-        basicAuth: {
-          active: values.basicAuthActive,
-          username: values.username,
-          password: values.password,
-        },
-      },
-      values.name,
-      values.projectToggle ? values.url : ''
-    );
-    if (!result) {
-      throw new Error('Er is helaas iets mis gegaan.');
+        values.name,
+        values.projectToggle ? values.url : ''
+      );
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+      if (!result) {
+        throw new Error('Er is helaas iets mis gegaan.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
 
     rebaselineAfterSave(form, sent);
@@ -488,6 +497,12 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
                         />
                       </>
                     ) : null}
+                    {isSubmitting && showUrl && !!form.watch('url') && (
+                      <p className="col-span-full text-sm text-muted-foreground">
+                        Het aanmaken van de website kan enkele minuten duren.
+                        Laat dit venster open.
+                      </p>
+                    )}
                   </div>
                 </Form>
               </div>

@@ -727,6 +727,7 @@ module.exports = function (db, sequelize, DataTypes) {
               'defaultResourceImage',
               'documentMapIconColor',
               'mapIcon',
+              'listIcon',
             ],
             through: { attributes: [] },
             required: false,

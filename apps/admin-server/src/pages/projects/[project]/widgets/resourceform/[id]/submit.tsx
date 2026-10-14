@@ -24,7 +24,6 @@ import * as z from 'zod';
 const formSchema = z.object({
   submitButton: z.string(),
   saveButton: z.string(),
-  saveConceptButton: z.string(),
   defaultAddedTags: z.string().optional(),
 });
 
@@ -41,7 +40,6 @@ export default function WidgetResourceFormSubmit(
     defaultValues: {
       submitButton: submit.submitButton || '',
       saveButton: submit.saveButton || '',
-      saveConceptButton: submit.saveConceptButton || '',
       defaultAddedTags: submit.defaultAddedTags || '',
     },
   });
@@ -106,23 +104,6 @@ export default function WidgetResourceFormSubmit(
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="saveConceptButton"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {`Tekst voor de 'opslaan als concept'-knop`}
-                  <InfoDialog content={'TODO'} />
-                </FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <Spacer />
 
           <FormLabel>

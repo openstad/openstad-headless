@@ -17,7 +17,6 @@ export type RawResourceWidgetProps = BaseProps &
     resourceId?: string;
     resourceIdRelativePath?: string;
     rawInput?: string;
-    stylingClasses?: { label: string; value: string }[];
   };
 
 function RawResource(props: RawResourceWidgetProps) {
@@ -58,11 +57,6 @@ function RawResource(props: RawResourceWidgetProps) {
     ? datastore.useResource(updatedProps)
     : { data: null };
 
-  const stylingClasses =
-    updatedProps.stylingClasses
-      ?.map((stylingClass) => stylingClass.value)
-      .join(' ') || '';
-
   let render = renderRawTemplate(updatedProps, resource, resourceId, true);
   render = render.replace(/&amp;amp;/g, '&');
 
@@ -73,7 +67,6 @@ function RawResource(props: RawResourceWidgetProps) {
         {render && (
           // this sets innerHTML, input is sanitized in widget.js
           <div
-            className={stylingClasses}
             dangerouslySetInnerHTML={{
               __html: render,
             }}></div>

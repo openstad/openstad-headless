@@ -46,6 +46,7 @@ import NotificationService from '../../lib/NotificationProvider/notification-ser
 import hasRole from '../../lib/has-role';
 import './document-map.css';
 import './gesture';
+import { characterLimitError } from './lib/character-limit-error';
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -570,7 +571,15 @@ function DocumentMap({
         setIsSubmittingComment(false);
       }
     } else {
-      return;
+      setHelpText(
+        characterLimitError({
+          length: commentValue.length,
+          min: props.comments?.descriptionMinLength || 0,
+          max: props.comments?.descriptionMaxLength || Infinity,
+          minErrorText: props?.minCharactersError,
+          maxErrorText: props?.maxCharactersError,
+        })
+      );
     }
   };
 
