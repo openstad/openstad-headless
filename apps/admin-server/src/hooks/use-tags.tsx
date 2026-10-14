@@ -1,3 +1,4 @@
+import { readCreated } from '@/lib/read-json';
 import useSWR from 'swr';
 
 import { validateProjectNumber } from '../lib/validateProjectNumber';
@@ -38,7 +39,7 @@ export default function useTag(
       }),
     });
 
-    return await res.json();
+    return readCreated(res, 'De tag kon niet worden aangemaakt.');
   }
 
   async function removeTag(id: number) {
