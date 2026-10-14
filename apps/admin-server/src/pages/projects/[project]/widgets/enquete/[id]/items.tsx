@@ -27,8 +27,15 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useDraftItems } from '@/hooks/useDraftItems';
+import { useOpenItemDraft } from '@/hooks/useOpenItemDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import {
+  applySelectedMatrixEdit,
+  applySelectedOptionEdit,
+  fieldKeyError,
+  mergeSelectedItem,
+} from '@/lib/open-item-merge';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
@@ -227,45 +234,49 @@ export default function WidgetEnqueteItems(
   const router = useRouter();
   const { project } = router.query;
 
+  type OpenItemState = {
+    options: Option[];
+    matrixOptions: Matrix;
+    selectedOption: Option | null;
+    matrixOption: (MatrixOption & { type: 'rows' | 'columns' }) | null;
+  };
+
+  function mergeOpenItem(
+    currentItems: Item[],
+    selectedId: string,
+    values: FormData,
+    state: OpenItemState
+  ) {
+    const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+    return mergeSelectedItem(currentItems, selectedId, {
+      ...valuesWithoutTrigger,
+      options: applySelectedOptionEdit(
+        state.options,
+        state.selectedOption,
+        values.options
+      ),
+      matrix: applySelectedMatrixEdit(
+        state.matrixOptions,
+        state.matrixOption,
+        values.matrix
+      ),
+    } as Partial<Item>);
+  }
+
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
     if (values?.options) {
       values.options = options;
     }
 
-    if (selectedItem) {
-      const oldOptions = selectedItem.options || [];
-      const newOptions = options || [];
-      const triggerMap: Record<string, string> = {};
-      for (let i = 0; i < Math.min(oldOptions.length, newOptions.length); i++) {
-        if (oldOptions[i].trigger !== newOptions[i].trigger) {
-          triggerMap[oldOptions[i].trigger] = newOptions[i].trigger;
-        }
-      }
-      const hasTriggerChanges = Object.keys(triggerMap).length > 0;
-
-      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
-
+    if (selectedItem?.id) {
+      const selectedId = selectedItem.id;
       commitItems((currentItems) =>
-        currentItems.map((item) => {
-          if (item.id === selectedItem.id) {
-            return { ...item, ...valuesWithoutTrigger };
-          }
-          if (
-            hasTriggerChanges &&
-            item.routingSelectedQuestion === selectedItem.trigger
-          ) {
-            const answers = Array.isArray(item.routingSelectedAnswer)
-              ? item.routingSelectedAnswer
-              : item.routingSelectedAnswer
-                ? [item.routingSelectedAnswer]
-                : [];
-            const updated = answers.map(
-              (answer) => triggerMap[answer] || answer
-            );
-            return { ...item, routingSelectedAnswer: updated };
-          }
-          return item;
+        mergeOpenItem(currentItems, selectedId, values, {
+          options,
+          matrixOptions,
+          selectedOption: null,
+          matrixOption: null,
         })
       );
       setSelectedItemId(null);
@@ -337,26 +348,9 @@ export default function WidgetEnqueteItems(
   // adds link to options array if no option is selected, otherwise updates the selected option
   function handleAddOption(values: FormData) {
     if (selectedOption) {
-      setOptions((currentOptions) => {
-        const updatedOptions = currentOptions
-          .map((option) => {
-            if (option.id === selectedOption.id) {
-              const newTitles =
-                values.options?.find((o) => o.trigger === option.trigger)
-                  ?.titles || [];
-
-              return {
-                ...option,
-                titles: newTitles,
-              };
-            }
-
-            return typeof option?.trigger !== 'undefined' ? option : false;
-          })
-          .filter((option) => option !== false);
-
-        return updatedOptions;
-      });
+      setOptions((currentOptions) =>
+        applySelectedOptionEdit(currentOptions, selectedOption, values.options)
+      );
 
       setOption(null);
     } else {
@@ -378,36 +372,13 @@ export default function WidgetEnqueteItems(
     updatedMatrixOption: 'rows' | 'columns'
   ) {
     if (matrixOption) {
-      setMatrixOptions((currentMatrix) => {
-        const updatedMatrix = { ...currentMatrix };
-
-        if (updatedMatrixOption === 'rows') {
-          updatedMatrix.rows = updatedMatrix.rows.map((row) =>
-            row.id === matrixOption.id
-              ? {
-                  ...row,
-                  text:
-                    values.matrix?.rows?.find((r) => r.trigger === row.trigger)
-                      ?.text || '',
-                }
-              : row
-          );
-        } else {
-          updatedMatrix.columns = updatedMatrix.columns.map((column) =>
-            column.id === matrixOption.id
-              ? {
-                  ...column,
-                  text:
-                    values.matrix?.columns?.find(
-                      (c) => c.trigger === column.trigger
-                    )?.text || '',
-                }
-              : column
-          );
-        }
-
-        return updatedMatrix;
-      });
+      setMatrixOptions((currentMatrix) =>
+        applySelectedMatrixEdit(
+          currentMatrix,
+          { ...matrixOption, type: updatedMatrixOption },
+          values.matrix
+        )
+      );
 
       setMatrixOption(null);
     } else {
@@ -506,6 +477,20 @@ export default function WidgetEnqueteItems(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: defaults(),
+  });
+
+  useOpenItemDraft<Item, FormData, OpenItemState>({
+    form,
+    openId: selectedItem?.id ?? null,
+    state: { options, matrixOptions, selectedOption, matrixOption },
+    items,
+    commitItems,
+    merge: mergeOpenItem,
+    validate: (currentItems, selectedId, values) =>
+      ['none', 'pagination', 'swipe'].includes(values.questionType || '')
+        ? undefined
+        : fieldKeyError(currentItems, selectedId, values.fieldKey),
+    label: 'Items',
   });
 
   function buildFormValues(item: Item) {
