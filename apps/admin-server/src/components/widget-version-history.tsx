@@ -630,8 +630,8 @@ export default function WidgetVersionHistory({
                     </div>
                   ) : null}
                   <div className="p-6">
-                    <div className={view === 'preview' ? '' : 'hidden'}>
-                      {selectedConfig === undefined ? (
+                    {view === 'preview' ? (
+                      selectedConfig === undefined ? (
                         <Paragraph className="text-muted-foreground">
                           Configuratie laden...
                         </Paragraph>
@@ -641,12 +641,13 @@ export default function WidgetVersionHistory({
                         </Paragraph>
                       ) : (
                         <WidgetPreview
+                          key={selected.id}
                           type={widgetType}
                           config={selectedConfig}
                           projectId={projectId}
                         />
-                      )}
-                    </div>
+                      )
+                    ) : null}
                     {view === 'diff' ? (
                       <div>
                         <div className="mb-4 flex flex-wrap items-center gap-2">
