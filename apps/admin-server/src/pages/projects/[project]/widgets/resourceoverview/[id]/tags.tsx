@@ -276,6 +276,11 @@ export default function WidgetResourceOverviewTags(
                                   placeholder="Groep label"
                                   key={`${groupName}-label-input-field`}
                                   name={groupName}
+                                  value={
+                                    field.value.find(
+                                      (g) => g.type === groupName
+                                    )?.label ?? ''
+                                  }
                                   disabled={
                                     field.value.find(
                                       (g) => g.type === groupName

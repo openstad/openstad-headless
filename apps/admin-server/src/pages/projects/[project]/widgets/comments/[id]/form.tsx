@@ -29,10 +29,10 @@ export default function ArgumentsForm(
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      formIntro: props.formIntro || 'Typ hier de intro tekst',
+      formIntro: props.formIntro ?? 'Typ hier de intro tekst',
       loginText:
         props.loginText || 'Inloggen om deel te nemen aan de discussie.',
-      placeholder: props?.placeholder || 'Typ hier uw reactie.',
+      placeholder: props?.placeholder ?? 'Typ hier uw reactie.',
     },
   });
 
