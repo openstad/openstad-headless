@@ -1,3 +1,4 @@
+import { throwApiError } from '@/lib/api-error';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
 
@@ -9,7 +10,10 @@ export default function useComment(projectId?: string, id?: string) {
 
   const commentSwr = useSWR(projectNumber && useId ? url : null);
 
-  async function updateComment(description: string, label: string) {
+  async function updateComment(
+    description: string,
+    label: string
+  ): Promise<any | null> {
     const res = await fetch(url, {
       method: 'PUT',
       headers: {
@@ -17,6 +21,10 @@ export default function useComment(projectId?: string, id?: string) {
       },
       body: JSON.stringify({ id: useId, description, label }),
     });
+
+    if (!res.ok) {
+      await throwApiError(res, 'De reactie kon niet worden opgeslagen.');
+    }
 
     return await res.json();
   }
