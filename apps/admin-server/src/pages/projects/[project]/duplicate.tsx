@@ -30,12 +30,16 @@ const formSchema = z.object({
 export default function ProjectDuplicate() {
   const router = useRouter();
   const { project } = router.query;
-  const { data, isLoading } = useProject(['includeAuthConfig']);
+  const { data, isLoading, waitForDuplication } = useProject([
+    'includeAuthConfig',
+  ]);
   const [errors, setErrors] = useState<Array<{ step: string; error: string }>>(
     []
   );
   const [isErrorsVisible, setIsErrorsVisible] = useState(false);
   const [duplicatingInProgress, setDuplicatingInProgress] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
+  const [stillRunning, setStillRunning] = useState(false);
   const [
     removePreviousDuplicatedDataInProgress,
     setRemovePreviousDuplicatedDataInProgress,
@@ -57,6 +61,35 @@ export default function ProjectDuplicate() {
   useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
+
+  useEffect(() => {
+    if (!project) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch(
+          `/api/openstad/api/project/${project}/duplication-status`
+        );
+        if (!res.ok) {
+          console.error(
+            `Duplicatiestatus opvragen mislukt met status ${res.status}`
+          );
+          return;
+        }
+        const data = await res.json();
+        if (cancelled || !data.previousFailure?.duplicatedData) return;
+        setDuplicatedData(data.previousFailure.duplicatedData);
+        setErrors(data.previousFailure.errors || []);
+      } catch (e) {
+        console.error('Duplicatiestatus opvragen mislukt', e);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [project]);
 
   if (!data) return null;
 
@@ -102,56 +135,91 @@ export default function ProjectDuplicate() {
     setDuplicatingInProgress(true);
     setDuplicatedData({});
 
-    const payload = await collectDuplicationPayload(data.id, data);
+    try {
+      const payload = await collectDuplicationPayload(data.id, data);
 
-    const duplicateData = {
-      ...payload,
-      sourceProjectId: data.id,
-      name: values.name,
-      isDuplicateRequest: true,
-    };
+      const duplicateData = {
+        ...payload,
+        sourceProjectId: data.id,
+        name: values.name,
+        isDuplicateRequest: true,
+      };
 
-    const response = await fetch(`/api/openstad/api/project`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(duplicateData),
-    });
+      const response = await fetch(`/api/openstad/api/project`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(duplicateData),
+      });
 
-    setDuplicatingInProgress(false);
+      if (!response.ok) {
+        const responseJSON = await response.json();
+        setErrors(
+          responseJSON.errors || [
+            {
+              error: 'There was an error trying to duplicate the project',
+              step: 'Duplicate project',
+            },
+          ]
+        );
+        setDuplicatedData(responseJSON.duplicatedData || {});
+        toast.error(
+          'Er is een fout opgetreden bij het dupliceren van het project.'
+        );
+        return;
+      }
 
-    if (!response.ok) {
-      const responseJSON = await response.json();
-      setErrors(
-        responseJSON.errors || [
-          {
-            error: 'There was an error trying to duplicate the project',
-            step: 'Duplicate project',
-          },
-        ]
+      const body = await response.json();
+      const newId = body?.id;
+      if (!newId) {
+        throw new Error('Geen project-id ontvangen');
+      }
+
+      const outcome = await waitForDuplication(newId);
+
+      if (outcome.status === 'running') {
+        setStillRunning(true);
+        toast(
+          'Het dupliceren duurt langer dan verwacht en gaat op de achtergrond door. Het project verschijnt vanzelf in het overzicht.',
+          { duration: 8000 }
+        );
+        return;
+      }
+
+      if (outcome.status !== 'done') {
+        setErrors(outcome.errors);
+        setDuplicatedData(outcome.duplicatedData || {});
+        toast.error(
+          'Er is een fout opgetreden bij het dupliceren van het project.'
+        );
+        return;
+      }
+
+      toast.success(
+        'Er is een kopie van het project aangemaakt. Je wordt nu doorgestuurd naar de projecten pagina.',
+        {
+          duration: 5000,
+        }
       );
-      setDuplicatedData(responseJSON.duplicatedData || {});
+
+      setRedirecting(true);
+      setTimeout(() => {
+        router.push(`/projects/${newId}/widgets`);
+      }, 4000);
+    } catch (error) {
+      setErrors([
+        {
+          step: 'Project dupliceren',
+          error: 'Netwerkfout of ongeldig antwoord van de server.',
+        },
+      ]);
       toast.error(
         'Er is een fout opgetreden bij het dupliceren van het project.'
       );
-
-      return;
+    } finally {
+      setDuplicatingInProgress(false);
     }
-
-    const newId = await response.json();
-    toast.success(
-      'Er is een kopie van het project aangemaakt. Je wordt nu doorgestuurd naar de projecten pagina.',
-      {
-        duration: 5000,
-      }
-    );
-
-    setTimeout(() => {
-      if (newId) {
-        router.push(`/projects/${newId}/widgets`);
-      }
-    }, 4000);
   }
 
   return (
@@ -203,7 +271,9 @@ export default function ProjectDuplicate() {
                 <Button
                   type="submit"
                   variant={'default'}
-                  disabled={duplicatingInProgress}>
+                  disabled={
+                    duplicatingInProgress || redirecting || stillRunning
+                  }>
                   {duplicatingInProgress
                     ? 'Bezig met dupliceren'
                     : 'Dupliceren'}
@@ -218,21 +288,25 @@ export default function ProjectDuplicate() {
                     project.
                   </Heading>
                   <div className="mt-4">
-                    <p>
-                      De data is al (deels) gedupliceerd. Als je de data wilt
-                      verwijderen, klik dan op de knop hieronder.
-                    </p>
+                    {duplicatedData?.rollbackSessionId && (
+                      <p>
+                        De data is al (deels) gedupliceerd. Als je de data wilt
+                        verwijderen, klik dan op de knop hieronder.
+                      </p>
+                    )}
 
                     <div className="flex mt-4">
-                      <Button
-                        variant={'default'}
-                        disabled={removePreviousDuplicatedDataInProgress}
-                        onClick={() => removePreviousDuplicatedData()}
-                        style={{ marginRight: '15px' }}>
-                        {removePreviousDuplicatedDataInProgress
-                          ? 'Bezig met verwijderen'
-                          : 'Verwijder laatste duplicaat'}
-                      </Button>
+                      {duplicatedData?.rollbackSessionId && (
+                        <Button
+                          variant={'default'}
+                          disabled={removePreviousDuplicatedDataInProgress}
+                          onClick={() => removePreviousDuplicatedData()}
+                          style={{ marginRight: '15px' }}>
+                          {removePreviousDuplicatedDataInProgress
+                            ? 'Bezig met verwijderen'
+                            : 'Verwijder laatste duplicaat'}
+                        </Button>
+                      )}
                       <Button
                         style={{ backgroundColor: 'red', color: 'white' }}
                         onClick={() => setIsErrorsVisible(!isErrorsVisible)}>
