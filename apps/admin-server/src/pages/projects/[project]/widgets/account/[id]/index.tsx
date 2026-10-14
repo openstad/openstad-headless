@@ -1,8 +1,7 @@
 import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -28,12 +27,11 @@ export default function WidgetCounter({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig<AccountWidgetProps>();
-  const { previewConfig, updatePreview } = useWidgetPreview<AccountWidgetProps>(
-    {
-      projectId,
-    }
-  );
+  const { previewConfig, onFieldChanged } = useWidgetDraft<AccountWidgetProps>({
+    projectId,
+  });
+
+  const tabUpdateConfig = ignoreTabSubmit;
 
   return (
     <div>
@@ -64,17 +62,8 @@ export default function WidgetCounter({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <AccountDisplay
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               ) : null}
             </TabsContent>
@@ -82,17 +71,8 @@ export default function WidgetCounter({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <AccountContent
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               ) : null}
             </TabsContent>

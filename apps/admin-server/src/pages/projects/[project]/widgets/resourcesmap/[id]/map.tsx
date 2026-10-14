@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -20,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
@@ -78,6 +78,11 @@ export default function WidgetResourcesMapMap(
       width: props?.width || '',
       height: props?.height || '',
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Kaart',
   });
 
   const { data: tags } = useTags(props.projectId);
@@ -326,8 +331,6 @@ export default function WidgetResourcesMapMap(
               </FormItem>
             )}
           />
-
-          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -29,10 +29,12 @@ export default function ArgumentsForm(
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      formIntro: props.formIntro || 'Typ hier de intro tekst',
-      loginText:
-        props.loginText || 'Inloggen om deel te nemen aan de discussie.',
-      placeholder: props?.placeholder || 'Typ hier uw reactie.',
+      // Hardcoded fallbacks would show text that is not in the config: emptying
+      // such a field then produces no change against the stored value, so the
+      // save bar stays disabled and the field can never be cleared.
+      formIntro: props.formIntro ?? '',
+      loginText: props.loginText ?? '',
+      placeholder: props?.placeholder ?? '',
     },
   });
 
@@ -41,6 +43,10 @@ export default function ArgumentsForm(
   }
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: props.customTitle || 'Formulier',
+  });
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -56,6 +62,7 @@ export default function ArgumentsForm(
                 <FormLabel>Formulier intro</FormLabel>
                 <FormControl>
                   <Input
+                    placeholder="Typ hier de intro tekst"
                     {...field}
                     onChange={(e) => {
                       onFieldChange(field.name, e.target.value);
@@ -104,7 +111,6 @@ export default function ArgumentsForm(
               </FormItem>
             )}
           />
-          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

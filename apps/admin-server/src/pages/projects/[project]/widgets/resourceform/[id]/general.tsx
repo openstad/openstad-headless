@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -18,10 +17,12 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ResourceFormWidgetProps } from '@openstad-headless/resource-form/src/props';
 import * as Switch from '@radix-ui/react-switch';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -38,8 +39,9 @@ const formSchema = z.object({
     (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val),
     z
       .string()
-      .refine((value) => /^(\/[^\s]*)|(https?:\/\/[^\s]*)$/i.test(value), {
-        message: 'Must be a valid URL or a relative path',
+      .refine((value) => /^(\/\S*|https?:\/\/\S*)$/i.test(value), {
+        message:
+          'Vul een volledige URL (https://…) of een pad op deze site (/…) in.',
       })
       .optional()
   ),
@@ -68,59 +70,49 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
-export default function WidgetResourceFormGeneral() {
+export default function WidgetResourceFormGeneral(
+  props: ResourceFormWidgetProps & EditFieldProps<ResourceFormWidgetProps>
+) {
   const category = 'general';
 
-  // should use the passed props widget, this is the old way and is not advised
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
-  const defaults = useCallback(
-    () => ({
-      resource: widget?.config?.[category]?.resource || 'resource',
-      formName: widget?.config?.[category]?.formName || '',
-      redirectUrl: widget?.config?.[category]?.redirectUrl || '',
-      hideAdmin: widget?.config?.[category]?.hideAdmin || false,
-      minCharactersWarning:
-        widget?.config?.[category]?.minCharactersWarning ||
-        'Nog minimaal {minCharacters} tekens',
-      maxCharactersWarning:
-        widget?.config?.[category]?.maxCharactersWarning ||
-        'Je hebt nog {maxCharacters} tekens over',
-      minCharactersError:
-        widget?.config?.[category]?.minCharactersError ||
-        'Tekst moet minimaal {minCharacters} karakters bevatten',
-      maxCharactersError:
-        widget?.config?.[category]?.maxCharactersError ||
-        'Tekst moet maximaal {maxCharacters} karakters bevatten',
-      showMinMaxAfterBlur:
-        widget?.config?.[category]?.showMinMaxAfterBlur || false,
-      maxCharactersOverWarning:
-        widget?.config?.[category]?.maxCharactersOverWarning ||
-        'Je hebt {overCharacters} tekens teveel',
-    }),
-    [widget?.config]
-  );
-
-  async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
-  }
+  const general = (props as any)[category] || {};
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      resource: general.resource || 'resource',
+      formName: general.formName || '',
+      redirectUrl: general.redirectUrl || '',
+      hideAdmin: general.hideAdmin || false,
+      minCharactersWarning:
+        general.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
+      maxCharactersWarning:
+        general.maxCharactersWarning ||
+        'Je hebt nog {maxCharacters} tekens over',
+      minCharactersError:
+        general.minCharactersError ||
+        'Tekst moet minimaal {minCharacters} karakters bevatten',
+      maxCharactersError:
+        general.maxCharactersError ||
+        'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      showMinMaxAfterBlur: general.showMinMaxAfterBlur || false,
+      maxCharactersOverWarning:
+        general.maxCharactersOverWarning ||
+        'Je hebt {overCharacters} tekens teveel',
+    },
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  const { onFieldChanged } = props;
+  const pushToDraft = useCallback(
+    (name: string, value: any) =>
+      onFieldChanged?.(`${category}.${name}`, value),
+    [onFieldChanged, category]
+  );
+  useSyncDraftForm(form, pushToDraft, {
+    schema: formSchema,
+    prefix: category,
+    label: 'Algemeen',
+  });
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -128,7 +120,7 @@ export default function WidgetResourceFormGeneral() {
         <Heading size="xl">Algemeen</Heading>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(event) => event.preventDefault()}
           className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-6">
           <FormField
             control={form.control}
@@ -321,10 +313,6 @@ export default function WidgetResourceFormGeneral() {
               </FormItem>
             )}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

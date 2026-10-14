@@ -23,6 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
+import { useDraftItems } from '@/hooks/useDraftItems';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { generateId, withId } from '@/lib/widget-item-helpers';
@@ -40,7 +41,7 @@ import {
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -157,7 +158,10 @@ export default function WidgetResourceFormItems(
   props: ResourceFormWidgetProps & EditFieldProps<ResourceFormWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, commitItems] = useDraftItems<Item>(
+    props.items,
+    props.onFieldChanged
+  );
   const [options, setOptions] = useState<Option[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
@@ -194,7 +198,7 @@ export default function WidgetResourceFormItems(
       }
       const hasTriggerChanges = Object.keys(triggerMap).length > 0;
 
-      setItems((currentItems) =>
+      commitItems((currentItems) =>
         currentItems.map((item) => {
           if (item.id === selectedItem.id) {
             return { ...item, ...valuesWithoutTrigger };
@@ -218,7 +222,7 @@ export default function WidgetResourceFormItems(
       );
       setSelectedItemId(null);
     } else {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
           (max, i) => Math.max(max, parseInt(i.trigger) || 0),
           0
@@ -410,21 +414,6 @@ export default function WidgetResourceFormItems(
     defaultValues: defaults(),
   });
 
-  const itemsInitialized = React.useRef(false);
-  useEffect(() => {
-    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
-      itemsInitialized.current = true;
-      setItems(props.items.map(withId));
-    }
-  }, [props?.items]);
-
-  const { onFieldChanged } = props;
-  useEffect(() => {
-    if (onFieldChanged) {
-      onFieldChanged('items', items);
-    }
-  }, [items]);
-
   // Sets form to selected item values when item is selected
   useEffect(() => {
     if (selectedItem) {
@@ -502,7 +491,7 @@ export default function WidgetResourceFormItems(
     matrixType: 'rows' | 'columns' = 'rows'
   ) => {
     if (isItemAction) {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         const index = currentItems.findIndex(
           (entry) => entry.trigger === clickedTrigger
         );
@@ -604,20 +593,6 @@ export default function WidgetResourceFormItems(
     }
 
     return sorted;
-  }
-
-  function handleSaveItems() {
-    const updatedProps = { ...props };
-
-    Object.keys(updatedProps).forEach((key: string) => {
-      if (key.startsWith('options.')) {
-        // @ts-ignore
-        delete updatedProps[key];
-      }
-    });
-
-    props.updateConfig({ ...updatedProps, items });
-    setMatrixOptions(matrixDefault);
   }
 
   const hasOptions = () => {
@@ -796,14 +771,6 @@ export default function WidgetResourceFormItems(
                         ))
                     : 'Geen items'}
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={() => handleSaveItems()}>
-                  Configuratie opslaan
-                </Button>
               </div>
             </div>
 

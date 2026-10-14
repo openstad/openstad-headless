@@ -12,7 +12,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, X } from 'lucide-react';
 import { useRouter } from 'next/router';
@@ -33,24 +34,24 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function WidgetMapLegend() {
-  const category = 'customLegend';
-
-  const { data: widget, updateConfig } = useWidgetConfig<any>();
-
+export default function WidgetMapLegend(
+  props: { [key: string]: any } & EditFieldProps<any> & {
+      customLegend?: any;
+    }
+) {
   const router = useRouter();
   const { project } = router.query;
 
   const defaults = useCallback(
     () => ({
-      customLegend: (widget?.config?.[category] || []).map((item: any) => ({
+      customLegend: (props?.customLegend || []).map((item: any) => ({
         label: item.label || '',
         color: item.color || '',
         icon: item.icon || '',
         iconUploader: '',
       })),
     }),
-    [widget?.config]
+    [props?.customLegend]
   );
 
   const form = useForm<FormData>({
@@ -64,20 +65,27 @@ export default function WidgetMapLegend() {
     keyName: 'reactKey',
   });
 
+  const { onFieldChanged } = props;
+  const pushToDraft = useCallback(
+    (name: string, value: any) => {
+      if (name.endsWith('.iconUploader')) return;
+      onFieldChanged(
+        name,
+        name === 'customLegend' && Array.isArray(value)
+          ? value.map(({ iconUploader, ...rest }: any) => rest)
+          : value
+      );
+    },
+    [onFieldChanged]
+  );
+  useSyncDraftForm(form, pushToDraft, {
+    schema: formSchema,
+    label: 'Legenda',
+  });
+
   useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
-
-  async function onSubmit(values: FormData) {
-    const cleaned = values.customLegend.map(
-      ({ iconUploader, ...rest }) => rest
-    );
-    try {
-      await updateConfig({ [category]: cleaned });
-    } catch (error) {
-      console.error('could not update', error);
-    }
-  }
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -89,7 +97,7 @@ export default function WidgetMapLegend() {
           een label en een kleur of icoon.
         </p>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(event) => event.preventDefault()}
           className="space-y-4 lg:w-2/3">
           {fields.map((field, index) => (
             <div
@@ -205,10 +213,6 @@ export default function WidgetMapLegend() {
             <Plus size={16} className="mr-1" />
             Item toevoegen
           </Button>
-
-          <div>
-            <Button type="submit">Opslaan</Button>
-          </div>
         </form>
       </Form>
     </div>
