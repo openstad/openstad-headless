@@ -2,8 +2,7 @@ import AuditLogTable from '@/components/audit-log-table';
 import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
 import WidgetVersionHistory from '@/components/widget-version-history';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -35,27 +34,16 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<StemBegrootWidgetProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<StemBegrootWidgetProps>({
-      projectId,
-    });
+  const { widget, previewConfig, onFieldChanged } =
+    useWidgetDraft<StemBegrootWidgetProps>({ projectId });
+
+  const tabUpdateConfig = ignoreTabSubmit;
 
   const totalPropPackage = {
     ...widget?.config,
     ...previewConfig,
-    updateConfig: (config: StemBegrootWidgetProps) =>
-      updateConfig({ ...widget.config, ...config }),
-
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
+    updateConfig: tabUpdateConfig,
+    onFieldChanged,
     projectId,
   };
 

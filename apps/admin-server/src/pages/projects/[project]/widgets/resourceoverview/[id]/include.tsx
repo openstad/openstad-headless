@@ -1,5 +1,4 @@
 import { CheckboxList } from '@/components/checkbox-list';
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -21,6 +20,7 @@ import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
@@ -69,6 +69,11 @@ export default function WidgetResourceOverviewInclude(
       onlyIncludeStatusIds: props?.onlyIncludeStatusIds || '',
       filterBehaviorInclude: props?.filterBehaviorInclude || 'or',
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Inclusief/exclusief',
   });
 
   return (
@@ -263,10 +268,6 @@ export default function WidgetResourceOverviewInclude(
               />
             </>
           )}
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

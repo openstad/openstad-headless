@@ -12,6 +12,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, X } from 'lucide-react';
@@ -68,16 +69,27 @@ export default function WidgetResourcesMapLegend(
     keyName: 'reactKey',
   });
 
+  const { onFieldChanged } = props;
+  const pushToDraft = useCallback(
+    (name: string, value: any) => {
+      if (name.endsWith('.iconUploader')) return;
+      onFieldChanged(
+        name,
+        name === 'customLegend' && Array.isArray(value)
+          ? value.map(({ iconUploader, ...rest }: any) => rest)
+          : value
+      );
+    },
+    [onFieldChanged]
+  );
+  useSyncDraftForm(form, pushToDraft, {
+    schema: formSchema,
+    label: 'Legenda',
+  });
+
   useEffect(() => {
     form.reset(defaults());
   }, [form, defaults]);
-
-  async function onSubmit(values: FormData) {
-    const cleaned = values.customLegend.map(
-      ({ iconUploader, ...rest }) => rest
-    );
-    props.updateConfig({ ...props, customLegend: cleaned });
-  }
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -89,7 +101,7 @@ export default function WidgetResourcesMapLegend(
           een label en een kleur of icoon.
         </p>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(event) => event.preventDefault()}
           className="space-y-4 lg:w-2/3">
           {fields.map((field, index) => (
             <div
@@ -205,18 +217,6 @@ export default function WidgetResourcesMapLegend(
             <Plus size={16} className="mr-1" />
             Item toevoegen
           </Button>
-
-          <div>
-            <Button
-              type={props?.buttonType || 'submit'}
-              onClick={() => {
-                if (props?.buttonType === 'button') {
-                  onSubmit(form.getValues());
-                }
-              }}>
-              Opslaan
-            </Button>
-          </div>
         </form>
       </Form>
     </div>

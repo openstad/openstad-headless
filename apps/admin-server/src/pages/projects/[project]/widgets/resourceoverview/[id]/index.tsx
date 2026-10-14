@@ -2,8 +2,8 @@ import AuditLogTable from '@/components/audit-log-table';
 import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
 import WidgetVersionHistory from '@/components/widget-version-history';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { flushAllFields } from '@/hooks/useFieldDebounce';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -13,7 +13,7 @@ import { LikeWidgetTabProps } from '@/pages/projects/[project]/widgets/likes/[id
 import LikesDisplay from '@/pages/projects/[project]/widgets/likes/[id]/weergave';
 import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
@@ -44,28 +44,21 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<MultiProjectResourceOverviewProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<MultiProjectResourceOverviewProps>({
-      projectId,
-    });
+  const { widget, previewConfig, updatePreview, onFieldChanged } =
+    useWidgetDraft<MultiProjectResourceOverviewProps>({ projectId });
+
+  const [activeTab, setActiveTab] = useState('general');
+
+  const onTabChange = (value: string) => {
+    flushAllFields();
+    setActiveTab(value);
+  };
 
   const totalPropPackage = {
     ...widget?.config,
     ...previewConfig,
-    updateConfig: (config: MultiProjectResourceOverviewProps) =>
-      updateConfig({ ...widget.config, ...config }),
-
-    onFieldChanged: (key: string, value: any) => {
-      console.log('onFieldChanged', key, value);
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
+    updateConfig: ignoreTabSubmit,
+    onFieldChanged,
     projectId,
   };
 
@@ -87,7 +80,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="general">
+          <Tabs value={activeTab} onValueChange={onTabChange}>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="display">Weergave</TabsTrigger>
@@ -129,7 +122,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig: previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -142,7 +134,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig: previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -155,7 +146,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig: previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -168,7 +158,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -181,7 +170,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -194,7 +182,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -249,7 +236,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           subWidgetKey: 'likeWidget',
                           previewConfig: previewConfig,
-                          updateConfig,
                           updatePreview,
                         })}
                       />

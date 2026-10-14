@@ -1,5 +1,4 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormDescription,
@@ -12,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { ArgumentWidgetTabProps } from '@/pages/projects/[project]/widgets/comments/[id]/index';
@@ -45,6 +45,11 @@ export default function ArgumentsConfirmation(
       overwriteEmailAddress: props?.overwriteEmailAddress || '',
       confirmationReplies: props?.confirmationReplies || false,
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Bevestiging',
   });
 
   return (
@@ -123,10 +128,6 @@ export default function ArgumentsConfirmation(
               </FormItem>
             )}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>
