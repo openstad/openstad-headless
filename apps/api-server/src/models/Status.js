@@ -73,11 +73,19 @@ module.exports = function (db, sequelize, DataTypes) {
 
       hooks: {
         afterCreate: function (instance, options) {
-          seqnr.renumber({ model: db.Status });
+          seqnr
+            .renumber({ model: db.Status })
+            .catch((err) =>
+              console.error('[Status] seqnr.renumber failed:', err)
+            );
         },
 
         afterUpdate: function (instance, options) {
-          seqnr.renumber({ model: db.Status });
+          seqnr
+            .renumber({ model: db.Status })
+            .catch((err) =>
+              console.error('[Status] seqnr.renumber failed:', err)
+            );
         },
       },
 

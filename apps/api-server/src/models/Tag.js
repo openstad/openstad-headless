@@ -99,11 +99,15 @@ module.exports = function (db, sequelize, DataTypes) {
 
       hooks: {
         afterCreate: function (instance, options) {
-          seqnr.renumber({ model: db.Tag, where: { type: instance.type } });
+          seqnr
+            .renumber({ model: db.Tag, where: { type: instance.type } })
+            .catch((err) => console.error('[Tag] seqnr.renumber failed:', err));
         },
 
         afterUpdate: function (instance, options) {
-          seqnr.renumber({ model: db.Tag, where: { type: instance.type } });
+          seqnr
+            .renumber({ model: db.Tag, where: { type: instance.type } })
+            .catch((err) => console.error('[Tag] seqnr.renumber failed:', err));
         },
       },
 
