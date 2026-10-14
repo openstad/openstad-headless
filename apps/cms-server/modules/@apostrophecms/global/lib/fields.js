@@ -143,7 +143,7 @@ module.exports = resultObject([
   {
     name: 'modbreakAuthor',
     type: 'string',
-    label: 'Author of the modbreaks',
+    label: 'Author of the official responses',
     required: false,
   },
   {

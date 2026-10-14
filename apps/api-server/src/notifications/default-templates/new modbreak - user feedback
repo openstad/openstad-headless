@@ -1,5 +1,5 @@
 <!-- template: new modbreak - user feedback -->
-<subject>{% if newModBreaks and newModBreaks.length %}Er is een modbreak geplaatst bij {% if isResourceOwner === false %}een inzending waarop u heeft gereageerd{% else %}uw inzending{% endif %}{% else %}Een modbreak bij {% if isResourceOwner === false %}een inzending waarop u heeft gereageerd{% else %}uw inzending{% endif %} is aangepast{% endif %}</subject>
+<subject>{% if newModBreaks and newModBreaks.length %}Er is een officiële reactie geplaatst bij {% if isResourceOwner === false %}een inzending waarop u heeft gereageerd{% else %}uw inzending{% endif %}{% else %}Een officiële reactie bij {% if isResourceOwner === false %}een inzending waarop u heeft gereageerd{% else %}uw inzending{% endif %} is aangepast{% endif %}</subject>
 <body>
 <mjml>
   <mj-head>
@@ -15,7 +15,7 @@
         {% if logo %}
         <mj-image src="{{logo}}" align="left" width="160px" alt="" padding-bottom="16px" />
         {% endif %}
-        <mj-text><h1 style="font-size:22px;font-weight:bold;line-height:1.3;margin:0">{% if newModBreaks and newModBreaks.length %}Er is een modbreak geplaatst.{% else %}Een modbreak is aangepast.{% endif %}</h1></mj-text>
+        <mj-text><h1 style="font-size:22px;font-weight:bold;line-height:1.3;margin:0">{% if newModBreaks and newModBreaks.length %}Er is een officiële reactie geplaatst.{% else %}Een officiële reactie is aangepast.{% endif %}</h1></mj-text>
         <mj-divider />
         <mj-text>Beste {{ user.name }},</mj-text>
         {% if newModBreaks and newModBreaks.length %}

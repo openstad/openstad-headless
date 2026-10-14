@@ -148,11 +148,27 @@ describe('default template: new modbreak - user feedback', () => {
 
     expect(result.errors).toEqual([]);
     expect(result.html).toContain('https://gemeente.nl/logo.png');
-    expect(result.html).toContain('Er is een modbreak geplaatst.');
+    expect(result.html).toContain('Er is een officiële reactie geplaatst.');
     expect(result.html).toContain('Let op - Redactie');
     expect(result.html).toContain('Dit is een automatisch bericht.');
     expect(result.html).not.toContain('mail-header.jpg');
     expect(result.html).not.toContain('logo-openstad.png');
+  });
+
+  it('uses the new name in the subject for a new and a changed response', () => {
+    const template = extractTemplate('new modbreak - user feedback');
+    const env = new nunjucks.Environment();
+
+    expect(
+      env.renderString(template.subject, {
+        newModBreaks: [{ description: 'Let op' }],
+      })
+    ).toBe('Er is een officiële reactie geplaatst bij uw inzending');
+    expect(
+      env.renderString(template.subject, {
+        changedModBreaks: [{ description: 'Let op' }],
+      })
+    ).toBe('Een officiële reactie bij uw inzending is aangepast');
   });
 
   it('links to the resource with a button and a plain link', async () => {

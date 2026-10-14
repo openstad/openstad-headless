@@ -322,7 +322,7 @@ export default function ProjectSettingsResource() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Wordt het invoerveld voor de auteur van de modbreak
+                      Wordt het invoerveld voor de auteur van de officiële reactie
                       weergegeven in het resource-formulier?
                     </FormLabel>
                     {YesNoSelect(field, {})}
@@ -336,10 +336,10 @@ export default function ProjectSettingsResource() {
                 name="modbreakTitle"
                 render={({ field }) => (
                   <FormItem className="col-span-1">
-                    <FormLabel>Titel voor boven modbreak</FormLabel>
+                    <FormLabel>Titel boven de officiële reactie</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Tekst die boven de modbreak wordt getoond"
+                        placeholder="Tekst die boven de officiële reactie wordt getoond"
                         {...field}
                       />
                     </FormControl>

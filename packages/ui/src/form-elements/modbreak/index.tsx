@@ -158,7 +158,9 @@ const ModbreakField: FC<ModbreakFieldProps> = ({
 
       <ul className="modbreak-items-list" role="list">
         {items.length === 0 && (
-          <li className="modbreak-empty">Nog geen modbreaks toegevoegd.</li>
+          <li className="modbreak-empty">
+            Nog geen officiële reacties toegevoegd.
+          </li>
         )}
         {items.map((item) => {
           const descriptionId = `${baseId}-description-${item.id}`;
@@ -168,11 +170,11 @@ const ModbreakField: FC<ModbreakFieldProps> = ({
           return (
             <li key={item.id} className="modbreak-item-card">
               <div className="modbreak-item-header">
-                <span className="modbreak-item-label">Modbreak</span>
+                <span className="modbreak-item-label">Officiële reactie</span>
                 <button
                   type="button"
                   className="modbreak-action-btn"
-                  aria-label="Verwijder modbreak"
+                  aria-label="Verwijder officiële reactie"
                   onClick={() => deleteItem(item.id)}>
                   <i className="ri-close-line" aria-hidden="true" />
                 </button>
@@ -250,7 +252,7 @@ const ModbreakField: FC<ModbreakFieldProps> = ({
         className="modbreak-add-item-btn"
         onClick={addItem}>
         <i className="ri-add-line" aria-hidden="true" />
-        Modbreak toevoegen
+        Officiële reactie toevoegen
       </SecondaryButton>
 
       {fieldInvalid && requiredWarning && (

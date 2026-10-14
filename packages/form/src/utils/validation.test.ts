@@ -150,7 +150,7 @@ describe('getSchemaForField: modbreak', () => {
     ]);
     expect(result.success).toBe(false);
     expect(result.error?.issues[0].message).toBe(
-      'Vul de inhoud in of verwijder de lege modbreak.'
+      'Vul de inhoud in of verwijder de lege officiële reactie.'
     );
   });
 });

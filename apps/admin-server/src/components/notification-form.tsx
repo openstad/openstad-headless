@@ -398,7 +398,7 @@ const initialDataModBreakNotification = `<mjml>
         {% if logo %}
         <mj-image src="{{logo}}" align="left" width="160px" alt="" padding-bottom="16px" />
         {% endif %}
-        <mj-text><h1 style="font-size:22px;font-weight:bold;line-height:1.3;margin:0">{% if newModBreaks and newModBreaks.length %}Er is een modbreak geplaatst.{% else %}Een modbreak is aangepast.{% endif %}</h1></mj-text>
+        <mj-text><h1 style="font-size:22px;font-weight:bold;line-height:1.3;margin:0">{% if newModBreaks and newModBreaks.length %}Er is een officiële reactie geplaatst.{% else %}Een officiële reactie is aangepast.{% endif %}</h1></mj-text>
         <mj-divider />
         <mj-text>Beste {{ user.name }},</mj-text>
         {% if newModBreaks and newModBreaks.length %}
@@ -473,7 +473,7 @@ const notificationTypes: Record<string, string> = {
   'new comment - admin': 'Nieuwe reactie - Notificatie naar de admin',
   'contact message - user': 'Contactbericht - Notificatie naar de indiener',
   'new modbreak - user feedback':
-    'Modbreak geplaatst - Notificatie naar de gebruiker',
+    'Officiële reactie geplaatst - Notificatie naar de gebruiker',
 };
 
 const formSchema = z.object({

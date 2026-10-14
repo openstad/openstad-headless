@@ -166,8 +166,9 @@ export default function ProjectNotifications() {
                         </p>
                         <br />
                         <p>
-                          newModBreaks (lijst met nieuw geplaatste modbreaks, te
-                          gebruiken met &#123;% for mb in newModBreaks %&#125;):
+                          newModBreaks (lijst met nieuw geplaatste officiële
+                          reacties, te gebruiken met &#123;% for mb in
+                          newModBreaks %&#125;):
                           <br />
                           -description
                           <br />
@@ -177,9 +178,9 @@ export default function ProjectNotifications() {
                         </p>
                         <br />
                         <p>
-                          changedModBreaks (lijst met aangepaste modbreaks, te
-                          gebruiken met &#123;% for mb in changedModBreaks
-                          %&#125;):
+                          changedModBreaks (lijst met aangepaste officiële
+                          reacties, te gebruiken met &#123;% for mb in
+                          changedModBreaks %&#125;):
                           <br />
                           -description
                           <br />
@@ -189,8 +190,9 @@ export default function ProjectNotifications() {
                         </p>
                         <br />
                         <p>
-                          isResourceOwner (alleen bij modbreak-meldingen: true
-                          voor de indiener, false voor een reageerder)
+                          isResourceOwner (alleen bij meldingen over een
+                          officiële reactie: true voor de indiener, false voor
+                          een reageerder)
                         </p>
                         <br />
                         <p>

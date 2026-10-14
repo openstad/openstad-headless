@@ -1062,7 +1062,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
           <Separator className="lg:col-span-2 my-6" />
 
           <div className="lg:col-span-2 col-span-2">
-            <Heading size="xl">Modbreaks</Heading>
+            <Heading size="xl">Officiële reacties</Heading>
             {!modbreakTitle && (
               <p className="text-sm text-orange-600 mb-4">
                 Geen standaardnaam ingesteld.{' '}
@@ -1090,11 +1090,11 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 })
               }>
               <Plus size={16} className="mr-2" />
-              Modbreak toevoegen
+              Officiële reactie toevoegen
             </Button>
             {modBreakFields.length === 0 && (
               <p className="text-sm text-muted-foreground mb-4">
-                Nog geen modbreaks toegevoegd.
+                Nog geen officiële reacties toegevoegd.
               </p>
             )}
             {visibleModBreaks.map((field, pageIndex) => {
@@ -1103,7 +1103,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 <div key={field.id} className="border rounded-md p-4 mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium">
-                      Modbreak {index + 1}
+                      Officiële reactie {index + 1}
                     </span>
                     <div className="flex items-center gap-1">
                       <Button

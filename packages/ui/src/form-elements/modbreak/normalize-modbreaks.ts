@@ -25,7 +25,7 @@ export function normalizeModBreakDate(value?: string | null): string {
 }
 
 export const EMPTY_MODBREAK_MESSAGE =
-  'Vul de inhoud in of verwijder de lege modbreak.';
+  'Vul de inhoud in of verwijder de lege officiële reactie.';
 
 const INVISIBLE_CHARACTERS = /[\u200B-\u200D\uFEFF]/g;
 

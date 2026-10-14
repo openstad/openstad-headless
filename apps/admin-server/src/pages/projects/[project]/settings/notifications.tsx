@@ -288,7 +288,7 @@ export default function ProjectSettingsNotifications({
                         niet opgenomen in de verplichte velden. Hierdoor krijgen
                         inzenders en reageerders bij het inloggen niet de vraag
                         of ze e-mails willen ontvangen. Zonder die toestemming
-                        ontvangen zij geen modbreak-mail.
+                        ontvangen zij geen e-mail over een officiële reactie.
                       </p>
                       <p className="mt-2">
                         Voeg het veld toe op de pagina{' '}
@@ -314,13 +314,13 @@ export default function ProjectSettingsNotifications({
                       {consentExplanationOpen && (
                         <div id="modbreak-consent-explanation" className="mt-2">
                           <p>
-                            Een modbreak-mail gaat alleen uit als <b>beide</b>{' '}
-                            aan staan:
+                            Een e-mail over een officiële reactie gaat alleen
+                            uit als <b>beide</b> aan staan:
                           </p>
                           <ol className="list-decimal pl-5 mt-1">
                             <li>
-                              <b>Per project:</b> de modbreak-optie hieronder,
-                              op deze pagina.
+                              <b>Per project:</b> de optie voor officiële
+                              reacties hieronder, op deze pagina.
                             </li>
                             <li>
                               <b>Per gebruiker, per project:</b> de toestemming
@@ -350,13 +350,15 @@ export default function ProjectSettingsNotifications({
                   name="sendModBreakNotification"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Modbreak-melding naar de indiener</FormLabel>
+                      <FormLabel>
+                        Melding over een officiële reactie aan de indiener
+                      </FormLabel>
                       <FormDescription>
                         Standaard uitgeschakeld. De indiener van de inzending
-                        ontvangt een e-mail zodra de redactie een modbreak
-                        plaatst of de tekst van een bestaande modbreak aanpast.
-                        Alleen als de indiener in dit project toestemming heeft
-                        gegeven voor e-mailnotificaties.
+                        ontvangt een e-mail zodra de redactie een officiële
+                        reactie plaatst of de tekst van een bestaande officiële
+                        reactie aanpast. Alleen als de indiener in dit project
+                        toestemming heeft gegeven voor e-mailnotificaties.
                       </FormDescription>
                       <FormControl>
                         <div className="flex items-center gap-2">
@@ -370,8 +372,8 @@ export default function ProjectSettingsNotifications({
                           <Label
                             htmlFor={field.name}
                             className="cursor-pointer">
-                            E-mail sturen naar de indiener als er een modbreak
-                            is geplaatst of aangepast
+                            E-mail sturen naar de indiener als er een officiële
+                            reactie is geplaatst of aangepast
                           </Label>
                         </div>
                       </FormControl>
@@ -385,7 +387,9 @@ export default function ProjectSettingsNotifications({
                 name="sendModBreakNotificationToCommenters"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Modbreak-melding naar reageerders</FormLabel>
+                    <FormLabel>
+                      Melding over een officiële reactie aan reageerders
+                    </FormLabel>
                     <FormDescription>
                       Standaard uitgeschakeld. Staat los van de optie hierboven.
                       Alleen reageerders die in dit project toestemming hebben
@@ -402,7 +406,7 @@ export default function ProjectSettingsNotifications({
                         />
                         <Label htmlFor={field.name} className="cursor-pointer">
                           E-mail sturen naar reageerders op de inzending als er
-                          een modbreak is geplaatst of aangepast
+                          een officiële reactie is geplaatst of aangepast
                         </Label>
                       </div>
                     </FormControl>
@@ -416,7 +420,8 @@ export default function ProjectSettingsNotifications({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Pad naar de inzending in de modbreak-mail
+                      Pad naar de inzending in de e-mail over een officiële
+                      reactie
                     </FormLabel>
                     <FormDescription>
                       Volledige URL of pad van de pagina met de inzending. Een

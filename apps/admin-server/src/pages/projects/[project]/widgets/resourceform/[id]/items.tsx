@@ -1360,7 +1360,7 @@ export default function WidgetResourceFormItems(
                                     (!selectedItem ||
                                       item.id !== selectedItem.id)
                                 )}>
-                                Inzending: Modbreak
+                                Inzending: Officiële reactie
                               </SelectItem>
                             </SelectContent>
                           </Select>
@@ -1498,7 +1498,7 @@ export default function WidgetResourceFormItems(
                                     {!field.value
                                       ? 'Key is verplicht'
                                       : !isModbreakTypeUnique
-                                        ? 'Er kan maar één Modbreak-veld per formulier zijn'
+                                        ? 'Er kan maar één veld voor officiële reacties per formulier zijn'
                                         : 'Key moet uniek zijn'}
                                   </FormMessage>
                                 )}
@@ -2580,13 +2580,14 @@ export default function WidgetResourceFormItems(
                           fontSize: '14px',
                         }}>
                         <strong>
-                          Modbreaks worden beheerd door beheerders (editor of
-                          moderator).
+                          Officiële reacties worden beheerd door beheerders
+                          (editor of moderator).
                         </strong>
                         <br />
                         Alleen beheerders (editor of moderator) kunnen bij het
-                        bewerken van een inzending modbreaks toevoegen, bewerken
-                        en verwijderen. Andere gebruikers zien dit veld niet.
+                        bewerken van een inzending officiële reacties toevoegen,
+                        bewerken en verwijderen. Andere gebruikers zien dit veld
+                        niet.
                       </div>
                     )}
 
@@ -2658,7 +2659,8 @@ export default function WidgetResourceFormItems(
                   </div>
                   {!isModbreakTypeUnique && (
                     <FormMessage>
-                      Er kan maar één Modbreak-veld per formulier zijn
+                      Er kan maar één veld voor officiële reacties per formulier
+                      zijn
                     </FormMessage>
                   )}
                   {(!form.watch('fieldKey') || !isFieldKeyUnique) &&
