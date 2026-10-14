@@ -62,7 +62,8 @@ const mountYouthScale = (config: EnqueteWidgetProps) => {
     'be.visible'
   );
   cy.get('.question-type-tickmark-slider figure img').should(($img) => {
-    expect(($img[0] as HTMLImageElement).complete).to.equal(true);
+    const image = $img[0] as HTMLImageElement;
+    expect(image.complete && image.naturalWidth > 0).to.equal(true);
   });
 };
 
@@ -115,6 +116,20 @@ const expectLayout = (withDescription: boolean) => {
         centres[i - 1]
       );
     }
+    rect(range).then((rangeRect) => {
+      const quarter = rangeRect.width / 4;
+      expect(centres[0], 'first step in left quarter').to.be.lessThan(
+        rangeRect.left + quarter
+      );
+      expect(centres[4], 'last step in right quarter').to.be.greaterThan(
+        rangeRect.right - quarter
+      );
+      const gaps = centres.slice(1).map((c, i) => c - centres[i]);
+      expect(
+        Math.abs(gaps[1] - gaps[2]),
+        'middle steps evenly spaced'
+      ).to.be.at.most(TOLERANCE);
+    });
   });
 
   if (withDescription) {
