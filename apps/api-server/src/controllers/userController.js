@@ -37,7 +37,6 @@ const filterBody = (req, res, next) => {
     'twoFactorToken',
     'twoFactorConfigured',
     'emailNotificationConsent',
-    'autoAddToNewProjects',
   ];
 
   keys.forEach((key) => {
@@ -750,7 +749,6 @@ async function updateUser(req, res, next) {
         'role',
         'emailNotificationConsent',
         'privacyConsentAt',
-        'autoAddToNewProjects',
       ]; // todo: dit moet natuurlijk niet hier, maar dat is nu minder relevant
       for (let userProjectSpecificField of userProjectSpecificFields) {
         delete synchronizedUpdatedUserData[userProjectSpecificField];
