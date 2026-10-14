@@ -2,8 +2,7 @@ import MarkersEditor from '@/components/markers-editor';
 import { PageLayout } from '@/components/ui/page-layout';
 import useMarker from '@/hooks/use-marker';
 import { useRouter } from 'next/router';
-import React, { useState } from 'react';
-import toast from 'react-hot-toast';
+import React from 'react';
 
 export default function ProjectMarkersEdit() {
   const router = useRouter();
@@ -12,18 +11,12 @@ export default function ProjectMarkersEdit() {
     project as string,
     id as string
   );
-  const [isSaving, setIsSaving] = useState(false);
 
+  // The global save bar reports saving, success and failure itself, so this
+  // must let a failure propagate instead of turning it into a toast — a
+  // swallowed error would leave the bar claiming the save succeeded.
   async function handleSave(name: string, markers: any[]) {
-    setIsSaving(true);
-    try {
-      await updateMarkers({ name, markers });
-      toast.success('Markers opgeslagen');
-    } catch (e) {
-      toast.error('Markers konden niet worden opgeslagen');
-    } finally {
-      setIsSaving(false);
-    }
+    await updateMarkers({ name, markers });
   }
 
   if (!markersData) return null;
@@ -44,7 +37,6 @@ export default function ProjectMarkersEdit() {
           initialMarkers={markersData.markers || []}
           project={project as string}
           onSave={handleSave}
-          isSaving={isSaving}
         />
       </PageLayout>
     </div>
