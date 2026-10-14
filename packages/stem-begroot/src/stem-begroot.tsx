@@ -99,6 +99,10 @@ export type StemBegrootWidgetProps = BaseProps &
     budgetRemainingTitle?: string;
     resetText?: string;
     applyText?: string;
+    searchLabel?: string;
+    displaySearchHint?: boolean;
+    searchHint?: string;
+    displaySearchPlaceholder?: boolean;
     searchPlaceholder?: string;
     step1Tab?: string;
     step2Tab?: string;
@@ -1567,6 +1571,10 @@ function StemBegroot({
                       displaySorting={props.displaySorting || false}
                       displaySearch={props.displaySearch || false}
                       displayTagFilters={props.displayTagFilters || false}
+                      searchLabel={props.searchLabel || 'Zoeken'}
+                      displaySearchHint={props.displaySearchHint || false}
+                      searchHint={props.searchHint || ''}
+                      displaySearchPlaceholder={props.displaySearchPlaceholder}
                       searchPlaceholder={props.searchPlaceholder || 'Zoeken'}
                       resetText={props.resetText || 'Reset'}
                       applyText={props.applyText || 'Toepassen'}

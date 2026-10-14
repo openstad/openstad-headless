@@ -22,6 +22,11 @@ const formSchema = z.object({
   displaySearch: z.boolean(),
   displaySearchText: z.boolean(),
   textActiveSearch: z.string(),
+  searchLabel: z.string().optional(),
+  displaySearchHint: z.boolean().optional(),
+  searchHint: z.string().optional(),
+  displaySearchPlaceholder: z.boolean().optional(),
+  searchPlaceholder: z.string().optional(),
 });
 
 export default function WidgetResourceOverviewSearch(
@@ -40,6 +45,11 @@ export default function WidgetResourceOverviewSearch(
       displaySearchText: props.displaySearchText || false,
       textActiveSearch:
         props.textActiveSearch || 'Bekijk de tekstresultaten voor [zoekterm]',
+      searchLabel: props.searchLabel || 'Zoeken',
+      displaySearchHint: props.displaySearchHint || false,
+      searchHint: props.searchHint || '',
+      displaySearchPlaceholder: props.displaySearchPlaceholder !== false,
+      searchPlaceholder: props.searchPlaceholder || 'Zoeken',
     },
   });
 
@@ -49,6 +59,8 @@ export default function WidgetResourceOverviewSearch(
     schema: formSchema,
     label: 'Zoeken',
   });
+
+  const displaySearchPlaceholder = form.watch('displaySearchPlaceholder');
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -101,6 +113,92 @@ export default function WidgetResourceOverviewSearch(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="searchLabel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Label voor het zoekveld</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displaySearchHint"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hint onder het zoekveld weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="searchHint"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hinttekst voor het zoekveld</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displaySearchPlaceholder"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Placeholder in het zoekveld weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {displaySearchPlaceholder !== false && (
+            <FormField
+              control={form.control}
+              name="searchPlaceholder"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tekst voor zoekveld placeholder</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </form>
       </Form>
     </div>
