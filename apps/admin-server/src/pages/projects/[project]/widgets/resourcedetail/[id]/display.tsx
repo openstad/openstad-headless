@@ -1,5 +1,4 @@
 import { CheckboxList } from '@/components/checkbox-list';
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -13,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -143,6 +143,11 @@ export default function WidgetResourceDetailDisplay(
           ? defaultShareValues
           : props?.selectedSocialShareOptions || [],
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Weergave',
   });
 
   return (
@@ -589,8 +594,21 @@ export default function WidgetResourceDetailDisplay(
                       const ids =
                         form.getValues('selectedSocialShareOptions') ?? [];
 
+                      const rank = (id: ShareOption) =>
+                        shareItems.findIndex(
+                          (item) => `${item.value}` === `${id}`
+                        );
+                      const insertAt = ids.findIndex(
+                        (id) => rank(id) > rank(share.value)
+                      );
                       const idsToSave = checked
-                        ? [...ids, share.value]
+                        ? insertAt === -1
+                          ? [...ids, share.value]
+                          : [
+                              ...ids.slice(0, insertAt),
+                              share.value,
+                              ...ids.slice(insertAt),
+                            ]
                         : ids.filter((id) => id !== `${share.value}`);
 
                       form.setValue('selectedSocialShareOptions', idsToSave);
@@ -604,10 +622,6 @@ export default function WidgetResourceDetailDisplay(
               )}
             />
           )}
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>
