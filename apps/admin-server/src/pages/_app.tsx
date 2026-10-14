@@ -1,3 +1,5 @@
+import { usePageKey } from '@/hooks/use-page-key';
+import '@/lib/zod-error-map';
 import '@/styles/globals.css';
 import type { AppProps } from 'next/app';
 import { useEffect, useState } from 'react';
@@ -9,8 +11,10 @@ import {
   type SessionUserType,
   fetchSessionUser,
 } from '../auth-context';
+import { SaveControllerProvider } from '../components/ui/save-controller';
 
 export default function App({ Component, pageProps }: AppProps) {
+  const pageKey = usePageKey();
   let [session, setSession] = useState({});
   useEffect(() => {
     fetchSessionUser()
@@ -39,7 +43,9 @@ export default function App({ Component, pageProps }: AppProps) {
               }
             }),
         }}>
-        <Component {...pageProps} />
+        <SaveControllerProvider>
+          <Component key={pageKey} {...pageProps} />
+        </SaveControllerProvider>
       </SWRConfig>
       <Toaster position="bottom-center" />
     </SessionContext.Provider>

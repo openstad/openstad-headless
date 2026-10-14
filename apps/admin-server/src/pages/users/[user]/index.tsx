@@ -34,10 +34,16 @@ export default function CreateUser() {
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
               <TabsTrigger value="apitokens">API-tokens</TabsTrigger>
             </TabsList>
-            <TabsContent value="general" className="p-0">
+            <TabsContent
+              value="general"
+              forceMount
+              className="p-0 data-[state=inactive]:hidden">
               <CreateUserGeneral />
             </TabsContent>
-            <TabsContent value="projects" className="p-0">
+            <TabsContent
+              value="projects"
+              forceMount
+              className="p-0 data-[state=inactive]:hidden">
               <CreateUserProjects />
             </TabsContent>
             <TabsContent value="auditlog" className="p-0">
