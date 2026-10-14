@@ -986,7 +986,32 @@
       .a-b-slider-container {
         position: relative;
         display: flex;
-        flex-direction: column-reverse;
+        flex-direction: column;
+        align-self: stretch;
+        width: 100%;
+
+        > .info-image-container,
+        > .osc-carousel,
+        > figure {
+          order: -1;
+          max-width: 100%;
+          margin: 0 0 16px;
+          text-align: center;
+
+          img {
+            max-height: 250px;
+            max-width: 100%;
+            object-fit: scale-down;
+          }
+        }
+
+        > .osc-carousel {
+          margin-bottom: 48px;
+        }
+
+        > .utrecht-form-field__label {
+          order: 0;
+        }
 
         .utrecht-form-field__label .utrecht-form-label {
           position: relative;
@@ -997,14 +1022,14 @@
 
         .range-slider-labels {
           pointer-events: none;
-
-          &.smiley-scale {
-            width: 94%;
-            margin: 0 auto;
-          }
+          order: 1;
+          align-self: stretch;
+          width: 100%;
+          box-sizing: border-box;
         }
 
         input[type='range'] {
+          order: 2;
           margin-bottom: 0;
           margin-top: 30px;
           touch-action: none;
