@@ -17,6 +17,7 @@ import {
   useLayoutEffect,
   useMemo,
   useRef,
+  useSyncExternalStore,
 } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 
@@ -60,6 +61,40 @@ function runDraftValidators(): { ok: boolean; message?: string } {
 }
 
 let draftValidatorSeq = 0;
+
+export function registerDraftValidator(validate: DraftValidator): () => void {
+  const key = `open:${(draftValidatorSeq += 1)}`;
+  const entry = { owner: draftOwner, validate };
+  draftValidators.set(key, entry);
+  return () => {
+    if (draftValidators.get(key) === entry) draftValidators.delete(key);
+  };
+}
+
+const openItemEdits = new Map<string, boolean>();
+const openItemListeners = new Set<() => void>();
+
+export function reportOpenItemEdit(key: string, dirty: boolean | null) {
+  if (dirty === null) {
+    if (!openItemEdits.has(key)) return;
+    openItemEdits.delete(key);
+  } else {
+    if (openItemEdits.get(key) === dirty) return;
+    openItemEdits.set(key, dirty);
+  }
+  openItemListeners.forEach((listener) => listener());
+}
+
+function subscribeOpenItemEdits(listener: () => void) {
+  openItemListeners.add(listener);
+  return () => {
+    openItemListeners.delete(listener);
+  };
+}
+
+function hasOpenItemEdit() {
+  return Array.from(openItemEdits.values()).some(Boolean);
+}
 
 export type ShownDefault = {
   shown: unknown;
@@ -665,7 +700,14 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
     });
   }, [updateConfig, widgetSettingsKeys, updatePreview]);
 
-  useRegisterSave({ isDirty, save });
+  const openItemDirty = useSyncExternalStore(
+    subscribeOpenItemEdits,
+    hasOpenItemEdit,
+    () => false
+  );
+  const hasUnsavedChanges = isDirty || openItemDirty;
+
+  useRegisterSave({ isDirty: hasUnsavedChanges, save });
 
   return {
     widget,
@@ -673,7 +715,7 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
     updatePreview,
     updateConfig,
     onFieldChanged,
-    isDirty,
+    isDirty: hasUnsavedChanges,
     save,
   };
 }
