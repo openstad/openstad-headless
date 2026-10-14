@@ -1197,7 +1197,6 @@ module.exports = function (db, sequelize, DataTypes) {
       delete data.hasResourceFormConfig;
       delete data.resourceFormFieldKeys;
       delete data.moderatorOnlyExtraDataKeys;
-      delete data.resourceFormFieldTypes;
       // dit zou nu dus gedefinieerd moeten worden op project.config, maar wegens backward compatible voor nu nog even hier:
       //
 
