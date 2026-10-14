@@ -669,7 +669,6 @@ module.exports = async function seed(config, db) {
           { type: 'area', multiple: true, label: 'Gebied' },
         ],
         displayTagFilters: true,
-        displayTagGroupName: false,
         displayBanner: true,
         titleMaxLength: '100',
         descriptionMaxLength: '100',

@@ -44,7 +44,6 @@ const formSchema = z
         multiple: z.boolean(),
       })
     ),
-    displayTagGroupName: z.boolean(),
     filterBehavior: z.string().optional(),
   })
   .superRefine((data, ctx) => {
@@ -105,7 +104,6 @@ export default function WidgetStemBegrootOverviewTags(
     defaultValues: {
       displayTagFilters: props?.displayTagFilters || false,
       tagGroups: props.tagGroups || [],
-      displayTagGroupName: props?.displayTagGroupName || false,
       filterBehavior: props?.filterBehavior || 'or',
     },
   });

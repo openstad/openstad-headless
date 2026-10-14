@@ -448,3 +448,13 @@ section.osc-begrootmodule-resource-detail-photo
 .budget-badge.budget-badge-primary.osc-budget-15 {
   flex: var(--osc-budget-15);
 }
+
+p.osc-searchtext {
+  display: inline-block;
+  padding: 0.5rem;
+  border-radius: 4px;
+  background-color: var(
+    --nlds-agenda-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
+}
