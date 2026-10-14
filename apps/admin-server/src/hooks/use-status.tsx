@@ -1,3 +1,4 @@
+import { throwApiError } from '@/lib/api-error';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
 
@@ -23,7 +24,7 @@ export default function useStatuses(projectId?: string, id?: string) {
       canComment: boolean | undefined;
       canLike: boolean | undefined;
     }
-  ) {
+  ): Promise<any | null> {
     const res = await fetch(url, {
       method: 'PUT',
       headers: {
@@ -43,6 +44,10 @@ export default function useStatuses(projectId?: string, id?: string) {
         extraFunctionality,
       }),
     });
+
+    if (!res.ok) {
+      await throwApiError(res, 'De status kon niet worden opgeslagen.');
+    }
 
     return await res.json();
   }

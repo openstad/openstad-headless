@@ -42,7 +42,12 @@ export default function useUser() {
       },
       body: JSON.stringify({ ...body }),
     });
-    if (!res.ok) throw new Error('User update failed');
+    if (!res.ok) {
+      console.error('Saving the user failed', res.status, res.statusText);
+      throw new Error(
+        'De gebruiker kon niet worden opgeslagen. Probeer het opnieuw.'
+      );
+    }
 
     return await res.json();
   }
@@ -62,7 +67,10 @@ export default function useUser() {
         anonymizeUserName: body.anonymizeUserName,
       }),
     });
-    if (!res.ok) throw new Error('User anonymization failed');
+    if (!res.ok) {
+      console.error('Anonymizing the user failed', res.status, res.statusText);
+      throw new Error('De gebruiker kon niet worden geanonimiseerd.');
+    }
 
     return await res.json();
   }

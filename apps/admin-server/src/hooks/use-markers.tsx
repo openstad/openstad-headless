@@ -17,7 +17,10 @@ export default function useMarkers(projectId?: string) {
       body: JSON.stringify({ name, markers }),
     });
     if (!res.ok) {
-      throw new Error('Could not create markers');
+      console.error('Creating the markers failed', res.status, res.statusText);
+      throw new Error(
+        'De markers konden niet worden aangemaakt. Probeer het opnieuw.'
+      );
     }
     const data = await res.json();
     markersSwr.mutate();
