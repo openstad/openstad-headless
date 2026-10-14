@@ -1,6 +1,7 @@
 import AuditLogTable from '@/components/audit-log-table';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
+import WidgetVersionHistory from '@/components/widget-version-history';
 import { flushAllFields } from '@/hooks/useFieldDebounce';
 import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
@@ -63,6 +64,7 @@ export default function WidgetActivity({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="display">Instellingen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
             <TabsContent value="display" className="p-0">
               {previewConfig ? (
@@ -83,16 +85,18 @@ export default function WidgetActivity({ apiUrl }: WithApiUrlProps) {
                 projectId={projectId as string}
               />
             </TabsContent>
-          </Tabs>
-          <div className="py-6 mt-6 bg-white rounded-md">
-            {previewConfig ? (
-              <WidgetPreview
-                type="activity"
-                config={previewConfig}
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
                 projectId={projectId as string}
               />
-            ) : null}
-          </div>
+            </TabsContent>
+          </Tabs>
+          <WidgetEditorPreview
+            type="activity"
+            config={previewConfig}
+            projectId={projectId as string}
+          />
         </div>
       </PageLayout>
     </div>

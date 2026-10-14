@@ -1,5 +1,6 @@
 import AuditLogTable from '@/components/audit-log-table';
 import WidgetPublish from '@/components/widget-publish';
+import WidgetVersionHistory from '@/components/widget-version-history';
 import { flushAllFields } from '@/hooks/useFieldDebounce';
 import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
@@ -87,6 +88,7 @@ export default function WidgetMap({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="legend">Legenda</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
             <TabsContent value="preview" className="p-0">
               {/* <Preview type="map" /> */}
@@ -138,6 +140,12 @@ export default function WidgetMap({ apiUrl }: WithApiUrlProps) {
               <AuditLogTable
                 modelName="widgets"
                 modelId={id as string}
+                projectId={projectId as string}
+              />
+            </TabsContent>
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
                 projectId={projectId as string}
               />
             </TabsContent>

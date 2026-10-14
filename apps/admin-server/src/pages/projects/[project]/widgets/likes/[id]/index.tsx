@@ -1,8 +1,9 @@
 import AuditLogTable from '@/components/audit-log-table';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
+import WidgetVersionHistory from '@/components/widget-version-history';
 import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
@@ -57,6 +58,7 @@ export default function WidgetLikes({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="display">Instellingen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
             <TabsContent value="display" className="p-0">
               {previewConfig ? (
@@ -77,17 +79,19 @@ export default function WidgetLikes({ apiUrl }: WithApiUrlProps) {
                 projectId={projectId as string}
               />
             </TabsContent>
-          </Tabs>
-
-          <div className="py-6 mt-6 bg-white rounded-md">
-            {previewConfig ? (
-              <WidgetPreview
-                type="likes"
-                config={previewConfig}
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
                 projectId={projectId as string}
               />
-            ) : null}
-          </div>
+            </TabsContent>
+          </Tabs>
+
+          <WidgetEditorPreview
+            type="likes"
+            config={previewConfig}
+            projectId={projectId as string}
+          />
         </div>
       </PageLayout>
     </div>

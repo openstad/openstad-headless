@@ -1,5 +1,6 @@
 import AuditLogTable from '@/components/audit-log-table';
 import WidgetPublish from '@/components/widget-publish';
+import WidgetVersionHistory from '@/components/widget-version-history';
 import { flushAllFields } from '@/hooks/useFieldDebounce';
 import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
@@ -61,10 +62,9 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="items">Items</TabsTrigger>
-              {/* <TabsTrigger value="display">Weergave</TabsTrigger> */}
-              {/* <TabsTrigger value="confirmation">Bevestiging</TabsTrigger> */}
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig && (
@@ -87,18 +87,6 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
                   />
                 )}
             </TabsContent>
-            {/* <TabsContent value="display" className="p-0">
-              {previewConfig && (
-                <WidgetEnqueteDisplay
-                  {...previewConfig}
-                  updateConfig={tabUpdateConfig}
-                  onFieldChanged={onFieldChanged}
-                />
-              )}
-            </TabsContent> */}
-            {/* <TabsContent value="confirmation" className="p-0">
-              <WidgetEnqueteConfirmation />
-            </TabsContent> */}
             <TabsContent value="publish" className="p-0">
               <WidgetPublish apiUrl={apiUrl} />
             </TabsContent>
@@ -106,6 +94,12 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
               <AuditLogTable
                 modelName="widgets"
                 modelId={id as string}
+                projectId={projectId as string}
+              />
+            </TabsContent>
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
                 projectId={projectId as string}
               />
             </TabsContent>
