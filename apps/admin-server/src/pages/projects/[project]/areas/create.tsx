@@ -1,5 +1,4 @@
 import { CheckboxList } from '@/components/checkbox-list';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -12,6 +11,11 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  useRegisterFormSave,
+  useSaveController,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,7 +24,7 @@ import useArea from '@/hooks/use-areas';
 import useTags from '@/hooks/use-tags';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -53,7 +57,15 @@ export default function ProjectAreaCreate() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const { allowNextNavigation } = useSaveController();
+
+  const save = useCallback(async () => {
+    const valid = await validateForSave(form);
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
+
     const area = await createArea(
       values.name,
       values.geoJSON,
@@ -61,15 +73,22 @@ export default function ProjectAreaCreate() {
       values.tagIds || [],
       values.tagIdsOutside || []
     );
-    if (area) {
-      toast.success('Polygoon aangemaakt!');
-      router.push(`/projects/${project}/areas`);
-    } else {
-      toast.error(
+    if (!area) {
+      throw new Error(
         'De polygoon die is meegegeven lijkt niet helemaal te kloppen.'
       );
     }
-  }
+
+    // A freshly created record is not an unsaved edit, so leaving this page
+    // must not prompt. useRegisterFormSave re-baselines the form afterwards,
+    // but that only reaches the controller on a later render -- the push
+    // starts now, so the guard has to be told directly.
+    allowNextNavigation();
+    toast.success('Polygoon aangemaakt!');
+    router.push(`/projects/${project}/areas`);
+  }, [form, createArea, router, project, allowNextNavigation]);
+
+  useRegisterFormSave(form, save, { label: 'Aanmaken' });
 
   return (
     <div>
@@ -91,7 +110,7 @@ export default function ProjectAreaCreate() {
         <div className="container py-6">
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={(event) => event.preventDefault()}
               className="grid grid-cols-1 gap-4">
               <Tabs defaultValue="general">
                 <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
@@ -206,7 +225,9 @@ export default function ProjectAreaCreate() {
                                       ? [...ids, tag.id]
                                       : ids.filter((id) => id !== tag.id);
 
-                                    form.setValue('tagIds', idsToSave);
+                                    form.setValue('tagIds', idsToSave, {
+                                      shouldDirty: true,
+                                    });
                                   }}
                                 />
                               </div>
@@ -252,7 +273,9 @@ export default function ProjectAreaCreate() {
                                       ? [...ids, tag.id]
                                       : ids.filter((id) => id !== tag.id);
 
-                                    form.setValue('tagIdsOutside', idsToSave);
+                                    form.setValue('tagIdsOutside', idsToSave, {
+                                      shouldDirty: true,
+                                    });
                                   }}
                                 />
                               </div>
@@ -265,9 +288,6 @@ export default function ProjectAreaCreate() {
                   </Tabs>
                 </TabsContent>
               </Tabs>
-              <Button className="w-fit col-span-full" type="submit">
-                Opslaan
-              </Button>
             </form>
           </Form>
         </div>
