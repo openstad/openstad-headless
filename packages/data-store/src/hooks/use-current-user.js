@@ -28,6 +28,9 @@ export default function useCurrentUser(props) {
   );
 
   async function getCurrentUser() {
+    // Without a project there is no user to fetch; /auth/project/undefined/me only fails
+    if (self.projectId === undefined || self.projectId === null) return {};
+
     const storage = new LocalStorage(props);
 
     // jwt in url: use and remove from url
@@ -130,8 +133,9 @@ export default function useCurrentUser(props) {
         });
 
         if (!openStadUser?.id) {
+          // self.api is a page-wide singleton: never clear the shared JWT here,
+          // invalid tokens are cleared by clearInvalidToken in api/fetch.js
           console.log('[osc-auth] token not accepted, continuing anonymous');
-          delete self.api.currentUserJWT;
           storage.remove('openStadUser');
           return {};
         }
@@ -146,7 +150,6 @@ export default function useCurrentUser(props) {
         return openStadUser;
       } catch (err) {
         console.log(`[osc-auth] user fetch failed: ${err?.message}`);
-        delete self.api.currentUserJWT;
         storage.remove('openStadUser');
         return {};
       }
