@@ -12,6 +12,7 @@ import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/s
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { humanizeDate } from '@openstad-headless/lib/humanize-date';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { buildResourceVoteLink } from '@openstad-headless/lib/resource-vote-link';
 import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
@@ -103,6 +104,12 @@ export type ResourceDetailWidgetProps = {
     collapseTagType?: string;
     collapseTagLabel?: string;
     headingLevel?: number;
+    // Opt-in "Steun dit plan!" block: links to the page with the begroot
+    // widget, with ?openstadResourceId=<id> so the resource is preselected.
+    displayVoteLinkButton?: boolean;
+    voteLinkPageUrl?: string;
+    voteLinkTitle?: string;
+    voteLinkButtonText?: string;
   } & MapPropsType &
   booleanProps & {
     likeWidget?: Omit<
@@ -219,6 +226,10 @@ function ResourceDetail({
   collapseTagType = '',
   collapseTagLabel = '',
   headingLevel = 2,
+  displayVoteLinkButton = false,
+  voteLinkPageUrl = '',
+  voteLinkTitle = 'Steun dit plan!',
+  voteLinkButtonText = 'Ga naar de stempagina',
   selectedSocialShareOptions = [
     'facebook',
     'x',
@@ -309,7 +320,15 @@ function ResourceDetail({
 
   const timelineItems = resource?.timeline ?? [];
 
+  // No vote button when the resource's status does not allow voting: the
+  // begroot widget would not add it to the selection anyway.
+  const voteLink =
+    displayVoteLinkButton && canLikeResource(resource)
+      ? buildResourceVoteLink(voteLinkPageUrl, resource.id)
+      : '';
+
   const shouldHaveSideColumn =
+    !!voteLink ||
     displayLikes ||
     displayTags ||
     displayStatus ||
@@ -791,6 +810,28 @@ function ResourceDetail({
         {shouldHaveSideColumn ? (
           <aside className="resource-detail-side-column">
             <div className="aside--content">
+              {voteLink ? (
+                <div className="resource-detail-side-section resource-detail-vote-link">
+                  <Spacer size={2} />
+                  {!!voteLinkTitle && (
+                    <>
+                      <Heading level={hSub} appearance="utrecht-heading-4">
+                        {voteLinkTitle}
+                      </Heading>
+                      <Spacer size={0.5} />
+                    </>
+                  )}
+                  <ButtonLink
+                    appearance="primary-action-button"
+                    className="resource-detail-vote-link-button"
+                    href={voteLink}>
+                    <Icon icon="ri-external-link-line" iconOnly />
+                    {voteLinkButtonText || 'Ga naar de stempagina'}
+                  </ButtonLink>
+                  <Spacer size={1} />
+                </div>
+              ) : null}
+
               {displayLikes ? (
                 <>
                   <Likes

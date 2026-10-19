@@ -28,6 +28,19 @@
   padding-bottom: 1rem;
 }
 
+.resource-detail-vote-link .resource-detail-vote-link-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  inline-size: 100%;
+  max-inline-size: none;
+  justify-content: flex-start;
+}
+
+.resource-detail-vote-link .resource-detail-vote-link-button .icon {
+  margin: 0;
+}
+
 .resource-detail-side-section-socials {
   display: flex;
   gap: 0.5rem;

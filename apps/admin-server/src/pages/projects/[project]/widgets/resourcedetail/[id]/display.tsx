@@ -91,6 +91,10 @@ const formSchema = z.object({
   collapseTagType: z.string().optional(),
   collapseTagLabel: z.string().optional(),
   selectedSocialShareOptions: z.array(z.enum(shareOptions)).optional(),
+  displayVoteLinkButton: z.boolean().optional(),
+  voteLinkPageUrl: z.string().optional(),
+  voteLinkTitle: z.string().optional(),
+  voteLinkButtonText: z.string().optional(),
 });
 
 const defaultShareValues: ShareOption[] = [...shareOptions];
@@ -164,6 +168,10 @@ export default function WidgetResourceDetailDisplay(
         typeof props?.selectedSocialShareOptions === 'undefined'
           ? defaultShareValues
           : props?.selectedSocialShareOptions || [],
+      displayVoteLinkButton: props?.displayVoteLinkButton || false,
+      voteLinkPageUrl: props?.voteLinkPageUrl ?? '',
+      voteLinkTitle: props?.voteLinkTitle ?? 'Steun dit plan!',
+      voteLinkButtonText: props?.voteLinkButtonText ?? 'Ga naar de stempagina',
     },
   });
 
@@ -721,6 +729,93 @@ export default function WidgetResourceDetailDisplay(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="displayVoteLinkButton"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Toon een knop naar de stempagina</FormLabel>
+                <FormDescription>
+                  Toont rechts een blok met een knop naar de pagina met de
+                  begrootmodule. De inzending staat daar dan al in de selectie
+                  van de bezoeker. Zet in de begrootmodule ook
+                  &apos;Stemlinks&apos; aan.
+                </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.watch('displayVoteLinkButton') && (
+            <>
+              <FormField
+                control={form.control}
+                name="voteLinkPageUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Wat is de URL van de pagina met de begrootmodule?
+                    </FormLabel>
+                    <FormDescription>
+                      Er wordt automatisch ?openstadResourceId=[id] aan de URL
+                      toegevoegd.
+                    </FormDescription>
+                    <FormControl>
+                      <Input
+                        placeholder="https://www.gemeente.nl/stemmen"
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="voteLinkTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Titel boven de knop</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="voteLinkButtonText"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tekst op de knop</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
 
           {form.watch('displaySocials') && (
             <FormField
