@@ -21,7 +21,7 @@ const rows = [
 ];
 
 describe('voteLinksToCsv', () => {
-  it('maakt een CSV met puntkomma en een kopregel', () => {
+  it('builds a semicolon CSV with a header row', () => {
     expect(voteLinksToCsv(rows)).toBe(
       [
         'ID;Titel;Stemlink;Opmerking',
@@ -33,7 +33,7 @@ describe('voteLinksToCsv', () => {
 });
 
 describe('voteLinksToClipboardText', () => {
-  it('zet titel en link in twee kolommen', () => {
+  it('puts the title and link in two columns', () => {
     expect(voteLinksToClipboardText(rows.slice(0, 1))).toBe(
       'Titel\tStemlink\nJeugdfestival\thttps://openstad.org/stemmen?openstadResourceId=1'
     );
@@ -41,14 +41,14 @@ describe('voteLinksToClipboardText', () => {
 });
 
 describe('toSpreadsheetValue', () => {
-  it('voorkomt dat een titel als formule wordt uitgevoerd', () => {
+  it('keeps a title from running as a formula', () => {
     expect(toSpreadsheetValue('=HYPERLINK("x")')).toBe(`'=HYPERLINK("x")`);
     expect(toSpreadsheetValue('+31 6')).toBe(`'+31 6`);
     expect(toSpreadsheetValue('-plan')).toBe(`'-plan`);
     expect(toSpreadsheetValue('@user')).toBe(`'@user`);
   });
 
-  it('haalt tabs en regeleinden weg', () => {
+  it('removes tabs and line breaks', () => {
     expect(toSpreadsheetValue('Plan\tmet\r\nregels')).toBe('Plan met regels');
   });
 });

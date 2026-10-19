@@ -6,19 +6,19 @@ import {
 } from './resource-vote-link';
 
 describe('buildResourceVoteLink', () => {
-  it('voegt openstadResourceId toe aan de stempagina', () => {
+  it('adds openstadResourceId to the vote page URL', () => {
     expect(buildResourceVoteLink('https://openstad.org/stemmen', 12)).toBe(
       'https://openstad.org/stemmen?openstadResourceId=12'
     );
   });
 
-  it('behoudt bestaande queryparameters en de hash', () => {
+  it('keeps existing query parameters and the hash', () => {
     expect(
       buildResourceVoteLink('https://openstad.org/stemmen?tagIds=3#stem', '7')
     ).toBe('https://openstad.org/stemmen?tagIds=3&openstadResourceId=7#stem');
   });
 
-  it('vervangt een openstadResourceId die al in de link stond', () => {
+  it('replaces an openstadResourceId already in the URL', () => {
     expect(
       buildResourceVoteLink(
         'https://openstad.org/stemmen?openstadResourceId=1',
@@ -27,26 +27,26 @@ describe('buildResourceVoteLink', () => {
     ).toBe('https://openstad.org/stemmen?openstadResourceId=2');
   });
 
-  it('maakt van een domein zonder protocol een https-link', () => {
+  it('turns a domain without protocol into an https URL', () => {
     expect(buildResourceVoteLink('  www.openstad.org/stemmen ', 5)).toBe(
       'https://www.openstad.org/stemmen?openstadResourceId=5'
     );
   });
 
-  it('houdt een relatieve link relatief', () => {
+  it('keeps a relative URL relative', () => {
     expect(buildResourceVoteLink('/stemmen', 5)).toBe(
       '/stemmen?openstadResourceId=5'
     );
   });
 
-  it('geeft niets terug bij een lege of onveilige link', () => {
+  it('returns an empty string for an empty or unsafe URL', () => {
     expect(buildResourceVoteLink('', 5)).toBe('');
     expect(buildResourceVoteLink(undefined, 5)).toBe('');
     expect(buildResourceVoteLink('javascript:alert(1)', 5)).toBe('');
     expect(buildResourceVoteLink('mailto:info@openstad.org', 5)).toBe('');
   });
 
-  it('geeft niets terug bij een ongeldig inzending-id', () => {
+  it('returns an empty string for an invalid resource id', () => {
     expect(buildResourceVoteLink('https://openstad.org/stemmen', 0)).toBe('');
     expect(buildResourceVoteLink('https://openstad.org/stemmen', 'abc')).toBe(
       ''
@@ -59,14 +59,14 @@ describe('buildResourceVoteLink', () => {
 });
 
 describe('getResourceIdFromVoteLink', () => {
-  it('leest het inzending-id uit de querystring', () => {
+  it('reads the resource id from the query string', () => {
     expect(getResourceIdFromVoteLink('?openstadResourceId=42')).toBe(42);
     expect(getResourceIdFromVoteLink('?a=1&openstadResourceId=42&b=2')).toBe(
       42
     );
   });
 
-  it('negeert ontbrekende of ongeldige waarden', () => {
+  it('ignores missing or invalid values', () => {
     expect(getResourceIdFromVoteLink('')).toBeNull();
     expect(getResourceIdFromVoteLink(undefined)).toBeNull();
     expect(getResourceIdFromVoteLink('?openstadResourceId=')).toBeNull();

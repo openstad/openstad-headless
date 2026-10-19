@@ -5,7 +5,7 @@ import { decideVoteLinkOutcome, voteLinkMessage } from './resource-vote-link';
 const resource = { id: 10, budget: 4000 };
 
 describe('decideVoteLinkOutcome', () => {
-  it('meldt een niet gevonden inzending', () => {
+  it('reports a resource that was not found', () => {
     expect(
       decideVoteLinkOutcome({
         resource: null,
@@ -16,7 +16,7 @@ describe('decideVoteLinkOutcome', () => {
     ).toBe('notFound');
   });
 
-  it('voegt toe bij stemmen op aantal als er nog plek is', () => {
+  it('adds the resource for count votes when there is room', () => {
     expect(
       decideVoteLinkOutcome({
         resource,
@@ -27,7 +27,7 @@ describe('decideVoteLinkOutcome', () => {
     ).toBe('added');
   });
 
-  it('voegt niet toe als het maximum aantal is bereikt', () => {
+  it('does not add when the maximum is reached', () => {
     expect(
       decideVoteLinkOutcome({
         resource,
@@ -38,7 +38,7 @@ describe('decideVoteLinkOutcome', () => {
     ).toBe('noRoom');
   });
 
-  it('herkent een inzending die al in de selectie staat', () => {
+  it('recognises a resource that is already selected', () => {
     expect(
       decideVoteLinkOutcome({
         resource,
@@ -49,7 +49,7 @@ describe('decideVoteLinkOutcome', () => {
     ).toBe('alreadySelected');
   });
 
-  it('voegt bij begroten alleen toe als het budget past', () => {
+  it('adds for budgeting only when the budget fits', () => {
     const selectedResources = [{ id: 1, budget: 5000 }];
     expect(
       decideVoteLinkOutcome({
@@ -69,7 +69,7 @@ describe('decideVoteLinkOutcome', () => {
     ).toBe('noRoom');
   });
 
-  it('voegt niet toe als de status stemmen niet toestaat', () => {
+  it('does not add when the status does not allow voting', () => {
     expect(
       decideVoteLinkOutcome({
         resource: {
@@ -85,7 +85,7 @@ describe('decideVoteLinkOutcome', () => {
 });
 
 describe('voteLinkMessage', () => {
-  it('noemt budget bij begroten en de volle selectie bij aantallen', () => {
+  it('mentions budget for budgeting and a full selection for count votes', () => {
     expect(voteLinkMessage('noRoom', 'budgeting')).toContain('budget');
     expect(voteLinkMessage('noRoom', 'count')).toContain('selectie is vol');
   });
