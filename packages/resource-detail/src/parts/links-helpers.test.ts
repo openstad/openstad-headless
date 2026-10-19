@@ -277,6 +277,12 @@ describe('contactTextDefaults', () => {
     expect(defaults.consentLabel).toContain('e-mailadres');
   });
 
+  it('uses the agreed default popup text for the built-in contact form', () => {
+    expect(contactTextDefaults('').popupDescription).toBe(
+      'Je bericht en e-mailadres worden gedeeld met de indiener.'
+    );
+  });
+
   it('does not promise to share the e-mail address for a plugin handler', () => {
     const defaults = contactTextDefaults('link-request');
     expect(Object.values(defaults).join(' ')).not.toMatch(/e-mail/);

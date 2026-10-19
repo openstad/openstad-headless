@@ -313,8 +313,7 @@ export type ContactTextDefaults = {
 const EMAIL_CONTACT_DEFAULTS: ContactTextDefaults = {
   description:
     'Via de contactknop gaat een bericht naar de indiener; alleen de indiener ziet het. De indiener kan per e-mail reageren.',
-  popupDescription:
-    'Het bericht gaat naar de indiener, samen met het e-mailadres van de afzender.',
+  popupDescription: 'Je bericht en e-mailadres worden gedeeld met de indiener.',
   consentLabel:
     'Ik ga akkoord met het delen van mijn e-mailadres volgens de privacyverklaring',
   loginDescription:
