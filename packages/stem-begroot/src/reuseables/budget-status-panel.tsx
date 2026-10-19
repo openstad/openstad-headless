@@ -14,6 +14,8 @@ export const BudgetStatusPanel = ({
   title,
   budgetChosenTitle,
   budgetRemainingTitle,
+  minNrOfResources = 0,
+  minRemainingTitle = '',
   headingLevel = 4,
 }: {
   typeIsBudgeting: boolean;
@@ -25,8 +27,14 @@ export const BudgetStatusPanel = ({
   title?: string;
   budgetChosenTitle?: string;
   budgetRemainingTitle?: string;
+  // Only shown for count votes with a minimum, and only when a label is given
+  // (the widget passes one when "Kies nog minimaal" is switched on).
+  minNrOfResources?: number;
+  minRemainingTitle?: string;
   headingLevel?: number;
 }): React.JSX.Element => {
+  const showMinRemaining = !!minRemainingTitle && minNrOfResources > 0;
+
   return (
     <>
       {showInfoMenu && (
@@ -91,6 +99,21 @@ export const BudgetStatusPanel = ({
                     </span>
                   </Paragraph>
                 </li>
+                {showMinRemaining && (
+                  <li>
+                    <Paragraph className="info-budget-label info-budget-label--min-remaining">
+                      <span>{minRemainingTitle}</span>
+                      <span>
+                        <Strong>
+                          {Math.max(
+                            minNrOfResources - nrOfResourcesSelected,
+                            0
+                          )}
+                        </Strong>
+                      </span>
+                    </Paragraph>
+                  </li>
+                )}
               </ul>
             </>
           )}

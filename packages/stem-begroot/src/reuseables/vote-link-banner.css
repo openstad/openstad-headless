@@ -1,0 +1,29 @@
+.stem-begroot-vote-link-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--nlds-budget-vote-link-banner-gap, 0.75rem);
+  margin-block-end: var(--nlds-budget-vote-link-banner-margin, 1.5rem);
+  padding: var(--nlds-budget-vote-link-banner-padding, 1.25rem 1.5rem);
+  background-color: var(
+    --nlds-budget-vote-link-banner-background-color,
+    #fff7c2
+  );
+  color: var(--nlds-budget-vote-link-banner-color, inherit);
+  border-radius: var(--nlds-budget-vote-link-banner-border-radius, 0);
+}
+
+.stem-begroot-vote-link-banner .stem-begroot-vote-link-banner-icon {
+  flex-shrink: 0;
+  margin: 0;
+  line-height: inherit;
+}
+
+.stem-begroot-vote-link-banner .stem-begroot-vote-link-banner-text {
+  margin: 0;
+}
+
+.stem-begroot-vote-link-banner .stem-begroot-vote-link-banner-title {
+  font-weight: var(--nlds-budget-vote-link-banner-title-font-weight, bold);
+  color: inherit;
+  text-decoration: underline;
+}

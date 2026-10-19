@@ -2,6 +2,10 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import {
+  RESOURCE_VOTE_LINK_PARAM,
+  getResourceIdFromVoteLink,
+} from '@openstad-headless/lib/resource-vote-link';
 import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import {
@@ -26,6 +30,7 @@ import React, {
 import NotificationProvider from '../../lib/NotificationProvider/notification-provider';
 import NotificationService from '../../lib/NotificationProvider/notification-service';
 import { BudgetUsedList } from './reuseables/used-budget-component';
+import { VoteLinkBanner, VoteLinkResult } from './reuseables/vote-link-banner';
 import './stem-begroot.css';
 import { StemBegrootBudgetList } from './step-1/begroot-budget-list/stem-begroot-budget-list';
 import { StemBegrootResourceDetailDialog } from './step-1/begroot-detail-dialog/stem-begroot-detail-dialog';
@@ -34,6 +39,10 @@ import { BegrotenSelectedOverview } from './step-2/selected-overview';
 import { Step3 } from './step-3';
 import { Step3Success } from './step-3-success';
 import { Step4 } from './step-4';
+import {
+  decideVoteLinkOutcome,
+  removeVoteLinkParamFromUrl,
+} from './utils/resource-vote-link';
 import { createSelectedResourcesStorage } from './utils/selected-resources-storage';
 import { createVoteCompletedStorage } from './utils/vote-completed-storage';
 import { createVotePendingStorage } from './utils/vote-pending-storage';
@@ -124,6 +133,11 @@ export type StemBegrootWidgetProps = BaseProps &
     displayModBreak?: boolean;
     randomSortRotationMs?: number;
     showConfetti?: boolean;
+    // Opt-in: ?openstadResourceId=<id> puts that resource in the selection
+    enableResourceVoteLink?: boolean;
+    // Opt-in: "Kies nog minimaal" row in the counter for count votes
+    showMinResourcesRemaining?: boolean;
+    minResourcesRemainingTitle?: string;
   };
 
 function StemBegroot({
@@ -180,10 +194,17 @@ function StemBegroot({
     type: '',
   });
 
-  async function fetchResourcesByIds(ids: number[]): Promise<any[]> {
+  async function fetchResourcesByIds(
+    ids: number[],
+    filters: { tags?: number[]; statuses?: number[] } = {}
+  ): Promise<any[]> {
     if (!ids.length || !props.api?.url) return [];
     const params = new URLSearchParams();
     ids.forEach((id) => params.append('ids', String(id)));
+    (filters.tags || []).forEach((id) => params.append('tags', String(id)));
+    (filters.statuses || []).forEach((id) =>
+      params.append('statuses', String(id))
+    );
     params.append('noPagination', 'true');
     params.append('includeTags', '1');
     try {
@@ -448,6 +469,67 @@ function StemBegroot({
       selectedResourcesStorage.setSelectedResources(selectedResources);
     }
   }, [selectedResources, selectedResourcesStorage, props.votes.voteType]);
+
+  // Stemlink: ?openstadResourceId=<id> puts that resource in the voter's
+  // selection and shows a notice about it. Opt-in per widget, and only for
+  // vote types with a single selection (not per tag).
+  const voteLinkEnabled = !!props.enableResourceVoteLink && !isPerTagVoting;
+  const [voteLinkResult, setVoteLinkResult] = useState<VoteLinkResult | null>(
+    null
+  );
+  const voteLinkHandledRef = useRef(false);
+  const currentStepRef = useRef(currentStep);
+  currentStepRef.current = currentStep;
+  const selectedResourcesRef = useRef(selectedResources);
+  selectedResourcesRef.current = selectedResources;
+
+  useEffect(() => {
+    if (!voteLinkEnabled || voteLinkHandledRef.current) return;
+    // A vote restored from the confirmation e-mail takes precedence.
+    if (pendingUuidFromUrl) return;
+
+    const resourceId = getResourceIdFromVoteLink(window.location.search);
+    if (!resourceId) return;
+
+    voteLinkHandledRef.current = true;
+    removeVoteLinkParamFromUrl(RESOURCE_VOTE_LINK_PARAM);
+
+    // Same tag/status limits as the list, so a stemlink cannot add a resource
+    // this widget does not show.
+    fetchResourcesByIds([resourceId], {
+      tags: tagIdsToLimitResourcesTo,
+      statuses: statusIdsToLimitResourcesTo,
+    }).then((records) => {
+      // The voter is already further in the flow (e.g. a logged-in voter
+      // with a pending vote): leave their selection alone.
+      if (currentStepRef.current !== 0) return;
+
+      const resource =
+        records.find((r: { id: number }) => r.id === resourceId) || null;
+      const outcome = decideVoteLinkOutcome({
+        resource,
+        selectedResources: selectedResourcesRef.current,
+        voteType: props.votes.voteType,
+        maxBudget: props.votes.maxBudget,
+        maxResources: props.votes.maxResources,
+      });
+
+      if (outcome === 'added' && resource) {
+        console.log(
+          `[stem-begroot] stemlink: resource=${resourceId} added to selection`
+        );
+        // Same as clicking "Voeg toe": a changed selection invalidates a
+        // pending vote.
+        votePendingStorage.clearAllVotePending();
+        selectedResourcesStorage.clearSelectedResources();
+        setSelectedResources((prev) =>
+          prev.some((r) => r.id === resource.id) ? prev : [...prev, resource]
+        );
+      }
+
+      setVoteLinkResult({ outcome, resource });
+    });
+  }, [voteLinkEnabled]);
 
   useEffect(() => {
     if (props.isSimpleView && currentStep === 1 && lastStep > currentStep) {
@@ -1184,6 +1266,26 @@ function StemBegroot({
     );
   }, [activeTagTab]);
 
+  // Hide the notice once the voter removes the stemlink resource again.
+  const voteLinkResourceId = voteLinkResult?.resource?.id;
+  const showVoteLinkResult =
+    currentStep === 0 &&
+    !!voteLinkResult &&
+    !(
+      (voteLinkResult.outcome === 'added' ||
+        voteLinkResult.outcome === 'alreadySelected') &&
+      !selectedResources.some((r) => r.id === voteLinkResourceId)
+    );
+  const voteLinkResourceIndex = voteLinkResourceId
+    ? resourcesToUse.findIndex(
+        (r: { id: number }) => r.id === voteLinkResourceId
+      )
+    : -1;
+
+  const minRemainingTitle = props.showMinResourcesRemaining
+    ? props.minResourcesRemainingTitle || 'Kies nog minimaal'
+    : '';
+
   return (
     <>
       <StemBegrootResourceDetailDialog
@@ -1274,6 +1376,21 @@ function StemBegroot({
         </div>
         <Spacer size={1} />
 
+        {voteLinkEnabled ? (
+          <VoteLinkBanner
+            result={showVoteLinkResult ? voteLinkResult : null}
+            voteType={props.votes.voteType}
+            onOpenResource={
+              voteLinkResourceIndex > -1
+                ? () => {
+                    setResourceDetailIndex(voteLinkResourceIndex);
+                    setOpenDetailDialog(true);
+                  }
+                : undefined
+            }
+          />
+        ) : null}
+
         {(props.votes.voteType === 'budgeting' ||
           props?.votes?.voteType === 'budgetingPerTag') &&
         currentStep !== 4 ? (
@@ -1323,6 +1440,8 @@ function StemBegroot({
                 allResourceInList={resources?.records}
                 selectedResources={selectedResources}
                 maxNrOfResources={props.votes.maxResources || 0}
+                minNrOfResources={props.votes.minResources || 0}
+                minRemainingTitle={minRemainingTitle}
                 typeIsBudgeting={
                   props.votes.voteType === 'budgeting' ||
                   props.votes.voteType === 'budgetingPerTag'
@@ -1406,6 +1525,8 @@ function StemBegroot({
                 selectedResources={selectedResources}
                 maxBudget={props.votes.maxBudget}
                 maxNrOfResources={props.votes.maxResources || 0}
+                minNrOfResources={props.votes.minResources || 0}
+                minRemainingTitle={minRemainingTitle}
                 typeIsBudgeting={
                   props.votes.voteType === 'budgeting' ||
                   props.votes.voteType === 'budgetingPerTag'

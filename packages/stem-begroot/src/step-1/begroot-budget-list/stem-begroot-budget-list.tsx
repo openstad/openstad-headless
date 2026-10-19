@@ -21,6 +21,8 @@ export const StemBegrootBudgetList = ({
   maxBudget,
   typeIsBudgeting,
   maxNrOfResources,
+  minNrOfResources = 0,
+  minRemainingTitle = '',
   showInfoMenu,
   decideCanAddMore,
   onSelectedResourceRemove,
@@ -42,6 +44,8 @@ export const StemBegrootBudgetList = ({
   maxBudget: number;
   typeIsBudgeting: boolean;
   maxNrOfResources: number;
+  minNrOfResources?: number;
+  minRemainingTitle?: string;
   introText?: string;
   showInfoMenu?: boolean;
   decideCanAddMore: () => boolean;
@@ -96,6 +100,8 @@ export const StemBegrootBudgetList = ({
               headingLevel={headingLevel}
               typeIsBudgeting={typeIsBudgeting}
               maxNrOfResources={maxNrOfResources}
+              minNrOfResources={minNrOfResources}
+              minRemainingTitle={minRemainingTitle}
               nrOfResourcesSelected={filteredResources.length}
               maxBudget={maxBudget}
               budgetUsed={budgetUsed}

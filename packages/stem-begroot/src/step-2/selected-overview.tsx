@@ -18,6 +18,8 @@ type Props = {
   budgetUsed: number;
   maxBudget: number;
   maxNrOfResources: number;
+  minNrOfResources?: number;
+  minRemainingTitle?: string;
   introText?: string;
   typeIsBudgeting: boolean;
   showInfoMenu?: boolean;
@@ -34,6 +36,8 @@ export const BegrotenSelectedOverview = ({
   budgetUsed,
   maxBudget,
   maxNrOfResources,
+  minNrOfResources = 0,
+  minRemainingTitle = '',
   selectedResources,
   introText = '',
   typeIsBudgeting,
@@ -138,6 +142,8 @@ export const BegrotenSelectedOverview = ({
                       headingLevel={headingLevel}
                       typeIsBudgeting={typeIsBudgeting}
                       maxNrOfResources={tagData.max}
+                      minNrOfResources={tagData.min}
+                      minRemainingTitle={minRemainingTitle}
                       nrOfResourcesSelected={tagData.current}
                       maxBudget={maxBudget}
                       budgetUsed={tagData.current}
@@ -163,6 +169,8 @@ export const BegrotenSelectedOverview = ({
               headingLevel={headingLevel}
               typeIsBudgeting={typeIsBudgeting}
               maxNrOfResources={maxNrOfResources}
+              minNrOfResources={minNrOfResources}
+              minRemainingTitle={minRemainingTitle}
               nrOfResourcesSelected={resourcesToShow.length}
               maxBudget={maxBudget}
               budgetUsed={budgetUsed}
