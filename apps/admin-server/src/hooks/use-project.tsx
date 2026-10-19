@@ -55,25 +55,16 @@ export function useProject(scopes?: Array<string>) {
     return await res.json();
   }
 
-  async function importProject(
-    name: string,
-    title: string,
-    config: object,
-    emailConfig: object
-  ) {
+  async function importProject(payload: object) {
     const res = await fetch('/api/openstad/api/project', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        name,
-        title,
-        config,
-        emailConfig,
-      }),
+      body: JSON.stringify(payload),
     });
-    return await res.json();
+    const body = await res.json().catch(() => null);
+    return { ok: res.ok, body };
   }
 
   async function updateProject(config: any, name?: any, url?: any) {
