@@ -5,9 +5,7 @@ export type VoteLinkRow = {
   note?: string;
 };
 
-// Resource titles are typed by citizens. A value starting with =, +, - or @
-// is run as a formula when the export is opened in Excel, so prefix those
-// with a quote. Tabs and line breaks would split the cell.
+// Titles are user input: keep them from running as spreadsheet formulas.
 export function toSpreadsheetValue(value: unknown): string {
   const text = String(value ?? '')
     .replace(/[\t\r\n]+/g, ' ')
@@ -22,7 +20,6 @@ function toCsvField(value: unknown, delimiter: string): string {
     : text;
 }
 
-// Semicolon-separated, which Dutch Excel opens without an import wizard.
 export function voteLinksToCsv(rows: VoteLinkRow[], delimiter = ';'): string {
   const lines = [
     ['ID', 'Titel', 'Stemlink', 'Opmerking'],
@@ -33,7 +30,6 @@ export function voteLinksToCsv(rows: VoteLinkRow[], delimiter = ';'): string {
     .join('\r\n');
 }
 
-// Tab-separated, so pasting it in Excel or Google Sheets fills two columns.
 export function voteLinksToClipboardText(rows: VoteLinkRow[]): string {
   return [
     'Titel\tStemlink',

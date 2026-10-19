@@ -1,12 +1,5 @@
 import { canLikeResource } from '@openstad-headless/lib/can-like';
 
-// What happened with the resource from a stemlink (?openstadResourceId=):
-// - added: it is now in the voter's selection
-// - alreadySelected: it was already in the selection
-// - notVotable: its status does not allow voting
-// - noRoom: the selection is full, or there is not enough budget left
-// - notFound: it does not exist, is not published, or is not part of this
-//   widget (tag/status filter)
 export type VoteLinkOutcome =
   'added' | 'alreadySelected' | 'notVotable' | 'noRoom' | 'notFound';
 
@@ -16,8 +9,6 @@ type VoteLinkResource = {
   statuses?: Array<{ extraFunctionality?: { canLike?: boolean } }>;
 };
 
-// Mirrors the "can this resource be added" rules of the widget's add button
-// for the vote types that use a single selection (not the per-tag types).
 export function decideVoteLinkOutcome({
   resource,
   selectedResources,
@@ -73,15 +64,9 @@ export function voteLinkMessage(
   }
 }
 
-// Removes ?openstadResourceId= from the address bar, so a reload or the return
-// from the login page does not put the resource back after it was removed.
 export function removeVoteLinkParamFromUrl(param: string) {
-  try {
-    const url = new URL(window.location.href);
-    if (!url.searchParams.has(param)) return;
-    url.searchParams.delete(param);
-    window.history.replaceState(window.history.state, '', url.toString());
-  } catch {
-    // ignore: the stemlink still works, it just stays in the address bar
-  }
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has(param)) return;
+  url.searchParams.delete(param);
+  window.history.replaceState(window.history.state, '', url.toString());
 }

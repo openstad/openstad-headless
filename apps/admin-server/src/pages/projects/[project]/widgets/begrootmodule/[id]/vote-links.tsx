@@ -51,6 +51,8 @@ type Resource = {
   statuses?: Array<{ extraFunctionality?: { canLike?: boolean } }>;
 };
 
+const UTF8_BOM = '\uFEFF';
+
 const idList = (value?: string) =>
   (value || '')
     .split(',')
@@ -75,7 +77,6 @@ export default function BegrootmoduleVoteLinks(
   const voteType = project?.config?.votes?.voteType || '';
   const isPerTag = voteType === 'countPerTag' || voteType === 'budgetingPerTag';
 
-  // The same resources the widget lists: its tag and status limits apply.
   const tagIds = idList(props.onlyIncludeTagIds);
   const statusIds = idList(props.onlyIncludeStatusIds);
   const params = new URLSearchParams({
@@ -98,7 +99,6 @@ export default function BegrootmoduleVoteLinks(
     const records: Resource[] = Array.isArray(data)
       ? data
       : data?.records || [];
-    // Concepts are not visible to voters, so a link to them would not work.
     return records
       .filter((resource) => !!resource.publishDate)
       .sort((a, b) =>
@@ -136,8 +136,7 @@ export default function BegrootmoduleVoteLinks(
   };
 
   const downloadCsv = () => {
-    // The BOM makes Excel read the file as UTF-8 (accents in titles).
-    const blob = new Blob([`﻿${voteLinksToCsv(rows)}`], {
+    const blob = new Blob([`${UTF8_BOM}${voteLinksToCsv(rows)}`], {
       type: 'text/csv;charset=utf-8',
     });
     const url = window.URL.createObjectURL(blob);

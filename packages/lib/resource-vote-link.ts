@@ -1,8 +1,5 @@
 import { sanitizeUrl } from './sanitize-url';
 
-// Query parameter that tells the begroot widget which resource to put in the
-// voter's selection. The resource detail widget and the admin "Stemlinks"
-// overview build their links with it, the begroot widget reads it.
 export const RESOURCE_VOTE_LINK_PARAM = 'openstadResourceId';
 
 const RELATIVE_BASE = 'http://relative.invalid';
@@ -12,10 +9,6 @@ function normaliseResourceId(resourceId: unknown): number | null {
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
-// Builds the vote page URL with ?openstadResourceId=<id>, keeping any query
-// string and hash the page already has. A pasted URL without protocol
-// ("www.gemeente.nl/stemmen") is treated as https. Returns '' for an empty or
-// unsafe URL, or an invalid resource id.
 export function buildResourceVoteLink(
   votePageUrl: string | undefined | null,
   resourceId: unknown
@@ -44,7 +37,6 @@ export function buildResourceVoteLink(
     : `${parsed.pathname}${parsed.search}${parsed.hash}`;
 }
 
-// Reads the resource id from a query string such as window.location.search.
 export function getResourceIdFromVoteLink(
   search: string | undefined | null
 ): number | null {

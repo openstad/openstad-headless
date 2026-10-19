@@ -16,9 +16,6 @@ export type VoteLinkResult = {
   resource?: { id: number; title?: string } | null;
 };
 
-// Notice above step 1 that tells the voter what a stemlink
-// (?openstadResourceId=) did with their selection. The live region is always
-// rendered so screen readers announce the text once the resource is loaded.
 export const VoteLinkBanner = ({
   result,
   voteType,
@@ -32,6 +29,8 @@ export const VoteLinkBanner = ({
   const showTitle = !!result && result.outcome !== 'notFound' && !!title;
 
   return (
+    // Rendered while empty too: screen readers only announce changes to an
+    // existing live region.
     <div className="stem-begroot-vote-link" role="status" aria-live="polite">
       {result ? (
         <div

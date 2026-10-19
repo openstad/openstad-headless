@@ -27,8 +27,6 @@ export const BudgetStatusPanel = ({
   title?: string;
   budgetChosenTitle?: string;
   budgetRemainingTitle?: string;
-  // Only shown for count votes with a minimum, and only when a label is given
-  // (the widget passes one when "Kies nog minimaal" is switched on).
   minNrOfResources?: number;
   minRemainingTitle?: string;
   headingLevel?: number;

@@ -133,9 +133,7 @@ export type StemBegrootWidgetProps = BaseProps &
     displayModBreak?: boolean;
     randomSortRotationMs?: number;
     showConfetti?: boolean;
-    // Opt-in: ?openstadResourceId=<id> puts that resource in the selection
     enableResourceVoteLink?: boolean;
-    // Opt-in: "Kies nog minimaal" row in the counter for count votes
     showMinResourcesRemaining?: boolean;
     minResourcesRemainingTitle?: string;
   };
@@ -470,9 +468,6 @@ function StemBegroot({
     }
   }, [selectedResources, selectedResourcesStorage, props.votes.voteType]);
 
-  // Stemlink: ?openstadResourceId=<id> puts that resource in the voter's
-  // selection and shows a notice about it. Opt-in per widget, and only for
-  // vote types with a single selection (not per tag).
   const voteLinkEnabled = !!props.enableResourceVoteLink && !isPerTagVoting;
   const [voteLinkResult, setVoteLinkResult] = useState<VoteLinkResult | null>(
     null
@@ -485,23 +480,19 @@ function StemBegroot({
 
   useEffect(() => {
     if (!voteLinkEnabled || voteLinkHandledRef.current) return;
-    // A vote restored from the confirmation e-mail takes precedence.
     if (pendingUuidFromUrl) return;
 
     const resourceId = getResourceIdFromVoteLink(window.location.search);
     if (!resourceId) return;
 
     voteLinkHandledRef.current = true;
+    // So a reload or the login redirect doesn't re-add a resource the voter removed.
     removeVoteLinkParamFromUrl(RESOURCE_VOTE_LINK_PARAM);
 
-    // Same tag/status limits as the list, so a stemlink cannot add a resource
-    // this widget does not show.
     fetchResourcesByIds([resourceId], {
       tags: tagIdsToLimitResourcesTo,
       statuses: statusIdsToLimitResourcesTo,
     }).then((records) => {
-      // The voter is already further in the flow (e.g. a logged-in voter
-      // with a pending vote): leave their selection alone.
       if (currentStepRef.current !== 0) return;
 
       const resource =
@@ -518,8 +509,6 @@ function StemBegroot({
         console.log(
           `[stem-begroot] stemlink: resource=${resourceId} added to selection`
         );
-        // Same as clicking "Voeg toe": a changed selection invalidates a
-        // pending vote.
         votePendingStorage.clearAllVotePending();
         selectedResourcesStorage.clearSelectedResources();
         setSelectedResources((prev) =>
@@ -1266,7 +1255,6 @@ function StemBegroot({
     );
   }, [activeTagTab]);
 
-  // Hide the notice once the voter removes the stemlink resource again.
   const voteLinkResourceId = voteLinkResult?.resource?.id;
   const showVoteLinkResult =
     currentStep === 0 &&
