@@ -37,6 +37,7 @@ const formSchema = z.object({
   panelTitle: z.string().optional(),
   budgetChosenTitle: z.string().optional(),
   budgetRemainingTitle: z.string().optional(),
+  minResourcesRemainingTitle: z.string().optional(),
   step1Tab: z.string().optional(),
   step2Tab: z.string().optional(),
   step3Tab: z.string().optional(),
@@ -81,6 +82,8 @@ export default function BegrootmoduleText(
       panelTitle: props.panelTitle ?? '',
       budgetChosenTitle: props.budgetChosenTitle ?? '',
       budgetRemainingTitle: props.budgetRemainingTitle ?? '',
+      minResourcesRemainingTitle:
+        props.minResourcesRemainingTitle ?? 'Kies nog minimaal',
       overviewTitle: props.overviewTitle ?? '',
     },
   });
@@ -515,6 +518,30 @@ export default function BegrootmoduleText(
                 <FormDescription>
                   Hier komt informatie bij te staan over hoeveel er nog gekozen
                   kan worden.
+                </FormDescription>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="minResourcesRemainingTitle"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>&apos;Kies nog minimaal&apos; tekst</FormLabel>
+                <FormDescription>
+                  Hier komt te staan hoeveel inzendingen er nog minimaal gekozen
+                  moeten worden. Alleen zichtbaar bij stemmen op aantal met een
+                  minimum, als dit bij Weergave opties aan staat.
                 </FormDescription>
                 <FormControl>
                   <Input

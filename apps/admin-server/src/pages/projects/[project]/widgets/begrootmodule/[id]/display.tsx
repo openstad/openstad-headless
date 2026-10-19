@@ -48,6 +48,7 @@ const formSchema = z.object({
     invalid_type_error: 'Alleen volledige nummers kunnen worden ingevoerd',
   }),
   showInfoMenu: z.boolean(),
+  showMinResourcesRemaining: z.boolean().optional(),
   hideTagsForResources: z.boolean(),
   tagTypeTagGroup: z.array(z.string()).optional(),
   tagTypeSelector: z.string().optional(),
@@ -91,6 +92,7 @@ export default function BegrootmoduleDisplay(
       resourceListColumns: props.resourceListColumns || 3,
       showInfoMenu:
         props.showInfoMenu === undefined ? true : props.showInfoMenu,
+      showMinResourcesRemaining: props.showMinResourcesRemaining || false,
       tagTypeTagGroup: props.tagTypeTagGroup || [],
       tagTypeTag: props.tagTypeTag || '',
       tagTypeSelector: props.tagTypeSelector || 'tag',
@@ -236,6 +238,28 @@ export default function BegrootmoduleDisplay(
               </FormItem>
             )}
           />
+
+          {(voteType === 'count' || voteType === 'countPerTag') &&
+            form.watch('showInfoMenu') && (
+              <FormField
+                control={form.control}
+                name="showMinResourcesRemaining"
+                render={({ field }) => (
+                  <FormItem className="col-span-1">
+                    <FormLabel>
+                      Toon &apos;Kies nog minimaal&apos; in de teller
+                    </FormLabel>
+                    <FormDescription>
+                      Toont in de teller hoeveel inzendingen er nog minimaal
+                      gekozen moeten worden. Alleen als er in de
+                      projectinstellingen een minimum aantal is ingesteld.
+                    </FormDescription>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
           <FormField
             control={form.control}
