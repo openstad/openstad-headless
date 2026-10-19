@@ -891,8 +891,10 @@ router
     }
 
     // create an oauth client if nessecary
+    // share one config object so clients created below end up on the project
+    req.body.config = req.body.config || {};
     let project = {
-      config: req.body.config || {},
+      config: req.body.config,
     };
     try {
       project.name = project?.name || req.body?.name || '';
@@ -926,6 +928,8 @@ router
               authConfig,
               project,
             });
+            project.config.auth = project.config.auth || {};
+            project.config.auth.provider = project.config.auth.provider || {};
             project.config.auth.provider[authConfig.provider] =
               project.config.auth.provider[authConfig.provider] || {};
             project.config.auth.provider[authConfig.provider].clientId =

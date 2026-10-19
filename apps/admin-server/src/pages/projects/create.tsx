@@ -12,6 +12,12 @@ import { PageLayout } from '@/components/ui/page-layout';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useProject } from '@/hooks/use-project';
+import {
+  MissingPart,
+  NotImportedPart,
+  ProjectImportError,
+  buildProjectImportPayload,
+} from '@/lib/project-import';
 import { zodResolver } from '@hookform/resolvers/zod';
 import router from 'next/router';
 import * as React from 'react';
@@ -30,6 +36,16 @@ const importFormSchema = z.object({
     message: 'Het project moet minimaal uit zes karakters bestaan!',
   }),
 });
+
+const MISSING_LABELS: Record<MissingPart, string> = {
+  config: 'instellingen',
+  emailConfig: 'e-mailinstellingen',
+};
+
+const NOT_IMPORTED_LABELS: Record<NotImportedPart, string> = {
+  statuses: 'statussen',
+  resources: 'inzendingen',
+};
 
 export default function CreateProject() {
   const { createProject, importProject } = useProject();
@@ -74,22 +90,60 @@ export default function CreateProject() {
   }
 
   async function onImport(values: z.infer<typeof importFormSchema>) {
+    let built;
     try {
-      const data = JSON.parse(file);
-      const project = await importProject(
-        values.importedProjectName,
-        data.title,
-        data.config,
-        data.emailConfig
-      );
-      if (project?.id) {
-        toast.success('Project aangemaakt!');
-        router.push(`/projects/${project.id}/settings`);
+      built = buildProjectImportPayload(file, values.importedProjectName);
+    } catch (e) {
+      if (e instanceof ProjectImportError && e.code === 'not-a-project') {
+        toast.error('Dit bestand is geen projectexport.');
       } else {
-        toast.error('De file die geüpload is bevat onjuiste data.');
+        toast.error('Dit bestand is geen geldig JSON-bestand.');
+      }
+      return;
+    }
+
+    try {
+      const { ok, body } = await importProject(built.payload);
+
+      if (ok && body?.id) {
+        const lines: string[] = [];
+        if (built.missing.length > 0) {
+          lines.push(
+            `Niet in het bestand, overgeslagen: ${built.missing
+              .map((part) => MISSING_LABELS[part])
+              .join(', ')}.`
+          );
+        }
+        if (built.notImported.length > 0) {
+          lines.push(
+            `Niet overgenomen: ${built.notImported
+              .map((part) => NOT_IMPORTED_LABELS[part])
+              .join(', ')}.`
+          );
+        }
+
+        if (lines.length === 0) {
+          toast.success('Project aangemaakt!');
+        } else {
+          toast(['Project aangemaakt.', ...lines].join('\n'), {
+            icon: '⚠️',
+            duration: 10000,
+          });
+        }
+        router.push(`/projects/${body.id}/settings`);
+        return;
+      }
+
+      const partialId = body?.duplicatedData?.projectId;
+      if (partialId) {
+        toast.error(
+          `Importeren is deels mislukt. Project ${partialId} is wel aangemaakt; controleer of verwijder het.`
+        );
+      } else {
+        toast.error('Importeren is mislukt.');
       }
     } catch (e) {
-      toast.error('Alleen JSON files worden geaccepteerd!');
+      toast.error('Importeren is mislukt.');
     }
   }
 
