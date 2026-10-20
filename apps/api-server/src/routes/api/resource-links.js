@@ -88,9 +88,22 @@ router.delete(
   requireEditor,
   async function (req, res, next) {
     try {
-      await resourceLinks.removeLink({
-        ...req.linkContext,
-        linkId: parseInt(req.params.linkId, 10),
+      const linkId = parseInt(req.params.linkId, 10);
+      const handler = pluginExtensions.get().getLinkRequestHandler();
+      await db.sequelize.transaction(async (transaction) => {
+        await resourceLinks.removeLink({
+          ...req.linkContext,
+          linkId,
+          transaction,
+        });
+        if (handler && handler.linkRemoved) {
+          await handler.linkRemoved({
+            project: req.project,
+            linkId,
+            user: req.user,
+            transaction,
+          });
+        }
       });
       res.json({ link: 'deleted' });
     } catch (err) {

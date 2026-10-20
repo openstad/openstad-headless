@@ -58,6 +58,7 @@ function createApp(user) {
   app.use(express.json());
   app.use((req, res, next) => {
     req.user = user;
+    req.project = { id: 1 };
     next();
   });
   app.use(
@@ -148,12 +149,58 @@ describe('resource links routes', () => {
     expect(res.status).toBe(403);
   });
 
-  it('lets editors remove links', async () => {
-    const res = await request(createApp(editor)).delete(`${url}/7`);
-    expect(res.status).toBe(200);
-    expect(calls).toEqual([
-      ['remove', { projectId: 1, resourceId: 5, linkId: 7 }],
-    ]);
+  describe('DELETE /:linkId', () => {
+    const transaction = { id: 'tx' };
+
+    beforeEach(() => {
+      vi.spyOn(db.sequelize, 'transaction').mockImplementation(async (work) =>
+        work(transaction)
+      );
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it('lets editors remove links', async () => {
+      vi.spyOn(pluginExtensions, 'get').mockReturnValue({
+        getLinkRequestHandler: () => null,
+      });
+
+      const res = await request(createApp(editor)).delete(`${url}/7`);
+
+      expect(res.status).toBe(200);
+      expect(calls).toEqual([
+        ['remove', { projectId: 1, resourceId: 5, linkId: 7, transaction }],
+      ]);
+    });
+
+    it('tells the link request handler which link was removed', async () => {
+      const linkRemoved = vi.fn(async () => {});
+      vi.spyOn(pluginExtensions, 'get').mockReturnValue({
+        getLinkRequestHandler: () => ({ linkRemoved }),
+      });
+
+      await request(createApp(editor)).delete(`${url}/7`);
+
+      expect(linkRemoved).toHaveBeenCalledWith({
+        project: { id: 1 },
+        linkId: 7,
+        user: editor,
+        transaction,
+      });
+    });
+
+    it('removes the link without a handler that supports it', async () => {
+      vi.spyOn(pluginExtensions, 'get').mockReturnValue({
+        getLinkRequestHandler: () => ({ submit: vi.fn() }),
+      });
+
+      const res = await request(createApp(editor)).delete(`${url}/7`);
+
+      expect(res.status).toBe(200);
+      expect(calls.map(([kind]) => kind)).toEqual(['remove']);
+    });
   });
 
   describe('GET /selection', () => {

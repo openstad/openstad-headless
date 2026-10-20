@@ -94,6 +94,30 @@ describe('plugin extensions', () => {
     });
   });
 
+  it('leaves linkRemoved out when the link request handler has none', () => {
+    const extensions = build([plugin()]);
+
+    expect(extensions.getLinkRequestHandler().linkRemoved).toBeUndefined();
+  });
+
+  it('passes a removed link to the link request handler when it supports it', async () => {
+    const extensions = build([
+      plugin({
+        api: {
+          linkRequestHandler: { handler: './link-requests-removed.js' },
+        },
+      }),
+    ]);
+
+    await extensions
+      .getLinkRequestHandler()
+      .linkRemoved({ project: { id: 1 }, linkId: 7 });
+
+    expect(extensions.getLinkRequestHandler().linkRemoved).toBeTypeOf(
+      'function'
+    );
+  });
+
   it('keeps the first link request handler', () => {
     const extensions = build([plugin(), plugin({ name: 'second' })]);
 
