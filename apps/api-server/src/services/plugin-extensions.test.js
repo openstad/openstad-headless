@@ -248,4 +248,10 @@ describe('getPluginServices', () => {
     expect(pluginServices.db).toBe(require('../db'));
     expect(pluginServices.resourceLinks).toBe(require('./resource-links'));
   });
+
+  it('gives plugins the contact consent rule', () => {
+    expect(getPluginServices().contactConsent).toBe(
+      require('./contact-consent')
+    );
+  });
 });

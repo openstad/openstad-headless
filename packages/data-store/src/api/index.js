@@ -163,6 +163,7 @@ function API(props = {}) {
     fetchItems: links.fetchItems.bind(self),
     fetchSelection: links.fetchSelection.bind(self),
     fetchLinks: links.fetchLinks.bind(self),
+    fetchContactStatus: links.fetchContactStatus.bind(self),
     sendContact: links.sendContact.bind(self),
   };
 

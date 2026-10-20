@@ -5,6 +5,10 @@ const db = require('../../db');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const pluginExtensions = require('../../services/plugin-extensions');
 const { OPENSTAD_SOURCE } = require('../../services/resource-links');
+const {
+  consentingUserIds,
+  requiresContactConsent,
+} = require('../../services/contact-consent');
 
 const router = express.Router({ mergeParams: true });
 
@@ -102,6 +106,13 @@ router.get('/:source', rateLimiter(), async function (req, res, next) {
       .map((id) => parseInt(id, 10))
       .filter(Number.isFinite);
     const words = search.split(/\s+/).filter(Boolean);
+    const contactableOwners =
+      !onlyMine && requiresContactConsent(req.project)
+        ? [
+            ...(req.user.id ? [req.user.id] : []),
+            ...(await consentingUserIds(req.project)),
+          ]
+        : null;
 
     const resources = await visibleResources(req, tagIds).findAll({
       where: {
@@ -113,6 +124,7 @@ router.get('/:source', rateLimiter(), async function (req, res, next) {
             title: { [Op.like]: `%${escapeLike(word)}%` },
           })),
           ...(excludeIds.length ? [{ id: { [Op.notIn]: excludeIds } }] : []),
+          ...(contactableOwners ? [{ userId: contactableOwners }] : []),
         ],
       },
       attributes: ['id', 'title', 'images', 'userId'],

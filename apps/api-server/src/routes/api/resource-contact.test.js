@@ -37,12 +37,23 @@ db.Notification.create = async (data) => {
   return data;
 };
 
-function createApp(user) {
+const consentProject = {
+  id: 1,
+  config: {
+    auth: {
+      provider: {
+        openstad: { requiredUserFields: ['name', 'emailNotificationConsent'] },
+      },
+    },
+  },
+};
+
+function createApp(user, project = { id: 1 }) {
   const app = express();
   app.use(express.json());
   app.use((req, res, next) => {
     req.user = user;
-    req.project = { id: 1 };
+    req.project = project;
     next();
   });
   app.use(
@@ -189,5 +200,102 @@ describe('POST contact', () => {
     expect(handle).toHaveBeenCalledWith(
       expect.objectContaining({ message: '', consent: false })
     );
+  });
+});
+
+describe('contact consent', () => {
+  beforeEach(() => {
+    notifications = [];
+    resourceOwnerId = OWNER.id;
+    ownerRecord = OWNER;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const anonymous = { role: 'anonymous', id: null };
+
+  it('says every submission is contactable without the consent field', async () => {
+    ownerRecord = { ...OWNER, emailNotificationConsent: null };
+
+    const res = await request(createApp(anonymous)).get(url);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ contactable: true });
+  });
+
+  it.each([
+    ['gave consent', true, true],
+    ['refused consent', false, false],
+    ['never answered', null, false],
+  ])(
+    'tells whether an owner who %s is contactable',
+    async (_label, consent, expected) => {
+      ownerRecord = { ...OWNER, emailNotificationConsent: consent };
+
+      const res = await request(createApp(anonymous, consentProject)).get(url);
+
+      expect(res.body).toEqual({ contactable: expected });
+    }
+  );
+
+  it('returns 404 for an unknown submission', async () => {
+    const res = await request(createApp(anonymous, consentProject)).get(
+      '/project/1/resource/6/contact'
+    );
+    expect(res.status).toBe(404);
+  });
+
+  it('refuses a message to an owner without consent', async () => {
+    ownerRecord = { ...OWNER, emailNotificationConsent: false };
+
+    const res = await request(createApp(sender, consentProject))
+      .post(url)
+      .send(validBody);
+
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe(
+      'Deze inzending kan niet via het platform benaderd worden.'
+    );
+    expect(notifications).toEqual([]);
+  });
+
+  it('refuses a plugin contact handler for an owner without consent', async () => {
+    ownerRecord = { ...OWNER, emailNotificationConsent: null };
+    const handle = vi.fn(async () => ({ requestId: 14 }));
+    vi.spyOn(pluginExtensions, 'get').mockReturnValue({
+      getContactHandler: (key) => (key === 'link-request' ? { handle } : null),
+    });
+
+    const res = await request(createApp(sender, consentProject))
+      .post(url)
+      .send({ handler: 'link-request', fields: { resourceId: 9 } });
+
+    expect(res.status).toBe(403);
+    expect(handle).not.toHaveBeenCalled();
+  });
+
+  it('mails an owner who gave consent', async () => {
+    ownerRecord = { ...OWNER, emailNotificationConsent: true };
+
+    const res = await request(createApp(sender, consentProject))
+      .post(url)
+      .send(validBody);
+
+    expect(res.status).toBe(200);
+    expect(notifications).toHaveLength(1);
+  });
+
+  it('lets an editor contact an owner without consent', async () => {
+    ownerRecord = { ...OWNER, emailNotificationConsent: false };
+
+    const res = await request(
+      createApp({ ...sender, role: 'editor' }, consentProject)
+    )
+      .post(url)
+      .send(validBody);
+
+    expect(res.status).toBe(200);
   });
 });

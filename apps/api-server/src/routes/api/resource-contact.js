@@ -3,11 +3,32 @@ const createError = require('http-errors');
 const db = require('../../db');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const pluginExtensions = require('../../services/plugin-extensions');
+const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
+const { ownerAllowsContact } = require('../../services/contact-consent');
 
 const router = express.Router({ mergeParams: true });
 
 const MAX_MESSAGE_LENGTH = 2000;
 const CONTACT_NOTIFICATION_TYPE = 'contact message - user';
+const NOT_CONTACTABLE_MESSAGE =
+  'Deze inzending kan niet via het platform benaderd worden.';
+
+function findVisibleResource(req) {
+  return db.Resource.scope('defaultScope', {
+    method: ['onlyVisible', req.user?.id, req.user?.role],
+  }).findOne({
+    where: {
+      id: parseInt(req.params.resourceId, 10),
+      projectId: parseInt(req.params.projectId, 10),
+    },
+  });
+}
+
+function senderMayContact(req, resource) {
+  if (resource.userId && resource.userId === req.user.id) return true;
+  if (hasRole(req.user, 'editor')) return true;
+  return ownerAllowsContact(req.project, resource);
+}
 
 function parseContactRequest(body) {
   const message = typeof body.message === 'string' ? body.message.trim() : '';
@@ -40,22 +61,30 @@ function assertDefaultContactRequest({ message, consent }) {
   }
 }
 
+router.get('/', async function (req, res, next) {
+  try {
+    const resource = await findVisibleResource(req);
+    if (!resource) {
+      throw createError(404, 'Resource not found');
+    }
+    res.json({ contactable: await ownerAllowsContact(req.project, resource) });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.post('/', rateLimiter(), async function (req, res, next) {
   try {
     if (!req.user || !req.user.id) {
       throw createError(401, 'You must be logged in to send a message');
     }
 
-    const resource = await db.Resource.scope('defaultScope', {
-      method: ['onlyVisible', req.user.id, req.user.role],
-    }).findOne({
-      where: {
-        id: parseInt(req.params.resourceId, 10),
-        projectId: parseInt(req.params.projectId, 10),
-      },
-    });
+    const resource = await findVisibleResource(req);
     if (!resource) {
       throw createError(404, 'Resource not found');
+    }
+    if (!(await senderMayContact(req, resource))) {
+      throw createError(403, NOT_CONTACTABLE_MESSAGE);
     }
 
     const { message, consent, handlerKey, fields } = parseContactRequest(

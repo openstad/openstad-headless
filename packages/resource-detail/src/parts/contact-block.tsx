@@ -28,6 +28,7 @@ import {
   contactConsent,
   contactStatus,
   contactTextDefaults,
+  showContactBlock,
   validateContact,
   withoutLinked,
 } from './links-helpers';
@@ -160,9 +161,26 @@ export function ContactBlock({
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState('');
   const [sending, setSending] = useState(false);
+  const [contactable, setContactable] = useState<boolean | null>(null);
 
   const isLoggedIn = !!currentUser?.id;
   const isDefaultHandler = !handler;
+
+  useEffect(() => {
+    if (!resourceId) return;
+    let cancelled = false;
+    datastore.api.links
+      .fetchContactStatus({ projectId, resourceId })
+      .then((result: { contactable?: boolean }) => {
+        if (!cancelled) setContactable(result?.contactable === true);
+      })
+      .catch(() => {
+        if (!cancelled) setContactable(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId, resourceId]);
 
   useEffect(() => {
     if (!formOpen || !showOwnResource) return;
@@ -279,7 +297,8 @@ export function ContactBlock({
   const ownResourceFieldId = `${fieldId}-own-resource`;
   const errorId = `${fieldId}-error`;
 
-  if (isLoggedIn && ownerId && currentUser.id === ownerId && isDefaultHandler)
+  const isOwner = !!(isLoggedIn && ownerId && currentUser.id === ownerId);
+  if (!showContactBlock({ isOwner, isDefaultHandler, contactable }))
     return null;
 
   return (
