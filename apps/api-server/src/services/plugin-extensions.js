@@ -98,7 +98,13 @@ function buildExtensions(plugins, services, resolvePluginFile) {
       } else if (implementation) {
         linkRequestHandler = {
           pluginName: plugin.name,
-          ...pick(implementation, ['submit', 'getPendingSelection']),
+          ...pick(implementation, [
+            'submit',
+            'getPendingSelection',
+            ...(hasFunctions(implementation, ['linkRemoved'])
+              ? ['linkRemoved']
+              : []),
+          ]),
         };
       }
     }
