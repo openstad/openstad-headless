@@ -44,11 +44,25 @@ const fixtureSource = {
   get: vi.fn(async ({ ids }) => ids.map((id) => ({ id, label: id }))),
 };
 
-function createApp(user = { role: 'anonymous', id: null }) {
+const consentProject = {
+  id: 1,
+  config: {
+    auth: {
+      provider: {
+        openstad: { requiredUserFields: ['emailNotificationConsent'] },
+      },
+    },
+  },
+};
+
+function createApp(
+  user = { role: 'anonymous', id: null },
+  project = { id: 1 }
+) {
   const app = express();
   app.use((req, res, next) => {
     req.user = user;
-    req.project = { id: 1 };
+    req.project = project;
     next();
   });
   app.use('/project/:projectId(\\d+)/link-options', linkOptionsRouter);
@@ -223,5 +237,66 @@ describe('link options', () => {
       '/project/1/link-options/openstad?search=stad'
     );
     expect(queries[0].where).not.toHaveProperty('userId');
+  });
+});
+
+describe('link options with contact consent', () => {
+  let userQueries = [];
+
+  beforeEach(() => {
+    scopes = [];
+    queries = [];
+    userQueries = [];
+    vi.spyOn(pluginExtensions, 'get').mockReturnValue({
+      getSource: () => null,
+    });
+    vi.spyOn(db.User, 'findAll').mockImplementation(async (query) => {
+      userQueries.push(query);
+      return [{ id: 20 }, { id: 21 }];
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('only lists own submissions and those of owners who gave consent', async () => {
+    await request(createApp({ role: 'member', id: 10 }, consentProject)).get(
+      '/project/1/link-options/openstad?search=stad'
+    );
+
+    expect(userQueries[0].where).toEqual({
+      projectId: 1,
+      emailNotificationConsent: true,
+    });
+    expect(queries[0].where[Op.and]).toContainEqual({ userId: [10, 20, 21] });
+  });
+
+  it('only lists owners who gave consent for an anonymous visitor', async () => {
+    await request(createApp(undefined, consentProject)).get(
+      '/project/1/link-options/openstad'
+    );
+
+    expect(queries[0].where[Op.and]).toContainEqual({ userId: [20, 21] });
+  });
+
+  it('does not filter on consent when the project does not ask for it', async () => {
+    await request(createApp({ role: 'member', id: 10 })).get(
+      '/project/1/link-options/openstad?search=stad'
+    );
+
+    expect(userQueries).toEqual([]);
+    expect(queries[0].where[Op.and]).toEqual([
+      { title: { [Op.like]: '%stad%' } },
+    ]);
+  });
+
+  it('keeps listing all own submissions with mine', async () => {
+    await request(createApp({ role: 'member', id: 10 }, consentProject)).get(
+      '/project/1/link-options/openstad?mine=1'
+    );
+
+    expect(userQueries).toEqual([]);
+    expect(queries[0].where.userId).toBe(10);
   });
 });

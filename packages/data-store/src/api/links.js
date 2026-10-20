@@ -39,6 +39,11 @@ export default {
     return this.fetch(url);
   },
 
+  fetchContactStatus: async function ({ projectId, resourceId }) {
+    const url = `/api/project/${projectId}/resource/${resourceId}/contact`;
+    return this.fetch(url);
+  },
+
   sendContact: async function ({ projectId, resourceId }, data) {
     const url = `/api/project/${projectId}/resource/${resourceId}/contact`;
     return this.fetch(url, {

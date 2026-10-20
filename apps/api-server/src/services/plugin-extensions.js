@@ -55,6 +55,7 @@ function getPluginServices() {
     db: require('../db'),
     resourceLinks: require('./resource-links'),
     resourceDetailUrls: require('./resource-detail-urls'),
+    contactConsent: require('./contact-consent'),
   };
 }
 

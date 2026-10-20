@@ -13,6 +13,7 @@ import {
   externalIdsBySource,
   filterByTags,
   relatedTagOptions,
+  showContactBlock,
   showsOwnResource,
   toRelatedItems,
   validateContact,
@@ -525,5 +526,46 @@ describe('contactFieldsShown', () => {
       showMessage: false,
       showConsent: true,
     });
+  });
+});
+
+describe('showContactBlock', () => {
+  it('shows the block to visitors when the owner may be contacted', () => {
+    expect(
+      showContactBlock({
+        isOwner: false,
+        isDefaultHandler: true,
+        contactable: true,
+      })
+    ).toBe(true);
+  });
+
+  it.each([
+    ['the owner refused contact', false],
+    ['the status is still loading', null],
+  ])('hides the block from visitors when %s', (_label, contactable) => {
+    expect(
+      showContactBlock({ isOwner: false, isDefaultHandler: false, contactable })
+    ).toBe(false);
+  });
+
+  it('hides the message block from the owner', () => {
+    expect(
+      showContactBlock({
+        isOwner: true,
+        isDefaultHandler: true,
+        contactable: true,
+      })
+    ).toBe(false);
+  });
+
+  it('keeps a plugin block for the owner whatever the consent', () => {
+    expect(
+      showContactBlock({
+        isOwner: true,
+        isDefaultHandler: false,
+        contactable: false,
+      })
+    ).toBe(true);
   });
 });

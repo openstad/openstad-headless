@@ -290,6 +290,19 @@ export function contactStatus(
   return successMessage;
 }
 
+export function showContactBlock({
+  isOwner,
+  isDefaultHandler,
+  contactable,
+}: {
+  isOwner: boolean;
+  isDefaultHandler: boolean;
+  contactable: boolean | null;
+}): boolean {
+  if (isOwner) return !isDefaultHandler;
+  return contactable === true;
+}
+
 export function validateContact({
   isDefaultHandler,
   showMessage,
