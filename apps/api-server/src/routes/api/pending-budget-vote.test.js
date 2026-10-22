@@ -10,6 +10,8 @@ process.env.NODE_CONFIG_DIR = path.resolve(
   '../../../config'
 );
 process.env.SUPPRESS_NO_CONFIG_WARNING = '1';
+// Mimic an installation with a very high global limit
+process.env.RATE_LIMIT = '75000';
 
 const require = createRequire(import.meta.url);
 const db = require('../../db');
@@ -64,6 +66,28 @@ describe('POST /pending-budget-vote', () => {
       .send('"kaas"');
 
     expect(res.status).toBe(400);
+    expect(created).toBeNull();
+  });
+});
+
+describe('POST /pending-budget-vote rate limit', () => {
+  it('blocks the 31st request from one public IP within the window', async () => {
+    // One app for all requests so they share the limiter store
+    const app = createApp();
+    app.set('trust proxy', true);
+    const post = () =>
+      request(app)
+        .post('/pending-budget-vote')
+        .set('X-Forwarded-For', '203.0.113.10')
+        .send({ 101: 1 });
+
+    for (let i = 0; i < 30; i++) {
+      expect((await post()).status).toBe(200);
+    }
+
+    created = null;
+    const res = await post();
+    expect(res.status).toBe(429);
     expect(created).toBeNull();
   });
 });
