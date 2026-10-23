@@ -6,6 +6,11 @@ module.exports = {
         className: 'bp-rich-text',
       },
     },
+    '@apostrophecms/oembed': {
+      options: {
+        minimumAllowlist: [],
+      },
+    },
     '@apostrophecms/global': {},
     asset: {},
     'default-page': {},
