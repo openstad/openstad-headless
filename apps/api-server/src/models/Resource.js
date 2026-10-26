@@ -108,6 +108,7 @@ module.exports = function (db, sequelize, DataTypes) {
       score: {
         type: DataTypes.DECIMAL(12, 11),
         auth: {
+          createableBy: 'editor',
           updateableBy: 'editor',
         },
         allowNull: false,
@@ -117,6 +118,7 @@ module.exports = function (db, sequelize, DataTypes) {
       sort: {
         type: DataTypes.INTEGER,
         auth: {
+          createableBy: 'editor',
           updateableBy: 'editor',
         },
         allowNull: false,
@@ -135,6 +137,7 @@ module.exports = function (db, sequelize, DataTypes) {
         ),
         defaultValue: 'all',
         auth: {
+          createableBy: 'editor',
           updateableBy: ['editor', 'owner'],
         },
         allowNull: true,
