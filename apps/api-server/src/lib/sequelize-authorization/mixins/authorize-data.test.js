@@ -76,7 +76,12 @@ describe('authorizeData on create keeps editor-only fields out of public submiss
   });
 
   it('keeps score, sort and viewableByRole for an editor resource create', () => {
-    const body = { title: 'Idea', score: 0.5, sort: 2, viewableByRole: 'member' };
+    const body = {
+      title: 'Idea',
+      score: 0.5,
+      sort: 2,
+      viewableByRole: 'member',
+    };
 
     db.Resource.authorizeData(body, 'create', editor);
 
