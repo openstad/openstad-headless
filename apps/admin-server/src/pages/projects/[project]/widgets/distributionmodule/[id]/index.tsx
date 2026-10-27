@@ -1,8 +1,8 @@
 import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { flushAllFields } from '@/hooks/useFieldDebounce';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -10,7 +10,7 @@ import {
 import WidgetDistributionModuleDistribute from '@/pages/projects/[project]/widgets/distributionmodule/[id]/distribute';
 import { DistributionModuleProps } from '@openstad-headless/distribution-module/src/distribution-module';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
@@ -28,12 +28,17 @@ export default function WidgetDistributionModule({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<DistributionModuleProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<DistributionModuleProps>({
-      projectId,
-    });
+  const { previewConfig, onFieldChanged } =
+    useWidgetDraft<DistributionModuleProps>({ projectId });
+
+  const [activeTab, setActiveTab] = useState('general');
+
+  const onTabChange = (value: string) => {
+    flushAllFields();
+    setActiveTab(value);
+  };
+
+  const tabUpdateConfig = ignoreTabSubmit;
 
   return (
     <div>
@@ -53,7 +58,7 @@ export default function WidgetDistributionModule({ apiUrl }: WithApiUrlProps) {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="general">
+          <Tabs value={activeTab} onValueChange={onTabChange}>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="items">Items</TabsTrigger>
@@ -65,53 +70,29 @@ export default function WidgetDistributionModule({ apiUrl }: WithApiUrlProps) {
               {previewConfig && (
                 <WidgetDistributionModuleGeneral
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               )}
             </TabsContent>
             <TabsContent value="items" className="p-0">
-              {previewConfig && (
-                <WidgetDistributionModuleItems
-                  {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
-                />
-              )}
+              {previewConfig &&
+                String((previewConfig as { widgetId?: unknown }).widgetId) ===
+                  String(id) && (
+                  <WidgetDistributionModuleItems
+                    key={String(id)}
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
+                )}
             </TabsContent>
             <TabsContent value="distribute" className="p-0">
               {previewConfig && (
                 <WidgetDistributionModuleDistribute
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               )}
             </TabsContent>

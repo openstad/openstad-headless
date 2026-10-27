@@ -1,5 +1,4 @@
 import { CheckboxList } from '@/components/checkbox-list';
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -20,6 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { ArgumentWidgetTabProps } from '@/pages/projects/[project]/widgets/comments/[id]/index';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -53,6 +53,11 @@ export default function ArgumentsInclude(
       includeOrExclude: props?.includeOrExclude || 'include',
       onlyIncludeOrExcludeTagIds: props?.onlyIncludeOrExcludeTagIds || '',
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Inclusief / exclusief',
   });
 
   return (
@@ -136,10 +141,6 @@ export default function ArgumentsInclude(
               props.onFieldChanged('onlyIncludeOrExcludeTagIds', idsToSave);
             }}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

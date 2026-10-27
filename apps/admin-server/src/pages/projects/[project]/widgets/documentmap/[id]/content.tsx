@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -18,6 +17,7 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
@@ -111,6 +111,11 @@ export default function DocumentContent(
       displayResourceTitle: props?.displayResourceTitle || 'yes',
       displayResourceSummary: props?.displayResourceSummary || 'yes',
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Content',
   });
 
   return (
@@ -578,10 +583,6 @@ export default function DocumentContent(
               </FormItem>
             )}
           />
-
-          <Button className="w-fit col-span-full mt-8" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>
