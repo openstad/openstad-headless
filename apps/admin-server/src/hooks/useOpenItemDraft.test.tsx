@@ -12,7 +12,9 @@ type DraftValidator = () => { ok: boolean; label?: string; message?: string };
 
 const draft = vi.hoisted(() => ({
   edits: new Map<string, boolean>(),
-  validators: new Set<() => { ok: boolean; label?: string; message?: string }>(),
+  validators: new Set<
+    () => { ok: boolean; label?: string; message?: string }
+  >(),
 }));
 
 vi.mock('./useWidgetDraft', () => ({
@@ -36,8 +38,11 @@ type TestValues = { title: string; fieldKey: string };
 const mergeItem = (items: TestItem[], openId: string, values: TestValues) =>
   items.map((item) => (item.id === openId ? { ...item, ...values } : item));
 
-const validateItem = (_items: TestItem[], _openId: string, values: TestValues) =>
-  values.fieldKey ? undefined : 'Vul een sleutel in.';
+const validateItem = (
+  _items: TestItem[],
+  _openId: string,
+  values: TestValues
+) => (values.fieldKey ? undefined : 'Vul een sleutel in.');
 
 const storedItem: TestItem = { id: 'q1', title: 'Vraag', fieldKey: 'vraag' };
 
@@ -56,7 +61,10 @@ function mountHook(initialItems: TestItem[], openId: string | null) {
 
   function Probe() {
     form = useForm<TestValues>({
-      defaultValues: { title: open?.title ?? '', fieldKey: open?.fieldKey ?? '' },
+      defaultValues: {
+        title: open?.title ?? '',
+        fieldKey: open?.fieldKey ?? '',
+      },
     });
     useOpenItemDraft<TestItem, TestValues, null>({
       form,
