@@ -24,9 +24,17 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useDraftItems } from '@/hooks/useDraftItems';
+import { useOpenItemDraft } from '@/hooks/useOpenItemDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import {
+  applySelectedMatrixEdit,
+  applySelectedOptionEdit,
+  ensureABDefaultsOnWeights,
+  mergeChoiceGuideWeights,
+  mergeSelectedItem,
+} from '@/lib/open-item-merge';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -193,7 +201,10 @@ export default function WidgetChoiceGuideItems(
   props: ChoiceGuideProps & EditFieldProps<ChoiceGuideProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, commitItems] = useDraftItems<Item>(
+    props.items,
+    props.onFieldChanged
+  );
   const [options, setOptions] = useState<Option[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
@@ -209,40 +220,46 @@ export default function WidgetChoiceGuideItems(
   >(null);
   const [imageIndexOpen, setImageIndexOpen] = useState<number | null>(null);
 
-  const { data: widget } = useWidgetConfig<any>();
-
   const router = useRouter();
   const { project } = router.query;
 
   const { data: allTags } = useTags(project as string);
   const firstTagType = allTags?.[0]?.type ?? '';
 
-  const ensureABDefaultsOnWeights = (
-    itemType: string | undefined,
-    weights: Record<string, any>
-  ) => {
-    if (itemType !== 'a-b-slider') return weights;
-
-    const normalized = structuredClone(weights || {});
-
-    Object.keys(normalized).forEach((groupId) => {
-      const groupWeights = normalized[groupId];
-      if (!groupWeights || typeof groupWeights !== 'object') return;
-
-      if (typeof groupWeights.weightAB === 'undefined') {
-        groupWeights.weightAB = 'A';
-      }
-
-      if (
-        typeof groupWeights.weightY !== 'undefined' &&
-        typeof groupWeights.weightABY === 'undefined'
-      ) {
-        groupWeights.weightABY = 'A';
-      }
-    });
-
-    return normalized;
+  type OpenItemState = {
+    options: Option[];
+    matrixOptions: Matrix;
+    selectedOption: Option | null;
+    matrixOption: (MatrixOption & { type: 'rows' | 'columns' }) | null;
   };
+
+  function mergeOpenItem(
+    currentItems: Item[],
+    selectedId: string,
+    values: FormData,
+    state: OpenItemState
+  ) {
+    const storedItem = currentItems.find((item) => item.id === selectedId);
+    const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+    return mergeSelectedItem(currentItems, selectedId, {
+      ...valuesWithoutTrigger,
+      weights: mergeChoiceGuideWeights(
+        values.type,
+        storedItem?.weights,
+        values.weights
+      ),
+      options: applySelectedOptionEdit(
+        state.options,
+        state.selectedOption,
+        values.options
+      ),
+      matrix: applySelectedMatrixEdit(
+        state.matrixOptions,
+        state.matrixOption,
+        values.matrix
+      ),
+    } as Partial<Item>);
+  }
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
@@ -251,61 +268,19 @@ export default function WidgetChoiceGuideItems(
       values.weights || {}
     );
 
-    if (selectedItem) {
-      // Merge immutably to avoid mutating references from selectedItem/form state.
-      const selectedItemWeights = structuredClone(selectedItem.weights || {});
-      const valuesWeights = structuredClone(normalizedValuesWeights);
-      const mergedWeights = {
-        ...selectedItemWeights,
-        ...valuesWeights,
-      };
-
-      const normalizedMergedWeights = ensureABDefaultsOnWeights(
-        values.type,
-        mergedWeights
-      );
-
-      const oldOptions = selectedItem.options || [];
-      const newOptions = options || [];
-      const triggerMap: Record<string, string> = {};
-      for (let i = 0; i < Math.min(oldOptions.length, newOptions.length); i++) {
-        if (oldOptions[i].trigger !== newOptions[i].trigger) {
-          triggerMap[oldOptions[i].trigger] = newOptions[i].trigger;
-        }
-      }
-      const hasTriggerChanges = Object.keys(triggerMap).length > 0;
-
-      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
-
-      setItems((currentItems) =>
-        currentItems.map((item) => {
-          if (item.id === selectedItem.id) {
-            return {
-              ...item,
-              ...valuesWithoutTrigger,
-              weights: normalizedMergedWeights,
-            };
-          }
-          if (
-            hasTriggerChanges &&
-            item.routingSelectedQuestion === selectedItem.trigger
-          ) {
-            const answers = Array.isArray(item.routingSelectedAnswer)
-              ? item.routingSelectedAnswer
-              : item.routingSelectedAnswer
-                ? [item.routingSelectedAnswer]
-                : [];
-            const updated = answers.map(
-              (answer) => triggerMap[answer] || answer
-            );
-            return { ...item, routingSelectedAnswer: updated };
-          }
-          return item;
+    if (selectedItem?.id) {
+      const selectedId = selectedItem.id;
+      commitItems((currentItems) =>
+        mergeOpenItem(currentItems, selectedId, values, {
+          options,
+          matrixOptions,
+          selectedOption: null,
+          matrixOption: null,
         })
       );
       setSelectedItemId(null);
     } else {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
           (max, i) => Math.max(max, parseInt(i.trigger) || 0),
           0
@@ -527,97 +502,84 @@ export default function WidgetChoiceGuideItems(
     defaultValues: defaults(),
   });
 
-  const itemsInitialized = React.useRef(false);
-  useEffect(() => {
-    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
-      itemsInitialized.current = true;
-      setItems(props.items.map(withId));
+  useOpenItemDraft<Item, FormData, OpenItemState>({
+    form,
+    openId: selectedItem?.id ?? null,
+    state: { options, matrixOptions, selectedOption, matrixOption },
+    items,
+    commitItems,
+    merge: mergeOpenItem,
+    label: 'Velden',
+  });
+
+  function openItem(item: Item) {
+    let images = item.images || [];
+    if ((!images || images.length === 0) && item.infoImage) {
+      images = [
+        {
+          url: item.infoImage,
+          imageAlt: '',
+          imageDescription: '',
+        },
+      ];
     }
-  }, [props?.items]);
 
-  const { onFieldChanged } = props;
-  useEffect(() => {
-    if (onFieldChanged) {
-      onFieldChanged('items', items);
-    }
-  }, [items]);
-
-  // Sets form to selected item values when item is selected
-  useEffect(() => {
-    if (selectedItem) {
-      // Migrate fallback image fields to images array if needed
-      let images = selectedItem.images || [];
-      if ((!images || images.length === 0) && selectedItem.infoImage) {
-        images = [
-          {
-            url: selectedItem.infoImage,
-            imageAlt: '',
-            imageDescription: '',
-          },
-        ];
-      }
-
-      const formValues = {
-        trigger: selectedItem.trigger,
-        title: selectedItem.title || '',
-        description: selectedItem.description || '',
-        type: selectedItem.type || '',
-        tags: selectedItem.tags || firstTagType,
-        options: selectedItem.options || [],
-        fieldRequired: selectedItem.fieldRequired || false,
-        onlyForModerator: selectedItem.onlyForModerator || false,
-        minCharacters: selectedItem.minCharacters || '',
-        maxCharacters: selectedItem.maxCharacters || '',
-        variant: selectedItem.variant || '',
-        multiple: selectedItem.multiple || false,
-        maxUploadSizeMB: selectedItem.maxUploadSizeMB || 25,
-        showMoreInfo: selectedItem.showMoreInfo || false,
-        moreInfoButton: selectedItem.moreInfoButton || '',
-        moreInfoContent: selectedItem.moreInfoContent || '',
-        labelA: selectedItem.labelA || '',
-        labelB: selectedItem.labelB || '',
-        sliderTitleUnderA: selectedItem.sliderTitleUnderA || '',
-        sliderTitleUnderB: selectedItem.sliderTitleUnderB || '',
-        explanationA: selectedItem.explanationA || '',
-        explanationB: selectedItem.explanationB || '',
-        placeholder: selectedItem.placeholder || '',
-        prevPageText: selectedItem.prevPageText || '',
-        nextPageText: selectedItem.nextPageText || '',
-        imageA: selectedItem.imageA || '',
-        imageB: selectedItem.imageB || '',
-        maxChoices: selectedItem.maxChoices || '',
-        maxChoicesMessage: selectedItem.maxChoicesMessage || '',
-        defaultValue: selectedItem.defaultValue || '',
-        weights: selectedItem.weights || {},
-        skipQuestion: selectedItem.skipQuestion || false,
-        skipQuestionAllowExplanation:
-          selectedItem.skipQuestionAllowExplanation || false,
-        skipQuestionExplanation: selectedItem.skipQuestionExplanation || '',
-        skipQuestionLabel: selectedItem.skipQuestionLabel || 'Sla vraag over',
-        matrix: selectedItem.matrix || matrixDefault,
-        matrixMultiple: selectedItem.matrixMultiple || false,
-        routingInitiallyHide: selectedItem.routingInitiallyHide || false,
-        createImageSlider: selectedItem.createImageSlider || false,
-        imageClickable: selectedItem.imageClickable || false,
-        routingSelectedQuestion: selectedItem.routingSelectedQuestion || '',
-        routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
-        images,
-
-        // Keeping this for backwards compatibility
-        infoImage: '',
-      };
-
-      form.reset(formValues);
-      setOptions((selectedItem.options || []).map(withId));
-      const matrix = selectedItem.matrix || matrixDefault;
-      setMatrixOptions({
-        ...matrix,
-        rows: (matrix.rows || []).map(withId),
-        columns: (matrix.columns || []).map(withId),
-      });
-      setActiveTab('1');
-    }
-  }, [selectedItemId, form]);
+    form.reset({
+      trigger: item.trigger,
+      title: item.title || '',
+      description: item.description || '',
+      type: item.type || '',
+      tags: item.tags || firstTagType,
+      options: item.options || [],
+      fieldRequired: item.fieldRequired || false,
+      onlyForModerator: item.onlyForModerator || false,
+      minCharacters: item.minCharacters || '',
+      maxCharacters: item.maxCharacters || '',
+      variant: item.variant || '',
+      multiple: item.multiple || false,
+      maxUploadSizeMB: item.maxUploadSizeMB || 25,
+      showMoreInfo: item.showMoreInfo || false,
+      moreInfoButton: item.moreInfoButton || '',
+      moreInfoContent: item.moreInfoContent || '',
+      labelA: item.labelA || '',
+      labelB: item.labelB || '',
+      sliderTitleUnderA: item.sliderTitleUnderA || '',
+      sliderTitleUnderB: item.sliderTitleUnderB || '',
+      explanationA: item.explanationA || '',
+      explanationB: item.explanationB || '',
+      placeholder: item.placeholder || '',
+      prevPageText: item.prevPageText || '',
+      nextPageText: item.nextPageText || '',
+      imageA: item.imageA || '',
+      imageB: item.imageB || '',
+      maxChoices: item.maxChoices || '',
+      maxChoicesMessage: item.maxChoicesMessage || '',
+      defaultValue: item.defaultValue || '',
+      weights: item.weights || {},
+      skipQuestion: item.skipQuestion || false,
+      skipQuestionAllowExplanation: item.skipQuestionAllowExplanation || false,
+      skipQuestionExplanation: item.skipQuestionExplanation || '',
+      skipQuestionLabel: item.skipQuestionLabel || 'Sla vraag over',
+      matrix: item.matrix || matrixDefault,
+      matrixMultiple: item.matrixMultiple || false,
+      routingInitiallyHide: item.routingInitiallyHide || false,
+      createImageSlider: item.createImageSlider || false,
+      imageClickable: item.imageClickable || false,
+      routingSelectedQuestion: item.routingSelectedQuestion || '',
+      routingSelectedAnswer: item.routingSelectedAnswer || '',
+      images,
+      infoImage: '',
+    });
+    setOptions((item.options || []).map(withId));
+    const matrix = item.matrix || matrixDefault;
+    setMatrixOptions({
+      ...matrix,
+      rows: (matrix.rows || []).map(withId),
+      columns: (matrix.columns || []).map(withId),
+    });
+    setActiveTab('1');
+    setSelectedItemId(item.id ?? null);
+  }
 
   useEffect(() => {
     if (selectedOption) {
@@ -650,7 +612,7 @@ export default function WidgetChoiceGuideItems(
     matrixType: 'rows' | 'columns' = 'rows'
   ) => {
     if (isItemAction) {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         const index = currentItems.findIndex(
           (entry) => entry.trigger === clickedTrigger
         );
@@ -756,7 +718,7 @@ export default function WidgetChoiceGuideItems(
 
   useEffect(() => {
     const chosenType = form.watch('type') || '';
-    const chosenConfig = widget?.config?.choiceGuide?.choicesType || 'default';
+    const chosenConfig = props?.choiceGuide?.choicesType || 'default';
 
     let dimensions = chosenConfig === 'plane' ? ['X', 'Y'] : ['X'];
 
@@ -779,61 +741,6 @@ export default function WidgetChoiceGuideItems(
 
     setDimensions(finalDimensions);
   }, [form.watch('type')]);
-
-  function handleSaveItems() {
-    let itemsToSave = [...items];
-
-    if (selectedItem) {
-      const values = form.getValues();
-      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
-      if (valuesWithoutTrigger?.options) {
-        valuesWithoutTrigger.options = options;
-      }
-      if (valuesWithoutTrigger?.matrix) {
-        valuesWithoutTrigger.matrix = matrixOptions;
-      }
-
-      const normalizedValuesWeights = ensureABDefaultsOnWeights(
-        valuesWithoutTrigger.type,
-        valuesWithoutTrigger.weights || {}
-      );
-      const selectedItemWeights = structuredClone(selectedItem.weights || {});
-      const mergedWeights = {
-        ...selectedItemWeights,
-        ...structuredClone(normalizedValuesWeights),
-      };
-      const normalizedMergedWeights = ensureABDefaultsOnWeights(
-        valuesWithoutTrigger.type,
-        mergedWeights
-      );
-
-      itemsToSave = itemsToSave.map((item) =>
-        item.id === selectedItem.id
-          ? {
-              ...item,
-              ...valuesWithoutTrigger,
-              weights: normalizedMergedWeights,
-            }
-          : item
-      );
-    }
-
-    const updatedProps = { ...props };
-
-    Object.keys(updatedProps).forEach((key: string) => {
-      if (key.startsWith('options.')) {
-        // @ts-ignore
-        delete updatedProps[key];
-      }
-    });
-
-    setItems(itemsToSave);
-    props.updateConfig({ ...updatedProps, items: itemsToSave });
-    setSelectedItemId(null);
-    form.reset(defaults());
-    setOptions([]);
-    setMatrixOptions(matrixDefault);
-  }
 
   const hasOptions = () => {
     switch (form.watch('type')) {
@@ -1125,9 +1032,7 @@ export default function WidgetChoiceGuideItems(
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
                                 if (selectedItem?.id === item.id) return;
-                                setSelectedItemId(item.id ?? null);
-                                setOptions([]);
-                                setMatrixOptions(matrixDefault);
+                                openItem(item);
                                 setSettingOptions(false);
                               }}>
                               <span
@@ -1151,14 +1056,6 @@ export default function WidgetChoiceGuideItems(
                         ))
                     : 'Geen items'}
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={() => handleSaveItems()}>
-                  Configuratie opslaan
-                </Button>
               </div>
             </div>
 
@@ -1813,12 +1710,14 @@ export default function WidgetChoiceGuideItems(
                                             />
                                           </div>
                                           <Button
+                                            type="button"
+                                            aria-label="Afbeelding verwijderen"
                                             color="red"
                                             onClick={() => {
                                               removeImage(index);
                                             }}
                                             className="absolute left-0 top-0">
-                                            <X size={24} />
+                                            <X size={24} aria-hidden="true" />
                                           </Button>
 
                                           <div
@@ -2355,6 +2254,8 @@ export default function WidgetChoiceGuideItems(
                                           alt={form.watch('imageA')}
                                         />
                                         <Button
+                                          type="button"
+                                          aria-label="Afbeelding verwijderen"
                                           color="red"
                                           onClick={() => {
                                             form.setValue('imageA', '');
@@ -2364,7 +2265,7 @@ export default function WidgetChoiceGuideItems(
                                             right: 0,
                                             top: 0,
                                           }}>
-                                          <X size={24} />
+                                          <X size={24} aria-hidden="true" />
                                         </Button>
                                       </div>
                                     </section>
@@ -2385,6 +2286,8 @@ export default function WidgetChoiceGuideItems(
                                           alt={form.watch('imageB')}
                                         />
                                         <Button
+                                          type="button"
+                                          aria-label="Afbeelding verwijderen"
                                           color="red"
                                           onClick={() => {
                                             form.setValue('imageB', '');
@@ -2394,7 +2297,7 @@ export default function WidgetChoiceGuideItems(
                                             right: 0,
                                             top: 0,
                                           }}>
-                                          <X size={24} />
+                                          <X size={24} aria-hidden="true" />
                                         </Button>
                                       </div>
                                     </section>
@@ -2869,8 +2772,7 @@ export default function WidgetChoiceGuideItems(
                       <div className="w-full mt-4 flex flex-col gap-y-4">
                         {(() => {
                           const isPlaneType =
-                            widget?.config?.choiceGuide?.choicesType ===
-                            'plane';
+                            props?.choiceGuide?.choicesType === 'plane';
                           const isCheckboxType = [
                             'checkbox',
                             'radiobox',
@@ -2883,7 +2785,7 @@ export default function WidgetChoiceGuideItems(
                           }
 
                           if (isCheckboxType) {
-                            return widget?.config?.choiceOption?.choiceOptions?.map(
+                            return props?.choiceOption?.choiceOptions?.map(
                               (singleGroup: ChoiceOptions, index: number) =>
                                 weightOptionsFields(singleGroup, index)
                             );
@@ -2893,7 +2795,7 @@ export default function WidgetChoiceGuideItems(
                             return weightFields({ id: 'plane' }, 999);
                           }
 
-                          return widget?.config?.choiceOption?.choiceOptions?.map(
+                          return props?.choiceOption?.choiceOptions?.map(
                             (singleGroup: ChoiceOptions, index: number) =>
                               weightFields(singleGroup, index)
                           );

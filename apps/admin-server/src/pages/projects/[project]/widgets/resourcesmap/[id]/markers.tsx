@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -19,6 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import useMarkers from '@/hooks/use-markers';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
@@ -64,6 +64,12 @@ export default function WidgetResourcesMapMarkers(
       markerInteractionType: props?.markerInteractionType || 'default',
     },
   });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Markers',
+  });
+
   const router = useRouter();
   const projectId = router.query.project as string;
 
@@ -170,16 +176,6 @@ export default function WidgetResourcesMapMarkers(
               </FormItem>
             )}
           />
-
-          <Button
-            type={props?.buttonType || 'submit'}
-            onClick={() => {
-              if (props?.buttonType === 'button') {
-                onSubmit(form.getValues());
-              }
-            }}>
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

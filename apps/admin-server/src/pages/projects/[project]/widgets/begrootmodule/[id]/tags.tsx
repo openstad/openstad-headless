@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -19,6 +18,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import {
@@ -31,7 +31,6 @@ import * as Switch from '@radix-ui/react-switch';
 import _ from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 const formSchema = z
@@ -90,16 +89,6 @@ export default function WidgetStemBegrootOverviewTags(
     }
   }, [tags]);
 
-  async function onSubmit(values: FormData) {
-    props.updateConfig({ ...props, ...values });
-  }
-
-  function onError() {
-    toast.error(
-      "Selecteer minimaal één tag groep of schakel 'Filteren op tags weergeven' uit."
-    );
-  }
-
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
@@ -110,13 +99,18 @@ export default function WidgetStemBegrootOverviewTags(
     },
   });
 
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Tags',
+  });
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
         <Heading size="xl">Tags</Heading>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit, onError)}
+          onSubmit={(e) => e.preventDefault()}
           className="lg:w-3/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
@@ -184,7 +178,7 @@ export default function WidgetStemBegrootOverviewTags(
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-[auto_1fr_1fr] gap-x-8 gap-y-2">
-                  {(tagGroupNames || []).map((groupName, index) => (
+                  {(tagGroupNames || []).map((groupName) => (
                     <>
                       <FormField
                         key={`parent${groupName}`}
@@ -240,7 +234,11 @@ export default function WidgetStemBegrootOverviewTags(
                                   <Input
                                     placeholder="Groep label"
                                     key={`${groupName}-label-input-field`}
-                                    defaultValue={field.value.at(index)?.label}
+                                    value={
+                                      field.value.find(
+                                        (g) => g.type === groupName
+                                      )?.label ?? ''
+                                    }
                                     disabled={
                                       field.value.find(
                                         (g) => g.type === groupName
@@ -248,17 +246,19 @@ export default function WidgetStemBegrootOverviewTags(
                                     }
                                     onChange={(e) => {
                                       const groups = field.value;
-                                      const existingGroup = groups[index];
-
-                                      if (existingGroup) {
-                                        existingGroup.label = e.target.value;
-                                        groups[index] = existingGroup;
-                                        field.onChange(groups);
-                                        props.onFieldChanged(
-                                          field.name,
-                                          groups
-                                        );
-                                      }
+                                      if (
+                                        !groups.some(
+                                          (g) => g.type === groupName
+                                        )
+                                      )
+                                        return;
+                                      const next = groups.map((g) =>
+                                        g.type === groupName
+                                          ? { ...g, label: e.target.value }
+                                          : g
+                                      );
+                                      field.onChange(next);
+                                      props.onFieldChanged(field.name, next);
                                     }}
                                   />
                                 </>
@@ -323,10 +323,6 @@ export default function WidgetStemBegrootOverviewTags(
               </FormItem>
             )}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

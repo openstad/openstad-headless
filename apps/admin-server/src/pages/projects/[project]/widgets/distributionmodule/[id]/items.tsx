@@ -10,8 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { useDraftItems } from '@/hooks/useDraftItems';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { generateId, withId } from '@/lib/widget-item-helpers';
+import { generateId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DistributionModuleProps } from '@openstad-headless/distribution-module/src/distribution-module';
 import {
@@ -19,7 +20,7 @@ import {
   Option,
 } from '@openstad-headless/enquete/src/types/enquete-props';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -35,7 +36,10 @@ export default function WidgetDistributionModuleItems(
   props: DistributionModuleProps & EditFieldProps<DistributionModuleProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, commitItems] = useDraftItems<Item>(
+    props.items,
+    props.onFieldChanged
+  );
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
     ? items.find((i) => i.id === selectedItemId) || null
@@ -46,7 +50,7 @@ export default function WidgetDistributionModuleItems(
     if (selectedItem) {
       const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
 
-      setItems((currentItems) =>
+      commitItems((currentItems) =>
         currentItems.map((item) =>
           item.id === selectedItem.id
             ? { ...item, ...valuesWithoutTrigger }
@@ -55,7 +59,7 @@ export default function WidgetDistributionModuleItems(
       );
       setSelectedItemId(null);
     } else {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
           (max, i) => Math.max(max, parseInt(i.trigger) || 0),
           0
@@ -90,21 +94,6 @@ export default function WidgetDistributionModuleItems(
     defaultValues: defaults(),
   });
 
-  const itemsInitialized = React.useRef(false);
-  useEffect(() => {
-    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
-      itemsInitialized.current = true;
-      setItems(props.items.map(withId));
-    }
-  }, [props?.items]);
-
-  const { onFieldChanged } = props;
-  useEffect(() => {
-    if (onFieldChanged) {
-      onFieldChanged('items', items);
-    }
-  }, [items]);
-
   // Sets form to selected item values when item is selected
   useEffect(() => {
     if (selectedItem) {
@@ -123,7 +112,7 @@ export default function WidgetDistributionModuleItems(
     isItemAction: boolean // Determines if the action is for items or options
   ) => {
     if (isItemAction) {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         return handleMovementOrDeletion(
           currentItems,
           actionType,
@@ -169,10 +158,6 @@ export default function WidgetDistributionModuleItems(
     }
 
     return sorted;
-  }
-
-  function handleSaveItems() {
-    props.updateConfig({ ...props, items });
   }
 
   function resetForm() {
@@ -236,14 +221,6 @@ export default function WidgetDistributionModuleItems(
                         ))
                     : 'Geen items'}
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={() => handleSaveItems()}>
-                  Configuratie opslaan
-                </Button>
               </div>
             </div>
 

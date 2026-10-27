@@ -1,5 +1,4 @@
 import { CheckboxList } from '@/components/checkbox-list';
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -26,6 +25,7 @@ import useEnqueteWidgets from '@/hooks/use-enquete-widgets';
 import useResources from '@/hooks/use-resources';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { CounterWidgetProps } from '@openstad-headless/counter/src/counter';
@@ -94,7 +94,13 @@ export default function CounterDisplay(
       includeOrExclude: props?.includeOrExclude || 'include',
       onlyIncludeOrExcludeTagIds: props?.onlyIncludeOrExcludeTagIds || '',
       rigCounter: props?.rigCounter || '0',
+      amount: props?.amount,
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Algemeen',
   });
 
   return (
@@ -116,7 +122,7 @@ export default function CounterDisplay(
                 <FormLabel>Label</FormLabel>
                 <FormControl>
                   <Input
-                    defaultValue={field.value}
+                    value={field.value ?? ''}
                     onChange={(e) => {
                       field.onChange(e);
                       onFieldChange(field.name, e.target.value);
@@ -135,7 +141,7 @@ export default function CounterDisplay(
                 <FormLabel>Url</FormLabel>
                 <FormControl>
                   <Input
-                    defaultValue={field.value}
+                    value={field.value ?? ''}
                     onChange={(e) => {
                       field.onChange(e);
                       onFieldChange(field.name, e.target.value);
@@ -201,10 +207,7 @@ export default function CounterDisplay(
                     <Input
                       type="number"
                       value={field.value || '0'}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        onFieldChange(field.name, e.target.value);
-                      }}
+                      onChange={field.onChange}
                     />
                   </FormControl>
                 </FormItem>
@@ -264,11 +267,8 @@ export default function CounterDisplay(
                   <FormControl>
                     <Input
                       type="number"
-                      defaultValue={field.value}
-                      onChange={(e) => {
-                        field.onChange(e);
-                        onFieldChange(field.name, e.target.value);
-                      }}
+                      value={field.value ?? ''}
+                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />
@@ -387,10 +387,6 @@ export default function CounterDisplay(
             </div>
           </>
         ) : null}
-
-        <Button className="w-fit col-span-full" type="submit">
-          Opslaan
-        </Button>
       </form>
     </Form>
   );

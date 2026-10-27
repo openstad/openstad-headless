@@ -2,8 +2,7 @@ import AuditLogTable from '@/components/audit-log-table';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -33,10 +32,12 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig<ChoiceGuideProps>();
-  const { previewConfig, updatePreview } = useWidgetPreview<ChoiceGuideProps>({
+  const { previewConfig, onFieldChanged } = useWidgetDraft<ChoiceGuideProps>({
     projectId,
   });
+
+  const tabUpdateConfig = ignoreTabSubmit;
+
   return (
     <div>
       <PageLayout
@@ -73,60 +74,42 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
                 // @ts-ignore
                 <ChoicesSelectorForm
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    // @ts-ignore
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key: string, value: any) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               )}
             </TabsContent>
             <TabsContent value="items" className="p-0">
+              {previewConfig &&
+                String((previewConfig as { widgetId?: unknown }).widgetId) ===
+                  String(id) && (
+                  // @ts-ignore
+                  <WidgetChoiceGuideItems
+                    key={String(id)}
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
+                )}
+            </TabsContent>
+            <TabsContent value="choiceOptions" className="p-0">
               {previewConfig && (
                 // @ts-ignore
-                <WidgetChoiceGuideItems
+                <WidgetChoiceGuideChoiceOptions
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    // @ts-ignore
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key: string, value: any) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               )}
             </TabsContent>
-            <TabsContent value="choiceOptions" className="p-0">
-              <WidgetChoiceGuideChoiceOptions />
-            </TabsContent>
             <TabsContent value="generalSettings" className="p-0">
-              <WidgetChoiceGuideGeneralSettings
-                {...previewConfig}
-                updateConfig={(config) =>
-                  // @ts-ignore
-                  updateConfig({ ...widget.config, ...config })
-                }
-                onFieldChanged={(key: string, value: any) => {
-                  if (previewConfig) {
-                    updatePreview({
-                      ...previewConfig,
-                      [key]: value,
-                    });
-                  }
-                }}
-              />
+              {previewConfig && (
+                <WidgetChoiceGuideGeneralSettings
+                  {...previewConfig}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
+                />
+              )}
             </TabsContent>
             <TabsContent value="datalayers" className="p-0">
               {previewConfig && (
@@ -140,17 +123,8 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
                   </Alert>
                   <WidgetResourcesMapDatalayers
                     {...previewConfig}
-                    updateConfig={(config) =>
-                      updateConfig({ ...widget.config, ...config })
-                    }
-                    onFieldChanged={(key, value) => {
-                      if (previewConfig) {
-                        updatePreview({
-                          ...previewConfig,
-                          [key]: value,
-                        });
-                      }
-                    }}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
                   />
                 </>
               )}
@@ -159,17 +133,8 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
               {previewConfig && (
                 <WidgetChoiceGuidePolygons
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               )}
             </TabsContent>
