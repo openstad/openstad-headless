@@ -1,5 +1,6 @@
 import AuditLogTable from '@/components/audit-log-table';
 import WidgetPublish from '@/components/widget-publish';
+import WidgetVersionHistory from '@/components/widget-version-history';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
 import {
@@ -56,6 +57,7 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="settings">Instellingen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
             <TabsContent value="settings" className="p-0">
               {previewConfig ? (
@@ -82,6 +84,12 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
               <AuditLogTable
                 modelName="widgets"
                 modelId={id as string}
+                projectId={projectId as string}
+              />
+            </TabsContent>
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
                 projectId={projectId as string}
               />
             </TabsContent>
