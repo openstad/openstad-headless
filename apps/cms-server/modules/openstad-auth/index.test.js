@@ -29,7 +29,7 @@ function setup({ existingUser }) {
   return { self, req, res, next };
 }
 
-function setupAuthenticate({ cachedUser }) {
+function setupAuthenticate({ cachedUser, lastCheck }) {
   const self = { apos: { permissions: { can: () => true } } };
   const req = {
     query: {},
@@ -43,6 +43,7 @@ function setupAuthenticate({ cachedUser }) {
     session: {
       openstadLoginToken: 'jwt',
       openstadUser: cachedUser,
+      openStadlastJWTCheck: lastCheck,
       save: vi.fn((cb) => cb()),
       destroy: vi.fn((cb) => cb()),
     },
@@ -57,7 +58,11 @@ describe('authenticate', () => {
 
   it('keeps the session when the /me check fails with a 5xx', async () => {
     const cachedUser = { id: 5, role: 'editor', email: 'zoe@example.org' };
-    const { self, req, res, next } = setupAuthenticate({ cachedUser });
+    const lastCheck = Date.now() - 60 * 1000;
+    const { self, req, res, next } = setupAuthenticate({
+      cachedUser,
+      lastCheck,
+    });
     vi.stubGlobal(
       'fetch',
       vi.fn(async () => ({ ok: false, status: 503 }))
@@ -69,7 +74,40 @@ describe('authenticate', () => {
     expect(res.redirect).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalled();
     expect(req.data.isEditor).toBe(true);
-    expect(req.session.openStadlastJWTCheck).toBeUndefined();
+    expect(req.session.openStadlastJWTCheck).toBe(lastCheck);
+  });
+
+  it('drops cached privileges after the grace window but keeps the session', async () => {
+    const cachedUser = { id: 5, role: 'editor', email: 'zoe@example.org' };
+    const lastCheck = Date.now() - 10 * 60 * 1000;
+    const { self, req, res, next } = setupAuthenticate({
+      cachedUser,
+      lastCheck,
+    });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: false, status: 503 }))
+    );
+
+    await middleware(self).authenticate(req, res, next);
+
+    expect(req.session.destroy).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalled();
+    expect(req.data.isEditor).toBeUndefined();
+  });
+
+  it('destroys the session on a 4xx other than 429', async () => {
+    const cachedUser = { id: 5, role: 'editor', email: 'zoe@example.org' };
+    const { self, req, res, next } = setupAuthenticate({ cachedUser });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: false, status: 401 }))
+    );
+
+    await middleware(self).authenticate(req, res, next);
+
+    expect(req.session.destroy).toHaveBeenCalled();
+    expect(res.redirect).toHaveBeenCalledWith('/');
   });
 
   it('destroys the session when /me returns no user', async () => {

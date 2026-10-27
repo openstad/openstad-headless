@@ -144,6 +144,7 @@ module.exports = {
             };
 
             const THIRTY_SECONDS = 30 * 1000;
+            const GRACE_MS = 5 * 60 * 1000;
             const date = new Date().getTime();
             const dateToCheck = req.session.openStadlastJWTCheck
               ? new Date(req.session.openStadlastJWTCheck)
@@ -167,22 +168,25 @@ module.exports = {
                     'Cache-Control': 'no-cache',
                   },
                 });
-                if (response.status === 401 || response.status === 403) {
-                  // Token rejected: handled below as a definitive logout
-                  user = {};
-                } else if (!response.ok) {
+                if (response.status === 429 || response.status >= 500) {
                   throw new Error(`API responded with ${response.status}`);
+                } else if (!response.ok) {
+                  // Any other 4xx: token rejected, handled below as a logout
+                  user = {};
                 } else {
                   user = await response.json();
                 }
               } catch (err) {
                 // Transient failure (5xx, 429, network): keep the session and
                 // retry on the next request. Destroying it here logs the user
-                // out of the CMS over an API hiccup.
+                // out of the CMS over an API hiccup. The cached user is only
+                // trusted for a short grace window after the last good check.
                 console.log(
                   `[${new Date().toISOString()}][cms-auth] user validation failed, keeping session: projectId=${req.project?.id} error=${err?.message}`
                 );
-                return req.session.openstadUser
+                const withinGrace =
+                  date - (req.session.openStadlastJWTCheck || 0) < GRACE_MS;
+                return req.session.openstadUser && withinGrace
                   ? setUserData(req, next)
                   : next();
               }
