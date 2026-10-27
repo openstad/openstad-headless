@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 const { middleware } = require('./index');
 
@@ -28,6 +28,65 @@ function setup({ existingUser }) {
   const next = vi.fn();
   return { self, req, res, next };
 }
+
+function setupAuthenticate({ cachedUser }) {
+  const self = { apos: { permissions: { can: () => true } } };
+  const req = {
+    query: {},
+    headers: {},
+    get: () => 'cms.example.org',
+    protocol: 'https',
+    originalUrl: '/page',
+    url: '/page',
+    project: { id: 1 },
+    data: {},
+    session: {
+      openstadLoginToken: 'jwt',
+      openstadUser: cachedUser,
+      save: vi.fn((cb) => cb()),
+      destroy: vi.fn((cb) => cb()),
+    },
+  };
+  const res = { redirect: vi.fn() };
+  const next = vi.fn();
+  return { self, req, res, next };
+}
+
+describe('authenticate', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('keeps the session when the /me check fails with a 5xx', async () => {
+    const cachedUser = { id: 5, role: 'editor', email: 'zoe@example.org' };
+    const { self, req, res, next } = setupAuthenticate({ cachedUser });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: false, status: 503 }))
+    );
+
+    await middleware(self).authenticate(req, res, next);
+
+    expect(req.session.destroy).not.toHaveBeenCalled();
+    expect(res.redirect).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalled();
+    expect(req.data.isEditor).toBe(true);
+    expect(req.session.openStadlastJWTCheck).toBeUndefined();
+  });
+
+  it('destroys the session when /me returns no user', async () => {
+    const cachedUser = { id: 5, role: 'editor', email: 'zoe@example.org' };
+    const { self, req, res, next } = setupAuthenticate({ cachedUser });
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: true, status: 200, json: async () => ({}) }))
+    );
+
+    await middleware(self).authenticate(req, res, next);
+
+    expect(req.session.destroy).toHaveBeenCalled();
+    expect(res.redirect).toHaveBeenCalledWith('/');
+    expect(next).not.toHaveBeenCalled();
+  });
+});
 
 describe('aposAuthenticate', () => {
   it('updates an existing user without resending a password', async () => {

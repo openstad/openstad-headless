@@ -158,6 +158,7 @@ module.exports = {
             ) {
               setUserData(req, next);
             } else {
+              let user;
               try {
                 let response = await fetch(url, {
                   headers: {
@@ -166,33 +167,39 @@ module.exports = {
                     'Cache-Control': 'no-cache',
                   },
                 });
-                if (!response.ok) {
-                  throw new Error('Fetch failed');
-                }
-
-                let user = await response.json();
-
-                if (user && Object.keys(user).length > 0 && user.id) {
-                  req.session.openstadUser = user;
-                  req.session.openStadlastJWTCheck = new Date().getTime();
-                  console.log(
-                    `[${new Date().toISOString()}][cms-auth] user authenticated: userId=${user.id} role=${user.role} projectId=${req.project?.id}`
-                  );
-
-                  req.session.save(() => {
-                    setUserData(req, next);
-                  });
+                if (response.status === 401 || response.status === 403) {
+                  // Token rejected: handled below as a definitive logout
+                  user = {};
+                } else if (!response.ok) {
+                  throw new Error(`API responded with ${response.status}`);
                 } else {
-                  console.log(
-                    `[${new Date().toISOString()}][cms-auth] invalid user data from API, destroying session: projectId=${req.project?.id}`
-                  );
-                  req.session.destroy(() => {
-                    res.redirect('/');
-                  });
+                  user = await response.json();
                 }
               } catch (err) {
+                // Transient failure (5xx, 429, network): keep the session and
+                // retry on the next request. Destroying it here logs the user
+                // out of the CMS over an API hiccup.
                 console.log(
-                  `[${new Date().toISOString()}][cms-auth] user validation failed, destroying session: projectId=${req.project?.id} error=${err?.message}`
+                  `[${new Date().toISOString()}][cms-auth] user validation failed, keeping session: projectId=${req.project?.id} error=${err?.message}`
+                );
+                return req.session.openstadUser
+                  ? setUserData(req, next)
+                  : next();
+              }
+
+              if (user && Object.keys(user).length > 0 && user.id) {
+                req.session.openstadUser = user;
+                req.session.openStadlastJWTCheck = new Date().getTime();
+                console.log(
+                  `[${new Date().toISOString()}][cms-auth] user authenticated: userId=${user.id} role=${user.role} projectId=${req.project?.id}`
+                );
+
+                req.session.save(() => {
+                  setUserData(req, next);
+                });
+              } else {
+                console.log(
+                  `[${new Date().toISOString()}][cms-auth] invalid user data from API, destroying session: projectId=${req.project?.id}`
                 );
                 req.session.destroy(() => {
                   res.redirect('/');
