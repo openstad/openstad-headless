@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -17,6 +16,7 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { ArgumentWidgetTabProps } from '@/pages/projects/[project]/widgets/comments/[id]/index';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -81,6 +81,11 @@ export default function ArgumentsSorting(
       defaultSorting: props?.defaultSorting || 'createdAt_asc',
       sorting: props?.sorting || [],
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Sorteren',
   });
 
   return (
@@ -176,9 +181,6 @@ export default function ArgumentsSorting(
               </FormItem>
             )}
           />
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

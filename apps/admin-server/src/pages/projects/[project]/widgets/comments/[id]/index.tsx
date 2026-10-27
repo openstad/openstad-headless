@@ -2,8 +2,7 @@ import AuditLogTable from '@/components/audit-log-table';
 import WidgetPreview from '@/components/widget-preview';
 import WidgetPublish from '@/components/widget-publish';
 import { useProject } from '@/hooks/use-project';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -41,11 +40,11 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig<CommentsWidgetProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<CommentsWidgetProps>({
-      projectId,
-    });
+  const { previewConfig, onFieldChanged } = useWidgetDraft<CommentsWidgetProps>(
+    { projectId }
+  );
+
+  const tabUpdateConfig = ignoreTabSubmit;
 
   const { data: projectConfig } = useProject(['includeConfig']);
   const requiredFieldsIncludesEmailNotificationConsent =
@@ -88,17 +87,8 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
                 <ArgumentsGeneral
                   omitSchemaKeys={['useSentiments']}
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               ) : null}
             </TabsContent>
@@ -106,17 +96,8 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <ArgumentsList
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               ) : null}
             </TabsContent>
@@ -124,17 +105,8 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <ArgumentsForm
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               ) : null}
             </TabsContent>
@@ -142,17 +114,8 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <ArgumentsExtraFields
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               ) : null}
             </TabsContent>
@@ -160,17 +123,8 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <ArgumentsInclude
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               ) : null}
             </TabsContent>
@@ -178,17 +132,8 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <ArgumentsConfirmation
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                   requiredFieldsIncludesEmailNotificationConsent={
                     requiredFieldsIncludesEmailNotificationConsent
                   }
@@ -199,17 +144,8 @@ export default function WidgetArguments({ apiUrl }: WithApiUrlProps) {
               {previewConfig ? (
                 <ArgumentsSorting
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               ) : null}
             </TabsContent>

@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -17,9 +16,9 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -35,46 +34,31 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function WidgetMapMap() {
+export default function WidgetMapMap(
+  props: { [key: string]: any } & EditFieldProps<any>
+) {
   const category = 'map';
-
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
-  const defaults = useCallback(
-    () => ({
-      variant: widget?.config?.[category]?.variant || 'NLMaps',
-      zoom: widget?.config?.[category]?.zoom || 'none',
-      defaultLocation: widget?.config?.[category]?.defaultLocation || '',
-      clustering: widget?.config?.[category]?.clustering || false,
-      clusteringSensitivity:
-        widget?.config?.[category]?.clusteringSensitivity || 40,
-      clickingChoosesLocation:
-        widget?.config?.[category]?.clickingChoosesLocation || false,
-      mapIcon: widget?.config?.[category]?.mapIcon || 'select',
-    }),
-    [widget?.config]
-  );
-
-  async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
-  }
+  const settings = props?.[category] || {};
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      variant: settings.variant || 'NLMaps',
+      zoom: settings.zoom || 'none',
+      defaultLocation: settings.defaultLocation || '',
+      clustering: settings.clustering || false,
+      clusteringSensitivity: settings.clusteringSensitivity || 40,
+      clickingChoosesLocation: settings.clickingChoosesLocation || false,
+      mapIcon: settings.mapIcon || 'select',
+    },
   });
 
   useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+    const subscription = form.watch((values) => {
+      props.onFieldChanged?.(category, values);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, props]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -82,7 +66,7 @@ export default function WidgetMapMap() {
         <Heading size="xl">Kaart</Heading>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(event) => event.preventDefault()}
           className="grid grid-cols-2 gap-4 lg:w-fit">
           <FormField
             control={form.control}
@@ -230,9 +214,6 @@ export default function WidgetMapMap() {
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-fit col-span-full">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

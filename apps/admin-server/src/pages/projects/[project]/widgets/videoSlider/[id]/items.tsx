@@ -21,6 +21,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { useDraftItems } from '@/hooks/useDraftItems';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { generateId, withId } from '@/lib/widget-item-helpers';
@@ -32,7 +33,7 @@ import {
 } from '@openstad-headless/enquete/src/types/enquete-props';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -94,7 +95,10 @@ export default function WidgetEnqueteItems(
   props: EnqueteWidgetProps & EditFieldProps<EnqueteWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, commitItems] = useDraftItems<Item>(
+    props.items,
+    props.onFieldChanged
+  );
   const [options, setOptions] = useState<Option[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
@@ -117,7 +121,7 @@ export default function WidgetEnqueteItems(
     if (selectedItem) {
       const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
 
-      setItems((currentItems) =>
+      commitItems((currentItems) =>
         currentItems.map((item) =>
           item.id === selectedItem.id
             ? { ...item, ...valuesWithoutTrigger }
@@ -126,7 +130,7 @@ export default function WidgetEnqueteItems(
       );
       setSelectedItemId(null);
     } else {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
           (max, i) => Math.max(max, parseInt(i.trigger) || 0),
           0
@@ -255,21 +259,6 @@ export default function WidgetEnqueteItems(
     defaultValues: defaults(),
   });
 
-  const itemsInitialized = React.useRef(false);
-  useEffect(() => {
-    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
-      itemsInitialized.current = true;
-      setItems(props.items.map(withId));
-    }
-  }, [props?.items]);
-
-  const { onFieldChanged } = props;
-  useEffect(() => {
-    if (onFieldChanged) {
-      onFieldChanged('items', items);
-    }
-  }, [items]);
-
   // Sets form to selected item values when item is selected
   useEffect(() => {
     if (selectedItem) {
@@ -334,7 +323,7 @@ export default function WidgetEnqueteItems(
     isItemAction: boolean // Determines if the action is for items or options
   ) => {
     if (isItemAction) {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         return handleMovementOrDeletion(
           currentItems,
           actionType,
@@ -388,20 +377,6 @@ export default function WidgetEnqueteItems(
     }
 
     return sorted;
-  }
-
-  function handleSaveItems() {
-    const updatedProps = { ...props };
-
-    Object.keys(updatedProps).forEach((key: string) => {
-      if (key.startsWith('options.')) {
-        // @ts-ignore
-        delete updatedProps[key];
-      }
-    });
-
-    props.updateConfig({ ...updatedProps, items });
-    setOptions([]);
   }
 
   const hasOptions = () => {
@@ -510,14 +485,6 @@ export default function WidgetEnqueteItems(
                         ))
                     : 'Geen items'}
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={() => handleSaveItems()}>
-                  Configuratie opslaan
-                </Button>
               </div>
             </div>
 
