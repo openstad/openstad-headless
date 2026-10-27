@@ -219,6 +219,7 @@ export default function AuditLogTable({
                     previousData={entry.previousData}
                     newData={entry.newData}
                     action={entry.action}
+                    widgetType={entry.newData?.type ?? entry.previousData?.type}
                   />
                 )}
               </div>
