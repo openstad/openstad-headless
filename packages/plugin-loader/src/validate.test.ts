@@ -443,5 +443,25 @@ describe('validateManifest', () => {
         }).errors
       ).toContain('api.notifications[0]: "immediate" must be a boolean');
     });
+
+    it('accepts a source with a boolean direct flag', () => {
+      expect(
+        withApi({
+          sources: [
+            { key: 'agenda', label: 'Agenda', handler: './s', direct: true },
+          ],
+        }).valid
+      ).toBe(true);
+    });
+
+    it('rejects a non-boolean direct flag on a source', () => {
+      expect(
+        withApi({
+          sources: [
+            { key: 'agenda', label: 'Agenda', handler: './s', direct: 'yes' },
+          ],
+        }).errors
+      ).toContain('api.sources[0]: "direct" must be a boolean');
+    });
   });
 });

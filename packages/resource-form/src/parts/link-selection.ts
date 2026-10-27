@@ -140,22 +140,43 @@ export function buildLinkPayload(
   };
 }
 
-export function splitAddedLinks(added: LinkValue[]): {
+const isDirect = (value: LinkValue, directSources: string[]) =>
+  directSources.includes(value.source);
+
+export function splitAddedLinks(
+  added: LinkValue[],
+  directSources: string[] = []
+): {
   others: LinkValue[];
   own: LinkValue[];
+  direct: LinkValue[];
 } {
   return {
-    others: added.filter((value) => !value.own),
-    own: added.filter((value) => value.own),
+    others: added.filter(
+      (value) => !value.own && !isDirect(value, directSources)
+    ),
+    own: added.filter((value) => value.own && !isDirect(value, directSources)),
+    direct: added.filter((value) => isDirect(value, directSources)),
   };
 }
 
+export function onlyDirectRemoved(
+  removed: LinkValue[],
+  directSources: string[] = []
+): boolean {
+  return (
+    removed.length > 0 &&
+    removed.every((value) => isDirect(value, directSources))
+  );
+}
+
 export function needsLinkConfirmation(
-  payload: Pick<LinkPayload, 'added' | 'removed'>
+  payload: Pick<LinkPayload, 'added' | 'removed'>,
+  directSources: string[] = []
 ): boolean {
   return (
     payload.removed.length > 0 ||
-    splitAddedLinks(payload.added).others.length > 0
+    splitAddedLinks(payload.added, directSources).others.length > 0
   );
 }
 

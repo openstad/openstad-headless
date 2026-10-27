@@ -8,6 +8,7 @@ import {
   getLinkFields,
   itemsToFetch,
   needsLinkConfirmation,
+  onlyDirectRemoved,
   restoreLinkValues,
   splitAddedLinks,
   withoutUnavailableLinkFields,
@@ -176,6 +177,7 @@ describe('own submissions', () => {
     expect(splitAddedLinks([arno, own, lena])).toEqual({
       others: [arno, lena],
       own: [own],
+      direct: [],
     });
   });
 
@@ -192,6 +194,51 @@ describe('own submissions', () => {
     const payload = buildLinkPayload({ stadmakers: [own] }, {});
     expect(payload.added).toEqual([own]);
     expect(payload.links).toEqual([{ source: 'openstad', id: '9' }]);
+  });
+});
+
+describe('direct sources', () => {
+  const activity = { source: 'metkoos', id: 'k1', label: 'Buurtfeest' };
+  const own = {
+    source: 'openstad',
+    id: '9',
+    label: 'Eigen inzending',
+    own: true,
+  };
+
+  it('splits items of a direct source apart from others and own items', () => {
+    expect(splitAddedLinks([arno, own, activity], ['metkoos'])).toEqual({
+      others: [arno],
+      own: [own],
+      direct: [activity],
+    });
+  });
+
+  it('treats items of a source that is not direct as items of others', () => {
+    expect(splitAddedLinks([activity]).others).toEqual([activity]);
+  });
+
+  it('does not ask for confirmation when only direct items are added', () => {
+    expect(
+      needsLinkConfirmation({ added: [activity, own], removed: [] }, [
+        'metkoos',
+      ])
+    ).toBe(false);
+    expect(
+      needsLinkConfirmation({ added: [activity, arno], removed: [] }, [
+        'metkoos',
+      ])
+    ).toBe(true);
+    expect(
+      needsLinkConfirmation({ added: [], removed: [activity] }, ['metkoos'])
+    ).toBe(true);
+  });
+
+  it('tells when only direct items are removed', () => {
+    expect(onlyDirectRemoved([activity], ['metkoos'])).toBe(true);
+    expect(onlyDirectRemoved([activity, lena], ['metkoos'])).toBe(false);
+    expect(onlyDirectRemoved([], ['metkoos'])).toBe(false);
+    expect(onlyDirectRemoved([activity])).toBe(false);
   });
 });
 

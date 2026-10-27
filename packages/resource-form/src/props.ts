@@ -22,7 +22,11 @@ export type ResourceFormWidget = {
   enableOnOffSwitching?: boolean;
   allowedPolygons?: Array<{ id: number; name: string }>;
   linkRequests?: LinkRequests;
-  pluginCapabilities?: { linkRequests?: boolean; contactHandlers?: string[] };
+  pluginCapabilities?: {
+    linkRequests?: boolean;
+    contactHandlers?: string[];
+    directSources?: string[];
+  };
 };
 
 export type LinkRequests = {

@@ -108,6 +108,9 @@ function validateManifest(manifest) {
                 if (source.key === RESERVED_SOURCE_KEY) {
                     errors.push(`api.sources[${i}]: key "${RESERVED_SOURCE_KEY}" is reserved`);
                 }
+                if (source.direct !== undefined && typeof source.direct !== 'boolean') {
+                    errors.push(`api.sources[${i}]: "direct" must be a boolean`);
+                }
             });
         }
         if (Array.isArray(api.notifications)) {

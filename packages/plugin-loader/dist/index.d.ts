@@ -41,6 +41,7 @@ export interface PluginApiSection {
         key: string;
         label: string;
         handler: string;
+        direct?: boolean;
     }>;
     notifications?: Array<{
         type: string;

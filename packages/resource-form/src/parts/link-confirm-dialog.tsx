@@ -17,7 +17,12 @@ import React, { useEffect, useRef, useState } from 'react';
 
 import './link-confirm-dialog.css';
 import { LINK_CONFIRM_TEXTS } from './link-confirm-texts';
-import { type LinkValue, linkKey, splitAddedLinks } from './link-selection';
+import {
+  type LinkValue,
+  linkKey,
+  onlyDirectRemoved,
+  splitAddedLinks,
+} from './link-selection';
 
 const MAX_MESSAGE_LENGTH = 1000;
 
@@ -25,12 +30,14 @@ type LinkConfirmDialogProps = {
   open: boolean;
   added: LinkValue[];
   removed: LinkValue[];
+  directSources?: string[];
   title?: string;
   description?: string;
   messageLabel?: string;
   chosenHeading?: string;
   removedHeading?: string;
   ownHeading?: string;
+  directHeading?: string;
   revokeTitle?: string;
   revokeDescription?: string;
   revokeConfirmText?: string;
@@ -50,11 +57,13 @@ export function LinkConfirmDialog({
   chosenHeading = 'Gekozen:',
   removedHeading = 'Deze koppelingen worden ingetrokken:',
   ownHeading = 'Deze eigen inzendingen worden direct gekoppeld:',
+  directHeading = 'Deze worden direct gekoppeld:',
   revokeTitle = LINK_CONFIRM_TEXTS.revokeTitle,
-  revokeDescription = LINK_CONFIRM_TEXTS.revokeDescription,
+  revokeDescription,
   revokeConfirmText = 'Bevestigen',
   confirmText = 'Versturen',
   cancelText = 'Annuleren',
+  directSources = [],
   onConfirm,
   onCancel,
 }: LinkConfirmDialogProps) {
@@ -62,8 +71,13 @@ export function LinkConfirmDialog({
   const [openMessages, setOpenMessages] = useState<Record<string, boolean>>({});
   const focusKey = useRef<string | null>(null);
   const textareas = useRef<Record<string, HTMLTextAreaElement | null>>({});
-  const { others, own } = splitAddedLinks(added);
-  const onlyRevoking = added.length === 0;
+  const { others, own, direct } = splitAddedLinks(added, directSources);
+  const onlyRevoking = others.length === 0;
+  const revokeText =
+    revokeDescription ||
+    (onlyDirectRemoved(removed, directSources)
+      ? LINK_CONFIRM_TEXTS.revokeDirectDescription
+      : LINK_CONFIRM_TEXTS.revokeDescription);
 
   useEffect(() => {
     if (open) {
@@ -93,7 +107,7 @@ export function LinkConfirmDialog({
         <DialogTitle>{onlyRevoking ? revokeTitle : title}</DialogTitle>
         <DialogDescription>
           <RteContent
-            content={onlyRevoking ? revokeDescription : description}
+            content={onlyRevoking ? revokeText : description}
             unwrapSingleRootDiv={true}
           />
         </DialogDescription>
@@ -161,6 +175,21 @@ export function LinkConfirmDialog({
             </Heading>
             <ul className="osc-link-confirm-list">
               {own.map((item) => (
+                <li key={linkKey(item)}>
+                  <span className="osc-link-confirm-name">{item.label}</span>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : null}
+
+        {direct.length > 0 ? (
+          <>
+            <Heading level={3} className="osc-link-confirm-heading">
+              {directHeading}
+            </Heading>
+            <ul className="osc-link-confirm-list">
+              {direct.map((item) => (
                 <li key={linkKey(item)}>
                   <span className="osc-link-confirm-name">{item.label}</span>
                 </li>

@@ -26,7 +26,12 @@ export interface PluginApiSection {
   envVars?: string[];
   linkRequestHandler?: { handler: string };
   contactHandlers?: Array<{ key: string; label: string; handler: string }>;
-  sources?: Array<{ key: string; label: string; handler: string }>;
+  sources?: Array<{
+    key: string;
+    label: string;
+    handler: string;
+    direct?: boolean;
+  }>;
   notifications?: Array<{
     type: string;
     label: string;

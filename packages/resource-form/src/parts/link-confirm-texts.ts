@@ -6,4 +6,5 @@ export const LINK_CONFIRM_TEXTS = {
   revokeTitle: 'Koppelingen intrekken',
   revokeDescription:
     'De gekozen koppelingen worden verwijderd. De eigenaren van de andere inzendingen krijgen daarvan bericht.',
+  revokeDirectDescription: 'De gekozen koppelingen worden verwijderd.',
 };

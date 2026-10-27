@@ -55,7 +55,9 @@ describe('plugin extensions', () => {
     expect(extensions.getCapabilities()).toEqual({
       linkRequests: true,
       contactHandlers: [{ key: 'link-request', label: 'Koppelverzoek' }],
-      sources: [{ key: 'fixture-source', label: 'Fixture bron' }],
+      sources: [
+        { key: 'fixture-source', label: 'Fixture bron', direct: false },
+      ],
       notificationTypes: [
         { type: 'link invitation - user', label: 'Uitnodiging ontvangen' },
       ],
@@ -291,8 +293,29 @@ describe('widgetPluginCapabilities', () => {
       expect(widgetPluginCapabilities(extensions, type)).toEqual({
         linkRequests: false,
         contactHandlers: [],
+        directSources: [],
       });
     }
+  });
+
+  it('lists the sources that link directly', () => {
+    const directPlugin = plugin({
+      api: {
+        ...fixtureManifest.api,
+        sources: [
+          ...fixtureManifest.api.sources,
+          {
+            ...fixtureManifest.api.sources[0],
+            key: 'direct-source',
+            direct: true,
+          },
+        ],
+      },
+    });
+    expect(
+      widgetPluginCapabilities(build([directPlugin]), 'resourceform')
+        .directSources
+    ).toEqual(['direct-source']);
   });
 
   it('lists the loaded contact handlers and link requests', () => {

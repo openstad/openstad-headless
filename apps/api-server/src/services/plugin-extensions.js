@@ -149,6 +149,7 @@ function buildExtensions(plugins, services, resolvePluginFile) {
         sources.set(entry.key, {
           key: entry.key,
           label: entry.label,
+          direct: entry.direct === true,
           pluginName: plugin.name,
           ...pick(implementation, ['search', 'get']),
         });
@@ -191,7 +192,11 @@ function buildExtensions(plugins, services, resolvePluginFile) {
         key,
         label,
       })),
-      sources: [...sources.values()].map(({ key, label }) => ({ key, label })),
+      sources: [...sources.values()].map(({ key, label, direct }) => ({
+        key,
+        label,
+        direct,
+      })),
       notificationTypes: [...notificationTypes.values()].map(
         ({ type, label }) => ({ type, label })
       ),
@@ -244,10 +249,14 @@ const WIDGETS_WITH_PLUGIN_CAPABILITIES = ['resourcedetail', 'resourceform'];
 
 function widgetPluginCapabilities(extensions, widgetType) {
   if (!WIDGETS_WITH_PLUGIN_CAPABILITIES.includes(widgetType)) return null;
-  const { linkRequests, contactHandlers } = extensions.getCapabilities();
+  const { linkRequests, contactHandlers, sources } =
+    extensions.getCapabilities();
   return {
     linkRequests,
     contactHandlers: contactHandlers.map(({ key }) => key),
+    directSources: sources
+      .filter((source) => source.direct)
+      .map(({ key }) => key),
   };
 }
 

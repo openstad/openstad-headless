@@ -439,10 +439,17 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     existingResource.update;
   const submitButtonText = editMode ? 'Opslaan' : submitButton || 'Versturen';
 
+  const directSources = props.pluginCapabilities?.directSources || [];
+
   const notifyLinkRequestError = (result) => {
     if (result?.linkRequests?.error) {
       NotificationService.addNotification(
         'Koppelverzoeken konden niet worden verstuurd',
+        'error'
+      );
+    } else if (result?.linkRequests?.failed?.length) {
+      NotificationService.addNotification(
+        'Niet alle koppelingen zijn gelukt. Probeer het later opnieuw.',
         'error'
       );
     }
@@ -462,7 +469,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
       payload.added.length > 0 || payload.removed.length > 0;
 
     if (
-      needsLinkConfirmation(payload) &&
+      needsLinkConfirmation(payload, directSources) &&
       props.linkRequests?.confirmEnabled !== false
     ) {
       setPendingLinkSubmit({
@@ -667,6 +674,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
           open={!!pendingLinkSubmit}
           added={pendingLinkSubmit?.payload.added || []}
           removed={pendingLinkSubmit?.payload.removed || []}
+          directSources={directSources}
           title={props.linkRequests?.confirmTitle || undefined}
           description={props.linkRequests?.confirmDescription || undefined}
           revokeTitle={props.linkRequests?.revokeTitle || undefined}
