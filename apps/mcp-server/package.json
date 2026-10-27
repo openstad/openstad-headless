@@ -1,0 +1,20 @@
+{
+  "name": "@openstad-headless/mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server exposing the Openstad reporting API as curated tools for LLM clients, without exposing the reporting bearer token to the model",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "dotenv": "^16.6.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "supertest": "^4.0.2"
+  },
+  "author": "Gemeente Amsterdam",
+  "license": "MIT"
+}

@@ -10,6 +10,7 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
 const removeProtocolFromUrl = require('../../middleware/remove-protocol-from-url');
+const dataScopeAdminGate = require('../../middleware/data-scope-admin-gate');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const ctrl = require('../../controllers/projectController');
 
@@ -49,6 +50,7 @@ router
   .post(ctrl.syncAuthProvidersAfterCreate)
   .post(ctrl.createDuplicatedData)
   .post(ctrl.addCurrentUserAsAdmin)
+  .post(ctrl.addAutoAdminUsers)
   .post(ctrl.publishNewProjectEvent)
   .post(auth.useReqUser)
   .post(ctrl.respondCreatedProject);
@@ -87,6 +89,9 @@ router
   .put(removeProtocolFromUrl)
   .put(ctrl.checkUniqueUrl)
   .put(rateLimiter(), ctrl.updateAuthClients)
+  // admin-only gate for the reporting data scope config — see
+  // middleware/data-scope-admin-gate.js.
+  .put(dataScopeAdminGate)
   .put(ctrl.updateProjectRecord)
   .put(ctrl.publishProjectUpdateMessages)
   .put(ctrl.respondUpdatedProject)

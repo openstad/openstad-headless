@@ -335,4 +335,106 @@ module.exports = {
     type: 'arrayOfStrings',
     default: [],
   },
+
+  // Controls which data components are exposed via the /stats reporting API.
+  // Each component has an 'enabled' flag and an optional list of personal fields
+  // (user-authored text / identifiers) that the admin has explicitly opted in to.
+  // Default: all components disabled — a token with no config reaches /stats only.
+  // Admin-configured, enforced in the project PUT route (routes/api/project.js):
+  // only an admin may change this subtree; resubmitting it unchanged is allowed
+  // for any role.
+  dataScope: {
+    type: 'object',
+    subset: {
+      resources: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      votes: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      comments: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      submissions: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+          // Separate per-field opt-in allowlist (#440) for the dynamic form
+          // answer columns (field_<key>) exposed by /reports/submissions and
+          // /reports/submissions/fields. Distinct from personalFields above
+          // (which lists fixed, cross-project field names from
+          // report-data-scope's static catalog) — form fields are dynamic,
+          // defined per widget, so they can't live in that catalog.
+          //
+          // SCOPE: project-wide per fieldKey, not per widget — opting in
+          // 'email' also exposes form B's field_email if B uses that same key.
+          // ?widgetId= narrows rows, never the allowlist.
+          //
+          // Default empty: no form answers are exposed until explicitly
+          // opted in per field key.
+          formFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      choiceguides: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+          // Per-field opt-in allowlist (#441) for the flattened
+          // answer_<key> columns exposed by /reports/choice-guide-results —
+          // same rationale as submissions.formFields above (dynamic,
+          // per-widget question keys can't live in the static catalog), and
+          // the same scope: project-wide per answer key.
+          answerFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      projects: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      // ADDITIVE (#441): choice-guide definition content (safe-only, no
+      // personalFields — see report-data-scope.js's choiceguideguides /
+      // choiceguidequestions comments).
+      choiceguideguides: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      choiceguidequestions: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+          personalFields: { type: 'arrayOfStrings', default: [] },
+        },
+      },
+      // ADDITIVE (#442): dedicated toggle for the participant roster
+      // (/reports/users/anonymized + /reports/users/aggregates). It spans every
+      // data source, so enabling e.g. only 'votes' must not unlock it.
+      // Enforced in middleware/api-token-scope-guard.js.
+      users: {
+        type: 'object',
+        subset: {
+          enabled: { type: 'boolean', default: false },
+        },
+      },
+    },
+  },
 };
