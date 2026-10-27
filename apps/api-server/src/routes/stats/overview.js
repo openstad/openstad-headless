@@ -12,6 +12,25 @@ const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 
+// Maps each overview query to the data-scope component it derives from. Used to
+// restrict the overview to the project's enabled components for reporting
+// tokens. A query key absent here maps to undefined and is therefore dropped
+// (fail-closed) for reporting requests until it is explicitly mapped.
+const QUERY_COMPONENT = {
+  resourceTotal: 'resources',
+  resourcesSubmittedPerDay: 'resources',
+  userVoteTotal: 'votes',
+  resourceVotesCountTotal: 'votes',
+  resourceVotesCountForTotal: 'votes',
+  resourceVotesCountAgainstTotal: 'votes',
+  usersVotedPerDay: 'votes',
+  votesPerDay: 'votes',
+  commentCountTotal: 'comments',
+  commentForCountTotal: 'comments',
+  commentAgainstCountTotal: 'comments',
+  choicesguideresultsCountTotal: 'choiceguides',
+};
+
 /**
  * After SQL query only the missing
  *
@@ -234,7 +253,16 @@ router
       },
     ];
 
-    req.queries = queries;
+    // For reporting tokens, restrict the overview to the components the project
+    // enabled in its data scope; disabled-component queries are dropped and
+    // never executed. Non-reporting (admin/JWT) requests are unaffected.
+    const enabledComponents =
+      req.reportingScope && req.reportingScope.enabledComponents;
+    req.queries = enabledComponents
+      ? queries.filter((query) =>
+          enabledComponents.includes(QUERY_COMPONENT[query.key])
+        )
+      : queries;
 
     next();
   })
