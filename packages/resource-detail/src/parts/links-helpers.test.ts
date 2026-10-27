@@ -10,7 +10,6 @@ import {
   contactStatus,
   contactTextDefaults,
   effectiveContactHandler,
-  externalIdsBySource,
   filterByTags,
   relatedTagOptions,
   showContactBlock,
@@ -55,23 +54,10 @@ describe('buildItemLink', () => {
   });
 });
 
-describe('externalIdsBySource', () => {
-  it('collects external targets per source', () => {
-    expect(externalIdsBySource(links)).toEqual({ metkoos: ['k1'] });
-  });
-});
-
 describe('toRelatedItems', () => {
-  it('maps both directions and external items', () => {
+  it('maps both directions and leaves out external links', () => {
     const items = toRelatedItems(links, {
       itemLink: '/inzending/[id]',
-      externalItems: {
-        'metkoos:k1': {
-          id: 'k1',
-          label: 'Kunstlessen',
-          url: 'https://koos/k1',
-        },
-      },
     });
 
     expect(items).toEqual([
@@ -94,14 +80,6 @@ describe('toRelatedItems', () => {
         image: undefined,
         url: '/inzending/9',
         tags: [{ id: '20', name: '', type: undefined }],
-      },
-      {
-        key: 'metkoos:k1',
-        source: 'metkoos',
-        id: 'k1',
-        title: 'Kunstlessen',
-        image: undefined,
-        url: 'https://koos/k1',
       },
     ]);
   });
@@ -133,20 +111,7 @@ describe('toRelatedItems', () => {
     expect(items.map((item) => item.key)).toEqual(['openstad:2']);
   });
 
-  it('drops external urls that are not http or https', () => {
-    const items = toRelatedItems([links[2]], {
-      externalItems: {
-        'metkoos:k1': {
-          id: 'k1',
-          label: 'Kunstlessen',
-          url: 'javascript:alert(1)',
-        },
-      },
-    });
-    expect(items[0].url).toBeUndefined();
-  });
-
-  it('leaves out external links whose item could not be loaded', () => {
+  it('never shows external links, which have their own widget', () => {
     expect(toRelatedItems([links[2]], {}).map((item) => item.key)).toEqual([]);
   });
 });

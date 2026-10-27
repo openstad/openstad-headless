@@ -15,13 +15,6 @@ export type ResourceLink = {
   };
 };
 
-export type ExternalItem = {
-  id: string;
-  label: string;
-  image?: string;
-  url?: string;
-};
-
 export type RelatedTag = {
   id: string;
   name: string;
@@ -136,21 +129,6 @@ export function buildItemLink(
   return itemLink.replace('[id]', encodeURIComponent(id));
 }
 
-export function externalIdsBySource(
-  links: ResourceLink[]
-): Record<string, string[]> {
-  const bySource: Record<string, string[]> = {};
-  links
-    .filter((link) => link.source !== OPENSTAD_SOURCE)
-    .forEach((link) => {
-      bySource[link.source] = bySource[link.source] || [];
-      if (!bySource[link.source].includes(link.targetId)) {
-        bySource[link.source].push(link.targetId);
-      }
-    });
-  return bySource;
-}
-
 export function withoutLinked<T extends { id: string }>(
   options: T[],
   links: ResourceLink[]
@@ -169,12 +147,10 @@ export function toRelatedItems(
     tagIds,
     itemLink,
     linkToDetail = true,
-    externalItems = {},
   }: {
     tagIds?: string;
     itemLink?: string;
     linkToDetail?: boolean;
-    externalItems?: Record<string, ExternalItem>;
   }
 ): RelatedItem[] {
   const allowedTags = parseTagIds(tagIds);
@@ -211,19 +187,6 @@ export function toRelatedItems(
           name: tag.name || '',
           type: tag.type,
         })),
-      });
-    } else if (link.source !== OPENSTAD_SOURCE) {
-      const key = `${link.source}:${link.targetId}`;
-      const item = externalItems[key];
-      if (!item || seen.has(key)) continue;
-      seen.add(key);
-      items.push({
-        key,
-        source: link.source,
-        id: link.targetId,
-        title: item.label,
-        image: item.image,
-        url: isHttpUrl(item.url) ? item.url : undefined,
       });
     }
   }

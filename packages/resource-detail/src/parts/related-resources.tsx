@@ -4,8 +4,6 @@ import { Button, Heading, Paragraph } from '@utrecht/component-library-react';
 import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 
 import {
-  type ExternalItem,
-  externalIdsBySource,
   filterByTags,
   relatedTagOptions,
   toRelatedItems,
@@ -56,44 +54,11 @@ export function RelatedResources({
     projectId,
     resourceId,
   });
-  const [externalItems, setExternalItems] = useState<
-    Record<string, ExternalItem>
-  >({});
-
-  const externalIds = externalIdsBySource(links);
-  const externalKey = JSON.stringify(externalIds);
-
-  useEffect(() => {
-    const sources = Object.entries(externalIds);
-    if (!sources.length) return;
-    let cancelled = false;
-    Promise.all(
-      sources.map(([source, ids]) =>
-        datastore.api.links
-          .fetchItems({ projectId, source, ids })
-          .then((items: ExternalItem[]) =>
-            (items || []).map((item) => [`${source}:${item.id}`, item])
-          )
-      )
-    )
-      .then((entries) => {
-        if (!cancelled) setExternalItems(Object.fromEntries(entries.flat()));
-      })
-      .catch((error: Error) => {
-        console.error(
-          `[resource-detail] loading linked items failed: resourceId=${resourceId} error=${error?.message}`
-        );
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [externalKey, projectId]);
 
   const allItems = toRelatedItems(links, {
     tagIds,
     itemLink,
     linkToDetail,
-    externalItems,
   });
 
   const filterId = useId();
