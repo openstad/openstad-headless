@@ -388,3 +388,13 @@ ul.admin-overview > li > a > div {
 ul.admin-overview > li > a {
   display: flex;
 }
+
+/*
+ * Leaflet gives its panes and controls z-index values of 400 and up. Those
+ * numbers are not confined to the map because the map container itself has no
+ * stacking context of its own, so a scrolled map paints over the sticky page
+ * header and its save bar. Isolating the container keeps them inside the map.
+ */
+.leaflet-container {
+  isolation: isolate;
+}
