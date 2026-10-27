@@ -92,6 +92,24 @@ export function useOpenItemDraft<T extends { id?: string }, V, S>({
     );
   };
 
+  const commitOpenItem = () => {
+    const latest = latestRef.current;
+    const currentOpenId = latest.openId;
+    if (!currentOpenId || !isOpenItemDirty() || validationMessage()) {
+      return false;
+    }
+    const values = cloneDeep(form.getValues() as V);
+    const currentState = latest.state;
+    latest.commitItems((currentItems) =>
+      latest.merge(currentItems, currentOpenId, values, currentState)
+    );
+    baselineRef.current = {
+      values: cloneDeep(values),
+      state: cloneDeep(currentState),
+    };
+    return true;
+  };
+
   useEffect(() => {
     reportOpenItemEdit(keyRef.current, isOpenItemDirty());
   });
@@ -103,19 +121,7 @@ export function useOpenItemDraft<T extends { id?: string }, V, S>({
     });
 
     const unregisterFlush = registerFieldFlusher(() => {
-      const latest = latestRef.current;
-      const currentOpenId = latest.openId;
-      if (!currentOpenId || !isOpenItemDirty() || validationMessage()) return;
-      const values = cloneDeep(form.getValues() as V);
-      const currentState = latest.state;
-      latest.commitItems((currentItems) =>
-        latest.merge(currentItems, currentOpenId, values, currentState)
-      );
-      baselineRef.current = {
-        values: cloneDeep(values),
-        state: cloneDeep(currentState),
-      };
-      reportOpenItemEdit(key, false);
+      if (commitOpenItem()) reportOpenItemEdit(key, false);
     });
 
     const unregisterValidator = registerDraftValidator(() => {
@@ -130,6 +136,7 @@ export function useOpenItemDraft<T extends { id?: string }, V, S>({
       subscription.unsubscribe();
       unregisterFlush();
       unregisterValidator();
+      commitOpenItem();
       reportOpenItemEdit(key, null);
     };
   }, [form]);
