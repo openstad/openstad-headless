@@ -262,7 +262,6 @@ module.exports = {
           const userData = {
             username: username, // easy way to keep the username unique is using the email, wont be used anyway
             title: email,
-            password: generateRandomPassword(), // generate a random password since apostrophe expects it
             firstName: firstName,
             lastName: lastName,
             email: email,
@@ -270,25 +269,29 @@ module.exports = {
             type: '@apostrophecms/user',
           };
 
-          /**
-           * See if user already exists
-           */
-          if (aposUser) {
-            userData._id = aposUser._id;
-          }
-
-          // update or inster depending on if user exists
-          const insertOrUpdate = aposUser
-            ? self.apos.user.update
-            : self.apos.user.insert;
-
           // In case user relogs in the data gets updated
           // one downside, if the user's admin or editor rights are revoked,
           // this will only go into effect after logging out
           try {
-            await insertOrUpdate(taskReq, userData);
+            if (aposUser) {
+              // Merge into the existing doc: update() replaces the whole
+              // document. Never send a password on update: Apostrophe sets
+              // loginInvalidBefore on every password change, which logs the
+              // user out of all their other sessions.
+              Object.assign(aposUser, userData);
+              await self.apos.user.update(taskReq, aposUser);
+            } else {
+              // Apostrophe requires a password; it is never used for login
+              aposUser = await self.apos.user.insert(taskReq, {
+                ...userData,
+                password: generateRandomPassword(),
+              });
+            }
           } catch (e) {
-            console.log('error', e);
+            console.log(
+              `[${new Date().toISOString()}][cms-auth] apostrophe user save error: ${e?.message}`
+            );
+            return next(e);
           }
 
           // session data gets cleared in the login; backup openstad values
