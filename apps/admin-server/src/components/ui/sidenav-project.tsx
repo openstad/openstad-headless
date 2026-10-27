@@ -31,9 +31,9 @@ export function SidenavProject({ className }: { className?: string }) {
         className
       )}>
       <div className="flex flex-col items-start justify-center h-24">
-        <button onClick={() => router.back()}>
+        <button type="button" aria-label="Terug" onClick={() => router.back()}>
           <div className="m-4 p-3 bg-secondary rounded">
-            <ArrowLeft size={20} />
+            <ArrowLeft size={20} aria-hidden="true" />
           </div>
         </button>
       </div>
@@ -188,6 +188,34 @@ export function SidenavProject({ className }: { className?: string }) {
                   size="default"
                   className="w-full flex justify-start pl-8">
                   <span className="truncate">TLS Certificaat (SSL)</span>
+                </Button>
+              </Link>
+            )}
+            {HasAccess(sessionData) && (
+              <Link href={`/projects/${project}/settings/data-scope`}>
+                <Button
+                  variant={
+                    location.includes('/settings/data-scope')
+                      ? 'secondary'
+                      : 'ghost'
+                  }
+                  size="default"
+                  className="w-full flex justify-start pl-8">
+                  <span className="truncate">Data via API</span>
+                </Button>
+              </Link>
+            )}
+            {HasAccess(sessionData) && (
+              <Link href={`/projects/${project}/settings/api-tokens`}>
+                <Button
+                  variant={
+                    location.includes('/settings/api-tokens')
+                      ? 'secondary'
+                      : 'ghost'
+                  }
+                  size="default"
+                  className="w-full flex justify-start pl-8">
+                  <span className="truncate">API-tokens</span>
                 </Button>
               </Link>
             )}
