@@ -1,4 +1,4 @@
-import { readJson } from '@/lib/read-json';
+import { readJson, readSaved } from '@/lib/read-json';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
@@ -81,7 +81,7 @@ export function useProject(scopes?: Array<string>) {
     config: any,
     name?: any,
     url?: any
-  ): Promise<any | null> {
+  ): Promise<any> {
     const body: { config: any; name?: string; url?: string } = { config };
     if (name) {
       body.name = name;
@@ -98,17 +98,13 @@ export function useProject(scopes?: Array<string>) {
       body: JSON.stringify(body),
     });
 
-    if (!res.ok) {
-      return null;
-    }
-
-    const data = await res.json();
+    const data = await readSaved(res, 'Er is helaas iets mis gegaan.');
     projectSwr.mutate(data);
 
     return data;
   }
 
-  async function updateProjectEmails(emailConfig: any): Promise<any | null> {
+  async function updateProjectEmails(emailConfig: any): Promise<any> {
     const res = await fetch(`/api/openstad/api/project/${projectNumber}`, {
       method: 'PUT',
       headers: {
@@ -117,11 +113,7 @@ export function useProject(scopes?: Array<string>) {
       body: JSON.stringify({ emailConfig }),
     });
 
-    if (!res.ok) {
-      return null;
-    }
-
-    const data = await res.json();
+    const data = await readSaved(res, 'Er is helaas iets mis gegaan.');
 
     projectSwr.mutate(data);
 
