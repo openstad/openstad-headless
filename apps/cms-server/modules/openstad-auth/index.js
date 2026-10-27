@@ -305,14 +305,14 @@ module.exports = {
           let bak = {
             openstadUser: req.session.openstadUser,
             openstadLoginToken: req.session.openstadLoginToken,
-            openstadLastJWTCheck: req.session.openstadLastJWTCheck,
+            openStadlastJWTCheck: req.session.openStadlastJWTCheck,
           };
 
           try {
             await req.login(aposUser, () => {
               req.session.openstadUser = bak.openstadUser;
               req.session.openstadLoginToken = bak.openstadLoginToken;
-              req.session.openstadLastJWTCheck = bak.openstadLastJWTCheck;
+              req.session.openStadlastJWTCheck = bak.openStadlastJWTCheck;
               res.redirect(req.url);
             });
           } catch (e) {
