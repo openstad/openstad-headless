@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -9,8 +10,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import {
-  useRegisterFormSave,
-  useSaveController,
+  errorMessageOf,
   validateForSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
@@ -39,8 +39,6 @@ export default function ProjectDatalayerCreate() {
     defaultValues: {},
   });
 
-  const { allowNextNavigation } = useSaveController();
-
   const save = useCallback(async () => {
     const valid = await validateForSave(form);
     if (!valid) {
@@ -55,16 +53,17 @@ export default function ProjectDatalayerCreate() {
       );
     }
 
-    // A freshly created record is not an unsaved edit, so leaving this page
-    // must not prompt. useRegisterFormSave re-baselines the form afterwards,
-    // but that only reaches the controller on a later render -- the push
-    // starts now, so the guard has to be told directly.
-    allowNextNavigation();
     toast.success('Kaartlaag aangemaakt!');
     router.push(`/projects/${projectId}/areas`);
-  }, [form, createDatalayer, router, projectId, allowNextNavigation]);
+  }, [form, createDatalayer, router, projectId]);
 
-  useRegisterFormSave(form, save, { label: 'Aanmaken' });
+  async function submit() {
+    try {
+      await save();
+    } catch (error) {
+      toast.error(errorMessageOf(error));
+    }
+  }
 
   return (
     <div>
@@ -88,7 +87,10 @@ export default function ProjectDatalayerCreate() {
             <Heading size="xl">Toevoegen</Heading>
             <Separator className="my-4" />
             <form
-              onSubmit={(event) => event.preventDefault()}
+              onSubmit={(event) => {
+                event.preventDefault();
+                submit();
+              }}
               className="lg:w-1/2 grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
@@ -122,6 +124,9 @@ export default function ProjectDatalayerCreate() {
                   </FormItem>
                 )}
               />
+              <Button className="w-fit col-span-full" type="submit">
+                Opslaan
+              </Button>
             </form>
           </Form>
         </div>

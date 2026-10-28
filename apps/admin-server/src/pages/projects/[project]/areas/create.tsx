@@ -1,4 +1,5 @@
 import { CheckboxList } from '@/components/checkbox-list';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -12,8 +13,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import {
-  useRegisterFormSave,
-  useSaveController,
+  errorMessageOf,
   validateForSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
@@ -57,8 +57,6 @@ export default function ProjectAreaCreate() {
     },
   });
 
-  const { allowNextNavigation } = useSaveController();
-
   const save = useCallback(async () => {
     const valid = await validateForSave(form);
     if (!valid) {
@@ -79,16 +77,17 @@ export default function ProjectAreaCreate() {
       );
     }
 
-    // A freshly created record is not an unsaved edit, so leaving this page
-    // must not prompt. useRegisterFormSave re-baselines the form afterwards,
-    // but that only reaches the controller on a later render -- the push
-    // starts now, so the guard has to be told directly.
-    allowNextNavigation();
     toast.success('Polygoon aangemaakt!');
     router.push(`/projects/${project}/areas`);
-  }, [form, createArea, router, project, allowNextNavigation]);
+  }, [form, createArea, router, project]);
 
-  useRegisterFormSave(form, save, { label: 'Aanmaken' });
+  async function submit() {
+    try {
+      await save();
+    } catch (error) {
+      toast.error(errorMessageOf(error));
+    }
+  }
 
   return (
     <div>
@@ -110,7 +109,10 @@ export default function ProjectAreaCreate() {
         <div className="container py-6">
           <Form {...form}>
             <form
-              onSubmit={(event) => event.preventDefault()}
+              onSubmit={(event) => {
+                event.preventDefault();
+                submit();
+              }}
               className="grid grid-cols-1 gap-4">
               <Tabs defaultValue="general">
                 <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
@@ -288,6 +290,9 @@ export default function ProjectAreaCreate() {
                   </Tabs>
                 </TabsContent>
               </Tabs>
+              <Button className="w-fit col-span-full" type="submit">
+                Opslaan
+              </Button>
             </form>
           </Form>
         </div>
