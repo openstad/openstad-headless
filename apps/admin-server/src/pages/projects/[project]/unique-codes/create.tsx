@@ -10,8 +10,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import {
-  useRegisterFormSave,
-  useSaveController,
+  errorMessageOf,
   validateForSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
@@ -42,8 +41,6 @@ export default function ProjectCodeCreate() {
     defaultValues: {},
   });
 
-  const { allowNextNavigation } = useSaveController();
-
   const save = useCallback(async () => {
     const valid = await validateForSave(form);
     if (!valid) {
@@ -56,16 +53,17 @@ export default function ProjectCodeCreate() {
       throw new Error('Er is helaas iets mis gegaan.');
     }
 
-    // A freshly created record is not an unsaved edit, so leaving this page
-    // must not prompt. useRegisterFormSave re-baselines the form afterwards,
-    // but that only reaches the controller on a later render -- the push
-    // starts now, so the guard has to be told directly.
-    allowNextNavigation();
     toast.success('De codes worden aangemaakt!');
     router.push(`/projects/${project}/unique-codes`);
-  }, [form, createUniqueCodes, router, project, allowNextNavigation]);
+  }, [form, createUniqueCodes, router, project]);
 
-  useRegisterFormSave(form, save, { label: 'Aanmaken' });
+  async function submit() {
+    try {
+      await save();
+    } catch (error) {
+      toast.error(errorMessageOf(error));
+    }
+  }
 
   return (
     <div>
@@ -90,7 +88,10 @@ export default function ProjectCodeCreate() {
             <Separator className="my-4" />
             <Form {...form}>
               <form
-                onSubmit={(event) => event.preventDefault()}
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  submit();
+                }}
                 className="lg:w-3/4 grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -111,6 +112,9 @@ export default function ProjectCodeCreate() {
                   )}
                 />
                 <div className="col-span-full flex gap-4">
+                  <Button type="submit" className="w-fit">
+                    Opslaan
+                  </Button>
                   <Button
                     type="button"
                     variant="outline"

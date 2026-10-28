@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -9,8 +10,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import {
-  useRegisterFormSave,
-  useSaveController,
+  errorMessageOf,
   validateForSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
@@ -37,8 +37,6 @@ export default function ProjectCodeCreate() {
     defaultValues: {},
   });
 
-  const { allowNextNavigation } = useSaveController();
-
   const save = useCallback(async () => {
     const valid = await validateForSave(form);
     if (!valid) {
@@ -51,16 +49,17 @@ export default function ProjectCodeCreate() {
       throw new Error('Er is helaas iets mis gegaan.');
     }
 
-    // A freshly created record is not an unsaved edit, so leaving this page
-    // must not prompt. useRegisterFormSave re-baselines the form afterwards,
-    // but that only reaches the controller on a later render -- the push
-    // starts now, so the guard has to be told directly.
-    allowNextNavigation();
     toast.success('De toegangscode is aangemaakt!');
     router.push(`/projects/${project}/authentication/access-codes`);
-  }, [form, createAccessCode, router, project, allowNextNavigation]);
+  }, [form, createAccessCode, router, project]);
 
-  useRegisterFormSave(form, save, { label: 'Aanmaken' });
+  async function submit() {
+    try {
+      await save();
+    } catch (error) {
+      toast.error(errorMessageOf(error));
+    }
+  }
 
   return (
     <div>
@@ -88,7 +87,10 @@ export default function ProjectCodeCreate() {
             <Heading size="xl">Toevoegen</Heading>
             <Separator className="my-4" />
             <form
-              onSubmit={(event) => event.preventDefault()}
+              onSubmit={(event) => {
+                event.preventDefault();
+                submit();
+              }}
               className="lg:w-3/4 grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -103,6 +105,9 @@ export default function ProjectCodeCreate() {
                   </FormItem>
                 )}
               />
+              <Button className="w-fit col-span-full" type="submit">
+                Opslaan
+              </Button>
             </form>
           </Form>
         </div>

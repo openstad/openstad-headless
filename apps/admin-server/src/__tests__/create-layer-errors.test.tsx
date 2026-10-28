@@ -21,7 +21,9 @@ vi.mock('@/components/ui/page-layout', () => ({
   PageLayout: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
-vi.mock('react-hot-toast', () => ({ default: { success() {}, error() {} } }));
+const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }));
+
+vi.mock('react-hot-toast', () => ({ default: toast }));
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -42,6 +44,8 @@ describe('Kaartlaag aanmaken: what a failed save says', () => {
   let root: Root;
 
   beforeEach(async () => {
+    toast.success.mockClear();
+    toast.error.mockClear();
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
@@ -91,9 +95,21 @@ describe('Kaartlaag aanmaken: what a failed save says', () => {
   }
 
   async function save() {
-    act(() => controller.triggerSave());
+    const button = Array.from(container.querySelectorAll('button')).find(
+      (candidate) => candidate.textContent === 'Opslaan'
+    ) as HTMLButtonElement;
+    act(() => button.click());
     await settle();
   }
+
+  it('keeps its own save button instead of joining the save bar', () => {
+    expect(controller.isRegistered).toBe(false);
+    expect(
+      Array.from(container.querySelectorAll('button')).some(
+        (button) => button.textContent === 'Opslaan'
+      )
+    ).toBe(true);
+  });
 
   it('names the failed create when the server answers with an error page', async () => {
     type('input[name="name"]', 'Laag');
@@ -102,9 +118,10 @@ describe('Kaartlaag aanmaken: what a failed save says', () => {
 
     await save();
 
-    expect(controller.errorMessage).toBe(
+    expect(toast.error).toHaveBeenCalledWith(
       'De kaartlaag kon niet worden aangemaakt.'
     );
+    expect(toast.success).not.toHaveBeenCalled();
   });
 
   it('does not report success when the server answers with an error', async () => {
@@ -126,9 +143,10 @@ describe('Kaartlaag aanmaken: what a failed save says', () => {
 
     await save();
 
-    expect(controller.errorMessage).toBe(
+    expect(toast.error).toHaveBeenCalledWith(
       'De kaartlaag kon niet worden aangemaakt.'
     );
+    expect(toast.success).not.toHaveBeenCalled();
   });
 
   it('still says the layer is not valid JSON when it is not', async () => {
@@ -138,7 +156,7 @@ describe('Kaartlaag aanmaken: what a failed save says', () => {
 
     await save();
 
-    expect(controller.errorMessage).toBe(
+    expect(toast.error).toHaveBeenCalledWith(
       'Een veld bevat geen geldige JSON (bijvoorbeeld de polygoon of de kaartlaag). Controleer de invoer en probeer het opnieuw.'
     );
   });

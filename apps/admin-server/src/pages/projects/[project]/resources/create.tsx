@@ -26,7 +26,7 @@ export default function ProjectResourceCreate() {
             url: `/projects/${project}/resources/create`,
           },
         ]}>
-        <ResourceForm onFormSubmit={(body) => create(body)} useGlobalSave />
+        <ResourceForm onFormSubmit={(body) => create(body)} />
       </PageLayout>
     </div>
   );

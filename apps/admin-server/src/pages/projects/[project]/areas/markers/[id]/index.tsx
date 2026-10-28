@@ -37,6 +37,7 @@ export default function ProjectMarkersEdit() {
           initialMarkers={markersData.markers || []}
           project={project as string}
           onSave={handleSave}
+          useGlobalSave
         />
       </PageLayout>
     </div>

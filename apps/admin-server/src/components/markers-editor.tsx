@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import {
+  errorMessageOf,
   useRegisterSave,
   validateForSave,
 } from '@/components/ui/save-controller';
@@ -25,6 +26,7 @@ import isEqual from 'lodash/isEqual';
 import { ArrowLeft, MapPin, Trash2, X } from 'lucide-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 const markerSchema = z.object({
@@ -58,6 +60,7 @@ interface MarkersEditorProps {
    * swallowed error would leave it claiming the save succeeded.
    */
   onSave: (name: string, markers: Marker[]) => Promise<void>;
+  useGlobalSave?: boolean;
 }
 
 export default function MarkersEditor({
@@ -65,6 +68,7 @@ export default function MarkersEditor({
   initialMarkers,
   project,
   onSave,
+  useGlobalSave = false,
 }: MarkersEditorProps) {
   const [markers, setMarkers] = useState<Marker[]>(initialMarkers);
   const [activeMarkerIndex, setActiveMarkerIndex] = useState<number | null>(
@@ -306,7 +310,20 @@ export default function MarkersEditor({
     refreshDirty();
   }
 
-  useRegisterSave({ isDirty, save: handleSave });
+  useRegisterSave({ isDirty, save: handleSave, enabled: useGlobalSave });
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  async function submit() {
+    setIsSaving(true);
+    try {
+      await handleSave();
+    } catch (error) {
+      toast.error(errorMessageOf(error));
+    } finally {
+      setIsSaving(false);
+    }
+  }
 
   return (
     <>
@@ -672,6 +689,16 @@ export default function MarkersEditor({
             )}
           </div>
         </div>
+
+        {!useGlobalSave && (
+          <>
+            <Separator className="my-4" />
+
+            <Button onClick={submit} disabled={isSaving}>
+              {isSaving ? 'Opslaan...' : 'Opslaan'}
+            </Button>
+          </>
+        )}
       </div>
     </>
   );

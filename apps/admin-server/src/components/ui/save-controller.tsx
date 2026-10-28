@@ -96,7 +96,7 @@ const INVALID_JSON_ERROR =
 const NETWORK_FAILURE =
   /failed to fetch|networkerror|load failed|network request failed/i;
 
-function errorMessageOf(error: unknown): string {
+export function errorMessageOf(error: unknown): string {
   if (error instanceof TypeError) {
     return NETWORK_FAILURE.test(error.message) ? NETWORK_ERROR : GENERIC_ERROR;
   }
