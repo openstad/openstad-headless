@@ -96,6 +96,14 @@ function hasOpenItemEdit() {
   return Array.from(openItemEdits.values()).some(Boolean);
 }
 
+export function useOpenItemEditDirty() {
+  return useSyncExternalStore(
+    subscribeOpenItemEdits,
+    hasOpenItemEdit,
+    () => false
+  );
+}
+
 export type ShownDefault = {
   shown: unknown;
   stored: unknown;
@@ -700,11 +708,7 @@ export function useWidgetDraft<T extends { [key: string]: any }>(
     });
   }, [updateConfig, widgetSettingsKeys, updatePreview]);
 
-  const openItemDirty = useSyncExternalStore(
-    subscribeOpenItemEdits,
-    hasOpenItemEdit,
-    () => false
-  );
+  const openItemDirty = useOpenItemEditDirty();
   const hasUnsavedChanges = isDirty || openItemDirty;
 
   useRegisterSave({ isDirty: hasUnsavedChanges, save });
