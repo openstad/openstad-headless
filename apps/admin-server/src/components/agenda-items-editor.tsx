@@ -10,6 +10,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import type { ItemsUpdater } from '@/hooks/useDraftItems';
+import { useOpenItemDraft } from '@/hooks/useOpenItemDraft';
+import {
+  applySelectedOptionEdit,
+  mergeSelectedItem,
+} from '@/lib/open-item-merge';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { formatDutchDate } from '@openstad-headless/lib/timeline-dates';
@@ -41,7 +47,7 @@ export interface AgendaLink {
 
 interface AgendaItemsEditorProps {
   items: AgendaItem[];
-  onItemsChange: (items: AgendaItem[]) => void;
+  onItemsChange: (updater: ItemsUpdater<AgendaItem>) => void;
   showActiveDates?: boolean;
   timelineMode?: boolean;
 }
@@ -113,6 +119,31 @@ function handleMovementOrDeletion(
   return sorted;
 }
 
+const linkFields = { title: '', url: '', openInNewWindow: false };
+
+type OpenItemState = {
+  links: AgendaLink[];
+  selectedLink: AgendaLink | null;
+};
+
+function mergeOpenItem(
+  currentItems: AgendaItem[],
+  selectedId: string,
+  values: FormData,
+  state: OpenItemState
+) {
+  const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+  return mergeSelectedItem(currentItems, selectedId, {
+    ...valuesWithoutTrigger,
+    links: applySelectedOptionEdit(
+      state.links,
+      state.selectedLink,
+      values.links,
+      linkFields
+    ),
+  } as Partial<AgendaItem>);
+}
+
 const defaults = (): FormData => ({
   trigger: '0',
   title: '',
@@ -149,21 +180,48 @@ export function AgendaItemsEditor({
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    if (selectedItem) {
-      form.reset({
-        trigger: selectedItem.trigger,
-        title: selectedItem.title || '',
-        description: selectedItem.description,
-        active: selectedItem.active,
-        highlighted: selectedItem.highlighted || false,
-        activeFrom: toDateInputValue(selectedItem.activeFrom),
-        activeTo: toDateInputValue(selectedItem.activeTo),
-        links: selectedItem.links || [],
-      });
-      setLinks((selectedItem.links || []).map(withId));
-    }
-  }, [selectedItemId, form]);
+  const { releaseOpenItem } = useOpenItemDraft<
+    AgendaItem,
+    FormData,
+    OpenItemState
+  >({
+    form,
+    openId: selectedItem?.id ?? null,
+    state: { links, selectedLink },
+    items,
+    commitItems: onItemsChange,
+    merge: mergeOpenItem,
+    label: 'Items',
+  });
+
+  function openItem(item: AgendaItem) {
+    form.reset({
+      trigger: item.trigger,
+      title: item.title || '',
+      description: item.description,
+      active: item.active,
+      highlighted: item.highlighted || false,
+      activeFrom: toDateInputValue(item.activeFrom),
+      activeTo: toDateInputValue(item.activeTo),
+      links: item.links || [],
+    });
+    setLinks((item.links || []).map(withId));
+    setLink(null);
+    setSelectedItemId(item.id ?? null);
+  }
+
+  function selectLink(link: AgendaLink) {
+    if (link.id === selectedLink?.id) return;
+    setLinks((currentLinks) =>
+      applySelectedOptionEdit(
+        currentLinks,
+        selectedLink,
+        form.getValues('links'),
+        linkFields
+      )
+    );
+    setLink(link);
+  }
 
   useEffect(() => {
     if (selectedLink) {
@@ -243,10 +301,9 @@ export function AgendaItemsEditor({
       const newLink = {
         id: generateId(),
         trigger: `${maxLinkTrigger + 1}`,
-        title: values.links?.[values.links.length - 1].title || '',
-        url: values.links?.[values.links.length - 1].url || '',
-        openInNewWindow:
-          values.links?.[values.links.length - 1].openInNewWindow || false,
+        title: values.links?.[links.length]?.title || '',
+        url: values.links?.[links.length]?.url || '',
+        openInNewWindow: values.links?.[links.length]?.openInNewWindow || false,
       };
       setLinks((currentLinks) => [...currentLinks, newLink]);
     }
@@ -284,9 +341,23 @@ export function AgendaItemsEditor({
   }
 
   function handleSaveLinks() {
-    form.setValue('links', links);
+    const editedLinks = applySelectedOptionEdit(
+      links,
+      selectedLink,
+      form.getValues('links'),
+      linkFields
+    );
+    setLinks(editedLinks);
+    form.setValue('links', editedLinks);
     setSettingLinks(false);
+    setLink(null);
   }
+
+  const selectedLinkIndex = links.findIndex(
+    (link) => link.id === selectedLink?.id
+  );
+  const activeLink =
+    selectedLinkIndex !== -1 ? selectedLinkIndex : links.length;
 
   return (
     <Form {...form}>
@@ -322,7 +393,12 @@ export function AgendaItemsEditor({
                           </span>
                           <span
                             className="gap-2 py-3 px-2 w-full"
-                            onClick={() => setSelectedItemId(item.id ?? null)}>
+                            onClick={() => {
+                              if (selectedItem?.id === item.id) return;
+                              if (!releaseOpenItem()) return;
+                              openItem(item);
+                              setSettingLinks(false);
+                            }}>
                             {item.title || item.description || '(geen titel)'}
                             {item.activeFrom && (
                               <span className="block text-sm text-muted-foreground">
@@ -355,7 +431,7 @@ export function AgendaItemsEditor({
                   <Separator className="mt-2" />
                   <FormField
                     control={form.control}
-                    name={`links.${links.length - 1}.title`}
+                    name={`links.${activeLink}.title`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Link titel</FormLabel>
@@ -366,7 +442,7 @@ export function AgendaItemsEditor({
                   />
                   <FormField
                     control={form.control}
-                    name={`links.${links.length - 1}.url`}
+                    name={`links.${activeLink}.url`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Link URL</FormLabel>
@@ -377,7 +453,7 @@ export function AgendaItemsEditor({
                   />
                   <FormField
                     control={form.control}
-                    name={`links.${links.length - 1}.openInNewWindow`}
+                    name={`links.${activeLink}.openInNewWindow`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Open in nieuw venster</FormLabel>
@@ -397,27 +473,15 @@ export function AgendaItemsEditor({
                     className="w-full bg-secondary text-black hover:text-white mt-4"
                     type="button"
                     onClick={() => handleAddLink(form.getValues())}>
-                    {selectedLink
-                      ? 'Sla wijzigingen op'
-                      : 'Voeg link toe aan lijst'}
+                    {selectedLink ? 'Nieuwe link' : 'Voeg link toe aan lijst'}
                   </Button>
                 </div>
                 <div className="flex gap-2">
                   <Button
-                    className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                    type="button"
-                    onClick={() => {
-                      setSettingLinks(false);
-                      setLink(null);
-                      setLinks([]);
-                    }}>
-                    Annuleer
-                  </Button>
-                  <Button
                     className="w-fit mt-4"
                     type="button"
                     onClick={() => handleSaveLinks()}>
-                    Sla links op
+                    Terug
                   </Button>
                 </div>
               </div>
@@ -426,7 +490,7 @@ export function AgendaItemsEditor({
                 <Separator className="my-4" />
                 <div className="flex flex-col gap-1">
                   {links.length > 0
-                    ? links
+                    ? [...links]
                         .sort(
                           (a, b) => parseInt(a.trigger) - parseInt(b.trigger)
                         )
@@ -452,7 +516,7 @@ export function AgendaItemsEditor({
                             </span>
                             <span
                               className="py-3 px-2 w-full"
-                              onClick={() => setLink(link)}>
+                              onClick={() => selectLink(link)}>
                               {link.title}
                             </span>
                             <span className="py-3 px-2">
@@ -612,21 +676,32 @@ export function AgendaItemsEditor({
               </div>
               <div className="flex gap-2">
                 {selectedItem && (
+                  <>
+                    <Button
+                      className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                      type="button"
+                      onClick={() => resetForm()}>
+                      Annuleer
+                    </Button>
+                    <Button
+                      className="w-fit mt-4"
+                      type="button"
+                      onClick={() => {
+                        if (!releaseOpenItem()) return;
+                        resetForm();
+                      }}>
+                      Nieuw item
+                    </Button>
+                  </>
+                )}
+                {!selectedItem && (
                   <Button
-                    className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                    className="w-fit mt-4"
                     type="button"
-                    onClick={() => resetForm()}>
-                    Annuleer
+                    onClick={form.handleSubmit(onSubmit)}>
+                    Voeg item toe aan lijst
                   </Button>
                 )}
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={form.handleSubmit(onSubmit)}>
-                  {selectedItem
-                    ? 'Sla wijzigingen op'
-                    : 'Voeg item toe aan lijst'}
-                </Button>
               </div>
             </div>
           )}
