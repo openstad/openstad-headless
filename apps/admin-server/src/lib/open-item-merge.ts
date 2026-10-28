@@ -8,7 +8,7 @@ type RoutedItem = {
   routingSelectedAnswer?: string | string[];
 };
 
-type EditableOption = { id?: string; trigger?: string; titles?: unknown };
+type EditableOption = { id?: string; trigger?: string };
 
 type MatrixEntry = { id?: string; trigger?: string; text?: string };
 
@@ -72,18 +72,21 @@ export function mergeSelectedItem<T extends RoutedItem>(
 export function applySelectedOptionEdit<O extends EditableOption>(
   options: O[],
   selectedOption: O | null,
-  formOptions: EditableOption[] | undefined
+  formOptions: Array<EditableOption & Record<string, unknown>> | undefined,
+  fieldDefaults: Record<string, unknown> = { titles: [] }
 ): O[] {
   if (!selectedOption) return options;
   return options
     .map((option) => {
       if (option.id === selectedOption.id) {
-        return {
-          ...option,
-          titles:
-            formOptions?.find((o) => o.trigger === option.trigger)?.titles ||
-            [],
-        };
+        const formOption = formOptions?.find(
+          (o) => o.trigger === option.trigger
+        );
+        const edited: Record<string, unknown> = { ...option };
+        Object.entries(fieldDefaults).forEach(([field, fallback]) => {
+          edited[field] = formOption?.[field] || fallback;
+        });
+        return edited as O;
       }
       return typeof option?.trigger !== 'undefined' ? option : false;
     })
