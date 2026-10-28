@@ -6,10 +6,6 @@
 const Url = require('url');
 const expressSession = require('express-session');
 
-const generateRandomPassword = () => {
-  return require('crypto').randomBytes(64).toString('hex');
-};
-
 function removeURLParameter(url, parameter) {
   // prefer to use l.search if you have a location/link object
   const urlparts = url.split('?');
@@ -262,7 +258,6 @@ module.exports = {
           const userData = {
             username: username, // easy way to keep the username unique is using the email, wont be used anyway
             title: email,
-            password: generateRandomPassword(), // generate a random password since apostrophe expects it
             firstName: firstName,
             lastName: lastName,
             email: email,
