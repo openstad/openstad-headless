@@ -110,6 +110,14 @@ export function useOpenItemDraft<T extends { id?: string }, V, S>({
     return true;
   };
 
+  const releaseOpenItem = () => {
+    if (!isOpenItemDirty()) return true;
+    if (validationMessage()) return false;
+    commitOpenItem();
+    reportOpenItemEdit(keyRef.current, false);
+    return true;
+  };
+
   useEffect(() => {
     reportOpenItemEdit(keyRef.current, isOpenItemDirty());
   });
@@ -140,4 +148,6 @@ export function useOpenItemDraft<T extends { id?: string }, V, S>({
       reportOpenItemEdit(key, null);
     };
   }, [form]);
+
+  return { releaseOpenItem };
 }
