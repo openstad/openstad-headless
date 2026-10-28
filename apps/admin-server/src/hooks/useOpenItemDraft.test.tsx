@@ -52,6 +52,7 @@ function mountHook(initialItems: TestItem[], openId: string | null) {
   let root: Root;
   let items = initialItems;
   let form: UseFormReturn<TestValues>;
+  let releaseOpenItem: () => boolean;
 
   const commitItems = vi.fn((updater: ItemsUpdater<TestItem>) => {
     items = typeof updater === 'function' ? updater(items) : updater;
@@ -66,7 +67,7 @@ function mountHook(initialItems: TestItem[], openId: string | null) {
         fieldKey: open?.fieldKey ?? '',
       },
     });
-    useOpenItemDraft<TestItem, TestValues, null>({
+    ({ releaseOpenItem } = useOpenItemDraft<TestItem, TestValues, null>({
       form,
       openId,
       state: null,
@@ -75,7 +76,7 @@ function mountHook(initialItems: TestItem[], openId: string | null) {
       merge: mergeItem,
       validate: validateItem,
       label: 'Items',
-    });
+    }));
     return null;
   }
 
@@ -93,6 +94,13 @@ function mountHook(initialItems: TestItem[], openId: string | null) {
       act(() => {
         form.setValue(field, value);
       }),
+    release: () => {
+      let released = false;
+      act(() => {
+        released = releaseOpenItem();
+      });
+      return released;
+    },
     unmount: () => {
       if (!mounted) return;
       mounted = false;
@@ -179,6 +187,44 @@ describe('useOpenItemDraft', () => {
     harness.edit('title', 'Nieuwe vraag');
 
     harness.unmount();
+
+    expect(harness.commitItems).not.toHaveBeenCalled();
+  });
+
+  it('commits the open item when it is released for another item', () => {
+    harness = mountHook([storedItem], 'q1');
+    harness.edit('title', 'Nieuwe vraag');
+
+    expect(harness.release()).toBe(true);
+
+    expect(harness.commitItems).toHaveBeenCalledTimes(1);
+    expect(harness.items()).toEqual([{ ...storedItem, title: 'Nieuwe vraag' }]);
+    expect(isDirty()).toBe(false);
+  });
+
+  it('keeps an invalid open item instead of releasing it', () => {
+    harness = mountHook([storedItem], 'q1');
+    harness.edit('fieldKey', '');
+
+    expect(harness.release()).toBe(false);
+
+    expect(harness.commitItems).not.toHaveBeenCalled();
+    expect(harness.items()).toEqual([storedItem]);
+  });
+
+  it('releases an unedited open item without committing it', () => {
+    harness = mountHook([storedItem], 'q1');
+
+    expect(harness.release()).toBe(true);
+
+    expect(harness.commitItems).not.toHaveBeenCalled();
+  });
+
+  it('releases when no item is open', () => {
+    harness = mountHook([storedItem], null);
+    harness.edit('title', 'Nieuwe vraag');
+
+    expect(harness.release()).toBe(true);
 
     expect(harness.commitItems).not.toHaveBeenCalled();
   });

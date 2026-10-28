@@ -132,6 +132,55 @@ describe('applySelectedOptionEdit', () => {
     expect(result).toHaveLength(2);
     expect(result[0].titles).toEqual([{ key: 'Fiets' }]);
   });
+
+  it('takes every given field of the selected option from the form', () => {
+    const withImages = [
+      { id: 'o1', trigger: '0', titles: [{ key: 'Fiets' }], images: [] },
+      { id: 'o2', trigger: '1', titles: [{ key: 'Auto' }], images: [] },
+    ];
+    const result = applySelectedOptionEdit(
+      withImages,
+      withImages[0],
+      [
+        {
+          trigger: '0',
+          titles: [{ key: 'Fiets of step' }],
+          images: [{ url: 'fiets.png' }],
+        },
+      ],
+      { titles: [], images: [] }
+    );
+
+    expect(result[0].titles).toEqual([{ key: 'Fiets of step' }]);
+    expect(result[0].images).toEqual([{ url: 'fiets.png' }]);
+    expect(result[1]).toBe(withImages[1]);
+  });
+
+  it('falls back to the given default for a field the form left empty', () => {
+    const links = [
+      {
+        id: 'l1',
+        trigger: '0',
+        title: 'Site',
+        url: 'https://a.nl',
+        openInNewWindow: true,
+      },
+    ];
+    const result = applySelectedOptionEdit(
+      links,
+      links[0],
+      [{ trigger: '0', title: 'Nieuwe site', url: 'https://b.nl' }],
+      { title: '', url: '', openInNewWindow: false }
+    );
+
+    expect(result[0]).toEqual({
+      id: 'l1',
+      trigger: '0',
+      title: 'Nieuwe site',
+      url: 'https://b.nl',
+      openInNewWindow: false,
+    });
+  });
 });
 
 describe('applySelectedMatrixEdit', () => {
