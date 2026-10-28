@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,8 +11,7 @@ import { FormObjectSelectField } from '@/components/ui/form-object-select-field'
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import {
-  useRegisterFormSave,
-  useSaveController,
+  errorMessageOf,
   validateForSave,
 } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
@@ -38,8 +38,6 @@ export default function CreateUser() {
     defaultValues: {},
   });
 
-  const { allowNextNavigation } = useSaveController();
-
   const save = useCallback(async () => {
     const valid = await validateForSave(form);
     if (!valid) {
@@ -60,18 +58,19 @@ export default function CreateUser() {
       );
     }
 
-    // A freshly created record is not an unsaved edit. This leaves via a full
-    // page load, so the flag also has to silence the beforeunload prompt.
     toast.success('User is toegevoegd');
     user.key = `${user.idpUser.provider}-*-${user.idpUser.identifier}`;
-
-    // Set immediately before leaving: anything that throws in between would
-    // otherwise leave the guard disabled for a navigation that never happened.
-    allowNextNavigation();
     document.location.href = `/users/${btoa(user.key)}`;
-  }, [form, createUser, allowNextNavigation]);
+  }, [form, createUser]);
 
-  useRegisterFormSave(form, save, { label: 'Aanmaken' });
+  async function submit() {
+    try {
+      await save();
+    } catch (error) {
+      toast.error(errorMessageOf(error));
+    }
+  }
+
   if (!projects) return null;
 
   return (
@@ -93,7 +92,10 @@ export default function CreateUser() {
             <Heading size="xl">User toevoegen</Heading>
             <Separator className="my-4" />
             <form
-              onSubmit={(event) => event.preventDefault()}
+              onSubmit={(event) => {
+                event.preventDefault();
+                submit();
+              }}
               className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4 auto-rows-auto">
               <FormField
                 control={form.control}
@@ -118,6 +120,10 @@ export default function CreateUser() {
                 label={(project: any) => `${project.name}`}
                 noSelection="&nbsp;"
               />
+
+              <Button className="col-span-full w-fit" type="submit">
+                Opslaan
+              </Button>
             </form>
           </Form>
         </div>

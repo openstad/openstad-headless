@@ -58,6 +58,7 @@ describe('Markers bewerken: the name error', () => {
             initialMarkers={[]}
             project="2"
             onSave={async () => {}}
+            useGlobalSave
           />
         </SaveControllerProvider>
       )
