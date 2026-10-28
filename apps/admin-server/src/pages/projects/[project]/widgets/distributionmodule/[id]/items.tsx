@@ -11,7 +11,9 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { useDraftItems } from '@/hooks/useDraftItems';
+import { useOpenItemDraft } from '@/hooks/useOpenItemDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { mergeSelectedItem } from '@/lib/open-item-merge';
 import { generateId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DistributionModuleProps } from '@openstad-headless/distribution-module/src/distribution-module';
@@ -20,7 +22,7 @@ import {
   Option,
 } from '@openstad-headless/enquete/src/types/enquete-props';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -94,17 +96,39 @@ export default function WidgetDistributionModuleItems(
     defaultValues: defaults(),
   });
 
-  // Sets form to selected item values when item is selected
-  useEffect(() => {
-    if (selectedItem) {
-      form.reset({
-        trigger: selectedItem.trigger,
-        title: selectedItem.title || '',
-        description: selectedItem.description || '',
-        placeholder: selectedItem.placeholder || '',
-      });
-    }
-  }, [selectedItemId, form]);
+  function mergeOpenItem(
+    currentItems: Item[],
+    selectedId: string,
+    values: FormData
+  ) {
+    const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+    return mergeSelectedItem(
+      currentItems,
+      selectedId,
+      valuesWithoutTrigger as Partial<Item>
+    );
+  }
+
+  const { releaseOpenItem } = useOpenItemDraft<Item, FormData, null>({
+    form,
+    openId: selectedItem?.id ?? null,
+    state: null,
+    items,
+    commitItems,
+    merge: mergeOpenItem,
+    label: 'Items',
+  });
+
+  function openItem(item: Item) {
+    form.reset({
+      trigger: item.trigger,
+      title: item.title || '',
+      key: item.key || '',
+      description: item.description || '',
+      placeholder: item.placeholder || '',
+    });
+    setSelectedItemId(item.id ?? null);
+  }
 
   const handleAction = (
     actionType: 'moveUp' | 'moveDown' | 'delete',
@@ -204,9 +228,11 @@ export default function WidgetDistributionModuleItems(
                             </span>
                             <span
                               className="gap-2 py-3 px-2 w-full"
-                              onClick={() =>
-                                setSelectedItemId(item.id ?? null)
-                              }>
+                              onClick={() => {
+                                if (selectedItem?.id === item.id) return;
+                                if (!releaseOpenItem()) return;
+                                openItem(item);
+                              }}>
                               {`${item.title || 'Geen titel'}`}
                             </span>
                             <span className="gap-2 py-3 px-2">
@@ -280,27 +306,38 @@ export default function WidgetDistributionModuleItems(
               <div>
                 <div className="flex gap-2">
                   {selectedItem && (
-                    <Button
-                      className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                      type="button"
-                      onClick={() => {
-                        resetForm();
-                      }}>
-                      Annuleer
-                    </Button>
+                    <>
+                      <Button
+                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                        type="button"
+                        onClick={() => {
+                          resetForm();
+                        }}>
+                        Annuleer
+                      </Button>
+                      <Button
+                        className="w-fit mt-4"
+                        type="button"
+                        onClick={() => {
+                          if (!releaseOpenItem()) return;
+                          resetForm();
+                        }}>
+                        Nieuw item
+                      </Button>
+                    </>
                   )}
 
-                  <Button
-                    className="w-fit mt-4"
-                    type="submit"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onSubmit(form.getValues());
-                    }}>
-                    {selectedItem
-                      ? 'Sla wijzigingen op'
-                      : 'Voeg item toe aan lijst'}
-                  </Button>
+                  {!selectedItem && (
+                    <Button
+                      className="w-fit mt-4"
+                      type="submit"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onSubmit(form.getValues());
+                      }}>
+                      Voeg item toe aan lijst
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
