@@ -24,8 +24,15 @@ import { Heading } from '@/components/ui/typography';
 import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
 import { useDraftItems } from '@/hooks/useDraftItems';
+import { useOpenItemDraft } from '@/hooks/useOpenItemDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import {
+  applySelectedMatrixEdit,
+  applySelectedOptionEdit,
+  fieldKeyError,
+  mergeSelectedItem,
+} from '@/lib/open-item-merge';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -182,6 +189,38 @@ export default function WidgetResourceFormItems(
   const { data: allStatuses } = useStatuses(project as string);
   const { data: allTags } = useTags(project as string);
   const firstTagType = allTags?.[0]?.type ?? '';
+
+  type OpenItemState = {
+    options: Option[];
+    matrixOptions: Matrix;
+    selectedOption: Option | null;
+    matrixOption: (MatrixOption & { type: 'rows' | 'columns' }) | null;
+  };
+
+  const optionFields = { titles: [], images: [] };
+
+  function mergeOpenItem(
+    currentItems: Item[],
+    selectedId: string,
+    values: FormData,
+    state: OpenItemState
+  ) {
+    const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+    return mergeSelectedItem(currentItems, selectedId, {
+      ...valuesWithoutTrigger,
+      options: applySelectedOptionEdit(
+        state.options,
+        state.selectedOption,
+        values.options,
+        optionFields
+      ),
+      matrix: applySelectedMatrixEdit(
+        state.matrixOptions,
+        state.matrixOption,
+        values.matrix
+      ),
+    } as Partial<Item>);
+  }
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
@@ -414,51 +453,72 @@ export default function WidgetResourceFormItems(
     defaultValues: defaults(),
   });
 
-  // Sets form to selected item values when item is selected
-  useEffect(() => {
-    if (selectedItem) {
-      form.reset({
-        trigger: selectedItem.trigger,
-        title: selectedItem.title || '',
-        description: selectedItem.description || '',
-        placeholder: selectedItem.placeholder || '',
-        defaultValue: selectedItem.defaultValue || '',
-        type: selectedItem.type || '',
-        tags: selectedItem.tags || firstTagType,
-        fieldType: selectedItem.fieldType || '',
-        options: selectedItem.options || [],
-        fieldKey: selectedItem.fieldKey || '',
-        fieldRequired: selectedItem.fieldRequired || false,
-        onlyForModerator: selectedItem.onlyForModerator || false,
-        minCharacters: selectedItem.minCharacters || '',
-        maxCharacters: selectedItem.maxCharacters || '',
-        maxChoices: selectedItem.maxChoices || '',
-        maxChoicesMessage: selectedItem.maxChoicesMessage || '',
-        variant: selectedItem.variant || '',
-        multiple: selectedItem.multiple || false,
-        maxUploadSizeMB: selectedItem.maxUploadSizeMB || 25,
-        prevPageText: selectedItem.prevPageText || '',
-        nextPageText: selectedItem.nextPageText || '',
-        matrix: selectedItem.matrix || matrixDefault,
-        matrixMultiple: selectedItem.matrixMultiple || false,
-        routingInitiallyHide: selectedItem.routingInitiallyHide || false,
-        routingSelectedQuestion: selectedItem.routingSelectedQuestion || '',
-        routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
-        selectAll: selectedItem.selectAll || false,
-        selectAllLabel:
-          typeof selectedItem.selectAllLabel === 'undefined'
-            ? 'Selecteer alles'
-            : selectedItem.selectAllLabel,
-      });
-      setOptions((selectedItem.options || []).map(withId));
-      const matrix = selectedItem.matrix || matrixDefault;
-      setMatrixOptions({
-        ...matrix,
-        rows: (matrix.rows || []).map(withId),
-        columns: (matrix.columns || []).map(withId),
-      });
-    }
-  }, [selectedItemId, form]);
+  const { releaseOpenItem } = useOpenItemDraft<Item, FormData, OpenItemState>({
+    form,
+    openId: selectedItem?.id ?? null,
+    state: { options, matrixOptions, selectedOption, matrixOption },
+    items,
+    commitItems,
+    merge: mergeOpenItem,
+    validate: (currentItems, selectedId, values) => {
+      if (values.type === 'tags' && !allTags?.length) {
+        return 'Geen tags gevonden om te selecteren';
+      }
+      if (['none', 'pagination'].includes(values.type || '')) return undefined;
+      return fieldKeyError(currentItems, selectedId, values.fieldKey);
+    },
+    label: 'Formulier velden',
+  });
+
+  function buildFormValues(item: Item) {
+    return {
+      trigger: item.trigger,
+      title: item.title || '',
+      description: item.description || '',
+      placeholder: item.placeholder || '',
+      defaultValue: item.defaultValue || '',
+      type: item.type || '',
+      tags: item.tags || firstTagType,
+      fieldType: item.fieldType || '',
+      options: item.options || [],
+      fieldKey: item.fieldKey || '',
+      fieldRequired: item.fieldRequired || false,
+      onlyForModerator: item.onlyForModerator || false,
+      minCharacters: item.minCharacters || '',
+      maxCharacters: item.maxCharacters || '',
+      maxChoices: item.maxChoices || '',
+      maxChoicesMessage: item.maxChoicesMessage || '',
+      variant: item.variant || '',
+      multiple: item.multiple || false,
+      maxUploadSizeMB: item.maxUploadSizeMB || 25,
+      prevPageText: item.prevPageText || '',
+      nextPageText: item.nextPageText || '',
+      matrix: item.matrix || matrixDefault,
+      matrixMultiple: item.matrixMultiple || false,
+      routingInitiallyHide: item.routingInitiallyHide || false,
+      routingSelectedQuestion: item.routingSelectedQuestion || '',
+      routingSelectedAnswer: item.routingSelectedAnswer || '',
+      selectAll: item.selectAll || false,
+      selectAllLabel:
+        typeof item.selectAllLabel === 'undefined'
+          ? 'Selecteer alles'
+          : item.selectAllLabel,
+    };
+  }
+
+  function openItem(item: Item) {
+    form.reset(buildFormValues(item));
+    setOptions((item.options || []).map(withId));
+    const matrix = item.matrix || matrixDefault;
+    setMatrixOptions({
+      ...matrix,
+      rows: (matrix.rows || []).map(withId),
+      columns: (matrix.columns || []).map(withId),
+    });
+    setOption(null);
+    setMatrixOption(null);
+    setSelectedItemId(item.id ?? null);
+  }
 
   useEffect(() => {
     if (selectedOption) {
@@ -625,13 +685,56 @@ export default function WidgetResourceFormItems(
     setSelectedItemId(null);
   }
 
+  function selectOption(option: Option) {
+    if (option.id === selectedOption?.id) return;
+    setOptions((currentOptions) =>
+      applySelectedOptionEdit(
+        currentOptions,
+        selectedOption,
+        form.getValues('options'),
+        optionFields
+      )
+    );
+    setOption(option);
+  }
+
+  function selectMatrixOption(
+    option: MatrixOption & { type: 'rows' | 'columns' }
+  ) {
+    if (option.id === matrixOption?.id && option.type === matrixOption?.type) {
+      return;
+    }
+    setMatrixOptions((currentMatrix) =>
+      applySelectedMatrixEdit(
+        currentMatrix,
+        matrixOption,
+        form.getValues('matrix')
+      )
+    );
+    setMatrixOption(option);
+  }
+
   function handleSaveOptions() {
-    form.setValue('options', options);
+    const editedOptions = applySelectedOptionEdit(
+      options,
+      selectedOption,
+      form.getValues('options'),
+      optionFields
+    );
+    setOptions(editedOptions);
+    form.setValue('options', editedOptions);
     setSettingOptions(false);
+    setOption(null);
   }
 
   function handleSaveMatrixOptions() {
-    form.setValue('matrix', matrixOptions);
+    const editedMatrix = applySelectedMatrixEdit(
+      matrixOptions,
+      matrixOption,
+      form.getValues('matrix')
+    );
+    setMatrixOptions(editedMatrix);
+    form.setValue('matrix', editedMatrix);
     setSettingOptions(false);
     setMatrixOption(null);
   }
@@ -745,9 +848,9 @@ export default function WidgetResourceFormItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
-                                setSelectedItemId(item.id ?? null);
-                                setOptions([]);
-                                setMatrixOptions(matrixDefault);
+                                if (selectedItem?.id === item.id) return;
+                                if (!releaseOpenItem()) return;
+                                openItem(item);
                                 setSettingOptions(false);
                               }}>
                               <span
@@ -830,7 +933,7 @@ export default function WidgetResourceFormItems(
                                       <span
                                         className="py-3 px-2 w-full"
                                         onClick={() =>
-                                          setMatrixOption({
+                                          selectMatrixOption({
                                             ...option,
                                             type: matrixItem.type,
                                           })
@@ -892,7 +995,7 @@ export default function WidgetResourceFormItems(
                             }>
                             {matrixOption &&
                             matrixOption.type === matrixItem.type
-                              ? 'Sla wijzigingen op'
+                              ? 'Nieuwe optie'
                               : 'Voeg optie toe aan lijst'}
                           </Button>
                         </div>
@@ -900,19 +1003,10 @@ export default function WidgetResourceFormItems(
                         {matrixItem.type === 'rows' && (
                           <div className="flex gap-2">
                             <Button
-                              className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                              type="button"
-                              onClick={() => {
-                                (setSettingOptions(() => !settingOptions),
-                                  setMatrixOption(null));
-                              }}>
-                              Annuleer
-                            </Button>
-                            <Button
                               className="w-fit mt-4"
                               type="button"
                               onClick={() => handleSaveMatrixOptions()}>
-                              Sla antwoordopties op
+                              Terug
                             </Button>
                           </div>
                         )}
@@ -1037,26 +1131,16 @@ export default function WidgetResourceFormItems(
                         type="button"
                         onClick={() => handleAddOption(form.getValues())}>
                         {selectedOption
-                          ? 'Sla wijzigingen op'
+                          ? 'Nieuwe optie'
                           : 'Voeg optie toe aan lijst'}
                       </Button>
                     </div>
                     <div className="flex gap-2">
                       <Button
-                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                        type="button"
-                        onClick={() => {
-                          (setSettingOptions(() => !settingOptions),
-                            setOption(null),
-                            setOptions([]));
-                        }}>
-                        Annuleer
-                      </Button>
-                      <Button
                         className="w-fit mt-4"
                         type="button"
                         onClick={() => handleSaveOptions()}>
-                        Sla antwoordopties op
+                        Terug
                       </Button>
                     </div>
                   </div>
@@ -1103,7 +1187,7 @@ export default function WidgetResourceFormItems(
                                 </span>
                                 <span
                                   className="py-3 px-2 w-full"
-                                  onClick={() => setOption(option)}>
+                                  onClick={() => selectOption(option)}>
                                   {option?.titles?.[0].key}
                                 </span>
                                 <span className="py-3 px-2">
@@ -2113,30 +2197,41 @@ export default function WidgetResourceFormItems(
                 <div>
                   <div className="flex gap-2">
                     {selectedItem && (
+                      <>
+                        <Button
+                          className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                          type="button"
+                          onClick={() => {
+                            resetForm();
+                          }}>
+                          Annuleer
+                        </Button>
+                        <Button
+                          className="w-fit mt-4"
+                          type="button"
+                          onClick={() => {
+                            if (!releaseOpenItem()) return;
+                            resetForm();
+                          }}>
+                          Nieuw item
+                        </Button>
+                      </>
+                    )}
+                    {!selectedItem && (
                       <Button
-                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                        type="button"
-                        onClick={() => {
-                          resetForm();
-                        }}>
-                        Annuleer
+                        className="w-fit mt-4"
+                        type="submit"
+                        disabled={
+                          (form.watch('type') === 'tags' &&
+                            allTags.length === 0) ||
+                          ((!form.watch('fieldKey') || !isFieldKeyUnique) &&
+                            !['none', 'pagination'].includes(
+                              form.watch('type') || ''
+                            ))
+                        }>
+                        Voeg item toe aan lijst
                       </Button>
                     )}
-                    <Button
-                      className="w-fit mt-4"
-                      type="submit"
-                      disabled={
-                        (form.watch('type') === 'tags' &&
-                          allTags.length === 0) ||
-                        ((!form.watch('fieldKey') || !isFieldKeyUnique) &&
-                          !['none', 'pagination'].includes(
-                            form.watch('type') || ''
-                          ))
-                      }>
-                      {selectedItem
-                        ? 'Sla wijzigingen op'
-                        : 'Voeg item toe aan lijst'}
-                    </Button>
                   </div>
                   {(!form.watch('fieldKey') || !isFieldKeyUnique) &&
                     !['none', 'pagination'].includes(
