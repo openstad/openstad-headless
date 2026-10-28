@@ -43,7 +43,8 @@ export default function useUnsavedChanges(
 
   // Next.js in-app navigation
   useEffect(() => {
-    const handler = () => {
+    const handler = (_url: string, options?: { shallow?: boolean }) => {
+      if (options?.shallow) return;
       if (!isDirty()) return;
       if (!window.confirm(message)) {
         router.events.emit('routeChangeError');
