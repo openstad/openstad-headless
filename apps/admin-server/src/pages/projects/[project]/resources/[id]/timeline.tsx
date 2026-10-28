@@ -5,7 +5,10 @@ import {
 import { useRegisterSave } from '@/components/ui/save-controller';
 import useResource from '@/hooks/use-resource';
 import useResources from '@/hooks/use-resources';
-import { withId } from '@/lib/widget-item-helpers';
+import type { ItemsUpdater } from '@/hooks/useDraftItems';
+import { flushAllFields } from '@/hooks/useFieldDebounce';
+import { useOpenItemEditDirty } from '@/hooks/useWidgetDraft';
+import { resolveItemsUpdate, withId } from '@/lib/widget-item-helpers';
 import { fillTimelineEndDates } from '@openstad-headless/lib/timeline-dates';
 import isEqual from 'lodash/isEqual';
 import { useRouter } from 'next/router';
@@ -49,7 +52,8 @@ export default function ProjectResourceTimeline() {
     setIsDirty(false);
   }, [resource?.id]);
 
-  function handleItemsChange(next: AgendaItem[]) {
+  function handleItemsChange(updater: ItemsUpdater<AgendaItem>) {
+    const next = resolveItemsUpdate(itemsRef.current, updater);
     const filled = fillTimelineEndDates(next) as AgendaItem[];
     itemsRef.current = filled;
     setItems(filled);
@@ -59,16 +63,21 @@ export default function ProjectResourceTimeline() {
   const save = useCallback(async () => {
     if (!id) return;
 
-    const timeline = fillTimelineEndDates(items) as AgendaItem[];
+    flushAllFields();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    const timeline = fillTimelineEndDates(itemsRef.current) as AgendaItem[];
     await update(Number.parseInt(id as string), { timeline });
 
     savedItems.current = timeline;
     setIsDirty(!isEqual(itemsRef.current, timeline));
     itemsInitialized.current = false;
     await mutate();
-  }, [id, items, update, mutate]);
+  }, [id, update, mutate]);
 
-  useRegisterSave({ isDirty, save });
+  const openItemDirty = useOpenItemEditDirty();
+
+  useRegisterSave({ isDirty: isDirty || openItemDirty, save });
 
   if (!resource) return null;
 
