@@ -479,7 +479,7 @@ export default function WidgetEnqueteItems(
     defaultValues: defaults(),
   });
 
-  useOpenItemDraft<Item, FormData, OpenItemState>({
+  const { releaseOpenItem } = useOpenItemDraft<Item, FormData, OpenItemState>({
     form,
     openId: selectedItem?.id ?? null,
     state: { options, matrixOptions, selectedOption, matrixOption },
@@ -732,14 +732,54 @@ export default function WidgetEnqueteItems(
     setSelectedItemId(null);
   }
 
+  function selectOption(option: Option) {
+    if (option.id === selectedOption?.id) return;
+    setOptions((currentOptions) =>
+      applySelectedOptionEdit(
+        currentOptions,
+        selectedOption,
+        form.getValues('options')
+      )
+    );
+    setOption(option);
+  }
+
+  function selectMatrixOption(
+    option: MatrixOption & { type: 'rows' | 'columns' }
+  ) {
+    if (option.id === matrixOption?.id && option.type === matrixOption?.type) {
+      return;
+    }
+    setMatrixOptions((currentMatrix) =>
+      applySelectedMatrixEdit(
+        currentMatrix,
+        matrixOption,
+        form.getValues('matrix')
+      )
+    );
+    setMatrixOption(option);
+  }
+
   function handleSaveOptions() {
-    form.setValue('options', options);
+    const editedOptions = applySelectedOptionEdit(
+      options,
+      selectedOption,
+      form.getValues('options')
+    );
+    setOptions(editedOptions);
+    form.setValue('options', editedOptions);
     setSettingOptions(false);
     setOption(null);
   }
 
   function handleSaveMatrixOptions() {
-    form.setValue('matrix', matrixOptions);
+    const editedMatrix = applySelectedMatrixEdit(
+      matrixOptions,
+      matrixOption,
+      form.getValues('matrix')
+    );
+    setMatrixOptions(editedMatrix);
+    form.setValue('matrix', editedMatrix);
     setSettingOptions(false);
     setMatrixOption(null);
   }
@@ -831,6 +871,7 @@ export default function WidgetEnqueteItems(
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
                                 if (selectedItem?.id === item.id) return;
+                                if (!releaseOpenItem()) return;
                                 form.reset(buildFormValues(item));
                                 setSelectedItemId(item.id ?? null);
                                 setOptions((item.options || []).map(withId));
@@ -927,7 +968,7 @@ export default function WidgetEnqueteItems(
                                       <span
                                         className="py-3 px-2 w-full"
                                         onClick={() =>
-                                          setMatrixOption({
+                                          selectMatrixOption({
                                             ...option,
                                             type: matrixItem.type,
                                           })
@@ -989,7 +1030,7 @@ export default function WidgetEnqueteItems(
                             }>
                             {matrixOption &&
                             matrixOption.type === matrixItem.type
-                              ? 'Sla wijzigingen op'
+                              ? 'Nieuwe optie'
                               : 'Voeg optie toe aan lijst'}
                           </Button>
                         </div>
@@ -997,19 +1038,10 @@ export default function WidgetEnqueteItems(
                         {matrixItem.type === 'rows' && (
                           <div className="flex gap-2">
                             <Button
-                              className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                              type="button"
-                              onClick={() => {
-                                (setSettingOptions(() => !settingOptions),
-                                  setMatrixOption(null));
-                              }}>
-                              Annuleer
-                            </Button>
-                            <Button
                               className="w-fit mt-4"
                               type="button"
                               onClick={() => handleSaveMatrixOptions()}>
-                              Sla antwoordopties op
+                              Terug
                             </Button>
                           </div>
                         )}
@@ -1416,25 +1448,16 @@ export default function WidgetEnqueteItems(
                         type="button"
                         onClick={() => handleAddOption(form.getValues())}>
                         {selectedOption
-                          ? 'Sla wijzigingen op'
+                          ? 'Nieuwe optie'
                           : 'Voeg optie toe aan lijst'}
                       </Button>
                     </div>
                     <div className="flex gap-2">
                       <Button
-                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                        type="button"
-                        onClick={() => {
-                          (setSettingOptions(() => !settingOptions),
-                            setOption(null));
-                        }}>
-                        Annuleer
-                      </Button>
-                      <Button
                         className="w-fit mt-4"
                         type="button"
                         onClick={() => handleSaveOptions()}>
-                        Sla antwoordopties op
+                        Terug
                       </Button>
                     </div>
                   </div>
@@ -1481,7 +1504,7 @@ export default function WidgetEnqueteItems(
                                 </span>
                                 <span
                                   className="py-3 px-2 w-full"
-                                  onClick={() => setOption(option)}>
+                                  onClick={() => selectOption(option)}>
                                   {option?.titles?.[0].key}
                                 </span>
                                 <span className="py-3 px-2">
@@ -2629,35 +2652,46 @@ export default function WidgetEnqueteItems(
                 <div>
                   <div className="flex gap-2">
                     {selectedItem && (
-                      <Button
-                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                        type="button"
-                        onClick={() => {
-                          resetForm();
-                        }}>
-                        Annuleer
-                      </Button>
+                      <>
+                        <Button
+                          className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                          type="button"
+                          onClick={() => {
+                            resetForm();
+                          }}>
+                          Annuleer
+                        </Button>
+                        <Button
+                          className="w-fit mt-4"
+                          type="button"
+                          onClick={() => {
+                            if (!releaseOpenItem()) return;
+                            resetForm();
+                          }}>
+                          Nieuw item
+                        </Button>
+                      </>
                     )}
 
-                    <Button
-                      className="w-fit mt-4"
-                      type="submit"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onSubmit(form.getValues());
-                        setOptions([]);
-                        setMatrixOptions(matrixDefault);
-                      }}
-                      disabled={
-                        (!form.watch('fieldKey') || !isFieldKeyUnique) &&
-                        form.watch('questionType') !== 'none' &&
-                        form.watch('questionType') !== 'pagination' &&
-                        form.watch('questionType') !== 'swipe'
-                      }>
-                      {selectedItem
-                        ? 'Sla wijzigingen op'
-                        : 'Voeg item toe aan lijst'}
-                    </Button>
+                    {!selectedItem && (
+                      <Button
+                        className="w-fit mt-4"
+                        type="submit"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onSubmit(form.getValues());
+                          setOptions([]);
+                          setMatrixOptions(matrixDefault);
+                        }}
+                        disabled={
+                          (!form.watch('fieldKey') || !isFieldKeyUnique) &&
+                          form.watch('questionType') !== 'none' &&
+                          form.watch('questionType') !== 'pagination' &&
+                          form.watch('questionType') !== 'swipe'
+                        }>
+                        Voeg item toe aan lijst
+                      </Button>
+                    )}
                   </div>
                   {(!form.watch('fieldKey') || !isFieldKeyUnique) &&
                     form.watch('questionType') !== 'pagination' &&
