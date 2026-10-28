@@ -129,7 +129,8 @@ describe('creating a project from a template', () => {
     ) as HTMLInputElement[];
     setInput(inputs[0], 'Mijn nieuw project');
     await settle();
-    expect(controller.state).toBe('dirty');
+    expect(controller.isRegistered).toBe(false);
+    expect(controller.state).toBe('neutral');
     setInput(container.querySelector('select') as HTMLSelectElement, '7');
     setInput(inputs[1], 'Project uit template');
     await settle();
@@ -145,5 +146,34 @@ describe('creating a project from a template', () => {
     expect(posts).toBe(1);
     expect(confirmSpy).not.toHaveBeenCalled();
     expect(nav.router.pushes).toEqual(['/projects/99/widgets']);
+  });
+
+  it('creates an empty project with its own save button', async () => {
+    act(() =>
+      root.render(
+        <SaveControllerProvider>
+          <Bar />
+          <CreateProject />
+        </SaveControllerProvider>
+      )
+    );
+    await settle();
+    const input = container.querySelector(
+      'input[placeholder="Naam"]'
+    ) as HTMLInputElement;
+    setInput(input, 'Mijn nieuw project');
+    await settle();
+    const save = Array.from(container.querySelectorAll('button')).find(
+      (button) => button.textContent === 'Opslaan'
+    ) as HTMLButtonElement;
+    await act(async () => {
+      save.click();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+    await settle();
+
+    expect(controller.isRegistered).toBe(false);
+    expect(confirmSpy).not.toHaveBeenCalled();
+    expect(nav.router.pushes).toEqual(['/projects/50/settings']);
   });
 });
