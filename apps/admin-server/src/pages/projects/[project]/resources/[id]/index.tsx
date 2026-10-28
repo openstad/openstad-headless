@@ -42,6 +42,7 @@ export default function ProjectResource() {
         <div className="container py-6">
           <Tabs
             value={tab}
+            activationMode="manual"
             onValueChange={(val) =>
               router.replace(
                 { query: { ...router.query, tab: val } },
@@ -58,10 +59,16 @@ export default function ProjectResource() {
               <TabsTrigger value="preview">Preview</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
             </TabsList>
-            <TabsContent value="info" className="p-0">
+            <TabsContent
+              value="info"
+              forceMount
+              className="p-0 data-[state=inactive]:hidden">
               <ProjectResourceCreate />
             </TabsContent>
-            <TabsContent value="timeline" className="p-0">
+            <TabsContent
+              value="timeline"
+              forceMount
+              className="p-0 data-[state=inactive]:hidden">
               <ProjectResourceTimeline />
             </TabsContent>
             <TabsContent value="votes" className="p-0">

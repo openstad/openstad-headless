@@ -18,10 +18,17 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  rebaselineAfterSave,
+  useLooseFormDirty,
+  useRegisterSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import {
   type WithCmsUrlProps,
   withCmsUrl,
@@ -30,35 +37,64 @@ import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { slugify } from '@openstad-headless/lib/slugify';
 import * as Switch from '@radix-ui/react-switch';
+import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
 import * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
 
-const formSchema = z.object({
-  name: z.string().min(1, {
-    message: 'De naam van een project mag niet leeg zijn!',
-  }),
-  username: z.string().optional(),
-  password: z.string().optional(),
-  endDate: z.date().min(new Date(), {
-    message: 'De datum moet nog niet geweest zijn!',
-  }),
-  // We don't want to restrict this URL too much
-  url: z
-    .string()
-    .regex(/^(?:([a-z0-9.:\-_\/]+))?$/g, {
-      message:
-        'De URL mag alleen kleine letters, cijfers, punten, dubbele punten, koppeltekens, onderstrepingstekens en schuine strepen bevatten.',
-    })
-    .optional(),
-  basicAuthActive: z.coerce.boolean().optional(),
-  projectToggle: z.boolean().optional(),
-});
+const GENERAL_TAB = { tab: 'general', tabLabel: 'Projectinformatie' };
+const FIELD_LABELS: Record<string, string> = {
+  name: 'Projectnaam',
+  endDate: 'Einddatum',
+  url: 'Project URL',
+  basicAuthActive: 'Beveiliging met wachtwoord',
+  password: 'Wachtwoord',
+  projectToggle: 'Website aan/uit',
+};
+
+const formSchema = z
+  .object({
+    name: z.string().min(1, {
+      message: 'De naam van een project mag niet leeg zijn!',
+    }),
+    username: z.string().optional(),
+    password: z.string().optional(),
+    endDate: z.date(),
+    // We don't want to restrict this URL too much
+    url: z
+      .string()
+      .regex(/^(?:([a-z0-9.:\-_\/]+))?$/g, {
+        message:
+          'De URL mag alleen kleine letters, cijfers, punten, dubbele punten, koppeltekens, onderstrepingstekens en schuine strepen bevatten.',
+      })
+      .optional(),
+    basicAuthActive: z.coerce.boolean().optional(),
+    projectToggle: z.boolean().optional(),
+  })
+  .superRefine((values, ctx) => {
+    if (values.basicAuthActive && !values.password?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['password'],
+        message: 'Vul een wachtwoord in om de beveiliging te activeren.',
+      });
+    }
+  });
+
+type SettingsField = keyof z.infer<typeof formSchema>;
+
+function isNewPastEndDate(value: unknown, stored: unknown): boolean {
+  if (!(value instanceof Date)) return false;
+  if (stored && new Date(stored as string).getTime() === value.getTime()) {
+    return false;
+  }
+  return value.getTime() < Date.now();
+}
 
 export const getServerSideProps = withCmsUrl;
 
@@ -87,6 +123,8 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
   const [basicAuthInitial, setBasicAuthInitial] = useState(true);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('general');
+  const autoFilledUrl = useRef<string | undefined>(undefined);
 
   const defaults = useCallback(() => {
     const currentDate = new Date();
@@ -109,11 +147,7 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-    // if(basicAuthActive !== data?.config?.basicAuth?.active)
-    //   setBasicAuthActive(data?.config?.basicAuth?.active);
-  }, [form, defaults]);
+  useSyncFormDefaults(form, defaults, data);
 
   useEffect(() => {
     if (!data) return;
@@ -122,7 +156,7 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
       const toggle = data?.config?.project?.projectToggle ?? !!data?.url;
       setShowUrl(toggle);
       setCheckboxInitial(false);
-      setProjectHasEnded(data?.config?.project?.projectHasEnded);
+      setProjectHasEnded(!!data?.config?.project?.projectHasEnded);
     }
 
     if (basicAuthInitial) {
@@ -131,53 +165,80 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
     }
   }, [data, checkboxInitial, basicAuthInitial, form]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const project = await updateProject(
-        {
-          project: {
-            endDate: values.endDate,
-            projectToggle: values.projectToggle,
-            lastUrl: values.url || data?.config?.project?.lastUrl || '',
-          },
-          basicAuth: {
-            active: values.basicAuthActive,
-            username: values.username,
-            password: values.password,
-          },
-        },
-        values.name,
-        values.projectToggle ? values.url : ''
-      );
-      if (project?.error) {
-        toast.error(project.error);
-      } else if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('could not update', error);
-      toast.error('Er is helaas iets mis gegaan.');
-    }
-  }
+  const formDirty = useLooseFormDirty(form);
+  const savedProjectHasEnded = !!data?.config?.project?.projectHasEnded;
+  const projectHasEndedDirty =
+    !checkboxInitial && !!projectHasEnded !== savedProjectHasEnded;
 
-  async function saveProjectHasEnded(value: boolean) {
-    try {
-      const project = await updateProject({
-        project: {
-          projectHasEnded: value,
-        },
+  const save = useCallback(async () => {
+    const valid = await validateForSave(form);
+    const endDatePassed = isNewPastEndDate(
+      form.getValues('endDate'),
+      form.formState.defaultValues?.endDate
+    );
+    if (endDatePassed) {
+      form.setError('endDate', {
+        type: 'min',
+        message: 'De datum moet nog niet geweest zijn!',
       });
-      if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('could not update', error);
     }
-  }
+    if (!valid || endDatePassed) {
+      setActiveTab(GENERAL_TAB.tab);
+      const firstErrorField = Object.keys(FIELD_LABELS).find(
+        (field) => form.getFieldState(field as SettingsField).invalid
+      );
+      if (firstErrorField) {
+        throw new Error(
+          `Controleer het veld "${FIELD_LABELS[firstErrorField]}".`
+        );
+      }
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
+    const sent = cloneDeep(form.getValues());
+    const result = await updateProject(
+      {
+        project: {
+          endDate: values.endDate,
+          projectToggle: values.projectToggle,
+          lastUrl: values.url || data?.config?.project?.lastUrl || '',
+        },
+        basicAuth: {
+          active: values.basicAuthActive,
+          username: values.username,
+          password: values.password,
+        },
+      },
+      values.name,
+      values.projectToggle ? values.url : ''
+    );
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+
+    rebaselineAfterSave(form, sent);
+  }, [form, updateProject, data]);
+
+  const saveProjectHasEnded = useCallback(async () => {
+    const result = await updateProject({
+      project: { projectHasEnded: !!projectHasEnded },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+  }, [updateProject, projectHasEnded]);
+
+  useRegisterSave({
+    isDirty: formDirty,
+    save,
+    label: GENERAL_TAB.tabLabel,
+  });
+  useRegisterSave({
+    isDirty: projectHasEndedDirty,
+    save: saveProjectHasEnded,
+    label: 'Project beëindigen',
+  });
+
   async function archiveProject() {
     if (!data?.config?.project?.projectHasEnded) {
       toast.error(
@@ -259,7 +320,7 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
           },
         ]}>
         <div className="container py-6">
-          <Tabs defaultValue="general">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Projectinformatie</TabsTrigger>
               <TabsTrigger value="csp">Beveiligingsheaders</TabsTrigger>
@@ -273,9 +334,7 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
                 <Form {...form}>
                   <Heading size="xl">Projectinformatie</Heading>
                   <Separator className="my-4" />
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="grid grid-cols-2 gap-x-4 gap-y-8">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-8">
                     <FormField
                       control={form.control}
                       name="name"
@@ -307,6 +366,18 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
                           <Switch.Root
                             className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                             onCheckedChange={(e: boolean) => {
+                              if (
+                                !e &&
+                                autoFilledUrl.current !== undefined &&
+                                form.getValues('url') === autoFilledUrl.current
+                              ) {
+                                form.setValue(
+                                  'url',
+                                  form.formState.defaultValues?.url ?? '',
+                                  { shouldValidate: true }
+                                );
+                              }
+                              if (!e) autoFilledUrl.current = undefined;
                               field.onChange(e);
                               setShowUrl(e);
                               if (e && !form.getValues('url')) {
@@ -321,6 +392,7 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
                                   form.setValue('url', nextUrl, {
                                     shouldValidate: true,
                                   });
+                                  autoFilledUrl.current = nextUrl;
                                 }
                               }
                             }}
@@ -416,10 +488,7 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
                         />
                       </>
                     ) : null}
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
-                  </form>
+                  </div>
                 </Form>
               </div>
             </TabsContent>
@@ -568,11 +637,6 @@ export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
                       <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
                     </Switch.Root>
                   </div>
-                  <Button
-                    className="mt-4 w-fit"
-                    onClick={() => saveProjectHasEnded(projectHasEnded)}>
-                    Opslaan
-                  </Button>
                 </div>
               </div>
             </TabsContent>

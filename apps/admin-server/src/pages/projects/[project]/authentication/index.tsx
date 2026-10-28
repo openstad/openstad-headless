@@ -14,6 +14,10 @@ import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import {
+  useRegisterFormSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -23,18 +27,21 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { WhitelistedEmailSelect } from '@/components/ui/whitelisted-email-select';
+import { useLastDefined } from '@/hooks/use-last-defined';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
+import { emptiedAuthEmail } from '@/lib/auth-email-check';
 import {
   WithWhitelistedEmailsProps,
   withWhitelistedEmails,
 } from '@/lib/server-side-props-definition';
 import { zodResolver } from '@hookform/resolvers/zod';
+import pickBy from 'lodash/pickBy';
 import { X } from 'lucide-react';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import { useState } from 'react';
 import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
@@ -62,9 +69,15 @@ const authTypes = [
 
 const formSchema = z.object({
   authTypes: z.string().array().default([]),
-  fromEmail: z.string().email().optional(),
+  // An emptied field arrives as '', which `.optional()` does not allow.
+  fromEmail: z
+    .union([z.string().email('Geen geldig e-mailadres'), z.literal('')])
+    .optional(),
   fromName: z.string().optional(),
-  contactEmail: z.string().email().optional(),
+  // An emptied field arrives as '', which `.optional()` does not allow.
+  contactEmail: z
+    .union([z.string().email('Geen geldig e-mailadres'), z.literal('')])
+    .optional(),
   defaultRoleId: z.enum(['2', '3']).optional(),
   imageLogo: z.string().optional(),
   logo: z.string().optional(),
@@ -123,75 +136,103 @@ export default function ProjectAuthentication({
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  // Guarded on the provider's `config` subtree, not on the provider itself:
+  // every value below lives under `provider.openstad.config`, and a save both
+  // strips that subtree from the body (api-server project.js) and answers with
+  // the raw project, so the provider stays truthy while those values are gone.
+  // Only the enriched GET carries `config`, so it is what tells the two apart.
+  // Re-baselining on such a response drops the fields from the form state
+  // without changing what is on screen, which the next save then writes away.
+  const authConfig = data?.config?.auth?.provider?.openstad?.config;
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      let updatedConfig: {
-        auth: {
-          provider: {
-            openstad: {
-              authTypes: string[];
-              config: {
-                fromEmail?: string;
-                fromName?: string;
-                contactEmail?: string;
-                defaultRoleId?: string;
-                clientDisclaimerUrl?: string;
-                clientDisclaimerText?: string;
-                styling: {
-                  logo?: string;
-                  favicon?: string;
-                };
-                clientStylesheets?: { url: string }[];
+  useSyncFormDefaults(form, defaults, authConfig);
+
+  const loadedAuthConfig = useLastDefined(authConfig, project);
+
+  const save = useCallback(async () => {
+    // Saving before the auth config has arrived would write the empty form over
+    // the stored settings and wipe them.
+    if (!loadedAuthConfig) {
+      throw new Error('De instellingen zijn nog niet geladen.');
+    }
+    const valid = await validateForSave(form);
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
+    const sendsLoginLinks = values.authTypes.includes('Url');
+    const checked = sendsLoginLinks
+      ? values
+      : { ...values, fromEmail: undefined };
+    const emptied = emptiedAuthEmail(
+      authConfig ?? {
+        ...loadedAuthConfig,
+        ...pickBy(
+          form.formState.defaultValues,
+          (value) => value !== '' && value != null
+        ),
+      },
+      checked
+    );
+    if (emptied) throw new Error(emptied);
+    let updatedConfig: {
+      auth: {
+        provider: {
+          openstad: {
+            authTypes: string[];
+            config: {
+              fromEmail?: string;
+              fromName?: string;
+              contactEmail?: string;
+              defaultRoleId?: string;
+              clientDisclaimerUrl?: string;
+              clientDisclaimerText?: string;
+              styling: {
+                logo?: string;
+                favicon?: string;
               };
+              clientStylesheets?: { url: string }[];
             };
           };
         };
-      } = {
-        auth: {
-          provider: {
-            openstad: {
-              authTypes: values.authTypes,
-              config: {
-                fromEmail: values.fromEmail,
-                fromName: values.fromName,
-                contactEmail: values.contactEmail,
-                defaultRoleId: values.defaultRoleId,
-                clientDisclaimerUrl: values.clientDisclaimerUrl,
-                clientDisclaimerText: values.clientDisclaimerText,
-                styling: {
-                  logo: values.logo,
-                  favicon: values.favicon,
-                },
+      };
+    } = {
+      auth: {
+        provider: {
+          openstad: {
+            authTypes: values.authTypes,
+            config: {
+              fromEmail: values.fromEmail,
+              fromName: values.fromName,
+              contactEmail: values.contactEmail,
+              defaultRoleId: values.defaultRoleId,
+              clientDisclaimerUrl: values.clientDisclaimerUrl,
+              clientDisclaimerText: values.clientDisclaimerText,
+              styling: {
+                logo: values.logo,
+                favicon: values.favicon,
               },
             },
           },
         },
-      };
+      },
+    };
 
-      if (values.cssUrl) {
-        updatedConfig.auth.provider.openstad.config.clientStylesheets = [
-          {
-            url: values.cssUrl,
-          },
-        ];
-      }
+    // The list is always sent, also when it is empty. Leaving the key out on an
+    // emptied field would keep the stored stylesheet, so clearing the URL would
+    // never take effect.
+    updatedConfig.auth.provider.openstad.config.clientStylesheets =
+      values.cssUrl ? [{ url: values.cssUrl }] : [];
 
-      const project = await updateProject(updatedConfig);
-      const doubleSave = await updateProject(updatedConfig);
+    const project = await updateProject(updatedConfig);
+    const doubleSave = await updateProject(updatedConfig);
 
-      if (doubleSave && project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('Could not update', error);
+    if (!doubleSave || !project) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+  }, [authConfig, loadedAuthConfig, form, updateProject]);
+
+  useRegisterFormSave(form, save);
 
   const [showEmailFields, setShowEmailFields] = useState(false);
   useEffect(() => {
@@ -231,9 +272,7 @@ export default function ProjectAuthentication({
                 authentificeren voor dit project.
               </p>
               <br />
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-6">
+              <div className="space-y-6">
                 <FormField
                   control={form.control}
                   name="authTypes"
@@ -401,7 +440,7 @@ export default function ProjectAuthentication({
                           typeof imageResult.url !== 'undefined'
                             ? imageResult.url
                             : '';
-                        form.setValue('logo', result);
+                        form.setValue('logo', result, { shouldDirty: true });
                         form.resetField('imageLogo');
                         form.trigger('logo');
                       }}
@@ -420,7 +459,9 @@ export default function ProjectAuthentication({
                           typeof imageResult.url !== 'undefined'
                             ? imageResult.url
                             : '';
-                        form.setValue('favicon', result);
+                        form.setValue('favicon', result, {
+                          shouldDirty: true,
+                        });
                         form.resetField('imageFavicon');
                         form.trigger('favicon');
                       }}
@@ -441,7 +482,7 @@ export default function ProjectAuthentication({
                           <Button
                             color="red"
                             onClick={() => {
-                              form.setValue('logo', '');
+                              form.setValue('logo', '', { shouldDirty: true });
                             }}
                             style={{
                               position: 'absolute',
@@ -469,7 +510,9 @@ export default function ProjectAuthentication({
                           <Button
                             color="red"
                             onClick={() => {
-                              form.setValue('favicon', '');
+                              form.setValue('favicon', '', {
+                                shouldDirty: true,
+                              });
                             }}
                             style={{
                               position: 'absolute',
@@ -533,9 +576,7 @@ export default function ProjectAuthentication({
                     />
                   </>
                 ) : null}
-
-                <Button type="submit">Opslaan</Button>
-              </form>
+              </div>
             </Form>
           </div>
         </div>

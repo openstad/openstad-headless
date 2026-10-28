@@ -10,11 +10,16 @@ import {
 import { FormObjectSelectField } from '@/components/ui/form-object-select-field';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  errorMessageOf,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import projectListSwr from '@/hooks/use-project-list';
 import useUsers from '@/hooks/use-users';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import * as z from 'zod';
@@ -33,22 +38,39 @@ export default function CreateUser() {
     defaultValues: {},
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const save = useCallback(async () => {
+    const valid = await validateForSave(form);
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
+
+    let user;
     try {
-      let user = await createUser({
+      user = await createUser({
         email: values.email,
         projectId: values.projectId,
       });
-      toast.success('User is toegevoegd');
-      user.key = `${user.idpUser.provider}-*-${user.idpUser.identifier}`;
-      document.location.href = `/users/${btoa(user.key)}`;
     } catch (err: unknown) {
-      toast.error(
+      throw new Error(
         (err instanceof Error && err.message) ||
           'User kon niet worden toegevoegd'
       );
     }
+
+    toast.success('User is toegevoegd');
+    user.key = `${user.idpUser.provider}-*-${user.idpUser.identifier}`;
+    document.location.href = `/users/${btoa(user.key)}`;
+  }, [form, createUser]);
+
+  async function submit() {
+    try {
+      await save();
+    } catch (error) {
+      toast.error(errorMessageOf(error));
+    }
   }
+
   if (!projects) return null;
 
   return (
@@ -70,7 +92,10 @@ export default function CreateUser() {
             <Heading size="xl">User toevoegen</Heading>
             <Separator className="my-4" />
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={(event) => {
+                event.preventDefault();
+                submit();
+              }}
               className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4 auto-rows-auto">
               <FormField
                 control={form.control}

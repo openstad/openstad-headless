@@ -9,13 +9,17 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  errorMessageOf,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useStatus from '@/hooks/use-statuses';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -30,23 +34,35 @@ export default function ProjectStatusCreate() {
   const router = useRouter();
   const project = router.query.project;
   const { createStatus } = useStatus(project as string);
-
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: {},
+    defaultValues: { addToNewResources: false },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const save = useCallback(async () => {
+    const valid = await validateForSave(form);
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
     const status = await createStatus(
       values.name,
       values.seqnr,
       values.addToNewResources
     );
-    if (status?.id) {
-      toast.success('Status aangemaakt!');
-      router.push(`/projects/${project}/statuses`);
-    } else {
-      toast.error('Er is helaas iets mis gegaan.');
+    if (!status?.id) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+
+    toast.success('Status aangemaakt!');
+    router.push(`/projects/${project}/statuses`);
+  }, [form, createStatus, router, project]);
+
+  async function submit() {
+    try {
+      await save();
+    } catch (error) {
+      toast.error(errorMessageOf(error));
     }
   }
 
@@ -72,7 +88,10 @@ export default function ProjectStatusCreate() {
             <Heading size="xl">Toevoegen</Heading>
             <Separator className="my-4" />
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={(event) => {
+                event.preventDefault();
+                submit();
+              }}
               className="lg:w-1/2 grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}
