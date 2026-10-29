@@ -147,14 +147,14 @@ describe('aposAuthenticate', () => {
     expect(res.redirect).toHaveBeenCalledWith('/page');
   });
 
-  it('inserts a new user with a password and logs in the inserted doc', async () => {
+  it('inserts a new user without a password and logs in the inserted doc', async () => {
     const { self, req, res, next } = setup({ existingUser: null });
 
     await middleware(self).aposAuthenticate(req, res, next);
 
     expect(self.apos.user.update).not.toHaveBeenCalled();
     const [, doc] = self.apos.user.insert.mock.calls[0];
-    expect(doc.password).toEqual(expect.any(String));
+    expect(doc).not.toHaveProperty('password');
     expect(doc.username).toBe('openstad_org_5');
     expect(req.login.mock.calls[0][0]._id).toBe('new-id');
     expect(res.redirect).toHaveBeenCalledWith('/page');

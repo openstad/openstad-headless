@@ -6,10 +6,6 @@
 const Url = require('url');
 const expressSession = require('express-session');
 
-const generateRandomPassword = () => {
-  return require('crypto').randomBytes(64).toString('hex');
-};
-
 function removeURLParameter(url, parameter) {
   // prefer to use l.search if you have a location/link object
   const urlparts = url.split('?');
@@ -292,11 +288,9 @@ module.exports = {
               Object.assign(aposUser, userData);
               await self.apos.user.update(taskReq, aposUser);
             } else {
-              // Apostrophe requires a password; it is never used for login
-              aposUser = await self.apos.user.insert(taskReq, {
-                ...userData,
-                password: generateRandomPassword(),
-              });
+              // Apostrophe generates a random password on insert when none
+              // is given; it is never used for login
+              aposUser = await self.apos.user.insert(taskReq, userData);
             }
           } catch (e) {
             console.log(
