@@ -122,6 +122,7 @@ module.exports = function (db, sequelize, DataTypes) {
       score: {
         type: DataTypes.DECIMAL(12, 11),
         auth: {
+          createableBy: 'editor',
           updateableBy: 'editor',
         },
         allowNull: false,
