@@ -1,15 +1,18 @@
 const fs = require('fs').promises;
 const path = require('path');
-const nunjucks = require('nunjucks');
 const mjml2html = require('mjml');
 const sendMessage = require('../notifications/send-engines');
 const { authClientSettingsFor } = require('../services/auth-client-settings');
+const {
+  createTemplateEnv,
+  toPlainData,
+} = require('@openstad-headless/lib/template-env');
 
 const nunjucksEnvReady = (async () => {
   const { applyFilters } =
     await import('../../../../packages/raw-resource/includes/nunjucks-filters-js.cjs');
 
-  const nunjucksEnv = new nunjucks.Environment();
+  const nunjucksEnv = createTemplateEnv();
   applyFilters(nunjucksEnv);
   return nunjucksEnv;
 })();
@@ -55,10 +58,9 @@ async function loadDefaultTemplate(type) {
 
 async function renderTemplate(template, templateData, instance) {
   const nunjucksEnv = await nunjucksEnvReady;
-  const subject = nunjucksEnv.renderString(template.subject, {
-    ...templateData,
-  });
-  let body = nunjucksEnv.renderString(template.body, { ...templateData });
+  const data = toPlainData(templateData);
+  const subject = nunjucksEnv.renderString(template.subject, data);
+  let body = nunjucksEnv.renderString(template.body, data);
 
   if (instance.engine === 'email') {
     const result = await mjml2html(body);
