@@ -9,7 +9,10 @@ const jsonFilter = require('../nunjucks/json');
 const timestampFilter = require('../nunjucks/timestamp');
 const mjml2html = require('mjml');
 const AzureTransport = require('@openstad-headless/lib/azure-transport');
-const { createTemplateEnv } = require('@openstad-headless/lib/template-env');
+const {
+  createTemplateEnv,
+  toPlainData,
+} = require('@openstad-headless/lib/template-env');
 
 const formatTransporter = function ({ host, port, secure, auth }) {
   return {
@@ -66,7 +69,10 @@ exports.send = async function ({
       loaders: [new nunjucks.FileSystemLoader(viewsPath)],
     });
     templateEnv.addFilter('date', dateFilter);
-    templateString = templateEnv.renderString(templateString, variables);
+    templateString = templateEnv.renderString(
+      templateString,
+      toPlainData(variables)
+    );
   }
 
   /**

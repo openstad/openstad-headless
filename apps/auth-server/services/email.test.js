@@ -34,6 +34,27 @@ describe('email.send with a client-provided templateString', () => {
     expect(globalThis.__emailTemplateCanary).toBeUndefined();
   });
 
+  test('strips Sequelize methods from variables via toPlainData', async () => {
+    const templateString =
+      '<mjml><mj-body><mj-section><mj-column><mj-text>' +
+      '{{ user.name }}' +
+      '</mj-text></mj-column></mj-section></mj-body></mjml>';
+
+    const user = {
+      sequelize: { query: () => (globalThis.__emailTemplateCanary = true) },
+      get: ({ plain }) => (plain ? { name: 'Alice' } : null),
+      destroy: () => (globalThis.__emailTemplateCanary = true),
+    };
+
+    await email
+      .send({ toEmail: 'a@example.org', templateString, variables: { user } })
+      .catch(() => {});
+
+    expect(globalThis.__emailTemplateCanary).toBeUndefined();
+    expect(sendMail).toHaveBeenCalledTimes(1);
+    expect(sendMail.mock.calls[0][0].html).toContain('Alice');
+  });
+
   test('still renders variables and the shared layout', async () => {
     const templateString =
       "{% extends 'emails/layout.html' %}" +
