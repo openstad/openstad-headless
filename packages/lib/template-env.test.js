@@ -128,4 +128,32 @@ describe('toPlainData', () => {
     expect(plain.resource.destroy).toBeUndefined();
     expect(plain.resource.sequelize).toBeUndefined();
   });
+
+  it('recursively strips nested Sequelize instances', () => {
+    const nested = {
+      sequelize: {},
+      get: ({ plain }) => (plain ? { id: 2 } : null),
+      save: () => {},
+    };
+    const plain = toPlainData({
+      wrapper: { inner: nested, label: 'x' },
+    });
+    expect(plain.wrapper.inner).toEqual({ id: 2 });
+    expect(plain.wrapper.label).toBe('x');
+  });
+
+  it('drops _previousDataValues and sequelize keys from plain objects', () => {
+    const plain = toPlainData({
+      obj: { name: 'A', _previousDataValues: { name: 'old' }, sequelize: {} },
+    });
+    expect(plain.obj).toEqual({ name: 'A' });
+  });
+
+  it('handles circular references without infinite loop', () => {
+    const circular = { name: 'loop' };
+    circular.self = circular;
+    const plain = toPlainData({ item: circular });
+    expect(plain.item.name).toBe('loop');
+    expect(plain.item.self).toBeUndefined();
+  });
 });

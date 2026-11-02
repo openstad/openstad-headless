@@ -102,12 +102,21 @@ function toPlainData(data) {
   return plain;
 }
 
-function toPlainValue(value) {
-  if (Array.isArray(value)) return value.map(toPlainValue);
-  if (value && typeof value.get === 'function' && value.sequelize) {
-    return value.get({ plain: true });
+function toPlainValue(value, seen) {
+  if (value == null || typeof value !== 'object') return value;
+  if (!seen) seen = new Set();
+  if (seen.has(value)) return undefined;
+  seen.add(value);
+  if (Array.isArray(value)) return value.map((v) => toPlainValue(v, seen));
+  if (typeof value.get === 'function' && value.sequelize) {
+    return toPlainValue(value.get({ plain: true }), seen);
   }
-  return value;
+  const copy = {};
+  for (const [key, v] of Object.entries(value)) {
+    if (key === 'sequelize' || key === '_previousDataValues') continue;
+    copy[key] = toPlainValue(v, seen);
+  }
+  return copy;
 }
 
 module.exports = { createTemplateEnv, toPlainData };
