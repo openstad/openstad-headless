@@ -9,6 +9,7 @@ const jsonFilter = require('../nunjucks/json');
 const timestampFilter = require('../nunjucks/timestamp');
 const mjml2html = require('mjml');
 const AzureTransport = require('@openstad-headless/lib/azure-transport');
+const { createTemplateEnv } = require('@openstad-headless/lib/template-env');
 
 const formatTransporter = function ({ host, port, secure, auth }) {
   return {
@@ -48,24 +49,24 @@ exports.send = async function ({
   /**
    * Initiatilize Nunjucks to render E-mail template
    */
-  const nunjucksEnv = nunjucks.configure(path.resolve(__dirname, '../views'), {
+  const viewsPath = path.resolve(__dirname, '../views');
+  const nunjucksEnv = nunjucks.configure(viewsPath, {
     autoescape: true,
   });
 
   nunjucksEnv.addFilter('date', dateFilter);
 
   /**
-   * This is for legacy reasons
-   * if extends 'emails/layout.html' then render as a string
-   * if not included then include by rendering the string and then rendering a blanco
-   * the layout by calling the blanco template
+   * A templateString comes from the client config, which project admins and
+   * editors can edit, so it is rendered in the hardened environment. It may
+   * still extend 'emails/layout.html' from the views folder.
    */
   if (templateString) {
-    if (templateString.includes("{% extends 'emails/layout.html' %}")) {
-      templateString = nunjucks.renderString(templateString, variables);
-    } else {
-      templateString = nunjucks.renderString(templateString, variables);
-    }
+    const templateEnv = createTemplateEnv({
+      loaders: [new nunjucks.FileSystemLoader(viewsPath)],
+    });
+    templateEnv.addFilter('date', dateFilter);
+    templateString = templateEnv.renderString(templateString, variables);
   }
 
   /**
