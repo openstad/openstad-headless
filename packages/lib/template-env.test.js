@@ -21,6 +21,16 @@ const escapeAttempts = [
   `{% include "../../package.json" %}`,
   `{% import "../../package.json" as pkg %}`,
   `{% extends "../../package.json" %}`,
+  // Bare-name routes: Object.prototype members and a rewired prototype chain.
+  `{% set __proto__ = constructor %}{{ constructor("${CANARY}")() }}`,
+  `{% set __proto__ = constructor %}{% set fn = constructor %}{{ fn("${CANARY}")() }}`,
+  `{{ constructor("${CANARY}")() }}`,
+  `{{ valueOf().env.filters.safe("${CANARY}") }}`,
+  `{% set obj = valueOf() %}{{ obj.env.filters.safe.constructor("${CANARY}")() }}`,
+  // Loop variables bypass member lookup; iterables must not yield functions.
+  `{% for k, v in valueOf().env.filters %}{% set __proto__ = v %}{{ constructor("${CANARY}")() }}{% endfor %}`,
+  `{% for k, v in user %}{{ v("${CANARY}") }}{% endfor %}`,
+  `{% for v in list %}{{ v("${CANARY}") }}{% endfor %}`,
 ];
 
 function attemptRender(env, template, data) {
@@ -42,7 +52,8 @@ describe('createTemplateEnv', () => {
       sequelize: { query: () => (globalThis.__templateEnvCanary = true) },
       destroy: () => (globalThis.__templateEnvCanary = true),
     };
-    attemptRender(env, template, { user });
+    const list = [() => (globalThis.__templateEnvCanary = true)];
+    attemptRender(env, template, { user, list });
     expect(globalThis.__templateEnvCanary).toBeUndefined();
   });
 
@@ -70,6 +81,16 @@ describe('createTemplateEnv', () => {
       }
     );
     expect(out).toBe('X12 T 2 /img/logo.png');
+  });
+
+  it('still iterates plain objects and keeps set variables', () => {
+    const env = createTemplateEnv();
+    const out = env.renderString(
+      '{% set greeting = "Hi" %}{% for k, v in tags %}{{ greeting }} {{ k }}={{ v }};{% endfor %}' +
+        '{% for item in items %}{{ item.name }}{% endfor %}',
+      { tags: { a: 1, b: 'x' }, items: [{ name: 'n1' }, { name: 'n2' }] }
+    );
+    expect(out).toBe('Hi a=1;Hi b=x;n1n2');
   });
 
   it('leaves other environments in the process untouched', () => {
