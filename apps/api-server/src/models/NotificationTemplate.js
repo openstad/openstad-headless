@@ -77,7 +77,7 @@ module.exports = (db, sequelize, DataTypes) => {
       const authSettings = require('../util/auth-settings');
       let providers = await authSettings.providers({ project });
       for (let provider of providers) {
-        let authConfig = await authSettings.config({
+        let authConfig = await authSettings.configForClientUpdate({
           project,
           useAuth: provider,
         });
