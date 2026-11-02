@@ -104,9 +104,11 @@ function toPlainData(data) {
 
 function toPlainValue(value, seen) {
   if (value == null || typeof value !== 'object') return value;
+  if (Buffer.isBuffer(value) || ArrayBuffer.isView(value)) return value;
   if (!seen) seen = new Set();
   if (seen.has(value)) return undefined;
   seen.add(value);
+  if (value instanceof Date || value instanceof RegExp) return value;
   if (Array.isArray(value)) return value.map((v) => toPlainValue(v, seen));
   if (typeof value.get === 'function' && value.sequelize) {
     return toPlainValue(value.get({ plain: true }), seen);

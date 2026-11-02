@@ -149,6 +149,18 @@ describe('toPlainData', () => {
     expect(plain.obj).toEqual({ name: 'A' });
   });
 
+  it('passes Buffer and Date through without iterating', () => {
+    const buf = Buffer.from('hello');
+    const date = new Date('2026-01-01');
+    const plain = toPlainData({
+      attachment: { content: buf, name: 'file.pdf' },
+      created: date,
+    });
+    expect(Buffer.isBuffer(plain.attachment.content)).toBe(true);
+    expect(plain.attachment.content).toBe(buf);
+    expect(plain.created).toBe(date);
+  });
+
   it('handles circular references without infinite loop', () => {
     const circular = { name: 'loop' };
     circular.self = circular;
