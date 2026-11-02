@@ -507,7 +507,10 @@ router
       projectId: req.project.id,
       role: req.body.role || req.oAuthUser.role || 'member',
       lastLogin: Date.now(),
+      // The auth server stores consent per client ({ [clientId]: value });
+      // the user gives consent for this project on its first login.
       emailNotificationConsent: null,
+      privacyConsentAt: null,
     };
 
     db.User.authorizeData(data, 'create', req.user)
