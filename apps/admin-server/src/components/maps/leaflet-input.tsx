@@ -1,3 +1,4 @@
+import { loadReactLeaflet } from '@/components/maps/load-react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import React, { useEffect, useState } from 'react';
 
@@ -30,24 +31,7 @@ const MapInput: React.FC<MapComponentProps> = ({
     if (typeof window !== 'undefined') {
       setIsSSR(false);
 
-      import('leaflet').then((L) => {
-        // any: Leaflet's private `_initContainer` is an untyped internal API.
-        // We patch it to clear a stale `_leaflet_id` so the same container can
-        // be re-initialised (e.g. under React StrictMode double-mount).
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const proto = L.Map.prototype as any;
-        const orig = proto._initContainer;
-        proto._initContainer = function (id: any) {
-          const container =
-            typeof id === 'string' ? document.getElementById(id) : id;
-          if (container && container._leaflet_id) {
-            container._leaflet_id = undefined;
-          }
-          return orig.call(this, id);
-        };
-      });
-
-      import('react-leaflet')
+      loadReactLeaflet()
         .then((leaflet) => {
           setLeafletComponents(leaflet);
         })
