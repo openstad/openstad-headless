@@ -113,7 +113,12 @@ function toPlainValue(value, seen) {
   }
   const copy = {};
   for (const [key, v] of Object.entries(value)) {
-    if (key === 'sequelize' || key === '_previousDataValues') continue;
+    if (
+      key === 'sequelize' ||
+      key === '_previousDataValues' ||
+      key === '__proto__'
+    )
+      continue;
     copy[key] = toPlainValue(v, seen);
   }
   return copy;
