@@ -1,4 +1,4 @@
-const DEFAULT_SENTIMENTS = ['for', 'against'];
+const DEFAULT_SENTIMENTS: string[] = [];
 
 /** The sentiment list of a stored value, which can be a list or its JSON text. */
 export function sentimentList(value: unknown): string[] {
