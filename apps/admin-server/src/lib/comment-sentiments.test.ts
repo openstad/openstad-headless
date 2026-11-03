@@ -13,9 +13,9 @@ describe('sentimentList', () => {
     expect(sentimentList('[]')).toEqual([]);
   });
 
-  it('falls back to for and against when nothing usable is stored', () => {
-    expect(sentimentList(undefined)).toEqual(['for', 'against']);
-    expect(sentimentList('')).toEqual(['for', 'against']);
-    expect(sentimentList('voor')).toEqual(['for', 'against']);
+  it('falls back to no reactions when nothing usable is stored', () => {
+    expect(sentimentList(undefined)).toEqual([]);
+    expect(sentimentList('')).toEqual([]);
+    expect(sentimentList('voor')).toEqual([]);
   });
 });

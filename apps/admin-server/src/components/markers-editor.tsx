@@ -1,5 +1,6 @@
 import ColorPicker from '@/components/colorpicker';
 import { ImageUploader } from '@/components/image-uploader';
+import { loadReactLeaflet } from '@/components/maps/load-react-leaflet';
 import MapClickHandler from '@/components/maps/map-click-handler';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -163,7 +164,7 @@ export default function MarkersEditor({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsSSR(false);
-      import('react-leaflet')
+      loadReactLeaflet()
         .then((leaflet) => setLeafletComponents(leaflet))
         .catch((error) => console.error('Failed to load react-leaflet', error));
 

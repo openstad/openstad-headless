@@ -148,6 +148,13 @@ describe('Tonen van reacties on the Reacties widget tab', () => {
     expect(controller.isDirty).toBe(false);
   });
 
+  it('shows no reactions when nothing is stored, and opens clean', async () => {
+    await open({});
+
+    expect(sentiments().value).toBe('[]');
+    expect(controller.isDirty).toBe(false);
+  });
+
   it('stores the choice as a list', async () => {
     await open({ useSentiments: ['for', 'against'] });
     act(() => {

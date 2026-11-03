@@ -29,17 +29,22 @@ import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-const formSchema = z.object({
-  resourceId: z.string(),
-  rawInput: z.string(),
-  resourceIdRelativePath: z
-    .string()
-    .optional()
-    .refine(
-      (value) => !value || value.includes('[id]'),
-      'Specificeer een [id] veld'
-    ),
-});
+const formSchema = z
+  .object({
+    resourceId: z.string(),
+    rawInput: z.string(),
+    resourceIdRelativePath: z.string().optional(),
+  })
+  .superRefine((values, ctx) => {
+    const path = values.resourceIdRelativePath;
+    if (values.resourceId === '' && path && !path.includes('[id]')) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['resourceIdRelativePath'],
+        message: 'Specificeer een [id] veld',
+      });
+    }
+  });
 
 export default function WidgetRawGeneral(
   props: RawResourceWidgetProps & EditFieldProps<RawResourceWidgetProps>

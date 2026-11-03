@@ -105,11 +105,11 @@ export default function DocumentGeneral(
 
   const { data } = useResources(props.projectId);
   const resources: Array<{ id: string | number; title: string }> = data || [];
-  const [toggle, setToggle] = useState('resourceId_');
 
   const form = useForm<DocumentMapProps>({
     defaultValues: {
       resourceId: props.resourceId || undefined,
+      resourceIdRelativePath: props.resourceIdRelativePath ?? '',
 
       zoom: props.zoom || 1,
       minZoom: props.minZoom || -6,
@@ -170,6 +170,8 @@ export default function DocumentGeneral(
     }
   }, [form.watch('minZoom'), form.watch('maxZoom'), form.watch('zoom')]);
 
+  const resourceIdValue = form.watch('resourceId');
+
   return (
     <Form {...form} className="p-6 bg-white rounded-md">
       <Heading size="xl" className="mb-4">
@@ -186,13 +188,10 @@ export default function DocumentGeneral(
           items={resources}
           keyForValue="id"
           label={(resource) => `${resource.id} ${resource.title}`}
-          onFieldChanged={(e, key) => {
-            props.onFieldChanged;
-            setToggle(e + '_' + key);
-          }}
+          onFieldChanged={props.onFieldChanged}
           noSelection="Niet koppelen - beschrijf het path of gebruik queryparam openstadResourceId"
         />
-        {toggle === 'resourceId_' ? (
+        {!resourceIdValue ? (
           <FormField
             control={form.control}
             name="resourceIdRelativePath"
