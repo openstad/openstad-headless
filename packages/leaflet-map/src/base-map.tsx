@@ -23,6 +23,7 @@ import { Area, isPointInArea } from './area';
 import { AutoZoom } from './auto-zoom';
 import './css/base-map.css';
 import { InvalidateSizeOnResize } from './invalidate-size-on-resize';
+import { focusFirstTabbableAfter } from './lib/focus-after';
 import parseLocation from './lib/parse-location';
 import { sanitizeColor } from './lib/sanitize';
 import { MapAccessibleName } from './map-accessible-name';
@@ -807,7 +808,7 @@ const BaseMap = ({
       <button
         type="button"
         className="osc-map-skip-link"
-        onClick={() => skipTargetRef.current?.focus()}>
+        onClick={() => focusFirstTabbableAfter(skipTargetRef.current)}>
         Sla kaart over
       </button>
       <div className="map-container osc-map" ref={containerWrapperRef}>

@@ -6,6 +6,7 @@ import {
 import CommentComponent from '@openstad-headless/comments/src/parts/comment';
 import DataStore from '@openstad-headless/data-store/src';
 import { FormValue } from '@openstad-headless/form/src/form';
+import { focusFirstTabbableAfter } from '@openstad-headless/leaflet-map/src/lib/focus-after';
 import { MapAccessibleName } from '@openstad-headless/leaflet-map/src/map-accessible-name';
 import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
@@ -1214,7 +1215,7 @@ function DocumentMap({
         <button
           type="button"
           className="osc-map-skip-link"
-          onClick={() => skipTargetRef.current?.focus()}>
+          onClick={() => focusFirstTabbableAfter(skipTargetRef.current)}>
           Sla afbeelding over
         </button>
         <div className="document-container">
