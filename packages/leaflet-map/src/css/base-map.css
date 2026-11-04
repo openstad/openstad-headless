@@ -442,11 +442,10 @@
    was niets te zien en op de inzoomknop alleen een streepje (WCAG 2.4.7). */
 .osc-map .leaflet-control-zoom a:focus,
 .osc-map .leaflet-control-zoom a:focus-visible {
+  /* Binnen de knop tekenen: .leaflet-control-zoom heeft overflow: hidden, een
+     rand erbuiten werd weggeknipt tot alleen een streepje tussen +/−. */
   outline: 3px solid #1471ef;
-  outline-offset: 2px;
-  /* boven de aangrenzende knop en de kaarttegels, anders knipt de rand weg */
-  position: relative;
-  z-index: 1000;
+  outline-offset: -3px;
 }
 
 /* Markerfocus haalde 2:1 tot 2,8:1 tegen de kaartachtergrond. Dubbele rand:
