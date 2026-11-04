@@ -23,8 +23,10 @@ import { Area, isPointInArea } from './area';
 import { AutoZoom } from './auto-zoom';
 import './css/base-map.css';
 import { InvalidateSizeOnResize } from './invalidate-size-on-resize';
+import { focusFirstTabbableAfter } from './lib/focus-after';
 import parseLocation from './lib/parse-location';
 import { sanitizeColor } from './lib/sanitize';
+import { MapAccessibleName } from './map-accessible-name';
 import { MapConsumer } from './map-consumer';
 import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
@@ -806,15 +808,10 @@ const BaseMap = ({
       <button
         type="button"
         className="osc-map-skip-link"
-        onClick={() => skipTargetRef.current?.focus()}>
+        onClick={() => focusFirstTabbableAfter(skipTargetRef.current)}>
         Sla kaart over
       </button>
-      <div
-        className="map-container osc-map"
-        role="application"
-        aria-label="Interactieve kaart"
-        aria-describedby={mapInstructionsId}
-        ref={containerWrapperRef}>
+      <div className="map-container osc-map" ref={containerWrapperRef}>
         <p id={mapInstructionsId} className="sr-only">
           Verschuif de kaart met de pijltjestoetsen wanneer de kaart focus
           heeft. Gebruik de knop {controlsToggleName} om de kaart met losse
@@ -829,6 +826,10 @@ const BaseMap = ({
             scrollWheelZoom={scrollWheelZoom}
             zoom={zoom}>
             <MapConsumer mapId={mapId} />
+            <MapAccessibleName
+              label={props?.mapAriaLabel?.trim() || 'Interactieve kaart'}
+              describedBy={mapInstructionsId}
+            />
             <PanToLocation location={panToLocation} />
             <InvalidateSizeOnResize />
             <MapInteraction isTouch={isTouchDevice} />

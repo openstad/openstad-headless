@@ -48,6 +48,7 @@ const formSchema = z.object({
   customUrl: z.string().optional(),
   width: z.string().optional(),
   height: z.string().optional(),
+  mapAriaLabel: z.string().optional(),
 });
 
 type SchemaKey = keyof typeof formSchema.shape;
@@ -77,6 +78,7 @@ export default function WidgetResourcesMapMap(
       customUrl: props?.customUrl || '',
       width: props?.width || '',
       height: props?.height || '',
+      mapAriaLabel: props?.mapAriaLabel || '',
     },
   });
 
@@ -113,6 +115,34 @@ export default function WidgetResourcesMapMap(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-4 lg:w-1/2">
+          <FormField
+            control={form.control}
+            name="mapAriaLabel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Toegankelijke naam van de kaart</FormLabel>
+                <FormDescription>
+                  Deze naam leest voorleessoftware voor wanneer de kaart focus
+                  krijgt. Beschrijf wat de kaart toont, bijvoorbeeld &quot;Kaart
+                  met plannen Wijkbudget Bloemenbuurt&quot;. Leeg laten geeft
+                  &quot;Interactieve kaart&quot;.
+                </FormDescription>
+                <FormControl>
+                  <Input
+                    placeholder="Interactieve kaart"
+                    type="text"
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="mapCenterMode"
