@@ -217,6 +217,28 @@ function MapInteraction({ isTouch }: { isTouch: boolean }) {
   return null;
 }
 
+// ponytail: Leaflet maakt zijn eigen container focusbaar (tabindex=0), dus de
+// toegankelijke naam moet op dát element staan, niet op een wrapper eromheen —
+// anders landt de toetsenbordfocus op een element zonder naam (WCAG 4.1.2).
+function MapAccessibleName({
+  label,
+  describedBy,
+}: {
+  label: string;
+  describedBy: string;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    const el = map.getContainer();
+    el.setAttribute('role', 'application');
+    el.setAttribute('aria-label', label);
+    el.setAttribute('aria-describedby', describedBy);
+  }, [map, label, describedBy]);
+
+  return null;
+}
+
 const BaseMap = ({
   iconCreateFunction = undefined,
   defaultIcon = undefined,
@@ -809,12 +831,7 @@ const BaseMap = ({
         onClick={() => skipTargetRef.current?.focus()}>
         Sla kaart over
       </button>
-      <div
-        className="map-container osc-map"
-        role="application"
-        aria-label="Interactieve kaart"
-        aria-describedby={mapInstructionsId}
-        ref={containerWrapperRef}>
+      <div className="map-container osc-map" ref={containerWrapperRef}>
         <p id={mapInstructionsId} className="sr-only">
           Verschuif de kaart met de pijltjestoetsen wanneer de kaart focus
           heeft. Gebruik de knop {controlsToggleName} om de kaart met losse
@@ -829,6 +846,10 @@ const BaseMap = ({
             scrollWheelZoom={scrollWheelZoom}
             zoom={zoom}>
             <MapConsumer mapId={mapId} />
+            <MapAccessibleName
+              label={props?.mapAriaLabel?.trim() || 'Interactieve kaart'}
+              describedBy={mapInstructionsId}
+            />
             <PanToLocation location={panToLocation} />
             <InvalidateSizeOnResize />
             <MapInteraction isTouch={isTouchDevice} />
