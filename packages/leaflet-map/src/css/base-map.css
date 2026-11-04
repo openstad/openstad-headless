@@ -52,7 +52,8 @@
 
 .osc-map .osc-map-controls-toggle:focus-visible {
   outline: 2px solid var(--utrecht-focus-outline-color, #1471ef);
-  outline-offset: 2px;
+  /* binnen de knop, net als de zoomknoppen erboven */
+  outline-offset: -2px;
 }
 
 .osc-map .osc-map-controls-panel {
@@ -430,7 +431,8 @@
   background: #fff;
   color: #1a1a1a;
   font-size: 15px;
-  outline: 3px solid #1471ef;
+  /* zelfde focusstijl als de overige kaartknoppen, via het thema-token */
+  outline: 2px solid var(--utrecht-focus-outline-color, #1471ef);
   outline-offset: 2px;
 }
 
@@ -444,8 +446,8 @@
 .osc-map .leaflet-control-zoom a:focus-visible {
   /* Binnen de knop tekenen: .leaflet-control-zoom heeft overflow: hidden, een
      rand erbuiten werd weggeknipt tot alleen een streepje tussen +/−. */
-  outline: 3px solid #1471ef;
-  outline-offset: -3px;
+  outline: 2px solid var(--utrecht-focus-outline-color, #1471ef);
+  outline-offset: -2px;
 }
 
 /* Markerfocus haalde 2:1 tot 2,8:1 tegen de kaartachtergrond. Dubbele rand:

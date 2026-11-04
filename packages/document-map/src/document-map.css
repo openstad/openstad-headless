@@ -356,6 +356,13 @@ a + .url-list:before {
   border-bottom: 1px solid #ccc;
 }
 
+/* Binnen de knop tekenen: overflow: hidden hierboven knipt een rand erbuiten
+   weg (WCAG 2.4.7). Zelfde token als de overige kaartknoppen. */
+.documentMap--container .leaflet-control-zoom a:focus-visible {
+  outline: 2px solid var(--utrecht-focus-outline-color, #1471ef);
+  outline-offset: -2px;
+}
+
 .documentMap--container .osc-map-controls-toggle {
   width: 34px;
   height: 33px;
@@ -380,7 +387,8 @@ a + .url-list:before {
 
 .documentMap--container .osc-map-controls-toggle:focus-visible {
   outline: 2px solid var(--utrecht-focus-outline-color, #1471ef);
-  outline-offset: 2px;
+  /* binnen de knop, net als de zoomknoppen erboven */
+  outline-offset: -2px;
 }
 
 /* Skiplink over de afbeelding: onzichtbaar tot hij focus krijgt, dan
@@ -417,7 +425,7 @@ a + .url-list:before {
   background: #fff;
   color: #1a1a1a;
   font-size: 15px;
-  outline: 3px solid #1471ef;
+  outline: 2px solid var(--utrecht-focus-outline-color, #1471ef);
   outline-offset: 2px;
 }
 
