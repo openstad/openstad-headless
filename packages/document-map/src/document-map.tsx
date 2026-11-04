@@ -6,6 +6,7 @@ import {
 import CommentComponent from '@openstad-headless/comments/src/parts/comment';
 import DataStore from '@openstad-headless/data-store/src';
 import { FormValue } from '@openstad-headless/form/src/form';
+import { MapAccessibleName } from '@openstad-headless/leaflet-map/src/map-accessible-name';
 import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
@@ -414,6 +415,7 @@ function DocumentMap({
   }, [docWidth, docHeight]);
 
   const contentRef = useRef<HTMLDivElement>(null);
+  const skipTargetRef = useRef<HTMLDivElement>(null);
   const [randomId, setRandomId] = useState('');
   const [helpText, setHelpText] = useState('');
 
@@ -1207,11 +1209,15 @@ function DocumentMap({
             </section>
           </div>
         )}
-        <div
-          className="document-container"
-          role="application"
-          aria-label="Interactieve afbeelding"
-          aria-describedby={mapInstructionsId}>
+        {/* ponytail: elke pin is focusbaar; zonder skiplink moet je er met
+            honderden tabs doorheen voor de rest van de pagina (WCAG 2.4.1) */}
+        <button
+          type="button"
+          className="osc-map-skip-link"
+          onClick={() => skipTargetRef.current?.focus()}>
+          Sla afbeelding over
+        </button>
+        <div className="document-container">
           <p id={mapInstructionsId} className="sr-only">
             Verschuif de afbeelding met de pijltjestoetsen wanneer de afbeelding
             focus heeft. Gebruik de knop {controlsToggleName} om de afbeelding
@@ -1231,6 +1237,10 @@ function DocumentMap({
                 : (bounds as LatLngBoundsLiteral)
             }>
             <MapEvents />
+            <MapAccessibleName
+              label="Interactieve afbeelding"
+              describedBy={mapInstructionsId}
+            />
             {filteredComments &&
               filteredComments
                 .filter((comment: any) => !!comment.location)
@@ -1559,6 +1569,11 @@ function DocumentMap({
             </>
           )}
         </div>
+        <div
+          ref={skipTargetRef}
+          tabIndex={-1}
+          className="osc-map-skip-target"
+        />
       </div>
       <div className="content document-map-info-container" ref={contentRef}>
         {!isDefinitive && (

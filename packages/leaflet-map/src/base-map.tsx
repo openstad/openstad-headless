@@ -25,6 +25,7 @@ import './css/base-map.css';
 import { InvalidateSizeOnResize } from './invalidate-size-on-resize';
 import parseLocation from './lib/parse-location';
 import { sanitizeColor } from './lib/sanitize';
+import { MapAccessibleName } from './map-accessible-name';
 import { MapConsumer } from './map-consumer';
 import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
@@ -213,28 +214,6 @@ function MapInteraction({ isTouch }: { isTouch: boolean }) {
       if (instance?.destroy) instance.destroy();
     };
   }, [map, isTouch]);
-
-  return null;
-}
-
-// ponytail: Leaflet maakt zijn eigen container focusbaar (tabindex=0), dus de
-// toegankelijke naam moet op dát element staan, niet op een wrapper eromheen —
-// anders landt de toetsenbordfocus op een element zonder naam (WCAG 4.1.2).
-function MapAccessibleName({
-  label,
-  describedBy,
-}: {
-  label: string;
-  describedBy: string;
-}) {
-  const map = useMap();
-
-  useEffect(() => {
-    const el = map.getContainer();
-    el.setAttribute('role', 'application');
-    el.setAttribute('aria-label', label);
-    el.setAttribute('aria-describedby', describedBy);
-  }, [map, label, describedBy]);
 
   return null;
 }

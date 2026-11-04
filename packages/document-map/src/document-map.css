@@ -383,6 +383,48 @@ a + .url-list:before {
   outline-offset: 2px;
 }
 
+/* Skiplink over de afbeelding: onzichtbaar tot hij focus krijgt, dan
+   zichtbaar mét focusrand (WCAG 2.4.1 + 2.4.7). Zelfde stijl als in
+   leaflet-map/base-map.css. */
+.documentMap--container .osc-map-skip-link {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.documentMap--container .osc-map-skip-link:focus,
+.documentMap--container .osc-map-skip-link:focus-visible {
+  position: static;
+  align-self: flex-start;
+  width: auto;
+  height: auto;
+  margin: 0 0 0.5rem;
+  padding: 8px 12px;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  white-space: normal;
+  cursor: pointer;
+  border: 1px solid #767676;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a1a1a;
+  font-size: 15px;
+  outline: 3px solid #1471ef;
+  outline-offset: 2px;
+}
+
+.documentMap--container .osc-map-skip-target {
+  outline: none;
+}
+
 .documentMap--container .osc-map-controls-panel {
   display: flex;
   flex-direction: column;
