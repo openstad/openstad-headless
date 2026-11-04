@@ -442,7 +442,7 @@
 
 /* Zoomknoppen van Leaflet hadden helemaal geen focusindicator; op de uitzoomknop
    was niets te zien en op de inzoomknop alleen een streepje (WCAG 2.4.7). */
-.osc-map .leaflet-control-zoom a:focus,
+/* Alleen :focus-visible: bij een muisklik geen focusrand, bij toetsenbord wel. */
 .osc-map .leaflet-control-zoom a:focus-visible {
   /* Binnen de knop tekenen: .leaflet-control-zoom heeft overflow: hidden, een
      rand erbuiten werd weggeknipt tot alleen een streepje tussen +/−. */
@@ -452,13 +452,14 @@
 
 /* Markerfocus haalde 2:1 tot 2,8:1 tegen de kaartachtergrond. Dubbele rand:
    een donkere kern met een witte halo, zodat het contrast klopt op zowel
-   lichte als donkere kaartdelen (WCAG 1.4.11). */
-.osc-map .leaflet-marker-icon:focus,
+   lichte als donkere kaartdelen (WCAG 1.4.11). Alleen :focus-visible, zodat
+   een muisklik op een pin geen dikke rand geeft. Geen position: relative —
+   Leaflet positioneert pins absoluut; z-index met !important tegen de inline
+   z-index van Leaflet. */
 .osc-map .leaflet-marker-icon:focus-visible {
   outline: 3px solid #1a1a1a;
   outline-offset: 2px;
   box-shadow: 0 0 0 6px #fff;
   border-radius: 4px;
-  position: relative;
-  z-index: 1000;
+  z-index: 1000 !important;
 }
