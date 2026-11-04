@@ -112,20 +112,19 @@ export function MultiSelect({
           {options?.map((option, index) => {
             const checkboxId = `${id}-option-${index}`;
             return (
-              <div
-                onClick={() => {
-                  const value = option.value;
-                  const label = option.label;
-                  onItemSelected(value, label);
-                }}
-                key={`multi-select-item-${option.label}`}>
+              <div key={`multi-select-item-${option.label}`}>
                 <FormField type="checkbox">
                   <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
+                    {/* ponytail: onChange op de checkbox, niet onClick op de div:
+                        een klik op het gekoppelde label bubbelt én stuurt een
+                        klik door naar de checkbox — op de div gaf dat 2× toggle. */}
                     <Checkbox
                       className="utrecht-form-field__input"
                       id={checkboxId}
                       checked={option.checked}
-                      aria-label={option.label}
+                      onChange={() =>
+                        onItemSelected(option.value, option.label)
+                      }
                     />
                     <FormLabel type="checkbox" htmlFor={checkboxId}>
                       {option.label}
