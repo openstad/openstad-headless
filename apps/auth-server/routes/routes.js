@@ -22,6 +22,7 @@ const authUnsubscribe = require('../controllers/auth/unsubscribe');
 const clientMw = require('../middleware/client');
 const userMw = require('../middleware/user');
 const bruteForce = require('../middleware/bruteForce');
+const normalizeEmailMw = require('../middleware/normalizeEmail');
 const authMw = require('../middleware/auth');
 const passwordResetMw = require('../middleware/passwordReset');
 const logMw = require('../middleware/log');
@@ -158,7 +159,12 @@ module.exports = function (app) {
   /**
    * Shared middleware for all auth routes, adding client and bruteforce
    */
-  app.use('/auth', [clientMw.withOne, currentClientAuthMw, bruteForce.global]);
+  app.use('/auth', [
+    normalizeEmailMw,
+    clientMw.withOne,
+    currentClientAuthMw,
+    bruteForce.global,
+  ]);
 
   /**
    * Login & register with local login
