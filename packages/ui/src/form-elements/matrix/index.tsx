@@ -150,7 +150,6 @@ const MatrixField: FC<MatrixFieldProps> = ({
   return (
     <div className="question">
       <Fieldset
-        role="group"
         invalid={fieldInvalid}
         aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}>
         {title && (

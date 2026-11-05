@@ -355,9 +355,7 @@ function Account({
             {Object.entries(userFormData).map((field, index) => {
               return field[0] === 'emailNotificationConsent'
                 ? showEmailConsentField && (
-                    <Fieldset
-                      role="group"
-                      className="consent-checkbox-container">
+                    <Fieldset className="consent-checkbox-container">
                       <FieldsetLegend>{field[1].label}</FieldsetLegend>
                       <FormField type="checkbox" key={index}>
                         <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">

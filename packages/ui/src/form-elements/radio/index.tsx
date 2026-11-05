@@ -205,7 +205,6 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
   return (
     <div className="question">
       <Fieldset
-        role="radiogroup"
         invalid={fieldInvalid}
         // ponytail: fieldInvalid, niet checkInvalid. checkInvalid betekent
         // "verplicht en nog leeg" en is dus al waar bij het laden, terwijl
