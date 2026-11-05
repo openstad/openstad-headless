@@ -1019,9 +1019,8 @@ function SwipeField({
                     : ''
                 }`}
                 onClick={(e) => (e.preventDefault(), handleSwipeLeft(true))}
-                disabled={unansweredCards.length === 0}
-                aria-label="Afwijzen">
-                <i className="ri-thumb-down-fill"></i>
+                disabled={unansweredCards.length === 0}>
+                <i className="ri-thumb-down-fill" aria-hidden="true"></i>
                 <span>Oneens</span>
               </button>
               <button
@@ -1031,9 +1030,8 @@ function SwipeField({
                     : ''
                 }`}
                 onClick={(e) => (e.preventDefault(), handleSwipeRight(true))}
-                disabled={unansweredCards.length === 0}
-                aria-label="Goedkeuren">
-                <i className="ri-thumb-up-fill"></i>
+                disabled={unansweredCards.length === 0}>
+                <i className="ri-thumb-up-fill" aria-hidden="true"></i>
                 <span>Eens</span>
               </button>
             </div>
