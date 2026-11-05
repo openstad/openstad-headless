@@ -358,7 +358,7 @@ function Account({
                     <Fieldset className="consent-checkbox-container">
                       <FieldsetLegend>{field[1].label}</FieldsetLegend>
                       <FormField type="checkbox" key={index}>
-                        <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
+                        <div className="utrecht-form-field__label utrecht-form-field__label--checkbox">
                           <FormLabel
                             htmlFor={field[0]}
                             type="checkbox"
@@ -384,7 +384,7 @@ function Account({
                             />
                             <span>{field[1]?.description}</span>
                           </FormLabel>
-                        </Paragraph>
+                        </div>
                       </FormField>
                     </Fieldset>
                   )

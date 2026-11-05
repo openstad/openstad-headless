@@ -5,7 +5,6 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
   Textarea,
   Textbox,
 } from '@utrecht/component-library-react';
@@ -516,7 +515,7 @@ const TextInput: FC<TextInputProps> = ({
   return (
     <FormField type="text">
       {title && (
-        <Paragraph className="utrecht-form-field__label">
+        <div className="utrecht-form-field__label">
           <FormLabel htmlFor={randomId}>
             <RteContent
               content={title}
@@ -524,7 +523,7 @@ const TextInput: FC<TextInputProps> = ({
               forceInline={true}
             />
           </FormLabel>
-        </Paragraph>
+        </div>
       )}
       {description && (
         <>

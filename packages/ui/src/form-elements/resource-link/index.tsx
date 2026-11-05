@@ -4,7 +4,6 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
 } from '@utrecht/component-library-react';
 import React, { FC, useEffect, useState } from 'react';
 
@@ -111,7 +110,7 @@ const ResourceLinkField: FC<ResourceLinkFieldProps> = ({
   return (
     <FormField type="text">
       {title && (
-        <Paragraph className="utrecht-form-field__label">
+        <div className="utrecht-form-field__label">
           <FormLabel htmlFor={fieldKey} id={labelId}>
             <RteContent
               content={title}
@@ -119,7 +118,7 @@ const ResourceLinkField: FC<ResourceLinkFieldProps> = ({
               forceInline={true}
             />
           </FormLabel>
-        </Paragraph>
+        </div>
       )}
       {description && (
         <>

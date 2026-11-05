@@ -9,7 +9,6 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
 } from '@utrecht/component-library-react';
 import React, { FC, useEffect, useRef, useState } from 'react';
 
@@ -308,7 +307,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
 
         {selectAll && (
           <FormField type="checkbox" key="select_all">
-            <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
+            <div className="utrecht-form-field__label utrecht-form-field__label--checkbox">
               <FormLabel
                 htmlFor={`${idKey}_select_all`}
                 type="checkbox"
@@ -338,7 +337,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                 />
                 <span>{selectAllLabel}</span>
               </FormLabel>
-            </Paragraph>
+            </div>
           </FormField>
         )}
 
@@ -361,7 +360,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
           return (
             <>
               <FormField type="checkbox" key={index}>
-                <Paragraph
+                <div
                   className={`utrecht-form-field__label utrecht-form-field__label--checkbox${feedbackClass}`}>
                   <FormLabel
                     htmlFor={`${idKey}_${index}`}
@@ -413,7 +412,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                       <span className="sr-only">Juist antwoord</span>
                     </span>
                   )}
-                </Paragraph>
+                </div>
               </FormField>
 
               {choice.isOtherOption &&

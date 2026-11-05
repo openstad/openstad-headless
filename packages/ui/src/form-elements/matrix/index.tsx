@@ -10,7 +10,6 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
   RadioButton,
   Table,
   TableBody,
@@ -237,7 +236,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
                   return (
                     <TableCell key={`cell-${cellIndex}`}>
                       <FormField type={type}>
-                        <Paragraph
+                        <div
                           className={`utrecht-form-field__label utrecht-form-field__label--${type}`}>
                           <FormLabel
                             htmlFor={`${idKey}_${cellIndex}`}
@@ -287,7 +286,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
                               </>
                             )}
                           </FormLabel>
-                        </Paragraph>
+                        </div>
                       </FormField>
                     </TableCell>
                   );

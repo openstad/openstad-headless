@@ -384,9 +384,9 @@ export function ContactBlock({
 
           {showMessage ? (
             <FormField type="text">
-              <Paragraph className="utrecht-form-field__label">
+              <div className="utrecht-form-field__label">
                 <FormLabel htmlFor={messageId}>{messageLabel}</FormLabel>
-              </Paragraph>
+              </div>
               <div className="utrecht-form-field__input">
                 <Textarea
                   id={messageId}

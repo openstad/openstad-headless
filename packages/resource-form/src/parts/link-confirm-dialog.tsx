@@ -10,7 +10,6 @@ import {
   FormField,
   FormLabel,
   Heading,
-  Paragraph,
   Textarea,
 } from '@utrecht/component-library-react';
 import React, { useEffect, useRef, useState } from 'react';
@@ -122,11 +121,11 @@ export function LinkConfirmDialog({
                     </button>
                     {isOpen ? (
                       <FormField type="text" className="osc-link-confirm-field">
-                        <Paragraph className="utrecht-form-field__label sr-only">
+                        <div className="utrecht-form-field__label sr-only">
                           <FormLabel htmlFor={textareaId}>
                             {`${messageLabel}: ${item.label}`}
                           </FormLabel>
-                        </Paragraph>
+                        </div>
                         <div className="utrecht-form-field__input">
                           <Textarea
                             id={textareaId}

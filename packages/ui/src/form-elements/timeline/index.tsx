@@ -11,7 +11,6 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
   Textarea,
   Textbox,
 } from '@utrecht/component-library-react';
@@ -338,7 +337,7 @@ const TimelineField: FC<TimelineFieldProps> = ({
       aria-describedby={fieldInvalid ? warningId : undefined}>
       <div className="timeline-header">
         {title && (
-          <Paragraph className="utrecht-form-field__label">
+          <div className="utrecht-form-field__label">
             <FormLabel htmlFor={randomId}>
               <RteContent
                 content={title}
@@ -346,7 +345,7 @@ const TimelineField: FC<TimelineFieldProps> = ({
                 forceInline={true}
               />
             </FormLabel>
-          </Paragraph>
+          </div>
         )}
 
         {description && (
@@ -415,9 +414,9 @@ const TimelineField: FC<TimelineFieldProps> = ({
               : 'Tijdlijn-item toevoegen'}
           </RadixDialog.Title>
           <FormField type="text">
-            <Paragraph className="utrecht-form-field__label">
+            <div className="utrecht-form-field__label">
               <FormLabel htmlFor={dateId}>Datum</FormLabel>
-            </Paragraph>
+            </div>
             <Textbox
               id={dateId}
               type="date"
@@ -429,9 +428,9 @@ const TimelineField: FC<TimelineFieldProps> = ({
           </FormField>
 
           <FormField type="text">
-            <Paragraph className="utrecht-form-field__label">
+            <div className="utrecht-form-field__label">
               <FormLabel htmlFor={titleId}>Titel</FormLabel>
-            </Paragraph>
+            </div>
             <Textbox
               id={titleId}
               value={form.title}
@@ -443,9 +442,9 @@ const TimelineField: FC<TimelineFieldProps> = ({
           </FormField>
 
           <FormField type="text">
-            <Paragraph className="utrecht-form-field__label">
+            <div className="utrecht-form-field__label">
               <FormLabel htmlFor={descriptionId}>Omschrijving</FormLabel>
-            </Paragraph>
+            </div>
             <Textarea
               id={descriptionId}
               rows={4}

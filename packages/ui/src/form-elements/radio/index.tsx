@@ -8,7 +8,6 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
   RadioButton,
 } from '@utrecht/component-library-react';
 import React, { FC, useState } from 'react';
@@ -270,7 +269,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
           return (
             <>
               <FormField type="radio" key={index}>
-                <Paragraph
+                <div
                   className={`utrecht-form-field__label utrecht-form-field__label--radio${feedbackClass}`}>
                   <FormLabel
                     htmlFor={`${idKey}_${index}`}
@@ -312,7 +311,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                       <span className="sr-only">Juist antwoord</span>
                     </span>
                   )}
-                </Paragraph>
+                </div>
               </FormField>
               {choice.isOtherOption && selectedOption === choice.value && (
                 <div className="marginTop10 marginBottom15">

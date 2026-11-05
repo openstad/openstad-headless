@@ -3,7 +3,6 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
   Textbox,
 } from '@utrecht/component-library-react';
 import React, { FC, useEffect, useId, useRef, useState } from 'react';
@@ -138,7 +137,7 @@ const ModbreakField: FC<ModbreakFieldProps> = ({
       <input type="hidden" name={fieldKey} />
       <div className="modbreak-header">
         {title && (
-          <Paragraph className="utrecht-form-field__label">
+          <div className="utrecht-form-field__label">
             <FormLabel id={titleId}>
               <RteContent
                 content={title}
@@ -146,7 +145,7 @@ const ModbreakField: FC<ModbreakFieldProps> = ({
                 forceInline={true}
               />
             </FormLabel>
-          </Paragraph>
+          </div>
         )}
 
         {description && (
@@ -181,9 +180,9 @@ const ModbreakField: FC<ModbreakFieldProps> = ({
               </div>
 
               <FormField type="text">
-                <Paragraph className="utrecht-form-field__label">
+                <div className="utrecht-form-field__label">
                   <FormLabel htmlFor={descriptionId}>Inhoud</FormLabel>
-                </Paragraph>
+                </div>
                 <TrixEditor
                   id={descriptionId}
                   value={item.description}
@@ -194,9 +193,9 @@ const ModbreakField: FC<ModbreakFieldProps> = ({
               </FormField>
 
               <FormField type="text">
-                <Paragraph className="utrecht-form-field__label">
+                <div className="utrecht-form-field__label">
                   <FormLabel htmlFor={authorId}>Naam</FormLabel>
-                </Paragraph>
+                </div>
                 <Textbox
                   id={authorId}
                   value={item.authorName || ''}
@@ -212,9 +211,9 @@ const ModbreakField: FC<ModbreakFieldProps> = ({
               </FormField>
 
               <FormField type="text">
-                <Paragraph className="utrecht-form-field__label">
+                <div className="utrecht-form-field__label">
                   <FormLabel htmlFor={dateId}>Datum en tijd</FormLabel>
-                </Paragraph>
+                </div>
                 <FormFieldDescription>
                   Staat de tijd op 00:00? Dan wordt alleen de datum getoond.{' '}
                   <button
