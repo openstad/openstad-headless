@@ -7,9 +7,15 @@ type LightboxProps = {
   src: string;
   alt?: string;
   onClose: () => void;
+  returnFocusRef?: React.RefObject<HTMLElement>;
 };
 
-export const Lightbox = ({ src, alt = '', onClose }: LightboxProps) => {
+export const Lightbox = ({
+  src,
+  alt = '',
+  onClose,
+  returnFocusRef,
+}: LightboxProps) => {
   return (
     <RadixDialog.Root
       open={true}
@@ -21,7 +27,12 @@ export const Lightbox = ({ src, alt = '', onClose }: LightboxProps) => {
           <RadixDialog.Overlay className="osc-lightbox-overlay" />
           <RadixDialog.Content
             className="osc-lightbox-content"
-            aria-describedby={undefined}>
+            aria-describedby={undefined}
+            onCloseAutoFocus={(event) => {
+              if (!returnFocusRef?.current) return;
+              event.preventDefault();
+              returnFocusRef.current.focus();
+            }}>
             <RadixDialog.Title className="osc-lightbox-srtitle">
               Afbeelding uitvergroot
             </RadixDialog.Title>

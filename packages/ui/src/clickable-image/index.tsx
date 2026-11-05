@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useRef, useState } from 'react';
 
 import { Lightbox } from '../lightbox';
 import './index.css';
@@ -50,20 +50,29 @@ export const ClickableImage = ({
   children,
 }: ClickableImageProps) => {
   const [open, setOpen] = useState(false);
+  const zoomButtonRef = useRef<HTMLButtonElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   if (!clickable || !src) {
     return <>{children}</>;
   }
 
-  const lightbox = open ? (
-    <Lightbox src={src} alt={alt} onClose={() => setOpen(false)} />
-  ) : null;
+  const lightbox = (returnFocusRef: React.RefObject<HTMLElement>) =>
+    open ? (
+      <Lightbox
+        src={src}
+        alt={alt}
+        onClose={() => setOpen(false)}
+        returnFocusRef={returnFocusRef}
+      />
+    ) : null;
 
   if (variant === 'overlay') {
     return (
       <span className="osc-clickable-image osc-clickable-image--overlay">
         {children}
         <button
+          ref={zoomButtonRef}
           type="button"
           className="osc-clickable-image-zoom"
           aria-label={label}
@@ -77,7 +86,7 @@ export const ClickableImage = ({
           }}>
           <ZoomIcon />
         </button>
-        {lightbox}
+        {lightbox(zoomButtonRef)}
       </span>
     );
   }
@@ -88,6 +97,7 @@ export const ClickableImage = ({
   return (
     <>
       <div
+        ref={wrapperRef}
         className="osc-clickable-image osc-clickable-image--wrapper"
         role="button"
         tabIndex={0}
@@ -101,7 +111,7 @@ export const ClickableImage = ({
         }}>
         {children}
       </div>
-      {lightbox}
+      {lightbox(wrapperRef)}
     </>
   );
 };
