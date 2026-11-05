@@ -96,6 +96,7 @@ export type TextInputProps = {
   imageClickable?: boolean;
   showMinMaxAfterBlur?: boolean;
   maxCharactersOverWarning?: string;
+  'aria-labelledby'?: string;
 };
 
 const TrixEditor: React.FC<{
@@ -373,6 +374,7 @@ const TextInput: FC<TextInputProps> = ({
   imageClickable = false,
   showMinMaxAfterBlur = false,
   maxCharactersOverWarning = 'Je hebt {overCharacters} tekens teveel',
+  'aria-labelledby': ariaLabelledBy,
 }) => {
   const variantMap = {
     'text input': Textbox,
@@ -590,6 +592,7 @@ const TextInput: FC<TextInputProps> = ({
             setHasBlurred(true);
           }}
           autoComplete={purpose.autoComplete}
+          aria-labelledby={ariaLabelledBy}
           aria-describedby={
             [
               // ponytail: fieldInvalid komt uit form.tsx en is alleen waar als

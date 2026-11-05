@@ -291,7 +291,9 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                       value={choice && choice.value}
                       checked={selectedOption === choice.value}
                     />
-                    <span>{choice && choice.label}</span>
+                    <span id={`${idKey}_${index}_label`}>
+                      {choice && choice.label}
+                    </span>
                   </FormLabel>
                   {optionState === 'correct' && (
                     <span className="osc-feedback-badge --correct">
@@ -324,7 +326,8 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                     fieldKey={`${fieldKey}_${choice.trigger || index}_other`}
                     title=""
                     fieldInvalid={false}
-                    randomId={`${idKey}_${choice.trigger || index}`}
+                    randomId={`${idKey}_${choice.trigger || index}_other`}
+                    aria-labelledby={`${idKey}_${index}_label`}
                   />
                 </div>
               )}
