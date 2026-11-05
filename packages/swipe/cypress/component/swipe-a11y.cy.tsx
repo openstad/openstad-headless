@@ -19,9 +19,8 @@ describe('<SwipeField /> a11y', () => {
       { selector: '.swipe-btn-pass', text: 'Oneens' },
       { selector: '.swipe-btn-like', text: 'Eens' },
     ].forEach(({ selector, text }) => {
-      cy.get(selector)
-        .should('not.have.attr', 'aria-label')
-        .and('contain.text', text);
+      cy.get(selector).should('not.have.attr', 'aria-label');
+      cy.get(selector).should('contain.text', text);
       cy.get(`${selector} i`).should('have.attr', 'aria-hidden', 'true');
     });
   });
