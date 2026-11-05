@@ -9,7 +9,6 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Heading,
   Paragraph,
   RadioButton,
 } from '@utrecht/component-library-react';
@@ -19,6 +18,7 @@ import { ClickableImage } from '../../clickable-image';
 import { InfoImage } from '../../infoImage';
 import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
 import { Spacer } from '../../spacer';
+import './index.css';
 
 export type ImageChoiceFieldProps = {
   title: string;
@@ -210,22 +210,25 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
               choice && choice.label
                 ? selectedChoices.includes(choice.label)
                 : false;
+            const titleId = `${idKey}_${index}_title`;
+            const descriptionId = `${idKey}_${index}_description`;
+            const showTitle = !!choice.label && !choice.hideLabel;
+            const showDescription = showTitle && !!choice.description;
+            const titleClassName = !showTitle
+              ? 'sr-only'
+              : showDescription
+                ? 'utrecht-heading-4'
+                : undefined;
             return (
               <FormField type="radio" key={index}>
-                <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">
+                <div className="utrecht-form-field__label utrecht-form-field__label--radio osc-clickable-image-anchor">
                   <FormLabel
                     htmlFor={`${idKey}_${index}`}
                     type="radio"
                     className={isSelected ? 'selected' : ''}>
-                    <figure>
-                      <ClickableImage
-                        clickable={imageClickable}
-                        src={choice.imageSrc}
-                        alt={choice.imageAlt}
-                        variant="overlay">
-                        <img src={choice.imageSrc} alt={choice.imageAlt} />
-                      </ClickableImage>
-                      <figcaption>
+                    <span className="image-choice-figure">
+                      <img src={choice.imageSrc} alt={choice.imageAlt} />
+                      <span className="image-choice-caption">
                         <ChoiceComponent
                           className="radio-field-input"
                           id={`${idKey}_${index}`}
@@ -245,32 +248,37 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                               ? selectedChoices.includes(choice.value)
                               : false
                           }
+                          aria-labelledby={choice.label ? titleId : undefined}
+                          aria-describedby={
+                            showDescription ? descriptionId : undefined
+                          }
                         />
-                        {choice.label &&
-                          !choice.hideLabel &&
-                          !choice.description &&
-                          choice.label}
-                        {choice.description &&
-                          choice.label &&
-                          !choice.hideLabel && (
-                            <>
-                              <Heading level={4}>{choice.label}</Heading>
-                              <RteContent
-                                content={choice.description}
-                                inlineComponent={Paragraph}
-                                unwrapSingleRootDiv={true}
-                              />
-                            </>
-                          )}
-                        {/* ponytail: hier stond een "✓ Gekozen"-badge voor 1.4.1.
-                            Die hoorde bij de beeldkiezer (het dilemma-vraagtype)
-                            en staat daar nu; hier was hij dubbelop, want de
-                            gekozen afbeelding krijgt al een rand van 3px waar de
-                            andere er geen heeft — dat is geen kleurverschil. */}
-                      </figcaption>
-                    </figure>
+                        {choice.label && (
+                          <span id={titleId} className={titleClassName}>
+                            {choice.label}
+                          </span>
+                        )}
+                      </span>
+                    </span>
                   </FormLabel>
-                </Paragraph>
+                  <ClickableImage
+                    clickable={imageClickable}
+                    src={choice.imageSrc}
+                    alt={choice.imageAlt}
+                    variant="trigger"
+                  />
+                  {showDescription && (
+                    <div
+                      id={descriptionId}
+                      className="image-choice-description">
+                      <RteContent
+                        content={choice.description}
+                        inlineComponent={Paragraph}
+                        unwrapSingleRootDiv={true}
+                      />
+                    </div>
+                  )}
+                </div>
               </FormField>
             );
           })}

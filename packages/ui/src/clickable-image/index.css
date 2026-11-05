@@ -12,6 +12,10 @@
   display: inline-block;
 }
 
+.osc-clickable-image-anchor {
+  position: relative;
+}
+
 .osc-clickable-image-zoom {
   position: absolute;
   top: 8px;
