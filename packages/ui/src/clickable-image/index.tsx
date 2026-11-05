@@ -57,7 +57,7 @@ export const ClickableImage = ({
     return <>{children}</>;
   }
 
-  const lightbox = (returnFocusRef: React.RefObject<HTMLElement>) =>
+  const lightbox = (returnFocusRef: React.RefObject<HTMLElement | null>) =>
     open ? (
       <Lightbox
         src={src}

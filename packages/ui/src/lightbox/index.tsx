@@ -7,7 +7,7 @@ type LightboxProps = {
   src: string;
   alt?: string;
   onClose: () => void;
-  returnFocusRef?: React.RefObject<HTMLElement>;
+  returnFocusRef?: React.RefObject<HTMLElement | null>;
 };
 
 export const Lightbox = ({
