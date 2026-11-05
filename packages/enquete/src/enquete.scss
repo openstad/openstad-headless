@@ -917,6 +917,14 @@
             }
           }
 
+          &:has(input:focus-visible) {
+            img {
+              outline: 3px solid
+                var(--youth-intro-card-background-color, #1d6b34);
+              outline-offset: 3px;
+            }
+          }
+
           img {
             max-height: none;
             height: 100%;
@@ -940,7 +948,15 @@
           display: block;
 
           .utrecht-radio-button.utrecht-radio-button--html-input.radio-field-input {
-            display: none;
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
           }
         }
       }
