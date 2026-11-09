@@ -47,7 +47,10 @@ export default function ProjectCommentEdit() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const comment = await updateComment(values.description, values.label);
+    const comment = await updateComment({
+      description: values.description,
+      label: values.label,
+    });
     if (comment) {
       toast.success('Comment aangepast!');
     } else {

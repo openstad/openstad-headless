@@ -76,6 +76,12 @@ export default function ProjectResourceArguments() {
                           Reageer
                         </Link>
                       </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href={`/projects/${project}/resources/${id}?tab=createComment&editCommentId=${comment.id}`}>
+                          Bewerken
+                        </Link>
+                      </DropdownMenuItem>
                       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
                         <RemoveResourceDialog
                           header="Reactie verwijderen"
