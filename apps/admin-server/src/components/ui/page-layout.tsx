@@ -43,7 +43,7 @@ export function PageLayout({
     <main className="flex flex-row min-h-screen bg-muted">
       <Sidenav narrow={hasProjectSidenav} />
       {hasProjectSidenav ? <SidenavProject /> : null}
-      <section className="col-span-full w-full">
+      <section className="col-span-full w-full min-w-0">
         <header className="h-fit md:h-24 flex flex-col justify-center border-b border-border sticky top-0 z-10 bg-background">
           <div className="flex flex-col md:flex-row justify-between container p-6">
             <div
