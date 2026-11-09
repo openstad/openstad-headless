@@ -307,13 +307,8 @@ export default function ProjectResources() {
               </div>
             </div>
 
-            <div className="p-6 bg-white rounded-md">
-              <div
-                className="grid grid-cols-2 items-center py-2 px-2 border-b border-border"
-                style={{
-                  gridTemplateColumns:
-                    'repeat(2, 50px) 3fr repeat(5, 1fr) 60px',
-                }}>
+            <div className="p-6 bg-white rounded-md overflow-x-auto">
+              <div className="grid items-center py-2 px-2 border-b border-border grid-cols-[50px_50px_minmax(160px,_3fr)_minmax(50px,_1fr)_minmax(50px,_1fr)_minmax(70px,_1fr)_minmax(170px,_1fr)_44px_0px] xl:grid-cols-[50px_50px_minmax(180px,_3fr)_minmax(56px,_1fr)_minmax(56px,_1fr)_minmax(80px,_1fr)_minmax(190px,_1fr)_minmax(110px,_1fr)_60px]">
                 <Checkbox
                   className="my-auto"
                   checked={
@@ -381,7 +376,7 @@ export default function ProjectResources() {
                 {data?.map((resource: any) => (
                   <li
                     key={resource.id}
-                    className="grid grid-cols-2 py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b"
+                    className="grid py-3 px-2 hover:bg-muted hover:cursor-pointer transition-all duration-200 border-b grid-cols-[50px_50px_minmax(160px,_3fr)_minmax(50px,_1fr)_minmax(50px,_1fr)_minmax(70px,_1fr)_minmax(170px,_1fr)_44px_0px] xl:grid-cols-[50px_50px_minmax(180px,_3fr)_minmax(56px,_1fr)_minmax(56px,_1fr)_minmax(80px,_1fr)_minmax(190px,_1fr)_minmax(110px,_1fr)_60px]"
                     role="button"
                     tabIndex={0}
                     onClick={() =>
@@ -396,10 +391,6 @@ export default function ProjectResources() {
                           `/projects/${project}/resources/${resource.id}`
                         );
                       }
-                    }}
-                    style={{
-                      gridTemplateColumns:
-                        'repeat(2, 50px) 3fr repeat(5, 1fr) 60px',
                     }}>
                     <div onClick={(e) => e.stopPropagation()}>
                       <Checkbox
@@ -441,7 +432,7 @@ export default function ProjectResources() {
                     <Paragraph className="hidden lg:flex truncate my-auto">
                       {resource.score || 0}
                     </Paragraph>
-                    <Paragraph className="hidden lg:flex truncate my-auto lg:-mr-16">
+                    <Paragraph className="hidden lg:flex truncate my-auto">
                       {resource.createDateHumanized}
                     </Paragraph>
 
@@ -454,6 +445,7 @@ export default function ProjectResources() {
                       <RemoveResourceDialog
                         header="Inzending verwijderen"
                         message="Weet je zeker dat je deze inzending wilt verwijderen?"
+                        labelClassName="hidden xl:inline"
                         onDeleteAccepted={() =>
                           remove(resource.id)
                             .then(() =>
@@ -469,7 +461,8 @@ export default function ProjectResources() {
                     </div>
                     <Link
                       href={`/projects/${project}/resources/${resource.id}`}
-                      onClick={(e) => e.stopPropagation()}>
+                      onClick={(e) => e.stopPropagation()}
+                      className="hidden xl:flex">
                       <ChevronRight
                         strokeWidth={1.5}
                         className="w-5 h-5 my-auto ml-auto"

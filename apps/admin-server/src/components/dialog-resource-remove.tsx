@@ -11,6 +11,7 @@ type Props = {
   deleteButtonText?: string;
   cancelButtonText?: string;
   onDeleteAccepted: () => void;
+  labelClassName?: string;
 };
 
 export function RemoveResourceDialog({
@@ -19,6 +20,7 @@ export function RemoveResourceDialog({
   deleteButtonText = 'Verwijderen',
   cancelButtonText = 'Annuleren',
   onDeleteAccepted,
+  labelClassName,
 }: Props) {
   const [open, setOpen] = useState<boolean>(false);
 
@@ -30,7 +32,8 @@ export function RemoveResourceDialog({
           e.preventDefault();
           setOpen(true);
         }}>
-        <Trash className="mr-2 h-4 w-4" /> Verwijder
+        <Trash className="mr-2 h-4 w-4" />
+        <span className={labelClassName}>Verwijder</span>
       </div>
       <DialogContent
         onEscapeKeyDown={(e: KeyboardEvent) => {
