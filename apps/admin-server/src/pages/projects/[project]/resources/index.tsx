@@ -2,6 +2,7 @@ import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { ImportButton } from '@/components/importButton';
 import { Checkbox } from '@/components/ui/checkbox';
+import InfoDialog from '@/components/ui/info-hover';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
 import { getRuntimeSpamFilterEnabled } from '@/lib/export-helpers/get-runtime-spam-flag';
@@ -361,13 +362,16 @@ export default function ProjectResources() {
                     Gestemd op nee
                   </button>
                 </ListHeading>
-                <ListHeading className="hidden lg:flex lg:col-span-1">
-                  <button
-                    className={getSortButtonClass('score')}
-                    onClick={() => handleSort('score')}>
-                    Wilson score interval
-                  </button>
-                </ListHeading>
+                <div className="hidden lg:flex lg:col-span-1 items-center gap-1">
+                  <ListHeading>
+                    <button
+                      className={getSortButtonClass('score')}
+                      onClick={() => handleSort('score')}>
+                      Populariteit
+                    </button>
+                  </ListHeading>
+                  <InfoDialog content="Populariteit is gebaseerd op het Wilson score interval. Dit houdt rekening met zowel het aandeel positieve stemmen als het totale aantal stemmen, zodat items met weinig stemmen niet onterecht hoog scoren." />
+                </div>
                 <ListHeading className="hidden lg:flex lg:col-span-1">
                   <button
                     className={getSortButtonClass('date-added')}
@@ -439,7 +443,11 @@ export default function ProjectResources() {
                       {resource.no || 0}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto">
-                      {resource.score || 0}
+                      {new Intl.NumberFormat('nl-NL', {
+                        style: 'percent',
+                        minimumFractionDigits: 1,
+                        maximumFractionDigits: 1,
+                      }).format(resource.score || 0)}
                     </Paragraph>
                     <Paragraph className="hidden lg:flex truncate my-auto lg:-mr-16">
                       {resource.createDateHumanized}
