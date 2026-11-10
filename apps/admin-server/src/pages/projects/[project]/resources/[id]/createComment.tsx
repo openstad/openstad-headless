@@ -122,6 +122,11 @@ export default function ProjectResourceCreateArgument() {
 
           notify(text, icon);
         }
+
+        const { parentId: _parentId, ...restQuery } = router.query;
+        router.push({ query: { ...restQuery, tab: 'comments' } }, undefined, {
+          shallow: true,
+        });
       } else {
         notifyFailed(newComment?.error);
       }
