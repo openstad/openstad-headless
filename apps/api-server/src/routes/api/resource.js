@@ -333,6 +333,9 @@ router
         'createdAt',
         'location.address.street',
         'location.address.city',
+        'tags.name',
+        'statuses.name',
+        'statuses.label',
       ],
     })
   )
@@ -453,7 +456,7 @@ router
   .get(filterByStreets)
   .get(
     searchInResults({
-      searchfields: [
+      searchfields: (req) => [
         'id',
         'title',
         'summary',
@@ -463,6 +466,12 @@ router
         'no',
         'location.address.street',
         'location.address.city',
+        'tags.name',
+        'statuses.name',
+        'statuses.label',
+        ...(userhasModeratorRights(req.user)
+          ? ['user.displayName', 'user.name', 'user.email']
+          : []),
       ],
     })
   )
