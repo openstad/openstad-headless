@@ -1,6 +1,7 @@
 import AuditLogTable from '@/components/audit-log-table';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
+import WidgetVersionHistory from '@/components/widget-version-history';
 import { useProject } from '@/hooks/use-project';
 import { useWidgetConfig } from '@/hooks/use-widget-config';
 import { useWidgetPreview } from '@/hooks/useWidgetPreview';
@@ -109,6 +110,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
               </TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig && (
@@ -407,19 +409,20 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                 projectId={projectId as string}
               />
             </TabsContent>
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
+                projectId={projectId as string}
+              />
+            </TabsContent>
           </Tabs>
 
-          <div className="container py-6 mt-6 bg-white rounded-md">
-            {previewConfig && (
-              <>
-                <WidgetPreview
-                  type="resourcedetail"
-                  config={previewConfig}
-                  projectId={projectId as string}
-                />
-              </>
-            )}
-          </div>
+          <WidgetEditorPreview
+            type="resourcedetail"
+            config={previewConfig}
+            projectId={projectId as string}
+            className="container py-6 mt-6 bg-white rounded-md"
+          />
         </div>
       </PageLayout>
     </div>

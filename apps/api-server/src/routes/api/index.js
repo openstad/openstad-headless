@@ -83,6 +83,10 @@ router.use('/project/:projectId(\\d+)/action', require('./action'));
 router.use('/project/:projectId(\\d+)/reports/v1', require('./reports'));
 
 //widgets
+router.use(
+  '/project/:projectId(\\d+)/widgets/:widgetId(\\d+)/versions',
+  require('./widget-version')
+);
 router.use('/project/:projectId(\\d+)/widgets', require('./widget'));
 router.use('/project/:projectId(\\d+)/widgets/:id(\\d+)', require('./widget'));
 

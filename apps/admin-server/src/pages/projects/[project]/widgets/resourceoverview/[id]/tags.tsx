@@ -413,7 +413,7 @@ export default function WidgetResourceOverviewTags(
                     <CheckboxList
                       form={form}
                       fieldName="onlyShowTheseTagIds"
-                      fieldLabel=""
+                      fieldLabel="Toon alleen deze tags"
                       label={(t) => t.name}
                       keyForGrouping="type"
                       keyPerItem={(t) => `${t.id}`}
