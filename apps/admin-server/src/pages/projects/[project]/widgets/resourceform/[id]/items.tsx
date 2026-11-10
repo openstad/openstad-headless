@@ -667,7 +667,14 @@ export default function WidgetResourceFormItems(
     );
 
     if (defaultFormItem) {
-      form.setValue('fieldKey', defaultFormItem.fieldKey || '');
+      const savedFieldKey =
+        selectedItem?.type === defaultFormItem.type
+          ? selectedItem.fieldKey
+          : '';
+      form.setValue(
+        'fieldKey',
+        savedFieldKey || defaultFormItem.fieldKey || ''
+      );
       if (form.watch('title') === '') {
         form.setValue('title', defaultFormItem.title || '');
       }
