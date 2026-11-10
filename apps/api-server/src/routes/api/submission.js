@@ -188,7 +188,9 @@ router
         type: 'new enquete - admin',
         projectId: req.project.id,
         data: notificationData,
-      });
+      }).catch((err) =>
+        console.error('Error sending admin notification for submission:', err)
+      );
     }
 
     if (sendConfirmationToUser) {
@@ -208,7 +210,9 @@ router
       }
 
       if (userEmailAddress || notificationData.data.userId) {
-        db.Notification.create(notificationData);
+        db.Notification.create(notificationData).catch((err) =>
+          console.error('Error sending user notification for submission:', err)
+        );
       }
     }
   });

@@ -98,6 +98,31 @@ window.setCookieConsent = function (allowCookies) {
 };
 
 let isMobile = false;
+let navbarMarker = null;
+
+function moveNavbarIntoMenu(navbar, navContainer) {
+  if (!navbar || !navContainer || navContainer.contains(navbar)) {
+    return;
+  }
+
+  if (!navbarMarker) {
+    navbarMarker = document.createComment('navbar');
+    navbar.before(navbarMarker);
+  }
+
+  navContainer.insertBefore(
+    navbar,
+    navContainer.querySelector('.extra-menu-buttons')
+  );
+}
+
+function moveNavbarBack(navbar) {
+  if (!navbar || !navbarMarker || navbarMarker.nextSibling === navbar) {
+    return;
+  }
+
+  navbarMarker.after(navbar);
+}
 
 function adjustMenu() {
   const mainContainer = document.querySelector('.main-header-container');
@@ -191,15 +216,18 @@ function adjustMenu() {
         navbar?.classList.add('--hidden');
         navContainer?.classList.add('--mobile');
         isMobile = true;
+        moveNavbarIntoMenu(navbar, navContainer);
       } else if (!isMobile) {
         navbar?.classList.remove('--hidden');
         navContainer?.classList.remove('--mobile');
+        moveNavbarBack(navbar);
       }
     }
   } else {
     navContainer?.classList.remove('--mobile');
     navbar?.classList.remove('--hidden');
     isMobile = false;
+    moveNavbarBack(navbar);
   }
 
   if (isMobile) {

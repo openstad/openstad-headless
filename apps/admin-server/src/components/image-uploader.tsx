@@ -1,4 +1,11 @@
 import { UploadDocument } from '@/hooks/upload-document';
+import useMaxUploadSizeMb from '@/hooks/use-max-upload-size';
+import {
+  GENERIC_UPLOAD_ERROR_MESSAGE,
+  UploadError,
+  assertUploadableSize,
+  performUpload,
+} from '@/lib/upload-limits';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import {
   buildImagePreviewUrl,
@@ -47,6 +54,7 @@ export const ImageUploader: React.FC<{
   const currentValue = form.watch(fieldName);
   const hasImage = typeof currentValue === 'string' && currentValue.length > 0;
   const hasCrop = hasImage ? parseImageCropUrl(currentValue).hasCrop : false;
+  const maxUploadSizeMb = useMaxUploadSizeMb();
 
   function prepareFile(image: any) {
     const formData = new FormData();
@@ -57,7 +65,7 @@ export const ImageUploader: React.FC<{
     return formData;
   }
 
-  async function uploadImage(data: any) {
+  async function uploadImage(data: File) {
     let response;
 
     if (
@@ -68,19 +76,15 @@ export const ImageUploader: React.FC<{
     ) {
       response = await UploadDocument(data, project);
     } else {
-      let image = prepareFile(data);
+      await assertUploadableSize(data);
 
+      const image = prepareFile(data);
       const projectNumber: number | undefined = validateProjectNumber(project);
 
-      const uploadCall = await fetch(
+      response = await performUpload(
         `/api/openstad/api/project/${projectNumber}/upload/image`,
-        {
-          method: 'POST',
-          body: image,
-        }
+        image
       );
-
-      response = await uploadCall.json();
     }
 
     if (response && response.url) {
@@ -106,6 +110,11 @@ export const ImageUploader: React.FC<{
         <FormItem>
           <FormLabel>{imageLabel}</FormLabel>
           {description && <FormDescription>{description}</FormDescription>}
+          {maxUploadSizeMb !== null && (
+            <FormDescription>
+              Maximale bestandsgrootte: {maxUploadSizeMb} MB
+            </FormDescription>
+          )}
           <FormControl>
             <Input
               type="file"
@@ -116,10 +125,19 @@ export const ImageUploader: React.FC<{
               onBlur={field.onBlur}
               onChange={async (e) => {
                 const files = e.target.files;
-                if (files && files.length > 0) {
+                if (!files || files.length === 0) return;
+
+                form.clearErrors(fieldName);
+                try {
                   for (const file of Array.from(files)) {
                     await uploadImage(file);
                   }
+                } catch (error) {
+                  const message =
+                    error instanceof UploadError
+                      ? error.message
+                      : GENERIC_UPLOAD_ERROR_MESSAGE;
+                  form.setError(fieldName, { type: 'manual', message });
                 }
               }}
             />

@@ -71,7 +71,7 @@ const types = [
     smsCodeErrorMessage:
       'Dat is niet de stemcode die u toegestuurd hebt gekregen. Vraag een een nieuwe code aan. Vul hieronder nogmaals uw telefoonnummer in.',
     smsCodeUrl: formatSMSCodeUrl('phonenumber'),
-    smsCodeText: 'Dit is je code: [[code]]',
+    smsCodeText: 'Code: [[code]]',
     smsCodeSender: 'OpenStad',
     backbutton: true,
     displaySidebar: true,

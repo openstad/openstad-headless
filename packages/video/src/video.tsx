@@ -14,12 +14,14 @@ export type VideoProps = {
   videoUrl?: string;
   videoLang?: string;
   videoSubtitle?: boolean;
+  videoLoop?: boolean;
 };
 
 const VideoField: FC<VideoFieldProps> = ({
   videoUrl,
   videoLang,
   videoSubtitle,
+  videoLoop,
   ...props
 }) => {
   const id = useId();
@@ -48,19 +50,20 @@ const VideoField: FC<VideoFieldProps> = ({
   // Alles wat vroeger playerVars was zit nu in de query van de iframe-src.
   const embedSrc = (() => {
     if (!videoId) return '';
+    const shouldLoop = videoLoop !== false;
     const p = new URLSearchParams({
       enablejsapi: '1',
       autoplay: '0',
       controls: '0',
       mute: '1',
-      loop: '1',
-      playlist: videoId,
+      loop: shouldLoop ? '1' : '0',
       rel: '0',
       iv_load_policy: '3',
       modestbranding: '1',
       playsinline: '1',
       cc_load_policy: videoSubtitle ? '1' : '0',
     });
+    if (shouldLoop) p.set('playlist', videoId);
     if (videoLang) p.set('cc_lang_pref', videoLang);
     if (typeof window !== 'undefined') p.set('origin', window.location.origin);
     return `https://www.youtube-nocookie.com/embed/${videoId}?${p.toString()}`;

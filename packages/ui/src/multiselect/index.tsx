@@ -15,6 +15,7 @@ import './index.css';
 
 export function MultiSelect({
   label = 'Selecteer optie',
+  legend,
   onItemSelected,
   defaultOpen,
   options,
@@ -22,6 +23,7 @@ export function MultiSelect({
   id,
 }: {
   label?: string;
+  legend: string;
   options: Array<{ value: string; label: string; checked?: boolean }>;
   defaultOpen?: boolean;
   id: string;
@@ -107,8 +109,8 @@ export function MultiSelect({
       {isOpen && (
         <fieldset
           className={`multiselect-container ${inlineOptions ? 'multiselect-container--inline' : ''}`}
-          role="group"
-          aria-label={label}>
+          role="group">
+          {legend && <legend className="sr-only">{legend}</legend>}
           {options?.map((option, index) => {
             const checkboxId = `${id}-option-${index}`;
             return (

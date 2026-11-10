@@ -1,5 +1,5 @@
 import { Link } from '@utrecht/component-library-react';
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 
 import './navBar.css';
 
@@ -23,24 +23,29 @@ function MenuItem({
   const ref = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const openRef = useRef(open);
+  const setOpenIndexRef = useRef(setOpenIndex);
 
   useEffect(() => {
     openRef.current = open;
   }, [open]);
 
-  const handleClickOutside = (event: MouseEvent) => {
+  useEffect(() => {
+    setOpenIndexRef.current = setOpenIndex;
+  }, [setOpenIndex]);
+
+  const handleClickOutside = useCallback((event: MouseEvent) => {
     if (!openRef.current) return;
     if (ref.current && !ref.current.contains(event.target as Node)) {
-      setOpenIndex(null);
+      setOpenIndexRef.current(null);
     }
-  };
+  }, []);
 
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [handleClickOutside]);
 
   useEffect(() => {
     if (!open) return;

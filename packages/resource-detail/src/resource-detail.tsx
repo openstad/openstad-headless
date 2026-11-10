@@ -42,6 +42,12 @@ import React, { useEffect, useId, useState } from 'react';
 import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links';
 import { canLikeResource, hasRole } from '../../lib';
 import { buildPageTitle } from './page-title';
+import { ContactBlock, type ContactBlockProps } from './parts/contact-block';
+import { type PrivacyConsent } from './parts/links-helpers';
+import {
+  RelatedResources,
+  type RelatedResourcesProps,
+} from './parts/related-resources';
 import './resource-detail.css';
 import { formatDocumentLabel } from './utils';
 
@@ -119,6 +125,10 @@ export type ResourceDetailWidgetProps = {
       ResourceDetailMapWidgetProps,
       keyof BaseProps | keyof ProjectSettingProps | 'resourceId'
     >;
+    relatedResources?: RelatedResourcesProps;
+    contactBlock?: ContactBlockProps;
+    privacyConsent?: PrivacyConsent | null;
+    pluginCapabilities?: { linkRequests?: boolean; contactHandlers?: string[] };
   };
 
 type DocumentType = {
@@ -502,7 +512,7 @@ function ResourceDetail({
         originalDocumentTitleRef.current
       );
     }
-  }, [resource]);
+  }, [props.pageTitle, resource]);
 
   useEffect(() => {
     if (displayDescriptionExpandable && descriptionRef.current) {
@@ -941,6 +951,32 @@ function ResourceDetail({
       </div>
 
       {!displayDeleteEditButtonOnTop && <GroupButtonDeleteEdit />}
+
+      {props.relatedResources?.display ? (
+        <RelatedResources
+          {...props.relatedResources}
+          projectId={props.projectId}
+          resourceId={resource?.id ? String(resource.id) : undefined}
+          api={props.api}
+          headingLevel={hSection}
+          itemHeadingLevel={hSub}
+        />
+      ) : null}
+
+      {props.contactBlock?.display ? (
+        <ContactBlock
+          {...props.contactBlock}
+          privacyConsent={props.privacyConsent}
+          projectId={props.projectId}
+          resourceId={resource?.id ? String(resource.id) : undefined}
+          api={props.api}
+          login={props.login}
+          headingLevel={hSection}
+          currentUserProps={props}
+          ownerId={resource?.userId}
+          availableHandlers={props.pluginCapabilities?.contactHandlers}
+        />
+      ) : null}
 
       <Spacer size={2} />
 

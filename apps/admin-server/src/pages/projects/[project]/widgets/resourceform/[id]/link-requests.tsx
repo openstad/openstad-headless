@@ -1,0 +1,224 @@
+import { Button } from '@/components/ui/button';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
+import { Heading } from '@/components/ui/typography';
+import usePluginCapabilities from '@/hooks/use-plugin-capabilities';
+import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { LINK_CONFIRM_TEXTS } from '@openstad-headless/resource-form/src/parts/link-confirm-texts';
+import dynamic from 'next/dynamic';
+import React, { useCallback, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+
+const TrixEditor = dynamic(
+  () =>
+    import('@openstad-headless/ui/src/form-elements/text/index').then(
+      (mod) => mod.TrixEditor
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-32 bg-gray-100 animate-pulse rounded border" />
+    ),
+  }
+);
+
+const formSchema = z.object({
+  confirmEnabled: z.boolean(),
+  confirmTitle: z.string().optional(),
+  confirmDescription: z.string().optional(),
+  revokeTitle: z.string().optional(),
+  revokeDescription: z.string().optional(),
+  messageLabel: z.string().optional(),
+});
+
+export default function WidgetResourceFormLinkRequests() {
+  type FormData = z.infer<typeof formSchema>;
+  const category = 'linkRequests';
+  const { capabilities, error: capabilitiesError } = usePluginCapabilities();
+  const { data: widget, updateConfig } = useWidgetConfig<any>();
+
+  const defaults = useCallback(
+    () => ({
+      confirmEnabled: widget?.config?.[category]?.confirmEnabled !== false,
+      confirmTitle: widget?.config?.[category]?.confirmTitle || '',
+      confirmDescription: widget?.config?.[category]?.confirmDescription || '',
+      revokeTitle: widget?.config?.[category]?.revokeTitle || '',
+      revokeDescription: widget?.config?.[category]?.revokeDescription || '',
+      messageLabel: widget?.config?.[category]?.messageLabel || '',
+    }),
+    [widget?.config]
+  );
+
+  const form = useForm<FormData>({
+    resolver: zodResolver<any>(formSchema),
+    defaultValues: defaults(),
+  });
+
+  useEffect(() => {
+    form.reset(defaults());
+  }, [form, defaults]);
+
+  async function onSubmit(values: FormData) {
+    try {
+      await updateConfig({ [category]: values });
+    } catch (error) {
+      console.error('could not update', error);
+    }
+  }
+
+  const hasConfig = !!widget?.config?.[category];
+  if (!capabilities.linkRequests && !hasConfig && !capabilitiesError) {
+    return null;
+  }
+
+  return (
+    <div className="p-6 bg-white rounded-md mt-4">
+      <Form {...form}>
+        <Heading size="xl">Koppelverzoeken</Heading>
+        <Separator className="my-4" />
+        {capabilitiesError ? (
+          <p className="text-sm text-destructive mb-4">
+            De plugin-instellingen konden niet worden geladen. Controleer of de
+            plugin actief is voordat je deze instellingen wijzigt.
+          </p>
+        ) : null}
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="lg:w-2/3 grid grid-cols-1 gap-4">
+          <FormField
+            control={form.control}
+            name="confirmEnabled"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Bevestiging tonen voor het versturen</FormLabel>
+                <FormDescription>
+                  Toont een pop-up met de gekozen koppelingen, waarin de
+                  indiener per koppeling een toelichting kan schrijven.
+                </FormDescription>
+                {YesNoSelect(field, {})}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {form.watch('confirmEnabled') ? (
+            <>
+              <FormField
+                control={form.control}
+                name="confirmTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Titel van de pop-up</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={LINK_CONFIRM_TEXTS.title}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="confirmDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Beschrijving van de pop-up</FormLabel>
+                    <FormDescription>
+                      {`Leeg = standaardtekst: "${LINK_CONFIRM_TEXTS.description}"`}
+                    </FormDescription>
+                    <FormControl>
+                      <TrixEditor
+                        value={field.value || ''}
+                        onChange={(e: any) => field.onChange(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="messageLabel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Label toelichting</FormLabel>
+                    <FormDescription>
+                      De link per gekozen koppeling waarmee de indiener een
+                      toelichting schrijft.
+                    </FormDescription>
+                    <FormControl>
+                      <Input
+                        placeholder={LINK_CONFIRM_TEXTS.messageLabel}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="revokeTitle"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Titel van de pop-up bij alleen intrekken
+                    </FormLabel>
+                    <FormDescription>
+                      Wordt gebruikt als de indiener alleen koppelingen
+                      verwijdert.
+                    </FormDescription>
+                    <FormControl>
+                      <Input
+                        placeholder={LINK_CONFIRM_TEXTS.revokeTitle}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="revokeDescription"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Beschrijving van de pop-up bij alleen intrekken
+                    </FormLabel>
+                    <FormDescription>
+                      {`Leeg = standaardtekst: "${LINK_CONFIRM_TEXTS.revokeDescription}"`}
+                    </FormDescription>
+                    <FormControl>
+                      <TrixEditor
+                        value={field.value || ''}
+                        onChange={(e: any) => field.onChange(e.target.value)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          ) : null}
+          <Button className="w-fit col-span-full" type="submit">
+            Opslaan
+          </Button>
+        </form>
+      </Form>
+    </div>
+  );
+}

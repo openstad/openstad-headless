@@ -8,6 +8,7 @@ import commentsByProject from './commentsByProject';
 import datalayer from './datalayer';
 import enqueteResultCount from './enqueteResultCount';
 import fetchx from './fetch';
+import links from './links';
 import markers from './markers';
 import projectVotedUsersCount from './projectVotedUsersCount';
 import resource from './resource';
@@ -155,6 +156,14 @@ function API(props = {}) {
   self.userVote = {
     fetch: userVote.fetch.bind(self),
     submitVote: userVote.submitVote.bind(self),
+  };
+
+  self.links = {
+    fetchOptions: links.fetchOptions.bind(self),
+    fetchItems: links.fetchItems.bind(self),
+    fetchSelection: links.fetchSelection.bind(self),
+    fetchLinks: links.fetchLinks.bind(self),
+    sendContact: links.sendContact.bind(self),
   };
 
   self.userActivity = {

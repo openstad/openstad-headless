@@ -1,4 +1,5 @@
 const Sequelize = require('sequelize');
+const createError = require('http-errors');
 const merge = require('merge');
 const moment = require('moment');
 const configField = require('./lib/config-field');
@@ -407,7 +408,8 @@ module.exports = function (db, sequelize, DataTypes) {
     try {
       if (!self.id) throw Error('Project not found');
       if (!self.config.project.projectHasEnded)
-        throw Error(
+        throw createError(
+          400,
           'Cannot anonymize users on an active project - first set the project-has-ended parameter'
         );
 

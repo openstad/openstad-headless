@@ -499,7 +499,7 @@ function DocumentMap({
         }
         setIsBoundsSet(true);
       }
-    }, [map, bounds, isBoundsSet]);
+    }, [map, bounds, entireDocumentVisible, isBoundsSet]);
 
     return null;
   };
@@ -602,7 +602,7 @@ function DocumentMap({
             : '')
       );
     }
-  }, []);
+  }, [relativePathPrepend]);
 
   let args = {
     canComment:
@@ -634,7 +634,7 @@ function DocumentMap({
     if (resource.extraData?.originalId) {
       setOriginalID(resource.extraData?.originalId);
     }
-  }, [resource]);
+  }, [resource, statusId]);
 
   if (canComment === false) args.canComment = canComment;
 
@@ -779,6 +779,9 @@ function DocumentMap({
               }
               setSelectedMarkerIndex(index);
               setSelectedCommentIndex(index);
+              if (!isPopupMarkerBehavior) {
+                scrollToComment(index);
+              }
             }
           },
           keydown: (e: L.LeafletKeyboardEvent) => {
@@ -793,6 +796,9 @@ function DocumentMap({
                 }
                 setSelectedMarkerIndex(index);
                 setSelectedCommentIndex(index);
+                if (!isPopupMarkerBehavior) {
+                  scrollToComment(index);
+                }
               }
             }
           },
@@ -1026,7 +1032,7 @@ function DocumentMap({
     if (openInfoPopupOnInit === 'yes') {
       setIsModalOpen(true);
     }
-  }, []);
+  }, [openInfoPopupOnInit]);
 
   const [showButton, setShowButton] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -1329,13 +1335,17 @@ function DocumentMap({
                         ) => {
                           return (
                             <div key={group.type}>
-                              <FormLabel htmlFor={group.type}>
+                              <FormLabel
+                                {...(group && group.multiple
+                                  ? { id: group.type }
+                                  : { htmlFor: group.type })}>
                                 {group.label}
                               </FormLabel>
 
                               {group && group.multiple ? (
                                 <MultiSelect
                                   id={group.type}
+                                  legend={group.label || ''}
                                   label={'Selecteer een optie'}
                                   onItemSelected={(optionValue: string) => {
                                     const value = parseInt(optionValue, 10);

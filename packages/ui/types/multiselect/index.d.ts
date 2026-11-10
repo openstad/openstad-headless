@@ -2,8 +2,9 @@ import '@utrecht/component-library-css';
 import '@utrecht/design-tokens/dist/root.css';
 import React from 'react';
 import './index.css';
-export declare function MultiSelect({ label, onItemSelected, defaultOpen, options, inlineOptions, id, }: {
+export declare function MultiSelect({ label, legend, onItemSelected, defaultOpen, options, inlineOptions, id, }: {
     label?: string;
+    legend: string;
     options: Array<{
         value: string;
         label: string;

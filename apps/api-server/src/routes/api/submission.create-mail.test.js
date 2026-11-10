@@ -87,4 +87,29 @@ describe('POST submission admin confirmation recipients', () => {
 
     expect((await adminMail()).data.emailReceivers).toBeUndefined();
   });
+
+  it('keeps running when the admin notification cannot be stored', async () => {
+    const unhandled = [];
+    const onUnhandled = (reason) => unhandled.push(reason);
+    process.on('unhandledRejection', onUnhandled);
+    let attempted = false;
+    db.Notification.create = () => {
+      attempted = true;
+      return Promise.reject(
+        new Error("Data too long for column 'to' at row 1")
+      );
+    };
+
+    try {
+      const res = await submit(4);
+      await vi.waitFor(() => expect(attempted).toBe(true));
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(res.status).toBe(200);
+      expect(unhandled).toEqual([]);
+    } finally {
+      process.off('unhandledRejection', onUnhandled);
+      db.Notification.create = notificationCreate;
+    }
+  });
 });

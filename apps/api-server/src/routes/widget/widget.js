@@ -11,6 +11,10 @@ const widgetDefinitions = getWidgetSettings();
 
 const { getWidgetJavascriptOutput } = require('./widget-output');
 const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
+const pluginExtensions = require('../../services/plugin-extensions');
+const {
+  authClientSettingsFor,
+} = require('../../services/auth-client-settings');
 const {
   normalizeWidgetUrl,
   hashWidgetUrl,
@@ -79,6 +83,12 @@ router
           createError(404, 'Could not find the project belonging to given id');
         }
         defaultConfig = getDefaultConfig(project, widgetType);
+        await addPrivacyConsent(
+          defaultConfig,
+          project,
+          widgetType,
+          req.widgetConfig
+        );
       } catch (e) {
         console.log(e);
         return next(createError(500, 'Could not fetch the project'));
@@ -132,7 +142,7 @@ router
       })
       .catch(next);
   })
-  .get((req, res, next) => {
+  .get(async (req, res, next) => {
     const widgetId = req.params.widgetId;
     const randomId = Math.floor(Math.random() * 1000000);
     const componentId = `osc-component-${widgetId}-${randomId}`;
@@ -154,6 +164,12 @@ router
       : null;
 
     const defaultConfig = getDefaultConfig(widget.project, widget.type);
+    await addPrivacyConsent(
+      defaultConfig,
+      widget.project,
+      widget.type,
+      widget.config
+    );
 
     try {
       const output = setConfigsToOutput(
@@ -249,7 +265,33 @@ function getDefaultConfig(project, widgetType) {
     result.area = project.area?.polygon;
   }
 
+  const pluginCapabilities = pluginExtensions.widgetPluginCapabilities(
+    pluginExtensions.get(),
+    widgetType
+  );
+  if (pluginCapabilities) {
+    result.pluginCapabilities = pluginCapabilities;
+  }
+
   return result;
+}
+
+async function addPrivacyConsent(
+  defaultConfig,
+  project,
+  widgetType,
+  widgetConfig
+) {
+  if (widgetType !== 'resourcedetail' || !widgetConfig?.contactBlock?.display)
+    return;
+  const settings = await authClientSettingsFor(project);
+  if (settings) {
+    defaultConfig.privacyConsent = {
+      url: settings.url,
+      linkText: settings.linkText,
+      label: settings.label,
+    };
+  }
 }
 
 function setConfigsToOutput(

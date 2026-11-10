@@ -1,0 +1,357 @@
+export const OPENSTAD_SOURCE = 'openstad';
+
+export type ResourceLink = {
+  id: number;
+  direction: 'incoming' | 'outgoing';
+  source: string;
+  targetId: string;
+  resource?: {
+    id: number;
+    detailUrl?: string | null;
+    title: string;
+    summary?: string;
+    images?: Array<{ url?: string }>;
+    tags?: Array<{ id: number; name?: string; type?: string }>;
+  };
+};
+
+export type ExternalItem = {
+  id: string;
+  label: string;
+  image?: string;
+  url?: string;
+};
+
+export type RelatedTag = {
+  id: string;
+  name: string;
+  type?: string;
+};
+
+export type RelatedItem = {
+  key: string;
+  source: string;
+  id: string;
+  title: string;
+  summary?: string;
+  image?: string;
+  url?: string;
+  tags?: RelatedTag[];
+};
+
+export function parseTagIds(tagIds?: string): string[] {
+  return (tagIds || '')
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
+
+export function isHttpUrl(url?: string): boolean {
+  return typeof url === 'string' && /^https?:\/\//i.test(url);
+}
+
+const PRIVACY_WORD = 'privacyverklaring';
+
+export type ConsentLabelParts = {
+  before: string;
+  linkText: string;
+  after: string;
+};
+
+export type PrivacyConsent = {
+  url?: string;
+  linkText?: string;
+  label?: string;
+};
+
+function privacyWord(linkText?: string): string {
+  const text = (linkText || '').trim();
+  return text ? text.charAt(0).toLowerCase() + text.slice(1) : PRIVACY_WORD;
+}
+
+export function consentLabelPlain(label: string, linkText?: string): string {
+  return label.split('{link}').join(privacyWord(linkText));
+}
+
+export function consentLabelParts(
+  label: string,
+  privacyUrl?: string,
+  linkText?: string
+): ConsentLabelParts | null {
+  if (!isHttpUrl(privacyUrl)) return null;
+  const word = privacyWord(linkText);
+  const placeholder = label.indexOf('{link}');
+  if (placeholder >= 0) {
+    return {
+      before: label.slice(0, placeholder),
+      linkText: word,
+      after: consentLabelPlain(
+        label.slice(placeholder + '{link}'.length),
+        linkText
+      ),
+    };
+  }
+  const lowerLabel = label.toLowerCase();
+  const found = [word, PRIVACY_WORD]
+    .map((candidate) => ({
+      candidate,
+      index: lowerLabel.indexOf(candidate.toLowerCase()),
+    }))
+    .find(({ index }) => index >= 0);
+  if (!found) return null;
+  const end = found.index + found.candidate.length;
+  return {
+    before: label.slice(0, found.index),
+    linkText: label.slice(found.index, end),
+    after: label.slice(end),
+  };
+}
+
+export function contactConsent({
+  handler,
+  consentLabel,
+  privacyUrl,
+  privacyConsent,
+}: {
+  handler?: string;
+  consentLabel?: string;
+  privacyUrl?: string;
+  privacyConsent?: PrivacyConsent | null;
+}): { label: string; url?: string; linkText?: string } {
+  const ownUrl = isHttpUrl(privacyUrl) ? privacyUrl : undefined;
+  const authLabel = handler ? privacyConsent?.label : undefined;
+  return {
+    label:
+      consentLabel ?? (authLabel || contactTextDefaults(handler).consentLabel),
+    url: ownUrl || privacyConsent?.url || undefined,
+    linkText: ownUrl ? undefined : privacyConsent?.linkText,
+  };
+}
+
+export function buildItemLink(
+  itemLink: string | undefined,
+  id: string
+): string | undefined {
+  if (!itemLink || !itemLink.includes('[id]')) return undefined;
+  return itemLink.replace('[id]', encodeURIComponent(id));
+}
+
+export function externalIdsBySource(
+  links: ResourceLink[]
+): Record<string, string[]> {
+  const bySource: Record<string, string[]> = {};
+  links
+    .filter((link) => link.source !== OPENSTAD_SOURCE)
+    .forEach((link) => {
+      bySource[link.source] = bySource[link.source] || [];
+      if (!bySource[link.source].includes(link.targetId)) {
+        bySource[link.source].push(link.targetId);
+      }
+    });
+  return bySource;
+}
+
+export function withoutLinked<T extends { id: string }>(
+  options: T[],
+  links: ResourceLink[]
+): T[] {
+  const linkedIds = new Set(
+    links
+      .filter((link) => link.source === OPENSTAD_SOURCE)
+      .map((link) => String(link.resource ? link.resource.id : link.targetId))
+  );
+  return options.filter((option) => !linkedIds.has(String(option.id)));
+}
+
+export function toRelatedItems(
+  links: ResourceLink[],
+  {
+    tagIds,
+    itemLink,
+    linkToDetail = true,
+    externalItems = {},
+  }: {
+    tagIds?: string;
+    itemLink?: string;
+    linkToDetail?: boolean;
+    externalItems?: Record<string, ExternalItem>;
+  }
+): RelatedItem[] {
+  const allowedTags = parseTagIds(tagIds);
+  const seen = new Set<string>();
+  const items: RelatedItem[] = [];
+
+  for (const link of links) {
+    if (link.source === OPENSTAD_SOURCE && link.resource) {
+      const resourceTags = (link.resource.tags || []).map((tag) =>
+        String(tag.id)
+      );
+      if (
+        allowedTags.length &&
+        !resourceTags.some((tag) => allowedTags.includes(tag))
+      ) {
+        continue;
+      }
+      const id = String(link.resource.id);
+      const key = `${OPENSTAD_SOURCE}:${id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      items.push({
+        key,
+        source: OPENSTAD_SOURCE,
+        id,
+        title: link.resource.title,
+        summary: link.resource.summary,
+        image: link.resource.images?.[0]?.url,
+        url: linkToDetail
+          ? link.resource.detailUrl || buildItemLink(itemLink, id)
+          : undefined,
+        tags: (link.resource.tags || []).map((tag) => ({
+          id: String(tag.id),
+          name: tag.name || '',
+          type: tag.type,
+        })),
+      });
+    } else if (link.source !== OPENSTAD_SOURCE) {
+      const key = `${link.source}:${link.targetId}`;
+      const item = externalItems[key];
+      if (!item || seen.has(key)) continue;
+      seen.add(key);
+      items.push({
+        key,
+        source: link.source,
+        id: link.targetId,
+        title: item.label,
+        image: item.image,
+        url: isHttpUrl(item.url) ? item.url : undefined,
+      });
+    }
+  }
+
+  return items;
+}
+
+export function relatedTagOptions(
+  items: RelatedItem[],
+  tagTypes?: string
+): RelatedTag[] {
+  const allowedTypes = parseTagIds(tagTypes);
+  const byId = new Map<string, RelatedTag>();
+  for (const item of items) {
+    for (const tag of item.tags || []) {
+      if (!tag.name) continue;
+      if (allowedTypes.length && !allowedTypes.includes(tag.type || '')) {
+        continue;
+      }
+      byId.set(tag.id, tag);
+    }
+  }
+  return Array.from(byId.values()).sort((a, b) =>
+    a.name.localeCompare(b.name, 'nl')
+  );
+}
+
+export function filterByTags(
+  items: RelatedItem[],
+  selectedTagIds: string[]
+): RelatedItem[] {
+  if (!selectedTagIds.length) return items;
+  return items.filter((item) =>
+    (item.tags || []).some((tag) => selectedTagIds.includes(tag.id))
+  );
+}
+
+export function contactStatus(
+  result: { linked?: unknown[]; requested?: unknown[] } | undefined,
+  linkedMessage: string,
+  successMessage: string
+): string {
+  const linked = (result?.linked || []).length > 0;
+  const requested = (result?.requested || []).length > 0;
+  if (linked && requested) return `${linkedMessage} ${successMessage}`;
+  return linked ? linkedMessage : successMessage;
+}
+
+export function validateContact({
+  isDefaultHandler,
+  showMessage,
+  showConsent,
+  showOwnResource,
+  message,
+  consent,
+  ownResourceIds,
+  messageRequiredText,
+  consentRequiredText,
+  ownResourceRequiredText,
+}: {
+  isDefaultHandler: boolean;
+  showMessage: boolean;
+  showConsent: boolean;
+  showOwnResource: boolean;
+  message: string;
+  consent: boolean;
+  ownResourceIds: string[];
+  messageRequiredText: string;
+  consentRequiredText: string;
+  ownResourceRequiredText: string;
+}): string | null {
+  if (showOwnResource && !ownResourceIds.length) return ownResourceRequiredText;
+  if (showMessage && isDefaultHandler && !message.trim()) {
+    return messageRequiredText;
+  }
+  if (showConsent && !consent) return consentRequiredText;
+  return null;
+}
+
+export type ContactTextDefaults = {
+  description: string;
+  popupDescription: string;
+  consentLabel: string;
+  loginDescription: string;
+};
+
+const EMAIL_CONTACT_DEFAULTS: ContactTextDefaults = {
+  description:
+    'Via de contactknop gaat een bericht naar de indiener; alleen de indiener ziet het. De indiener kan per e-mail reageren.',
+  popupDescription: 'Je bericht en e-mailadres worden gedeeld met de indiener.',
+  consentLabel:
+    'Ik ga akkoord met het delen van mijn e-mailadres volgens de privacyverklaring',
+  loginDescription:
+    'Na inloggen is het e-mailadres bekend, zodat de indiener kan reageren.',
+};
+
+const HANDLER_CONTACT_DEFAULTS: ContactTextDefaults = {
+  description: 'Via deze knop gaat een verzoek naar de indiener.',
+  popupDescription:
+    'Een bericht toevoegen kan. De indiener ziet het bij het verzoek.',
+  consentLabel: 'Ik ga akkoord met de privacyverklaring',
+  loginDescription: 'Log in zodat de indiener weet van wie het verzoek komt.',
+};
+
+export function contactTextDefaults(handler?: string): ContactTextDefaults {
+  return handler ? HANDLER_CONTACT_DEFAULTS : EMAIL_CONTACT_DEFAULTS;
+}
+
+export function showsOwnResource(
+  showOwnResource: boolean,
+  handler?: string
+): boolean {
+  return showOwnResource && !!handler;
+}
+
+export function effectiveContactHandler(
+  handler?: string,
+  availableHandlers?: string[]
+): string {
+  return handler && availableHandlers?.includes(handler) ? handler : '';
+}
+
+export function contactFieldsShown(
+  handler: string,
+  showMessage: boolean,
+  showConsent: boolean
+): { showMessage: boolean; showConsent: boolean } {
+  return handler
+    ? { showMessage, showConsent }
+    : { showMessage: true, showConsent: true };
+}

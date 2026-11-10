@@ -225,7 +225,7 @@ router
 
     // Sanitize the incoming value, not the stored one
     if (typesToSanitize.includes(widget.type) && config.rawInput) {
-      config.rawInput = sanitize.content(config.rawInput);
+      config.rawInput = sanitize.rawInput(config.rawInput);
     }
 
     widget

@@ -9,6 +9,7 @@ import {
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import { extractConfig } from '@/lib/sub-widget-helper';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import ArgumentsConfirmation from '@/pages/projects/[project]/widgets/comments/[id]/confirmation';
 import ArgumentsExtraFields from '@/pages/projects/[project]/widgets/comments/[id]/extraFields';
 import ArgumentsInclude from '@/pages/projects/[project]/widgets/comments/[id]/include';
@@ -40,6 +41,7 @@ import { LikeWidgetTabProps } from '../../likes/[id]';
 import LikesDisplay from '../../likes/[id]/weergave';
 import WidgetResourceDetailDisplay from './display';
 import WidgetResourceDetailGeneral from './general';
+import WidgetResourceDetailLinks from './links';
 
 export const getServerSideProps = withApiUrl;
 
@@ -82,25 +84,18 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Inzending detailpagina',
-            url: `/projects/${projectId}/widgets/resourcedetail/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Inzending detailpagina',
+          `/projects/${projectId}/widgets/resourcedetail/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="display">Weergave</TabsTrigger>
+              <TabsTrigger value="links">Koppelingen</TabsTrigger>
               <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="comments">Reacties widget</TabsTrigger>
               <TabsTrigger value="likes">Likes widget</TabsTrigger>
@@ -118,6 +113,11 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
             <TabsContent value="display" className="p-0">
               {previewConfig && (
                 <WidgetResourceDetailDisplay {...totalPropPackage} />
+              )}
+            </TabsContent>
+            <TabsContent value="links" className="p-0">
+              {previewConfig && (
+                <WidgetResourceDetailLinks {...totalPropPackage} />
               )}
             </TabsContent>
 

@@ -284,7 +284,7 @@ export default function BegrootmoduleDisplay(
             name="displayModBreak"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Toon de ModBreak</FormLabel>
+                <FormLabel>Toon officiële reacties</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

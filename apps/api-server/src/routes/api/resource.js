@@ -20,6 +20,18 @@ const {
 } = require('../../services/spam-detector');
 const { stripVisibilityScope } = require('../../lib/resource-create-scope');
 const { normalizeContributedUrl } = require('../../util/normalize-url');
+const resourceLinks = require('../../services/resource-links');
+const resourceLinkRequests = require('../../services/resource-link-requests');
+const {
+  restrictModeratorOnlyBody,
+} = require('../../lib/restrict-moderator-only-body');
+const {
+  snapshotModBreakIds,
+  snapshotModBreakDescriptions,
+  findNewModBreaks,
+  findChangedModBreaks,
+  sendModBreakNotifications,
+} = require('../../lib/modbreak-notifications');
 
 const router = express.Router({ mergeParams: true });
 const userhasModeratorRights = (user) => {
@@ -487,6 +499,21 @@ router
       req.body.publishDate = null;
     }
 
+    try {
+      req.linkSelection = resourceLinkRequests.parseSelection(req.body.links);
+      req.removedLinks = resourceLinkRequests.parseRemoved(
+        req.body.removedLinks
+      );
+      resourceLinkRequests.assertHandlerAvailable(
+        req.linkSelection,
+        req.removedLinks
+      );
+    } catch (err) {
+      return next(err);
+    }
+    delete req.body.links;
+    delete req.body.removedLinks;
+
     const data = {
       ...req.body,
       projectId: req.params.projectId,
@@ -549,6 +576,7 @@ router
     db.Resource.authorizeData(data, 'create', req.user, null, req.project)
       .create(data)
       .then((resourceInstance) => {
+        req.createdResource = resourceInstance;
         // Re-fetch without onlyVisible so the creator gets their own resource
         // back, even when it is still pending (publishDate is null).
         const createScope = stripVisibilityScope(req.scope);
@@ -666,6 +694,23 @@ router
   })
 
   // TODO: Add notifications
+  .post(async function (req, res, next) {
+    if (req.isSpamSubmission) return next();
+    try {
+      const linkRequests = await resourceLinkRequests.submitSelection({
+        project: req.project,
+        resource: req.results,
+        selection: req.linkSelection,
+        removed: req.removedLinks,
+        user: req.user,
+        mode: 'create',
+      });
+      if (linkRequests) req.results.linkRequests = linkRequests;
+      next();
+    } catch (err) {
+      next(err);
+    }
+  })
   .post(auth.useReqUser)
   .post(async function (req, res, next) {
     const sendConfirmationToUser =
@@ -712,7 +757,9 @@ router
             resourceId: req.results.id,
             emailReceivers: emailReceivers,
           },
-        });
+        }).catch((err) =>
+          console.error('Error sending admin notification for resource:', err)
+        );
       }
 
       if (sendConfirmationToAdmin) {
@@ -723,7 +770,9 @@ router
             userId: req.user.id,
             resourceId: req.results.id,
           },
-        });
+        }).catch((err) =>
+          console.error('Error sending admin notification for resource:', err)
+        );
       }
 
       if (sendConfirmationToUser) {
@@ -734,7 +783,9 @@ router
             userId: req.user.id,
             resourceId: req.results.id,
           },
-        });
+        }).catch((err) =>
+          console.error('Error sending user notification for resource:', err)
+        );
       }
     } else if (!req.query.nomail && !req.body['publishDate']) {
       if (sendConfirmationToUser) {
@@ -745,8 +796,24 @@ router
             userId: req.user.id,
             resourceId: req.results.id,
           },
-        });
+        }).catch((err) =>
+          console.error('Error sending user notification for resource:', err)
+        );
       }
+    }
+
+    if (!req.query.nomail && req.createdResource) {
+      const newModBreaks = findNewModBreaks(
+        new Set(),
+        req.createdResource.modBreaks
+      );
+      sendModBreakNotifications({
+        db,
+        req,
+        resource: req.createdResource,
+        newModBreaks,
+        changedModBreaks: [],
+      });
     }
   });
 
@@ -771,6 +838,13 @@ router
         found.project = req.project;
         stripHiddenVoteScore(found, req.canIncludeVoteCount);
         await attachModeratorOnlyExtraDataKeys(found);
+        if (req.query.includeLinks) {
+          found.links = await resourceLinks.listLinks({
+            projectId: found.projectId,
+            resourceId: found.id,
+            user: req.user,
+          });
+        }
         if (req.query.includePoll) {
           // TODO: naar poll hooks
           if (found.poll) found.poll.countVotes(!req.query.includeVotes);
@@ -796,6 +870,7 @@ router
   // update resource
   // -----------
   .put(auth.useReqUser)
+  .put(restrictModeratorOnlyBody)
   .put(function (req, res, next) {
     if (!(
       req.project.config &&
@@ -824,11 +899,33 @@ router
     req.changedToPublished = wasConcept && willNowBePublished;
     next();
   })
+  .put(function (req, res, next) {
+    req.previousModBreakIds = snapshotModBreakIds(req.results.modBreaks);
+    req.previousModBreakDescriptions = snapshotModBreakDescriptions(
+      req.results.modBreaks
+    );
+    next();
+  })
   .put(rateLimiter(), function (req, res, next) {
     var resource = req.results;
 
     if (!(resource && resource.can && resource.can('update')))
       return next(new Error('You cannot update this Resource'));
+
+    try {
+      req.linkSelection = resourceLinkRequests.parseSelection(req.body.links);
+      req.removedLinks = resourceLinkRequests.parseRemoved(
+        req.body.removedLinks
+      );
+      resourceLinkRequests.assertHandlerAvailable(
+        req.linkSelection,
+        req.removedLinks
+      );
+    } catch (err) {
+      return next(err);
+    }
+    delete req.body.links;
+    delete req.body.removedLinks;
 
     if (req.body.location) {
       try {
@@ -852,7 +949,7 @@ router
       ...req.body,
     };
 
-    if (!userhasModeratorRights(req.user)) {
+    if (!hasRole(req.user, ['editor', 'moderator'])) {
       delete data.modBreaks;
     }
 
@@ -979,7 +1076,9 @@ router
           userId: req.user.id,
           resourceId: req.results.id,
         },
-      });
+      }).catch((err) =>
+        console.error('Error sending admin notification for resource:', err)
+      );
     }
     if (req.changedToPublished) {
       db.Notification.create({
@@ -989,10 +1088,44 @@ router
           userId: req.user.id,
           resourceId: req.results.id,
         },
-      });
+      }).catch((err) =>
+        console.error('Error sending user notification for resource:', err)
+      );
     }
 
+    const newModBreaks = findNewModBreaks(
+      req.previousModBreakIds,
+      req.results?.modBreaks
+    );
+    const changedModBreaks = findChangedModBreaks(
+      req.previousModBreakDescriptions,
+      req.results?.modBreaks
+    );
+
+    sendModBreakNotifications({
+      db,
+      req,
+      newModBreaks,
+      changedModBreaks,
+    });
+
     next();
+  })
+  .put(async function (req, res, next) {
+    try {
+      const linkRequests = await resourceLinkRequests.submitSelection({
+        project: req.project,
+        resource: req.results,
+        selection: req.linkSelection,
+        removed: req.removedLinks,
+        user: req.user,
+        mode: 'update',
+      });
+      if (linkRequests) req.results.linkRequests = linkRequests;
+      next();
+    } catch (err) {
+      next(err);
+    }
   })
   .put(auth.useReqUser)
   .put(function (req, res, next) {

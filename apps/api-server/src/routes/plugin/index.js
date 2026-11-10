@@ -19,6 +19,9 @@ router.get('/registry', function (req, res) {
     pages: [],
     menuItems: [],
     widgetAdminComponents: {},
+    capabilities: require('../../services/plugin-extensions')
+      .get()
+      .getCapabilities(),
   };
 
   try {

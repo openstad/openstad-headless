@@ -1,6 +1,6 @@
 import DataStore from '@openstad-headless/data-store/src';
 import Form from '@openstad-headless/form/src/form';
-import { FormValue } from '@openstad-headless/form/src/form';
+import type { FormValue } from '@openstad-headless/form/src/form';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { Banner, Button, Spacer } from '@openstad-headless/ui/src';
 import {
@@ -17,7 +17,7 @@ import RteContent from '../../ui/src/rte-formatting/rte-content';
 import { ChoiceGuideSidebar } from './includes/sidebar.js';
 import { InitializeFormFields } from './parts/init-fields.js';
 import { InitializeWeights } from './parts/init-weights.js';
-import { ChoiceGuideProps, WeightOverview } from './props.js';
+import type { ChoiceGuideProps, WeightOverview } from './props.js';
 import './style.css';
 
 function ChoiceGuide(props: ChoiceGuideProps) {

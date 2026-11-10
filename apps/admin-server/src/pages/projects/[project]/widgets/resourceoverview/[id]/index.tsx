@@ -8,6 +8,7 @@ import {
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import { extractConfig } from '@/lib/sub-widget-helper';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import { LikeWidgetTabProps } from '@/pages/projects/[project]/widgets/likes/[id]';
 import LikesDisplay from '@/pages/projects/[project]/widgets/likes/[id]/weergave';
 import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
@@ -71,20 +72,12 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Inzendingen overzicht',
-            url: `/projects/${projectId}/widgets/resourceoverview/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Inzendingen overzicht',
+          `/projects/${projectId}/widgets/resourceoverview/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">

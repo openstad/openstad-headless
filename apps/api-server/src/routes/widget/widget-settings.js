@@ -70,6 +70,9 @@ let moduleDefinitions = {
         'De tekst mag niet korter zijn dan {minCharacters} tekens',
       maxCharactersWarning: 'Je hebt nog {maxCharacters} tekens over',
       minCharactersWarning: 'Nog minimaal {minCharacters} tekens',
+      closeFormAfterSubmit: false,
+      closedFormMessage:
+        'Je antwoord is ontvangen. Je kunt deze enquête maar één keer invullen.',
     },
   },
   rawresource: {

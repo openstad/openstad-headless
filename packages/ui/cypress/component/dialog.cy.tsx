@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Dialog } from '../../src/dialog';
+import { Dialog, DialogDescription, DialogTitle } from '../../src/dialog';
 
 describe('<Dialog />', () => {
   it('renders', () => {
@@ -23,5 +23,49 @@ describe('<Dialog />', () => {
 
     cy.get('[test-id="dialog-close-button"]').click();
     cy.get('@onOpenChange').should('have.been.called');
+  });
+
+  it('is named by its DialogTitle and described by its DialogDescription', () => {
+    cy.mount(
+      <Dialog open={true} onOpenChange={() => {}}>
+        <DialogTitle>Je gaat een bericht versturen</DialogTitle>
+        <DialogDescription>Uitleg bij het bericht</DialogDescription>
+      </Dialog>
+    );
+
+    cy.get('.osc-DialogTitle')
+      .invoke('attr', 'id')
+      .then((titleId) => {
+        cy.get('[role="dialog"]').should(
+          'have.attr',
+          'aria-labelledby',
+          titleId
+        );
+      });
+    cy.get('.osc-DialogDescription')
+      .invoke('attr', 'id')
+      .then((descriptionId) => {
+        cy.get('[role="dialog"]').should(
+          'have.attr',
+          'aria-describedby',
+          descriptionId
+        );
+      });
+  });
+
+  it('keeps an explicit aria-label', () => {
+    cy.mount(
+      <Dialog
+        open={true}
+        onOpenChange={() => {}}
+        aria-label="Details van inzending">
+        <p>Inhoud</p>
+      </Dialog>
+    );
+    cy.get('[role="dialog"]').should(
+      'have.attr',
+      'aria-label',
+      'Details van inzending'
+    );
   });
 });

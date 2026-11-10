@@ -1,4 +1,8 @@
 import { stripHtmlTags } from '@openstad-headless/lib/strip-html-tags';
+import {
+  EMPTY_MODBREAK_MESSAGE,
+  hasModBreakContent,
+} from '@openstad-headless/ui/src/form-elements/modbreak/normalize-modbreaks';
 import { z } from 'zod';
 
 import { CombinedFieldPropsWithType } from '../props';
@@ -280,6 +284,29 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
           );
       }
       return undefined;
+
+    case 'resourceLink':
+      if (typeof field.fieldRequired !== 'undefined' && field.fieldRequired) {
+        return z
+          .array(z.object({ source: z.string(), id: z.string() }).passthrough())
+          .min(
+            1,
+            'requiredWarning' in field && field.requiredWarning
+              ? field.requiredWarning
+              : 'Het veld' + fieldTitle + 'is verplicht'
+          );
+      }
+      return undefined;
+
+    case 'modbreak':
+      return z
+        .any()
+        .refine(
+          (items) =>
+            !Array.isArray(items) ||
+            items.every((item) => hasModBreakContent(item?.description)),
+          EMPTY_MODBREAK_MESSAGE
+        );
 
     default:
       return undefined;

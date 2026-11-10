@@ -13,6 +13,12 @@ const INVALID_TOKEN_ERRORS = [
 const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
 
 let adapters = {};
+const uploadPathSuffixes = [
+  '/upload/image',
+  '/upload/images',
+  '/upload/document',
+  '/upload/documents',
+];
 
 /**
  * Get user from jwt or fixed token and validate with auth server
@@ -23,12 +29,11 @@ let adapters = {};
  */
 module.exports = async function getUser(req, res, next) {
   try {
-    if (!req.headers['authorization']) {
-      return nextWithEmptyUser(req, res, next);
-    } else {
-      const allowedUploadPaths = ['/upload/images', '/upload/documents'];
-
-      const isUploadRequest = allowedUploadPaths.some((path) =>
+    if (
+      process.env.API_UPLOAD_LEGACY_AUTH_BYPASS === 'true' &&
+      req.headers['authorization']
+    ) {
+      const isUploadRequest = uploadPathSuffixes.some((path) =>
         req.path.endsWith(path)
       );
 
@@ -38,12 +43,15 @@ module.exports = async function getUser(req, res, next) {
           authProvider: 'upload-service',
           exp: Math.floor(Date.now() / 1000) + 5 * 60,
         };
-
         const uploadJwt = jwt.sign(payload, config.auth.jwtSecret);
-
         req.headers['authorization'] = `Bearer ${uploadJwt}`;
       }
     }
+
+    if (!req.headers['authorization']) {
+      return nextWithEmptyUser(req, res, next);
+    }
+
     let parsedAuthHeader;
     try {
       parsedAuthHeader = parseAuthHeader(req.headers['authorization']);

@@ -1,0 +1,12 @@
+<subject>Fixture uitnodiging ontvangen</subject>
+<body>
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text>Fixture template voor een uitnodiging.</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
+</body>

@@ -49,5 +49,9 @@ export function useWidgetConfig<R>(idOverride?: string) {
     }
   }
 
-  return { ...swr, data: swr.data as { config: R }, updateConfig };
+  return {
+    ...swr,
+    data: swr.data as { config: R; description: string },
+    updateConfig,
+  };
 }

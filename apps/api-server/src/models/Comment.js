@@ -102,6 +102,10 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.VIRTUAL,
       },
 
+      confirmationNotificationId: {
+        type: DataTypes.VIRTUAL,
+      },
+
       createDateHumanized: {
         type: DataTypes.VIRTUAL,
         get: function () {
@@ -118,6 +122,7 @@ module.exports = function (db, sequelize, DataTypes) {
       score: {
         type: DataTypes.DECIMAL(12, 11),
         auth: {
+          createableBy: 'editor',
           updateableBy: 'editor',
         },
         allowNull: false,

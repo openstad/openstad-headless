@@ -190,8 +190,27 @@ async function generatePdf(htmlString) {
   return Buffer.from(arrayBuffer);
 }
 
+function urlOrigin(url) {
+  try {
+    return new URL(url).origin;
+  } catch (err) {
+    return null;
+  }
+}
+
+function isImageServerUrl(url) {
+  const origin = urlOrigin(url);
+  if (!origin) return false;
+  return [process.env.IMAGE_APP_URL, process.env.IMAGE_APP_URL_INTERNAL]
+    .filter(Boolean)
+    .some((imageServerUrl) => urlOrigin(imageServerUrl) === origin);
+}
+
 async function fetchImageAsDataUrl(url) {
   if (!url || url.startsWith('data:')) return url;
+  if (!isImageServerUrl(url)) {
+    throw new Error(`Image is not hosted on the image server: ${url}`);
+  }
   // Replace external image URL with internal Docker URL for container-to-container fetch
   let fetchUrl = url;
   if (process.env.IMAGE_APP_URL && process.env.IMAGE_APP_URL_INTERNAL) {

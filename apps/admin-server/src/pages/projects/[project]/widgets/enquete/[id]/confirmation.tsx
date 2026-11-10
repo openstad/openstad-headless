@@ -32,7 +32,11 @@ const formSchema = z.object({
   userEmailAddress: z.string().optional(),
 });
 
-export default function WidgetEnqueteConfirmation() {
+export default function WidgetEnqueteConfirmation({
+  onSaved,
+}: {
+  onSaved?: (config: { [key: string]: any }) => void;
+}) {
   type FormData = z.infer<typeof formSchema>;
   const category = 'confirmation';
 
@@ -69,8 +73,10 @@ export default function WidgetEnqueteConfirmation() {
   }, [widget?.config]);
 
   async function onSubmit(values: FormData) {
+    const savedConfig = { [category]: values };
     try {
-      await updateConfig({ [category]: values });
+      const saved = await updateConfig(savedConfig);
+      if (saved) onSaved?.(savedConfig);
     } catch (error) {
       console.error('could not update', error);
     }
@@ -224,6 +230,7 @@ export default function WidgetEnqueteConfirmation() {
               )}
             />
           )}
+
           <Button className="w-fit col-span-full" type="submit">
             Opslaan
           </Button>

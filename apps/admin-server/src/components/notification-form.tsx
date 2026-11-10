@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useNotificationTemplate from '@/hooks/use-notification-template';
 import { applyFilters } from '@/lib/nunjucks-filters';
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import nunjucks from 'nunjucks';
@@ -21,6 +22,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
+import useSWR from 'swr';
 import * as z from 'zod';
 
 import {
@@ -382,6 +384,49 @@ const initialDataAccountExpiry = `<mjml>
         </mj-body>
     </mjml>`;
 
+const initialDataModBreakNotification = `<mjml>
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Helvetica Neue, Helvetica, Arial, sans-serif" />
+      <mj-text font-size="15px" line-height="1.6" color="#333333" />
+      <mj-divider border-width="1px" border-color="#dddddd" />
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#f4f4f4">
+    <mj-section background-color="#ffffff" padding="32px 24px">
+      <mj-column>
+        {% if logo %}
+        <mj-image src="{{logo}}" align="left" width="160px" alt="" padding-bottom="16px" />
+        {% endif %}
+        <mj-text><h1 style="font-size:22px;font-weight:bold;line-height:1.3;margin:0">{% if newModBreaks and newModBreaks.length %}Er is een officiële reactie geplaatst.{% else %}Een officiële reactie is aangepast.{% endif %}</h1></mj-text>
+        <mj-divider />
+        <mj-text>Beste {{ user.name }},</mj-text>
+        {% if newModBreaks and newModBreaks.length %}
+        <mj-text padding-bottom="0">De redactie heeft een bericht geplaatst bij {% if isResourceOwner === false %}de inzending "{{ resource.title }}" waarop u heeft gereageerd{% else %}uw inzending "{{ resource.title }}"{% endif %}:</mj-text>
+        {% for mb in newModBreaks %}
+        <mj-text font-style="italic">{{ mb.description | safe }}{% set mbAuthor = mb.authorName or project.config.resources.modbreakTitle %}{% if mbAuthor %} - {{ mbAuthor }}{% endif %}</mj-text>
+        {% endfor %}
+        {% endif %}
+        {% if changedModBreaks and changedModBreaks.length %}
+        <mj-text padding-bottom="0">De redactie heeft een bericht bij {% if isResourceOwner === false %}de inzending "{{ resource.title }}" waarop u heeft gereageerd{% else %}uw inzending "{{ resource.title }}"{% endif %} aangepast:</mj-text>
+        {% for mb in changedModBreaks %}
+        <mj-text font-style="italic">{{ mb.description | safe }}{% set mbAuthor = mb.authorName or project.config.resources.modbreakTitle %}{% if mbAuthor %} - {{ mbAuthor }}{% endif %}</mj-text>
+        {% endfor %}
+        {% endif %}
+        {% if redirectUrl %}
+        <mj-button background-color="#12B886" href="{{ redirectUrl }}" align="left">Weergeven</mj-button>
+        <mj-text font-size="13px" color="#777777">Of gebruik deze link in je browser: <a href="{{ redirectUrl }}">{{ redirectUrl }}</a></mj-text>
+        {% endif %}
+        <mj-divider />
+        <mj-text align="center" font-size="13px" color="#777777">Dit is een automatisch bericht. Antwoorden op deze e-mail is niet mogelijk.</mj-text>
+        {% if unsubscribeUrl %}
+        <mj-text align="center" font-size="12px" color="#999999">Wilt u geen e-mails meer ontvangen? <a href="{{ unsubscribeUrl }}">Uitschrijven</a></mj-text>
+        {% endif %}
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>`;
+
 type Props = {
   type:
     | 'login email'
@@ -394,7 +439,11 @@ type Props = {
     | 'new enquete - user'
     | 'notification comment - user'
     | 'notification comment reply - user'
-    | 'new comment - admin';
+    | 'new comment - admin'
+    | 'contact message - user'
+    | 'new modbreak - user feedback'
+    | (string & {});
+  typeLabel?: string;
   engine?: 'email' | 'sms';
   id?: string;
   label?: string;
@@ -402,7 +451,7 @@ type Props = {
   body?: string;
 };
 
-const notificationTypes = {
+const notificationTypes: Record<string, string> = {
   'login email': 'Inloggen via e-mail',
   'login sms': 'Inloggen via sms',
   'new published resource - user feedback':
@@ -422,6 +471,9 @@ const notificationTypes = {
   'notification comment reply - user':
     'Nieuwe reactie op een reactie - Notificatie naar de gebruiker',
   'new comment - admin': 'Nieuwe reactie - Notificatie naar de admin',
+  'contact message - user': 'Contactbericht - Notificatie naar de indiener',
+  'new modbreak - user feedback':
+    'Officiële reactie geplaatst - Notificatie naar de gebruiker',
 };
 
 const formSchema = z.object({
@@ -449,6 +501,7 @@ const formSchema = z.object({
 
 export function NotificationForm({
   type,
+  typeLabel,
   engine,
   id,
   label,
@@ -458,7 +511,18 @@ export function NotificationForm({
   const router = useRouter();
   const project = router.query.project as string;
   const { data, create, update } = useNotificationTemplate(project as string);
-  const notificationTitle = notificationTypes[type];
+  const notificationTitle = typeLabel || notificationTypes[type] || type;
+  const isExisting = !!(label && subject && body !== undefined);
+  const projectNumber = validateProjectNumber(project);
+  const { data: defaultTemplate, isLoading: loadingDefaultTemplate } = useSWR<{
+    subject?: string;
+    body?: string;
+  }>(
+    !isExisting && projectNumber && type
+      ? `/api/openstad/notification/project/${projectNumber}/template/default/${encodeURIComponent(type)}`
+      : null,
+    { shouldRetryOnError: false }
+  );
 
   type MailContextType = {
     user: { name: string; fullName: string };
@@ -497,6 +561,7 @@ export function NotificationForm({
 
   const defaultValueBody =
     body ||
+    defaultTemplate?.body ||
     (type === 'new published resource - user feedback'
       ? initialDataResourceSubmission
       : '') ||
@@ -512,16 +577,19 @@ export function NotificationForm({
     (type === 'new comment - admin'
       ? initialDataCommentAdminNotification
       : '') ||
-    (type === 'user account about to expire' ? initialDataAccountExpiry : '');
+    (type === 'user account about to expire' ? initialDataAccountExpiry : '') ||
+    (type === 'new modbreak - user feedback'
+      ? initialDataModBreakNotification
+      : '');
 
   const defaults = React.useCallback(
     () => ({
       engine: engine || 'email',
-      label: label || '',
-      subject: subject || '',
+      label: label || (isExisting ? '' : notificationTitle),
+      subject: subject || defaultTemplate?.subject || '',
       body: defaultValueBody,
     }),
-    [engine, label, subject, body]
+    [engine, label, subject, body, defaultTemplate, notificationTitle]
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -614,6 +682,10 @@ export function NotificationForm({
       }
     }
   }, [fieldValue]);
+
+  if (loadingDefaultTemplate) {
+    return <p className="py-6 text-muted-foreground">Laden...</p>;
+  }
 
   return (
     <div>

@@ -18,6 +18,7 @@ API_URL=${process.env.API_URL}
 API_URL_INTERNAL=${process.env.API_URL}
 API_FIXED_AUTH_KEY=${process.env.API_FIXED_AUTH_KEY}
 PORT=${process.env.ADMIN_PORT}
+MAX_FILE_UPLOAD_SIZE_MB=${process.env.MAX_FILE_UPLOAD_SIZE_MB}
 `;
     if (actions['create config']) {
       console.log('------------------------------');

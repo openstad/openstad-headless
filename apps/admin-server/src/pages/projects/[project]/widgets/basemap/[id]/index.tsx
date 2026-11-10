@@ -6,6 +6,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import type { BaseMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/basemap-widget-props';
 import { useRouter } from 'next/router';
 import React from 'react';
@@ -35,20 +36,12 @@ export default function WidgetBaseMap({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Base Map',
-            url: `/projects/${projectId}/widgets/basemap/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Base Map',
+          `/projects/${projectId}/widgets/basemap/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="publish">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">

@@ -1,28 +1,50 @@
 const fs = require('fs').promises;
 const path = require('path');
-const nunjucks = require('nunjucks');
 const mjml2html = require('mjml');
 const sendMessage = require('../notifications/send-engines');
+const { authClientSettingsFor } = require('../services/auth-client-settings');
+const {
+  createTemplateEnv,
+  toPlainData,
+} = require('@openstad-headless/lib/template-env');
 
 const nunjucksEnvReady = (async () => {
   const { applyFilters } =
     await import('../../../../packages/raw-resource/includes/nunjucks-filters-js.cjs');
 
-  const nunjucksEnv = new nunjucks.Environment();
+  const nunjucksEnv = createTemplateEnv();
   applyFilters(nunjucksEnv);
   return nunjucksEnv;
 })();
 
+async function readTemplateFile(templatePath) {
+  try {
+    return await fs.readFile(templatePath);
+  } catch (err) {
+    return null;
+  }
+}
+
+async function mailLogo(project) {
+  if (!project) return '';
+  const settings = await authClientSettingsFor(project);
+  return (settings && settings.logo) || project.config?.styling?.logo || '';
+}
+
 async function loadDefaultTemplate(type) {
-  const templatePath = path.join(
+  const coreTemplatePath = path.join(
     __dirname,
     '../notifications/default-templates',
     path.basename(type || '')
   );
-  let file;
-  try {
-    file = await fs.readFile(templatePath);
-  } catch (err) {
+  let file = await readTemplateFile(coreTemplatePath);
+  if (!file) {
+    const pluginType = require('../services/plugin-extensions')
+      .get()
+      .getNotificationType(type);
+    file = pluginType ? await readTemplateFile(pluginType.templatePath) : null;
+  }
+  if (!file) {
     return null;
   }
   file = file.toString();
@@ -36,10 +58,9 @@ async function loadDefaultTemplate(type) {
 
 async function renderTemplate(template, templateData, instance) {
   const nunjucksEnv = await nunjucksEnvReady;
-  const subject = nunjucksEnv.renderString(template.subject, {
-    ...templateData,
-  });
-  let body = nunjucksEnv.renderString(template.body, { ...templateData });
+  const data = toPlainData(templateData);
+  const subject = nunjucksEnv.renderString(template.subject, data);
+  let body = nunjucksEnv.renderString(template.body, data);
 
   if (instance.engine === 'email') {
     const result = await mjml2html(body);
@@ -140,6 +161,7 @@ module.exports = (db, sequelize, DataTypes) => {
                 'includeConfig',
                 'includeEmailConfig'
               ).findByPk(instance.projectId);
+              templateData.logo = await mailLogo(templateData.project);
               let keys = ['resource', 'user', 'comment', 'submission'];
               for (let key of keys) {
                 let idkey = key + 'Id';

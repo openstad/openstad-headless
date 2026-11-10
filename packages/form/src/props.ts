@@ -8,8 +8,10 @@ import type { ImageUploadProps } from '@openstad-headless/ui/src/form-elements/i
 import type { InfoFieldProps } from '@openstad-headless/ui/src/form-elements/info';
 import type { MapProps } from '@openstad-headless/ui/src/form-elements/map';
 import { MatrixFieldProps } from '@openstad-headless/ui/src/form-elements/matrix';
+import type { ModbreakFieldProps } from '@openstad-headless/ui/src/form-elements/modbreak';
 import type { NumberInputProps } from '@openstad-headless/ui/src/form-elements/number';
 import type { RadioboxFieldProps } from '@openstad-headless/ui/src/form-elements/radio';
+import type { ResourceLinkFieldProps } from '@openstad-headless/ui/src/form-elements/resource-link';
 import type { SelectFieldProps } from '@openstad-headless/ui/src/form-elements/select';
 import type { SortFieldProps } from '@openstad-headless/ui/src/form-elements/sort';
 import type { TextInputProps } from '@openstad-headless/ui/src/form-elements/text';
@@ -21,7 +23,10 @@ export type FormProps = {
   fields: Array<FieldWithOptionalFields>;
   fieldKey?: any;
   submitText?: string;
-  submitHandler: (values: { [p: string]: FormValue }) => void;
+  submitHandler: (values: {
+    [p: string]: FormValue;
+  }) => void | boolean | Promise<void | boolean>;
+  navigateAfterSubmitSuccess?: boolean;
   getValuesOnChange?: (
     values: { [p: string]: FormValue },
     hiddenFields?: string[],
@@ -79,7 +84,9 @@ type CombinedFieldPropsWithType =
   | ({ type?: 'pagination' } & PaginationFieldProps)
   | ({ type?: 'sort' } & SortFieldProps)
   | ({ type?: 'none' } & InfoFieldProps)
-  | ({ type?: 'timeline' } & TimelineFieldProps);
+  | ({ type?: 'timeline' } & TimelineFieldProps)
+  | ({ type?: 'resourceLink' } & ResourceLinkFieldProps)
+  | ({ type?: 'modbreak' } & ModbreakFieldProps);
 
 type ComponentFieldProps = {
   index?: number;
@@ -104,6 +111,8 @@ type CombinedFieldProps =
   | MatrixFieldProps
   | InfoFieldProps
   | TimelineFieldProps
+  | ResourceLinkFieldProps
+  | ModbreakFieldProps
   | (SortFieldProps & {
       infoBlockStyle?: string;
       infoBlockExtraButtonTitle?: string;
@@ -137,3 +146,7 @@ export type {
   TimelineItem,
   TimelineFieldProps,
 } from '@openstad-headless/ui/src/form-elements/timeline';
+export type {
+  ModbreakItem,
+  ModbreakFieldProps,
+} from '@openstad-headless/ui/src/form-elements/modbreak';

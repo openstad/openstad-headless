@@ -8,6 +8,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import WidgetResourcesMapDatalayers from '@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
 import { useRouter } from 'next/router';
@@ -42,20 +43,12 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Enquête',
-            url: `/projects/${projectId}/widgets/enquete/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Enquête',
+          `/projects/${projectId}/widgets/enquete/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
@@ -123,7 +116,13 @@ export default function WidgetEnquete({ apiUrl }: WithApiUrlProps) {
               )}
             </TabsContent>
             <TabsContent value="confirmation" className="p-0">
-              <WidgetEnqueteConfirmation />
+              <WidgetEnqueteConfirmation
+                onSaved={(config) => {
+                  if (previewConfig) {
+                    updatePreview({ ...previewConfig, ...config });
+                  }
+                }}
+              />
             </TabsContent>
             <TabsContent value="datalayers" className="p-0">
               {previewConfig && (

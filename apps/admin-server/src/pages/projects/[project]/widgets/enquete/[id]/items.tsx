@@ -29,6 +29,7 @@ import { Heading } from '@/components/ui/typography';
 import { usePanelSwitchFocus } from '@/hooks/usePanelSwitchFocus';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { isOnRandomizedPage } from '@/lib/is-on-randomized-page';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
@@ -142,6 +143,7 @@ const formSchema = z.object({
   ),
   randomizeItems: z.boolean().optional(),
   randomizeQuestions: z.boolean().optional(),
+  excludeFromRandomize: z.boolean().optional(),
   image: z.string().optional(),
   imageUpload: z.string().optional(),
   fieldRequired: z.boolean().optional(),
@@ -181,6 +183,7 @@ const formSchema = z.object({
   videoUrl: z.string().optional(),
   videoSubtitle: z.boolean().optional(),
   videoLang: z.string().optional(),
+  videoLoop: z.boolean().optional(),
   numberingStyle: z.string().optional(),
   images: z
     .array(
@@ -390,6 +393,7 @@ export default function WidgetEnqueteItems(
             imageCropRatioHeight: values.imageCropRatioHeight,
             randomizeItems: values.randomizeItems || false,
             randomizeQuestions: values.randomizeQuestions || false,
+            excludeFromRandomize: values.excludeFromRandomize || false,
             image_b: values.image_b || '',
             description_b: values.description_b || '',
             key_b: values.key_b || '',
@@ -416,6 +420,10 @@ export default function WidgetEnqueteItems(
             infoField: values.infoField || '',
             infofieldExplanation: values.infofieldExplanation || false,
             numberingStyle: values.numberingStyle || 'none',
+            videoUrl: values.videoUrl || '',
+            videoSubtitle: values.videoSubtitle || false,
+            videoLang: values.videoLang || '',
+            videoLoop: values.videoLoop !== false,
             images: values?.images || [],
             // Keeping these for backwards compatibility
             image1: values.image1 || '',
@@ -584,6 +592,7 @@ export default function WidgetEnqueteItems(
     imageCropRatioHeight: undefined,
     randomizeItems: false,
     randomizeQuestions: false,
+    excludeFromRandomize: false,
     infoBlockStyle: 'default',
     infoBlockShareButton: false,
     infoBlockExtraButton: '',
@@ -612,6 +621,7 @@ export default function WidgetEnqueteItems(
     videoUrl: '',
     videoSubtitle: false,
     videoLang: '',
+    videoLoop: true,
     images: [],
 
     // Keeping these for backwards compatibility
@@ -689,6 +699,7 @@ export default function WidgetEnqueteItems(
       imageCropRatioHeight: item.imageCropRatioHeight,
       randomizeItems: item.randomizeItems || false,
       randomizeQuestions: item.randomizeQuestions || false,
+      excludeFromRandomize: item.excludeFromRandomize || false,
       infoBlockStyle: item.infoBlockStyle || 'default',
       infoBlockShareButton: item.infoBlockShareButton || false,
       infoBlockExtraButton: item.infoBlockExtraButton || '',
@@ -718,6 +729,7 @@ export default function WidgetEnqueteItems(
       videoUrl: item.videoUrl || '',
       videoSubtitle: item.videoSubtitle || false,
       videoLang: item.videoLang || '',
+      videoLoop: item.videoLoop !== false,
       images,
 
       // Keeping these for backwards compatibility
@@ -2325,6 +2337,13 @@ export default function WidgetEnqueteItems(
                             </FormItem>
                           )}
                         />
+                      </>
+                    )}
+
+                    {['none', 'scale'].includes(
+                      form.watch('questionType') || ''
+                    ) && (
+                      <>
                         <ImageUploader
                           form={form}
                           project={project as string}
@@ -2520,7 +2539,11 @@ export default function WidgetEnqueteItems(
                             </FormItem>
                           )}
                         />
+                      </>
+                    )}
 
+                    {form.watch('questionType') === 'none' && (
+                      <>
                         {props.formStyle === 'youth' && (
                           <FormField
                             control={form.control}
@@ -2675,6 +2698,25 @@ export default function WidgetEnqueteItems(
                             )}
                           />
                         )}
+                        <FormField
+                          control={form.control}
+                          name="videoLoop"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Automatisch opnieuw afspelen
+                              </FormLabel>
+                              <FormDescription>
+                                Als je deze optie aanzet, begint de video na
+                                afloop automatisch opnieuw. Staat de optie uit,
+                                dan stopt de video na afloop en kan de bezoeker
+                                hem met de afspeelknop opnieuw starten.
+                              </FormDescription>
+                              {YesNoSelect(field, props)}
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
                       </>
                     )}
 
@@ -3431,6 +3473,35 @@ export default function WidgetEnqueteItems(
                         )}
                       />
                     )}
+
+                    {!['pagination', 'none', 'video'].includes(
+                      form.watch('questionType') || ''
+                    ) &&
+                      (isOnRandomizedPage(items, selectedItemId) ||
+                        form.watch('excludeFromRandomize')) && (
+                        <FormField
+                          control={form.control}
+                          name="excludeFromRandomize"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Deze vraag op zijn plek laten staan
+                              </FormLabel>
+                              <FormDescription>
+                                <em className="text-xs">
+                                  Werkt alleen op een pagina waar &quot;Vragen
+                                  op deze pagina in willekeurige volgorde
+                                  tonen&quot; aanstaat. Gebruik dit voor een
+                                  afsluitende vraag die onder de andere vragen
+                                  hoort te blijven, zoals een toelichting.
+                                </em>
+                              </FormDescription>
+                              {YesNoSelect(field, props)}
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
 
                     {props.isQuiz &&
                       ['multiplechoice', 'multiple'].includes(

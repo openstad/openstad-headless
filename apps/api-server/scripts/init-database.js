@@ -36,7 +36,7 @@ if (
 
       const umzug = new Umzug({
         migrations: {
-          glob: migrationGlobs,
+          glob: [migrationGlobs, {}],
           params: [
             db.sequelize.getQueryInterface(),
             db.Sequelize, // Sequelize constructor - the required module

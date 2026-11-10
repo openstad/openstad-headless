@@ -1,3 +1,4 @@
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -24,11 +25,14 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { WhitelistedEmailSelect } from '@/components/ui/whitelisted-email-select';
+import { isEmailNotificationConsentRequired } from '@/lib/email-consent';
+import { isEmailList } from '@/lib/email-list';
 import {
   WithWhitelistedEmailsProps,
   withWhitelistedEmails,
 } from '@/lib/server-side-props-definition';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import { useCallback, useEffect } from 'react';
@@ -42,10 +46,15 @@ export const getServerSideProps = withWhitelistedEmails;
 
 const formSchema = z.object({
   fromAddress: z.string().email(),
-  projectmanagerAddress: z.string().email(),
+  projectmanagerAddress: z.string().refine(isEmailList, {
+    message: 'Vul geldige e-mailadressen in, gescheiden met een komma.',
+  }),
   fromName: z.string().optional(),
   sendUpdatedResourceAdminEmail: z.boolean().optional(),
   sendCommentAdminEmail: z.boolean().optional(),
+  sendModBreakNotification: z.boolean().optional(),
+  sendModBreakNotificationToCommenters: z.boolean().optional(),
+  modBreakNotificationResourcePath: z.string().optional(),
   pdfAttachmentEnabled: z.boolean().optional(),
   pdfAttachmentAdminEnabled: z.boolean().optional(),
   pdfTitle: z.string().optional(),
@@ -60,6 +69,10 @@ export default function ProjectSettingsNotifications({
   const router = useRouter();
   const { project } = router.query;
   const { data, isLoading, updateProjectEmails, pdfAvailable } = useProject();
+  const [consentExplanationOpen, setConsentExplanationOpen] =
+    React.useState(false);
+  const showConsentWarning =
+    !!data && !isEmailNotificationConsentRequired(data.config);
   const defaults = useCallback(
     () => ({
       fromAddress: data?.emailConfig?.[category]?.fromAddress || '',
@@ -70,6 +83,13 @@ export default function ProjectSettingsNotifications({
         data?.emailConfig?.[category]?.sendUpdatedResourceAdminEmail || false,
       sendCommentAdminEmail:
         data?.emailConfig?.[category]?.sendCommentAdminEmail || false,
+      sendModBreakNotification:
+        data?.emailConfig?.[category]?.sendModBreakNotification || false,
+      sendModBreakNotificationToCommenters:
+        data?.emailConfig?.[category]?.sendModBreakNotificationToCommenters ||
+        false,
+      modBreakNotificationResourcePath:
+        data?.emailConfig?.[category]?.modBreakNotificationResourcePath ?? '',
       pdfAttachmentEnabled:
         data?.emailConfig?.[category]?.pdfAttachmentEnabled || false,
       pdfAttachmentAdminEnabled:
@@ -99,6 +119,11 @@ export default function ProjectSettingsNotifications({
           sendUpdatedResourceAdminEmail:
             values.sendUpdatedResourceAdminEmail || false,
           sendCommentAdminEmail: values.sendCommentAdminEmail || false,
+          sendModBreakNotification: values.sendModBreakNotification || false,
+          sendModBreakNotificationToCommenters:
+            values.sendModBreakNotificationToCommenters || false,
+          modBreakNotificationResourcePath:
+            values.modBreakNotificationResourcePath || '',
           pdfAttachmentEnabled: values.pdfAttachmentEnabled || false,
           pdfAttachmentAdminEnabled: values.pdfAttachmentAdminEnabled || false,
           pdfTitle: values.pdfTitle || '',
@@ -252,20 +277,187 @@ export default function ProjectSettingsNotifications({
                   </FormItem>
                 )}
               />
+              <div className="grid grid-cols-1 gap-0 mt-4">
+                {showConsentWarning && (
+                  <Alert variant="warning">
+                    <AlertTitle>Let op!</AlertTitle>
+                    <AlertDescription>
+                      <p>
+                        Het veld{' '}
+                        <b>&apos;E-mail notificatie toestemming&apos;</b> is
+                        niet opgenomen in de verplichte velden. Hierdoor krijgen
+                        inzenders en reageerders bij het inloggen niet de vraag
+                        of ze e-mails willen ontvangen. Zonder die toestemming
+                        ontvangen zij geen e-mail over een officiële reactie.
+                      </p>
+                      <p className="mt-2">
+                        Voeg het veld toe op de pagina{' '}
+                        <Link
+                          href={`/projects/${project}/authentication/requiredfields`}
+                          className="underline">
+                          Authenticatie &gt; Verplichte velden
+                        </Link>
+                        .
+                      </p>
+                      <button
+                        type="button"
+                        className="mt-2 underline"
+                        aria-expanded={consentExplanationOpen}
+                        aria-controls="modbreak-consent-explanation"
+                        onClick={() =>
+                          setConsentExplanationOpen((open) => !open)
+                        }>
+                        {consentExplanationOpen
+                          ? 'Minder uitleg'
+                          : 'Waarom komt er geen mail aan?'}
+                      </button>
+                      {consentExplanationOpen && (
+                        <div id="modbreak-consent-explanation" className="mt-2">
+                          <p>
+                            Een e-mail over een officiële reactie gaat alleen
+                            uit als <b>beide</b> aan staan:
+                          </p>
+                          <ol className="list-decimal pl-5 mt-1">
+                            <li>
+                              <b>Per project:</b> de optie voor officiële
+                              reacties hieronder, op deze pagina.
+                            </li>
+                            <li>
+                              <b>Per gebruiker, per project:</b> de toestemming
+                              voor e-mailnotificaties van de ontvanger. Iemand
+                              kan in het ene project wel toestemming hebben en
+                              in een ander project niet.
+                            </li>
+                          </ol>
+                          <p className="mt-2">
+                            Een gebruiker geeft toestemming bij het inloggen
+                            (als het veld verplicht is) of op zijn accountpagina
+                            (als de account-widget het toestemmingsveld toont).
+                            Een superbeheerder kan de toestemming zien en
+                            aanpassen bij{' '}
+                            <i>
+                              Gebruikers &gt; gebruiker &gt; Projectsrechten
+                            </i>
+                            .
+                          </p>
+                        </div>
+                      )}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                <FormField
+                  control={form.control}
+                  name="sendModBreakNotification"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Melding over een officiële reactie aan de indiener
+                      </FormLabel>
+                      <FormDescription>
+                        Standaard uitgeschakeld. De indiener van de inzending
+                        ontvangt een e-mail zodra de redactie een officiële
+                        reactie plaatst of de tekst van een bestaande officiële
+                        reactie aanpast. Alleen als de indiener in dit project
+                        toestemming heeft gegeven voor e-mailnotificaties.
+                      </FormDescription>
+                      <FormControl>
+                        <div className="flex items-center gap-2">
+                          <Checkbox
+                            id={field.name}
+                            checked={field.value}
+                            onCheckedChange={(checked) =>
+                              field.onChange(Boolean(checked))
+                            }
+                          />
+                          <Label
+                            htmlFor={field.name}
+                            className="cursor-pointer">
+                            E-mail sturen naar de indiener als er een officiële
+                            reactie is geplaatst of aangepast
+                          </Label>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <FormField
+                control={form.control}
+                name="sendModBreakNotificationToCommenters"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Melding over een officiële reactie aan reageerders
+                    </FormLabel>
+                    <FormDescription>
+                      Standaard uitgeschakeld. Staat los van de optie hierboven.
+                      Alleen reageerders die in dit project toestemming hebben
+                      gegeven voor e-mailnotificaties ontvangen deze mail.
+                    </FormDescription>
+                    <FormControl>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={field.name}
+                          checked={field.value}
+                          onCheckedChange={(checked) =>
+                            field.onChange(Boolean(checked))
+                          }
+                        />
+                        <Label htmlFor={field.name} className="cursor-pointer">
+                          E-mail sturen naar reageerders op de inzending als er
+                          een officiële reactie is geplaatst of aangepast
+                        </Label>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="modBreakNotificationResourcePath"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Pad naar de inzending in de e-mail over een officiële
+                      reactie
+                    </FormLabel>
+                    <FormDescription>
+                      Volledige URL of pad van de pagina met de inzending. Een
+                      pad wordt achter de project-URL geplakt. [id] wordt
+                      vervangen door het ID van de inzending. Zonder [id] wordt
+                      ?openstadResourceId= met het ID automatisch toegevoegd.
+                      Leeg laten = geen knop in de mail.
+                    </FormDescription>
+                    <FormControl>
+                      <Input
+                        placeholder="https://www.voorbeeld.nl/inzending?openstadResourceId=[id]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="projectmanagerAddress"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Naar welk e-mailadres worden beheerder-notificaties
+                      Naar welke e-mailadressen worden beheerder-notificaties
                       verstuurd?
                       <InfoDialog
                         content={
-                          'Dit is het adres waar automatische beheerder-notificaties naartoe gaan, zoals nieuwe formulier-inzendingen, bewerkte inzendingen en nieuwe reacties. Zonder een geldig adres hier worden er geen beheerder-notificaties verzonden.'
+                          'Dit zijn de adressen waar automatische beheerder-notificaties naartoe gaan, zoals nieuwe formulier-inzendingen, bewerkte inzendingen en nieuwe reacties. Zonder een geldig adres hier worden er geen beheerder-notificaties verzonden.'
                         }
                       />
                     </FormLabel>
+                    <FormDescription>
+                      Meerdere e-mailadressen zijn mogelijk, mits ze gescheiden
+                      zijn met een komma.
+                    </FormDescription>
                     <FormControl>
                       <Input placeholder="" {...field} />
                     </FormControl>

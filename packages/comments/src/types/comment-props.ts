@@ -1,4 +1,4 @@
-import { Comment } from '@openstad-headless/types';
+import type { Comment } from '@openstad-headless/types';
 import React, { Dispatch, SetStateAction } from 'react';
 
 export type CommentProps = {

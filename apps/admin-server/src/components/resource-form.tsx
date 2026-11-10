@@ -30,6 +30,10 @@ import {
 } from '@openstad-headless/lib/address-search-texts';
 import { buildImagePreviewUrl } from '@openstad-headless/lib/image-crop/crop-url';
 import {
+  EMPTY_MODBREAK_MESSAGE,
+  hasModBreakContent,
+} from '@openstad-headless/ui/src/form-elements/modbreak/normalize-modbreaks';
+import {
   ArrowDown,
   ArrowLeft,
   ArrowRight,
@@ -41,7 +45,7 @@ import {
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { FieldErrors, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
 
@@ -94,9 +98,13 @@ const baseSchema = z.object({
     .array(
       z.object({
         id: z.string(),
-        description: z.string().default(''),
+        description: z
+          .string()
+          .default('')
+          .refine(hasModBreakContent, EMPTY_MODBREAK_MESSAGE),
         authorName: z.string().optional().default(''),
         modBreakDate: z.string().optional().default(''),
+        createdAt: z.string().optional(),
       })
     )
     .optional()
@@ -273,6 +281,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 ? mb.modBreakDate.slice(0, 16)
                 : mb.modBreakDate + 'T00:00'
               : '',
+            createdAt: mb.createdAt,
           }))
           .sort(
             (a: any, b: any) =>
@@ -453,6 +462,14 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     (modBreakPage + 1) * modBreaksPerPage
   );
 
+  const onInvalid = (errors: FieldErrors<FormType>) => {
+    if (!Array.isArray(errors.modBreaks)) return;
+    const firstInvalidIndex = errors.modBreaks.findIndex(Boolean);
+    if (firstInvalidIndex < 0) return;
+    setModBreakPage(Math.floor(firstInvalidIndex / modBreaksPerPage));
+    toast.error(EMPTY_MODBREAK_MESSAGE);
+  };
+
   const moveUpModBreak = (index: number) => {
     if (index <= 0) return;
     swapModBreak(index, index - 1);
@@ -569,7 +586,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         <Heading size="xl">{id ? 'Aanpassen' : 'Toevoegen'}</Heading>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(onSubmit, onInvalid)}
           className="lg:w-3/3 grid grid-cols-2 lg:auto-rows-fit gap-10">
           <FormField
             control={form.control}
@@ -1045,7 +1062,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
           <Separator className="lg:col-span-2 my-6" />
 
           <div className="lg:col-span-2 col-span-2">
-            <Heading size="xl">Modbreaks</Heading>
+            <Heading size="xl">Officiële reacties</Heading>
             {!modbreakTitle && (
               <p className="text-sm text-orange-600 mb-4">
                 Geen standaardnaam ingesteld.{' '}
@@ -1073,11 +1090,11 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 })
               }>
               <Plus size={16} className="mr-2" />
-              Modbreak toevoegen
+              Officiële reactie toevoegen
             </Button>
             {modBreakFields.length === 0 && (
               <p className="text-sm text-muted-foreground mb-4">
-                Nog geen modbreaks toegevoegd.
+                Nog geen officiële reacties toegevoegd.
               </p>
             )}
             {visibleModBreaks.map((field, pageIndex) => {
@@ -1086,7 +1103,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 <div key={field.id} className="border rounded-md p-4 mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium">
-                      Modbreak {index + 1}
+                      Officiële reactie {index + 1}
                     </span>
                     <div className="flex items-center gap-1">
                       <Button

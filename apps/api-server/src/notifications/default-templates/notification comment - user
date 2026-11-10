@@ -1,0 +1,64 @@
+<!-- template: notification comment - user -->
+<subject>Nieuwe reactie op je inzending op {{ project.title }}</subject>
+<body>
+  <mjml>
+  <mj-body background-color="#f6f6f7">
+    <!-- Main section for the email content -->
+    <mj-section background-color="#ffffff" padding="20px">
+      <mj-column>
+
+        <!-- Title of the email -->
+        <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">
+          Je hebt een nieuwe reactie ontvangen
+        </mj-text>
+
+        <!-- Divider line -->
+        <mj-divider border-color="#cccccc" border-width="1px"></mj-divider>
+
+        <!-- Introduction text based on conditions -->
+        <mj-text font-size="16px" color="#444" font-family="Helvetica">
+          {% if comment.sentiment == 'for' %}
+            Hier zie je een positieve reactie op je inzending.
+          {% elseif comment.sentiment == 'against' %}
+            Hier zie je een negatieve reactie op je inzending.
+          {% else %}
+            Hier zie je de reactie op je inzending.
+          {% endif %}
+
+          Geplaatst op {{ comment.createDateHumanized }}
+          door {{ comment.userName or 'een anonieme gebruiker' }}.
+
+          <!-- Embedded url link if Embedded url exist -->
+          {% if embeddedUrl %}
+            <a href="{{ embeddedUrl }}">Klik hier</a> om naar de inzending te gaan.
+          {% endif %}
+        </mj-text>
+
+        <!-- Divider line -->
+        <mj-divider border-width="0" padding="10px" />
+
+        <!-- The comment description itself -->
+        <mj-text font-size="14px" font-weight="700" color="#444" font-family="Helvetica" align="center">
+            Reactie:
+          </mj-text>
+        <mj-text font-size="14px" line-height="22px" color="#444" font-family="Helvetica">
+          {{ comment.description }}
+        </mj-text>
+
+        <!-- Divider line -->
+        <mj-divider border-width="0" padding="10px" />
+
+        <!-- Unsubscribe link if unsubscribeUrl exist -->
+        {% if unsubscribeUrl %}
+          <mj-text font-size="14px" color="#444" font-family="Helvetica" align="center">
+            Wil je je uitschrijven? Dat kan via de volgende link:
+            <br />
+            <a href="{{ unsubscribeUrl }}">Uitschrijven</a>
+          </mj-text>
+        {% endif %}
+
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
+</body>

@@ -1,7 +1,7 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Banner, Paginator } from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
@@ -29,7 +29,7 @@ import hasRole from '../../lib/has-role';
 import './index.css';
 import CommentForm from './parts/comment-form.js';
 import Comment from './parts/comment.js';
-import { CommentFormProps } from './types/comment-form-props';
+import type { CommentFormProps } from './types/comment-form-props';
 
 // This type holds all properties needed for this component to work
 export type CommentsWidgetProps = BaseProps &
@@ -419,7 +419,7 @@ function CommentsInner({
     ) {
       setTotalPages(Math.ceil(comments.length / pageSize));
     }
-  }, [comments, commentsMeta, pageSize]);
+  }, [comments, commentsMeta, displayPagination, pageSize]);
 
   const randomIdRef = useRef(
     Math.random().toString(36).replace('0.', 'container_')

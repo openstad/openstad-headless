@@ -891,8 +891,10 @@ router
     }
 
     // create an oauth client if nessecary
+    // share one config object so clients created below end up on the project
+    req.body.config = req.body.config || {};
     let project = {
-      config: req.body.config || {},
+      config: req.body.config,
     };
     try {
       project.name = project?.name || req.body?.name || '';
@@ -926,6 +928,8 @@ router
               authConfig,
               project,
             });
+            project.config.auth = project.config.auth || {};
+            project.config.auth.provider = project.config.auth.provider || {};
             project.config.auth.provider[authConfig.provider] =
               project.config.auth.provider[authConfig.provider] || {};
             project.config.auth.provider[authConfig.provider].clientId =
@@ -1536,10 +1540,34 @@ router
         model: db.Resource,
         include: [
           { model: db.Tag },
-          { model: db.Vote },
-          { model: db.Comment, as: 'commentsFor' },
-          { model: db.Comment, as: 'commentsAgainst' },
-          { model: db.Comment, as: 'commentsNoSentiment' },
+          { model: db.Vote, separate: true },
+          {
+            model: db.Comment,
+            as: 'commentsFor',
+            where: { sentiment: 'for' },
+            required: false,
+            separate: true,
+            scope: false,
+            include: db.Comment.options.defaultScope.include,
+          },
+          {
+            model: db.Comment,
+            as: 'commentsAgainst',
+            where: { sentiment: 'against' },
+            required: false,
+            separate: true,
+            scope: false,
+            include: db.Comment.options.defaultScope.include,
+          },
+          {
+            model: db.Comment,
+            as: 'commentsNoSentiment',
+            where: { sentiment: 'no sentiment' },
+            required: false,
+            separate: true,
+            scope: false,
+            include: db.Comment.options.defaultScope.include,
+          },
           { model: db.Poll, as: 'poll' },
         ],
       },

@@ -1,4 +1,5 @@
 import { FormValue } from '@openstad-headless/form/src/form';
+import { toHtmlId } from '@openstad-headless/lib/to-html-id';
 import {
   AccordionProvider,
   Button,
@@ -90,6 +91,8 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
   maxChoices,
   maxChoicesMessage,
 }) => {
+  const idKey = toHtmlId(fieldKey);
+
   let initialValue = [];
 
   try {
@@ -158,7 +161,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
   return (
     <div className={`question`}>
       <Fieldset
-        aria-invalid={checkInvalid}
+        invalid={fieldInvalid}
         aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}>
         {title && (
           <FieldsetLegend>
@@ -211,7 +214,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
               <FormField type="radio" key={index}>
                 <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">
                   <FormLabel
-                    htmlFor={`${fieldKey}_${index}`}
+                    htmlFor={`${idKey}_${index}`}
                     type="radio"
                     className={isSelected ? 'selected' : ''}>
                     <figure>
@@ -225,7 +228,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                       <figcaption>
                         <ChoiceComponent
                           className="radio-field-input"
-                          id={`${fieldKey}_${index}`}
+                          id={`${idKey}_${index}`}
                           name={fieldKey}
                           required={fieldRequired}
                           onChange={() => {

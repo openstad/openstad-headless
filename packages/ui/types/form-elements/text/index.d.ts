@@ -68,6 +68,7 @@ export type TextInputProps = {
     maxCharactersOverWarning?: string;
 };
 declare const TrixEditor: React.FC<{
+    id?: string;
     value: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     onFocus?: () => void;

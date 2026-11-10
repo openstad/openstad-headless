@@ -20,7 +20,7 @@ type Props = {
 
 export function RenameResourceDialog({ header, widget }: Props) {
   const [open, setOpen] = useState<boolean>(false);
-  const [name, setName] = useState<string>('');
+  const [name, setName] = useState<string>(widget.description);
   const [error, setError] = useState<boolean>(false);
   const { updateWidget } = useWidgetsHook(widget.projectId);
 
@@ -35,11 +35,11 @@ export function RenameResourceDialog({ header, widget }: Props) {
   };
 
   useEffect(() => {
-    if (!open) {
+    if (open) {
       setError(false);
-      setName('');
+      setName(widget.description);
     }
-  }, [open]);
+  }, [open, widget.description]);
 
   return (
     <Dialog open={open} modal={true} onOpenChange={setOpen}>
@@ -76,7 +76,7 @@ export function RenameResourceDialog({ header, widget }: Props) {
               <Input
                 type="text"
                 id="name"
-                placeholder={widget.description}
+                value={name}
                 onChange={(e) => setName(e.target.value)}
               />
               {error && (

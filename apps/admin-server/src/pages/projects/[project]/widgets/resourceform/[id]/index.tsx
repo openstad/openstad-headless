@@ -8,6 +8,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import WidgetResourceFormItems from '@/pages/projects/[project]/widgets/resourceform/[id]/items';
 import WidgetResourceFormPolygons from '@/pages/projects/[project]/widgets/resourceform/[id]/polygons';
 import WidgetResourcesMapDatalayers from '@/pages/projects/[project]/widgets/resourcesmap/[id]/datalayers';
@@ -25,6 +26,7 @@ import {
 import WidgetResourceFormConfirmation from './confirmation';
 import WidgetResourceFormGeneral from './general';
 import WidgetResourceFormInfo from './info';
+import WidgetResourceFormLinkRequests from './link-requests';
 import WidgetResourceFormSubmit from './submit';
 
 export const getServerSideProps = withApiUrl;
@@ -43,20 +45,12 @@ export default function WidgetResourceForm({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Inzending formulier',
-            url: `/projects/${projectId}/widgets/resourceform/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Inzending formulier',
+          `/projects/${projectId}/widgets/resourceform/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6 overflow-hidden">
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
@@ -94,6 +88,7 @@ export default function WidgetResourceForm({ apiUrl }: WithApiUrlProps) {
             </TabsContent>
             <TabsContent value="submit" className="p-0">
               <WidgetResourceFormSubmit />
+              <WidgetResourceFormLinkRequests />
             </TabsContent>
             <TabsContent value="confirmation" className="p-0">
               <WidgetResourceFormConfirmation />

@@ -9,6 +9,7 @@ import {
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import { extractConfig } from '@/lib/sub-widget-helper';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import { ArgumentWidgetTabProps } from '@/pages/projects/[project]/widgets/comments/[id]';
 import ArgumentsConfirmation from '@/pages/projects/[project]/widgets/comments/[id]/confirmation';
 import type { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
@@ -76,20 +77,12 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Interactieve afbeelding',
-            url: `/projects/${projectId}/widgets/documentmap/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Interactieve afbeelding',
+          `/projects/${projectId}/widgets/documentmap/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
