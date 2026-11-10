@@ -65,6 +65,7 @@ type booleanProps = {
       | 'displayDate'
       | 'displayBudget'
       | 'displayLocation'
+      | 'displayLocationAddress'
       | 'displayBudgetDocuments'
       | 'displayLikes'
       | 'displayTags'
@@ -198,6 +199,7 @@ function ResourceDetail({
   displayDate = true,
   displayBudget = true,
   displayLocation = true,
+  displayLocationAddress = false,
   displayBudgetDocuments = true,
   displayLikes = true,
   displayTags = true,
@@ -769,6 +771,17 @@ function ResourceDetail({
                     <Heading level={hSection} appearance="utrecht-heading-2">
                       Plaats
                     </Heading>
+                    {displayLocationAddress &&
+                      resource.location?.address?.street && (
+                        <Paragraph className="resource-detail-location-address">
+                          {[
+                            resource.location.address.street,
+                            resource.location.address.city,
+                          ]
+                            .filter(Boolean)
+                            .join(', ')}
+                        </Paragraph>
+                      )}
                     <ResourceDetailMap
                       resourceId={resource.id || resourceId || '0'}
                       resourceIdRelativePath={
