@@ -16,8 +16,12 @@ metadata:
     {{- if eq (include "openstad.ingress.type" .) "traefik" }}
     traefik.ingress.kubernetes.io/router.middlewares: {{ include "openstad.traefik.middlewares.admin" . }}
     {{- else }}
-    {{- with .Values.admin.ingress.annotations }}
+    {{- $allowlist := include "openstad.admin.ingress.allowlist" . }}
+    {{- with omit (.Values.admin.ingress.annotations | default dict) (ternary "nginx.ingress.kubernetes.io/whitelist-source-range" "" (ne $allowlist "")) }}
 {{ toYaml . | indent 4 }}
+    {{- end }}
+    {{- if $allowlist }}
+    nginx.ingress.kubernetes.io/whitelist-source-range: {{ $allowlist | quote }}
     {{- end }}
     {{- end }}
 

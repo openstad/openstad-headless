@@ -320,10 +320,22 @@ nginx
     Each returns the full comma-separated middleware chain for that service.
 */}}
 
-{{/* admin: security-headers + noindex + body-size-limit + compress */}}
+{{/*
+    IP allowlist (list of IPs / CIDR ranges) for the admin ingress.
+    Returns a comma-separated string, empty when no allowlist is configured.
+*/}}
+{{- define "openstad.admin.ingress.allowlist" -}}
+{{- $allowlist := .Values.admin.ingress.allowlist | default dict -}}
+{{- join "," (compact ($allowlist.sourceRange | default list)) -}}
+{{- end -}}
+
+{{/* admin: [ip-allowlist +] security-headers + noindex + body-size-limit + compress */}}
 {{- define "openstad.traefik.middlewares.admin" -}}
 {{- $ns := .Release.Namespace -}}
 {{- $fn := include "openstad.fullname" . -}}
+{{- if include "openstad.admin.ingress.allowlist" . -}}
+{{- printf "%s-%s-admin-ip-allowlist@kubernetescrd," $ns $fn -}}
+{{- end -}}
 {{- printf "%s-%s-security-headers@kubernetescrd,%s-%s-security-headers-noindex@kubernetescrd,%s-%s-body-size-limit@kubernetescrd,%s-%s-compress-response@kubernetescrd" $ns $fn $ns $fn $ns $fn $ns $fn -}}
 {{- end -}}
 
