@@ -1,10 +1,12 @@
 import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { ImportButton } from '@/components/importButton';
+import { TagFilter } from '@/components/tag-filter';
 import { Checkbox } from '@/components/ui/checkbox';
 import InfoDialog from '@/components/ui/info-hover';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
+import useTags from '@/hooks/use-tags';
 import { getRuntimeSpamFilterEnabled } from '@/lib/export-helpers/get-runtime-spam-flag';
 import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
 import { keyMap } from '@/lib/keyMap';
@@ -111,7 +113,9 @@ export default function ProjectResources() {
   const [sortField, setSortField] = useState<string>('date-added');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [apiSearchTerm] = useDebouncedValue(searchTerm, 400);
+  const [filterTagId, setFilterTagId] = useState<number | null>(null);
   const [selectedWidgets, setSelectedWidgets] = useState<number[]>([]);
+  const { data: tags } = useTags(project as string);
 
   const { data, pagination, remove, duplicate, fetchAll } = useResources(
     project as string,
@@ -122,6 +126,7 @@ export default function ProjectResources() {
       sort: `${RESOURCE_SORT_MAP[sortField] || 'createdAt'}_${sortDirection}`,
       searchField: RESOURCE_SEARCH_FIELD_MAP[filterSearchType] || 'text',
       searchTerm: apiSearchTerm || undefined,
+      tags: filterTagId ? [filterTagId] : undefined,
     }
   );
 
@@ -157,7 +162,7 @@ export default function ProjectResources() {
 
   useEffect(() => {
     setPage(0);
-  }, [apiSearchTerm, filterSearchType]);
+  }, [apiSearchTerm, filterSearchType, filterTagId]);
 
   const handleSort = (field: string) => {
     if (field === sortField) {
@@ -304,6 +309,11 @@ export default function ProjectResources() {
                   placeholder="Zoeken..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <TagFilter
+                  tags={tags || []}
+                  selectedTagId={filterTagId}
+                  onChange={setFilterTagId}
                 />
               </div>
             </div>
