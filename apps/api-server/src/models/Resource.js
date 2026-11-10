@@ -32,6 +32,7 @@ const commentVoteThreshold =
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 const canBypassEditLock = require('../lib/can-bypass-edit-lock');
 const hasModBreakContent = require('../lib/has-mod-break-content');
+const { resolveLocationAddress } = require('../lib/location-address');
 const roles = require('../lib/sequelize-authorization/lib/roles');
 const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
 const htmlToText = require('html-to-text');
@@ -502,6 +503,7 @@ module.exports = function (db, sequelize, DataTypes) {
         // onderstaand is een workaround: bij een delete wordt wel de validatehook aangeroepen, maar niet de beforeValidate hook. Dat lijkt een bug.
         beforeValidate: beforeValidateHook,
         beforeDestroy: beforeValidateHook,
+        beforeSave: deriveLocationAddressHook,
 
         afterCreate: function (instance, options) {},
 
@@ -1448,6 +1450,17 @@ module.exports = function (db, sequelize, DataTypes) {
     };
 
   return Resource;
+
+  async function deriveLocationAddressHook(instance) {
+    if (!instance.isNewRecord && !instance.changed('location')) return;
+    const location = await resolveLocationAddress({
+      location: instance.get('location'),
+      previous: instance.previous('location'),
+      isNewRecord: instance.isNewRecord,
+      reverseApiUrl: process.env.ZIPCODE_REVERSE_API_URL,
+    });
+    instance.set('location', location);
+  }
 
   async function beforeValidateHook(instance, options) {
     // add project config
