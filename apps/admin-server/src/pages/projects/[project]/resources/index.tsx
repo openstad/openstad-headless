@@ -1,20 +1,23 @@
 import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { ImportButton } from '@/components/importButton';
+import ResourcesMap from '@/components/maps/resources-map';
 import { TagFilter } from '@/components/tag-filter';
 import { Checkbox } from '@/components/ui/checkbox';
 import InfoDialog from '@/components/ui/info-hover';
 import { ListHeading, Paragraph } from '@/components/ui/typography';
+import useResourceMarkers from '@/hooks/use-resource-markers';
 import useResources from '@/hooks/use-resources';
 import useTags from '@/hooks/use-tags';
 import { getRuntimeSpamFilterEnabled } from '@/lib/export-helpers/get-runtime-spam-flag';
 import { exportToXLSX } from '@/lib/export-helpers/xlsx-export';
 import { keyMap } from '@/lib/keyMap';
+import { toMapPoints } from '@/lib/resource-map-points';
 import { Paginator } from '@openstad-headless/ui/src';
 import { ChevronRight, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { useDebouncedValue } from 'rooks';
 
@@ -116,6 +119,13 @@ export default function ProjectResources() {
   const [filterTagId, setFilterTagId] = useState<number | null>(null);
   const [selectedWidgets, setSelectedWidgets] = useState<number[]>([]);
   const { data: tags } = useTags(project as string);
+  const [view, setView] = useState<'list' | 'map'>('list');
+  const { data: markers } = useResourceMarkers(project as string, {
+    searchTerm: apiSearchTerm || undefined,
+    tags: filterTagId ? [filterTagId] : undefined,
+    enabled: view === 'map',
+  });
+  const mapPoints = useMemo(() => toMapPoints(markers), [markers]);
 
   const { data, pagination, remove, duplicate, fetchAll } = useResources(
     project as string,
@@ -222,7 +232,7 @@ export default function ProjectResources() {
             </div>
           }>
           <div className="container py-6">
-            <div className="mb-2">
+            <div className="mb-2 flex justify-between items-center">
               <span className="text-sm text-gray-500">
                 {selectedWidgets.length > 0
                   ? `${selectedWidgets.length} van ${totalCount} ${
@@ -232,6 +242,26 @@ export default function ProjectResources() {
                       totalCount === 1 ? 'inzending' : 'inzendingen'
                     }`}
               </span>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  aria-pressed={view === 'list'}
+                  onClick={() => setView('list')}
+                  className={`p-2 rounded text-sm ${
+                    view === 'list' ? 'bg-white font-medium' : ''
+                  }`}>
+                  Lijst
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={view === 'map'}
+                  onClick={() => setView('map')}
+                  className={`p-2 rounded text-sm ${
+                    view === 'map' ? 'bg-white font-medium' : ''
+                  }`}>
+                  Kaart
+                </button>
+              </div>
             </div>
             <div className="flex justify-between mb-4 gap-4">
               <div className="flex gap-4">
@@ -318,7 +348,12 @@ export default function ProjectResources() {
               </div>
             </div>
 
-            <div className="p-6 bg-white rounded-md overflow-x-auto">
+            <div
+              className={
+                view === 'list'
+                  ? 'p-6 bg-white rounded-md overflow-x-auto'
+                  : 'hidden'
+              }>
               <div className="grid items-center py-2 px-2 border-b border-border grid-cols-[50px_50px_minmax(160px,_3fr)_minmax(50px,_1fr)_minmax(50px,_1fr)_minmax(70px,_1fr)_minmax(170px,_1fr)_44px_0px] xl:grid-cols-[50px_50px_minmax(180px,_3fr)_minmax(56px,_1fr)_minmax(56px,_1fr)_minmax(80px,_1fr)_minmax(190px,_1fr)_minmax(110px,_1fr)_60px]">
                 <Checkbox
                   className="my-auto"
@@ -518,6 +553,21 @@ export default function ProjectResources() {
                 </div>
               )}
             </div>
+
+            {view === 'map' ? (
+              <div className="p-6 bg-white rounded-md">
+                <ResourcesMap
+                  points={mapPoints}
+                  onSelect={(id) =>
+                    router.push(`/projects/${project}/resources/${id}`)
+                  }
+                />
+                <p className="text-sm text-muted-foreground mt-2">
+                  {mapPoints.length} van {markers.length} inzendingen hebben een
+                  locatie op de kaart.
+                </p>
+              </div>
+            ) : null}
           </div>
         </PageLayout>
       </div>
