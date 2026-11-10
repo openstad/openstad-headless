@@ -23,7 +23,6 @@ const formSchema = z.object({
   displayUser: z.boolean(),
   displayDate: z.boolean(),
   displayBudget: z.boolean(),
-  displayBudgetDocuments: z.boolean(),
   displayLocation: z.boolean(),
   displayTags: z.boolean(),
   displaySocials: z.boolean(),
@@ -50,9 +49,6 @@ export default function WidgetResourceDetailDisplay(
       displayUser: undefinedToTrueOrProp(props?.displayUser),
       displayDate: undefinedToTrueOrProp(props?.displayDate),
       displayBudget: undefinedToTrueOrProp(props?.displayBudget),
-      displayBudgetDocuments: undefinedToTrueOrProp(
-        props?.displayBudgetDocuments
-      ),
       displayLocation: undefinedToTrueOrProp(props?.displayLocation),
       displayTags: undefinedToTrueOrProp(props?.displayTags),
       displaySocials: undefinedToTrueOrProp(props?.displaySocials),
@@ -124,17 +120,6 @@ export default function WidgetResourceDetailDisplay(
               </FormItem>
             )}
           />
-          {/* <FormField
-            control={form.control}
-            name="displayBudgetDocuments"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Budget bestanden weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          /> */}
           <FormField
             control={form.control}
             name="displaySummary"

@@ -52,7 +52,6 @@ const formSchema = z
         inlineOptions: z.boolean().optional(),
       })
     ),
-    displayTagGroupName: z.boolean(),
     filterBehavior: z.string().optional(),
     onlyShowTheseTagIds: z.string().optional(),
   })
@@ -125,7 +124,6 @@ export default function WidgetResourceOverviewTags(
       showActiveTags: props?.showActiveTags || false,
       filterBehavior: props?.filterBehavior || 'or',
       tagGroups: props.tagGroups || [],
-      displayTagGroupName: props?.displayTagGroupName || false,
       onlyShowTheseTagIds: props?.onlyShowTheseTagIds || '',
     },
   });
@@ -276,6 +274,11 @@ export default function WidgetResourceOverviewTags(
                                   placeholder="Groep label"
                                   key={`${groupName}-label-input-field`}
                                   name={groupName}
+                                  value={
+                                    field.value.find(
+                                      (g) => g.type === groupName
+                                    )?.label ?? ''
+                                  }
                                   disabled={
                                     field.value.find(
                                       (g) => g.type === groupName
