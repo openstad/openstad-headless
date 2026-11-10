@@ -149,6 +149,12 @@ let moduleDefinitions = {
       displayLocationHint: false,
       locationHint: 'Typ een postcode en kies een adres uit de lijst.',
       locationPlaceholder: '',
+      displayStreetFilter: false,
+      streetFilterLabel: 'Straat',
+      displayStreetFilterHint: false,
+      streetFilterHint:
+        'Toont ideeën die aan deze straat liggen. Zoek je ideeën in de buurt? Gebruik dan het postcodefilter.',
+      streetFilterPlaceholder: '',
       includeOrExcludeTagIds: 'include',
       includeOrExcludeStatusIds: 'include',
       resourceOverviewMapWidget: {
@@ -497,6 +503,12 @@ let moduleDefinitions = {
       displayLocationHint: false,
       locationHint: 'Typ een postcode en kies een adres uit de lijst.',
       locationPlaceholder: '',
+      displayStreetFilter: false,
+      streetFilterLabel: 'Straat',
+      displayStreetFilterHint: false,
+      streetFilterHint:
+        'Toont ideeën die aan deze straat liggen. Zoek je ideeën in de buurt? Gebruik dan het postcodefilter.',
+      streetFilterPlaceholder: '',
       includeOrExcludeTagIds: 'include',
       includeOrExcludeStatusIds: 'include',
       resourceOverviewMapWidget: {

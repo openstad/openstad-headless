@@ -32,6 +32,7 @@ import {
   Filters,
   PostcodeAutoFillLocation,
 } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
+import { StreetOption } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter/street-filter';
 import '@utrecht/component-library-css';
 import {
   Button,
@@ -182,6 +183,11 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayLocationHint?: boolean;
     locationHint?: string;
     locationPlaceholder?: string;
+    displayStreetFilter?: boolean;
+    streetFilterLabel?: string;
+    displayStreetFilterHint?: boolean;
+    streetFilterHint?: string;
+    streetFilterPlaceholder?: string;
     excludeResourcesInOverview?: boolean;
     filterBehavior?: string;
     filterBehaviorInclude?: string;
@@ -1012,6 +1018,7 @@ function ResourceOverviewInner({
   );
   const [randomSortKey, setRandomSortKey] = useState<number>(0);
   const [location, setLocation] = useState<PostcodeAutoFillLocation>(undefined);
+  const [streets, setStreets] = useState<Array<StreetOption>>([]);
 
   const [resources, setResources] = useState<Array<any>>([]);
   const [filteredResources, setFilteredResources] = useState<Array<any>>([]);
@@ -1051,7 +1058,7 @@ function ResourceOverviewInner({
     return tagsMap;
   }, [allTags]);
 
-  const apiTagGroups = useMemo(() => {
+  const apiIncludeTagGroups = useMemo(() => {
     const groups: number[][] = [];
 
     if (includeTags.length > 0) {
@@ -1070,6 +1077,12 @@ function ResourceOverviewInner({
       }
     }
 
+    return groups;
+  }, [filterBehaviorInclude, includeTags, groupedTags]);
+
+  const apiTagGroups = useMemo(() => {
+    const groups: number[][] = [...apiIncludeTagGroups];
+
     if (filterBehavior === 'and' && tags.length > 0) {
       Object.keys(groupedTags).forEach((tagType) => {
         const tagsOfType = groupedTags[tagType];
@@ -1083,7 +1096,7 @@ function ResourceOverviewInner({
     }
 
     return groups;
-  }, [filterBehavior, filterBehaviorInclude, tags, includeTags, groupedTags]);
+  }, [filterBehavior, tags, apiIncludeTagGroups, groupedTags]);
 
   const flatApiTags = useMemo(() => {
     if (filterBehavior === 'and') return [];
@@ -1105,6 +1118,7 @@ function ResourceOverviewInner({
     statuses: apiStatuses,
     excludeStatuses: apiExcludeStatuses,
     tagGroups: apiTagGroups,
+    streets,
     lat: location?.lat,
     lng: location?.lng,
     maxDistance: location ? (location.proximity || 999) * 1000 : undefined,
@@ -1119,6 +1133,15 @@ function ResourceOverviewInner({
           ? true
           : 'markers'
       : false,
+  });
+
+  const { data: streetOptions } = datastore.useResourceStreets({
+    projectId: props.projectId,
+    excludeTags: apiExcludeTags,
+    statuses: apiStatuses,
+    excludeStatuses: apiExcludeStatuses,
+    tagGroups: apiIncludeTagGroups,
+    enabled: !!props.displayStreetFilter,
   });
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
@@ -1298,7 +1321,16 @@ function ResourceOverviewInner({
 
   useEffect(() => {
     setPage(0);
-  }, [tags, statuses, search, sort, location, includeTags, excludeTags]);
+  }, [
+    tags,
+    statuses,
+    search,
+    sort,
+    location,
+    streets,
+    includeTags,
+    excludeTags,
+  ]);
 
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
 
@@ -1396,7 +1428,8 @@ function ResourceOverviewInner({
     (props.displaySearch ||
       props.displaySorting ||
       props.displayTagFilters ||
-      props.displayLocationFilter);
+      props.displayLocationFilter ||
+      props.displayStreetFilter);
 
   const getDisplayVariant = (variant: string) => {
     if (!variant) {
@@ -1566,6 +1599,8 @@ function ResourceOverviewInner({
               displayTagFilters={props.displayTagFilters || false}
               displaySearch={props.displaySearch || false}
               displayLocationFilter={props.displayLocationFilter || false}
+              displayStreetFilter={props.displayStreetFilter || false}
+              streetOptions={streetOptions || []}
               searchPlaceholder={props.searchPlaceholder || 'Zoeken'}
               resetText={props.resetText || 'Reset'}
               applyText={props.applyText || 'Toepassen'}
@@ -1595,6 +1630,7 @@ function ResourceOverviewInner({
                 }
                 setSearch(f.search.text);
                 setLocation(f.location);
+                setStreets(f.streets || []);
               }}
               preFilterTags={prefilterTagObj}
               displayCollapsibleFilter={displayCollapsibleFilter}
