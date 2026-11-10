@@ -96,8 +96,10 @@ a:visited {
   color: #004699;
 }
 
+/* 16px or larger: iOS Safari zooms the page in when a smaller input gets focus,
+   and the login screen then has to be pinched back after every field. */
 .form-input {
-  font-size: 15px;
+  font-size: 16px;
 }
 
 label.error {
