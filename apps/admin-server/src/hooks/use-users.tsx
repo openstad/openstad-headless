@@ -18,12 +18,7 @@ export type UsersPaginationOptions = {
   excludeAnonymous?: boolean;
 };
 
-export type UsersPaginationMetadata = {
-  page: number;
-  pageSize: number;
-  pageCount: number;
-  totalCount: number;
-};
+export type { PaginationMetadata as UsersPaginationMetadata } from '@openstad-headless/types';
 
 function buildUsersUrl(options?: UsersPaginationOptions) {
   const params = new URLSearchParams();
