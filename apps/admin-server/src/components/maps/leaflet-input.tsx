@@ -99,6 +99,13 @@ const MapInput: React.FC<MapComponentProps> = ({
           const container =
             typeof id === 'string' ? document.getElementById(id) : id;
           if (container && container._leaflet_id) {
+            // A previous Leaflet instance (e.g. from React Strict Mode's
+            // double-invoked mount in dev) may still be attached to this
+            // container. Fully tear it down instead of just clearing the
+            // id flag, otherwise two live maps end up stacked on one
+            // container and their drag handlers conflict.
+            L.DomEvent.off(container);
+            container.innerHTML = '';
             container._leaflet_id = undefined;
           }
           return orig.call(this, id);
@@ -175,7 +182,7 @@ const MapInput: React.FC<MapComponentProps> = ({
       <MapContainer
         center={center}
         zoom={7}
-        scrollWheelZoom={false}
+        scrollWheelZoom={true}
         style={{ height: '600px', width: '100%' }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
