@@ -8,6 +8,7 @@ import {
 import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useComments from '@/hooks/use-comments';
 import useUsers from '@/hooks/use-users';
+import { getSentimentLabel } from '@/lib/sentiment-labels';
 import { MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -60,7 +61,7 @@ export default function ProjectResourceArguments() {
                   {comment.createdAt}
                 </Paragraph>
                 <Paragraph className="hidden lg:flex lg:col-span-1 truncate">
-                  {comment.sentiment}
+                  {getSentimentLabel(comment.sentiment)}
                 </Paragraph>
                 <div
                   className="col-span-1 lg:col-span-1 flex ml-auto"

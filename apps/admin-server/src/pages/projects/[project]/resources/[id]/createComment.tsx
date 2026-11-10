@@ -104,7 +104,7 @@ export default function ProjectResourceCreateArgument() {
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       description: '',
-      sentiment: 'for',
+      sentiment: 'no sentiment',
       confirmation: false,
       parentId: '',
     },
@@ -132,7 +132,7 @@ export default function ProjectResourceCreateArgument() {
                 <FormLabel>Sentiment</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value || 'for'}>
+                  value={field.value || 'no sentiment'}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Voor" />
