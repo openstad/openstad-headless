@@ -38,4 +38,21 @@ describe('<TrixEditor />', () => {
     mountEditor(true, '<div>Tweede editor</div>');
     assertCustomizedEditor('Tweede editor');
   });
+
+  it('does not report a new value from the parent as a change', () => {
+    const onChange = cy.stub().as('onChange');
+    cy.mount(<TrixEditor value="<p>Een</p>" onChange={onChange} />).then(
+      ({ rerender }) => {
+        cy.get('trix-editor').should('contain.text', 'Een');
+        cy.then(() =>
+          rerender(<TrixEditor value="<p>Twee</p>" onChange={onChange} />)
+        );
+        cy.get('trix-editor').should('contain.text', 'Twee');
+        cy.wait(100);
+        cy.get('@onChange').should('not.have.been.called');
+        cy.get('trix-editor').type(' en meer');
+        cy.get('@onChange').should('have.been.called');
+      }
+    );
+  });
 });

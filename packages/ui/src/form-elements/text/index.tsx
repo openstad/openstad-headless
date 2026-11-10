@@ -129,12 +129,25 @@ const TrixEditor: React.FC<{
   // normalises that HTML and fires a change event for it, which is not a user
   // edit and must not be reported to the parent form.
   const isLoadingValueRef = useRef(false);
+  const loadingValueTimeoutRef = useRef<number | null>(null);
 
   const targetBlankHrefsRef = useRef<Set<string>>(new Set());
 
   const idRef = useRef(
     `trix-editor-${Math.random().toString(36).substring(2, 9)}`
   );
+
+  const loadValueIntoEditor = (html: string) => {
+    if (loadingValueTimeoutRef.current !== null) {
+      window.clearTimeout(loadingValueTimeoutRef.current);
+    }
+    isLoadingValueRef.current = true;
+    editorInstance.current.loadHTML(html);
+    loadingValueTimeoutRef.current = window.setTimeout(() => {
+      isLoadingValueRef.current = false;
+      loadingValueTimeoutRef.current = null;
+    }, 0);
+  };
 
   useEffect(() => {
     (async () => {
@@ -252,13 +265,7 @@ const TrixEditor: React.FC<{
 
       if (valueRef.current && editorInstance.current) {
         targetBlankHrefsRef.current = getTargetBlankHrefs(valueRef.current);
-        isLoadingValueRef.current = true;
-        editorInstance.current.loadHTML(valueRef.current);
-        // Trix can dispatch the change for this load asynchronously, so the
-        // flag is cleared on the next tick instead of straight after the call.
-        setTimeout(() => {
-          isLoadingValueRef.current = false;
-        }, 0);
+        loadValueIntoEditor(valueRef.current);
       }
     };
 
@@ -337,6 +344,11 @@ const TrixEditor: React.FC<{
       inputEl.removeEventListener('input', handleTrixChange);
       editorEl.removeEventListener('trix-focus', handleTrixFocus);
       editorEl.removeEventListener('trix-blur', handleTrixBlur);
+      if (loadingValueTimeoutRef.current !== null) {
+        window.clearTimeout(loadingValueTimeoutRef.current);
+        loadingValueTimeoutRef.current = null;
+      }
+      isLoadingValueRef.current = false;
     };
   }, []);
 
@@ -348,11 +360,7 @@ const TrixEditor: React.FC<{
     if (newHrefs.size > 0) {
       newHrefs.forEach((h) => targetBlankHrefsRef.current.add(h));
     }
-    isLoadingValueRef.current = true;
-    editorInstance.current.loadHTML(value || '');
-    setTimeout(() => {
-      isLoadingValueRef.current = false;
-    }, 0);
+    loadValueIntoEditor(value || '');
   }, [value]);
 
   return (
