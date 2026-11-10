@@ -26,17 +26,10 @@ export default function WidgetStemBegrootInclude(
   }
 
   const { data: loadedStatuses } = useStatuses(props.projectId);
-  let statuses = (loadedStatuses || []) as {
-    id: number;
-    name: string;
-  }[];
+  let statuses = loadedStatuses || [];
 
   const { data: loadedTags } = useTags(props.projectId);
-  const tags = (loadedTags || []) as Array<{
-    id: string;
-    name: string;
-    type?: string;
-  }>;
+  const tags = loadedTags || [];
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),

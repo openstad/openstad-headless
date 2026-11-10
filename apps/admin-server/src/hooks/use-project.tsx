@@ -1,6 +1,10 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiProject, DynamicJson } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
+
+// Failed updates resolve to `{ error }` instead of a project.
+export type ProjectUpdateResult = Partial<ApiProject> & { error?: string };
 
 export function useProject(scopes?: Array<string>) {
   const router = useRouter();
@@ -11,7 +15,7 @@ export function useProject(scopes?: Array<string>) {
   let useScopes: Array<string> = ['includeConfig', 'includeEmailConfig'];
   if (scopes) useScopes = useScopes.concat(scopes);
 
-  const projectSwr = useSWR(
+  const projectSwr = useSWR<ApiProject>(
     projectNumber
       ? `/api/openstad/api/project/${projectNumber}?${useScopes
           .map((s) => `${s}=1`)
@@ -19,13 +23,16 @@ export function useProject(scopes?: Array<string>) {
       : null
   );
 
-  const pdfStatusSwr = useSWR(
+  const pdfStatusSwr = useSWR<{ available?: boolean }>(
     projectNumber
       ? `/api/openstad/api/project/${projectNumber}/pdf/status`
       : null
   );
 
-  async function createProject(name: string) {
+  // Resolves to the error body (e.g. `{ status: 500 }`) when creation fails.
+  async function createProject(
+    name: string
+  ): Promise<Partial<ApiProject> & { status?: number }> {
     const res = await fetch('/api/openstad/api/project', {
       method: 'POST',
       headers: {
@@ -60,7 +67,7 @@ export function useProject(scopes?: Array<string>) {
     title: string,
     config: object,
     emailConfig: object
-  ) {
+  ): Promise<ApiProject> {
     const res = await fetch('/api/openstad/api/project', {
       method: 'POST',
       headers: {
@@ -76,8 +83,14 @@ export function useProject(scopes?: Array<string>) {
     return await res.json();
   }
 
-  async function updateProject(config: any, name?: any, url?: any) {
-    const body: { config: any; name?: string; url?: string } = { config };
+  async function updateProject(
+    config: DynamicJson,
+    name?: string,
+    url?: string
+  ): Promise<ProjectUpdateResult> {
+    const body: { config: DynamicJson; name?: string; url?: string } = {
+      config,
+    };
     if (name) {
       body.name = name;
     }
@@ -104,7 +117,9 @@ export function useProject(scopes?: Array<string>) {
     return data;
   }
 
-  async function updateProjectEmails(emailConfig: any) {
+  async function updateProjectEmails(
+    emailConfig: DynamicJson
+  ): Promise<ApiProject> {
     const res = await fetch(`/api/openstad/api/project/${projectNumber}`, {
       method: 'PUT',
       headers: {

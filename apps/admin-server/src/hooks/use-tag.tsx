@@ -1,3 +1,4 @@
+import type { ApiTag } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 import { validateProjectNumber } from '../lib/validateProjectNumber';
@@ -12,7 +13,7 @@ export default function useTags(projectId?: string, id?: string) {
 
   const url = `/api/openstad/api/project/${projectNumber}/tag/${useId}`;
 
-  const tagSwr = useSWR(
+  const tagSwr = useSWR<ApiTag>(
     (projectNumber || projectNumber === 0) && useId ? url : null
   );
 
@@ -30,7 +31,7 @@ export default function useTags(projectId?: string, id?: string) {
     newSubmitAddress: string | undefined,
     defaultResourceImage: string | undefined,
     documentMapIconColor: string | undefined
-  ) {
+  ): Promise<ApiTag> {
     const res = await fetch(url, {
       method: 'PUT',
       headers: {

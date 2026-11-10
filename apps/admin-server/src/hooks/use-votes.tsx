@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiVote } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export default function useVotes(projectId?: string) {
@@ -7,7 +8,9 @@ export default function useVotes(projectId?: string) {
   const baseUrl = `/api/openstad/api/project/${projectNumber}/vote`;
   const url = baseUrl + '?includeResource';
 
-  const { data, isLoading, error, mutate } = useSWR(projectNumber ? url : null);
+  const { data, isLoading, error, mutate } = useSWR<ApiVote[]>(
+    projectNumber ? url : null
+  );
 
   async function remove(id: string | number) {
     const res = await fetch(`${baseUrl}/${id}`, {
@@ -18,7 +21,7 @@ export default function useVotes(projectId?: string) {
     });
 
     if (res.ok) {
-      const existingData = [...data];
+      const existingData = [...(data || [])];
       const updatedList = existingData.filter((ed) => ed.id !== id);
       mutate(updatedList);
       return updatedList;

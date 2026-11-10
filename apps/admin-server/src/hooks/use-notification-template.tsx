@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiNotificationTemplate } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export default function useNotificationTemplate(projectId?: string) {
@@ -6,7 +7,9 @@ export default function useNotificationTemplate(projectId?: string) {
 
   let url = `/api/openstad/notification/project/${projectNumber}/template`;
 
-  const notificationTemplateSwr = useSWR(projectNumber ? url : null);
+  const notificationTemplateSwr = useSWR<ApiNotificationTemplate[]>(
+    projectNumber ? url : null
+  );
 
   async function create(
     projectId: string,
@@ -15,7 +18,7 @@ export default function useNotificationTemplate(projectId?: string) {
     label: string,
     subject: string,
     body: string
-  ) {
+  ): Promise<ApiNotificationTemplate> {
     const projectNumber: number | undefined = validateProjectNumber(projectId);
 
     const res = await fetch(url, {
@@ -34,9 +37,12 @@ export default function useNotificationTemplate(projectId?: string) {
     });
 
     if (res.ok) {
-      const data = await res.json();
+      const data: ApiNotificationTemplate = await res.json();
       console.log(data);
-      notificationTemplateSwr.mutate([...notificationTemplateSwr.data, data]);
+      notificationTemplateSwr.mutate([
+        ...(notificationTemplateSwr.data || []),
+        data,
+      ]);
       return data;
     } else {
       throw new Error('Could not create the template');
@@ -48,7 +54,7 @@ export default function useNotificationTemplate(projectId?: string) {
     label: string,
     subject: string,
     body: string
-  ) {
+  ): Promise<ApiNotificationTemplate> {
     let url = `/api/openstad/notification/project/${projectNumber}/template/${id}`;
     const res = await fetch(url, {
       method: 'PUT',
@@ -63,8 +69,11 @@ export default function useNotificationTemplate(projectId?: string) {
     });
 
     if (res.ok) {
-      const data = await res.json();
-      notificationTemplateSwr.mutate([...notificationTemplateSwr.data, data]);
+      const data: ApiNotificationTemplate = await res.json();
+      notificationTemplateSwr.mutate([
+        ...(notificationTemplateSwr.data || []),
+        data,
+      ]);
       return data;
     } else {
       throw new Error('Could not edit the template');

@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiDatalayer } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export default function useDatalayers(projectId?: string) {
@@ -6,9 +7,12 @@ export default function useDatalayers(projectId?: string) {
 
   let url = `/api/openstad/api/datalayer`;
 
-  const datalayerSwr = useSWR(projectNumber ? url : null);
+  const datalayerSwr = useSWR<ApiDatalayer[]>(projectNumber ? url : null);
 
-  async function createDatalayer(name: string, layer: string) {
+  async function createDatalayer(
+    name: string,
+    layer: string
+  ): Promise<ApiDatalayer> {
     const res = await fetch(url, {
       method: 'POST',
       headers: {
@@ -30,7 +34,7 @@ export default function useDatalayers(projectId?: string) {
     });
 
     if (res.ok) {
-      const existingData = [...datalayerSwr.data];
+      const existingData = [...(datalayerSwr.data || [])];
       const updatedList = existingData.filter((ed) => ed.id !== id);
       datalayerSwr.mutate(updatedList);
       return updatedList;

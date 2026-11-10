@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiWidget } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export default function useChoiceGuideWidgets(projectId?: string) {
@@ -6,7 +7,9 @@ export default function useChoiceGuideWidgets(projectId?: string) {
 
   const url = `/api/openstad/api/project/${projectNumber}/choicesguide/widgets`;
 
-  const choiceGuidesSwr = useSWR(projectNumber ? url : null);
+  const choiceGuidesSwr = useSWR<Pick<ApiWidget, 'id' | 'description'>[]>(
+    projectNumber ? url : null
+  );
 
   return { ...choiceGuidesSwr };
 }

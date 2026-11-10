@@ -256,9 +256,9 @@ export default function DocumentExtraFields(
                   form={form}
                   fieldName="defaultTags"
                   fieldLabel="Select default tags"
-                  label={(t: Tag) => t.name}
+                  label={(t) => t.name}
                   keyForGrouping="type"
-                  keyPerItem={(t: Tag) => `${t.id}`}
+                  keyPerItem={(t) => `${t.id}`}
                   items={tags || []}
                   layout="vertical"
                   selectedPredicate={(t) =>

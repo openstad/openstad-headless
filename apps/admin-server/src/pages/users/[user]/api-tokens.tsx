@@ -61,8 +61,8 @@ export default function UserApiTokens() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const user = memberships[selectedIndex];
 
-  const projectName = (projectId?: number) =>
-    projects?.find((project: any) => project.id === projectId)?.name ||
+  const projectName = (projectId?: number | null) =>
+    projects?.find((project) => project.id === projectId)?.name ||
     `Project ${projectId}`;
 
   const {
@@ -71,7 +71,7 @@ export default function UserApiTokens() {
     isLoading,
     createToken,
     revokeToken,
-  } = useApiTokens(user?.projectId, user?.id);
+  } = useApiTokens(user?.projectId ?? undefined, user?.id);
 
   const [newToken, setNewToken] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -150,7 +150,7 @@ export default function UserApiTokens() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {memberships.map((membership: any, index: number) => (
+              {memberships.map((membership, index) => (
                 <SelectItem key={membership.id} value={String(index)}>
                   {projectName(membership.projectId)}
                 </SelectItem>

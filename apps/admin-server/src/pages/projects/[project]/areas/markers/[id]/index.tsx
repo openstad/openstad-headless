@@ -1,6 +1,7 @@
 import MarkersEditor from '@/components/markers-editor';
 import { PageLayout } from '@/components/ui/page-layout';
 import useMarker from '@/hooks/use-marker';
+import type { ApiMapMarker } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -14,7 +15,7 @@ export default function ProjectMarkersEdit() {
   );
   const [isSaving, setIsSaving] = useState(false);
 
-  async function handleSave(name: string, markers: any[]) {
+  async function handleSave(name: string, markers: ApiMapMarker[]) {
     setIsSaving(true);
     try {
       await updateMarkers({ name, markers });

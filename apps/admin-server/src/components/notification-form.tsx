@@ -348,8 +348,8 @@ type Props = {
   engine?: 'email' | 'sms';
   id?: string;
   label?: string;
-  subject?: string;
-  body?: string;
+  subject?: string | null;
+  body?: string | null;
 };
 
 const notificationTypes = {
@@ -632,7 +632,9 @@ export function NotificationForm({
                       <Textarea
                         placeholder="Inhoud van de mail..."
                         defaultValue={
-                          field.value.length > 0 ? field.value : body
+                          field.value.length > 0
+                            ? field.value
+                            : (body ?? undefined)
                         }
                         rows={20}
                         onKeyUpCapture={(e) => handleOnChange(e, field)}

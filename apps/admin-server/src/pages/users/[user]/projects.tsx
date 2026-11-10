@@ -8,7 +8,7 @@ import UserRoleDropdownList from '@/components/user-role-dropdown-list';
 import useAdminProjectId from '@/hooks/use-admin-project-id';
 import projectListSwr from '@/hooks/use-project-list';
 import useUser from '@/hooks/use-user';
-import useUsers from '@/hooks/use-users';
+import useUsers, { type userType } from '@/hooks/use-users';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -91,12 +91,11 @@ export default function CreateUserProjects() {
     ];
 
     for (let updateValue of mergedProjects) {
-      let user = users;
-      if (Array.isArray(users)) {
-        user = users.find(
-          (user: any) => user.projectId == updateValue.projectId
-        );
-      }
+      let user = Array.isArray(users)
+        ? users.find(
+            (user) => String(user.projectId) === String(updateValue.projectId)
+          )
+        : users;
       if (user) {
         try {
           const updatedUser = user;
@@ -115,10 +114,10 @@ export default function CreateUserProjects() {
           error = err;
         }
       } else {
-        user = users[0];
-        if (user.idpUser?.identifier && user.idpUser?.provider) {
+        user = Array.isArray(users) ? users[0] : users;
+        if (user?.idpUser?.identifier && user?.idpUser?.provider) {
           try {
-            const newUser = {
+            const newUser: userType = {
               ...user,
               projectId: updateValue.projectId,
             };

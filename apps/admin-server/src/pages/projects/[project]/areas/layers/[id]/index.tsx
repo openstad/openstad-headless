@@ -40,9 +40,9 @@ export default function ProjectDatalayerEdit() {
 
   const defaults = useCallback(
     () => ({
-      name: data?.name || null,
+      name: data?.name || undefined,
       layer: JSON.stringify(data?.layer),
-      icon: data?.icon || null,
+      icon: data?.icon || undefined,
       iconUploader: '',
     }),
     [data]

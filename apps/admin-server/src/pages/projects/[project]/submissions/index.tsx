@@ -91,8 +91,8 @@ export default function ProjectSubmissions() {
     const ID = value !== '0' ? value?.split(' - ')[0] : '0';
     setActiveWidget(value);
 
-    const selectedWidget = widgetData.find(
-      (widget: any) => widget.id.toString() === ID
+    const selectedWidget = widgetData?.find(
+      (widget) => widget.id.toString() === ID
     );
     setSelectedWidget(selectedWidget);
   };

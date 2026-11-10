@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiWidget, DynamicJson } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
 import toast from 'react-hot-toast';
 import useSWR from 'swr';
@@ -11,13 +12,13 @@ export function useWidgetConfig<R>(idOverride?: string) {
   let projectNumber: number | undefined = validateProjectNumber(projectId);
   let useId: number | undefined = validateProjectNumber(id);
 
-  const swr = useSWR(
+  const swr = useSWR<Omit<ApiWidget, 'config'> & { config: R }>(
     projectNumber && useId
       ? `/api/openstad/api/project/${projectNumber}/widgets/${useId}?includeType=1`
       : null
   );
 
-  async function updateConfig<R extends { [key: string]: any }>(config: R) {
+  async function updateConfig<C extends DynamicJson>(config: C) {
     // these are added by the preview but should not be saved
     if (config.login?.url) delete config.login?.url;
     if (config.logout?.url) delete config.logout?.url;

@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiMapMarker, ApiMarkers } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export default function useMarker(projectId?: string, markersId?: string) {
@@ -7,9 +8,14 @@ export default function useMarker(projectId?: string, markersId?: string) {
 
   let url = `/api/openstad/api/project/${projectNumber}/markers/${markersNumber}`;
 
-  const markerSwr = useSWR(projectNumber && markersNumber ? url : null);
+  const markerSwr = useSWR<ApiMarkers>(
+    projectNumber && markersNumber ? url : null
+  );
 
-  async function updateMarkers(body: { name?: string; markers?: any[] }) {
+  async function updateMarkers(body: {
+    name?: string;
+    markers?: ApiMapMarker[];
+  }): Promise<ApiMarkers> {
     const res = await fetch(url, {
       method: 'PUT',
       headers: {

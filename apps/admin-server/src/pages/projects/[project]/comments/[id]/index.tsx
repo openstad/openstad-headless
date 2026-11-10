@@ -35,8 +35,8 @@ export default function ProjectCommentEdit() {
 
   const defaults = useCallback(
     () => ({
-      description: data?.description || null,
-      label: data?.label || null,
+      description: data?.description || undefined,
+      label: data?.label || undefined,
     }),
     [data]
   );

@@ -84,11 +84,7 @@ export default function WidgetResourceOverviewTags(
 ) {
   type FormData = z.infer<typeof formSchema>;
   const { data: tags } = useTags(props.projectId);
-  const allTags = (tags || []) as Array<{
-    id: string;
-    name: string;
-    type?: string;
-  }>;
+  const allTags = tags || [];
 
   const [tagGroupNames, setGroupedNames] = useState<string[]>([]);
 
@@ -232,9 +228,8 @@ export default function WidgetResourceOverviewTags(
                                     ) > -1
                                   }
                                   onCheckedChange={(checked) => {
-                                    const projectId = tags.find(
-                                      (tag: { type: string }) =>
-                                        tag.type === groupName
+                                    const projectId = allTags.find(
+                                      (tag) => tag.type === groupName
                                     )?.projectId;
 
                                     const updatedFields =

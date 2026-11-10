@@ -176,7 +176,7 @@ export default function ProjectSettingsUsers(
     project as string
   );
   const template = notificationTemplates?.find(
-    (t: { type: string }) => t.type === 'user account about to expire'
+    (t) => t.type === 'user account about to expire'
   );
 
   const sendEmail = data?.emailConfig?.notifications?.fromAddress;
@@ -367,8 +367,8 @@ export default function ProjectSettingsUsers(
                   <NotificationForm
                     type="user account about to expire"
                     label="Gebruikersaccount staat op het punt te verlopen"
-                    engine={template?.engine}
-                    id={template?.id}
+                    engine={template?.engine as 'email' | 'sms' | undefined}
+                    id={template?.id?.toString()}
                     subject={template?.subject}
                     body={template?.body}
                   />

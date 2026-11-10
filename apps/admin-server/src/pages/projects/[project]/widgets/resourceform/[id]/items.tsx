@@ -2016,7 +2016,7 @@ export default function WidgetResourceFormItems(
                               let options = selectedQuestion?.options || [];
 
                               if (selectedQuestion?.type === 'tags') {
-                                options = allTags
+                                options = (allTags || [])
                                   .filter(
                                     (tag: any) =>
                                       tag.type === selectedQuestion.tags
@@ -2160,7 +2160,7 @@ export default function WidgetResourceFormItems(
                       type="submit"
                       disabled={
                         (form.watch('type') === 'tags' &&
-                          allTags.length === 0) ||
+                          (allTags || []).length === 0) ||
                         ((!form.watch('fieldKey') || !isFieldKeyUnique) &&
                           !['none', 'pagination'].includes(
                             form.watch('type') || ''

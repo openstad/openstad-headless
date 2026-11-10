@@ -62,10 +62,9 @@ export default function WidgetResourcesMapDatalayers(
   const router = useRouter();
   const projectId = router.query.project as string;
 
-  const { data: datalayers } =
-    (useDatalayers(
-      props.projectId === undefined ? projectId : props.projectId
-    ) as { data: { id: string; name: string }[] }) ?? [];
+  const { data: datalayers } = useDatalayers(
+    props.projectId === undefined ? projectId : props.projectId
+  );
 
   useEffect(() => {
     if (!form.getValues('enableOnOffSwitching')) {

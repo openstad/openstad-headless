@@ -1,4 +1,5 @@
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
+import type { ApiStatus } from '@openstad-headless/types';
 import useSWR from 'swr';
 
 export default function useStatuses(projectId?: string, id?: string) {
@@ -7,7 +8,7 @@ export default function useStatuses(projectId?: string, id?: string) {
 
   const url = `/api/openstad/api/project/${projectNumber}/status/${useId}`;
 
-  const statuseswr = useSWR(projectNumber && useId ? url : null);
+  const statuseswr = useSWR<ApiStatus>(projectNumber && useId ? url : null);
 
   async function updateStatus(
     name: string | undefined,
@@ -23,7 +24,7 @@ export default function useStatuses(projectId?: string, id?: string) {
       canComment: boolean | undefined;
       canLike: boolean | undefined;
     }
-  ) {
+  ): Promise<ApiStatus> {
     const res = await fetch(url, {
       method: 'PUT',
       headers: {

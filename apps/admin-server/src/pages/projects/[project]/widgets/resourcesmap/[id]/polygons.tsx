@@ -90,10 +90,9 @@ export default function WidgetResourcesMapButton(
   const router = useRouter();
   const projectId = router.query.project as string;
 
-  const { data: areas } =
-    (useAreas(props.projectId === undefined ? projectId : props.projectId) as {
-      data: { id: string; name: string }[];
-    }) ?? [];
+  const { data: areas } = useAreas(
+    props.projectId === undefined ? projectId : props.projectId
+  );
 
   return (
     <div className="p-6 bg-white rounded-md">

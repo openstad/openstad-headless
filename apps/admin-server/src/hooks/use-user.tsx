@@ -1,5 +1,11 @@
+import type { ApiUser } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
+
+export type UserUpdateBody = Partial<ApiUser> & {
+  id?: number;
+  projectId?: number | null;
+};
 
 export default function useUser() {
   const router = useRouter();
@@ -25,9 +31,10 @@ export default function useUser() {
     }
   }
 
-  const userSwr = useSWR(url ? url : null);
+  // byIdpUser lookups return every membership (one User row per project).
+  const userSwr = useSWR<ApiUser | ApiUser[]>(url ? url : null);
 
-  async function updateUser(body: any) {
+  async function updateUser(body: UserUpdateBody): Promise<ApiUser> {
     if (!Array.isArray(body)) {
       // update user
       let projectId = body.projectId;
