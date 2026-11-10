@@ -7,6 +7,8 @@ const db = require('../../db');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
+const filterByStreets = require('../../middleware/filter-by-streets');
+const { collectStreets } = require('../../lib/resource-streets');
 const c = require('config');
 
 const { Op } = require('sequelize');
@@ -320,13 +322,33 @@ router
       .catch(next);
   })
   .get(auth.useReqUser)
+  .get(filterByStreets)
   .get(
     searchInResults({
-      searchfields: ['id', 'title', 'summary', 'description', 'createdAt'],
+      searchfields: [
+        'id',
+        'title',
+        'summary',
+        'description',
+        'createdAt',
+        'location.address.street',
+        'location.address.city',
+      ],
     })
   )
   .get(function (req, res, next) {
     res.json(req.results);
+  });
+
+router
+  .route('/streets')
+  .get(auth.can('Resource', 'list'))
+  .get(function (req, res, next) {
+    req.scope.push('markerFields');
+    db.Resource.scope(...req.scope)
+      .findAll({ where: { projectId: req.params.projectId, deletedAt: null } })
+      .then((resources) => res.json(collectStreets(resources)))
+      .catch(next);
   });
 
 router
@@ -428,6 +450,7 @@ router
       .catch(next);
   })
   .get(auth.useReqUser)
+  .get(filterByStreets)
   .get(
     searchInResults({
       searchfields: [
@@ -438,6 +461,8 @@ router
         'createdAt',
         'yes',
         'no',
+        'location.address.street',
+        'location.address.city',
       ],
     })
   )
