@@ -14,7 +14,7 @@
   "author": "Gemeente Amsterdam",
   "license": "MIT",
   "dependencies": {
-    "@azure/msal-node": "^7.1.2",
+    "@azure/msal-node": "^7.2.1",
     "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/api-logs": "^0.223.0",
     "@opentelemetry/auto-instrumentations-node": "^0.81.0",
