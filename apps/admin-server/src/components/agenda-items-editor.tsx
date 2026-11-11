@@ -264,7 +264,12 @@ export function AgendaItemsEditor({
           highlighted: values.highlighted,
           activeFrom: values.activeFrom,
           activeTo: values.activeTo,
-          links: values.links || [],
+          links: applySelectedOptionEdit(
+            links,
+            selectedLink,
+            values.links,
+            linkFields
+          ),
         },
       ]);
     }
@@ -430,28 +435,31 @@ export function AgendaItemsEditor({
                   <Heading size="xl">Links</Heading>
                   <Separator className="mt-2" />
                   <FormField
+                    key={`title-${activeLink}`}
                     control={form.control}
                     name={`links.${activeLink}.title`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Link titel</FormLabel>
-                        <Input {...field} />
+                        <Input {...field} value={field.value ?? ''} />
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   <FormField
+                    key={`url-${activeLink}`}
                     control={form.control}
                     name={`links.${activeLink}.url`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Link URL</FormLabel>
-                        <Input {...field} />
+                        <Input {...field} value={field.value ?? ''} />
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   <FormField
+                    key={`openInNewWindow-${activeLink}`}
                     control={form.control}
                     name={`links.${activeLink}.openInNewWindow`}
                     render={({ field }) => (
@@ -462,7 +470,7 @@ export function AgendaItemsEditor({
                           onCheckedChange={(e: boolean) => {
                             field.onChange(e);
                           }}
-                          checked={field.value}>
+                          checked={field.value ?? false}>
                           <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
                         </Switch.Root>
                         <FormMessage />
