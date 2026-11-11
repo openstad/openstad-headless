@@ -39,7 +39,7 @@ export default function WidgetResourceOverviewSearch(
       displaySearch: props.displaySearch || false,
       displaySearchText: props.displaySearchText || false,
       textActiveSearch:
-        props.textActiveSearch || 'Bekijk de tekstresultaten voor [zoekterm]',
+        props.textActiveSearch ?? 'Bekijk de tekstresultaten voor [zoekterm]',
     },
   });
 
