@@ -3,6 +3,8 @@ import { useProject } from '@/hooks/use-project';
 import 'leaflet/dist/leaflet.css';
 import React, { useEffect, useMemo, useState } from 'react';
 
+import { allowLeafletContainerReuse } from './allow-leaflet-container-reuse';
+
 interface LeafletComponents {
   MapContainer: React.ComponentType<any>;
   TileLayer: React.ComponentType<any>;
@@ -43,12 +45,6 @@ function getBoundsFromPolygon(
   ];
 }
 
-// MapContainer's center/zoom props only apply on the initial mount, but the
-// project's polygon loads asynchronously (after that mount), so fit to it
-// imperatively once it arrives instead of relying on the prop alone. Defined
-// at module scope (not inline in MapInput) so it keeps a stable identity
-// across renders and the effect below only re-fires when bounds actually
-// changes, not on every unrelated re-render.
 function FitToPolygon({
   bounds,
   useMap,
@@ -92,25 +88,7 @@ const MapInput: React.FC<MapComponentProps> = ({
     if (typeof window !== 'undefined') {
       setIsSSR(false);
 
-      import('leaflet').then((L) => {
-        const proto = L.Map.prototype as any;
-        const orig = proto._initContainer;
-        proto._initContainer = function (id: any) {
-          const container =
-            typeof id === 'string' ? document.getElementById(id) : id;
-          if (container && container._leaflet_id) {
-            // A previous Leaflet instance (e.g. from React Strict Mode's
-            // double-invoked mount in dev) may still be attached to this
-            // container. Fully tear it down instead of just clearing the
-            // id flag, otherwise two live maps end up stacked on one
-            // container and their drag handlers conflict.
-            L.DomEvent.off(container);
-            container.innerHTML = '';
-            container._leaflet_id = undefined;
-          }
-          return orig.call(this, id);
-        };
-      });
+      import('leaflet').then((L) => allowLeafletContainerReuse(L));
 
       import('react-leaflet')
         .then((leaflet) => {
