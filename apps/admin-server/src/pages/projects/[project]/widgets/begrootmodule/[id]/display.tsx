@@ -80,13 +80,13 @@ export default function BegrootmoduleDisplay(
       displayRanking: props.displayRanking || false,
       displayPriceLabel: props.displayPriceLabel || false,
       showVoteCount: props.showVoteCount || false,
-      notEnoughBudgetText: props.notEnoughBudgetText || 'Niet genoeg budget',
+      notEnoughBudgetText: props.notEnoughBudgetText ?? 'Niet genoeg budget',
       showOriginalResource: props.showOriginalResource || false,
       hideReadMore: props.hideReadMore || false,
       scrollWhenMaxReached: props.scrollWhenMaxReached || false,
       originalResourceUrl: props.originalResourceUrl || '',
       originalResourceText:
-        props.originalResourceText || 'Bekijk het originele ingediende plan',
+        props.originalResourceText ?? 'Bekijk het originele ingediende plan',
       resourceListColumns: props.resourceListColumns || 3,
       showInfoMenu:
         props.showInfoMenu === undefined ? true : props.showInfoMenu,
