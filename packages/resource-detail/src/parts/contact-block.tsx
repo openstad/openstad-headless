@@ -327,7 +327,7 @@ export function ContactBlock({
         {buttonText}
       </Button>
       <p className="osc-contact-block-status" role="status">
-        {status}
+        {status ? <RteContent content={status} forceInline={true} /> : null}
       </p>
 
       <Dialog
@@ -337,7 +337,9 @@ export function ContactBlock({
         <div className="osc-contact-block-dialog-body">
           <DialogTitle>{loginTitle}</DialogTitle>
           <DialogDescription>
-            <Paragraph>{loginDescriptionText}</Paragraph>
+            <Paragraph>
+              <RteContent content={loginDescriptionText} forceInline={true} />
+            </Paragraph>
           </DialogDescription>
           <div className="osc-contact-block-actions">
             <Button
@@ -386,7 +388,10 @@ export function ContactBlock({
                 <Paragraph>Laden...</Paragraph>
               ) : choosableResources.length === 0 ? (
                 <FormFieldDescription>
-                  {ownResourceEmptyText}
+                  <RteContent
+                    content={ownResourceEmptyText}
+                    forceInline={true}
+                  />
                 </FormFieldDescription>
               ) : (
                 choosableResources.map((option) => {

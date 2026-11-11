@@ -47,6 +47,8 @@ const TrixEditor = dynamic(
 );
 
 const DEFAULT_HANDLER = 'default';
+const HTML_ALLOWED =
+  'HTML is toegestaan, bijvoorbeeld <a href="https://www.voorbeeld.nl">een link</a>.';
 
 const formSchema = z.object({
   relatedResources: z.object({
@@ -507,7 +509,8 @@ export default function WidgetResourceDetailLinks(
                   {textField(
                     'contactBlock.ownResourceEmptyText',
                     'Tekst als er geen eigen inzending is',
-                    'Er is nog geen eigen inzending die hiervoor gekozen kan worden.'
+                    'Er is nog geen eigen inzending die hiervoor gekozen kan worden.',
+                    HTML_ALLOWED
                   )}
                 </>
               ) : null}
@@ -556,7 +559,8 @@ export default function WidgetResourceDetailLinks(
               {textField(
                 'contactBlock.loginDescription',
                 'Beschrijving login pop-up',
-                contactDefaults.loginDescription
+                contactDefaults.loginDescription,
+                HTML_ALLOWED
               )}
               {textField(
                 'contactBlock.loginButtonText',
@@ -570,7 +574,8 @@ export default function WidgetResourceDetailLinks(
               {textField(
                 'contactBlock.successMessage',
                 'Melding na versturen',
-                'Het bericht is verstuurd.'
+                'Het bericht is verstuurd.',
+                HTML_ALLOWED
               )}
               {isContactMessage
                 ? null
@@ -578,7 +583,7 @@ export default function WidgetResourceDetailLinks(
                     'contactBlock.linkedMessage',
                     'Melding na direct koppelen',
                     'De koppeling is gemaakt.',
-                    'Als de bezoeker eigen inzendingen aan elkaar koppelt, wordt de koppeling direct gemaakt.'
+                    `Als de bezoeker eigen inzendingen aan elkaar koppelt, wordt de koppeling direct gemaakt. ${HTML_ALLOWED}`
                   )}
               {isContactMessage
                 ? null
@@ -586,7 +591,7 @@ export default function WidgetResourceDetailLinks(
                     'contactBlock.notSentMessage',
                     'Melding als er niets is verstuurd',
                     'Er is geen nieuwe uitnodiging verstuurd. Er staat al een uitnodiging open of de inzendingen zijn al gekoppeld.',
-                    'Als er al een uitnodiging openstaat of de inzendingen al gekoppeld zijn, wordt er geen nieuwe uitnodiging verstuurd.'
+                    `Als er al een uitnodiging openstaat of de inzendingen al gekoppeld zijn, wordt er geen nieuwe uitnodiging verstuurd. ${HTML_ALLOWED}`
                   )}
             </div>
           ) : null}
