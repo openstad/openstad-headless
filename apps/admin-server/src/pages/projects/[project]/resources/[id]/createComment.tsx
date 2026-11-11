@@ -213,13 +213,13 @@ export default function ProjectResourceCreateArgument() {
             name="sentiment"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Sentiment</FormLabel>
+                <FormLabel>Soort reactie</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   value={field.value || 'no sentiment'}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Voor" />
+                      <SelectValue placeholder="Neutraal" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
