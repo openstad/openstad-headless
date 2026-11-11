@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -12,11 +11,12 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useDatalayers from '@/hooks/use-datalayers';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -55,10 +55,16 @@ export default function WidgetResourcesMapDatalayers(
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
-      datalayer: props?.datalayer || '',
+      datalayer: props?.datalayer || [],
       enableOnOffSwitching: props?.enableOnOffSwitching || false,
     },
   });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Kaartlagen',
+  });
+
   const router = useRouter();
   const projectId = router.query.project as string;
 
@@ -67,16 +73,22 @@ export default function WidgetResourcesMapDatalayers(
       props.projectId === undefined ? projectId : props.projectId
     ) as { data: { id: string; name: string }[] }) ?? [];
 
+  const onOffSwitching = form.getValues('enableOnOffSwitching');
+  const previousOnOffSwitching = useRef(onOffSwitching);
   useEffect(() => {
-    if (!form.getValues('enableOnOffSwitching')) {
-      const updatedLayers = (form.getValues('datalayer') || []).map((layer) => {
-        const { activeOnInit, ...rest } = layer;
-        return rest;
-      });
+    const wasOn = previousOnOffSwitching.current;
+    previousOnOffSwitching.current = onOffSwitching;
+    if (!wasOn || onOffSwitching) return;
+    const current = form.getValues('datalayer') || [];
+    const updatedLayers = current.map((layer) => {
+      const { activeOnInit, ...rest } = layer;
+      return rest;
+    });
+    if (JSON.stringify(updatedLayers) !== JSON.stringify(current)) {
       form.setValue('datalayer', updatedLayers);
       props.onFieldChanged('datalayer', updatedLayers);
     }
-  }, [form.getValues('enableOnOffSwitching')]);
+  }, [onOffSwitching]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -204,16 +216,6 @@ export default function WidgetResourcesMapDatalayers(
               </FormItem>
             )}
           />
-
-          <Button
-            type={props?.buttonType || 'submit'}
-            onClick={() => {
-              if (props?.buttonType === 'button') {
-                onSubmit(form.getValues());
-              }
-            }}>
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

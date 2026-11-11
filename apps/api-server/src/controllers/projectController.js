@@ -566,7 +566,7 @@ async function syncAuthProvidersAfterCreate(req, res, next) {
         continue;
       }
 
-      let authConfig = await authSettings.config({
+      let authConfig = await authSettings.configForClientUpdate({
         project,
         useAuth: provider,
       });
@@ -875,7 +875,7 @@ async function updateAuthClients(req, res, next) {
         continue;
       }
 
-      let authConfig = await authSettings.config({
+      let authConfig = await authSettings.configForClientUpdate({
         project,
         useAuth: provider,
       });

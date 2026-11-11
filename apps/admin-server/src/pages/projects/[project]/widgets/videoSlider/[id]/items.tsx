@@ -21,8 +21,15 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { useDraftItems } from '@/hooks/useDraftItems';
+import { useOpenItemDraft } from '@/hooks/useOpenItemDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import {
+  applySelectedOptionEdit,
+  fieldKeyError,
+  mergeSelectedItem,
+} from '@/lib/open-item-merge';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
@@ -32,7 +39,7 @@ import {
 } from '@openstad-headless/enquete/src/types/enquete-props';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -90,11 +97,16 @@ const formSchema = z.object({
   key2: z.string().optional(),
 });
 
+type SliderItem = Item & { videoUrl?: string; view?: string; group?: string };
+
 export default function WidgetEnqueteItems(
   props: EnqueteWidgetProps & EditFieldProps<EnqueteWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, commitItems] = useDraftItems<Item>(
+    props.items,
+    props.onFieldChanged
+  );
   const [options, setOptions] = useState<Option[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
@@ -108,6 +120,35 @@ export default function WidgetEnqueteItems(
   const router = useRouter();
   const { project } = router.query;
 
+  type OpenItemState = {
+    options: Option[];
+    selectedOption: Option | null;
+  };
+
+  function mergeOpenItem(
+    currentItems: Item[],
+    selectedId: string,
+    values: FormData,
+    state: OpenItemState
+  ) {
+    const {
+      trigger: _formTrigger,
+      imageUpload: _imageUpload,
+      imageOptionUpload: _imageOptionUpload,
+      image1Upload: _image1Upload,
+      image2Upload: _image2Upload,
+      ...itemValues
+    } = values;
+    return mergeSelectedItem(currentItems, selectedId, {
+      ...itemValues,
+      options: applySelectedOptionEdit(
+        state.options,
+        state.selectedOption,
+        values.options
+      ),
+    } as Partial<Item>);
+  }
+
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
     if (values?.options) {
@@ -117,7 +158,7 @@ export default function WidgetEnqueteItems(
     if (selectedItem) {
       const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
 
-      setItems((currentItems) =>
+      commitItems((currentItems) =>
         currentItems.map((item) =>
           item.id === selectedItem.id
             ? { ...item, ...valuesWithoutTrigger }
@@ -126,7 +167,7 @@ export default function WidgetEnqueteItems(
       );
       setSelectedItemId(null);
     } else {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
           (max, i) => Math.max(max, parseInt(i.trigger) || 0),
           0
@@ -255,62 +296,60 @@ export default function WidgetEnqueteItems(
     defaultValues: defaults(),
   });
 
-  const itemsInitialized = React.useRef(false);
-  useEffect(() => {
-    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
-      itemsInitialized.current = true;
-      setItems(props.items.map(withId));
-    }
-  }, [props?.items]);
+  const { releaseOpenItem } = useOpenItemDraft<Item, FormData, OpenItemState>({
+    form,
+    openId: selectedItem?.id ?? null,
+    state: { options, selectedOption },
+    items,
+    commitItems,
+    merge: mergeOpenItem,
+    validate: (currentItems, selectedId, values) =>
+      values.questionType === 'none'
+        ? undefined
+        : fieldKeyError(currentItems, selectedId, values.fieldKey),
+    label: 'Items',
+  });
 
-  const { onFieldChanged } = props;
-  useEffect(() => {
-    if (onFieldChanged) {
-      onFieldChanged('items', items);
-    }
-  }, [items]);
+  function buildFormValues(item: SliderItem) {
+    return {
+      trigger: item.trigger,
+      title: item.title || '',
+      key: item.key || '',
+      fieldKey: item.fieldKey || '',
+      description: item.description || '',
+      questionType: item.questionType || '',
+      videoUrl: item.videoUrl || '',
+      minCharacters: item.minCharacters || '',
+      maxCharacters: item.maxCharacters || '',
+      variant: item.variant || '',
+      options: item.options || [],
+      multiple: item.multiple || false,
+      view: item.view || 'default',
+      group: item.group || '',
+      image: item.image || '',
+      imageAlt: item.imageAlt || '',
+      imageDescription: item.imageDescription || '',
+      fieldRequired: item.fieldRequired || false,
+      maxChoices: item.maxChoices || '',
+      maxChoicesMessage: item.maxChoicesMessage || '',
+      showSmileys: item.showSmileys || false,
+      defaultValue: item.defaultValue || '',
+      placeholder: item.placeholder || '',
+      image1: item.image1 || '',
+      text1: item.text1 || '',
+      key1: item.key1 || '',
+      image2: item.image2 || '',
+      text2: item.text2 || '',
+      key2: item.key2 || '',
+    };
+  }
 
-  // Sets form to selected item values when item is selected
-  useEffect(() => {
-    if (selectedItem) {
-      form.reset({
-        trigger: selectedItem.trigger,
-        title: selectedItem.title || '',
-        fieldKey: selectedItem.fieldKey || '',
-        description: selectedItem.description || '',
-        questionType: selectedItem.questionType || '',
-        // @ts-ignore
-        videoUrl: selectedItem.videoUrl || '',
-        minCharacters: selectedItem.minCharacters || '',
-        maxCharacters: selectedItem.maxCharacters || '',
-        variant: selectedItem.variant || '',
-        options: selectedItem.options || [],
-        multiple: selectedItem.multiple || false,
-        // @ts-ignore
-        view: selectedItem.view || 'default',
-        // @ts-ignore
-        group: selectedItem.group || '',
-        image: selectedItem.image || '',
-        imageAlt: selectedItem.imageAlt || '',
-        imageDescription: selectedItem.imageDescription || '',
-        fieldRequired: selectedItem.fieldRequired || false,
-        maxChoices: selectedItem.maxChoices || '',
-        maxChoicesMessage: selectedItem.maxChoicesMessage || '',
-        showSmileys: selectedItem.showSmileys || false,
-        defaultValue: selectedItem.defaultValue || '',
-        placeholder: selectedItem.placeholder || '',
-
-        // Keeping these for backwards compatibility
-        image1: selectedItem.image1 || '',
-        text1: selectedItem.text1 || '',
-        key1: selectedItem.key1 || '',
-        image2: selectedItem.image2 || '',
-        text2: selectedItem.text2 || '',
-        key2: selectedItem.key2 || '',
-      });
-      setOptions((selectedItem.options || []).map(withId));
-    }
-  }, [selectedItemId, form]);
+  function openItem(item: SliderItem) {
+    form.reset(buildFormValues(item));
+    setOptions((item.options || []).map(withId));
+    setOption(null);
+    setSelectedItemId(item.id ?? null);
+  }
 
   useEffect(() => {
     if (selectedOption) {
@@ -334,7 +373,7 @@ export default function WidgetEnqueteItems(
     isItemAction: boolean // Determines if the action is for items or options
   ) => {
     if (isItemAction) {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         return handleMovementOrDeletion(
           currentItems,
           actionType,
@@ -390,20 +429,6 @@ export default function WidgetEnqueteItems(
     return sorted;
   }
 
-  function handleSaveItems() {
-    const updatedProps = { ...props };
-
-    Object.keys(updatedProps).forEach((key: string) => {
-      if (key.startsWith('options.')) {
-        // @ts-ignore
-        delete updatedProps[key];
-      }
-    });
-
-    props.updateConfig({ ...updatedProps, items });
-    setOptions([]);
-  }
-
   const hasOptions = () => {
     switch (form.watch('questionType')) {
       case 'multiplechoice':
@@ -434,9 +459,28 @@ export default function WidgetEnqueteItems(
     setSelectedItemId(null);
   }
 
+  function selectOption(option: Option) {
+    if (option.id === selectedOption?.id) return;
+    setOptions((currentOptions) =>
+      applySelectedOptionEdit(
+        currentOptions,
+        selectedOption,
+        form.getValues('options')
+      )
+    );
+    setOption(option);
+  }
+
   function handleSaveOptions() {
-    form.setValue('options', options);
+    const editedOptions = applySelectedOptionEdit(
+      options,
+      selectedOption,
+      form.getValues('options')
+    );
+    setOptions(editedOptions);
+    form.setValue('options', editedOptions);
     setSettingOptions(false);
+    setOption(null);
   }
 
   useEffect(() => {
@@ -492,8 +536,9 @@ export default function WidgetEnqueteItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
-                                setSelectedItemId(item.id ?? null);
-                                setOptions([]);
+                                if (selectedItem?.id === item.id) return;
+                                if (!releaseOpenItem()) return;
+                                openItem(item);
                                 setSettingOptions(false);
                               }}>
                               {`${item.title || 'Geen titel'}`}
@@ -510,14 +555,6 @@ export default function WidgetEnqueteItems(
                         ))
                     : 'Geen items'}
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={() => handleSaveItems()}>
-                  Configuratie opslaan
-                </Button>
               </div>
             </div>
 
@@ -714,25 +751,16 @@ export default function WidgetEnqueteItems(
                       type="button"
                       onClick={() => handleAddOption(form.getValues())}>
                       {selectedOption
-                        ? 'Sla wijzigingen op'
+                        ? 'Nieuwe optie'
                         : 'Voeg optie toe aan lijst'}
                     </Button>
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                      type="button"
-                      onClick={() => {
-                        (setSettingOptions(() => !settingOptions),
-                          setOption(null));
-                      }}>
-                      Annuleer
-                    </Button>
-                    <Button
                       className="w-fit mt-4"
                       type="button"
                       onClick={() => handleSaveOptions()}>
-                      Sla antwoordopties op
+                      Terug
                     </Button>
                   </div>
                 </div>
@@ -778,7 +806,7 @@ export default function WidgetEnqueteItems(
                                 </span>
                                 <span
                                   className="py-3 px-2 w-full"
-                                  onClick={() => setOption(option)}>
+                                  onClick={() => selectOption(option)}>
                                   {option?.titles?.[0].key}
                                 </span>
                                 <span className="py-3 px-2">
@@ -1251,32 +1279,43 @@ export default function WidgetEnqueteItems(
                 <div>
                   <div className="flex gap-2">
                     {selectedItem && (
-                      <Button
-                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                        type="button"
-                        onClick={() => {
-                          resetForm();
-                        }}>
-                        Annuleer
-                      </Button>
+                      <>
+                        <Button
+                          className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                          type="button"
+                          onClick={() => {
+                            resetForm();
+                          }}>
+                          Annuleer
+                        </Button>
+                        <Button
+                          className="w-fit mt-4"
+                          type="button"
+                          onClick={() => {
+                            if (!releaseOpenItem()) return;
+                            resetForm();
+                          }}>
+                          Nieuw item
+                        </Button>
+                      </>
                     )}
 
-                    <Button
-                      className="w-fit mt-4"
-                      type="submit"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onSubmit(form.getValues());
-                        setOptions([]);
-                      }}
-                      disabled={
-                        (!form.watch('fieldKey') || !isFieldKeyUnique) &&
-                        form.watch('questionType') !== 'none'
-                      }>
-                      {selectedItem
-                        ? 'Sla wijzigingen op'
-                        : 'Voeg item toe aan lijst'}
-                    </Button>
+                    {!selectedItem && (
+                      <Button
+                        className="w-fit mt-4"
+                        type="submit"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onSubmit(form.getValues());
+                          setOptions([]);
+                        }}
+                        disabled={
+                          (!form.watch('fieldKey') || !isFieldKeyUnique) &&
+                          form.watch('questionType') !== 'none'
+                        }>
+                        Voeg item toe aan lijst
+                      </Button>
+                    )}
                   </div>
                   {(!form.watch('fieldKey') || !isFieldKeyUnique) && (
                     <FormMessage>

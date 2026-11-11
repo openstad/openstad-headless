@@ -213,7 +213,7 @@ export default function ProjectResourceCreateArgument() {
             className="w-fit col-span-full"
             type="submit"
             disabled={disableSubmit}>
-            Opslaan
+            Reactie plaatsen
           </Button>
         </form>
       </Form>

@@ -2,8 +2,7 @@ import AuditLogTable from '@/components/audit-log-table';
 import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
 import WidgetVersionHistory from '@/components/widget-version-history';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -42,27 +41,16 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<ResourceOverviewWidgetProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<ResourceOverviewWidgetProps>({
-      projectId,
-    });
+  const { widget, previewConfig, updatePreview, onFieldChanged } =
+    useWidgetDraft<ResourceOverviewWidgetProps>({ projectId });
+
+  const tabUpdateConfig = ignoreTabSubmit;
 
   const totalPropPackageOverview = {
     ...widget?.config,
     ...previewConfig,
-    updateConfig: (config: ResourceOverviewWidgetProps) =>
-      updateConfig({ ...widget.config, ...config }),
-
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
+    updateConfig: tabUpdateConfig,
+    onFieldChanged,
     projectId,
   };
 
@@ -166,7 +154,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -179,7 +166,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -192,7 +178,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -205,7 +190,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -218,7 +202,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -231,7 +214,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />

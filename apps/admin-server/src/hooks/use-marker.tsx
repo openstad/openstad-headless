@@ -20,7 +20,10 @@ export default function useMarker(projectId?: string, markersId?: string) {
 
     if (!res.ok) {
       const errorText = await res.text();
-      throw new Error(`Could not update markers: ${errorText}`);
+      console.error('Saving the markers failed', res.status, errorText);
+      throw new Error(
+        'De markers konden niet worden opgeslagen. Probeer het opnieuw.'
+      );
     }
 
     const data = await res.json();

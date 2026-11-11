@@ -3,8 +3,7 @@ import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
 import WidgetVersionHistory from '@/components/widget-version-history';
 import { useProject } from '@/hooks/use-project';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -38,33 +37,18 @@ export const getServerSideProps = withApiUrl;
 export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
   const router = useRouter();
   const id = router.query.id;
-  const projectId = router.query.project;
+  const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig<DocumentMapProps>();
-  const { previewConfig, updatePreview } = useWidgetPreview<DocumentMapProps>({
-    projectId: projectId as string,
-  });
+  const { widget, previewConfig, updatePreview, onFieldChanged } =
+    useWidgetDraft<DocumentMapProps>({ projectId });
+
+  const tabUpdateConfig = ignoreTabSubmit;
 
   const totalPropPackage = {
     ...widget?.config,
-    updateConfig: (config: DocumentMapProps) => {
-      const newConfig = {
-        ...widget.config,
-        ...config,
-        projectId: projectId as string,
-      };
-      updateConfig(newConfig);
-      updatePreview(newConfig);
-    },
-
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
+    ...previewConfig,
+    updateConfig: tabUpdateConfig,
+    onFieldChanged,
     projectId,
   };
 
@@ -170,7 +154,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
                   {...extractConfig<DocumentMapProps, LikeWidgetTabProps>({
                     subWidgetKey: 'likeWidget',
                     previewConfig: previewConfig,
-                    updateConfig,
                     updatePreview,
                   })}
                 />
@@ -182,7 +165,6 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
                   {...extractConfig<DocumentMapProps, ArgumentWidgetTabProps>({
                     subWidgetKey: 'commentsWidget',
                     previewConfig: previewConfig,
-                    updateConfig,
                     updatePreview,
                   })}
                   requiredFieldsIncludesEmailNotificationConsent={

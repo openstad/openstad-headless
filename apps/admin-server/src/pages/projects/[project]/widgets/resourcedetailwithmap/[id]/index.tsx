@@ -2,8 +2,7 @@ import AuditLogTable from '@/components/audit-log-table';
 import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
 import WidgetVersionHistory from '@/components/widget-version-history';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import {
   WithApiUrlProps,
@@ -36,12 +35,10 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<ResourceDetailWidgetProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<ResourceDetailWidgetProps>({
-      projectId,
-    });
+  const { widget, previewConfig, updatePreview, onFieldChanged } =
+    useWidgetDraft<ResourceDetailWidgetProps>({ projectId });
+
+  const tabUpdateConfig = ignoreTabSubmit;
 
   const totalPropPackageMap: ResourceOverviewMapWidgetProps &
     EditFieldProps<ResourceOverviewMapWidgetProps> = {
@@ -53,16 +50,8 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
     markerIcon: {
       // provide default values for the markerIcon properties
     },
-    updateConfig: (config: ResourceOverviewMapWidgetProps) =>
-      updateConfig({ ...(widget?.config || {}), ...config }),
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
+    updateConfig: ignoreTabSubmit,
+    onFieldChanged,
     projectId,
   };
 
@@ -104,17 +93,8 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   {previewConfig && (
                     <WidgetResourceDetailGeneral
                       {...previewConfig}
-                      updateConfig={(config) =>
-                        updateConfig({ ...widget.config, ...config })
-                      }
-                      onFieldChanged={(key, value) => {
-                        if (previewConfig) {
-                          updatePreview({
-                            ...previewConfig,
-                            [key]: value,
-                          });
-                        }
-                      }}
+                      updateConfig={tabUpdateConfig}
+                      onFieldChanged={onFieldChanged}
                     />
                   )}
                 </TabsContent>
@@ -122,17 +102,8 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   {previewConfig && (
                     <WidgetResourceDetailDisplay
                       {...previewConfig}
-                      updateConfig={(config) =>
-                        updateConfig({ ...widget.config, ...config })
-                      }
-                      onFieldChanged={(key, value) => {
-                        if (previewConfig) {
-                          updatePreview({
-                            ...previewConfig,
-                            [key]: value,
-                          });
-                        }
-                      }}
+                      updateConfig={tabUpdateConfig}
+                      onFieldChanged={onFieldChanged}
                     />
                   )}
                 </TabsContent>
@@ -163,7 +134,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   >({
                     subWidgetKey: 'likeWidget',
                     previewConfig: previewConfig,
-                    updateConfig,
                     updatePreview,
                   })}
                 />

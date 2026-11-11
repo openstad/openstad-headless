@@ -9,13 +9,17 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  errorMessageOf,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useDatalayers from '@/hooks/use-datalayers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -35,15 +39,29 @@ export default function ProjectDatalayerCreate() {
     defaultValues: {},
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const save = useCallback(async () => {
+    const valid = await validateForSave(form);
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
+
     const area = await createDatalayer(values.name, values.layer);
-    if (area) {
-      toast.success('Kaartlaag aangemaakt!');
-      router.push(`/projects/${projectId}/areas`);
-    } else {
-      toast.error(
+    if (!area) {
+      throw new Error(
         'De kaartlaag die is meegegeven lijkt niet helemaal te kloppen.'
       );
+    }
+
+    toast.success('Kaartlaag aangemaakt!');
+    router.push(`/projects/${projectId}/areas`);
+  }, [form, createDatalayer, router, projectId]);
+
+  async function submit() {
+    try {
+      await save();
+    } catch (error) {
+      toast.error(errorMessageOf(error));
     }
   }
 
@@ -69,7 +87,10 @@ export default function ProjectDatalayerCreate() {
             <Heading size="xl">Toevoegen</Heading>
             <Separator className="my-4" />
             <form
-              onSubmit={form.handleSubmit(onSubmit)}
+              onSubmit={(event) => {
+                event.preventDefault();
+                submit();
+              }}
               className="lg:w-1/2 grid grid-cols-1 gap-4">
               <FormField
                 control={form.control}

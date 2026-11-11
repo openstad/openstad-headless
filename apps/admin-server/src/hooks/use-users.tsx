@@ -75,7 +75,12 @@ function useUsers(options?: UsersPaginationOptions) {
       },
       body: JSON.stringify(user),
     });
-    if (!res.ok) throw new Error('User update failed');
+    if (!res.ok) {
+      console.error('Creating the user failed', res.status, res.statusText);
+      throw new Error(
+        'De gebruiker kon niet worden aangemaakt. Probeer het opnieuw.'
+      );
+    }
 
     return await res.json();
   }

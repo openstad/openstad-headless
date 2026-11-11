@@ -1,3 +1,4 @@
+import { readJson, readSaved } from '@/lib/read-json';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
@@ -52,7 +53,7 @@ export function useProject(scopes?: Array<string>) {
         },
       }),
     });
-    return await res.json();
+    return readJson(res, 'Het project kon niet worden aangemaakt.');
   }
 
   async function importProject(
@@ -76,7 +77,11 @@ export function useProject(scopes?: Array<string>) {
     return await res.json();
   }
 
-  async function updateProject(config: any, name?: any, url?: any) {
+  async function updateProject(
+    config: any,
+    name?: any,
+    url?: any
+  ): Promise<any> {
     const body: { config: any; name?: string; url?: string } = { config };
     if (name) {
       body.name = name;
@@ -93,18 +98,13 @@ export function useProject(scopes?: Array<string>) {
       body: JSON.stringify(body),
     });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      return { error: data.message || 'Er is helaas iets mis gegaan.' };
-    }
-
+    const data = await readSaved(res, 'Er is helaas iets mis gegaan.');
     projectSwr.mutate(data);
 
     return data;
   }
 
-  async function updateProjectEmails(emailConfig: any) {
+  async function updateProjectEmails(emailConfig: any): Promise<any> {
     const res = await fetch(`/api/openstad/api/project/${projectNumber}`, {
       method: 'PUT',
       headers: {
@@ -112,11 +112,12 @@ export function useProject(scopes?: Array<string>) {
       },
       body: JSON.stringify({ emailConfig }),
     });
-    const data = await res.json();
+
+    const data = await readSaved(res, 'Er is helaas iets mis gegaan.');
 
     projectSwr.mutate(data);
 
-    return await data;
+    return data;
   }
 
   async function anonymizeUsersOfProject() {

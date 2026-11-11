@@ -26,8 +26,16 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { useDraftItems } from '@/hooks/useDraftItems';
+import { useOpenItemDraft } from '@/hooks/useOpenItemDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import {
+  applySelectedMatrixEdit,
+  applySelectedOptionEdit,
+  fieldKeyError,
+  mergeSelectedItem,
+} from '@/lib/open-item-merge';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
@@ -40,7 +48,7 @@ import {
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -203,7 +211,10 @@ export default function WidgetEnqueteItems(
   props: EnqueteWidgetProps & EditFieldProps<EnqueteWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, commitItems] = useDraftItems<Item>(
+    props.items,
+    props.onFieldChanged
+  );
   const [options, setOptions] = useState<Option[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
@@ -223,50 +234,54 @@ export default function WidgetEnqueteItems(
   const router = useRouter();
   const { project } = router.query;
 
+  type OpenItemState = {
+    options: Option[];
+    matrixOptions: Matrix;
+    selectedOption: Option | null;
+    matrixOption: (MatrixOption & { type: 'rows' | 'columns' }) | null;
+  };
+
+  function mergeOpenItem(
+    currentItems: Item[],
+    selectedId: string,
+    values: FormData,
+    state: OpenItemState
+  ) {
+    const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+    return mergeSelectedItem(currentItems, selectedId, {
+      ...valuesWithoutTrigger,
+      options: applySelectedOptionEdit(
+        state.options,
+        state.selectedOption,
+        values.options
+      ),
+      matrix: applySelectedMatrixEdit(
+        state.matrixOptions,
+        state.matrixOption,
+        values.matrix
+      ),
+    } as Partial<Item>);
+  }
+
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
     if (values?.options) {
       values.options = options;
     }
 
-    if (selectedItem) {
-      const oldOptions = selectedItem.options || [];
-      const newOptions = options || [];
-      const triggerMap: Record<string, string> = {};
-      for (let i = 0; i < Math.min(oldOptions.length, newOptions.length); i++) {
-        if (oldOptions[i].trigger !== newOptions[i].trigger) {
-          triggerMap[oldOptions[i].trigger] = newOptions[i].trigger;
-        }
-      }
-      const hasTriggerChanges = Object.keys(triggerMap).length > 0;
-
-      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
-
-      setItems((currentItems) =>
-        currentItems.map((item) => {
-          if (item.id === selectedItem.id) {
-            return { ...item, ...valuesWithoutTrigger };
-          }
-          if (
-            hasTriggerChanges &&
-            item.routingSelectedQuestion === selectedItem.trigger
-          ) {
-            const answers = Array.isArray(item.routingSelectedAnswer)
-              ? item.routingSelectedAnswer
-              : item.routingSelectedAnswer
-                ? [item.routingSelectedAnswer]
-                : [];
-            const updated = answers.map(
-              (answer) => triggerMap[answer] || answer
-            );
-            return { ...item, routingSelectedAnswer: updated };
-          }
-          return item;
+    if (selectedItem?.id) {
+      const selectedId = selectedItem.id;
+      commitItems((currentItems) =>
+        mergeOpenItem(currentItems, selectedId, values, {
+          options,
+          matrixOptions,
+          selectedOption: null,
+          matrixOption: null,
         })
       );
       setSelectedItemId(null);
     } else {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
           (max, i) => Math.max(max, parseInt(i.trigger) || 0),
           0
@@ -340,26 +355,9 @@ export default function WidgetEnqueteItems(
   // adds link to options array if no option is selected, otherwise updates the selected option
   function handleAddOption(values: FormData) {
     if (selectedOption) {
-      setOptions((currentOptions) => {
-        const updatedOptions = currentOptions
-          .map((option) => {
-            if (option.id === selectedOption.id) {
-              const newTitles =
-                values.options?.find((o) => o.trigger === option.trigger)
-                  ?.titles || [];
-
-              return {
-                ...option,
-                titles: newTitles,
-              };
-            }
-
-            return typeof option?.trigger !== 'undefined' ? option : false;
-          })
-          .filter((option) => option !== false);
-
-        return updatedOptions;
-      });
+      setOptions((currentOptions) =>
+        applySelectedOptionEdit(currentOptions, selectedOption, values.options)
+      );
 
       setOption(null);
     } else {
@@ -381,36 +379,13 @@ export default function WidgetEnqueteItems(
     updatedMatrixOption: 'rows' | 'columns'
   ) {
     if (matrixOption) {
-      setMatrixOptions((currentMatrix) => {
-        const updatedMatrix = { ...currentMatrix };
-
-        if (updatedMatrixOption === 'rows') {
-          updatedMatrix.rows = updatedMatrix.rows.map((row) =>
-            row.id === matrixOption.id
-              ? {
-                  ...row,
-                  text:
-                    values.matrix?.rows?.find((r) => r.trigger === row.trigger)
-                      ?.text || '',
-                }
-              : row
-          );
-        } else {
-          updatedMatrix.columns = updatedMatrix.columns.map((column) =>
-            column.id === matrixOption.id
-              ? {
-                  ...column,
-                  text:
-                    values.matrix?.columns?.find(
-                      (c) => c.trigger === column.trigger
-                    )?.text || '',
-                }
-              : column
-          );
-        }
-
-        return updatedMatrix;
-      });
+      setMatrixOptions((currentMatrix) =>
+        applySelectedMatrixEdit(
+          currentMatrix,
+          { ...matrixOption, type: updatedMatrixOption },
+          values.matrix
+        )
+      );
 
       setMatrixOption(null);
     } else {
@@ -511,20 +486,19 @@ export default function WidgetEnqueteItems(
     defaultValues: defaults(),
   });
 
-  const itemsInitialized = React.useRef(false);
-  useEffect(() => {
-    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
-      itemsInitialized.current = true;
-      setItems(props.items.map(withId));
-    }
-  }, [props?.items]);
-
-  const { onFieldChanged } = props;
-  useEffect(() => {
-    if (onFieldChanged) {
-      onFieldChanged('items', items);
-    }
-  }, [items]);
+  const { releaseOpenItem } = useOpenItemDraft<Item, FormData, OpenItemState>({
+    form,
+    openId: selectedItem?.id ?? null,
+    state: { options, matrixOptions, selectedOption, matrixOption },
+    items,
+    commitItems,
+    merge: mergeOpenItem,
+    validate: (currentItems, selectedId, values) =>
+      ['none', 'pagination', 'swipe'].includes(values.questionType || '')
+        ? undefined
+        : fieldKeyError(currentItems, selectedId, values.fieldKey),
+    label: 'Items',
+  });
 
   function buildFormValues(item: Item) {
     let images = item.images || [];
@@ -625,7 +599,7 @@ export default function WidgetEnqueteItems(
     matrixType: 'rows' | 'columns' = 'rows'
   ) => {
     if (isItemAction) {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         const index = currentItems.findIndex(
           (entry) => entry.trigger === clickedTrigger
         );
@@ -729,42 +703,6 @@ export default function WidgetEnqueteItems(
     return sorted;
   }
 
-  function handleSaveItems() {
-    let itemsToSave = [...items];
-
-    if (selectedItem) {
-      const values = form.getValues();
-      const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
-      if (valuesWithoutTrigger?.options) {
-        valuesWithoutTrigger.options = options;
-      }
-      if (valuesWithoutTrigger?.matrix) {
-        valuesWithoutTrigger.matrix = matrixOptions;
-      }
-      itemsToSave = itemsToSave.map((item) =>
-        item.id === selectedItem.id
-          ? { ...item, ...valuesWithoutTrigger }
-          : item
-      );
-    }
-
-    const updatedProps = { ...props };
-
-    Object.keys(updatedProps).forEach((key: string) => {
-      if (key.startsWith('options.') || key.startsWith('matrix.')) {
-        // @ts-ignore
-        delete updatedProps[key];
-      }
-    });
-
-    setItems(itemsToSave);
-    props.updateConfig({ ...updatedProps, items: itemsToSave });
-    setSelectedItemId(null);
-    form.reset(defaults());
-    setOptions([]);
-    setMatrixOptions(matrixDefault);
-  }
-
   const hasOptions = () => {
     switch (form.watch('questionType')) {
       case 'multiplechoice':
@@ -801,14 +739,54 @@ export default function WidgetEnqueteItems(
     setSelectedItemId(null);
   }
 
+  function selectOption(option: Option) {
+    if (option.id === selectedOption?.id) return;
+    setOptions((currentOptions) =>
+      applySelectedOptionEdit(
+        currentOptions,
+        selectedOption,
+        form.getValues('options')
+      )
+    );
+    setOption(option);
+  }
+
+  function selectMatrixOption(
+    option: MatrixOption & { type: 'rows' | 'columns' }
+  ) {
+    if (option.id === matrixOption?.id && option.type === matrixOption?.type) {
+      return;
+    }
+    setMatrixOptions((currentMatrix) =>
+      applySelectedMatrixEdit(
+        currentMatrix,
+        matrixOption,
+        form.getValues('matrix')
+      )
+    );
+    setMatrixOption(option);
+  }
+
   function handleSaveOptions() {
-    form.setValue('options', options);
+    const editedOptions = applySelectedOptionEdit(
+      options,
+      selectedOption,
+      form.getValues('options')
+    );
+    setOptions(editedOptions);
+    form.setValue('options', editedOptions);
     setSettingOptions(false);
     setOption(null);
   }
 
   function handleSaveMatrixOptions() {
-    form.setValue('matrix', matrixOptions);
+    const editedMatrix = applySelectedMatrixEdit(
+      matrixOptions,
+      matrixOption,
+      form.getValues('matrix')
+    );
+    setMatrixOptions(editedMatrix);
+    form.setValue('matrix', editedMatrix);
     setSettingOptions(false);
     setMatrixOption(null);
   }
@@ -900,6 +878,7 @@ export default function WidgetEnqueteItems(
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
                                 if (selectedItem?.id === item.id) return;
+                                if (!releaseOpenItem()) return;
                                 form.reset(buildFormValues(item));
                                 setSelectedItemId(item.id ?? null);
                                 setOptions((item.options || []).map(withId));
@@ -937,14 +916,6 @@ export default function WidgetEnqueteItems(
                         ))
                     : 'Geen items'}
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={() => handleSaveItems()}>
-                  Configuratie opslaan
-                </Button>
               </div>
             </div>
 
@@ -1004,7 +975,7 @@ export default function WidgetEnqueteItems(
                                       <span
                                         className="py-3 px-2 w-full"
                                         onClick={() =>
-                                          setMatrixOption({
+                                          selectMatrixOption({
                                             ...option,
                                             type: matrixItem.type,
                                           })
@@ -1066,7 +1037,7 @@ export default function WidgetEnqueteItems(
                             }>
                             {matrixOption &&
                             matrixOption.type === matrixItem.type
-                              ? 'Sla wijzigingen op'
+                              ? 'Nieuwe optie'
                               : 'Voeg optie toe aan lijst'}
                           </Button>
                         </div>
@@ -1074,19 +1045,10 @@ export default function WidgetEnqueteItems(
                         {matrixItem.type === 'rows' && (
                           <div className="flex gap-2">
                             <Button
-                              className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                              type="button"
-                              onClick={() => {
-                                (setSettingOptions(() => !settingOptions),
-                                  setMatrixOption(null));
-                              }}>
-                              Annuleer
-                            </Button>
-                            <Button
                               className="w-fit mt-4"
                               type="button"
                               onClick={() => handleSaveMatrixOptions()}>
-                              Sla antwoordopties op
+                              Terug
                             </Button>
                           </div>
                         )}
@@ -1493,25 +1455,16 @@ export default function WidgetEnqueteItems(
                         type="button"
                         onClick={() => handleAddOption(form.getValues())}>
                         {selectedOption
-                          ? 'Sla wijzigingen op'
+                          ? 'Nieuwe optie'
                           : 'Voeg optie toe aan lijst'}
                       </Button>
                     </div>
                     <div className="flex gap-2">
                       <Button
-                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                        type="button"
-                        onClick={() => {
-                          (setSettingOptions(() => !settingOptions),
-                            setOption(null));
-                        }}>
-                        Annuleer
-                      </Button>
-                      <Button
                         className="w-fit mt-4"
                         type="button"
                         onClick={() => handleSaveOptions()}>
-                        Sla antwoordopties op
+                        Terug
                       </Button>
                     </div>
                   </div>
@@ -1558,7 +1511,7 @@ export default function WidgetEnqueteItems(
                                 </span>
                                 <span
                                   className="py-3 px-2 w-full"
-                                  onClick={() => setOption(option)}>
+                                  onClick={() => selectOption(option)}>
                                   {option?.titles?.[0].key}
                                 </span>
                                 <span className="py-3 px-2">
@@ -1895,12 +1848,14 @@ export default function WidgetEnqueteItems(
                                         />
                                       </div>
                                       <Button
+                                        type="button"
+                                        aria-label="Afbeelding verwijderen"
                                         color="red"
                                         onClick={() => {
                                           removeImage(index);
                                         }}
                                         className="absolute left-0 top-0">
-                                        <X size={24} />
+                                        <X size={24} aria-hidden="true" />
                                       </Button>
 
                                       <div
@@ -2704,35 +2659,46 @@ export default function WidgetEnqueteItems(
                 <div>
                   <div className="flex gap-2">
                     {selectedItem && (
-                      <Button
-                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                        type="button"
-                        onClick={() => {
-                          resetForm();
-                        }}>
-                        Annuleer
-                      </Button>
+                      <>
+                        <Button
+                          className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                          type="button"
+                          onClick={() => {
+                            resetForm();
+                          }}>
+                          Annuleer
+                        </Button>
+                        <Button
+                          className="w-fit mt-4"
+                          type="button"
+                          onClick={() => {
+                            if (!releaseOpenItem()) return;
+                            resetForm();
+                          }}>
+                          Nieuw item
+                        </Button>
+                      </>
                     )}
 
-                    <Button
-                      className="w-fit mt-4"
-                      type="submit"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onSubmit(form.getValues());
-                        setOptions([]);
-                        setMatrixOptions(matrixDefault);
-                      }}
-                      disabled={
-                        (!form.watch('fieldKey') || !isFieldKeyUnique) &&
-                        form.watch('questionType') !== 'none' &&
-                        form.watch('questionType') !== 'pagination' &&
-                        form.watch('questionType') !== 'swipe'
-                      }>
-                      {selectedItem
-                        ? 'Sla wijzigingen op'
-                        : 'Voeg item toe aan lijst'}
-                    </Button>
+                    {!selectedItem && (
+                      <Button
+                        className="w-fit mt-4"
+                        type="submit"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onSubmit(form.getValues());
+                          setOptions([]);
+                          setMatrixOptions(matrixDefault);
+                        }}
+                        disabled={
+                          (!form.watch('fieldKey') || !isFieldKeyUnique) &&
+                          form.watch('questionType') !== 'none' &&
+                          form.watch('questionType') !== 'pagination' &&
+                          form.watch('questionType') !== 'swipe'
+                        }>
+                        Voeg item toe aan lijst
+                      </Button>
+                    )}
                   </div>
                   {(!form.watch('fieldKey') || !isFieldKeyUnique) &&
                     form.watch('questionType') !== 'pagination' &&

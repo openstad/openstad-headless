@@ -1,3 +1,4 @@
+import { withoutDraftSync } from '@/lib/draft-sync-pause';
 import _ from 'lodash';
 import React, { Fragment, useEffect, useRef } from 'react';
 
@@ -59,7 +60,7 @@ export const CheckboxList = <T extends { [key: string]: any }>({
       const cleaned = ids.filter((id) => validKeys.has(id)).join(',');
       if (cleaned !== currentValue && cleaned !== prevCleanedRef.current) {
         prevCleanedRef.current = cleaned;
-        form.setValue(fieldName, cleaned);
+        withoutDraftSync(() => form.setValue(fieldName, cleaned));
       }
     } else if (Array.isArray(currentValue)) {
       const cleaned = currentValue.filter((id) =>
@@ -71,7 +72,7 @@ export const CheckboxList = <T extends { [key: string]: any }>({
         cleanedKey !== prevCleanedRef.current
       ) {
         prevCleanedRef.current = cleanedKey;
-        form.setValue(fieldName, cleaned);
+        withoutDraftSync(() => form.setValue(fieldName, cleaned));
       }
     }
   }, [items]);

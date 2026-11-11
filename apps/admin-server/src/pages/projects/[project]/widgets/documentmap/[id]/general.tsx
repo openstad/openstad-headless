@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import type { DocumentMapProps } from '@openstad-headless/document-map/src/document-map';
@@ -20,7 +21,6 @@ import * as React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-import { Button } from '../../../../../../components/ui/button';
 import {
   Form,
   FormControl,
@@ -51,11 +51,47 @@ const formSchema = z.object({
 });
 type FormData = z.infer<typeof formSchema>;
 
+const zoomNumber = z
+  .union([z.literal(''), z.coerce.number()], {
+    errorMap: () => ({ message: 'Vul een getal in.' }),
+  })
+  .optional();
+const draftSchema = z
+  .object({
+    zoom: zoomNumber,
+    minZoom: zoomNumber,
+    maxZoom: zoomNumber,
+    itemsPerPage: zoomNumber,
+  })
+  .passthrough()
+  .superRefine((values, ctx) => {
+    const { zoom, minZoom, maxZoom } = values;
+    if (
+      typeof zoom !== 'number' ||
+      typeof minZoom !== 'number' ||
+      typeof maxZoom !== 'number'
+    )
+      return;
+    if (minZoom >= maxZoom) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['minZoom'],
+        message: 'Waarde kan niet hoger zijn dan het uitzoom niveau',
+      });
+    }
+    if (zoom > maxZoom || zoom < minZoom) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['zoom'],
+        message: 'Waarde moet tussen het in- en uitzoom niveau liggen',
+      });
+    }
+  });
+
 export default function DocumentGeneral(
   props: DocumentMapProps & EditFieldProps<DocumentMapProps>
 ) {
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
-  const [disabled, setDisabled] = useState(false);
   const [accessibilityUrlVisible, setAccessibilityUrlVisible] = useState(
     props.accessibilityUrlVisible || false
   );
@@ -69,11 +105,11 @@ export default function DocumentGeneral(
 
   const { data } = useResources(props.projectId);
   const resources: Array<{ id: string | number; title: string }> = data || [];
-  const [toggle, setToggle] = useState('resourceId_');
 
   const form = useForm<DocumentMapProps>({
     defaultValues: {
       resourceId: props.resourceId || undefined,
+      resourceIdRelativePath: props.resourceIdRelativePath ?? '',
 
       zoom: props.zoom || 1,
       minZoom: props.minZoom || -6,
@@ -92,12 +128,15 @@ export default function DocumentGeneral(
     },
   });
 
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: draftSchema,
+    label: 'Algemeen',
+  });
+
   useEffect(() => {
     const minZoomValue = form.watch('minZoom');
     const maxZoomValue = form.watch('maxZoom');
     const zoomValue = form.watch('zoom');
-
-    let shouldDisable = false;
 
     if (minZoomValue && maxZoomValue && zoomValue) {
       const minZoom =
@@ -112,7 +151,6 @@ export default function DocumentGeneral(
           type: 'manual',
           message: 'Waarde moet tussen het in- en uitzoom niveau liggen',
         });
-        shouldDisable = true;
       } else {
         form.clearErrors('zoom');
       }
@@ -126,14 +164,13 @@ export default function DocumentGeneral(
           type: 'manual',
           message: 'Waarde kan niet lager zijn dan het inzoom niveau',
         });
-        shouldDisable = true;
       } else {
         form.clearErrors(['minZoom', 'maxZoom']);
       }
     }
-
-    setDisabled(shouldDisable);
   }, [form.watch('minZoom'), form.watch('maxZoom'), form.watch('zoom')]);
+
+  const resourceIdValue = form.watch('resourceId');
 
   return (
     <Form {...form} className="p-6 bg-white rounded-md">
@@ -151,13 +188,10 @@ export default function DocumentGeneral(
           items={resources}
           keyForValue="id"
           label={(resource) => `${resource.id} ${resource.title}`}
-          onFieldChanged={(e, key) => {
-            props.onFieldChanged;
-            setToggle(e + '_' + key);
-          }}
+          onFieldChanged={props.onFieldChanged}
           noSelection="Niet koppelen - beschrijf het path of gebruik queryparam openstadResourceId"
         />
-        {toggle === 'resourceId_' ? (
+        {!resourceIdValue ? (
           <FormField
             control={form.control}
             name="resourceIdRelativePath"
@@ -438,10 +472,6 @@ export default function DocumentGeneral(
                     {...field}
                     placeholder="9999"
                     {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -461,10 +491,6 @@ export default function DocumentGeneral(
             </FormItem>
           )}
         />
-
-        <Button type="submit" disabled={disabled}>
-          Opslaan
-        </Button>
       </form>
     </Form>
   );

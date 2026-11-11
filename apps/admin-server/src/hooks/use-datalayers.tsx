@@ -1,3 +1,4 @@
+import { readCreated } from '@/lib/read-json';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
 
@@ -16,7 +17,7 @@ export default function useDatalayers(projectId?: string) {
       },
       body: JSON.stringify({ name: name, layer: JSON.parse(layer) }),
     });
-    return await res.json();
+    return readCreated(res, 'De kaartlaag kon niet worden aangemaakt.');
   }
 
   async function removeDatalayer(id: number) {

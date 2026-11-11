@@ -59,6 +59,17 @@ let getConfig = async function ({ project, useAuth = 'default' }) {
   return authConfig;
 };
 
+let getConfigForClientUpdate = async function ({
+  project,
+  useAuth = 'default',
+}) {
+  const { config: _storedClientConfig, ...authConfig } = await getConfig({
+    project,
+    useAuth,
+  });
+  return authConfig;
+};
+
 let getAdapter = async function ({ authConfig, project, useAuth = 'default' }) {
   authConfig = authConfig || (await getConfig({ project, useAuth }));
 
@@ -85,6 +96,7 @@ let getProviders = async function ({
 
 module.exports = {
   config: getConfig,
+  configForClientUpdate: getConfigForClientUpdate,
   adapter: getAdapter,
   providers: getProviders,
 };
