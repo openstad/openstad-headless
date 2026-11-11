@@ -18,7 +18,6 @@ export default function useStatuses(projectId?: string, id?: string) {
     color: string | undefined,
     label: string | undefined,
     mapIcon: string | undefined,
-    listIcon: string | undefined,
     extraFunctionality: {
       editableByUser: boolean | undefined;
       canComment: boolean | undefined;
@@ -40,7 +39,6 @@ export default function useStatuses(projectId?: string, id?: string) {
         color,
         label,
         mapIcon,
-        listIcon,
         extraFunctionality,
       }),
     });

@@ -44,7 +44,6 @@ const formSchema = z.object({
   label: z.string().optional(),
   mapIcon: z.string().optional(),
   mapIconUploader: z.string().optional(),
-  listIcon: z.string().optional(),
   canLike: z.boolean().optional(),
   editableByUser: z.boolean().optional(),
   canComment: z.boolean().optional(),
@@ -68,7 +67,6 @@ export default function ProjectStatusEdit() {
       label: data?.label || undefined,
       mapIcon: data?.mapIcon || undefined,
       mapIconUploader: '',
-      listIcon: data?.listIcon || undefined,
       canLike: data?.extraFunctionality?.canLike ?? true,
       editableByUser: data?.extraFunctionality?.editableByUser ?? true,
       canComment: data?.extraFunctionality?.canComment ?? true,
@@ -97,7 +95,6 @@ export default function ProjectStatusEdit() {
       values.color,
       values.label,
       values.mapIcon,
-      values.listIcon,
       {
         editableByUser: values.editableByUser,
         canComment: values.canComment,
@@ -356,20 +353,6 @@ export default function ProjectStatusEdit() {
                         )}
                       </div>
                     </div>
-
-                    <FormField
-                      control={form.control}
-                      name="listIcon"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Resource overview icon</FormLabel>
-                          <FormControl>
-                            <Input placeholder="" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
                   </div>
                 </Form>
               </div>
