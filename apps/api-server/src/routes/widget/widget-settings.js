@@ -160,6 +160,8 @@ let moduleDefinitions = {
         displayDislike: false,
         showProgressBar: true,
         progressBarDescription: '',
+        markerPreviewCard: false,
+        markerPreviewButtonText: 'Lees meer',
       },
     },
   },
@@ -507,6 +509,8 @@ let moduleDefinitions = {
         countButton: {
           show: false,
         },
+        markerPreviewCard: false,
+        markerPreviewButtonText: 'Lees meer',
       },
     },
   },

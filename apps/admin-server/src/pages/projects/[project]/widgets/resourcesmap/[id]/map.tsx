@@ -20,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
@@ -38,6 +39,8 @@ type Tag = {
 const formSchema = z.object({
   markerHref: z.string().optional(),
   mapCenterMode: z.enum(['', 'markers', 'area']).optional(),
+  markerPreviewCard: z.boolean().optional(),
+  markerPreviewButtonText: z.string().optional(),
   categorize: z.object({
     categorizeByField: z.string().optional(),
   }),
@@ -61,7 +64,9 @@ export default function WidgetResourcesMapMap(
   type FormData = z.infer<typeof formSchema>;
 
   async function onSubmit(values: FormData) {
-    props.updateConfig({ ...props, ...values });
+    const { showMarkerPreviewSetting: _showMarkerPreviewSetting, ...config } =
+      props;
+    props.updateConfig({ ...config, ...values });
   }
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
@@ -71,6 +76,8 @@ export default function WidgetResourcesMapMap(
     defaultValues: {
       markerHref: props?.markerHref || '',
       mapCenterMode: props?.mapCenterMode || '',
+      markerPreviewCard: props?.markerPreviewCard || false,
+      markerPreviewButtonText: props?.markerPreviewButtonText || 'Lees meer',
       clustering: props?.clustering || {},
       categorize: props?.categorize || {},
       tilesVariant: props?.tilesVariant || '',
@@ -142,6 +149,45 @@ export default function WidgetResourcesMapMap(
               </FormItem>
             )}
           />
+
+          {props.showMarkerPreviewSetting ? (
+            <FormField
+              control={form.control}
+              name="markerPreviewCard"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Klik op een pin toont een voorbeeld in de kaart
+                  </FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
+
+          {props.showMarkerPreviewSetting && form.watch('markerPreviewCard') ? (
+            <FormField
+              control={form.control}
+              name="markerPreviewButtonText"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tekst van de knop in het voorbeeld</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
 
           {/*
           <FormField

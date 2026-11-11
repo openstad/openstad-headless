@@ -151,6 +151,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
 
                     <TabsContent value="map" className="p-0">
                       <WidgetResourcesMapMap
+                        showMarkerPreviewSetting
                         {...extractConfig<
                           ResourceOverviewWidgetProps,
                           ResourceOverviewMapWidgetTabProps

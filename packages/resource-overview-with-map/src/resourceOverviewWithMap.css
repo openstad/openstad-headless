@@ -45,6 +45,17 @@
   height: 100% !important;
 }
 
+.resourceOverviewWithMap-container > .osc-map-preview-wrapper {
+  min-width: 0;
+  height: 100%;
+}
+
+.resourceOverviewWithMap-container
+  > .osc-map-preview-wrapper
+  > .map-container--buttons {
+  height: 100%;
+}
+
 .resourceOverviewWithMap-container #map {
   position: absolute;
   top: 0;
@@ -126,7 +137,8 @@
     height: auto;
     grid-template-rows: 250px auto;
   }
-  .resourceOverviewWithMap-container .map-container {
+  .resourceOverviewWithMap-container .map-container,
+  .resourceOverviewWithMap-container > .osc-map-preview-wrapper {
     grid-row: 1;
   }
   .resourceOverviewWithMap-container .detail-container {

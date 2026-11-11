@@ -49,7 +49,15 @@ import React, {
 import { elipsizeHTML } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
 import { findResourceIndex } from './lib/find-resource-index';
+import { buildResourceDetailUrl } from './lib/resource-detail-url';
+import { MapPreviewCard } from './parts/map-preview-card';
 import './resource-overview.css';
+
+export type MapPreviewConfig = {
+  selectedResourceId?: number | string;
+  onSelect: (resource: any) => void;
+  renderCard: () => React.ReactNode;
+};
 
 export type ResourceOverviewWidgetProps = BaseProps &
   ProjectSettingProps & {
@@ -140,6 +148,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     onFilteredResourcesChange?: (filteredResources: any[]) => void;
     onLocationChange?: (location: PostcodeAutoFillLocation) => void;
     onMarkerResourceClick?: (resource: any, index: number) => void;
+    mapPreview?: MapPreviewConfig;
     onResourceClickHandlerRegister?: (
       handler: (resource: any, index?: number) => void
     ) => void;
@@ -208,24 +217,37 @@ const defaultHeaderRenderer = (
   location?: PostcodeAutoFillLocation,
   headingLevel?: string
 ) => {
+  const mapPreview = widgetProps.mapPreview;
+  const mapElement = displayMap ? (
+    <ResourceOverviewMap
+      {...widgetProps}
+      {...widgetProps.resourceOverviewMapWidget}
+      givenResources={resources}
+      noFetch={true}
+      selectedProjects={selectedProjects}
+      locationProx={location}
+      selectedResourceId={mapPreview?.selectedResourceId}
+      onMarkerClick={
+        widgetProps.displayType === 'cardgrid'
+          ? (resource, index) => {
+              widgetProps.onMarkerResourceClick?.(resource, index);
+            }
+          : mapPreview
+            ? (resource) => mapPreview.onSelect(resource)
+            : undefined
+      }
+    />
+  ) : null;
+
   return (
     <>
-      {displayMap && (
-        <ResourceOverviewMap
-          {...widgetProps}
-          {...widgetProps.resourceOverviewMapWidget}
-          givenResources={resources}
-          noFetch={true}
-          selectedProjects={selectedProjects}
-          locationProx={location}
-          onMarkerClick={
-            widgetProps.displayType === 'cardgrid'
-              ? (resource, index) => {
-                  widgetProps.onMarkerResourceClick?.(resource, index);
-                }
-              : undefined
-          }
-        />
+      {mapElement && mapPreview ? (
+        <div className="osc-map-preview-wrapper">
+          {mapElement}
+          {mapPreview.renderCard()}
+        </div>
+      ) : (
+        mapElement
       )}
       {displayHeader && (
         <section className="osc-resource-overview-title-container">
@@ -290,34 +312,13 @@ const defaultItemRenderer = (
     defaultImage = tagWithImage?.defaultResourceImage || '';
   }
 
-  const getUrl = () => {
-    let location = document.location;
-
-    let urlToUse = props?.itemLink;
-
-    if (!!props.selectedProjects && props.selectedProjects.length > 0) {
-      const project = props.selectedProjects.find(
-        (project) => project.id === resource.projectId
-      );
-
-      if (resource?.id && project) {
-        urlToUse = project.detailPageLink;
-      } else if (!resource?.id && project?.overviewUrl) {
-        urlToUse = project.overviewUrl;
-      }
-    }
-
-    let newUrl = urlToUse?.replace('[id]', resource.id);
-    if (!newUrl?.startsWith('http')) {
-      if (!newUrl?.startsWith('/')) {
-        newUrl = `${location.pathname}${
-          location.pathname.endsWith('/') ? '' : '/'
-        }${newUrl}`;
-      }
-      newUrl = `${location.protocol}//${location.host}${newUrl}`;
-    }
-    return newUrl;
-  };
+  const getUrl = () =>
+    buildResourceDetailUrl(
+      props?.itemLink,
+      resource,
+      props.selectedProjects,
+      document.location
+    );
 
   const resourceImages =
     Array.isArray(resource.images) && resource.images.length > 0
@@ -1389,6 +1390,54 @@ function ResourceOverviewInner({
     props.onResourceClickHandlerRegister?.(onMarkerClickInternal);
   }, [onMarkerClickInternal, props.onResourceClickHandlerRegister]);
 
+  const mapPreviewEnabled =
+    !!props.resourceOverviewMapWidget?.markerPreviewCard &&
+    displayType !== 'cardgrid';
+  const [selectedMapResource, setSelectedMapResource] = useState<
+    { id: number | string; projectId?: number | string } | undefined
+  >(undefined);
+
+  useEffect(() => {
+    if (!selectedMapResource || isLoading) return;
+    const isStillListed = markerDialogList.some(
+      (resource: any) => String(resource.id) === String(selectedMapResource.id)
+    );
+    if (!isStillListed) setSelectedMapResource(undefined);
+  }, [markerDialogList, selectedMapResource, isLoading]);
+
+  const mapPreview: MapPreviewConfig | undefined = mapPreviewEnabled
+    ? {
+        selectedResourceId: selectedMapResource?.id,
+        onSelect: (resource: any) =>
+          setSelectedMapResource({
+            id: resource.id,
+            projectId: resource.projectId,
+          }),
+        renderCard: () => {
+          if (!selectedMapResource) return null;
+          return (
+            <MapPreviewCard
+              datastore={datastore}
+              projectId={selectedMapResource.projectId || props.projectId}
+              resourceId={selectedMapResource.id}
+              detailUrl={buildResourceDetailUrl(
+                props.itemLink,
+                selectedMapResource,
+                selectedProjects,
+                document.location
+              )}
+              summaryMaxLength={props.summaryMaxLength}
+              headingLevel={props.headingLevel}
+              buttonText={
+                props.resourceOverviewMapWidget?.markerPreviewButtonText
+              }
+              onClose={() => setSelectedMapResource(undefined)}
+            />
+          );
+        },
+      }
+    : undefined;
+
   const filterNeccesary =
     allowFiltering &&
     (props.displaySearch ||
@@ -1525,6 +1574,7 @@ function ResourceOverviewInner({
                 ...props,
                 displayType,
                 onMarkerResourceClick: onMarkerClickInternal,
+                mapPreview,
               },
               allResourcesData?.records || filteredResources || [],
               bannerText,
@@ -1616,7 +1666,7 @@ function ResourceOverviewInner({
               <TabsContent value="list">{overviewSection}</TabsContent>
               <TabsContent value="map">
                 {renderHeader(
-                  props,
+                  { ...props, mapPreview },
                   allResourcesData?.records || filteredResources || [],
                   bannerText,
                   false,
