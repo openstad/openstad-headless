@@ -44,6 +44,8 @@ const ResourceOverviewMap = ({
   noFetch = false,
   selectedProjects = [],
   onMarkerClick,
+  selectedResourceId,
+  markerPreviewCard,
   ...props
 }: PropsWithChildren<ResourceOverviewMapWidgetProps>) => {
   const datastore = new DataStore({
@@ -95,6 +97,9 @@ const ResourceOverviewMap = ({
       let marker: MarkerProps = {
         markerId: `resource-${resource.id || resource.uniqueId || index}`,
         location: resource?.location ? { ...resource.location } : undefined,
+        isSelected:
+          selectedResourceId !== undefined &&
+          String(resource.id) === String(selectedResourceId),
       };
       const markerLatLng: any = parseLocation(marker); // unify location format
       marker.lat = markerLatLng.lat;

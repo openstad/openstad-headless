@@ -32,6 +32,9 @@ export type ResourceOverviewMapWidgetProps = BaseProps &
     enableOnOffSwitching?: boolean;
     displayDislike?: boolean;
     onMarkerClick?: (resource: any, index: number) => void;
+    selectedResourceId?: number | string;
+    markerPreviewCard?: boolean;
+    markerPreviewButtonText?: string;
     markerSets?: MarkerSetConfig[];
     markerInteractionType?: 'default' | 'direct';
     customLegend?: CustomLegendItem[];

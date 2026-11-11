@@ -581,7 +581,8 @@ const BaseMap = ({
         (marker, index) =>
           marker.markerId !== currentMarkers[index]?.markerId ||
           marker.lat !== currentMarkers[index]?.lat ||
-          marker.lng !== currentMarkers[index]?.lng
+          marker.lng !== currentMarkers[index]?.lng ||
+          marker.isSelected !== currentMarkers[index]?.isSelected
       );
 
     if (markersChanged) {

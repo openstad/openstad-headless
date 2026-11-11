@@ -6,6 +6,7 @@ import type { MarkerIconType } from './marker-icon';
 export type MarkerProps = LocationType & {
   markerId?: string;
   isFaded?: boolean;
+  isSelected?: boolean;
   isVisible?: boolean;
   icon?: MarkerIconType;
   iconCreateFunction?: () => any; // TODO
