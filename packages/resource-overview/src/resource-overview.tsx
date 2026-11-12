@@ -1107,7 +1107,7 @@ function ResourceOverviewInner({
     tagGroups: apiTagGroups,
     lat: location?.lat,
     lng: location?.lng,
-    maxDistance: location ? (location.proximity || 999) * 1000 : undefined,
+    maxDistance: location?.proximity ? location.proximity * 1000 : undefined,
     sort,
     randomSortKey: sort === 'random' ? randomSortKey : undefined,
     projectIds: projectIds || [],
