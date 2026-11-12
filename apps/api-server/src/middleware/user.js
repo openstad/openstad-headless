@@ -154,7 +154,7 @@ function parseJwt(authorizationHeader) {
         `[${new Date().toISOString()}][auth-middleware] JWT verification failed: ${err.name}: ${err.message}`
       );
     }
-    throw err;
+    return null;
   }
 }
 
