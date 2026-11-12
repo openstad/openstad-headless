@@ -2,3 +2,18 @@
 .image-choice-caption {
   display: block;
 }
+
+.image-choice-container
+  .osc-clickable-image-anchor:has(> .osc-clickable-image-zoom) {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.image-choice-container
+  .osc-clickable-image-anchor:has(> .osc-clickable-image-zoom)
+  .image-choice-caption,
+.image-choice-container
+  .osc-clickable-image-anchor:has(> .osc-clickable-image-zoom)
+  .image-choice-description {
+  contain: inline-size;
+}

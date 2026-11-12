@@ -218,6 +218,47 @@ describe('a11y: form markup', () => {
     });
   });
 
+  describe('<ImageChoiceField /> in a wide column', () => {
+    it('keeps the zoom button on the image', () => {
+      cy.viewport(1280, 800);
+      cy.mount(
+        <div style={{ width: 1000 }}>
+          <ImageChoiceField
+            title="Wat kies je?"
+            fieldKey="breed"
+            choices={[
+              {
+                value: 'a',
+                label: 'Optie A',
+                description: '<p>Meer bomen in de straat.</p>',
+                imageSrc: IMAGE,
+                imageAlt: 'Bomen',
+                imageDescription: '',
+              },
+            ]}
+            imageClickable={true}
+          />
+        </div>
+      );
+      cy.get('.image-choice-figure img').should(($img) => {
+        expect(($img[0] as HTMLImageElement).naturalWidth).to.be.greaterThan(0);
+      });
+      cy.get('.osc-clickable-image-zoom').then(($button) => {
+        const image = $button[0]
+          .closest('.osc-clickable-image-anchor')
+          ?.querySelector('img')
+          ?.getBoundingClientRect();
+        const button = $button[0].getBoundingClientRect();
+        expect(button.left, 'left edge of the zoom button').to.be.at.least(
+          image?.left ?? Infinity
+        );
+        expect(button.right, 'right edge of the zoom button').to.be.at.most(
+          image?.right ?? -Infinity
+        );
+      });
+    });
+  });
+
   describe('<ClickableImage /> wrapper variant', () => {
     it('returns focus to the image after closing the enlarged image', () => {
       cy.mount(
