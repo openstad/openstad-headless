@@ -1,9 +1,3 @@
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@openstad-headless/admin-server/src/components/ui/tabs';
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
 //@ts-ignore
@@ -23,6 +17,10 @@ import {
   Icon,
   Paginator,
   Pill,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
   headingLevels,
 } from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
