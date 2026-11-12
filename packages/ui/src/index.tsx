@@ -22,6 +22,7 @@ export { List } from './list';
 export { Stepper } from './stepper';
 export { Pill } from './pill';
 export { Separator } from './separator';
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './tabs';
 export { formatFileSize, getFileFormat } from './lib/format-file-size';
 export { fireConfetti } from './fire-confetti';
 export { Lightbox } from './lightbox';

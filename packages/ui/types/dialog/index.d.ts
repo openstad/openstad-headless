@@ -7,3 +7,9 @@ export declare const Dialog: ({ children, open, onOpenChange, className, "aria-l
     "aria-label"?: string;
     "aria-labelledby"?: string;
 }>) => React.JSX.Element;
+export declare const DialogTitle: ({ children, className, }: PropsWithChildren<{
+    className?: string;
+}>) => React.JSX.Element;
+export declare const DialogDescription: ({ children, className, }: PropsWithChildren<{
+    className?: string;
+}>) => React.JSX.Element;

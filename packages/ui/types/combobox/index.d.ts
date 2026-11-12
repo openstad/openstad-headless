@@ -1,0 +1,31 @@
+import '@utrecht/component-library-css';
+import '@utrecht/design-tokens/dist/root.css';
+import React from 'react';
+import './index.css';
+export type ComboboxOption = {
+    id: string;
+    label: string;
+    image?: string;
+    group?: string;
+};
+export type ComboboxProps = {
+    id?: string;
+    labelledBy?: string;
+    describedBy?: string;
+    invalid?: boolean;
+    placeholder?: string;
+    selected: ComboboxOption[];
+    onChange: (selected: ComboboxOption[]) => void;
+    loadOptions: (query: string) => Promise<ComboboxOption[]>;
+    minQueryLength?: number;
+    loadOnFocus?: boolean;
+    debounceMs?: number;
+    minQueryText?: string;
+    loadingText?: string;
+    noResultsText?: string;
+    resultsText?: string;
+    errorText?: string;
+    removeText?: string;
+};
+export declare function Combobox({ id, labelledBy, describedBy, invalid, placeholder, selected, onChange, loadOptions, minQueryLength, loadOnFocus, debounceMs, minQueryText, loadingText, noResultsText, resultsText, errorText, removeText, }: ComboboxProps): React.JSX.Element;
+export default Combobox;
