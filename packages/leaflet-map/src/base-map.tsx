@@ -992,22 +992,25 @@ const BaseMap = ({
                 );
               })}
 
-            {locationProx && locationProx.lat && locationProx.lng && (
-              <Circle
-                center={[
-                  parseFloat(locationProx.lat),
-                  parseFloat(locationProx.lng),
-                ]}
-                radius={(locationProx.proximity || 1) * 1000}
-                pathOptions={{
-                  color: '#0077ff',
-                  fillColor: '#0077ff',
-                  fillOpacity: 0.1,
-                  weight: 2,
-                  dashArray: '4 4',
-                }}
-              />
-            )}
+            {locationProx &&
+              locationProx.lat &&
+              locationProx.lng &&
+              locationProx.proximity && (
+                <Circle
+                  center={[
+                    parseFloat(locationProx.lat),
+                    parseFloat(locationProx.lng),
+                  ]}
+                  radius={locationProx.proximity * 1000}
+                  pathOptions={{
+                    color: '#0077ff',
+                    fillColor: '#0077ff',
+                    fillOpacity: 0.1,
+                    weight: 2,
+                    dashArray: '4 4',
+                  }}
+                />
+              )}
           </MapContainer>
         )}
 
