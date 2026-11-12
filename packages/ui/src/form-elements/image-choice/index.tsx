@@ -18,6 +18,7 @@ import { ClickableImage } from '../../clickable-image';
 import { InfoImage } from '../../infoImage';
 import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
 import { Spacer } from '../../spacer';
+import { FormFieldLabel } from '../form-field-label';
 import './index.css';
 
 export type ImageChoiceFieldProps = {
@@ -221,7 +222,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                 : undefined;
             return (
               <FormField type="radio" key={index}>
-                <div className="utrecht-form-field__label utrecht-form-field__label--radio osc-clickable-image-anchor">
+                <FormFieldLabel className="utrecht-form-field__label--radio osc-clickable-image-anchor">
                   <FormLabel
                     htmlFor={`${idKey}_${index}`}
                     type="radio"
@@ -278,7 +279,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                       />
                     </div>
                   )}
-                </div>
+                </FormFieldLabel>
               </FormField>
             );
           })}

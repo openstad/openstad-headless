@@ -10,6 +10,7 @@ import React, { FC, useEffect, useState } from 'react';
 import { Combobox, ComboboxOption } from '../../combobox';
 import RteContent from '../../rte-formatting/rte-content';
 import { Spacer } from '../../spacer';
+import { FormFieldLabel } from '../form-field-label';
 
 export type ResourceLinkValue = {
   source: string;
@@ -110,7 +111,7 @@ const ResourceLinkField: FC<ResourceLinkFieldProps> = ({
   return (
     <FormField type="text">
       {title && (
-        <div className="utrecht-form-field__label">
+        <FormFieldLabel>
           <FormLabel htmlFor={fieldKey} id={labelId}>
             <RteContent
               content={title}
@@ -118,7 +119,7 @@ const ResourceLinkField: FC<ResourceLinkFieldProps> = ({
               forceInline={true}
             />
           </FormLabel>
-        </div>
+        </FormFieldLabel>
       )}
       {description && (
         <>

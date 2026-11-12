@@ -15,6 +15,7 @@ import { useEffect } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
+import { FormFieldLabel } from '../form-field-label';
 import TextInput from '../text';
 
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -269,8 +270,8 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
           return (
             <>
               <FormField type="radio" key={index}>
-                <div
-                  className={`utrecht-form-field__label utrecht-form-field__label--radio${feedbackClass}`}>
+                <FormFieldLabel
+                  className={`utrecht-form-field__label--radio${feedbackClass}`}>
                   <FormLabel
                     htmlFor={`${idKey}_${index}`}
                     type="radio"
@@ -313,7 +314,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                       <span className="sr-only">Juist antwoord</span>
                     </span>
                   )}
-                </div>
+                </FormFieldLabel>
               </FormField>
               {choice.isOtherOption && selectedOption === choice.value && (
                 <div className="marginTop10 marginBottom15">

@@ -1,4 +1,5 @@
 import DataStore from '@openstad-headless/data-store/src';
+import { FormFieldLabel } from '@openstad-headless/ui/src/form-elements/form-field-label';
 import {
   Button,
   Dialog,
@@ -384,9 +385,9 @@ export function ContactBlock({
 
           {showMessage ? (
             <FormField type="text">
-              <div className="utrecht-form-field__label">
+              <FormFieldLabel>
                 <FormLabel htmlFor={messageId}>{messageLabel}</FormLabel>
-              </div>
+              </FormFieldLabel>
               <div className="utrecht-form-field__input">
                 <Textarea
                   id={messageId}

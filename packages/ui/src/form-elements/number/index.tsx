@@ -10,6 +10,7 @@ import React, { FC, useEffect, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
+import { FormFieldLabel } from '../form-field-label';
 import './style.css';
 
 export type NumberInputProps = {
@@ -122,7 +123,7 @@ const NumberInput: FC<NumberInputProps> = ({
   return (
     <FormField type="text">
       {title && (
-        <div className="utrecht-form-field__label">
+        <FormFieldLabel>
           <FormLabel htmlFor={randomID}>
             <RteContent
               content={title}
@@ -130,7 +131,7 @@ const NumberInput: FC<NumberInputProps> = ({
               forceInline={true}
             />
           </FormLabel>
-        </div>
+        </FormFieldLabel>
       )}
       {description && (
         <>

@@ -1,3 +1,4 @@
+import { FormFieldLabel } from '@openstad-headless/ui/src/form-elements/form-field-label';
 import {
   Button,
   Dialog,
@@ -121,11 +122,11 @@ export function LinkConfirmDialog({
                     </button>
                     {isOpen ? (
                       <FormField type="text" className="osc-link-confirm-field">
-                        <div className="utrecht-form-field__label sr-only">
+                        <FormFieldLabel className="sr-only">
                           <FormLabel htmlFor={textareaId}>
                             {`${messageLabel}: ${item.label}`}
                           </FormLabel>
-                        </div>
+                        </FormFieldLabel>
                         <div className="utrecht-form-field__input">
                           <Textarea
                             id={textareaId}

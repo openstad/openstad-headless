@@ -14,6 +14,7 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
+import { FormFieldLabel } from '../form-field-label';
 import TextInput from '../text';
 
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -307,7 +308,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
 
         {selectAll && (
           <FormField type="checkbox" key="select_all">
-            <div className="utrecht-form-field__label utrecht-form-field__label--checkbox">
+            <FormFieldLabel className="utrecht-form-field__label--checkbox">
               <FormLabel
                 htmlFor={`${idKey}_select_all`}
                 type="checkbox"
@@ -337,7 +338,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                 />
                 <span>{selectAllLabel}</span>
               </FormLabel>
-            </div>
+            </FormFieldLabel>
           </FormField>
         )}
 
@@ -360,8 +361,8 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
           return (
             <>
               <FormField type="checkbox" key={index}>
-                <div
-                  className={`utrecht-form-field__label utrecht-form-field__label--checkbox${feedbackClass}`}>
+                <FormFieldLabel
+                  className={`utrecht-form-field__label--checkbox${feedbackClass}`}>
                   <FormLabel
                     htmlFor={`${idKey}_${index}`}
                     type="checkbox"
@@ -414,7 +415,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                       <span className="sr-only">Juist antwoord</span>
                     </span>
                   )}
-                </div>
+                </FormFieldLabel>
               </FormField>
 
               {choice.isOtherOption &&

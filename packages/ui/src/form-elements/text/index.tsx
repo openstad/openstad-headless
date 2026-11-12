@@ -13,6 +13,7 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
 import { FieldVariant, purposeAttributes } from '../field-purpose';
+import { FormFieldLabel } from '../form-field-label';
 import { parseEditorHtml, stripTrailingBreaks } from './strip-trailing-breaks';
 import './style.css';
 
@@ -517,7 +518,7 @@ const TextInput: FC<TextInputProps> = ({
   return (
     <FormField type="text">
       {title && (
-        <div className="utrecht-form-field__label">
+        <FormFieldLabel>
           <FormLabel htmlFor={randomId}>
             <RteContent
               content={title}
@@ -525,7 +526,7 @@ const TextInput: FC<TextInputProps> = ({
               forceInline={true}
             />
           </FormLabel>
-        </div>
+        </FormFieldLabel>
       )}
       {description && (
         <>

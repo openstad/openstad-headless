@@ -22,6 +22,7 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
+import { FormFieldLabel } from '../form-field-label';
 import './matrix.css';
 
 export type MatrixFieldProps = {
@@ -236,8 +237,8 @@ const MatrixField: FC<MatrixFieldProps> = ({
                   return (
                     <TableCell key={`cell-${cellIndex}`}>
                       <FormField type={type}>
-                        <div
-                          className={`utrecht-form-field__label utrecht-form-field__label--${type}`}>
+                        <FormFieldLabel
+                          className={`utrecht-form-field__label--${type}`}>
                           <FormLabel
                             htmlFor={`${idKey}_${cellIndex}`}
                             type={type}
@@ -286,7 +287,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
                               </>
                             )}
                           </FormLabel>
-                        </div>
+                        </FormFieldLabel>
                       </FormField>
                     </TableCell>
                   );
