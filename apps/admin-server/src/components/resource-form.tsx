@@ -892,12 +892,20 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                   />
                 </FormControl>
                 {existingData?.user && (
-                  <FormDescription className="text-sm text-gray-600">
-                    Huidige gebruiker:{' '}
-                    {existingData.user.displayName ||
-                      existingData.user.name ||
-                      'Onbekend'}
-                    {existingData.user.email && ` (${existingData.user.email})`}
+                  <FormDescription className="mt-2 flex flex-wrap items-baseline gap-x-1 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-base">
+                    <span className="font-medium text-gray-500">
+                      Huidige gebruiker:
+                    </span>
+                    <span className="font-semibold text-gray-900">
+                      {existingData.user.displayName ||
+                        existingData.user.name ||
+                        'Onbekend'}
+                    </span>
+                    {existingData.user.email && (
+                      <span className="text-gray-600">
+                        ({existingData.user.email})
+                      </span>
+                    )}
                   </FormDescription>
                 )}
                 {isLoadingTargetUser && (
@@ -906,17 +914,25 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                   </FormDescription>
                 )}
                 {targetUser && !isLoadingTargetUser && (
-                  <FormDescription className="text-sm text-blue-600">
-                    Nieuwe gebruiker:{' '}
-                    {targetUser.displayName || targetUser.name || 'Onbekend'}
-                    {targetUser.email && ` (${targetUser.email})`}
+                  <FormDescription className="mt-2 flex flex-wrap items-baseline gap-x-1 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-base">
+                    <span className="font-medium text-blue-500">
+                      Nieuwe gebruiker:
+                    </span>
+                    <span className="font-semibold text-blue-900">
+                      {targetUser.displayName || targetUser.name || 'Onbekend'}
+                    </span>
+                    {targetUser.email && (
+                      <span className="text-blue-700">
+                        ({targetUser.email})
+                      </span>
+                    )}
                   </FormDescription>
                 )}
                 {pendingUserId &&
                   !isLoadingTargetUser &&
                   !targetUser &&
                   pendingUserId !== existingData?.userId && (
-                    <FormDescription className="text-sm text-red-600">
+                    <FormDescription className="mt-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-base font-semibold text-red-700">
                       Gebruiker niet gevonden
                     </FormDescription>
                   )}
