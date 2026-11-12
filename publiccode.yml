@@ -188,7 +188,7 @@ maintenance:
   contractors:
     - name: 'Gemeente Amsterdam'
       until: '2025-12-31'
-      email: "i.rieken\x64amsterdam.nl"
+      email: "dv_het.oprachtenteam\x64amsterdam.nl"
       website: 'https://amsterdam.nl'
     - name: 'Draad'
       until: '2025-12-31'
@@ -199,8 +199,8 @@ maintenance:
       email: "bauke.huijbers\x64sniglet.nl"
       website: 'https://sniglet.nl'
   contacts:
-    - name: 'Ian Rieken'
-      email: "i.rieken\x64amsterdam.nl"
+    - name: 'Het opdrachtenteam'
+      email: "dv_het.oprachtenteam\x64amsterdam.nl"
       affiliation: 'Gemeente Amsterdam, maintainer of repository and code'
     - name: 'Rudi van Hierden'
       email: "rudi\x64draad.nl"
