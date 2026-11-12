@@ -10,7 +10,6 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
   RadioButton,
   Table,
   TableBody,
@@ -23,6 +22,7 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
+import { FormFieldLabel } from '../form-field-label';
 import './matrix.css';
 
 export type MatrixFieldProps = {
@@ -150,7 +150,6 @@ const MatrixField: FC<MatrixFieldProps> = ({
   return (
     <div className="question">
       <Fieldset
-        role="group"
         invalid={fieldInvalid}
         aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}>
         {title && (
@@ -238,8 +237,8 @@ const MatrixField: FC<MatrixFieldProps> = ({
                   return (
                     <TableCell key={`cell-${cellIndex}`}>
                       <FormField type={type}>
-                        <Paragraph
-                          className={`utrecht-form-field__label utrecht-form-field__label--${type}`}>
+                        <FormFieldLabel
+                          className={`utrecht-form-field__label--${type}`}>
                           <FormLabel
                             htmlFor={`${idKey}_${cellIndex}`}
                             type={type}
@@ -288,7 +287,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
                               </>
                             )}
                           </FormLabel>
-                        </Paragraph>
+                        </FormFieldLabel>
                       </FormField>
                     </TableCell>
                   );

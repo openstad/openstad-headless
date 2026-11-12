@@ -5,7 +5,6 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
   Textarea,
   Textbox,
 } from '@utrecht/component-library-react';
@@ -14,6 +13,7 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
 import { FieldVariant, purposeAttributes } from '../field-purpose';
+import { FormFieldLabel } from '../form-field-label';
 import { parseEditorHtml, stripTrailingBreaks } from './strip-trailing-breaks';
 import './style.css';
 
@@ -97,6 +97,7 @@ export type TextInputProps = {
   imageClickable?: boolean;
   showMinMaxAfterBlur?: boolean;
   maxCharactersOverWarning?: string;
+  'aria-labelledby'?: string;
 };
 
 const TrixEditor: React.FC<{
@@ -374,6 +375,7 @@ const TextInput: FC<TextInputProps> = ({
   imageClickable = false,
   showMinMaxAfterBlur = false,
   maxCharactersOverWarning = 'Je hebt {overCharacters} tekens teveel',
+  'aria-labelledby': ariaLabelledBy,
 }) => {
   const variantMap = {
     'text input': Textbox,
@@ -516,7 +518,7 @@ const TextInput: FC<TextInputProps> = ({
   return (
     <FormField type="text">
       {title && (
-        <Paragraph className="utrecht-form-field__label">
+        <FormFieldLabel>
           <FormLabel htmlFor={randomId}>
             <RteContent
               content={title}
@@ -524,7 +526,7 @@ const TextInput: FC<TextInputProps> = ({
               forceInline={true}
             />
           </FormLabel>
-        </Paragraph>
+        </FormFieldLabel>
       )}
       {description && (
         <>
@@ -591,6 +593,7 @@ const TextInput: FC<TextInputProps> = ({
             setHasBlurred(true);
           }}
           autoComplete={purpose.autoComplete}
+          aria-labelledby={ariaLabelledBy}
           aria-describedby={
             [
               // ponytail: fieldInvalid komt uit form.tsx en is alleen waar als

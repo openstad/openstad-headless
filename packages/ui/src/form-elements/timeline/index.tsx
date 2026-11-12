@@ -11,7 +11,6 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
   Textarea,
   Textbox,
 } from '@utrecht/component-library-react';
@@ -21,6 +20,7 @@ import { Button, SecondaryButton } from '../../button';
 import { Dialog } from '../../dialog';
 import { formatFileSize, getFileFormat } from '../../lib/format-file-size';
 import RteContent from '../../rte-formatting/rte-content';
+import { FormFieldLabel } from '../form-field-label';
 import './timeline.css';
 
 type LinkKind = 'link' | 'document';
@@ -338,7 +338,7 @@ const TimelineField: FC<TimelineFieldProps> = ({
       aria-describedby={fieldInvalid ? warningId : undefined}>
       <div className="timeline-header">
         {title && (
-          <Paragraph className="utrecht-form-field__label">
+          <FormFieldLabel>
             <FormLabel htmlFor={randomId}>
               <RteContent
                 content={title}
@@ -346,7 +346,7 @@ const TimelineField: FC<TimelineFieldProps> = ({
                 forceInline={true}
               />
             </FormLabel>
-          </Paragraph>
+          </FormFieldLabel>
         )}
 
         {description && (
@@ -415,9 +415,9 @@ const TimelineField: FC<TimelineFieldProps> = ({
               : 'Tijdlijn-item toevoegen'}
           </RadixDialog.Title>
           <FormField type="text">
-            <Paragraph className="utrecht-form-field__label">
+            <FormFieldLabel>
               <FormLabel htmlFor={dateId}>Datum</FormLabel>
-            </Paragraph>
+            </FormFieldLabel>
             <Textbox
               id={dateId}
               type="date"
@@ -429,9 +429,9 @@ const TimelineField: FC<TimelineFieldProps> = ({
           </FormField>
 
           <FormField type="text">
-            <Paragraph className="utrecht-form-field__label">
+            <FormFieldLabel>
               <FormLabel htmlFor={titleId}>Titel</FormLabel>
-            </Paragraph>
+            </FormFieldLabel>
             <Textbox
               id={titleId}
               value={form.title}
@@ -443,9 +443,9 @@ const TimelineField: FC<TimelineFieldProps> = ({
           </FormField>
 
           <FormField type="text">
-            <Paragraph className="utrecht-form-field__label">
+            <FormFieldLabel>
               <FormLabel htmlFor={descriptionId}>Omschrijving</FormLabel>
-            </Paragraph>
+            </FormFieldLabel>
             <Textarea
               id={descriptionId}
               rows={4}

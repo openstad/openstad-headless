@@ -2,6 +2,7 @@ import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Banner, Spacer } from '@openstad-headless/ui/src';
+import { FormFieldLabel } from '@openstad-headless/ui/src/form-elements/form-field-label';
 import '@utrecht/component-library-css';
 import {
   Button,
@@ -355,12 +356,10 @@ function Account({
             {Object.entries(userFormData).map((field, index) => {
               return field[0] === 'emailNotificationConsent'
                 ? showEmailConsentField && (
-                    <Fieldset
-                      role="group"
-                      className="consent-checkbox-container">
+                    <Fieldset className="consent-checkbox-container">
                       <FieldsetLegend>{field[1].label}</FieldsetLegend>
                       <FormField type="checkbox" key={index}>
-                        <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
+                        <FormFieldLabel className="utrecht-form-field__label--checkbox">
                           <FormLabel
                             htmlFor={field[0]}
                             type="checkbox"
@@ -386,7 +385,7 @@ function Account({
                             />
                             <span>{field[1]?.description}</span>
                           </FormLabel>
-                        </Paragraph>
+                        </FormFieldLabel>
                       </FormField>
                     </Fieldset>
                   )

@@ -9,12 +9,12 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
 } from '@utrecht/component-library-react';
 import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
+import { FormFieldLabel } from '../form-field-label';
 import TextInput from '../text';
 
 const shuffleArray = <T,>(array: T[]): T[] => {
@@ -260,7 +260,6 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
   return (
     <div className="question">
       <Fieldset
-        role="group"
         invalid={fieldInvalid}
         aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}>
         {title && (
@@ -309,7 +308,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
 
         {selectAll && (
           <FormField type="checkbox" key="select_all">
-            <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
+            <FormFieldLabel className="utrecht-form-field__label--checkbox">
               <FormLabel
                 htmlFor={`${idKey}_select_all`}
                 type="checkbox"
@@ -339,7 +338,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                 />
                 <span>{selectAllLabel}</span>
               </FormLabel>
-            </Paragraph>
+            </FormFieldLabel>
           </FormField>
         )}
 
@@ -362,8 +361,8 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
           return (
             <>
               <FormField type="checkbox" key={index}>
-                <Paragraph
-                  className={`utrecht-form-field__label utrecht-form-field__label--checkbox${feedbackClass}`}>
+                <FormFieldLabel
+                  className={`utrecht-form-field__label--checkbox${feedbackClass}`}>
                   <FormLabel
                     htmlFor={`${idKey}_${index}`}
                     type="checkbox"
@@ -394,7 +393,9 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                         (maxReached && !selectedChoices.includes(choice.value))
                       }
                     />
-                    <span>{choice && choice.label}</span>
+                    <span id={`${idKey}_${index}_label`}>
+                      {choice && choice.label}
+                    </span>
                   </FormLabel>
                   {optionState === 'correct' && (
                     <span className="osc-feedback-badge --correct">
@@ -414,7 +415,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                       <span className="sr-only">Juist antwoord</span>
                     </span>
                   )}
-                </Paragraph>
+                </FormFieldLabel>
               </FormField>
 
               {choice.isOtherOption &&
@@ -434,7 +435,8 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                         ]
                       }
                       fieldInvalid={false}
-                      randomId={`${idKey}_${choice.trigger || index}`}
+                      randomId={`${idKey}_${choice.trigger || index}_other`}
+                      aria-labelledby={`${idKey}_${index}_label`}
                     />
                   </div>
                 )}

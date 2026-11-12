@@ -443,7 +443,10 @@ const ImageUploadField: FC<ImageUploadProps> = ({
         imageClickable: imageClickable,
       })}
 
-      <div className="utrecht-form-field__input">
+      <div
+        className="utrecht-form-field__input"
+        role={title ? 'group' : undefined}
+        aria-labelledby={title ? `${randomId}_label` : undefined}>
         <FilePond
           ref={pondRef}
           files={finalImages as File[] | FilePondInitialFile[]}
@@ -539,7 +542,6 @@ const ImageUploadField: FC<ImageUploadProps> = ({
             }
           }}
           id={randomId}
-          aria-labelledby={title ? `${randomId}_label` : undefined}
           required={fieldRequired}
           disabled={disabled}
           acceptedFileTypes={

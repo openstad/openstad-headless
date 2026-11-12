@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useRef, useState } from 'react';
 
 import { Lightbox } from '../lightbox';
 import './index.css';
@@ -14,12 +14,15 @@ type ClickableImageProps = {
    * `wrapper`: the whole image acts as the enlarge trigger (display-only images).
    * `overlay`: a small zoom button is placed over the image, so the image itself
    * can keep its own interaction (selection, swipe, …).
+   * `trigger`: only the zoom button, for images inside a `<label>`. The caller
+   * renders the image and gives the shared container `osc-clickable-image-anchor`,
+   * so the button sits in the top corner without becoming part of the label.
    */
-  variant?: 'wrapper' | 'overlay';
+  variant?: 'wrapper' | 'overlay' | 'trigger';
   /** Accessible label for the enlarge action. */
   label?: string;
-  /** The rendered image element to wrap. */
-  children: ReactNode;
+  /** The rendered image element to wrap. Not used by the `trigger` variant. */
+  children?: ReactNode;
 };
 
 const ZoomIcon = () => (
@@ -50,34 +53,56 @@ export const ClickableImage = ({
   children,
 }: ClickableImageProps) => {
   const [open, setOpen] = useState(false);
+  const zoomButtonRef = useRef<HTMLButtonElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   if (!clickable || !src) {
     return <>{children}</>;
   }
 
-  const lightbox = open ? (
-    <Lightbox src={src} alt={alt} onClose={() => setOpen(false)} />
-  ) : null;
+  const lightbox = (returnFocusRef: React.RefObject<HTMLElement | null>) =>
+    open ? (
+      <Lightbox
+        src={src}
+        alt={alt}
+        onClose={() => setOpen(false)}
+        returnFocusRef={returnFocusRef}
+      />
+    ) : null;
+
+  const zoomButton = (
+    <button
+      ref={zoomButtonRef}
+      type="button"
+      className="osc-clickable-image-zoom"
+      aria-label={label}
+      onPointerDown={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setOpen(true);
+      }}>
+      <ZoomIcon />
+    </button>
+  );
+
+  if (variant === 'trigger') {
+    return (
+      <>
+        {zoomButton}
+        {lightbox(zoomButtonRef)}
+      </>
+    );
+  }
 
   if (variant === 'overlay') {
     return (
       <span className="osc-clickable-image osc-clickable-image--overlay">
         {children}
-        <button
-          type="button"
-          className="osc-clickable-image-zoom"
-          aria-label={label}
-          onPointerDown={(e) => e.stopPropagation()}
-          onMouseDown={(e) => e.stopPropagation()}
-          onTouchStart={(e) => e.stopPropagation()}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setOpen(true);
-          }}>
-          <ZoomIcon />
-        </button>
-        {lightbox}
+        {zoomButton}
+        {lightbox(zoomButtonRef)}
       </span>
     );
   }
@@ -88,6 +113,7 @@ export const ClickableImage = ({
   return (
     <>
       <div
+        ref={wrapperRef}
         className="osc-clickable-image osc-clickable-image--wrapper"
         role="button"
         tabIndex={0}
@@ -101,7 +127,7 @@ export const ClickableImage = ({
         }}>
         {children}
       </div>
-      {lightbox}
+      {lightbox(wrapperRef)}
     </>
   );
 };

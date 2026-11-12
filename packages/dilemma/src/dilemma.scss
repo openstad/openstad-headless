@@ -86,7 +86,7 @@
 
     &:has(input:checked) {
       input:not(:checked) + label {
-        figure {
+        .dilemma-option-image {
           scale: 0.98;
           opacity: 0.5;
         }
@@ -120,14 +120,14 @@
         &:focus {
           outline: none;
 
-          &:focus-visible + label figure {
+          &:focus-visible + label .dilemma-option-image {
             outline: 2px dashed var(--dilemmaOptionOutlineColorActive);
             outline-offset: 2px;
           }
         }
 
         &:checked + label {
-          figure {
+          .dilemma-option-image {
             outline-color: var(--dilemmaOptionOutlineColorActive);
             outline-width: var(--dilemmaOptionOutlineWidthActive);
             outline-offset: var(--dilemmaOptionOutlineOffsetActive);
@@ -164,7 +164,7 @@
         }
       }
 
-      figure {
+      .dilemma-option-image {
         margin: 0;
         padding: 0;
         aspect-ratio: var(--dilemmaOptionFigureAspectRatio);
