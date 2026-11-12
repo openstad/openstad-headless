@@ -129,9 +129,13 @@ export function MultiSelect({
                       checked={option.checked}
                       aria-label={option.label}
                     />
-                    <FormLabel type="checkbox" htmlFor={checkboxId}>
-                      {option.label}
-                    </FormLabel>
+                    {/* No htmlFor here: a label linked to this checkbox would make
+                        the browser forward a second, synthetic click to the
+                        checkbox when the label text is clicked, which bubbles to
+                        this row's onClick and double-fires onItemSelected
+                        (toggling the tag on and back off in one click). The
+                        checkbox already has its own aria-label. */}
+                    <FormLabel type="checkbox">{option.label}</FormLabel>
                   </Paragraph>
                 </FormField>
               </div>
