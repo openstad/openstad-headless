@@ -364,6 +364,11 @@ export default function ProjectAuthentication({
                       <FormControl>
                         <Input placeholder="" {...field} />
                       </FormControl>
+                      <FormDescription>
+                        Als je hier een URL invult, moet een gebruiker bij
+                        inloggen via &quot;E-mail een inloglink&quot; eerst
+                        akkoord gaan met de privacyverklaring.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

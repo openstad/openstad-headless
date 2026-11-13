@@ -13,6 +13,7 @@ const authUrlConfig = require('../../config/auth').get('Url');
 const clientAuth = require('../../utils/clientAuth');
 const interpolate = require('../../utils/interpolate');
 const sanitize = require('../../utils/sanitize');
+const privacyConsent = require('../../utils/privacyConsent');
 const { logAuthEvent } = require('../../middleware/auditLog');
 const anonymousRoleId = parseInt(process.env.ANONYMOUS_ROLE_ID, 10) || 3;
 
@@ -56,6 +57,7 @@ exports.login = [
       ),
       buttonText: sanitize.plainText(configAuthType.buttonText || false),
       isPriviligedRoute: priviligedRoute,
+      privacyConsent: privacyConsent.consentField(req.client),
     });
   },
 ];
@@ -121,24 +123,32 @@ exports.register = (req, res, next) => {
   });
 };
 
+const isPrivilegedRequest = (req) =>
+  req.params.priviligedRoute === 'admin' ||
+  req?.query?.priviligedRoute === 'admin' ||
+  req?.client?.id === 1;
+
+const loginPageUrl = (req) => {
+  const url =
+    '/auth/url/login?clientId=' +
+    req.client.clientId +
+    '&redirect_uri=' +
+    req.redirectUrl;
+
+  return isPrivilegedRequest(req) ? url + '&priviligedRoute=admin' : url;
+};
+
 const handleSending = async (req, res, next) => {
-  let isPrivilegedRoute = req.params.priviligedRoute === 'admin';
-
-  if (!isPrivilegedRoute) {
-    isPrivilegedRoute = req?.query?.priviligedRoute === 'admin' || false;
-  }
-
-  // Mark route as privileged if the client ID is 1 (Admin panel)
-  if (req?.client?.id && req?.client?.id === 1) {
-    isPrivilegedRoute = true;
-  }
-
   try {
-    if (isPrivilegedRoute) {
+    if (isPrivilegedRequest(req)) {
       req.user = await authService.validatePrivilegeUser(
         req.body.email,
         req.client.id
       );
+    }
+
+    if (privacyConsent.policyUrl(req.client)) {
+      await privacyConsent.recordConsent(req.user, req.client);
     }
 
     await verificationService.sendVerification(
@@ -165,17 +175,7 @@ const handleSending = async (req, res, next) => {
       msg: 'Het is niet gelukt om de e-mail te versturen!',
     });
 
-    let redirectUrl =
-      '/auth/url/login?clientId=' +
-      req.client.clientId +
-      '&redirect_uri=' +
-      req.redirectUrl;
-
-    if (isPrivilegedRoute) {
-      redirectUrl += '&priviligedRoute=admin';
-    }
-
-    res.redirect(redirectUrl);
+    res.redirect(loginPageUrl(req));
   }
 };
 
@@ -201,6 +201,16 @@ exports.postLogin = async (req, res, next) => {
         : req.redirectUri
           ? encodeURIComponent(req.redirectUri)
           : '';
+
+    if (
+      privacyConsent.policyUrl(req.client) &&
+      req.body.privacyConsent !== 'on'
+    ) {
+      req.flash('error', {
+        msg: 'Je moet akkoord gaan met de privacyverklaring om verder te gaan.',
+      });
+      return res.redirect(loginPageUrl(req));
+    }
 
     let user = await getUser(req.body.email);
 
