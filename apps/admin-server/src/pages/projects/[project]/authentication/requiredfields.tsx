@@ -3,7 +3,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -17,7 +16,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Copy, Info } from 'lucide-react';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
@@ -26,25 +24,6 @@ import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
-
-function CopyableVar({ value }: { value: string }) {
-  return (
-    <button
-      type="button"
-      onClick={() => {
-        navigator.clipboard?.writeText(value).catch(() => null);
-        toast('Tekst gekopieerd', {
-          icon: <Info className="h-4 w-4 text-blue-500" />,
-        });
-      }}
-      title={`Kopieer ${value}`}
-      aria-label={`Kopieer ${value}`}
-      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted font-mono text-xs text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors cursor-copy">
-      {value}
-      <Copy className="h-3 w-3" />
-    </button>
-  );
-}
 
 const requiredUserFields = [
   {
@@ -85,16 +64,15 @@ const requiredUserFields = [
     defaultLabel: 'Ik ga akkoord met het ontvangen van e-mail notificaties.',
   },
   {
-    id: 'privacyConsent',
-    label: 'Privacy toestemming (AVG)',
-    defaultLabel:
-      'Ik ga akkoord met de verwerking van mijn persoonsgegevens conform de {link}',
-  },
-  {
     id: 'accessCode',
     label: 'Toegangscode',
   },
 ];
+
+const knownRequiredUserFields = (fields?: string[] | null) =>
+  (fields || []).filter((id) =>
+    requiredUserFields.some((field) => field.id === id)
+  );
 
 const formSchema = z.object({
   requiredUserFields: z.string().array().default([]),
@@ -122,8 +100,9 @@ export default function ProjectAuthenticationRequiredFields() {
   // User form defaults - reads from openstad provider
   const userDefaults = useCallback(
     () => ({
-      requiredUserFields:
-        data?.config?.auth?.provider?.openstad?.requiredUserFields || [],
+      requiredUserFields: knownRequiredUserFields(
+        data?.config?.auth?.provider?.openstad?.requiredUserFields
+      ),
       requiredUserFieldsLabels:
         data?.config?.auth?.provider?.openstad?.config?.requiredFields
           ?.requiredUserFieldsLabels || defaultLabels,
@@ -146,8 +125,9 @@ export default function ProjectAuthenticationRequiredFields() {
   // Anonymous form defaults - reads from anonymous provider
   const anonymousDefaults = useCallback(
     () => ({
-      requiredUserFields:
-        data?.config?.auth?.provider?.anonymous?.requiredUserFields || [],
+      requiredUserFields: knownRequiredUserFields(
+        data?.config?.auth?.provider?.anonymous?.requiredUserFields
+      ),
       requiredUserFieldsLabels:
         data?.config?.auth?.provider?.anonymous?.config?.requiredFields
           ?.requiredUserFieldsLabels || defaultLabels,
@@ -262,13 +242,17 @@ export default function ProjectAuthenticationRequiredFields() {
 
   useEffect(() => {
     setShowUserPageFields(
-      data?.config?.auth?.provider?.openstad?.requiredUserFields?.length > 0
+      knownRequiredUserFields(
+        data?.config?.auth?.provider?.openstad?.requiredUserFields
+      ).length > 0
     );
   }, [data?.config?.auth?.provider?.openstad?.requiredUserFields]);
 
   useEffect(() => {
     setShowAnonymousPageFields(
-      data?.config?.auth?.provider?.anonymous?.requiredUserFields?.length > 0
+      knownRequiredUserFields(
+        data?.config?.auth?.provider?.anonymous?.requiredUserFields
+      ).length > 0
     );
   }, [data?.config?.auth?.provider?.anonymous?.requiredUserFields]);
 
@@ -404,19 +388,6 @@ export default function ProjectAuthenticationRequiredFields() {
                                       }}
                                     />
                                   </FormControl>
-                                  {item.id === 'privacyConsent' && (
-                                    <FormDescription>
-                                      Gebruik <CopyableVar value="{link}" /> om
-                                      de link naar de privacyverklaring in te
-                                      voegen. De URL stel je in via{' '}
-                                      <a
-                                        href={`/projects/${project}/authentication`}
-                                        className="underline">
-                                        Authenticatie → Algemeen
-                                      </a>
-                                      .
-                                    </FormDescription>
-                                  )}
                                   <FormMessage />
                                 </FormItem>
                               )}
@@ -610,19 +581,6 @@ export default function ProjectAuthenticationRequiredFields() {
                                       }}
                                     />
                                   </FormControl>
-                                  {item.id === 'privacyConsent' && (
-                                    <FormDescription>
-                                      Gebruik <CopyableVar value="{link}" /> om
-                                      de link naar de privacyverklaring in te
-                                      voegen. De URL stel je in via{' '}
-                                      <a
-                                        href={`/projects/${project}/authentication`}
-                                        className="underline">
-                                        Authenticatie → Algemeen
-                                      </a>
-                                      .
-                                    </FormDescription>
-                                  )}
                                   <FormMessage />
                                 </FormItem>
                               )}

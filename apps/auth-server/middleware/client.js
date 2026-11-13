@@ -5,6 +5,7 @@ const privilegedRoles = require('../config/roles').privilegedRoles;
 const defaultRole = require('../config/roles').defaultRole;
 const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
 const configAuthTypes = require('../config/auth.js').types;
+const userFields = require('../config/user').fields;
 const clientAuth = require('../utils/clientAuth');
 const { validateRedirectUri } = require('../utils/redirectUri');
 
@@ -289,6 +290,8 @@ exports.checkRequiredUserFields = (req, res, next) => {
 
   if (requiredFields) {
     requiredFields.forEach((field) => {
+      if (!userFields.some((userField) => userField.key === field)) return;
+
       // Consent field is a special case since it can contain multiple client IDs
       if (field === 'emailNotificationConsent') {
         const clientId = String(req?.client?.id);
@@ -299,18 +302,6 @@ exports.checkRequiredUserFields = (req, res, next) => {
           error = true;
           return;
         }
-      }
-
-      // Privacy consent is stored per client ID as a timestamp
-      if (field === 'privacyConsent') {
-        const clientId = String(req?.client?.id);
-        const currentValue = req?.user?.privacyConsentAt || {};
-        const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
-
-        if (!clientConsentIsSet) {
-          error = true;
-        }
-        return;
       }
 
       // if at least one required field is empty, set to error

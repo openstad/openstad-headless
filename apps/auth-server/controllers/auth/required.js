@@ -24,15 +24,6 @@ exports.index = (req, res, next) => {
       return !clientConsentIsSet;
     }
 
-    // Privacy consent is stored per client ID as a timestamp
-    if (field?.key === 'privacyConsent') {
-      const clientId = String(req?.client?.id);
-      const currentValue = req?.user?.privacyConsentAt || {};
-      const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
-
-      return !clientConsentIsSet;
-    }
-
     return !req.user[field.key];
   });
 
@@ -42,28 +33,6 @@ exports.index = (req, res, next) => {
 
   const requiredUserFieldsLabels =
     (config && config.requiredFields?.requiredUserFieldsLabels) || {};
-
-  // Alleen absolute http(s)-URL's; new URL(...).href percent-encodeert
-  // quotes zodat de waarde veilig in het href-attribuut kan
-  let privacyPolicyUrl = '';
-  try {
-    const parsed = new URL(
-      req.client.clientDisclaimerUrl || config?.clientDisclaimerUrl || ''
-    );
-    if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
-      privacyPolicyUrl = parsed.href;
-    }
-  } catch {
-    privacyPolicyUrl = '';
-  }
-  const privacyPolicyTextRaw = sanitize.noTags(
-    req.client.clientDisclaimerText ||
-      config?.clientDisclaimerText ||
-      'privacyverklaring'
-  );
-  const privacyPolicyText =
-    privacyPolicyTextRaw.charAt(0).toLowerCase() +
-    privacyPolicyTextRaw.slice(1);
 
   // Replace field labels with labels defined in the client config (if provided)
   if (Object.keys(requiredUserFieldsLabels).length > 0) {
@@ -77,22 +46,6 @@ exports.index = (req, res, next) => {
       return field;
     });
   }
-
-  // Split the {link} placeholder in the privacyConsent label into structured
-  // parts so the template can build the anchor under autoescape. No server-side
-  // HTML composition, so the view needs no |safe on the label.
-  requiredUserFields = requiredUserFields.map((field) => {
-    if (field.key === 'privacyConsent' && field.label.includes('{link}')) {
-      const [labelPrefix, labelSuffix] = sanitize
-        .noTags(field.label)
-        .split('{link}');
-      field.labelPrefix = labelPrefix;
-      field.labelSuffix = labelSuffix || '';
-      field.privacyUrl = privacyPolicyUrl;
-      field.privacyText = privacyPolicyText;
-    }
-    return field;
-  });
 
   res.render('auth/required-fields', {
     client: sanitize.client(req.client),
@@ -132,25 +85,6 @@ exports.post = (req, res, next) => {
         data[field] = {
           ...currentValue,
           [clientId]: newValue,
-        };
-      }
-    } else if (field === 'privacyConsent') {
-      const clientId = String(req?.client?.id);
-      const currentValue = req?.user?.privacyConsentAt || {};
-      const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
-
-      if (!clientConsentIsSet) {
-        if (req.body[field] !== 'on') {
-          req.flash('error', {
-            msg: 'Je moet akkoord gaan met de privacyverklaring om verder te gaan.',
-          });
-          return res.redirect(
-            `/auth/required-fields?redirect_uri=${redirectUrl}`
-          );
-        }
-        data['privacyConsentAt'] = {
-          ...currentValue,
-          [clientId]: new Date().toISOString(),
         };
       }
     } else if (field === 'email' && !!req.user.email) {

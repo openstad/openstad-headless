@@ -336,15 +336,11 @@ export default function CreateUserProjects() {
                     </Paragraph>
 
                     <Paragraph className="text-sm text-muted-foreground">
-                      {project?.config?.auth?.provider?.openstad?.requiredUserFields?.includes(
-                        'privacyConsent'
-                      )
-                        ? user?.privacyConsentAt
-                          ? new Date(user.privacyConsentAt).toLocaleDateString(
-                              'nl-NL',
-                              { day: 'numeric', month: 'long', year: 'numeric' }
-                            )
-                          : 'Niet geaccepteerd'
+                      {user?.privacyConsentAt
+                        ? new Date(user.privacyConsentAt).toLocaleDateString(
+                            'nl-NL',
+                            { day: 'numeric', month: 'long', year: 'numeric' }
+                          )
                         : '–'}
                     </Paragraph>
                   </li>

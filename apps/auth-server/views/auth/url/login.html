@@ -41,6 +41,20 @@
 				autocomplete="email"
 				/>
 			</div>
+
+			{% if privacyConsent %}
+			<div class="form-group privacyConsent">
+				<input
+				type="checkbox"
+				name="privacyConsent"
+				class="input-privacyConsent input-field"
+				id="privacyConsent"
+				required
+				/>
+				<label for="privacyConsent">{{ privacyConsent.labelPrefix }}{% if privacyConsent.hasLink %}<a href="{{ privacyConsent.url }}" target="_blank" rel="noreferrer noopener" aria-label="{{ privacyConsent.linkText }} (opent in nieuw tabblad)">{{ privacyConsent.linkText }}</a>{{ privacyConsent.labelSuffix }}{% endif %}</label>
+			</div>
+			{% endif %}
+
 			<input type="hidden" name="_csrf" value="{{csrfToken}}">
 			<input type="hidden" name="clientId" value="{{clientId}}">
 

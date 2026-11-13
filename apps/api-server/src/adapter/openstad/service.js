@@ -458,9 +458,11 @@ service.updateClient = async function ({ authConfig, project }) {
       'clientDisclaimerUrl',
       'clientDisclaimerText',
     ];
+    const clearableProperties = ['clientDisclaimerUrl', 'clientDisclaimerText'];
     properties.forEach((property) => {
-      if (authConfig?.config && authConfig.config[property]) {
-        newClientConfig[property] = authConfig.config[property];
+      const value = authConfig?.config?.[property];
+      if (value || (clearableProperties.includes(property) && value === '')) {
+        newClientConfig[property] = value;
       } else if (client?.config && client.config[property]) {
         newClientConfig[property] = client.config[property];
       }
