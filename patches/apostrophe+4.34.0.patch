@@ -11,3 +11,16 @@ index a45aa62..db8d653 100644
      return !props.accept.includes(ext);
    });
  
+diff --git a/node_modules/apostrophe/modules/@apostrophecms/ui/ui/apos/components/AposFile.vue b/node_modules/apostrophe/modules/@apostrophecms/ui/ui/apos/components/AposFile.vue
+index 0bfc023..d34da45 100644
+--- a/node_modules/apostrophe/modules/@apostrophecms/ui/ui/apos/components/AposFile.vue
++++ b/node_modules/apostrophe/modules/@apostrophecms/ui/ui/apos/components/AposFile.vue
+@@ -127,7 +127,7 @@ export default {
+       const [ file ] = target.files ? target.files : (dataTransfer.files || []);
+       this.resetField();
+ 
+-      const extension = file.name.split('.').pop();
++      const extension = file.name.split('.').pop().toLowerCase();
+       const allowedFile = await this.checkFileGroup(`.${extension}`);
+ 
+       if (!allowedFile) {
