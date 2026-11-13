@@ -20,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
@@ -48,6 +49,7 @@ const formSchema = z.object({
   customUrl: z.string().optional(),
   width: z.string().optional(),
   height: z.string().optional(),
+  displayMarkers: z.boolean().optional(),
 });
 
 type SchemaKey = keyof typeof formSchema.shape;
@@ -77,6 +79,7 @@ export default function WidgetResourcesMapMap(
       customUrl: props?.customUrl || '',
       width: props?.width || '',
       height: props?.height || '',
+      displayMarkers: undefinedToTrueOrProp(props?.displayMarkers),
     },
   });
 
@@ -326,6 +329,20 @@ export default function WidgetResourcesMapMap(
               </FormItem>
             )}
           />
+
+          {props?.supportsMarkerToggle && (
+            <FormField
+              control={form.control}
+              name="displayMarkers"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Toon locatie markers van inzendingen</FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <Button type="submit">Opslaan</Button>
         </form>

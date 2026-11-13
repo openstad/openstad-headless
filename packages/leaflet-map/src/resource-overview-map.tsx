@@ -42,6 +42,7 @@ const ResourceOverviewMap = ({
   locationProx = undefined,
   givenResources,
   noFetch = false,
+  displayMarkers = true,
   selectedProjects = [],
   onMarkerClick,
   ...props
@@ -58,13 +59,15 @@ const ResourceOverviewMap = ({
 
   const { data: resources } = datastore.useResources(
     {
-      projectId: noFetch ? undefined : props.projectId,
+      projectId:
+        noFetch || displayMarkers === false ? undefined : props.projectId,
       pageSize: 99999,
     },
     { suspense: false }
   );
 
-  const allResources = givenResources || resources?.records || [];
+  const allResources =
+    displayMarkers === false ? [] : givenResources || resources?.records || [];
   let categorizeByField = categorize?.categorizeByField;
   let categories: CategoriesType = {};
 

@@ -123,6 +123,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                           updateConfig,
                           updatePreview,
                         })}
+                        supportsMarkerToggle={true}
                       />
                     </TabsContent>
                     <TabsContent value="buttons" className="p-0">

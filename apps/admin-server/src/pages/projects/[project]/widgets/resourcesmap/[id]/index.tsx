@@ -31,6 +31,7 @@ export const getServerSideProps = withApiUrl;
 
 export type ResourceOverviewMapWidgetTabProps = {
   hideOverviewFields?: boolean;
+  supportsMarkerToggle?: boolean;
 } & Omit<ResourceOverviewMapWidgetProps, keyof Omit<BaseProps, 'projectId'>>;
 
 export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
@@ -91,7 +92,10 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
             {previewConfig ? (
               <>
                 <TabsContent value="map" className="p-0">
-                  <WidgetResourcesMapMap {...totalPropPackage} />
+                  <WidgetResourcesMapMap
+                    {...totalPropPackage}
+                    supportsMarkerToggle={true}
+                  />
                 </TabsContent>
                 <TabsContent value="button" className="p-0">
                   <WidgetResourcesMapButtons {...totalPropPackage} />
