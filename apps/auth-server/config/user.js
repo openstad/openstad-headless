@@ -37,11 +37,6 @@ exports.fields = [
     type: 'checkbox',
   },
   {
-    key: 'privacyConsent',
-    label: 'Privacy toestemming',
-    type: 'checkbox',
-  },
-  {
     key: 'accessCode',
     label: 'Toegangscode',
   },
