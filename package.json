@@ -24,7 +24,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint:fix": "npm run lint --workspaces --if-present -- --fix",
-    "prepare": "husky"
+    "prepare": "husky",
+    "postinstall": "patch-package"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,css,scss,md,json,html,yml,yaml}": "prettier --write"
@@ -53,6 +54,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "mysql2": "^3.17.0",
+    "patch-package": "^8.0.1",
     "prettier": "^3.8.1",
     "vitest": "^4.1.8"
   },

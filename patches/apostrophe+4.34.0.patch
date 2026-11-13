@@ -1,0 +1,13 @@
+diff --git a/node_modules/apostrophe/modules/@apostrophecms/image/ui/apos/components/AposMediaUploaderUi.vue b/node_modules/apostrophe/modules/@apostrophecms/image/ui/apos/components/AposMediaUploaderUi.vue
+index a45aa62..db8d653 100644
+--- a/node_modules/apostrophe/modules/@apostrophecms/image/ui/apos/components/AposMediaUploaderUi.vue
++++ b/node_modules/apostrophe/modules/@apostrophecms/image/ui/apos/components/AposMediaUploaderUi.vue
+@@ -273,7 +273,7 @@ async function uploadMedia (event) {
+   }
+ 
+   const hasNoValidFile = [ ...files ].find((file) => {
+-    const ext = file.name.split('.').pop();
++    const ext = file.name.split('.').pop().toLowerCase();
+     return !props.accept.includes(ext);
+   });
+ 
