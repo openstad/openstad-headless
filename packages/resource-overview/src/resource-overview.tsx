@@ -151,6 +151,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayBudget?: boolean;
     displayTags?: boolean;
     displayTagIcon?: boolean;
+    displayImage?: boolean;
     displayOverviewTagGroups?: boolean;
     overviewTagGroups?: string[];
     dialogTagGroups?: string[];
@@ -321,6 +322,7 @@ const defaultItemRenderer = (
     return newUrl;
   };
 
+  const displayImage = props.displayImage !== false;
   const resourceImages =
     Array.isArray(resource.images) && resource.images.length > 0
       ? resource.images
@@ -603,40 +605,42 @@ const defaultItemRenderer = (
             <TileFooter />
           )}
 
-          <Carousel
-            items={resourceImages}
-            buttonText={{
-              next: 'Volgende afbeelding',
-              previous: 'Vorige afbeelding',
-            }}
-            className="osc-carousel-container"
-            itemRenderer={(i) => (
-              <Image
-                src={i.url}
-                imageFooter={
-                  props.displayStatusLabel && (
-                    <div className={`${hasImages} ${statusClasses}`}>
-                      <Paragraph className="osc-resource-overview-content-item-status">
-                        {!!multiProjectLabel ? (
-                          <span className="status-label">
-                            {multiProjectLabel}
-                          </span>
-                        ) : (
-                          resourceFilteredStatuses?.map((statusTag: any) => (
-                            <span
-                              className="status-label"
-                              key={statusTag.label}>
-                              {statusTag.label}
+          {displayImage && (
+            <Carousel
+              items={resourceImages}
+              buttonText={{
+                next: 'Volgende afbeelding',
+                previous: 'Vorige afbeelding',
+              }}
+              className="osc-carousel-container"
+              itemRenderer={(i) => (
+                <Image
+                  src={i.url}
+                  imageFooter={
+                    props.displayStatusLabel && (
+                      <div className={`${hasImages} ${statusClasses}`}>
+                        <Paragraph className="osc-resource-overview-content-item-status">
+                          {!!multiProjectLabel ? (
+                            <span className="status-label">
+                              {multiProjectLabel}
                             </span>
-                          ))
-                        )}
-                      </Paragraph>
-                    </div>
-                  )
-                }
-              />
-            )}
-          />
+                          ) : (
+                            resourceFilteredStatuses?.map((statusTag: any) => (
+                              <span
+                                className="status-label"
+                                key={statusTag.label}>
+                                {statusTag.label}
+                              </span>
+                            ))
+                          )}
+                        </Paragraph>
+                      </div>
+                    )
+                  }
+                />
+              )}
+            />
+          )}
 
           {props.displayTagIcon && firstTag && MapIconImage && (
             <div className="resource-card--link_tagicon">
@@ -789,38 +793,40 @@ const defaultItemRenderer = (
             ) : null}
           </div>
 
-          <Carousel
-            items={resourceImages}
-            buttonText={{
-              next: 'Volgende afbeelding',
-              previous: 'Vorige afbeelding',
-            }}
-            className="osc-carousel-container"
-            itemRenderer={(i) => (
-              <Image
-                src={i.url}
-                imageFooter={
-                  props.displayStatusLabel && (
-                    <div className={`${hasImages} ${statusClasses}`}>
-                      <Paragraph className="osc-resource-overview-content-item-status">
-                        {!!multiProjectLabel ? (
-                          <span className="status-label">
-                            {multiProjectLabel}
-                          </span>
-                        ) : (
-                          resourceFilteredStatuses?.map((statusTag: any) => (
+          {displayImage && (
+            <Carousel
+              items={resourceImages}
+              buttonText={{
+                next: 'Volgende afbeelding',
+                previous: 'Vorige afbeelding',
+              }}
+              className="osc-carousel-container"
+              itemRenderer={(i) => (
+                <Image
+                  src={i.url}
+                  imageFooter={
+                    props.displayStatusLabel && (
+                      <div className={`${hasImages} ${statusClasses}`}>
+                        <Paragraph className="osc-resource-overview-content-item-status">
+                          {!!multiProjectLabel ? (
                             <span className="status-label">
-                              {statusTag.label}
+                              {multiProjectLabel}
                             </span>
-                          ))
-                        )}
-                      </Paragraph>
-                    </div>
-                  )
-                }
-              />
-            )}
-          />
+                          ) : (
+                            resourceFilteredStatuses?.map((statusTag: any) => (
+                              <span className="status-label">
+                                {statusTag.label}
+                              </span>
+                            ))
+                          )}
+                        </Paragraph>
+                      </div>
+                    )
+                  }
+                />
+              )}
+            />
+          )}
 
           {props.displayTagIcon && firstTag && MapIconImage && (
             <div className="resource-card--link_tagicon">
