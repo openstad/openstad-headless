@@ -140,11 +140,14 @@ export default function ProjectSettingsUsers(
 
   async function onUsersSubmit(values: z.infer<typeof usersFormSchema>) {
     try {
-      await updateProject({
+      const result = await updateProject({
         users: {
           canCreateNewUsers: values.canCreateNewUsers,
         },
       });
+      if (!result || result.error) {
+        throw new Error(result?.error);
+      }
       toast.success('Project aangepast!');
     } catch (error) {
       toast.error('Er is helaas iets mis gegaan.');
@@ -156,9 +159,12 @@ export default function ProjectSettingsUsers(
     values: z.infer<typeof anonymizeFormSchema>
   ) {
     try {
-      await updateProject({
+      const result = await updateProject({
         [anonymizeCategory]: values,
       });
+      if (!result || result.error) {
+        throw new Error(result?.error);
+      }
       toast.success('Project aangepast!');
     } catch (error) {
       toast.error('Er is helaas iets mis gegaan.');
