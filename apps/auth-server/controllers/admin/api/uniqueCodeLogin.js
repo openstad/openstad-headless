@@ -2,6 +2,7 @@ const db = require('../../../db');
 const authCodeConfig = require('../../../config/auth').get('UniqueCode');
 const auditLog = require('../../../middleware/auditLog');
 const lockout = require('../../../utils/uniqueCodeLockout');
+const stripUserSecrets = require('../../../utils/stripUserSecrets');
 
 const auditMethod = 'uniqueCodeInline';
 
@@ -12,12 +13,7 @@ const auditRequest = (req, user) => ({
   originalUrl: req.originalUrl,
 });
 
-const outputUser = (user) => {
-  const result = { ...user.dataValues };
-  delete result.password;
-  delete result.hashedPhoneNumber;
-  return result;
-};
+const outputUser = (user) => stripUserSecrets({ ...user.dataValues });
 
 exports.post = async (req, res, next) => {
   const client = req.user;
@@ -52,7 +48,6 @@ exports.post = async (req, res, next) => {
 
     if (isNew) {
       const created = await db.User.create({});
-      // Claim only an unused code, so concurrent first uses share one user
       const [claimed] = await db.UniqueCode.update(
         { userId: created.id },
         { where: { id: uniqueCode.id, userId: null } }

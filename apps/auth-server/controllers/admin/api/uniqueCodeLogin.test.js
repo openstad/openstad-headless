@@ -12,7 +12,14 @@ const client = { id: 7, clientId: 'project-7', config: { defaultRoleId: 5 } };
 
 const fakeUser = (id) => ({
   id,
-  dataValues: { id, password: 'secret', hashedPhoneNumber: 'hash', name: 'x' },
+  dataValues: {
+    id,
+    password: 'secret',
+    hashedPhoneNumber: 'hash',
+    twoFactorToken: 'totp-secret',
+    resetPasswordToken: 'reset-token',
+    name: 'x',
+  },
   getRoleForClient: vi.fn().mockResolvedValue('member'),
 });
 
@@ -154,6 +161,16 @@ describe('POST /api/admin/unique-code-login', () => {
     expect(createUser).not.toHaveBeenCalled();
     expect(createRole).not.toHaveBeenCalled();
     expect(res.json.mock.calls[0][0].isNew).toBe(false);
+  });
+
+  it('never returns secrets of the user', async () => {
+    vi.spyOn(db.UniqueCode, 'findOne').mockResolvedValue({ userId: 12 });
+    vi.spyOn(db.User, 'findOne').mockResolvedValue(fakeUser(12));
+    vi.spyOn(db.UserRole, 'findOne').mockResolvedValue({ roleId: 2 });
+
+    const { res } = await call({ code: 'LINKED' });
+
+    expect(res.json.mock.calls[0][0].user).toEqual({ id: 12, name: 'x' });
   });
 
   it('fails without counting a guess when the linked user no longer exists', async () => {
