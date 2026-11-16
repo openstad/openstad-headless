@@ -340,3 +340,224 @@ describe('useCurrentUser with a shared API instance', () => {
     expect(api.currentUserJWT).toBe('valid');
   });
 });
+
+describe('useCurrentUser logout and cross-tab writes', () => {
+  let originalWindow;
+  let originalDocument;
+  let originalHistory;
+
+  const stored = () =>
+    JSON.parse(global.window.localStorage.getItem('openstad'));
+
+  function setup({ search = '', projects }) {
+    global.history = { replaceState: vi.fn() };
+    global.window = {
+      location: {
+        search,
+        href: `https://example.com/${search}`,
+        pathname: '/',
+        hash: '',
+      },
+      history: global.history,
+      localStorage: createLocalStorage({ openstad: JSON.stringify(projects) }),
+    };
+  }
+
+  beforeEach(() => {
+    originalWindow = global.window;
+    originalDocument = global.document;
+    originalHistory = global.history;
+    global.document = { cookie: '' };
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    global.window = originalWindow;
+    global.document = originalDocument;
+    global.history = originalHistory;
+    vi.restoreAllMocks();
+  });
+
+  test('openstadlogout clears every project with multi-project login', async () => {
+    setup({
+      search: '?openstadlogout=true',
+      projects: {
+        6: { openStadUser: { jwt: 'jwt-6' } },
+        7: { openStadUser: { jwt: 'jwt-7' } },
+      },
+    });
+    const api = { currentUserJWT: 'jwt-6', user: { fetchMe: vi.fn() } };
+
+    await runGetCurrentUser(
+      { projectId: 6, api, refresh: vi.fn() },
+      { projectId: 6, multiProjectLogin: true }
+    );
+
+    expect(stored()).toEqual({});
+  });
+
+  test('openstadlogout reads the flag from the api config of the data store', async () => {
+    setup({
+      search: '?openstadlogout=true',
+      projects: {
+        6: { openStadUser: { jwt: 'jwt-6' } },
+        7: { openStadUser: { jwt: 'jwt-7' } },
+      },
+    });
+    const api = { currentUserJWT: 'jwt-6', user: { fetchMe: vi.fn() } };
+
+    await runGetCurrentUser(
+      { projectId: 6, api, refresh: vi.fn() },
+      {
+        projectId: 6,
+        api: { url: 'http://api.local', multiProjectLogin: true },
+      }
+    );
+
+    expect(stored()).toEqual({});
+  });
+
+  test('openstadlogout only clears its own project without multi-project login', async () => {
+    setup({
+      search: '?openstadlogout=true',
+      projects: {
+        6: { openStadUser: { jwt: 'jwt-6' } },
+        7: { openStadUser: { jwt: 'jwt-7' } },
+      },
+    });
+    const api = { currentUserJWT: 'jwt-6', user: { fetchMe: vi.fn() } };
+
+    await runGetCurrentUser(
+      { projectId: 6, api, refresh: vi.fn() },
+      { projectId: 6 }
+    );
+
+    expect(stored()[6]).toEqual({});
+    expect(stored()[7]).toEqual({ openStadUser: { jwt: 'jwt-7' } });
+  });
+
+  test('does not write a token back that was removed while /me was pending', async () => {
+    setup({ projects: { 6: { openStadUser: { jwt: 'jwt-6' } } } });
+    let resolveMe;
+    const fetchMe = vi.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveMe = resolve;
+        })
+    );
+    const api = { currentUserJWT: null, user: { fetchMe } };
+
+    const pending = runGetCurrentUser(
+      { projectId: 6, api, refresh: vi.fn() },
+      { projectId: 6, multiProjectLogin: true }
+    );
+    await vi.waitFor(() => expect(fetchMe).toHaveBeenCalled());
+    global.window.localStorage.setItem('openstad', JSON.stringify({}));
+    resolveMe({ id: 12, role: 'member' });
+
+    await expect(pending).resolves.toEqual({});
+    expect(stored()).toEqual({});
+    expect(console.log).toHaveBeenCalledWith(
+      '[osc-auth] token removed while fetching the user, continuing anonymous'
+    );
+  });
+
+  test('keeps the token when it is still stored after /me', async () => {
+    setup({ projects: { 6: { openStadUser: { jwt: 'jwt-6' } } } });
+    const api = {
+      currentUserJWT: null,
+      apiUrl: 'http://api.local',
+      user: { fetchMe: vi.fn().mockResolvedValue({ id: 12, role: 'member' }) },
+    };
+
+    await expect(
+      runGetCurrentUser(
+        { projectId: 6, api, refresh: vi.fn() },
+        { projectId: 6, multiProjectLogin: true }
+      )
+    ).resolves.toEqual({ id: 12, role: 'member' });
+    expect(stored()[6].openStadUser.jwt).toBe('jwt-6');
+  });
+
+  test('a logout signal cookie from the cms clears every project with multi-project login', async () => {
+    setup({
+      projects: {
+        6: { openStadUser: { jwt: 'jwt-6' } },
+        7: { openStadUser: { jwt: 'jwt-7' } },
+      },
+    });
+    global.document = { cookie: 'openstad_logout=1' };
+    const api = { currentUserJWT: 'jwt-6', user: { fetchMe: vi.fn() } };
+
+    await expect(
+      runGetCurrentUser(
+        { projectId: 6, api, refresh: vi.fn() },
+        { projectId: 6, multiProjectLogin: true }
+      )
+    ).resolves.toEqual({});
+
+    expect(stored()).toEqual({});
+    expect(api.user.fetchMe).not.toHaveBeenCalled();
+    expect(global.document.cookie).toBe('openstad_logout=; path=/; max-age=0');
+  });
+
+  test('ignores the logout signal cookie without multi-project login', async () => {
+    setup({ projects: { 6: { openStadUser: { jwt: 'jwt-6' } } } });
+    global.document = { cookie: 'openstad_logout=1' };
+    const api = {
+      currentUserJWT: null,
+      apiUrl: 'http://api.local',
+      user: { fetchMe: vi.fn().mockResolvedValue({ id: 12, role: 'member' }) },
+    };
+
+    await runGetCurrentUser(
+      { projectId: 6, api, refresh: vi.fn() },
+      { projectId: 6 }
+    );
+
+    expect(stored()[6].openStadUser.jwt).toBe('jwt-6');
+    expect(global.document.cookie).toBe('openstad_logout=1');
+  });
+
+  test('a fresh login token in the url wins over an earlier logout signal cookie', async () => {
+    setup({
+      search: '?openstadlogintoken=jwt-new&openstadprojectid=6',
+      projects: { 7: { openStadUser: { jwt: 'jwt-7' } } },
+    });
+    global.document = { cookie: 'openstad_logout=1' };
+    const api = {
+      currentUserJWT: null,
+      apiUrl: 'http://api.local',
+      user: { fetchMe: vi.fn().mockResolvedValue({ id: 12, role: 'member' }) },
+    };
+
+    await expect(
+      runGetCurrentUser(
+        { projectId: 6, api, refresh: vi.fn() },
+        { projectId: 6, multiProjectLogin: true }
+      )
+    ).resolves.toEqual({ id: 12, role: 'member' });
+
+    expect(stored()[6].openStadUser.jwt).toBe('jwt-new');
+    expect(global.document.cookie).toBe('openstad_logout=; path=/; max-age=0');
+  });
+
+  test('keeps a login from the url when an old cms user is cleared during the same load', async () => {
+    setup({
+      search: '?openstadlogintoken=jwt-url&openstadprojectid=6',
+      projects: { 6: { cmsUser: { access_token: 'old-cms-token' } } },
+    });
+    const api = {
+      currentUserJWT: null,
+      apiUrl: 'http://api.local',
+      user: { fetchMe: vi.fn().mockResolvedValue({ id: 12, role: 'member' }) },
+    };
+
+    await expect(
+      runGetCurrentUser(
+        { projectId: 6, api, refresh: vi.fn() },
+        { projectId: 6, multiProjectLogin: true }
+      )
+    ).resolves.toEqual({ id: 12, role: 'member' });
+  });
+});

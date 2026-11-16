@@ -42,6 +42,7 @@ export default class LocalStorage {
     if (typeof value == 'undefined') value = '';
 
     let { data, target } = this.getData();
+    if (JSON.stringify(target[name]) === JSON.stringify(value)) return;
     target[name] = value;
 
     window.localStorage.setItem('openstad', JSON.stringify(data));
@@ -51,6 +52,7 @@ export default class LocalStorage {
     if (typeof name != 'string') return;
 
     let { data, target } = this.getData();
+    if (!(name in target)) return;
 
     delete target[name];
 

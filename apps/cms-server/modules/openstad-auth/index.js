@@ -6,6 +6,7 @@
 const Url = require('url');
 const expressSession = require('express-session');
 const { isLoginTokenForProject } = require('./lib/login-token');
+const { markLogoutForWidgets } = require('./lib/logout-signal');
 
 function removeURLParameter(url, parameter) {
   // prefer to use l.search if you have a location/link object
@@ -53,6 +54,9 @@ module.exports = {
           if (!/^\/(?![/\\])/.test(target)) {
             target = '/';
           }
+          markLogoutForWidgets(res, {
+            secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
+          });
           return req.session.destroy(() => {
             res.redirect(target);
           });

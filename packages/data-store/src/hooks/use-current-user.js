@@ -2,7 +2,9 @@ import { useEffect } from 'react';
 import useSWR, { mutate } from 'swr';
 
 import {
+  clearLogoutSignalCookie,
   hasActiveSessionCookie,
+  hasLogoutSignalCookie,
   notifyAuthChange,
   onAuthChange,
 } from '../../../lib/auth-broker';
@@ -71,19 +73,20 @@ export default function useCurrentUser(props) {
   let self = this;
 
   const projectId = props.projectId;
+  const multiProjectLogin =
+    props.multiProjectLogin ?? props.api?.multiProjectLogin;
 
   const { data, error, isLoading } = useSWR(
     { type: 'current-user', projectId: self.projectId },
     getCurrentUser
   );
 
-  useEffect(
-    () =>
-      onAuthChange(() =>
-        mutate({ type: 'current-user', projectId: self.projectId })
-      ),
-    [self.projectId]
-  );
+  useEffect(() => {
+    if (!multiProjectLogin) return undefined;
+    return onAuthChange(() =>
+      mutate({ type: 'current-user', projectId: self.projectId })
+    );
+  }, [self.projectId, multiProjectLogin]);
 
   async function getCurrentUser() {
     if (self.projectId === undefined || self.projectId === null) return {};
@@ -93,11 +96,23 @@ export default function useCurrentUser(props) {
     // jwt in url: use and remove from url
     const params = new URLSearchParams(window.location.search);
 
-    if (params.has('openstadlogout')) {
+    const freshLoginInUrl = !!consumeLoginTokenFromUrl({
+      search: window.location.search,
+      projectId,
+    }).jwt;
+    const logoutSignalCookie = multiProjectLogin && hasLogoutSignalCookie();
+    if (logoutSignalCookie && freshLoginInUrl) clearLogoutSignalCookie();
+    const logoutSignalledByCms = logoutSignalCookie && !freshLoginInUrl;
+    if (params.has('openstadlogout') || logoutSignalledByCms) {
       console.log('[osc-auth] logout detected, clearing session');
-      storage.remove('cmsUser');
-      storage.remove('openStadUser');
-      storage.remove('expireOnClose');
+      if (multiProjectLogin) {
+        storage.destroy();
+      } else {
+        storage.remove('cmsUser');
+        storage.remove('openStadUser');
+        storage.remove('expireOnClose');
+      }
+      if (logoutSignalledByCms) clearLogoutSignalCookie();
 
       let url = window.location.href;
       url = url.replace(new RegExp(`[?&]openstadlogout=true`), '');
@@ -167,6 +182,7 @@ export default function useCurrentUser(props) {
     if (!jwt && sessionUser.jwt) {
       jwt = sessionUser.jwt;
     }
+    const jwtIsStored = !!jwt && jwt === sessionUser.jwt && jwt !== jwtFromUrl;
     if (!jwt && initialUser.jwt) {
       jwt = initialUser.jwt;
     }
@@ -198,6 +214,17 @@ export default function useCurrentUser(props) {
         if (!openStadUser?.id) {
           console.log('[osc-auth] token not accepted, continuing anonymous');
           storage.remove('openStadUser');
+          return {};
+        }
+
+        if (
+          multiProjectLogin &&
+          jwtIsStored &&
+          storage.get('openStadUser')?.jwt !== jwt
+        ) {
+          console.log(
+            '[osc-auth] token removed while fetching the user, continuing anonymous'
+          );
           return {};
         }
 

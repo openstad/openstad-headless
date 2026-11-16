@@ -1,6 +1,7 @@
 const STORAGE_KEY = 'openstad';
 const AUTH_CHANGED_EVENT = 'osc-auth-changed';
 const ACTIVE_SESSION_COOKIE = /(^|;\s*)openstad_active=1/;
+const LOGOUT_SIGNAL_COOKIE = /(^|;\s*)openstad_logout=1/;
 
 export type KnownIdentity = { projectId: string; jwt: string };
 
@@ -26,6 +27,14 @@ const jwtExpiresAt = (jwt: string): number | null => {
 
 export function hasActiveSessionCookie(): boolean {
   return ACTIVE_SESSION_COOKIE.test(document.cookie);
+}
+
+export function hasLogoutSignalCookie(): boolean {
+  return LOGOUT_SIGNAL_COOKIE.test(document.cookie);
+}
+
+export function clearLogoutSignalCookie(): void {
+  document.cookie = 'openstad_logout=; path=/; max-age=0';
 }
 
 export function getKnownIdentities({
