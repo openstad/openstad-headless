@@ -130,6 +130,20 @@ describe('exchange', () => {
     ).toBe(401);
   });
 
+  it('refuses a vote code identity as source for another project', async () => {
+    service.fetchClient.mockImplementation(async ({ authConfig: used }) =>
+      used.provider === 'openstad'
+        ? targetClient({ authTypes: ['UniqueCode'] })
+        : targetClient()
+    );
+
+    const result = await call(routes.exchange, { sourceJwt: sourceJwt() });
+
+    expect(result.status).toBe(401);
+    expect(result.body).toEqual({ status: 'not_allowed' });
+    expect(db.User.create).not.toHaveBeenCalled();
+  });
+
   it('mints a jwt for the target project with the member role when the user has no role row there', async () => {
     service.fetchUserData.mockResolvedValue(
       rawUser({
@@ -302,6 +316,24 @@ describe('completeFields', () => {
         })
       ).status
     ).toBe(401);
+  });
+
+  it('rejects a pending token of a user from another provider', async () => {
+    db.User.findOne.mockResolvedValue({
+      id: 77,
+      projectId: 2,
+      idpUser: { identifier: 42, provider: 'other-provider' },
+    });
+    const update = vi.spyOn(service, 'updateUser').mockResolvedValue({});
+
+    const result = await call(routes.completeFields, {
+      pendingJwt: pendingJwt(),
+      fields: { postcode: '1234AB' },
+    });
+
+    expect(result.status).toBe(401);
+    expect(result.body).toEqual({ status: 'invalid_token' });
+    expect(update).not.toHaveBeenCalled();
   });
 
   it('sends only the missing fields to the auth server, never a role', async () => {

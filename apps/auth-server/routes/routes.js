@@ -22,6 +22,7 @@ const authUnsubscribe = require('../controllers/auth/unsubscribe');
 const clientMw = require('../middleware/client');
 const userMw = require('../middleware/user');
 const bruteForce = require('../middleware/bruteForce');
+const endCodeOnlySessionForOtherClients = require('../middleware/codeOnlySessionGuard');
 const authMw = require('../middleware/auth');
 const passwordResetMw = require('../middleware/passwordReset');
 const logMw = require('../middleware/log');
@@ -458,6 +459,7 @@ module.exports = function (app) {
     clientMw.withOne,
     currentClientAuthMw,
     authMw.check,
+    endCodeOnlySessionForOtherClients,
     userMw.withRoleForClient,
     clientMw.checkRequiredUserFields,
     clientMw.check2FA,

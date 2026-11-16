@@ -10,6 +10,7 @@ const {
   evaluateClientGates,
   fieldLabelsFor,
   findInvalidFields,
+  isUniqueCodeOnlyClient,
   mintJwt,
   pickAllowedFields,
   privacyLinkFor,
@@ -36,8 +37,7 @@ const loadTargetUser = ({ authConfig, identifier }) =>
   ]);
 
 const hasUniqueCodeFor = async ({ authConfig, client, identifier }) => {
-  const authTypes = client.authTypes || [];
-  if (authTypes.length !== 1 || authTypes[0] !== 'UniqueCode') return false;
+  if (!isUniqueCodeOnlyClient(client)) return false;
   const codes = await service.fetchUniqueCodesForUser({
     authConfig,
     userId: identifier,
@@ -162,7 +162,13 @@ exports.exchange = async (req, res, next) => {
     }
 
     const identifier = sourceUser.idpUser.identifier;
-    const [client, rawUser] = await loadTargetUser({ authConfig, identifier });
+    const [sourceClient, [client, rawUser]] = await Promise.all([
+      service.fetchClient({ authConfig: sourceAuthConfig }),
+      loadTargetUser({ authConfig, identifier }),
+    ]);
+    if (isUniqueCodeOnlyClient(sourceClient)) {
+      return res.status(401).json({ status: 'not_allowed' });
+    }
     const role = resolveTargetRole({ rawUser, clientId: authConfig.clientId });
     const hasUniqueCode = await hasUniqueCodeFor({
       authConfig,
@@ -200,8 +206,6 @@ exports.uniqueCodeLogin = async (req, res, next) => {
       return res.status(401).json({ status: 'invalid_code' });
     }
     if (result.status === 429) {
-      // A client-wide lock can be caused by others; the widget then falls
-      // back to the auth-server login instead of showing an error
       const status =
         result.data?.scope === 'client' ? 'client_locked' : 'too_many_attempts';
       return res.status(429).json({ status });
@@ -240,7 +244,11 @@ exports.completeFields = async (req, res, next) => {
     const projectUser = await db.User.findOne({
       where: { id: claims.userId, projectId: req.project.id },
     });
-    if (!projectUser || !projectUser.idpUser) {
+    if (
+      !projectUser ||
+      !projectUser.idpUser ||
+      projectUser.idpUser.provider !== req.authConfig.provider
+    ) {
       return res.status(401).json({ status: 'invalid_token' });
     }
 

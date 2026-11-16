@@ -23,6 +23,14 @@ const findMissingFields = ({ client, user }) =>
     return !user[field];
   });
 
+const isUniqueCodeOnlyClient = (client) => {
+  const authTypes = client?.authTypes || [];
+  return authTypes.length === 1 && authTypes[0] === 'UniqueCode';
+};
+
+const hasPhonenumberLogin = (client) =>
+  (client?.authTypes || []).includes('Phonenumber');
+
 const evaluateClientGates = ({
   client,
   user,
@@ -47,12 +55,7 @@ const evaluateClientGates = ({
   ) {
     return { ok: false, status: 'phonenumber_required' };
   }
-  if (
-    authTypes.length === 1 &&
-    authTypes[0] === 'UniqueCode' &&
-    !hasUniqueCode &&
-    !isPrivileged
-  ) {
+  if (isUniqueCodeOnlyClient(client) && !hasUniqueCode && !isPrivileged) {
     return { ok: false, status: 'uniquecode_required' };
   }
 
@@ -79,8 +82,6 @@ const mintJwt = ({ authConfig, userId, role, projectId, pending = false }) => {
   });
 };
 
-// Digest login keeps swallowing update errors (existing behaviour); the inline
-// path throws so a half-filled project user never gets a final jwt
 const upsertProjectUser = async ({
   User,
   project,
@@ -211,8 +212,6 @@ const privacyLinkFor = (client) => {
   return { url: url.href, text: text.charAt(0).toLowerCase() + text.slice(1) };
 };
 
-// Checks submitted fields against the api User model, so the project user
-// update after login cannot fail on them
 const findInvalidFields = async ({ User, fields }) => {
   const keys = Object.keys(fields).filter((key) => User.rawAttributes[key]);
   if (keys.length === 0) return [];
@@ -226,17 +225,14 @@ const findInvalidFields = async ({ User, fields }) => {
   }
 };
 
-// Shared devices: a UniqueCode-only client must not silently reuse the
-// auth-server session of the previous voter
 const shouldForceNewLogin = async ({ query, project, fetchClient }) => {
   if (query.forceNewLogin) return true;
   if (process.env.MULTI_PROJECT_LOGIN !== 'true') return false;
-  // newLoginDone marks the return from the forced logout
   if (query.newLoginDone) return false;
   if (project?.config?.auth?.forceNewLoginOnWidgets !== undefined) return false;
   try {
-    const authTypes = (await fetchClient()).authTypes || [];
-    return authTypes.length === 1 && authTypes[0] === 'UniqueCode';
+    const client = await fetchClient();
+    return isUniqueCodeOnlyClient(client) || hasPhonenumberLogin(client);
   } catch (err) {
     return false;
   }
@@ -247,6 +243,7 @@ module.exports = {
   evaluateClientGates,
   fieldLabelsFor,
   findInvalidFields,
+  isUniqueCodeOnlyClient,
   mintJwt,
   pickAllowedFields,
   privacyLinkFor,

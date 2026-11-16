@@ -67,6 +67,13 @@ describe('shouldForceNewLogin', () => {
     expect(await force().result).toBe(true);
   });
 
+  it('forces a new login for a client with phone number login', async () => {
+    expect(await force({ authTypes: ['Phonenumber'] }).result).toBe(true);
+    expect(await force({ authTypes: ['Url', 'Phonenumber'] }).result).toBe(
+      true
+    );
+  });
+
   it('keeps the shared session for other clients', async () => {
     expect(await force({ authTypes: ['Url'] }).result).toBe(false);
     expect(await force({ authTypes: ['UniqueCode', 'Url'] }).result).toBe(
