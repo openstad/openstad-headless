@@ -90,9 +90,9 @@ function projectsWithChangedLogin(
 ): string[] {
   const before = storedJwtsByProject(oldValue);
   const after = storedJwtsByProject(newValue);
-  return [...new Set([...Object.keys(before), ...Object.keys(after)])].filter(
-    (projectId) => before[projectId] !== after[projectId]
-  );
+  return Array.from(
+    new Set([...Object.keys(before), ...Object.keys(after)])
+  ).filter((projectId) => before[projectId] !== after[projectId]);
 }
 
 export function notifyAuthChange(projectIds?: string[]): void {
