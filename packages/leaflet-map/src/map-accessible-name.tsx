@@ -2,9 +2,9 @@ import { useEffect } from 'react';
 // @ts-ignore
 import { useMap } from 'react-leaflet/hooks';
 
-// ponytail: Leaflet maakt zijn eigen container focusbaar (tabindex=0), dus de
-// toegankelijke naam moet op dát element staan, niet op een wrapper eromheen —
-// anders landt de toetsenbordfocus op een element zonder naam (WCAG 4.1.2).
+// Leaflet makes its own container focusable (tabindex=0), so the accessible
+// name must be on that element, not on a wrapper around it. Otherwise keyboard
+// focus lands on an element without a name (WCAG 4.1.2).
 export function MapAccessibleName({
   label,
   describedBy,

@@ -12,13 +12,13 @@
   position: relative;
 }
 
-/* ponytail: kaartbediening — kompas (pannen zonder slepen, 2.5.7) + plaats-knop (keyboard, 2.1.1) */
+/* Map controls: compass (panning without dragging, 2.5.7) + place button (keyboard, 2.1.1) */
 .osc-map .osc-map-controls {
   position: absolute;
-  /* ponytail: 800 is de laag van Leaflets eigen bediening (leaflet-control),
-     boven de tegels, markers en kaartpopups. Dit stond op 1000 — gelijk aan de
-     dialog uit packages/ui — en dan wint de laatste in de DOM: de pijltjes
-     kwamen over de detailpopup heen te liggen. */
+  /* 800 is the layer of Leaflet's own controls (leaflet-control), above the
+     tiles, markers and map popups. This was 1000, equal to the dialog from
+     packages/ui, and then the last one in the DOM wins: the arrows ended up
+     on top of the detail popup. */
   z-index: 800;
   left: 10px;
   top: 72px;
@@ -52,7 +52,7 @@
 
 .osc-map .osc-map-controls-toggle:focus-visible {
   outline: 2px solid var(--utrecht-focus-outline-color, #1471ef);
-  /* binnen de knop, net als de zoomknoppen erboven */
+  /* inside the button, like the zoom buttons above */
   outline-offset: -2px;
 }
 
@@ -62,11 +62,11 @@
   gap: 2px;
 }
 
-/* ponytail: compact gehouden zodat de bediening de kaart niet domineert. Niet
-   wegstoppen achter hover/focus: deze knoppen zijn er juist voor touch- en
-   single-pointergebruikers die niet kunnen slepen (2.5.7). Randkleur #767676
-   geeft 4,5:1 op wit, ruim boven de 3:1 die 1.4.11 vraagt, en de vlakken
-   blijven 32px — boven het minimum van 24px uit 2.5.8. */
+/* Kept compact so the controls don't dominate the map. Not hidden behind
+   hover/focus: these buttons exist precisely for touch and single-pointer
+   users who cannot drag (2.5.7). Border colour #767676 gives 4.5:1 on white,
+   well above the 3:1 that 1.4.11 requires, and the targets stay 32px, above
+   the 24px minimum from 2.5.8. */
 .osc-map .osc-map-compass {
   display: grid;
   grid-template-columns: repeat(3, 32px);
@@ -155,7 +155,7 @@
   outline-offset: 2px;
 }
 
-/* centraal kruisje: toont waar "Marker plaatsen" landt */
+/* Center crosshair: shows where "Marker plaatsen" will land */
 .osc-map .osc-map-crosshair {
   position: absolute;
   z-index: 999;
@@ -191,10 +191,10 @@
   transform: translateY(-50%);
 }
 
-/* Terugkoppeling bij "Marker plaatsen". Was sr-only, waardoor een ziende
-   toetsenbordgebruiker niets zag gebeuren als het midden buiten het toegestane
-   gebied lag — de actie faalde stil (WCAG 3.3.1). Nu zichtbaar voor iedereen;
-   het element blijft altijd in de DOM staan zodat aria-live blijft werken. */
+/* Feedback for "Marker plaatsen". This was sr-only, so a sighted keyboard user
+   saw nothing happen when the center was outside the allowed area: the action
+   failed silently (WCAG 3.3.1). Now visible to everyone; the element always
+   stays in the DOM so aria-live keeps working. */
 .osc-map-status {
   margin-block-start: 0.5rem;
   padding: 8px 12px;
@@ -234,8 +234,8 @@
   color: var(--utrecht-button-primary-action-background-color);
 }
 
-/* ponytail: Leaflet-default voor uitgeschakelde zoomknop is #bbb (1,8:1 op #f4f4f4).
-   Donkerder grijs voor ≥3:1 (WCAG 1.4.11). */
+/* Leaflet's default for a disabled zoom button is #bbb (1.8:1 on #f4f4f4).
+   Darker grey for ≥3:1 (WCAG 1.4.11). */
 .leaflet-container a.leaflet-disabled {
   color: #6b6b6b;
 }
@@ -397,10 +397,10 @@
   transition: fill-opacity 0.2s ease;
 }
 
-/* ── Kaart-toegankelijkheid ────────────────────────────────────────────────
-   Skiplink: standaard onzichtbaar, maar wél zichtbaar zodra hij focus krijgt.
-   Onzichtbaar-bij-focus is een eigen faalpunt: toetsenbordgebruikers zonder
-   voorleessoftware zien dan niet waar de focus staat (WCAG 2.4.7). */
+/* ── Map accessibility ─────────────────────────────────────────────────────
+   Skip link: hidden by default, but visible as soon as it receives focus.
+   Staying invisible on focus is a failure of its own: keyboard users without
+   a screen reader can't see where focus is (WCAG 2.4.7). */
 .osc-map-skip-link {
   position: absolute;
   width: 1px;
@@ -431,7 +431,7 @@
   background: #fff;
   color: #1a1a1a;
   font-size: 15px;
-  /* zelfde focusstijl als de overige kaartknoppen, via het thema-token */
+  /* same focus style as the other map controls, via the theme token */
   outline: 2px solid var(--utrecht-focus-outline-color, #1471ef);
   outline-offset: 2px;
 }
@@ -440,22 +440,21 @@
   outline: none;
 }
 
-/* Zoomknoppen van Leaflet hadden helemaal geen focusindicator; op de uitzoomknop
-   was niets te zien en op de inzoomknop alleen een streepje (WCAG 2.4.7). */
-/* Alleen :focus-visible: bij een muisklik geen focusrand, bij toetsenbord wel. */
+/* Leaflet's zoom buttons had no visible focus indicator: nothing on the zoom-out
+   button and only a stripe on the zoom-in button (WCAG 2.4.7). */
+/* :focus-visible only: no ring on mouse click, but on keyboard focus. */
 .osc-map .leaflet-control-zoom a:focus-visible {
-  /* Binnen de knop tekenen: .leaflet-control-zoom heeft overflow: hidden, een
-     rand erbuiten werd weggeknipt tot alleen een streepje tussen +/−. */
+  /* Draw inside the button: .leaflet-control-zoom has overflow: hidden, so an
+     outline outside it was clipped to a stripe between +/−. */
   outline: 2px solid var(--utrecht-focus-outline-color, #1471ef);
   outline-offset: -2px;
 }
 
-/* Markerfocus haalde 2:1 tot 2,8:1 tegen de kaartachtergrond. Dubbele rand:
-   een donkere kern met een witte halo, zodat het contrast klopt op zowel
-   lichte als donkere kaartdelen (WCAG 1.4.11). Alleen :focus-visible, zodat
-   een muisklik op een pin geen dikke rand geeft. Geen position: relative —
-   Leaflet positioneert pins absoluut; z-index met !important tegen de inline
-   z-index van Leaflet. */
+/* Marker focus reached only 2:1 to 2.8:1 against the map background. Double
+   ring: a dark core with a white halo, so the contrast holds on both light
+   and dark map areas (WCAG 1.4.11). :focus-visible only, so a mouse click on
+   a pin shows no thick ring. No position: relative, since Leaflet positions
+   pins absolutely; z-index uses !important to beat Leaflet's inline z-index. */
 .osc-map .leaflet-marker-icon:focus-visible {
   outline: 3px solid #1a1a1a;
   outline-offset: 2px;

@@ -1,6 +1,6 @@
-/* De samenvatting was een <h2> en is nu een paragraaf (het is geen kop). De
-   klasse utrecht-heading-4 die daarbij stond deed niets — utrecht-paragraph wint.
-   Dit geeft de samenvatting weer eigen nadruk, zonder kop-semantiek. */
+/* The summary was an <h2> and is now a paragraph (it is not a heading). The
+   utrecht-heading-4 class it had did nothing, since utrecht-paragraph wins.
+   This gives the summary its own emphasis again, without heading semantics. */
 .osc-summary {
   font-size: 1.125rem;
   font-weight: 500;
@@ -148,18 +148,18 @@
   border-top: solid 1px rgba(0, 0, 0, 0.1);
 }
 
-/* Pins waren opacity: 0.5 zodat de afbeelding erdoor zichtbaar bleef, maar
-   dan haalt de pin zelf geen 3:1 (WCAG 1.4.11). Nu dekkend met een witte
-   contour (marker-icon.ts); wie de afbeelding zonder pins wil zien gebruikt
-   "Toon markers". De geselecteerde pin onderscheidt zich met een schaduw. */
+/* Pins used opacity: 0.5 so the image showed through, but then the pin itself
+   falls below 3:1 (WCAG 1.4.11). Now opaque with a white outline
+   (marker-icon.ts); to see the image without pins, use "Toon markers". The
+   selected pin stands out with a drop shadow. */
 .leaflet-container .leaflet-marker-pane .leaflet-marker-icon.--highlightedIcon {
   z-index: 999 !important;
   filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.8));
 }
 
-/* Focus op een pin haalde 2:1–2,8:1 (dunne standaardring, op 50% opacity).
-   Dezelfde dubbele rand als de geografische kaart: donkere kern + witte halo,
-   zodat het contrast op lichte én donkere delen klopt (WCAG 1.4.11). */
+/* Pin focus reached only 2:1–2.8:1 (thin default ring at 50% opacity).
+   Same double ring as the geographic map: dark core + white halo, so the
+   contrast holds on both light and dark areas (WCAG 1.4.11). */
 .documentMap--container
   .leaflet-marker-pane
   .leaflet-marker-icon:focus-visible {
@@ -335,7 +335,7 @@ a + .url-list:before {
   border-bottom: 1px solid #ccc;
 }
 
-/* ponytail: kaartbediening — kompas (pannen zonder slepen, 2.5.7) + reactie-plaats-knop (keyboard, 2.1.1) */
+/* Map controls: compass (panning without dragging, 2.5.7) + place-comment button (keyboard, 2.1.1) */
 .documentMap--container .document-container .osc-map-controls {
   position: absolute;
   z-index: 2;
@@ -369,8 +369,8 @@ a + .url-list:before {
   border-bottom: 1px solid #ccc;
 }
 
-/* Binnen de knop tekenen: overflow: hidden hierboven knipt een rand erbuiten
-   weg (WCAG 2.4.7). Zelfde token als de overige kaartknoppen. */
+/* Draw inside the button: overflow: hidden above clips an outline drawn
+   outside it (WCAG 2.4.7). Same token as the other map controls. */
 .documentMap--container .leaflet-control-zoom a:focus-visible {
   outline: 2px solid var(--utrecht-focus-outline-color, #1471ef);
   outline-offset: -2px;
@@ -400,13 +400,12 @@ a + .url-list:before {
 
 .documentMap--container .osc-map-controls-toggle:focus-visible {
   outline: 2px solid var(--utrecht-focus-outline-color, #1471ef);
-  /* binnen de knop, net als de zoomknoppen erboven */
+  /* inside the button, like the zoom buttons above */
   outline-offset: -2px;
 }
 
-/* Skiplink over de afbeelding: onzichtbaar tot hij focus krijgt, dan
-   zichtbaar mét focusrand (WCAG 2.4.1 + 2.4.7). Zelfde stijl als in
-   leaflet-map/base-map.css. */
+/* Skip link past the image: hidden until focused, then visible with a focus
+   ring (WCAG 2.4.1 + 2.4.7). Same style as in leaflet-map/base-map.css. */
 .documentMap--container .osc-map-skip-link {
   position: absolute;
   width: 1px;
@@ -452,7 +451,7 @@ a + .url-list:before {
   gap: 2px;
 }
 
-/* ponytail: zelfde compacte maatvoering als de geografische kaart */
+/* Same compact sizing as the geographic map */
 .documentMap--container .osc-map-compass {
   display: grid;
   grid-template-columns: repeat(3, 32px);
@@ -541,7 +540,7 @@ a + .url-list:before {
   outline-offset: 2px;
 }
 
-/* centraal kruisje: toont waar "Reactie plaatsen" landt */
+/* Center crosshair: shows where "Reactie plaatsen" will land */
 .documentMap--container .osc-map-crosshair {
   position: absolute;
   z-index: 1;

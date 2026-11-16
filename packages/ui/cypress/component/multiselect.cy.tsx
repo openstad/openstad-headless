@@ -32,8 +32,8 @@ describe('<MultiSelect />', () => {
     cy.get('@onItemSelected').should('have.been.calledWith', 'option3');
   });
 
-  // Regressie (audit 24994): het label is gekoppeld via for/id, dus een klik
-  // erop klikt óók de checkbox. Dat mag maar één selectie opleveren.
+  // Regression (audit 24994): the label is linked via for/id, so clicking it
+  // also clicks the checkbox. That must result in a single selection.
   it('selects exactly once when the label is clicked', () => {
     const onItemSelected = cy.stub().as('onItemSelected');
 

@@ -2,21 +2,21 @@ import React from 'react';
 
 import { focusFirstTabbableAfter } from '../../src/lib/focus-after';
 
-// Audit 24984: de skiplink mag de focus niet op een leeg/onzichtbaar element
-// zetten, maar op het eerstvolgende tabbare element na de kaart.
+// Audit 24984: the skip link must not move focus to an empty/invisible element,
+// but to the first tabbable element after the map.
 describe('focusFirstTabbableAfter', () => {
-  it('focust het eerstvolgende zichtbare, tabbare element na de marker', () => {
+  it('focuses the first visible, tabbable element after the marker', () => {
     cy.mount(
       <div>
-        <button>voor de kaart</button>
+        <button>before the map</button>
         <div id="marker" tabIndex={-1} />
-        <button hidden>verborgen</button>
+        <button hidden>hidden</button>
         <div aria-hidden="true">
           <button>aria-hidden</button>
         </div>
-        <a>geen href</a>
-        <button disabled>uitgeschakeld</button>
-        <button id="next">na de kaart</button>
+        <a>no href</a>
+        <button disabled>disabled</button>
+        <button id="next">after the map</button>
       </div>
     );
 
@@ -24,10 +24,10 @@ describe('focusFirstTabbableAfter', () => {
     cy.focused().should('have.id', 'next');
   });
 
-  it('valt terug op de marker als er niets meer volgt', () => {
+  it('falls back to the marker when nothing follows', () => {
     cy.mount(
       <div>
-        <button>voor de kaart</button>
+        <button>before the map</button>
         <div id="marker" tabIndex={-1} />
       </div>
     );

@@ -10,7 +10,7 @@ import { DataLayer } from './resource-overview-map-widget-props';
 export type BaseMapProps = {
   width?: string;
   height?: string;
-  // Toegankelijke naam van de kaart, bv. "Kaart Wijkbudget Bloemenbuurt" (WCAG 4.1.2)
+  // Accessible name of the map, e.g. "Kaart Wijkbudget Bloemenbuurt" (WCAG 4.1.2)
   mapAriaLabel?: string;
   markers?: Array<MarkerProps>;
   zoom?: number;
