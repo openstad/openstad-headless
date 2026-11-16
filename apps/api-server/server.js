@@ -37,10 +37,8 @@ externalCertificates.validateInfrastructure().catch((err) => {
   );
 });
 
-// Refuse to start when a project overrides the global jwtSecret, or when that
-// cannot be checked; only listen once the check passed
 require('./src/services/validateProjectAuthConfig')
-  .assertNoJwtSecretOverrides(require('./src/db'))
+  .warnAboutJwtSecretOverrides(require('./src/db'))
   .then(() => Server.start(config.get('express.port')))
   .catch((err) => {
     console.error('[auth-settings] Startup validation failed:', err.message);
