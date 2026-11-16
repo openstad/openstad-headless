@@ -4,8 +4,6 @@ const windowMs = 15 * 60 * 1000;
 const maxFailuresPerIp = 20;
 const maxFailuresPerClient = 200;
 
-// Returns 'client', 'ip' or null; callers fall back to another login flow
-// on a client lock, since that one can be triggered by anyone
 const lockScope = async ({ clientId, ip }) => {
   const createdAt = { [db.Sequelize.Op.gte]: new Date(Date.now() - windowMs) };
 

@@ -1000,12 +1000,10 @@ function StemBegroot({
     const params = currentUrl.searchParams;
     params.delete('openstadlogintoken');
 
-    // With multi-project login the auth-server session would otherwise log the
-    // next voter on this device in as this one
-    const logoutUrl =
-      props.multiProjectLogin && props.logout?.url
-        ? props.logout.url
-        : currentUrl.toString();
+    const logoutUrlEndingAuthServerSession = props.multiProjectLogin
+      ? props.logout?.url
+      : undefined;
+    const logoutUrl = logoutUrlEndingAuthServerSession || currentUrl.toString();
 
     await currentUser.logout({ url: logoutUrl });
   }
@@ -1484,7 +1482,6 @@ function StemBegroot({
                 appearance="secondary-action-button"
                 onClick={() => {
                   const loginUrl = new URL(`${props?.login?.url}`);
-                  // Switching identity must never reuse the current auth-server session
                   loginUrl.searchParams.set('forceNewLogin', '1');
                   document.location.href = loginUrl.toString();
                 }}>

@@ -6,8 +6,6 @@ function setQueryParam(url, name, value) {
   return `${stripped}${stripped.includes('?') ? '&' : '?'}${name}=${value}`;
 }
 
-// The allowlist only compares hosts; in production never send a jwt to a
-// plain-http url (query string or postMessage)
 function canSendJwtTo(url, env = process.env) {
   if (env.NODE_ENV !== 'production' || env.FORCE_HTTP) return true;
   try {

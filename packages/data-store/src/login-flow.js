@@ -66,8 +66,7 @@ export function waitForPopupLogin({
   win = window,
   readJwt = () => null,
 }) {
-  // A magic link opened in another tab logs in there and stores the jwt
-  const initialJwt = readJwt();
+  const jwtBeforePopup = readJwt();
   return new Promise((resolve) => {
     const finish = (jwt) => {
       win.removeEventListener('message', onMessage);
@@ -84,7 +83,7 @@ export function waitForPopupLogin({
     };
     const timer = win.setInterval(() => {
       const storedJwt = readJwt();
-      if (storedJwt && storedJwt !== initialJwt) {
+      if (storedJwt && storedJwt !== jwtBeforePopup) {
         popup.close();
         finish(storedJwt);
       } else if (popup.closed) finish(null);
