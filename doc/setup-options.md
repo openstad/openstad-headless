@@ -142,7 +142,7 @@ value on the admin-server and the image server.
 
 ## Multi-project login (`MULTI_PROJECT_LOGIN`) (2026-10-07)
 
-Opt-in: set `MULTI_PROJECT_LOGIN=true` on both the api-server and the auth-server. Only the exact value `true` enables it. Without it, login behaves as before. In the Helm chart, set `multiProjectLogin: true`; it is passed to both.
+Opt-in: set `MULTI_PROJECT_LOGIN=true` on the api-server, the auth-server, the cms-server and the admin-server. Only the exact value `true` enables it. Without it, login behaves as before. In the Helm chart, set `multiProjectLogin: true`; it is passed to all four.
 
 With the flag on:
 
@@ -151,14 +151,21 @@ With the flag on:
 - A magic link opened in another tab also completes the login in the original tab.
 - Widgets no longer force a new login by default (`forceNewLogin=1`). Exceptions:
   - projects whose auth client only allows `UniqueCode` always force a new login, so the next person on a shared device does not continue as the previous voter;
+  - projects whose auth client allows `Phonenumber` always force a new login, so the visitor gets the SMS screen instead of an error;
   - "Vul een andere stemcode in" always forces a new login;
-  - `config.auth.forceNewLoginOnWidgets` on a project overrides the default (`true` or `false`).
+  - `config.auth.forceNewLoginOnWidgets` on a project overrides the default (`true` or `false`). The setting also applies to the regular CMS login.
 - After voting, the budgeting widget also ends the auth-server session.
+- Logging out, through a widget, the CMS or a link on the site that returns with `openstadlogout`, clears the logins of all projects in this browser and ends the auth-server session. Other open tabs follow the stored logins and log out as well. After a CMS logout the widgets read a short-lived cookie `openstad_logout`, because the CMS removes the `openstadlogout` parameter itself.
+- A vote code identity is never logged in on a project without vote codes: the auth-server ends that session and shows the regular login screen.
+- The CMS login reuses the auth-server session like the widgets do. The CMS admin login (`/admin/login`) reuses the session for a user with the role `admin`, `moderator` or `editor` on that site, and then always asks for the 2FA code, once per site per session. Without a session, or for other users, it shows the admin login screen as before. The admin panel itself always asks for its own login.
+- The project settings in the admin panel show a button "Bewerk site" for projects with a website, which opens the CMS admin login of that site.
 - A vote code login creates its own identity. It is never linked to the visitor's e-mail identity, so votes cannot be traced back to an e-mail address and profile data is not shared with vote code projects.
 
 Endpoints, the exchange policy, the vote code lockout and known gaps are described in [multi-project login](./multi-project-login.md).
 
-Independent of the flag: in production (`NODE_ENV=production` without `FORCE_HTTP`) the api-server only sends a login token back to an `https:` URL.
+Independent of the flag: in production (`NODE_ENV=production` without `FORCE_HTTP`) the api-server only sends a login token back to an `https:` URL. A plain `http:` return address is refused with `Redirect url must use https`.
+
+Independent of the flag: at startup the api-server reports projects that override `config.auth.jwtSecret`. Tokens are verified with the global secret, so logins for those projects fail until the override is removed. The server keeps running.
 
 ## Trusted proxies (`TRUST_PROXY`) (2026-10-07)
 
@@ -169,4 +176,4 @@ Sets Express' `trust proxy` on the api-server and the auth-server, which decides
 - An address or subnet list, for example `10.0.0.0/8, loopback`.
 - `false`: ignore `X-Forwarded-For`.
 
-In the Helm chart, set it through `api.extraEnvVars` and `auth.extraEnvVars`.
+In the Helm chart, set `trustProxy` (default `"1"`, for a single ingress controller); it is passed to the api-server and the auth-server. Add one for every extra proxy in front of the ingress, such as a CDN. An empty value trusts every proxy.

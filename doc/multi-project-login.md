@@ -30,7 +30,7 @@ Request:
 { "sourceJwt": "<jwt of another project>" }
 ```
 
-The source JWT must be valid for the installation's global `jwtSecret`, must not be a pending token, must not be anonymous, and its project must use the `openstad` adapter on the same auth-server as the target project. Otherwise: `401 { "status": "invalid_token" }` or `401 { "status": "not_allowed" }`.
+The source JWT must be valid for the installation's global `jwtSecret`, must not be a pending token, must not be anonymous, and its project must use the `openstad` adapter on the same auth-server as the target project. A login from a project whose client only allows `UniqueCode` is never used as source: vote code identities stay within their own project. Otherwise: `401 { "status": "invalid_token" }` or `401 { "status": "not_allowed" }`. The widget then tries the next known login or opens the popup.
 
 After that, the response follows the [shared gate responses](#shared-gate-responses).
 
@@ -101,6 +101,7 @@ Any other error is passed on as a regular error response (`5xx`); the widget the
 - **Two-factor authentication is never satisfied silently.** Whether 2FA was completed is stored in the auth-server session per client, and the api-server cannot see that session. A role that needs 2FA on the target client therefore always gets `two_factor_required`, and the popup runs the real 2FA flow on the auth-server. Do not change this into an inline 2FA step or a cached 2FA result: that would be a 2FA bypass across projects.
 - Phone number confirmation is never done inline either (`phonenumber_required` → popup with the SMS flow).
 - A login on a project with only vote codes needs a code of that project. An e-mail login from another project is not enough, and is never linked to the code.
+- A vote code login is never used to log in on another project, so it never collects profile data that could flow back to the vote code project. This also holds for the popup: the auth-server ends the session of an identity without e-mail address or phone number (a vote code identity) when it is used for a client that does not accept vote codes, and shows the regular login screen instead (`apps/auth-server/middleware/codeOnlySessionGuard.js`). Users with the role `admin`, `moderator` or `editor` on that client are excluded, such as the seeded first admin, who has no e-mail address.
 - Anonymous logins are never exchanged.
 
 When the browser holds identities of several projects, they are tried in storage order and the first usable one wins. In practice there is one real identity per visitor.
@@ -118,7 +119,7 @@ Vote codes are guessable, so `uniquecode-login` is protected in two layers.
 
 The lockout is shared by all api-server instances because it lives in the auth-server database. It only applies to the inline endpoint; the existing code screen of the auth-server is not counted.
 
-**Rate limiting on the api-server.** The generic limiter of `@openstad-headless/lib/rateLimiter` applies to all api routes, including these three: 100 requests per minute per IP by default (`RATE_LIMIT`, `RATE_WINDOW_MS`). It is in memory per instance and skips private IP addresses, so it is only a first line.
+**Rate limiting on the api-server.** The generic limiter of `@openstad-headless/lib/rateLimiter` applies to all api routes, and the three inline routes have their own limiter with the same settings: 100 requests per minute per IP by default (`RATE_LIMIT`, `RATE_WINDOW_MS`). The inline routes answer `429 { "status": "too_many_requests" }` as JSON, so the dialog can show the message. The limiters are in memory per instance and skip private IP addresses, so they are only a first line.
 
 Both use `req.ip`. Set [`TRUST_PROXY`](./setup-options.md#trusted-proxies-trust_proxy-2026-10-07) to the real proxy setup; with the default (trust every proxy) a client can choose its own IP through `X-Forwarded-For` and avoid the per-IP lockout. The per-client limit still applies.
 
@@ -134,10 +135,21 @@ Consequences:
 
 ## Logout
 
-Logout still ends the whole auth-server session and clears the logins of all projects in the browser, also with the flag on. Logout per project is postponed: the auth-server lets a valid session through to every client, so removing only one client's login would let the next person on a shared device log back in with one click.
+Logout ends the whole auth-server session and clears the logins of all projects in the browser, also with the flag on. This holds for the logout of a widget and, with the flag on, also for a logout through a link on the site that returns with `openstadlogout`, and for a logout through the CMS. The CMS removes `openstadlogout` from the url itself, so it sets a short-lived cookie `openstad_logout` (five minutes, path `/`) that the widgets read and remove. On a host with several CMS sites in subfolders, a logout on one site therefore also clears the widget logins of the other sites on that host. Other open tabs follow the stored logins and log out too; a tab never writes back a login that was removed while it was loading the user. A widget only fetches its user again when the stored login of its own project changes, once per project; a refreshed profile in another tab does not count, so opening or reloading a tab costs the other tabs no requests. Logout per project is postponed: the auth-server lets a valid session through to every client, so removing only one client's login would let the next person on a shared device log back in with one click.
+
+## CMS sites (Apostrophe)
+
+- The regular CMS login uses the same default as the widgets: with the flag on it reuses the auth-server session, unless `config.auth.forceNewLoginOnWidgets` says otherwise.
+- The CMS admin login (`/admin/login`) reuses the auth-server session for a user with the role `admin`, `moderator` or `editor` on that site (`apps/auth-server/middleware/adminLoginSessionReuse.js`). It then always asks for the 2FA code, also when the site does not require 2FA for that role. This happens once per site per auth-server session. The admin panel (client 1) is excluded and always asks for its own login. The reused session starts a new privileged session window for that site, even when the original login is older; the required 2FA code is the re-authentication. A fresh login for that site clears the 2FA requirement again.
+- After any CMS login, a user with the role `admin` or `editor` on that site is logged in to Apostrophe automatically (`aposAuthenticate` in `apps/cms-server/modules/openstad-auth/index.js`). Moderators are logged in to the site but not to Apostrophe.
+- The project settings in the admin panel show a "Bewerk site" button that opens the CMS admin login of the project's website. Admin panel users who are not superuser only see projects where they are `admin` or `editor`. A superuser without a role on that site gets the admin login screen of the site and cannot log in there as an editor; the creator of a project gets the `admin` role on its site automatically, other users through user management.
 
 ## Known gaps
 
 - The auth-server does not validate `postcode` itself. Through the popup or redirect login, a project user with missing or invalid data can still get a valid JWT, because digest login ignores update errors. The inline endpoints do reject it (`422`).
 - `exchange` returns a `5xx` when the identity holds old data that the api-server `User` model rejects. The widget then falls back to the popup.
 - `user_roles` has no unique index on `(clientId, userId)`. Two simultaneous first logins with the same vote code can create duplicate role rows.
+- `complete-fields` cannot store a name, e-mail address or phone number for a user who has a role on another client. The auth-server refuses that write (`ensureIdentityWriteAllowed`) to protect such identities. The widget then falls back to the popup, where the visitor fills in the field again. Since vote code identities are no longer exchanged, this only affects users with a role on several projects, such as editors.
+- Budgeting widgets created before this change keep their stored step 3 text, which says the vote code is entered on a separate page and the voter then returns to this page. With the flag on, the code is asked in a popup or a dialog instead. Check and update that text when you turn the flag on; new budgeting widgets get a text that fits both.
+- Only the likes and budgeting widgets use the inline login. Account, choice guide, comments, distribution module, document map, survey and resource form still redirect to the login page; their login on other projects stays intact.
+- In Safari (WebKit), the Tab key skips buttons by default. In a dialog with a text field, such as the vote code dialog, Tab then moves focus from the field to the page behind the dialog, because the focus trap of the shared dialog only catches Tab on its first and last button. With Option+Tab focus stays inside the dialog, but moving forward stops at the submit button; Escape closes the dialog and returns focus. Chromium and Firefox are not affected.
