@@ -4,6 +4,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import hasRole from './lib/hasRole';
 import { Role } from './lib/roles';
+import { queryWithoutLoginParams } from './lib/strip-login-params';
 
 interface OpenstadProfile extends Record<string, any> {
   id: number;
@@ -93,9 +94,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
     await session.save();
     let path = req.nextUrl.pathname;
     if (path == '' || path == '/') path = '/projects';
-    let query = searchParams ? '?' + searchParams.toString() : '';
-    query = query.replace(/openstadlogintoken=(?:.(?!&|$))+./, '');
-    if (query == '?') query = '';
+    const query = queryWithoutLoginParams(searchParams);
     let newUrl = `${process.env.URL}${path}${query}`;
     console.log(
       `[${new Date().toISOString()}][admin-auth] login token received: projectId=${targetProjectId} redirect=${path}`
@@ -192,8 +191,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
   // api requests: add jwt
   if (jwt && req.nextUrl.pathname.startsWith('/api/openstad')) {
     let path = req.nextUrl.pathname.replace('/api/openstad', '');
-    let query = searchParams ? '?' + searchParams.toString() : '';
-    query = query.replace(/openstadlogintoken=(?:.(?!&|$))+./, '');
+    const query = queryWithoutLoginParams(searchParams);
     const rewrittenUrl = `${
       process.env.API_URL_INTERNAL || process.env.API_URL
     }${path}${query}`;
@@ -207,8 +205,7 @@ async function authMiddleware(req: NextRequest, res: NextResponse) {
   // email assets requests: add jwt
   if (jwt && req.nextUrl.pathname.startsWith('/email-assets')) {
     let path = req.nextUrl.pathname.replace('/email-assets', '');
-    let query = searchParams ? '?' + searchParams.toString() : '';
-    query = query.replace(/openstadlogintoken=(?:.(?!&|$))+./, '');
+    const query = queryWithoutLoginParams(searchParams);
     const rewrittenUrl = `${process.env.EMAIL_ASSETS_URL}${path}${query}`;
     return NextResponse.rewrite(rewrittenUrl, {
       headers: {
