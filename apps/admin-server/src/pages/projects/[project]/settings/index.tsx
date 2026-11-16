@@ -33,6 +33,7 @@ import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../hooks/use-project';
+import { getRuntimeMultiProjectLogin } from '../../../../lib/get-runtime-multi-project-login';
 
 const formSchema = z
   .object({
@@ -70,6 +71,22 @@ export default function ProjectSettings() {
   const { data, isLoading, updateProject } = useProject([
     'includeInstallationUrls',
   ]);
+
+  const [editSiteUrl, setEditSiteUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const siteUrl = data?.url;
+    if (!siteUrl) {
+      setEditSiteUrl(null);
+      return;
+    }
+    getRuntimeMultiProjectLogin().then((enabled) => {
+      const base = /^https?:\/\//.test(siteUrl)
+        ? siteUrl
+        : `${window.location.protocol}//${siteUrl}`;
+      setEditSiteUrl(enabled ? `${base.replace(/\/$/, '')}/admin/login` : null);
+    });
+  }, [data?.url]);
 
   let projectNumber: number | undefined = validateProjectNumber(project);
 
@@ -250,7 +267,18 @@ export default function ProjectSettings() {
             name: 'Instellingen',
             url: `/projects/${projectNumber}/settings`,
           },
-        ]}>
+        ]}
+        action={
+          editSiteUrl ? (
+            <div className="flex flex-row w-full md:w-auto my-auto">
+              <Button asChild className="text-xs p-2 w-fit">
+                <a href={editSiteUrl} target="_blank" rel="noopener noreferrer">
+                  Bewerk site
+                </a>
+              </Button>
+            </div>
+          ) : undefined
+        }>
         <div className="container py-6">
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">

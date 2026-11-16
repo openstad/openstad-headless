@@ -22,6 +22,7 @@ const authUnsubscribe = require('../controllers/auth/unsubscribe');
 const clientMw = require('../middleware/client');
 const userMw = require('../middleware/user');
 const bruteForce = require('../middleware/bruteForce');
+const reuseSessionForAdminLogin = require('../middleware/adminLoginSessionReuse');
 const endCodeOnlySessionForOtherClients = require('../middleware/codeOnlySessionGuard');
 const authMw = require('../middleware/auth');
 const passwordResetMw = require('../middleware/passwordReset');
@@ -268,7 +269,7 @@ module.exports = function (app) {
   // admin login routes redirect to normal login but with priviliged params
   app.get(
     '/auth/admin/login',
-    [csrfProtection, addCsrfGlobal],
+    [csrfProtection, addCsrfGlobal, reuseSessionForAdminLogin],
     (req, res, next) => {
       const queryIndex = req.originalUrl.indexOf('?');
       const queryString =

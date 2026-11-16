@@ -117,6 +117,37 @@ describe('setClientAuth', () => {
   });
 });
 
+describe('initializeClientAuth twoFactorRequired', () => {
+  it('clears a 2FA requirement from session reuse on a fresh login for that client', async () => {
+    const session = {};
+    clientAuth.setClientAuth(session, { id: 7 }, { twoFactorRequired: true });
+
+    await clientAuth.initializeClientAuth(
+      session,
+      { id: 7 },
+      { id: 5 },
+      { role: 'member', authType: 'Url' }
+    );
+
+    expect(clientAuth.getClientAuth(session, { id: 7 }).twoFactorRequired).toBe(
+      false
+    );
+  });
+});
+
+describe('setClientAuth twoFactorRequired', () => {
+  it('stores and keeps the requirement until it is changed', () => {
+    const session = {};
+    clientAuth.setClientAuth(session, { id: 7 }, { twoFactorRequired: true });
+    clientAuth.setClientAuth(session, { id: 7 }, { twoFactorValid: true });
+
+    expect(clientAuth.getClientAuth(session, { id: 7 })).toMatchObject({
+      twoFactorRequired: true,
+      twoFactorValid: true,
+    });
+  });
+});
+
 describe('isSameSessionUser', () => {
   it('matches the serialized passport user against the user logging in', () => {
     expect(

@@ -1,15 +1,16 @@
+const {
+  shouldForceNewLoginByDefault,
+} = require('@openstad-headless/lib/force-new-login');
 const pluginExtensions = require('../../services/plugin-extensions');
 
 function getDefaultConfig(project, widgetType, apiConfig) {
-  // Without multi-project login, widgets always force a new login (pre-existing behaviour)
-  const forceNewLoginDefault = process.env.MULTI_PROJECT_LOGIN !== 'true';
-  const forceNewLogin =
-    (project.config?.auth?.forceNewLoginOnWidgets ?? forceNewLoginDefault)
-      ? '&forceNewLogin=1'
-      : '';
+  const forceNewLogin = shouldForceNewLoginByDefault(project)
+    ? '&forceNewLogin=1'
+    : '';
   const loginUrl = `${apiConfig.url}/auth/project/${project.id}/login?useAuth=default${forceNewLogin}&redirectUri=[[REDIRECT_URI]]`;
   const loginUrlAnonymous = `${apiConfig.url}/auth/project/${project.id}/login?useAuth=anonymous${forceNewLogin}&redirectUri=[[REDIRECT_URI]]`;
   const logoutUrl = `${apiConfig.url}/auth/project/${project.id}/logout?useAuth=default&redirectUri=[[REDIRECT_URI]]`;
+  const multiProjectLogin = process.env.MULTI_PROJECT_LOGIN === 'true';
 
   let url = process.env.IMAGE_APP_URL;
   let zipCodeAutofillApiUrl = process.env.ZIPCODE_AUTOFILL_API_URL;
@@ -24,6 +25,7 @@ function getDefaultConfig(project, widgetType, apiConfig) {
   let result = {
     api: {
       url: apiConfig.url,
+      multiProjectLogin,
     },
     login: {
       url: loginUrl,
@@ -34,7 +36,7 @@ function getDefaultConfig(project, widgetType, apiConfig) {
     logout: {
       url: logoutUrl,
     },
-    multiProjectLogin: process.env.MULTI_PROJECT_LOGIN === 'true',
+    multiProjectLogin,
     projectId: project.id,
     imageUrl: apiConfig.url + `/api/project/${project.id}/upload`,
     zipCodeApiUrl: zipCodeApiUrl || '',

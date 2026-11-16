@@ -72,4 +72,33 @@ describe('check2FA', () => {
 
     expect(next).toHaveBeenCalledWith();
   });
+
+  it('asks for 2FA when the session requires it for this client, even without twoFactorRoles', () => {
+    const req = createReq({
+      client: { id: 1, clientId: 'client-1', twoFactorRoles: null },
+      currentClientAuth: { twoFactorRequired: true },
+    });
+    const res = { redirect: vi.fn() };
+    const next = vi.fn();
+
+    check2FA(req, res, next);
+
+    expect(next).not.toHaveBeenCalled();
+    expect(res.redirect).toHaveBeenCalledWith(
+      expect.stringContaining('/auth/two-factor?clientId=client-1')
+    );
+  });
+
+  it('passes a required 2FA once it is valid for this client', () => {
+    const req = createReq({
+      client: { id: 1, clientId: 'client-1', twoFactorRoles: null },
+      currentClientAuth: { twoFactorRequired: true, twoFactorValid: true },
+    });
+    const res = { redirect: vi.fn() };
+    const next = vi.fn();
+
+    check2FA(req, res, next);
+
+    expect(next).toHaveBeenCalledWith();
+  });
 });

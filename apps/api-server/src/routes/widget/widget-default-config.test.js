@@ -87,6 +87,18 @@ describe('getDefaultConfig login urls', () => {
     ).toBe(false);
   });
 
+  it('passes the multi-project flag to the data store through the api config', () => {
+    process.env.MULTI_PROJECT_LOGIN = 'true';
+    expect(
+      getDefaultConfig({ id: 2, config: {} }, 'likes', apiConfig).api
+    ).toEqual({ url: apiConfig.url, multiProjectLogin: true });
+    delete process.env.MULTI_PROJECT_LOGIN;
+    expect(
+      getDefaultConfig({ id: 2, config: {} }, 'likes', apiConfig).api
+        .multiProjectLogin
+    ).toBe(false);
+  });
+
   it('keeps the logout url unchanged', () => {
     const result = getDefaultConfig({ id: 2, config: {} }, 'likes', apiConfig);
 

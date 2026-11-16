@@ -52,6 +52,10 @@ const setClientAuth = (session, client, data = {}) => {
       typeof data.twoFactorValid !== 'undefined'
         ? data.twoFactorValid
         : previous.twoFactorValid || false,
+    twoFactorRequired:
+      typeof data.twoFactorRequired !== 'undefined'
+        ? data.twoFactorRequired
+        : previous.twoFactorRequired || false,
   };
 
   return store[key];
@@ -104,6 +108,7 @@ const initializeClientAuth = async (session, client, user, data = {}) => {
 
   return setClientAuth(session, client, {
     authenticatedAt: Date.now(),
+    twoFactorRequired: false,
     ...data,
     role,
   });
