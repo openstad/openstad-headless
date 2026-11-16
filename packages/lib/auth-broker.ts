@@ -69,18 +69,55 @@ export function getKnownIdentities({
   });
 }
 
-export function notifyAuthChange(): void {
-  window.dispatchEvent(new CustomEvent(AUTH_CHANGED_EVENT));
+const storedJwtsByProject = (value: string | null): Record<string, string> => {
+  let data: Record<string, any>;
+  try {
+    data = JSON.parse(value || '{}') || {};
+  } catch (err) {
+    return {};
+  }
+  return Object.fromEntries(
+    Object.entries(data).flatMap(([projectId, projectData]) => {
+      const jwt = parseEntry(projectData?.openStadUser)?.jwt;
+      return jwt ? [[projectId, jwt]] : [];
+    })
+  );
+};
+
+function projectsWithChangedLogin(
+  oldValue: string | null,
+  newValue: string | null
+): string[] {
+  const before = storedJwtsByProject(oldValue);
+  const after = storedJwtsByProject(newValue);
+  return [...new Set([...Object.keys(before), ...Object.keys(after)])].filter(
+    (projectId) => before[projectId] !== after[projectId]
+  );
 }
 
-export function onAuthChange(callback: () => void): () => void {
-  const onStorage = (event: StorageEvent) => {
-    if (event.key === STORAGE_KEY) callback();
+export function notifyAuthChange(projectIds?: string[]): void {
+  window.dispatchEvent(
+    new CustomEvent(AUTH_CHANGED_EVENT, {
+      detail: { projectIds: projectIds ?? null },
+    })
+  );
+}
+
+export function onAuthChange(
+  callback: (projectIds: string[] | null) => void
+): () => void {
+  const onChangeOnThisPage = (event: Event) => {
+    callback((event as CustomEvent).detail?.projectIds ?? null);
   };
-  window.addEventListener(AUTH_CHANGED_EVENT, callback);
+  const onStorage = (event: StorageEvent) => {
+    if (event.key !== STORAGE_KEY) return;
+    const changed = projectsWithChangedLogin(event.oldValue, event.newValue);
+    if (changed.length > 0) callback(changed);
+  };
+  window.addEventListener(AUTH_CHANGED_EVENT, onChangeOnThisPage);
   window.addEventListener('storage', onStorage);
   return () => {
-    window.removeEventListener(AUTH_CHANGED_EVENT, callback);
+    window.removeEventListener(AUTH_CHANGED_EVENT, onChangeOnThisPage);
     window.removeEventListener('storage', onStorage);
   };
 }

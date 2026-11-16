@@ -62,11 +62,30 @@ export function pickInitialUser({ globalUser, propsUser, projectId }) {
   return (globalUserIsForThisProject ? globalUser : null) || propsUser || {};
 }
 
+const scheduledRefreshes = new Set();
+
+export function refreshCurrentUser(projectId) {
+  const key = String(projectId);
+  if (scheduledRefreshes.has(key)) return;
+  scheduledRefreshes.add(key);
+  queueMicrotask(() => {
+    scheduledRefreshes.delete(key);
+    mutate({ type: 'current-user', projectId });
+  });
+}
+
+export function refreshCurrentUserOnAuthChange(projectId) {
+  return (projectIds) => {
+    if (projectIds && !projectIds.includes(String(projectId))) return;
+    refreshCurrentUser(projectId);
+  };
+}
+
 export function applyJwt({ storage, api, projectId, jwt }) {
   storage.set('openStadUser', { jwt, apiUrl: api.apiUrl });
   api.currentUserJWT = jwt;
-  mutate({ type: 'current-user', projectId });
-  notifyAuthChange();
+  refreshCurrentUser(projectId);
+  notifyAuthChange([String(projectId)]);
 }
 
 export default function useCurrentUser(props) {
@@ -83,9 +102,7 @@ export default function useCurrentUser(props) {
 
   useEffect(() => {
     if (!multiProjectLogin) return undefined;
-    return onAuthChange(() =>
-      mutate({ type: 'current-user', projectId: self.projectId })
-    );
+    return onAuthChange(refreshCurrentUserOnAuthChange(self.projectId));
   }, [self.projectId, multiProjectLogin]);
 
   async function getCurrentUser() {

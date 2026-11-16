@@ -96,20 +96,87 @@ describe('getKnownIdentities', () => {
 });
 
 describe('auth change events', () => {
-  it('calls back on a change on this page and on storage changes for openstad only', () => {
+  const storageEvent = (
+    oldValue: object | null,
+    newValue: object | null,
+    key = 'openstad'
+  ) =>
+    Object.assign(new Event('storage'), {
+      key,
+      oldValue: oldValue && JSON.stringify(oldValue),
+      newValue: newValue && JSON.stringify(newValue),
+    });
+
+  it('passes the projects that changed on this page, or null when none are given', () => {
     const callback = vi.fn();
     const unsubscribe = onAuthChange(callback);
 
+    notifyAuthChange(['3']);
     notifyAuthChange();
-    window.dispatchEvent(
-      Object.assign(new Event('storage'), { key: 'openstad' })
-    );
-    window.dispatchEvent(Object.assign(new Event('storage'), { key: 'other' }));
 
-    expect(callback).toHaveBeenCalledTimes(2);
+    expect(callback.mock.calls).toEqual([[['3']], [null]]);
 
     unsubscribe();
-    notifyAuthChange();
+    notifyAuthChange(['3']);
     expect(callback).toHaveBeenCalledTimes(2);
+  });
+
+  it('ignores storage writes that keep every login, such as a refreshed profile', () => {
+    const callback = vi.fn();
+    const unsubscribe = onAuthChange(callback);
+    const before = {
+      6: { openStadUser: { id: 1, jwt: 'jwt-6', jwtExpiresInHours: '2.00' } },
+    };
+    const after = {
+      6: { openStadUser: { id: 1, jwt: 'jwt-6', jwtExpiresInHours: '1.99' } },
+    };
+
+    window.dispatchEvent(storageEvent(before, after));
+    window.dispatchEvent(storageEvent({}, after, 'other'));
+
+    expect(callback).not.toHaveBeenCalled();
+    unsubscribe();
+  });
+
+  it('passes the projects whose stored login changed in another tab', () => {
+    const callback = vi.fn();
+    const unsubscribe = onAuthChange(callback);
+
+    window.dispatchEvent(
+      storageEvent(
+        {
+          6: { openStadUser: { jwt: 'jwt-6' } },
+          7: { openStadUser: { jwt: 'old-7' } },
+        },
+        {
+          6: { openStadUser: { jwt: 'jwt-6' } },
+          7: { openStadUser: JSON.stringify({ jwt: 'new-7' }) },
+        }
+      )
+    );
+
+    expect(callback.mock.calls).toEqual([[['7']]]);
+    unsubscribe();
+  });
+
+  it('passes every project when another tab logs out or logs in for the first time', () => {
+    const callback = vi.fn();
+    const unsubscribe = onAuthChange(callback);
+
+    window.dispatchEvent(
+      storageEvent(
+        {
+          6: { openStadUser: { jwt: 'jwt-6' } },
+          7: { openStadUser: { jwt: 'jwt-7' } },
+        },
+        {}
+      )
+    );
+    window.dispatchEvent(
+      storageEvent(null, { 8: { openStadUser: { jwt: 'jwt-8' } } })
+    );
+
+    expect(callback.mock.calls).toEqual([[['6', '7']], [['8']]]);
+    unsubscribe();
   });
 });

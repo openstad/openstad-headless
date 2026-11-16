@@ -7,6 +7,8 @@ import {
   consumeLoginToken,
   consumeLoginTokenFromUrl,
   pickInitialUser,
+  refreshCurrentUser,
+  refreshCurrentUserOnAuthChange,
 } from './use-current-user';
 
 let capturedFetcher;
@@ -253,7 +255,7 @@ describe('applyJwt', () => {
     vi.clearAllMocks();
   });
 
-  test('stores the jwt with its api url, uses it for requests and announces the change', () => {
+  test('stores the jwt with its api url, uses it for requests and announces the change for its project', async () => {
     const api = { apiUrl: 'http://api.local' };
     const announced = vi.fn();
     window.addEventListener('osc-auth-changed', announced);
@@ -264,6 +266,7 @@ describe('applyJwt', () => {
       projectId: 3,
       jwt: 'jwt-3',
     });
+    await Promise.resolve();
 
     expect(JSON.parse(stored.openstad)['3'].openStadUser).toEqual({
       jwt: 'jwt-3',
@@ -272,6 +275,47 @@ describe('applyJwt', () => {
     expect(api.currentUserJWT).toBe('jwt-3');
     expect(mutate).toHaveBeenCalledWith({ type: 'current-user', projectId: 3 });
     expect(announced).toHaveBeenCalledTimes(1);
+    expect(announced.mock.calls[0][0].detail).toEqual({ projectIds: ['3'] });
+  });
+});
+
+describe('refreshing the current user after an auth change', () => {
+  beforeEach(() => {
+    mutate.mockClear();
+  });
+
+  test('fetches the user of a project once for all requests in the same tick', async () => {
+    refreshCurrentUser(6);
+    refreshCurrentUser(6);
+    refreshCurrentUser(7);
+
+    expect(mutate).not.toHaveBeenCalled();
+    await Promise.resolve();
+    expect(mutate.mock.calls).toEqual([
+      [{ type: 'current-user', projectId: 6 }],
+      [{ type: 'current-user', projectId: 7 }],
+    ]);
+
+    refreshCurrentUser(6);
+    await Promise.resolve();
+    expect(mutate).toHaveBeenCalledTimes(3);
+  });
+
+  test('only refreshes when the change concerns its own project or is not specified', async () => {
+    const onAuthChangeFor6 = refreshCurrentUserOnAuthChange(6);
+
+    onAuthChangeFor6(['7']);
+    await Promise.resolve();
+    expect(mutate).not.toHaveBeenCalled();
+
+    onAuthChangeFor6(['6', '7']);
+    await Promise.resolve();
+    onAuthChangeFor6(null);
+    await Promise.resolve();
+    expect(mutate.mock.calls).toEqual([
+      [{ type: 'current-user', projectId: 6 }],
+      [{ type: 'current-user', projectId: 6 }],
+    ]);
   });
 });
 
