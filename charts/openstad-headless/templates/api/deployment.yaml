@@ -306,6 +306,9 @@ spec:
           - name: MULTI_PROJECT_LOGIN
             value: {{ .Values.multiProjectLogin | default false | toString | quote }}
 
+          - name: TRUST_PROXY
+            value: {{ .Values.trustProxy | toString | quote }}
+
           - name: OTEL_SERVICE_NAME
             value: {{ .Values.api.otelServiceName | quote }}
 

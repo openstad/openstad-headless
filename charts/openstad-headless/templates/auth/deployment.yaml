@@ -241,6 +241,9 @@ spec:
           - name: MULTI_PROJECT_LOGIN
             value: {{ .Values.multiProjectLogin | default false | toString | quote }}
 
+          - name: TRUST_PROXY
+            value: {{ .Values.trustProxy | toString | quote }}
+
           - name: AUDIT_API_ENDPOINT
             value: "http://{{ template "openstad.api.fullname" . }}:{{ .Values.api.service.httpPort }}/api/audit-log/auth-event"
           - name: AUDIT_API_TOKEN

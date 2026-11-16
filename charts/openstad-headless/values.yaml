@@ -77,8 +77,12 @@ rateLimit:
   limit: 100
 randomSortRotationMs: 0
 # Multi-project login (opt-in): one login for all projects of this installation.
-# Sets MULTI_PROJECT_LOGIN on both the api-server and the auth-server.
+# Sets MULTI_PROJECT_LOGIN on the api-server, auth-server, cms-server and admin-server.
 multiProjectLogin: false
+# Express 'trust proxy' (TRUST_PROXY) on the api-server and the auth-server: the number of
+# proxies in front of the app. "1" fits a single ingress controller; add one for every extra
+# proxy, such as a CDN. An empty value trusts every proxy, which lets clients spoof their IP.
+trustProxy: "1"
 # Settings
 
 ##
