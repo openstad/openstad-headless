@@ -11,6 +11,7 @@ export default defineConfig({
   allowCypressEnv: false,
 
   e2e: {
+    baseUrl: process.env.ADMIN_URL,
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },

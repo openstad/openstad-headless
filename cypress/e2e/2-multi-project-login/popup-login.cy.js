@@ -1,22 +1,30 @@
-// Requires MULTI_PROJECT_LOGIN=true on the api-server and auth-server
-// (set in docker-compose.e2e.yml). Builds its own project, so it runs on an
-// empty installation.
 const apiUrl = () => Cypress.expose('API_URL');
 const adminUrl = () => Cypress.expose('ADMIN_URL');
 
-const apiRequest = (method, path, body) =>
+const apiRequest = (method, path, body, { failOnStatusCode = true } = {}) =>
   cy.request({
     method,
     url: `${apiUrl()}${path}`,
     body,
+    failOnStatusCode,
     headers: { Authorization: Cypress.expose('API_FIXED_AUTH_KEY') },
+  });
+
+const deleteProjectOnceAnonymized = (projectId, attempts = 20) =>
+  apiRequest('DELETE', `/api/project/${projectId}`, undefined, {
+    failOnStatusCode: false,
+  }).then(({ status }) => {
+    if (status === 200) return;
+    if (attempts <= 1) throw new Error(`Project ${projectId} was not deleted`);
+    cy.wait(500);
+    return deleteProjectOnceAnonymized(projectId, attempts - 1);
   });
 
 const waitForUniqueCode = (projectId, attempts = 20) =>
   apiRequest('GET', `/auth/project/${projectId}/uniquecode?useAuth=openstad`)
     .its('body')
     .then((body) => {
-      if (body.total > 0) return body.data[0].code;
+      if (body.total > 0 && body.data?.length > 0) return body.data[0].code;
       if (attempts <= 1) throw new Error('No unique code generated');
       cy.wait(500);
       return waitForUniqueCode(projectId, attempts - 1);
@@ -31,8 +39,6 @@ describe('Multi-project login: first login through a popup', () => {
   let code;
 
   before(() => {
-    // UniqueCode-only client, so the jwt for the simulated popup message can
-    // be obtained through the public uniquecode-login endpoint
     apiRequest('POST', '/api/project', {
       name: `e2e multi-project login ${run}`,
       config: {
@@ -91,12 +97,26 @@ describe('Multi-project login: first login through a popup', () => {
       });
   });
 
+  after(() => {
+    if (!projectId) return;
+    apiRequest('PUT', `/api/project/${projectId}`, {
+      config: { project: { projectHasEnded: true } },
+    })
+      .then(() =>
+        apiRequest(
+          'PUT',
+          `/api/project/${projectId}/do-anonymize-all-users`,
+          {}
+        )
+      )
+      .then(() => deleteProjectOnceAnonymized(projectId));
+  });
+
   it('opens the popup within the click and registers the like after the login message', () => {
     cy.intercept('GET', hostPage(), {
       headers: { 'content-type': 'text/html' },
       body: `<!doctype html><html lang="nl"><head><title>e2e</title></head><body><script src="${apiUrl()}/widget/${widgetId}"></script></body></html>`,
     });
-    // Keep the real auth-server login out of the stubbed popup
     cy.intercept('GET', `${apiUrl()}/auth/project/*/login*`, {
       headers: { 'content-type': 'text/html' },
       body: '<!doctype html><title>login</title>',
@@ -108,16 +128,13 @@ describe('Multi-project login: first login through a popup', () => {
     cy.visit(hostPage(), {
       onBeforeLoad(win) {
         win.localStorage.clear();
-        // A real window is needed as message source; a hidden iframe stands in.
-        // window.event is only the click while it is being dispatched, so a
-        // call after an await records false (popup blockers would block it)
         cy.stub(win, 'open')
           .as('windowOpen')
           .callsFake(() => {
-            const frame = win.document.createElement('iframe');
-            frame.style.display = 'none';
-            win.document.body.appendChild(frame);
-            popup = frame.contentWindow;
+            const popupStandIn = win.document.createElement('iframe');
+            popupStandIn.style.display = 'none';
+            win.document.body.appendChild(popupStandIn);
+            popup = popupStandIn.contentWindow;
             openedInClick = win.event?.type === 'click';
             return popup;
           });
