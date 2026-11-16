@@ -43,8 +43,9 @@ function isPrivateIp(address) {
 }
 
 // Explicit options win over the operator-configured env values.
-function rateLimiter({ windowMs, max } = {}) {
+function rateLimiter({ windowMs, max, message } = {}) {
   return rateLimit({
+    ...(message !== undefined ? { message } : {}),
     windowMs:
       windowMs ??
       (process.env.RATE_WINDOW_MS

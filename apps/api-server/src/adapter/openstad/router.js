@@ -100,15 +100,17 @@ router
   });
 
 if (process.env.MULTI_PROJECT_LOGIN === 'true') {
+  const inlineLoginRateLimiter = () =>
+    rateLimiter({ message: { status: 'too_many_requests' } });
   router
     .route('/project/:projectId/exchange')
-    .post(rateLimiter(), inlineLoginRoutes.exchange);
+    .post(inlineLoginRateLimiter(), inlineLoginRoutes.exchange);
   router
     .route('/project/:projectId/uniquecode-login')
-    .post(rateLimiter(), inlineLoginRoutes.uniqueCodeLogin);
+    .post(inlineLoginRateLimiter(), inlineLoginRoutes.uniqueCodeLogin);
   router
     .route('/project/:projectId/complete-fields')
-    .post(rateLimiter(), inlineLoginRoutes.completeFields);
+    .post(inlineLoginRateLimiter(), inlineLoginRoutes.completeFields);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -209,11 +211,7 @@ router
         (returnTo.includes('?') ? '&' : '?') +
         'openstadlogintoken=[[jwt]]';
     if (req.params.projectId)
-      returnTo = setQueryParam(
-        returnTo,
-        'openstadprojectid',
-        req.params.projectId
-      );
+      returnTo = setQueryParam(returnTo, 'openstadprojectid', req.project.id);
     let redirectUrl = returnTo;
     redirectUrl =
       redirectUrl ||
@@ -243,20 +241,28 @@ router
     };
 
     // check if redirect domain is allowed
-    if (
-      isAllowedRedirectDomain(redirectUrl, req.project) &&
-      canSendJwtTo(redirectUrl)
-    ) {
+    const redirectDomainAllowed = isAllowedRedirectDomain(
+      redirectUrl,
+      req.project
+    );
+    if (redirectDomainAllowed && canSendJwtTo(redirectUrl)) {
       req.redirectUrl = redirectUrl;
       return next();
-    } else {
+    }
+    if (redirectDomainAllowed) {
       console.log(
-        `[${new Date().toISOString()}][digest-login] redirect domain not allowed: ${redirectUrl?.substring(0, 100)} projectId=${req.project?.id}`
+        `[${new Date().toISOString()}][digest-login] https required for the redirect: ${redirectUrl?.substring(0, 100)} projectId=${req.project?.id}`
       );
-      res.status(500).json({
-        status: 'Redirect domain not allowed',
+      return res.status(500).json({
+        status: 'Redirect url must use https',
       });
     }
+    console.log(
+      `[${new Date().toISOString()}][digest-login] redirect domain not allowed: ${redirectUrl?.substring(0, 100)} projectId=${req.project?.id}`
+    );
+    res.status(500).json({
+      status: 'Redirect domain not allowed',
+    });
   })
   .get(async function (req, res, next) {
     let code = req.query.code;
@@ -264,7 +270,6 @@ router
       console.log(
         `[${new Date().toISOString()}][digest-login] no auth code in request: projectId=${req.project?.id}`
       );
-      // next(), not throw: express 4 does not catch async errors
       return next(createError(403, 'Je bent niet ingelogd'));
     }
 
