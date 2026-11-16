@@ -39,6 +39,7 @@ export const Step3 = ({
     () => createVotePendingStorage(projectId),
     [projectId]
   );
+  const loginInProgress = React.useRef(false);
 
   return (
     <>
@@ -112,7 +113,13 @@ export const Step3 = ({
             document.location.href = await buildLoginUrl();
             return;
           }
-          await requireLogin({ loginUrl: buildLoginUrl });
+          if (loginInProgress.current) return;
+          loginInProgress.current = true;
+          try {
+            await requireLogin({ loginUrl: buildLoginUrl });
+          } finally {
+            loginInProgress.current = false;
+          }
         }}>
         {stemCodeTitle}
       </Button>

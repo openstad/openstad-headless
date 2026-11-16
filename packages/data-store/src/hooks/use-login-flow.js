@@ -10,8 +10,7 @@ import {
 } from '../login-flow';
 
 const POPUP_NAME = 'osc-login';
-// A popup that closes this fast was most likely blocked, not cancelled
-const BLOCKED_WITHIN_MS = 1500;
+const POPUP_CLOSED_AS_IF_BLOCKED_WITHIN_MS = 1500;
 
 export default function useLoginFlow(props) {
   const self = this;
@@ -27,6 +26,8 @@ export default function useLoginFlow(props) {
 
   const openPopup = (url) =>
     window.open(url, POPUP_NAME, 'width=480,height=640');
+
+  const openPopupBeforeAnyAwait = () => openPopup('about:blank');
 
   const readOwnJwt = () =>
     getKnownIdentities({ apiUrl: self.api.apiUrl }).find(
@@ -71,9 +72,9 @@ export default function useLoginFlow(props) {
       handle({ type: 'loggedIn', jwt });
       return;
     }
-    // Blocked, or closed too fast to be a deliberate cancel: let the user
-    // choose a same-window login instead of redirecting unasked
-    if (!popup || Date.now() - openedAt < BLOCKED_WITHIN_MS) {
+    const popupWasBlocked =
+      !popup || Date.now() - openedAt < POPUP_CLOSED_AS_IF_BLOCKED_WITHIN_MS;
+    if (popupWasBlocked) {
       setDialog({ step: 'blocked', busy: false });
       return;
     }
@@ -87,6 +88,7 @@ export default function useLoginFlow(props) {
   };
 
   const handle = (outcome) => {
+    if (!pending.current && outcome.type !== 'loggedIn') return;
     if (outcome.type === 'loggedIn') {
       self.applyJwt(outcome.jwt);
       const current = close();
@@ -139,8 +141,7 @@ export default function useLoginFlow(props) {
         excludeProjectId: self.projectId,
       });
       if (identities.length === 0) {
-        // Open within the click, before any await, so popup blockers allow it
-        pending.current.popup = openPopup('about:blank');
+        pending.current.popup = openPopupBeforeAnyAwait();
         redirect();
         return;
       }

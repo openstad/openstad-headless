@@ -12,8 +12,10 @@ import React, { FormEvent, useEffect, useId, useRef } from 'react';
 
 import { Dialog } from '../dialog';
 import {
+  autocompleteFor,
   fieldLabelFor,
   fieldTypeFor,
+  inputTypeFor,
   isFieldRequired,
   readFieldValues,
   splitLinkLabel,
@@ -227,6 +229,8 @@ export function LoginDialogContent({
             <Textbox
               id={id}
               name={key}
+              type={inputTypeFor(key)}
+              autoComplete={autocompleteFor(key)}
               autoFocus={autoFocus}
               required={required}
               inputRequired={required}
@@ -276,7 +280,6 @@ export function LoginDialog({
       open={open}
       onOpenChange={onOpenChange}
       aria-labelledby={titleId}
-      // Text present on open is not announced as status, so describe the dialog with it
       aria-describedby={
         content.step === 'blocked' ? `${titleId}-description` : undefined
       }

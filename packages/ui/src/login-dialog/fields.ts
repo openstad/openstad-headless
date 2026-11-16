@@ -14,6 +14,26 @@ export const defaultFieldLabels: Record<string, string> = {
   accessCode: 'Toegangscode',
 };
 
+const autocompleteByField: Record<string, string> = {
+  name: 'name',
+  email: 'email',
+  phoneNumber: 'tel',
+  streetName: 'address-line1',
+  postcode: 'postal-code',
+  city: 'address-level2',
+};
+
+const inputTypeByField: Record<string, 'email' | 'tel'> = {
+  email: 'email',
+  phoneNumber: 'tel',
+};
+
+export const autocompleteFor = (key: string): string | undefined =>
+  autocompleteByField[key];
+
+export const inputTypeFor = (key: string): 'email' | 'tel' | 'text' =>
+  inputTypeByField[key] || 'text';
+
 const checkboxFields = ['emailNotificationConsent', 'privacyConsent'];
 const optionalFields = ['emailNotificationConsent'];
 

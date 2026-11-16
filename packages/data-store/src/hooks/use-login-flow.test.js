@@ -78,6 +78,30 @@ describe('useLoginFlow popup login', () => {
     expect(hook.dialog.step).toBe('uniquecode');
   });
 
+  test('keeps the dialog closed when a pending code check answers after closing', async () => {
+    storeLogin(3, jwtFor(1));
+    self.api.user.exchangeLogin.mockResolvedValue({
+      status: 409,
+      data: { status: 'uniquecode_required' },
+    });
+    let answer;
+    self.api.user.loginWithUniqueCode = vi.fn(
+      () =>
+        new Promise((resolve) => {
+          answer = resolve;
+        })
+    );
+
+    flow.requireLogin({ loginUrl });
+    await vi.advanceTimersByTimeAsync(0);
+    flow.dialogProps.onSubmitCode('WRONG');
+    flow.dialogProps.onOpenChange(false);
+    answer({ status: 401, data: {} });
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(hook.dialog).toBeNull();
+  });
+
   test('offers a same-window login when the popup is blocked', async () => {
     window.open.mockReturnValue(null);
     const onBeforeRedirect = vi.fn();

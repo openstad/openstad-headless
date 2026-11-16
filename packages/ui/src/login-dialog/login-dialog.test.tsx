@@ -66,6 +66,23 @@ describe('LoginDialogContent', () => {
     );
   });
 
+  it('tells browsers what each personal data field is for', () => {
+    const markup = render({
+      step: 'fields',
+      missingFields: ['name', 'email', 'phoneNumber', 'postcode', 'city'],
+    });
+
+    expect(inputTag(markup, 'name')).toContain('autoComplete="name"');
+    expect(inputTag(markup, 'email')).toContain('type="email"');
+    expect(inputTag(markup, 'email')).toContain('autoComplete="email"');
+    expect(inputTag(markup, 'phoneNumber')).toContain('type="tel"');
+    expect(inputTag(markup, 'phoneNumber')).toContain('autoComplete="tel"');
+    expect(inputTag(markup, 'postcode')).toContain(
+      'autoComplete="postal-code"'
+    );
+    expect(inputTag(markup, 'city')).toContain('autoComplete="address-level2"');
+  });
+
   it('shows the plain label when there is no privacy link', () => {
     const markup = render({
       step: 'fields',
