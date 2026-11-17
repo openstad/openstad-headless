@@ -60,27 +60,31 @@ async function buildAuthProviderSyncConfig({
   return providerConfigForSync;
 }
 
-// Whether `user` may duplicate from the given source project.
-async function canUserUseSourceProjectForDuplication({
-  user,
-  sourceProjectId,
-}) {
-  if (!sourceProjectId) return true;
+async function isProjectAdminOrEditor({ user, projectId }) {
   if (hasRole(user, 'superuser')) return true;
 
   const identifier = user?.idpUser?.identifier;
   const provider = user?.idpUser?.provider;
   if (!identifier || !provider) return false;
 
-  const sourceProjectUser = await db.User.findOne({
+  const projectUser = await db.User.findOne({
     where: {
-      projectId: sourceProjectId,
+      projectId,
       idpUser: { identifier, provider },
       [Op.or]: [{ role: 'admin' }, { role: 'editor' }],
     },
   });
 
-  return !!sourceProjectUser;
+  return !!projectUser;
+}
+
+// Whether `user` may duplicate from the given source project.
+async function canUserUseSourceProjectForDuplication({
+  user,
+  sourceProjectId,
+}) {
+  if (!sourceProjectId) return true;
+  return isProjectAdminOrEditor({ user, projectId: sourceProjectId });
 }
 
 // Strip project-specific credentials/provider ids so a duplicate regenerates them.
@@ -144,6 +148,7 @@ function stripAuthClientManagedFieldsFromProjectConfig(config = {}) {
 module.exports = {
   buildAuthProviderSyncConfig,
   canUserUseSourceProjectForDuplication,
+  isProjectAdminOrEditor,
   sanitizeAuthConfigForDuplication,
   stripAuthClientManagedFieldsFromProjectConfig,
 };
