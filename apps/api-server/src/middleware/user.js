@@ -2,12 +2,26 @@ const config = require('config');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const merge = require('merge');
+const createError = require('http-errors');
 const db = require('../db');
 const authSettings = require('../util/auth-settings');
 const auditLogService = require('../services/audit-log');
 const { isExpired } = require('../lib/api-token-status');
 
+const INVALID_TOKEN_ERRORS = [
+  'TokenExpiredError',
+  'JsonWebTokenError',
+  'NotBeforeError',
+];
+const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
+
 let adapters = {};
+const uploadPathSuffixes = [
+  '/upload/image',
+  '/upload/images',
+  '/upload/document',
+  '/upload/documents',
+];
 
 // RFC 7235 allows any amount of whitespace between the auth scheme and its
 // credentials, so match the scheme tolerantly instead of assuming a single
@@ -59,27 +73,37 @@ module.exports = async function getUser(req, res, next) {
       return handleApiToken(req, res, next, bearerToken);
     }
 
-    const allowedUploadPaths = ['/upload/images', '/upload/documents'];
+    if (
+      process.env.API_UPLOAD_LEGACY_AUTH_BYPASS === 'true' &&
+      req.headers['authorization']
+    ) {
+      const isUploadRequest = uploadPathSuffixes.some((path) =>
+        req.path.endsWith(path)
+      );
 
-    const isUploadRequest = allowedUploadPaths.some((path) =>
-      req.path.endsWith(path)
-    );
-
-    if (isUploadRequest) {
-      const payload = {
-        userId: '9999999',
-        authProvider: 'upload-service',
-        exp: Math.floor(Date.now() / 1000) + 5 * 60,
-      };
-
-      const uploadJwt = jwt.sign(payload, config.auth.jwtSecret);
-
-      req.headers['authorization'] = `Bearer ${uploadJwt}`;
+      if (isUploadRequest) {
+        const payload = {
+          userId: '9999999',
+          authProvider: 'upload-service',
+          exp: Math.floor(Date.now() / 1000) + 5 * 60,
+        };
+        const uploadJwt = jwt.sign(payload, config.auth.jwtSecret);
+        req.headers['authorization'] = `Bearer ${uploadJwt}`;
+      }
     }
 
-    let { userId, isFixed, authProvider } = parseAuthHeader(
-      req.headers['authorization']
-    );
+    let parsedAuthHeader;
+    try {
+      parsedAuthHeader = parseAuthHeader(req.headers['authorization']);
+    } catch (err) {
+      if (!INVALID_TOKEN_ERRORS.includes(err?.name)) throw err;
+      if (SAFE_METHODS.includes(req.method)) {
+        res.set('WWW-Authenticate', 'Bearer error="invalid_token"');
+        return nextWithEmptyUser(req, res, next);
+      }
+      return next(createError(401, 'Invalid or expired token'));
+    }
+    let { userId, isFixed, authProvider } = parsedAuthHeader;
     let authConfig = await authSettings.config({
       project: req.project,
       useAuth: authProvider,

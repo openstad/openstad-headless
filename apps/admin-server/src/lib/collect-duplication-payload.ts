@@ -49,10 +49,11 @@ export async function collectDuplicationPayload(
   projectData?: any
 ): Promise<DuplicationPayload> {
   let data = projectData;
+  const encodedProjectId = encodeURIComponent(projectId);
 
   if (!data) {
     const response = await fetch(
-      `/api/openstad/api/project/${projectId}?includeConfig=1&includeEmailConfig=1&includeAuthConfig=1`
+      `/api/openstad/api/project/${encodedProjectId}?includeConfig=1&includeEmailConfig=1&includeAuthConfig=1`
     );
     if (!response.ok) {
       throw new Error('Kon het project niet ophalen');
@@ -80,17 +81,19 @@ export async function collectDuplicationPayload(
   }
 
   payload.widgets = await fetchList(
-    `/api/openstad/api/project/${projectId}/widgets`
+    `/api/openstad/api/project/${encodedProjectId}/widgets`
   );
-  payload.tags = await fetchList(`/api/openstad/api/project/${projectId}/tag`);
+  payload.tags = await fetchList(
+    `/api/openstad/api/project/${encodedProjectId}/tag`
+  );
   payload.statuses = await fetchList(
-    `/api/openstad/api/project/${projectId}/status`
+    `/api/openstad/api/project/${encodedProjectId}/status`
   );
   payload.resources = await fetchList(
-    `/api/openstad/api/project/${projectId}/resource?includeTags=1&includeStatus=1`
+    `/api/openstad/api/project/${encodedProjectId}/resource?includeTags=1&includeStatus=1`
   );
   payload.notificationTemplates = await fetchList(
-    `/api/openstad/notification/project/${projectId}/template`
+    `/api/openstad/notification/project/${encodedProjectId}/template`
   );
 
   payload.resourceSettings = payload?.config?.resources || {};

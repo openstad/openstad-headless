@@ -116,7 +116,7 @@ router
     if (req.body.markers !== undefined) updateData.markers = req.body.markers;
 
     markers
-      .authorizeData(markers, 'update')
+      .authorizeData(updateData, 'update')
       .update(updateData)
       .then((result) => {
         req.results = result;

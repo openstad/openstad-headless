@@ -1,9 +1,12 @@
 import { UploadDocument } from '@/hooks/upload-document';
+import useMaxUploadSizeMb from '@/hooks/use-max-upload-size';
+import { GENERIC_UPLOAD_ERROR_MESSAGE, UploadError } from '@/lib/upload-limits';
 import React from 'react';
 import { FieldValues, Path, UseFormReturn } from 'react-hook-form';
 
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -14,7 +17,12 @@ import { Input } from './ui/input';
 export const DocumentUploader: React.FC<{
   form: UseFormReturn<any>;
   fieldName: Path<FieldValues>;
-  onDocumentUploaded?: (documentObject: { url: string; name?: string }) => void;
+  onDocumentUploaded?: (documentObject: {
+    url: string;
+    name?: string;
+    size?: number;
+    mimeType?: string;
+  }) => void;
   documentLabel?: string;
   allowedTypes?: string[];
   project?: string;
@@ -28,6 +36,8 @@ export const DocumentUploader: React.FC<{
   project,
   allowMultiple = false,
 }) => {
+  const maxUploadSizeMb = useMaxUploadSizeMb();
+
   async function doUpload(file: File) {
     const uploadedDocument = await UploadDocument(file, project);
 
@@ -53,6 +63,8 @@ export const DocumentUploader: React.FC<{
     onDocumentUploaded?.({
       url: uploadedDocumentUrl,
       name: uploadedDocument?.name,
+      size: uploadedDocument?.size,
+      mimeType: uploadedDocument?.mimeType,
     });
   }
 
@@ -65,6 +77,11 @@ export const DocumentUploader: React.FC<{
       render={({ field }) => (
         <FormItem>
           <FormLabel>{documentLabel}</FormLabel>
+          {maxUploadSizeMb !== null && (
+            <FormDescription>
+              Maximale bestandsgrootte: {maxUploadSizeMb} MB
+            </FormDescription>
+          )}
           <FormControl>
             <Input
               type="file"
@@ -73,10 +90,19 @@ export const DocumentUploader: React.FC<{
               {...field}
               onChange={async (e) => {
                 const files = e.target.files;
-                if (files && files.length > 0) {
+                if (!files || files.length === 0) return;
+
+                form.clearErrors(fieldName);
+                try {
                   for (const file of Array.from(files)) {
                     await doUpload(file);
                   }
+                } catch (error) {
+                  const message =
+                    error instanceof UploadError
+                      ? error.message
+                      : GENERIC_UPLOAD_ERROR_MESSAGE;
+                  form.setError(fieldName, { type: 'manual', message });
                 }
               }}
             />

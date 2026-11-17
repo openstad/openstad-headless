@@ -15,3 +15,74 @@
 .filepond--wrapper .filepond--drop-label label {
   cursor: pointer;
 }
+
+.image-crop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-block-start: 8px;
+}
+
+.image-crop-list-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 12px 16px;
+}
+
+.image-crop-list-thumb {
+  object-fit: cover;
+  border-radius: 4px;
+  max-inline-size: 100%;
+}
+
+.image-crop-list-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-inline-size: 0;
+}
+
+.image-crop-list-name {
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+
+.image-crop-list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.image-crop-list-remark {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.image-crop-list-counter {
+  align-self: flex-end;
+  font-size: 0.875em;
+}
+
+@media (max-width: 560px) {
+  .image-crop-list-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ponytail: FilePond-default groen #369763 = 3,6:1 met witte tekst. Donkerder groen
+   (#2b7d4f ≈ 5:1) zodat bestandsnaam/grootte/status leesbaar zijn (WCAG 1.4.3).
+   Alleen op het paneel: de statustekst zelf had ook een eigen groen vlak en dat
+   plakte strak om de letters. Het paneel eronder is al groen, dus dat is genoeg. */
+html [data-filepond-item-state*='processing-complete'] .filepond--item-panel,
+html [data-filepond-item-state*='load-complete'] .filepond--item-panel {
+  background-color: #2b7d4f !important;
+}
+
+/* ponytail: bij een afbeeldingsupload ligt de preview-overlay over het paneel
+   en tekent die zijn gradient met currentColor, standaard weer #369763. Zonder
+   deze regel staat de witte bestandsnaam dus alsnog op 3,6:1 (WCAG 1.4.3). */
+html .filepond--image-preview-overlay-success {
+  color: #2b7d4f;
+}

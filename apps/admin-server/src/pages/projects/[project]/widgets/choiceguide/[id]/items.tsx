@@ -26,6 +26,7 @@ import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useDraftItems } from '@/hooks/useDraftItems';
 import { useOpenItemDraft } from '@/hooks/useOpenItemDraft';
+import { usePanelSwitchFocus } from '@/hooks/usePanelSwitchFocus';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import {
@@ -47,6 +48,7 @@ import {
   Matrix,
   MatrixOption,
 } from '@openstad-headless/enquete/src/types/enquete-props';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
@@ -82,6 +84,7 @@ const formSchema = z.object({
   type: z.string().optional(),
   tags: z.string().optional(),
   fieldRequired: z.boolean().optional(),
+  enableAddressSearch: z.boolean().optional(),
   onlyForModerator: z.boolean().optional(),
   placeholder: z.string().optional(),
   minCharacters: z.string().optional(),
@@ -93,6 +96,16 @@ const formSchema = z.object({
   maxUploadSizeMB: z.preprocess(
     (val) => (val === '' || val === null ? undefined : val),
     z.coerce.number().positive().optional()
+  ),
+  imageCropEnabled: z.boolean().optional(),
+  imageCropRequired: z.boolean().optional(),
+  imageCropRatioWidth: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number().int().positive().optional()
+  ),
+  imageCropRatioHeight: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce.number().int().positive().optional()
   ),
   prevPageText: z.string().optional(),
   nextPageText: z.string().optional(),
@@ -135,6 +148,7 @@ const formSchema = z.object({
   showMoreInfo: z.boolean().optional(),
   moreInfoButton: z.string().optional(),
   moreInfoContent: z.string().optional(),
+  headingLevel: z.coerce.number().optional(),
   labelA: z.string().optional(),
   labelB: z.string().optional(),
   sliderTitleUnderA: z.string().optional(),
@@ -212,6 +226,7 @@ export default function WidgetChoiceGuideItems(
     : null;
   const [selectedOption, setOption] = useState<Option | null>(null);
   const [settingOptions, setSettingOptions] = useState<boolean>(false);
+  const panelRef = usePanelSwitchFocus(settingOptions);
   const [activeTab, setActiveTab] = useState<string>('1');
   const [dimensions, setDimensions] = useState<string[]>([]);
   const [matrixOptions, setMatrixOptions] = useState<Matrix>(matrixDefault);
@@ -294,11 +309,16 @@ export default function WidgetChoiceGuideItems(
             description: values.description,
             type: values.type,
             fieldRequired: values.fieldRequired || false,
+            enableAddressSearch: values.enableAddressSearch || false,
             minCharacters: values.minCharacters,
             maxCharacters: values.maxCharacters,
             variant: values.variant || 'text input',
             multiple: values.multiple || false,
             maxUploadSizeMB: values.maxUploadSizeMB || 25,
+            imageCropEnabled: values.imageCropEnabled || false,
+            imageCropRequired: values.imageCropRequired || false,
+            imageCropRatioWidth: values.imageCropRatioWidth,
+            imageCropRatioHeight: values.imageCropRatioHeight,
             options: values.options || [],
             showMoreInfo: values.showMoreInfo || false,
             moreInfoButton: values.moreInfoButton || '',
@@ -456,15 +476,21 @@ export default function WidgetChoiceGuideItems(
     description: '',
     type: '',
     fieldRequired: false,
+    enableAddressSearch: false,
     minCharacters: '',
     maxCharacters: '',
     variant: 'text input',
     multiple: false,
     maxUploadSizeMB: 25,
+    imageCropEnabled: false,
+    imageCropRequired: false,
+    imageCropRatioWidth: undefined,
+    imageCropRatioHeight: undefined,
     prevPageText: '',
     nextPageText: '',
     options: [],
     showMoreInfo: false,
+    headingLevel: 3,
     moreInfoButton: '',
     moreInfoContent: '',
     labelA: '',
@@ -532,13 +558,19 @@ export default function WidgetChoiceGuideItems(
       tags: item.tags || firstTagType,
       options: item.options || [],
       fieldRequired: item.fieldRequired || false,
+      enableAddressSearch: item.enableAddressSearch || false,
       onlyForModerator: item.onlyForModerator || false,
       minCharacters: item.minCharacters || '',
       maxCharacters: item.maxCharacters || '',
       variant: item.variant || '',
       multiple: item.multiple || false,
       maxUploadSizeMB: item.maxUploadSizeMB || 25,
+      imageCropEnabled: item.imageCropEnabled || false,
+      imageCropRequired: item.imageCropRequired || false,
+      imageCropRatioWidth: item.imageCropRatioWidth,
+      imageCropRatioHeight: item.imageCropRatioHeight,
       showMoreInfo: item.showMoreInfo || false,
+      headingLevel: item.headingLevel || 3,
       moreInfoButton: item.moreInfoButton || '',
       moreInfoContent: item.moreInfoContent || '',
       labelA: item.labelA || '',
@@ -1079,10 +1111,11 @@ export default function WidgetChoiceGuideItems(
                               }}>
                               <span
                                 dangerouslySetInnerHTML={{
-                                  __html:
+                                  __html: sanitizeHtml(
                                     item.type === 'pagination'
                                       ? '--- Nieuwe pagina ---'
-                                      : item.title || 'Geen titel',
+                                      : item.title || 'Geen titel'
+                                  ),
                                 }}
                               />
                             </span>
@@ -1102,7 +1135,12 @@ export default function WidgetChoiceGuideItems(
             </div>
 
             {settingOptions ? (
-              <div className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
+              <div
+                ref={panelRef}
+                tabIndex={-1}
+                role="group"
+                aria-label="Antwoordopties"
+                className="p-6 bg-white rounded-md col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-x-6">
                 {form.watch('type') === 'matrix' ? (
                   matrixList.map((matrixItem) => (
                     <>
@@ -1507,7 +1545,12 @@ export default function WidgetChoiceGuideItems(
                 )}
               </div>
             ) : (
-              <div className="p-0 bg-transparent rounded-md flex flex-col justify-start col-span-2">
+              <div
+                ref={panelRef}
+                tabIndex={-1}
+                role="group"
+                aria-label="Vraag instellingen"
+                className="p-0 bg-transparent rounded-md flex flex-col justify-start col-span-2">
                 <div className="w-full px-4 py-3 bg-white border-b-0 mb-4 rounded-md improvised-tab-list flex gap-4">
                   <button
                     type="button"
@@ -1601,6 +1644,43 @@ export default function WidgetChoiceGuideItems(
                             <FormMessage />
                           </FormItem>
                         )}></FormField>
+                      {form.watch('type') === 'map' && (
+                        <FormField
+                          control={form.control}
+                          name="enableAddressSearch"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Kan de gebruiker de locatie zoeken met postcode
+                                en huisnummer?
+                              </FormLabel>
+                              <FormDescription>
+                                <em className="text-xs">
+                                  Toont invulvelden voor postcode en huisnummer
+                                  boven de kaart. Bij een match wordt de pin op
+                                  het gevonden adres gezet.
+                                </em>
+                              </FormDescription>
+                              <Select
+                                onValueChange={(e: string) =>
+                                  field.onChange(e === 'true')
+                                }
+                                value={field.value ? 'true' : 'false'}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
                       {form.watch('type') === 'pagination' && (
                         <>
                           <FormField
@@ -1647,6 +1727,44 @@ export default function WidgetChoiceGuideItems(
                               </FormItem>
                             )}
                           />
+                          {form.watch('type') === 'none' && (
+                            <FormField
+                              control={form.control}
+                              name="headingLevel"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Kopniveau van de titel</FormLabel>
+                                  <Select
+                                    value={String(field.value ?? 3)}
+                                    onValueChange={(e) =>
+                                      field.onChange(Number(e))
+                                    }>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Kies kopniveau" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="2">
+                                        Kop 2 (h2)
+                                      </SelectItem>
+                                      <SelectItem value="3">
+                                        Kop 3 (h3)
+                                      </SelectItem>
+                                      <SelectItem value="4">
+                                        Kop 4 (h4)
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormDescription>
+                                    Kies zo dat de koppenhiërarchie op de pagina
+                                    klopt (geen niveaus overslaan).
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
                           <FormField
                             control={form.control}
                             name="description"
@@ -1972,10 +2090,13 @@ export default function WidgetChoiceGuideItems(
                                 name="variant"
                                 render={({ field }) => (
                                   <FormItem>
-                                    <FormLabel>
-                                      Is het veld qua grootte 1 regel of een
-                                      tekstvak?
-                                    </FormLabel>
+                                    <FormLabel>Type open vraag</FormLabel>
+                                    <FormDescription>
+                                      Kies hier het type van jouw open vraag.
+                                      Bij een specifiek doel (zoals naam of
+                                      telefoonnummer) kan de browser het veld
+                                      automatisch invullen.
+                                    </FormDescription>
                                     <Select
                                       value={field.value || 'text input'}
                                       onValueChange={field.onChange}>
@@ -1990,6 +2111,30 @@ export default function WidgetChoiceGuideItems(
                                         </SelectItem>
                                         <SelectItem value="textarea">
                                           Tekstvak
+                                        </SelectItem>
+                                        <SelectItem value="email">
+                                          E-mail (validatie)
+                                        </SelectItem>
+                                        <SelectItem value="name">
+                                          Naam
+                                        </SelectItem>
+                                        <SelectItem value="given-name">
+                                          Voornaam
+                                        </SelectItem>
+                                        <SelectItem value="family-name">
+                                          Achternaam
+                                        </SelectItem>
+                                        <SelectItem value="tel">
+                                          Telefoonnummer
+                                        </SelectItem>
+                                        <SelectItem value="postal-code">
+                                          Postcode
+                                        </SelectItem>
+                                        <SelectItem value="street-address">
+                                          Adres
+                                        </SelectItem>
+                                        <SelectItem value="address-level2">
+                                          Woonplaats
                                         </SelectItem>
                                       </SelectContent>
                                     </Select>
@@ -2141,6 +2286,69 @@ export default function WidgetChoiceGuideItems(
                               )}
                             />
                           )}
+
+                          {form.watch('type') === 'imageUpload' && (
+                            <FormField
+                              control={form.control}
+                              name="imageCropEnabled"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>
+                                    Mag de gebruiker de afbeelding bijsnijden?
+                                  </FormLabel>
+                                  <Select
+                                    onValueChange={(e: string) =>
+                                      field.onChange(e === 'true')
+                                    }
+                                    value={field.value ? 'true' : 'false'}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Kies een optie" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="true">Ja</SelectItem>
+                                      <SelectItem value="false">Nee</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                          )}
+
+                          {form.watch('type') === 'imageUpload' &&
+                            form.watch('imageCropEnabled') && (
+                              <FormField
+                                control={form.control}
+                                name="imageCropRequired"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>
+                                      Is bijsnijden verplicht?
+                                    </FormLabel>
+                                    <Select
+                                      onValueChange={(e: string) =>
+                                        field.onChange(e === 'true')
+                                      }
+                                      value={field.value ? 'true' : 'false'}>
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Kies een optie" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem value="true">Ja</SelectItem>
+                                        <SelectItem value="false">
+                                          Nee
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+                            )}
 
                           {form.watch('type') === 'a-b-slider' && (
                             <div className="col-span-full grid-cols-2 grid gap-4 gap-y-4">

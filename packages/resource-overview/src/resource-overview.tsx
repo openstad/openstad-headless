@@ -18,7 +18,13 @@ import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import { renderRawTemplate } from '@openstad-headless/raw-resource/includes/template-render';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Carousel, Icon, Paginator, Pill } from '@openstad-headless/ui/src';
+import {
+  Carousel,
+  Icon,
+  Paginator,
+  Pill,
+  headingLevels,
+} from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import { Image } from '@openstad-headless/ui/src';
 import { Dialog } from '@openstad-headless/ui/src';
@@ -100,6 +106,10 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displaySearch?: boolean;
     displaySearchText?: boolean;
     textActiveSearch?: string;
+    searchLabel?: string;
+    displaySearchHint?: boolean;
+    searchHint?: string;
+    displaySearchPlaceholder?: boolean;
     searchPlaceholder?: string;
     itemLink?: string;
     sorting: Array<{ value: string; label: string }>;
@@ -168,6 +178,10 @@ export type ResourceOverviewWidgetProps = BaseProps &
     includeOrExcludeStatusIds?: string;
     includeProjectsInOverview?: boolean;
     displayLocationFilter?: boolean;
+    locationLabel?: string;
+    displayLocationHint?: boolean;
+    locationHint?: string;
+    locationPlaceholder?: string;
     excludeResourcesInOverview?: boolean;
     filterBehavior?: string;
     filterBehaviorInclude?: string;
@@ -218,7 +232,7 @@ const defaultHeaderRenderer = (
       {displayHeader && (
         <section className="osc-resource-overview-title-container">
           <Heading
-            level={Number(headingLevel) || 4}
+            level={headingLevels(headingLevel)[0]}
             appearance="utrecht-heading-4">
             {title}
           </Heading>
@@ -247,10 +261,11 @@ const defaultItemRenderer = (
       render = render.replace(/&amp;amp;/g, '&');
 
       return (
-        <div
-          dangerouslySetInnerHTML={{
-            __html: render,
-          }}></div>
+        // Raw templates are admin-authored widget config (trusted, may contain
+        // iframes/scripts on purpose). Untrusted variable values are sanitized
+        // inside renderRawTemplate.
+        // eslint-disable-next-line react/no-danger
+        <div dangerouslySetInnerHTML={{ __html: render }}></div>
       );
     } catch (e) {
       console.error('De template kon niet worden geparsed: ', e);
@@ -378,6 +393,7 @@ const defaultItemRenderer = (
       : null;
   const TagIconImage = tagIcon(firstTag);
   const selectedOpinion = resource?.userVote?.opinion;
+  const showVoteCount = !!props.displayVote && !!props.votes?.isViewable;
 
   const TileFooter = ({
     doVote,
@@ -388,6 +404,7 @@ const defaultItemRenderer = (
   }) => {
     const displayResource = likeResource || resource;
     const opinion = displayResource?.userVote?.opinion;
+    const showVoteIcons = !!doVote || !!props.displayVote;
 
     const vote = async (sentiment: string) => {
       if (doVote) {
@@ -401,12 +418,12 @@ const defaultItemRenderer = (
         className={`osc-resource-overview-content-item-footer ${
           doVote ? 'liking-allowed' : ''
         }`}>
-        {props.likeWidget?.variant != 'micro-score' && props.displayVote && (
+        {props.likeWidget?.variant != 'micro-score' && showVoteIcons && (
           <>
             <Icon
               icon="ri-thumb-up-line"
               variant="big"
-              text={displayResource.yes}
+              text={showVoteCount ? displayResource.yes : undefined}
               description="Stemmen voor"
               onClick={() => vote('yes')}
               className={opinion === 'yes' ? 'selected' : ''}
@@ -416,7 +433,7 @@ const defaultItemRenderer = (
               <Icon
                 icon="ri-thumb-down-line"
                 variant="big"
-                text={displayResource.no}
+                text={showVoteCount ? displayResource.no : undefined}
                 description="Stemmen tegen"
                 onClick={() => vote('no')}
                 className={opinion === 'no' ? 'selected' : ''}
@@ -425,7 +442,7 @@ const defaultItemRenderer = (
           </>
         )}
 
-        {props.likeWidget?.variant == 'micro-score' && props.displayVote && (
+        {props.likeWidget?.variant == 'micro-score' && showVoteIcons && (
           <div className="micro-score-container">
             <Icon
               icon={`${
@@ -438,9 +455,11 @@ const defaultItemRenderer = (
                 opinion === 'yes' ? 'selected' : ''
               }`}
             />
-            <Paragraph className="votes-score">
-              {displayResource.netVotes}
-            </Paragraph>
+            {showVoteCount && (
+              <Paragraph className="votes-score">
+                {displayResource.netVotes}
+              </Paragraph>
+            )}
             {props.likeWidget?.displayDislike && (
               <Icon
                 icon={`${
@@ -479,7 +498,7 @@ const defaultItemRenderer = (
             <Spacer size={1} />
             {props.displayTitle ? (
               <Heading
-                level={Number(props.headingLevel) || 4}
+                level={headingLevels(props.headingLevel)[1]}
                 appearance="utrecht-heading-4">
                 <a
                   href={getUrl()}
@@ -497,7 +516,9 @@ const defaultItemRenderer = (
             {displayOverviewTagGroups && resourceFilteredTags.length > 0 && (
               <>
                 <Spacer size={0.5} />
-                <div className="pill-grid">
+                {/* ponytail: zonder rol/naam leest AT de tags als losse woorden
+                    zonder context (WCAG 1.3.1) */}
+                <div className="pill-grid" role="list" aria-label="Categorieën">
                   {(
                     resourceFilteredTags as Array<{
                       type: string;
@@ -506,7 +527,11 @@ const defaultItemRenderer = (
                   )
                     ?.filter((t) => t.type !== 'status')
                     ?.map((t) => (
-                      <Pill text={t.name} />
+                      <Pill
+                        key={`${t.type}-${t.name}`}
+                        role="listitem"
+                        text={t.name}
+                      />
                     ))}
                 </div>
               </>
@@ -632,7 +657,7 @@ const defaultItemRenderer = (
             <Spacer size={1} />
             {props.displayTitle ? (
               <Heading
-                level={Number(props.headingLevel) || 4}
+                level={headingLevels(props.headingLevel)[1]}
                 appearance="utrecht-heading-4">
                 <button
                   className="resource-card--link_trigger"
@@ -649,7 +674,9 @@ const defaultItemRenderer = (
             {displayOverviewTagGroups && resourceFilteredTags.length > 0 && (
               <>
                 <Spacer size={0.5} />
-                <div className="pill-grid">
+                {/* ponytail: zonder rol/naam leest AT de tags als losse woorden
+                    zonder context (WCAG 1.3.1) */}
+                <div className="pill-grid" role="list" aria-label="Categorieën">
                   {(
                     resourceFilteredTags as Array<{
                       type: string;
@@ -658,7 +685,11 @@ const defaultItemRenderer = (
                   )
                     ?.filter((t) => t.type !== 'status')
                     ?.map((t) => (
-                      <Pill text={t.name} />
+                      <Pill
+                        key={`${t.type}-${t.name}`}
+                        role="listitem"
+                        text={t.name}
+                      />
                     ))}
                 </div>
               </>
@@ -695,14 +726,16 @@ const defaultItemRenderer = (
                   <Icon
                     icon="ri-thumb-up-line"
                     variant="big"
-                    text={resource.yes}
+                    text={showVoteCount ? resource.yes : undefined}
+                    description="Stemmen voor"
                     className={selectedOpinion === 'yes' ? 'selected' : ''}
                   />
                   {props.likeWidget?.displayDislike && (
                     <Icon
                       icon="ri-thumb-down-line"
                       variant="big"
-                      text={resource.no}
+                      text={showVoteCount ? resource.no : undefined}
+                      description="Stemmen tegen"
                       className={selectedOpinion === 'no' ? 'selected' : ''}
                     />
                   )}
@@ -719,13 +752,16 @@ const defaultItemRenderer = (
                         : 'ri-triangle-line'
                     } micro-score-triangle`}
                     variant="big"
+                    description="Stemmen voor"
                     className={`micro-score-vote micro-score-vote--yes ${
                       selectedOpinion === 'yes' ? 'selected' : ''
                     }`}
                   />
-                  <Paragraph className="votes-score">
-                    {resource.netVotes}
-                  </Paragraph>
+                  {showVoteCount && (
+                    <Paragraph className="votes-score">
+                      {resource.netVotes}
+                    </Paragraph>
+                  )}
                   {props.likeWidget?.displayDislike && (
                     <Icon
                       icon={`${
@@ -734,6 +770,7 @@ const defaultItemRenderer = (
                           : 'ri-triangle-line'
                       } micro-score-triangle micro-score-triangle-down`}
                       variant="big"
+                      description="Stemmen tegen"
                       className={`micro-score-vote micro-score-vote--no ${
                         selectedOpinion === 'no' ? 'selected' : ''
                       }`}
@@ -747,6 +784,7 @@ const defaultItemRenderer = (
                 icon="ri-message-line"
                 variant="big"
                 text={resource.commentCount}
+                description="Aantal reacties"
               />
             ) : null}
           </div>
@@ -816,6 +854,7 @@ type DialogResourceItemProps = {
   clickableImage?: boolean;
   onRemoveClick: (resource: any) => void;
   forwardProps: ResourceOverviewWidgetProps;
+  refreshResourceLikes?: () => void;
 };
 
 function DialogResourceItem({
@@ -990,11 +1029,6 @@ function ResourceOverviewInner({
   const needsAllResourcesFetch =
     listUsesAllResources || !!displayMap || !!onFilteredResourcesChange;
 
-  // Build API filter params — always send filters to the API
-  const apiTags = useMemo(
-    () => [...(includeTags.length > 0 ? includeTags : []), ...tags],
-    [includeTags, tags]
-  );
   const apiExcludeTags = useMemo(() => excludeTags, [excludeTags]);
   const apiStatuses = useMemo(
     () => (includeOrExcludeStatusIds === 'include' ? statuses : []),
@@ -1019,25 +1053,25 @@ function ResourceOverviewInner({
     return tagsMap;
   }, [allTags]);
 
-  // When AND behavior is needed, group selected tags by their type for the API.
-  // Handle includeTags and user tags separately — they can have different behavior settings.
   const apiTagGroups = useMemo(() => {
     const groups: number[][] = [];
 
-    // includeTags: group by type when filterBehaviorInclude is 'and'
-    if (filterBehaviorInclude === 'and' && includeTags.length > 0) {
-      Object.keys(groupedTags).forEach((tagType) => {
-        const tagsOfType = groupedTags[tagType];
-        const selectedOfType = includeTags.filter((tagId) =>
-          tagsOfType.includes(tagId)
-        );
-        if (selectedOfType.length > 0) {
-          groups.push(selectedOfType);
-        }
-      });
+    if (includeTags.length > 0) {
+      if (filterBehaviorInclude === 'and') {
+        Object.keys(groupedTags).forEach((tagType) => {
+          const tagsOfType = groupedTags[tagType];
+          const selectedOfType = includeTags.filter((tagId) =>
+            tagsOfType.includes(tagId)
+          );
+          if (selectedOfType.length > 0) {
+            groups.push(selectedOfType);
+          }
+        });
+      } else {
+        groups.push(includeTags);
+      }
     }
 
-    // user-selected tags: group by type when filterBehavior is 'and'
     if (filterBehavior === 'and' && tags.length > 0) {
       Object.keys(groupedTags).forEach((tagType) => {
         const tagsOfType = groupedTags[tagType];
@@ -1053,13 +1087,10 @@ function ResourceOverviewInner({
     return groups;
   }, [filterBehavior, filterBehaviorInclude, tags, includeTags, groupedTags]);
 
-  // When tag groups handle the AND logic, send only the remaining OR tags as flat params
   const flatApiTags = useMemo(() => {
-    if (filterBehaviorInclude === 'and' && filterBehavior === 'and') return [];
-    if (filterBehaviorInclude === 'and') return tags;
-    if (filterBehavior === 'and') return includeTags;
-    return apiTags;
-  }, [filterBehavior, filterBehaviorInclude, tags, includeTags, apiTags]);
+    if (filterBehavior === 'and') return [];
+    return tags;
+  }, [filterBehavior, tags]);
 
   const {
     data: resourcesWithPagination,
@@ -1103,7 +1134,12 @@ function ResourceOverviewInner({
     ) {
       setResources(resourcesWithPagination.records || []);
     }
-  }, [resourcesWithPagination, isLoading]);
+  }, [
+    resourcesWithPagination,
+    isLoading,
+    selectedProjects.length,
+    projectIds.length,
+  ]);
 
   useEffect(() => {
     if (listUsesAllResources) {
@@ -1166,7 +1202,22 @@ function ResourceOverviewInner({
         }
       );
 
-      const combined = [...uniqueResources, ...allRecords].sort(
+      const filteredProjectCards = uniqueResources.filter((card: any) => {
+        const cardTagIds: number[] =
+          card.tags?.map((tag: { id: number }) => tag.id) ?? [];
+        if (cardTagIds.some((id) => excludeTags.includes(id))) return false;
+        if (
+          flatApiTags.length > 0 &&
+          !flatApiTags.some((id: number) => cardTagIds.includes(id))
+        )
+          return false;
+        return apiTagGroups.every(
+          (group: number[]) =>
+            group.length === 0 || group.some((id) => cardTagIds.includes(id))
+        );
+      });
+
+      const combined = [...filteredProjectCards, ...allRecords].sort(
         (a: any, b: any) => {
           if (sort === 'createdAt_desc')
             return (
@@ -1202,6 +1253,9 @@ function ResourceOverviewInner({
     allTags,
     search,
     sort,
+    excludeTags,
+    flatApiTags,
+    apiTagGroups,
   ]);
 
   useEffect(() => {
@@ -1425,6 +1479,7 @@ function ResourceOverviewInner({
       <Dialog
         open={open}
         onOpenChange={setOpen}
+        aria-label="Details van inzending"
         children={
           <Carousel
             startIndex={resourceDetailIndex}
@@ -1460,6 +1515,7 @@ function ResourceOverviewInner({
                     console.error(e);
                   }
                 }}
+                refreshResourceLikes={refreshLikes}
                 forwardProps={props}
               />
             )}></Carousel>
@@ -1480,7 +1536,7 @@ function ResourceOverviewInner({
               displayMap && !displayAsTabs,
               selectedProjects,
               location,
-              props.headingLevel || '4'
+              props.headingLevel
             )
           : null}
 
@@ -1553,11 +1609,11 @@ function ResourceOverviewInner({
             <div className="osc-resource-overview-tabs-container">
               <TabsList>
                 <TabsTrigger value="list">
-                  <Icon icon="ri-list-unordered" />
+                  <Icon icon="ri-list-unordered" iconOnly />
                   {listTabTitle}
                 </TabsTrigger>
                 <TabsTrigger value="map">
-                  <Icon icon="ri-map-pin-line" />
+                  <Icon icon="ri-map-pin-line" iconOnly />
                   {mapTabTitle}
                 </TabsTrigger>
               </TabsList>
@@ -1571,7 +1627,7 @@ function ResourceOverviewInner({
                   true,
                   selectedProjects,
                   location,
-                  props.headingLevel || '4'
+                  props.headingLevel
                 )}
               </TabsContent>
             </div>

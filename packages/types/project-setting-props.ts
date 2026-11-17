@@ -5,6 +5,8 @@ export type ProjectSettingProps = {
     endDateNotificationSent: boolean;
     projectHasEnded: boolean;
     areaId: string;
+    imageCropRatioWidth: number;
+    imageCropRatioHeight: number;
   };
   anonymize: {
     anonymizeUsersXDaysAfterEndDate: number;
@@ -83,5 +85,9 @@ export type ProjectSettingProps = {
     tilesVariant?: string;
     customUrl?: string;
     autoZoomAndCenter?: 'area' | 'markers';
+    addressSearchFoundText?: string;
+    addressSearchNotFoundText?: string;
+    addressSearchErrorText?: string;
+    addressSearchOutsideAreaText?: string;
   };
 };

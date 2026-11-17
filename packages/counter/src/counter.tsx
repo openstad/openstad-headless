@@ -1,6 +1,6 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import '@utrecht/component-library-css';
 import { ButtonLink, Paragraph } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
@@ -125,6 +125,10 @@ function Counter({
     amountDisplayed = resources?.metadata?.totalCount || 0;
   }
 
+  if (counterType === 'vote' && !props.votes?.isViewable) {
+    return null;
+  }
+
   if (counterType === 'vote') {
     if (opinion === 'for') {
       amountDisplayed = resource.yes || 0;
@@ -179,10 +183,18 @@ function Counter({
           </span>
         ));
     };
+    const fullText = `${amountDisplayed || 0} ${label || ''}`.trim();
     return (
-      <Paragraph>
-        <span className="amount">{renderAmount(amountDisplayed || 0)}</span>
-        {label ? <span className="label">{label}</span> : null}
+      <Paragraph role="status" aria-live="polite" aria-atomic="true">
+        <span className="sr-only">{fullText}</span>
+        <span className="amount" aria-hidden="true">
+          {renderAmount(amountDisplayed || 0)}
+        </span>
+        {label ? (
+          <span className="label" aria-hidden="true">
+            {label}
+          </span>
+        ) : null}
       </Paragraph>
     );
   };
@@ -194,9 +206,7 @@ function Counter({
       {content()}
     </ButtonLink>
   ) : (
-    <div className="osc counter-container">
-      <>{content()}</>
-    </div>
+    <div className="osc counter-container">{content()}</div>
   );
 }
 

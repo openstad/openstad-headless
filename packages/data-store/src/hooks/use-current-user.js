@@ -2,6 +2,21 @@ import useSWR from 'swr';
 
 import { LocalStorage } from '../../../lib/local-storage';
 
+function setActiveCookie() {
+  document.cookie =
+    'openstad_active=1; path=/; SameSite=Lax' +
+    (location.protocol === 'https:' ? '; Secure' : '');
+}
+
+function hasActiveCookie() {
+  return /(^|;\s*)openstad_active=1/.test(document.cookie);
+}
+
+function activateExpireOnClose(storage) {
+  storage.set('expireOnClose', true);
+  setActiveCookie();
+}
+
 export default function useCurrentUser(props) {
   let self = this;
 
@@ -13,6 +28,8 @@ export default function useCurrentUser(props) {
   );
 
   async function getCurrentUser() {
+    if (self.projectId === undefined || self.projectId === null) return {};
+
     const storage = new LocalStorage(props);
 
     // jwt in url: use and remove from url
@@ -31,10 +48,7 @@ export default function useCurrentUser(props) {
       return {};
     }
 
-    if (
-      storage.get('expireOnClose') &&
-      !/(^|;\s*)openstad_active=1/.test(document.cookie)
-    ) {
+    if (storage.get('expireOnClose') && !hasActiveCookie()) {
       storage.remove('cmsUser');
       storage.remove('openStadUser');
       storage.remove('expireOnClose');
@@ -49,10 +63,7 @@ export default function useCurrentUser(props) {
     } catch (err) {}
 
     if (params.has('expireOnClose')) {
-      storage.set('expireOnClose', true);
-      document.cookie =
-        'openstad_active=1; path=/; SameSite=Lax' +
-        (location.protocol === 'https:' ? '; Secure' : '');
+      activateExpireOnClose(storage);
       let url = window.location.href;
       url = url.replace(/[?&]expireOnClose=1/, '');
       history.replaceState(null, '', url);
@@ -104,10 +115,7 @@ export default function useCurrentUser(props) {
       });
       jwt = result.jwt;
       if (result.expireOnClose) {
-        storage.set('expireOnClose', true);
-        document.cookie =
-          'openstad_active=1; path=/; SameSite=Lax' +
-          (location.protocol === 'https:' ? '; Secure' : '');
+        activateExpireOnClose(storage);
       }
     }
 
@@ -123,10 +131,19 @@ export default function useCurrentUser(props) {
           projectId: self.projectId,
         });
 
+        if (!openStadUser?.id) {
+          console.log('[osc-auth] token not accepted, continuing anonymous');
+          storage.remove('openStadUser');
+          return {};
+        }
+
         console.log(
           `[osc-auth] user authenticated: userId=${openStadUser?.id} role=${openStadUser?.role}`
         );
         storage.set('openStadUser', { ...openStadUser, jwt });
+        if (openStadUser && openStadUser.expireOnClose) {
+          activateExpireOnClose(storage);
+        }
         return openStadUser;
       } catch (err) {
         console.log(`[osc-auth] user fetch failed: ${err?.message}`);

@@ -195,12 +195,16 @@ router
 
     req.confirmation = data.confirmation || false;
     req.confirmationReplies = data.confirmationReplies || false;
-    req.overwriteEmailAddress = data.overwriteEmailAddress || '';
+    req.widgetId = parseInt(data.widgetId) || null;
+    // the widget signals that an address is configured; never fall back to the
+    // resource owner then, even if the widget config cannot be resolved
+    req.expectsOverwriteAddress = !!data.overwriteEmailAddress;
     req.embeddedUrl = data.embeddedUrl || '';
 
     delete data.confirmation;
     delete data.confirmationReplies;
     delete data.overwriteEmailAddress;
+    delete data.widgetId;
     delete data.embeddedUrl;
 
     db.Comment.authorizeData(data, 'create', req.user)
@@ -236,7 +240,17 @@ router
   .post(async function (req, res, next) {
     const confirmation = req.confirmation;
     const confirmationReplies = req.confirmationReplies;
-    const overwriteEmailAddress = req.overwriteEmailAddress;
+
+    // the recipient comes from the widget config; the request must not pick it
+    const widget = req.widgetId
+      ? await db.Widget.findOne({
+          where: { id: req.widgetId, projectId: req.project.id },
+        })
+      : null;
+    const overwriteEmailAddress =
+      widget?.config?.overwriteEmailAddress ||
+      widget?.config?.commentsWidget?.overwriteEmailAddress ||
+      '';
 
     let receiver = '';
     let receiverUserId = 0;
@@ -248,6 +262,8 @@ router
     if (confirmation && !req?.results?.parentId) {
       if (overwriteEmailAddress) {
         receiver = overwriteEmailAddress;
+      } else if (req.expectsOverwriteAddress) {
+        confirmationSent = false;
       } else if (req.results && req.results.resourceId) {
         const resource = await db.Resource.findByPk(req.results.resourceId);
         if (resource && resource.userId) {
@@ -320,20 +336,57 @@ router
 
         if (!notificationType) throw new Error('No valid notification type');
 
-        db.Notification.create({
-          type: notificationType,
-          projectId: req.project.id,
-          to: receiver,
-          data: commentData,
-        });
-        confirmationSent = true;
+        const notification = await db.Notification.create(
+          {
+            type: notificationType,
+            projectId: req.project.id,
+            to: receiver,
+            data: commentData,
+          },
+          { sendInBackground: true }
+        );
+        req.results.confirmationNotificationId = notification.id;
       } catch (e) {
         console.log('Error sending notification email for comment:', e);
+        confirmationSent = undefined;
       }
     }
 
+    try {
+      const projectEmailConfig = await db.Project.unscoped().findByPk(
+        req.project.id,
+        { attributes: ['emailConfig'] }
+      );
+      if (
+        projectEmailConfig?.emailConfig?.notifications
+          ?.sendCommentAdminEmail === true
+      ) {
+        const adminData = {
+          resourceId: req.results.resourceId,
+          comment: {
+            description: req.results.description,
+            userName: req.results.user ? req.results.user.displayName : '',
+          },
+        };
+        if (req.results.parentId && req?.parentComment?.description) {
+          adminData.parentComment = {
+            description: req.parentComment.description,
+          };
+        }
+        db.Notification.create({
+          type: 'new comment - admin',
+          projectId: req.project.id,
+          data: adminData,
+        }).catch((err) =>
+          console.error('Error sending admin notification for comment:', err)
+        );
+      }
+    } catch (e) {
+      console.error('Error sending admin notification for comment:', e);
+    }
+
     req.results.confirmationSent = confirmationSent;
-    res.json(req.results);
+    res.json(req.results.toJSON(req.user));
   });
 
 // bulk delete comments

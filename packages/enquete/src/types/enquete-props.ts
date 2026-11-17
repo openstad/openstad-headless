@@ -24,7 +24,12 @@ export type EnqueteProps = {
   infoBlockStyle?: string;
   allowedPolygons?: Array<{ id: number; name: string }>;
   enableDraftPersistence?: boolean;
+  closeFormAfterSubmit?: boolean;
+  closedFormMessage?: string;
   draftRetentionHours?: number;
+  gtmEnvironment?: string;
+  isQuiz?: boolean;
+  confirmAnswerMessage?: string;
 };
 
 export type Item = {
@@ -39,12 +44,19 @@ export type Item = {
   maxCharacters?: string;
   nextPageText?: string;
   prevPageText?: string;
+  stepName?: string;
   variant?: string;
   options?: Array<Option>;
   imageUpload?: string;
   multiple?: boolean;
   maxUploadSizeMB?: number;
+  imageCropEnabled?: boolean;
+  imageCropRequired?: boolean;
+  imageCropRatioWidth?: number;
+  imageCropRatioHeight?: number;
   randomizeItems?: boolean;
+  randomizeQuestions?: boolean;
+  excludeFromRandomize?: boolean;
   image?: string;
   imageAlt?: string;
   imageDescription?: string;
@@ -52,10 +64,17 @@ export type Item = {
   infoBlockShareButton?: boolean;
   infoBlockExtraButton?: string;
   infoBlockExtraButtonTitle?: string;
+  headingLevel?: number;
   fieldRequired?: boolean;
+  enableAddressSearch?: boolean;
   maxChoices?: string;
   maxChoicesMessage?: string;
+  minChoices?: string;
+  minChoicesMessage?: string;
   showSmileys?: boolean;
+  scaleDisplay?: 'numbers' | 'smileys' | 'custom';
+  scaleStepCount?: number;
+  scaleSteps?: Array<ScaleStepConfig>;
   placeholder?: string;
   defaultValue?: string;
   imageOptionUpload?: string;
@@ -73,6 +92,7 @@ export type Item = {
   videoUrl?: string;
   videoSubtitle?: boolean;
   videoLang?: string;
+  videoLoop?: boolean;
   images?: Array<{
     url: string;
     name?: string;
@@ -81,6 +101,12 @@ export type Item = {
   }>;
   createImageSlider?: boolean;
   imageClickable?: boolean;
+  feedbackMode?: string;
+  feedbackText?: string;
+  feedbackCorrect?: string;
+  feedbackIncorrect?: string;
+  scaleFeedback?: string[];
+  instantFeedback?: boolean;
 
   // Keeping this for backwards compatibility
   image1?: string;
@@ -89,6 +115,12 @@ export type Item = {
   image2?: string;
   text2?: string;
   key2?: string;
+};
+
+export type ScaleStepConfig = {
+  label?: string;
+  imageUrl?: string;
+  imageAlt?: string;
 };
 
 export type Option = {
@@ -111,6 +143,8 @@ export type Title = {
   key_b?: string;
   description_b?: string;
   image_b?: string;
+  isCorrect?: boolean;
+  feedbackText?: string;
 };
 
 export type Confirmation = {

@@ -1,7 +1,7 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { Banner, Paginator } from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
@@ -17,6 +17,8 @@ import React, {
   createContext,
   useCallback,
   useEffect,
+  useId,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -27,7 +29,7 @@ import hasRole from '../../lib/has-role';
 import './index.css';
 import CommentForm from './parts/comment-form.js';
 import Comment from './parts/comment.js';
-import { CommentFormProps } from './types/comment-form-props';
+import type { CommentFormProps } from './types/comment-form-props';
 
 // This type holds all properties needed for this component to work
 export type CommentsWidgetProps = BaseProps &
@@ -76,6 +78,7 @@ export type CommentsWidgetProps = BaseProps &
     confirmation?: boolean;
     overwriteEmailAddress?: string;
     confirmationReplies?: boolean;
+    widgetId?: number;
     searchTerm?: string;
     autoApply?: boolean;
     displayCollapsibleFilter?: boolean;
@@ -118,6 +121,9 @@ function CommentsInner({
   variant = 'medium',
   ...props
 }: CommentsWidgetProps) {
+  const instanceId = useId();
+  const loginDescriptionId = `${instanceId}-login-description`;
+
   const [refreshKey, setRefreshKey] = useState(0); // Key for SWR refresh
   const [page, setPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -202,7 +208,7 @@ function CommentsInner({
   }, [onGoToLastPage, goToLastPage]);
 
   useEffect(() => {
-    if (overridePage != null && overridePage !== page) {
+    if (typeof overridePage === 'number' && overridePage !== page) {
       setPage(overridePage);
       if (onOverridePageConsumed) {
         onOverridePageConsumed();
@@ -261,10 +267,10 @@ function CommentsInner({
       'Je hebt nog {maxCharacters} tekens over',
     minCharactersError:
       props?.comments?.minCharactersError ||
-      'Tekst moet minimaal {minCharacters} karakters bevatten',
+      'De tekst mag niet korter zijn dan {minCharacters} tekens',
     maxCharactersError:
       props?.comments?.maxCharactersError ||
-      'Tekst moet maximaal {maxCharacters} karakters bevatten',
+      'De tekst mag niet langer zijn dan {maxCharacters} tekens',
     adminLabel: props.comments?.adminLabel || 'admin',
     editorLabel: props.comments?.editorLabel,
     variant: variant || 'medium',
@@ -360,6 +366,8 @@ function CommentsInner({
     formDataCopy.confirmationReplies = confirmationReplies || false;
     formDataCopy.overwriteEmailAddress =
       confirmation && overwriteEmailAddress ? overwriteEmailAddress : '';
+    // the api resolves the notification recipient from this widget's config
+    formDataCopy.widgetId = props.widgetId;
     formDataCopy.embeddedUrl = window.location.href;
 
     try {
@@ -411,12 +419,30 @@ function CommentsInner({
     ) {
       setTotalPages(Math.ceil(comments.length / pageSize));
     }
-  }, [comments, commentsMeta, pageSize]);
+  }, [comments, commentsMeta, displayPagination, pageSize]);
 
   const randomIdRef = useRef(
     Math.random().toString(36).replace('0.', 'container_')
   );
   const randomId = randomIdRef.current;
+  const sectionRef = useRef<HTMLElement>(null);
+  const scrolledToCommentRef = useRef<Number | undefined>(undefined);
+
+  useEffect(() => {
+    if (selectedComment === undefined || Number(selectedComment) < 0) {
+      scrolledToCommentRef.current = undefined;
+      return;
+    }
+    if (scrolledToCommentRef.current === selectedComment) return;
+
+    const commentElement = sectionRef.current?.querySelector(
+      `#comment-${selectedComment}`
+    );
+    if (commentElement) {
+      commentElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      scrolledToCommentRef.current = selectedComment;
+    }
+  }, [selectedComment, page, comments]);
 
   const scrollToTop = () => {
     const divElement = document.getElementById(randomId);
@@ -432,7 +458,7 @@ function CommentsInner({
         ...args,
         setRefreshComments: refreshComments || defaultSetRefreshComments,
       }}>
-      <section className="osc" id={randomId}>
+      <section className="osc" id={randomId} ref={sectionRef}>
         <Heading3 className="comments-title">
           {comments && title?.replace(/\[\[nr\]\]/, commentCount.toString())}
           {!comments && title}
@@ -462,11 +488,11 @@ function CommentsInner({
               </>
             )}
             <Banner className="big" role="complementary">
-              <p id="login-description">{loginText}</p>
+              <p id={loginDescriptionId}>{loginText}</p>
               <Spacer size={1} />
               <Button
                 appearance="primary-action-button"
-                aria-describedby="login-description"
+                aria-describedby={loginDescriptionId}
                 onClick={() => {
                   // login
                   if (args.login?.url) {

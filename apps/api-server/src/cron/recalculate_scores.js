@@ -19,9 +19,7 @@ module.exports = {
         const resources = await Resource.findAll();
         for (const resource of resources) {
           // Workaround for validation in Resource model
-          resource.auth.user = {
-            role: 'admin',
-          };
+          resource.auth = { ...resource.auth, user: { role: 'admin' } };
           await resource.calculateAndSaveScore();
         }
 
@@ -29,9 +27,7 @@ module.exports = {
         const comments = await Comment.findAll();
         for (const comment of comments) {
           // Workaround for validation in Comment model
-          comment.auth.user = {
-            role: 'admin',
-          };
+          comment.auth = { ...comment.auth, user: { role: 'admin' } };
           await comment.calculateAndSaveScore();
         }
 

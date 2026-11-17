@@ -2,6 +2,20 @@
   height: 100%;
 }
 
+/* ponytail: eigen sr-only — de globale .osc .sr-only matcht niet omdat de navBar niet
+   onder .osc rendert, waardoor de knop-tekst zichtbaar werd. */
+#navbar .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 #navbar .container #main-menu {
   height: 100%;
   display: inline-flex;
@@ -78,8 +92,12 @@
   padding: 10px;
   font-size: var(--utrecht-link-icon-size);
   align-self: stretch;
-  margin-left: -20px;
-  pointer-events: none;
+  /* ponytail: knop moet klikbaar zijn (touch/muis) en target >=24px zonder de link te
+     overlappen (WCAG 2.5.8 / 2.4.4). Was pointer-events:none + margin-left:-20px. */
+  min-width: 24px;
+  min-height: 24px;
+  margin-left: 0;
+  cursor: pointer;
 }
 #navbar .container #main-menu .submenu {
   position: absolute;
@@ -92,6 +110,11 @@
   z-index: 999;
 }
 
+#navbar .container #main-menu .submenu .submenu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
 #navbar .container #main-menu .submenu .level-2 {
   width: 100%;
   display: block;
@@ -103,6 +126,6 @@
 #navbar .container #main-menu .submenu .level-2:hover {
   background-color: #f2f2f2;
 }
-#navbar .container #main-menu .submenu .level-2 + .level-2 {
+#navbar .container #main-menu .submenu .submenu-list li + li .level-2 {
   border-top: solid 1px #f2f2f2;
 }

@@ -280,6 +280,8 @@ async function setupEnvVars() {
     process.env.IMAGE_HQ_ORIGINAL_MAX_PIXELS || 160000;
   process.env.DISABLE_WEBP_CONVERSION =
     process.env.DISABLE_WEBP_CONVERSION || false;
+  process.env.MAX_FILE_UPLOAD_SIZE_MB =
+    process.env.MAX_FILE_UPLOAD_SIZE_MB || 25;
 
   // admin server
   process.env.ADMIN_URL = ADMIN_URL;
@@ -300,6 +302,9 @@ async function setupEnvVars() {
   process.env.MAIL_MS_CLIENT_SECRET = process.env.MAIL_MS_CLIENT_SECRET || '';
   process.env.MAIL_MS_TENANT_ID = process.env.MAIL_MS_TENANT_ID || '';
   process.env.WHITELISTED_EMAILS = process.env.WHITELISTED_EMAILS || '';
+
+  // debugging
+  process.env.VERBOSE_LOGGING = process.env.VERBOSE_LOGGING || false;
 }
 
 async function writeEnvFile() {
@@ -345,6 +350,8 @@ FORCE_HTTP=${process.env.FORCE_HTTP}
 MYSQL_USER=${process.env.DB_USERNAME}
 MYSQL_PASSWORD=${process.env.DB_PASSWORD}
 MYSQL_ROOT_PASSWORD=${process.env.DB_PASSWORD}
+
+VERBOSE_LOGGING=${process.env.VERBOSE_LOGGING}
 
 #api server
 API_URL=${process.env.API_URL}
@@ -438,6 +445,7 @@ IMAGE_THROTTLE_CC_REQUESTS=${process.env.IMAGE_THROTTLE_CC_REQUESTS}
 
 IMAGE_HQ_ORIGINAL_MAX_PIXELS=${process.env.IMAGE_HQ_ORIGINAL_MAX_PIXELS}
 DISABLE_WEBP_CONVERSION=${process.env.DISABLE_WEBP_CONVERSION}
+MAX_FILE_UPLOAD_SIZE_MB=${process.env.MAX_FILE_UPLOAD_SIZE_MB}
 
 #admin server
 ADMIN_URL=${process.env.ADMIN_URL}

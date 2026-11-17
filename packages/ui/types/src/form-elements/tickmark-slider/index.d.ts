@@ -7,7 +7,8 @@ export type TickmarkSliderProps = {
     title: string;
     fieldOptions?: {
         value: string;
-        label: string;
+        label: any;
+        ariaValueText?: string;
     }[];
     images?: Array<{
         url: string;

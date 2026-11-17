@@ -11,4 +11,5 @@ export type ChoiceGuideResults = {
   displayImage?: boolean;
   displayAsFeaturedOnly?: boolean;
   hideScores?: boolean;
+  imageClickable?: boolean;
 };

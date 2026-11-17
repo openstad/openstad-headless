@@ -1,6 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { useRegisterSave } from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading, ListHeading, Paragraph } from '@/components/ui/typography';
@@ -26,10 +27,16 @@ type EmailNotificationConsent = {
   consent: boolean;
 };
 
+type ProjectDisplayName = {
+  projectId: string;
+  displayName: string;
+};
+
 type CombinedProjectRoleAndConsent = {
   projectId: string;
   roleId?: string;
   consent?: boolean;
+  displayName?: string;
 };
 
 export default function CreateUserProjects() {
@@ -42,6 +49,9 @@ export default function CreateUserProjects() {
     Array<EmailNotificationConsent>
   >([]);
   const createdUsers = useRef<Record<string, any>>({});
+  const [projectDisplayNames, setProjectDisplayNames] = useState<
+    Array<ProjectDisplayName>
+  >([]);
 
   useEffect(() => {}, [projects, users]);
 
@@ -82,11 +92,29 @@ export default function CreateUserProjects() {
     });
   };
 
+  const addProjectDisplayName = (projectId: string, displayName: string) => {
+    setProjectDisplayNames((prev) => {
+      let updated = [...prev];
+      const index = updated.findIndex((e) => e.projectId === projectId);
+
+      if (index !== -1) {
+        updated[index] = { ...updated[index], displayName };
+      } else {
+        updated.push({ projectId, displayName });
+      }
+      return updated;
+    });
+  };
+
   const save = useCallback(async () => {
     let error: any;
 
     const mergedProjects: CombinedProjectRoleAndConsent[] = [];
-    [...projectRoles, ...emailNotificationConsents].forEach((change) => {
+    [
+      ...projectRoles,
+      ...emailNotificationConsents,
+      ...projectDisplayNames,
+    ].forEach((change) => {
       const same = mergedProjects.find(
         (entry) => entry.projectId == change.projectId
       );
@@ -110,12 +138,18 @@ export default function CreateUserProjects() {
       }
       if (user) {
         try {
-          const changes: any = { id: user.id, projectId: user.projectId };
+          const changes: any = {};
           if (
             typeof updateValue.consent !== 'undefined' &&
             user.emailNotificationConsent !== updateValue.consent
           ) {
             changes.emailNotificationConsent = updateValue.consent;
+          }
+          if (
+            typeof updateValue.displayName !== 'undefined' &&
+            user.projectDisplayName !== (updateValue.displayName || null)
+          ) {
+            changes.projectDisplayName = updateValue.displayName || null;
           }
           if (
             typeof updateValue.roleId !== 'undefined' &&
@@ -124,23 +158,32 @@ export default function CreateUserProjects() {
             changes.role = updateValue.roleId;
           }
 
-          await updateUser(changes);
+          if (Object.keys(changes).length > 0) {
+            await updateUser({
+              id: user.id,
+              projectId: user.projectId,
+              ...changes,
+            });
+          }
         } catch (err) {
           error = err;
         }
-      } else {
+      } else if (updateValue.roleId) {
         user = Array.isArray(latest) ? latest[0] : latest;
         if (user.idpUser?.identifier && user.idpUser?.provider) {
           try {
             const newUser = {
               ...user,
               projectId: updateValue.projectId,
+              role: updateValue.roleId,
+              nickName: null,
+              projectDisplayName: updateValue.displayName || null,
+              privacyConsentAt: null,
+              listableByRole: null,
+              detailsViewableByRole: null,
             };
             if (typeof updateValue.consent !== 'undefined') {
               newUser.emailNotificationConsent = updateValue.consent;
-            }
-            if (updateValue.roleId) {
-              newUser.role = updateValue.roleId;
             }
 
             const created = await createUser(newUser);
@@ -193,10 +236,21 @@ export default function CreateUserProjects() {
           )
       )
     );
+    setProjectDisplayNames((prev) =>
+      prev.filter(
+        (pending) =>
+          !projectDisplayNames.some(
+            (sent) =>
+              sent.projectId === pending.projectId &&
+              sent.displayName === pending.displayName
+          )
+      )
+    );
     await mutate();
   }, [
     projectRoles,
     emailNotificationConsents,
+    projectDisplayNames,
     users,
     updateUser,
     createUser,
@@ -204,9 +258,10 @@ export default function CreateUserProjects() {
   ]);
 
   useRegisterSave({
-    // Every edit on this page lands in one of these two lists, so a
-    // non-empty list is the page's unsaved state.
-    isDirty: projectRoles.length > 0 || emailNotificationConsents.length > 0,
+    isDirty:
+      projectRoles.length > 0 ||
+      emailNotificationConsents.length > 0 ||
+      projectDisplayNames.length > 0,
     save,
     label: 'Projectsrechten',
   });
@@ -245,9 +300,10 @@ export default function CreateUserProjects() {
 
         <form onSubmit={(e) => e.preventDefault()}>
           <div className="ml-1">
-            <div className="mt-4 grid grid-cols-1 lg:grid-cols-5 items-center lg:py-3 lg:border-b border-border gap-4">
+            <div className="mt-4 grid grid-cols-1 lg:grid-cols-6 items-center lg:py-3 lg:border-b border-border gap-4">
               <ListHeading className="hidden lg:flex">Projectnaam</ListHeading>
               <ListHeading className="hidden lg:flex">Gebruiker ID</ListHeading>
+              <ListHeading className="hidden lg:flex">Weergavenaam</ListHeading>
               <ListHeading className="hidden lg:flex">Rol</ListHeading>
               <ListHeading className="hidden lg:flex">
                 E-mail notificaties toestemming
@@ -280,10 +336,22 @@ export default function CreateUserProjects() {
                 return (
                   <li
                     key={project.id}
-                    className="grid grid-cols-1 lg:grid-cols-5 items-center py-3 h-fit hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-4">
+                    className="grid grid-cols-1 lg:grid-cols-6 items-center py-3 h-fit hover:bg-secondary-background hover:cursor-pointer border-b border-border gap-4">
                     <Paragraph className="truncate">{project.name}</Paragraph>
                     <Paragraph className="truncate text-muted-foreground">
                       {user?.id ?? '—'}
+                    </Paragraph>
+                    <Paragraph className="truncate mr-4">
+                      {!!effectiveRole && (
+                        <Input
+                          type="text"
+                          defaultValue={user?.projectDisplayName || ''}
+                          placeholder="Weergavenaam"
+                          onChange={(e) => {
+                            addProjectDisplayName(project.id, e.target.value);
+                          }}
+                        />
+                      )}
                     </Paragraph>
                     <Paragraph className="truncate mr-4">
                       <UserRoleDropdownList

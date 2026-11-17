@@ -30,7 +30,8 @@ export default function useTags(projectId?: string, id?: string) {
     useDifferentSubmitAddress: boolean | undefined,
     newSubmitAddress: string | undefined,
     defaultResourceImage: string | undefined,
-    documentMapIconColor: string | undefined
+    documentMapIconColor: string | undefined,
+    detailPageUrl: string | undefined
   ): Promise<any | null> {
     const res = await fetch(url, {
       method: 'PUT',
@@ -53,6 +54,7 @@ export default function useTags(projectId?: string, id?: string) {
         newSubmitAddress,
         defaultResourceImage,
         documentMapIconColor,
+        detailPageUrl,
       }),
     });
 

@@ -3,7 +3,7 @@ import { IconButton } from '@openstad-headless/ui/src';
 import '@utrecht/component-library-css';
 import { Button, FormLabel } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { useDebounce } from 'rooks';
 
 import PostcodeAutoFill from '../../location';
@@ -48,6 +48,10 @@ type Props = {
     inlineOptions?: boolean;
   }>;
   tagsLimitation?: Array<number> | { [key: string]: number[] };
+  searchLabel?: string;
+  displaySearchHint?: boolean;
+  searchHint?: string;
+  displaySearchPlaceholder?: boolean;
   searchPlaceholder: string;
   resetText: string;
   applyText: string;
@@ -59,6 +63,10 @@ type Props = {
     name: string;
   }>;
   displayLocationFilter?: boolean;
+  locationLabel?: string;
+  displayLocationHint?: boolean;
+  locationHint?: string;
+  locationPlaceholder?: string;
   displayCollapsibleFilter?: boolean;
   closeFiltersOnAutoApply?: boolean;
 };
@@ -129,9 +137,23 @@ export function Filters({
   const [locationValue, setLocationValue] =
     useState<PostcodeAutoFillLocation>(undefined);
   const [filtersVisible, setFiltersVisible] = useState<boolean>(false);
+  // ponytail: unieke id's zodat twee filters op één pagina elkaars koppelingen niet
+  // overschrijven (1.3.1). Alles wat via label/aria-controls verwezen wordt is per
+  // instance uniek; de rest is class-only.
+  const searchId = useId();
+  const sortId = useId();
+  const filtersContainerId = useId();
   const [disableTransition, setDisableTransition] = useState(true);
+  const sectionRef = useRef<HTMLElement>(null);
   const filtersWrapperRef = useRef<HTMLDivElement>(null);
+  const filtersContainerRef = useRef<HTMLDivElement>(null);
   const [resetCounter, setResetCounter] = useState(0);
+
+  useEffect(() => {
+    if (filtersContainerRef.current) {
+      filtersContainerRef.current.inert = !filtersVisible;
+    }
+  }, [filtersVisible]);
 
   useEffect(() => {
     if (filtersVisible && disableTransition) {
@@ -352,6 +374,48 @@ export function Filters({
     }
   }, [tagState, autoApply, newActiveTagsDraft]);
 
+  // Sluit de filter-popup en zet focus terug op de toggle-knop (WCAG 2.4.11 / 2.4.3)
+  const closeFilters = () => {
+    setFiltersVisible(false);
+    // ponytail: via de eigen ref, niet via een gedeeld id — anders pakt een tweede
+    // filter op dezelfde pagina de knop van de eerste (2.4.11 / 2.4.3)
+    const toggle = sectionRef.current?.querySelector<HTMLElement>(
+      '.toggle-filters-button'
+    );
+    toggle?.focus();
+  };
+
+  // Escape sluit; Tab wordt binnen de popup gevangen (focus trap)
+  const handleFiltersKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      closeFilters();
+      return;
+    }
+    if (e.key !== 'Tab') return;
+
+    const wrapper = filtersWrapperRef.current;
+    if (!wrapper) return;
+
+    const focusables = Array.from(
+      wrapper.querySelectorAll<HTMLElement>(
+        "input, select, textarea, button, a[href], [tabindex]:not([tabindex='-1'])"
+      )
+    ).filter((el) => !el.hasAttribute('disabled') && el.offsetParent !== null);
+
+    if (focusables.length === 0) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
+
   const handleSubmit = (e?: any, updatedFilter?: Filter, updatedTags?: any) => {
     setStopUsingDefaultValue(true);
     if (e && e.preventDefault) e.preventDefault();
@@ -469,12 +533,12 @@ export function Filters({
 
         {props.displaySorting ? (
           <div className="form-element">
-            <FormLabel htmlFor={'sortField'}>Sorteer op</FormLabel>
+            <FormLabel htmlFor={sortId}>Sorteer op</FormLabel>
             <Select
               value={sortValue}
               onValueChange={setSort}
               options={sorting}
-              id="sortField"
+              id={sortId}
               defaultValue={props.defaultSorting || 'createdAt_desc'}
               disableDefaultOption={true}
             />
@@ -492,10 +556,10 @@ export function Filters({
         <div className="button-group">
           <Button
             appearance="secondary-action-button"
+            aria-label={`${props.resetText}: alle aangepaste filters wissen`}
             onClick={() => {
-              const filterParent = document.querySelector(
-                '#stem-begroot-filter'
-              );
+              // ponytail: eigen sectie, niet de eerste op de pagina
+              const filterParent = sectionRef.current;
 
               const singleSelects: NodeListOf<HTMLSelectElement> | undefined =
                 filterParent?.querySelectorAll(':scope select');
@@ -532,6 +596,7 @@ export function Filters({
             <Button
               type="submit"
               appearance="primary-action-button"
+              aria-label={`${props.applyText}: de geselecteerde filters toepassen`}
               test-id={'filter-apply-button'}>
               {props.applyText}
             </Button>
@@ -547,7 +612,7 @@ export function Filters({
     props.displaySorting ||
     props.displayLocationFilter
   ) ? null : (
-    <section id="stem-begroot-filter">
+    <section ref={sectionRef} className="osc-filter-section">
       <form
         className={`osc-resources-filter ${className}`}
         onSubmit={
@@ -555,7 +620,14 @@ export function Filters({
         }>
         {props.displaySearch ? (
           <div className="form-element">
-            <FormLabel htmlFor="search">Zoeken</FormLabel>
+            <FormLabel htmlFor={searchId}>
+              {props.searchLabel || 'Zoeken'}
+            </FormLabel>
+            {props.displaySearchHint && props.searchHint ? (
+              <p id={`${searchId}-hint`} className="form-element-hint">
+                {props.searchHint}
+              </p>
+            ) : null}
             <Input
               value={searchValue}
               onChange={(e) => {
@@ -563,15 +635,24 @@ export function Filters({
                 search(e.target.value);
               }}
               className="osc-filter-search-bar"
-              placeholder={props.searchPlaceholder}
-              id="search"
+              placeholder={
+                props.displaySearchPlaceholder === false
+                  ? undefined
+                  : props.searchPlaceholder
+              }
+              id={searchId}
+              aria-describedby={
+                props.displaySearchHint && props.searchHint
+                  ? `${searchId}-hint`
+                  : undefined
+              }
             />
           </div>
         ) : null}
         {props.displaySearch && displayCollapsibleFilter ? (
           <button type="submit" className="apply-filters-button">
             <span className="filter-icon"></span>
-            <span className="sr-only">Filters toepassen</span>
+            <span className="sr-only">Zoeken</span>
           </button>
         ) : null}
 
@@ -582,7 +663,7 @@ export function Filters({
               appearance="primary-action-button"
               type="button"
               aria-expanded={filtersVisible ? 'true' : 'false'}
-              aria-controls="filters-container"
+              aria-controls={filtersContainerId}
               onClick={(e) => {
                 if (!filtersVisible && disableTransition)
                   setDisableTransition(false);
@@ -592,10 +673,9 @@ export function Filters({
               <span className="sr-only">Filters uitklappen</span>
             </Button>
             <div
-              id="filters-container"
-              className={`filters-container ${
-                displayCollapsibleFilter ? '--collapsable' : ''
-              } ${disableTransition ? 'no-transition' : ''}`}
+              id={filtersContainerId}
+              ref={filtersContainerRef}
+              className={`filters-container ${displayCollapsibleFilter ? '--collapsable' : ''} ${disableTransition ? 'no-transition' : ''}`}
               aria-hidden={!filtersVisible ? 'true' : 'false'}
               onClick={(e) => {
                 setFiltersVisible(false);
@@ -603,6 +683,7 @@ export function Filters({
               <div
                 className="filters-wrapper"
                 ref={filtersWrapperRef}
+                onKeyDown={handleFiltersKeyDown}
                 onClick={(e) => {
                   e.stopPropagation();
                 }}>
@@ -610,7 +691,7 @@ export function Filters({
                   className="close-filters-button"
                   type="button"
                   onClick={(e) => {
-                    setFiltersVisible(false);
+                    closeFilters();
                   }}>
                   <span className="close-icon"></span>
                   <span className="sr-only">Sluit filters</span>
@@ -647,7 +728,7 @@ export function Filters({
       )}
 
       {activeFilter && (
-        <div id="filter-status" aria-live="polite" className="sr-only">
+        <div aria-live="polite" className="filter-status sr-only">
           <>
             <p>Huidige filterinstellingen:</p>
 

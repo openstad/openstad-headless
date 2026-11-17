@@ -102,6 +102,10 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.VIRTUAL,
       },
 
+      confirmationNotificationId: {
+        type: DataTypes.VIRTUAL,
+      },
+
       createDateHumanized: {
         type: DataTypes.VIRTUAL,
         get: function () {
@@ -118,6 +122,7 @@ module.exports = function (db, sequelize, DataTypes) {
       score: {
         type: DataTypes.DECIMAL(12, 11),
         auth: {
+          createableBy: 'editor',
           updateableBy: 'editor',
         },
         allowNull: false,
@@ -131,6 +136,20 @@ module.exports = function (db, sequelize, DataTypes) {
           const yes = this.getDataValue('yes') || 0;
           const no = this.getDataValue('no') || 0;
           return yes - no;
+        },
+      },
+
+      authorStaffRole: {
+        type: DataTypes.VIRTUAL,
+        auth: {
+          // intended public signal for the staff badge; carries no id, name or email
+          viewableBy: 'all',
+        },
+        get: function () {
+          // real association value, read before serialization masks the role
+          const role = this.user && this.user.role;
+          // staff set = the roles that get a badge today; add 'moderator' here if desired
+          return role === 'admin' || role === 'editor' ? role : null;
         },
       },
     },
@@ -220,6 +239,7 @@ module.exports = function (db, sequelize, DataTypes) {
               'id',
               'role',
               'displayName',
+              'projectDisplayName',
               'nickName',
               'name',
               'email',
@@ -285,6 +305,7 @@ module.exports = function (db, sequelize, DataTypes) {
                 'hasUserDisliked',
                 'confirmationSent',
                 'yes',
+                'authorStaffRole',
               ],
             },
           ],
@@ -303,6 +324,7 @@ module.exports = function (db, sequelize, DataTypes) {
                 'id',
                 'role',
                 'displayName',
+                'projectDisplayName',
                 'nickName',
                 'name',
                 'email',

@@ -8,22 +8,29 @@ import type { ImageUploadProps } from '@openstad-headless/ui/src/form-elements/i
 import type { InfoFieldProps } from '@openstad-headless/ui/src/form-elements/info';
 import type { MapProps } from '@openstad-headless/ui/src/form-elements/map';
 import { MatrixFieldProps } from '@openstad-headless/ui/src/form-elements/matrix';
+import type { ModbreakFieldProps } from '@openstad-headless/ui/src/form-elements/modbreak';
 import type { NumberInputProps } from '@openstad-headless/ui/src/form-elements/number';
 import type { RadioboxFieldProps } from '@openstad-headless/ui/src/form-elements/radio';
+import type { ResourceLinkFieldProps } from '@openstad-headless/ui/src/form-elements/resource-link';
 import type { SelectFieldProps } from '@openstad-headless/ui/src/form-elements/select';
 import type { SortFieldProps } from '@openstad-headless/ui/src/form-elements/sort';
 import type { TextInputProps } from '@openstad-headless/ui/src/form-elements/text';
 import type { TickmarkSliderProps } from '@openstad-headless/ui/src/form-elements/tickmark-slider';
+import type { TimelineFieldProps } from '@openstad-headless/ui/src/form-elements/timeline';
 
 export type FormProps = {
   title?: string;
   fields: Array<FieldWithOptionalFields>;
   fieldKey?: any;
   submitText?: string;
-  submitHandler: (values: { [p: string]: FormValue }) => void;
+  submitHandler: (values: {
+    [p: string]: FormValue;
+  }) => void | boolean | Promise<void | boolean>;
+  navigateAfterSubmitSuccess?: boolean;
   getValuesOnChange?: (
     values: { [p: string]: FormValue },
-    hiddenFields?: string[]
+    hiddenFields?: string[],
+    fieldState?: { confirmed: string[]; touched: string[] }
   ) => void;
   submitDisabled?: boolean;
   allowResetAfterSubmit?: boolean;
@@ -42,6 +49,13 @@ export type FormProps = {
   totalFieldCount?: number;
   formStyle?: string;
   initialValues?: { [p: string]: FormValue };
+  initialConfirmedFields?: string[];
+  initialTouchedFields?: string[];
+  confirmAnswerMessage?: string;
+  onFieldInteraction?: (fieldKey: string) => void;
+  onValidationErrors?: (
+    errors: Array<{ fieldKey: string; errorMessage: string | null }>
+  ) => void;
 };
 
 type PaginationFieldProps = {
@@ -69,7 +83,10 @@ type CombinedFieldPropsWithType =
   | ({ type?: 'matrix' } & MatrixFieldProps)
   | ({ type?: 'pagination' } & PaginationFieldProps)
   | ({ type?: 'sort' } & SortFieldProps)
-  | ({ type?: 'none' } & InfoFieldProps);
+  | ({ type?: 'none' } & InfoFieldProps)
+  | ({ type?: 'timeline' } & TimelineFieldProps)
+  | ({ type?: 'resourceLink' } & ResourceLinkFieldProps)
+  | ({ type?: 'modbreak' } & ModbreakFieldProps);
 
 type ComponentFieldProps = {
   index?: number;
@@ -93,6 +110,9 @@ type CombinedFieldProps =
   | NumberInputProps
   | MatrixFieldProps
   | InfoFieldProps
+  | TimelineFieldProps
+  | ResourceLinkFieldProps
+  | ModbreakFieldProps
   | (SortFieldProps & {
       infoBlockStyle?: string;
       infoBlockExtraButtonTitle?: string;
@@ -106,6 +126,14 @@ type FieldWithOptionalFields = CombinedFieldProps & {
   routingSelectedQuestion?: string;
   routingSelectedAnswer?: string | string[];
   infoBlockStyle?: string;
+  feedbackMode?: 'none' | 'static' | 'perAnswer' | 'correctIncorrect';
+  feedbackText?: string;
+  feedbackCorrect?: string;
+  feedbackIncorrect?: string;
+  scaleFeedback?: string[];
+  instantFeedback?: boolean;
+  minChoices?: string;
+  minChoicesMessage?: string;
 };
 
 export type {
@@ -114,3 +142,11 @@ export type {
   CombinedFieldPropsWithType,
   ComponentFieldProps,
 };
+export type {
+  TimelineItem,
+  TimelineFieldProps,
+} from '@openstad-headless/ui/src/form-elements/timeline';
+export type {
+  ModbreakItem,
+  ModbreakFieldProps,
+} from '@openstad-headless/ui/src/form-elements/modbreak';

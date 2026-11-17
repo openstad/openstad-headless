@@ -25,10 +25,72 @@ const {
   getValidStatuses,
   getOnlyIds,
 } = require('../services/resourceTagsStatuses');
+const { stripVisibilityScope } = require('../lib/resource-create-scope');
+const { normalizeContributedUrl } = require('../util/normalize-url');
+const resourceLinks = require('../services/resource-links');
+const resourceLinkRequests = require('../services/resource-link-requests');
+const {
+  snapshotModBreakIds,
+  snapshotModBreakDescriptions,
+  findNewModBreaks,
+  findChangedModBreaks,
+  sendModBreakNotifications,
+} = require('../lib/modbreak-notifications');
 
 const userhasModeratorRights = (user) => {
   return hasRole(user, 'editor');
 };
+
+function stripHiddenVoteScore(resources, canIncludeVoteCount) {
+  if (canIncludeVoteCount) return;
+
+  const records = Array.isArray(resources) ? resources : [resources];
+  records.filter(Boolean).forEach((resource) => {
+    resource.score = undefined;
+  });
+}
+
+function captureLinkSelection(req) {
+  req.linkSelection = resourceLinkRequests.parseSelection(req.body.links);
+  req.removedLinks = resourceLinkRequests.parseRemoved(req.body.removedLinks);
+  resourceLinkRequests.assertHandlerAvailable(
+    req.linkSelection,
+    req.removedLinks
+  );
+  delete req.body.links;
+  delete req.body.removedLinks;
+}
+
+function normalizeExtraDataUrl(data) {
+  if (!data.extraData || typeof data.extraData.url === 'undefined') {
+    return null;
+  }
+  const urlResult = normalizeContributedUrl(data.extraData.url);
+  if (!urlResult.ok) {
+    return createError(
+      400,
+      'De ingevulde URL is ongeldig. Controleer of de link correct is en begin met https://'
+    );
+  }
+  data.extraData.url = urlResult.value;
+  return null;
+}
+
+async function submitLinkRequests(req, mode) {
+  const linkRequests = await resourceLinkRequests.submitSelection({
+    project: req.project,
+    resource: req.results,
+    selection: req.linkSelection,
+    removed: req.removedLinks,
+    user: req.user,
+    mode,
+  });
+  if (linkRequests) req.results.linkRequests = linkRequests;
+}
+
+function logNotificationError(message) {
+  return (err) => console.error(message, err);
+}
 
 async function shouldSendUpdatedResourceAdminEmail(projectId) {
   try {
@@ -75,15 +137,7 @@ function setResourceScope(req, res, next) {
       });
     }
 
-    if (
-      req.query.includeUserVote &&
-      req.project &&
-      req.project.config &&
-      req.project.config.votes &&
-      req.project.config.votes.isViewable &&
-      req.user &&
-      req.user.id
-    ) {
+    if (req.query.includeUserVote && req.user && req.user.id) {
       // ik denk dat je daar niet het hele object wilt?
       req.scope.push({ method: ['includeUserVote', req.user.id] });
     }
@@ -280,6 +334,7 @@ function listResources(req, res, next) {
         if (req.query.includePoll && resource.poll)
           resource.poll.countVotes(!req.query.includeVotes);
       });
+      stripHiddenVoteScore(result.rows, req.canIncludeVoteCount);
       await attachModeratorOnlyExtraDataKeys(result.rows);
       const { rows } = result;
       req.results = rows;
@@ -367,6 +422,14 @@ function prepareCreateResourceData(req) {
 function createResource(req, res, next) {
   const data = prepareCreateResourceData(req);
 
+  try {
+    captureLinkSelection(req);
+  } catch (err) {
+    return next(err);
+  }
+  delete data.links;
+  delete data.removedLinks;
+
   // Check if resource has images and if so, check their domains
   let imageServer = process.env.IMAGE_APP_URL;
   if (!imageServer) {
@@ -403,12 +466,21 @@ function createResource(req, res, next) {
     }
   }
 
+  const urlError = normalizeExtraDataUrl(data);
+  if (urlError) return next(urlError);
+
   db.Resource.authorizeData(data, 'create', req.user, null, req.project)
     .create(data)
     .then((resourceInstance) => {
-      db.Resource.scope(...req.scope)
+      req.createdResource = resourceInstance;
+      db.Resource.scope(...stripVisibilityScope(req.scope))
         .findByPk(resourceInstance.id)
         .then(async (result) => {
+          if (!result) {
+            return next(
+              createError(500, 'Failed to load resource after creation')
+            );
+          }
           result.project = req.project;
           await attachModeratorOnlyExtraDataKeys(result);
           req.results = result;
@@ -461,6 +533,11 @@ async function applyDefaultStatuses(req, res, next) {
   let statuses = req.body.statuses || [];
   if (!Array.isArray(statuses)) statuses = [statuses];
   statuses = statuses.filter((status) => Number.isInteger(status));
+  if (statuses.length) {
+    statuses = (await getValidStatuses(req.project.id, statuses)).map(
+      (status) => status.id
+    );
+  }
   let defaultStatuses = await db.Status.findAll({
     where: { projectId: req.project.id, addToNewResources: true },
   });
@@ -484,6 +561,11 @@ async function applyDefaultTags(req, res, next) {
     where: { projectId: req.project.id, addToNewResources: true },
   });
   tags = tags.map((tag) => parseInt(tag));
+  if (tags.length) {
+    tags = (await getValidTags(req.project.id, tags, true)).map(
+      (tag) => tag.id
+    );
+  }
   tags = tags.concat(defaultTags.map((status) => status.id));
   tags = tags.filter((value, index) => tags.indexOf(value) === index); // unique
   if (tags.length) {
@@ -505,6 +587,16 @@ function refetchCreatedResource(req, res, next) {
       return next();
     })
     .catch(next);
+}
+
+async function submitCreateLinkRequests(req, res, next) {
+  if (req.isSpamSubmission) return next();
+  try {
+    await submitLinkRequests(req, 'create');
+    next();
+  } catch (err) {
+    next(err);
+  }
 }
 
 async function sendCreateNotifications(req, res, next) {
@@ -550,7 +642,9 @@ async function sendCreateNotifications(req, res, next) {
             resourceId: req.results.id,
             emailReceivers: emailReceivers,
           },
-        });
+        }).catch(
+          logNotificationError('Error sending admin notification for resource:')
+        );
       }
     }
 
@@ -562,7 +656,9 @@ async function sendCreateNotifications(req, res, next) {
           userId: req.user.id,
           resourceId: req.results.id,
         },
-      });
+      }).catch(
+        logNotificationError('Error sending admin notification for resource:')
+      );
     }
 
     if (sendConfirmationToUser) {
@@ -573,7 +669,9 @@ async function sendCreateNotifications(req, res, next) {
           userId: req.user.id,
           resourceId: req.results.id,
         },
-      });
+      }).catch(
+        logNotificationError('Error sending user notification for resource:')
+      );
     }
   } else if (!req.query.nomail && !req.body['publishDate']) {
     if (sendConfirmationToUser) {
@@ -584,8 +682,24 @@ async function sendCreateNotifications(req, res, next) {
           userId: req.user.id,
           resourceId: req.results.id,
         },
-      });
+      }).catch(
+        logNotificationError('Error sending user notification for resource:')
+      );
     }
+  }
+
+  if (!req.query.nomail && req.createdResource) {
+    const newModBreaks = findNewModBreaks(
+      new Set(),
+      req.createdResource.modBreaks
+    );
+    sendModBreakNotifications({
+      db,
+      req,
+      resource: req.createdResource,
+      newModBreaks,
+      changedModBreaks: [],
+    });
   }
 }
 
@@ -608,7 +722,15 @@ function loadResource(req, res, next) {
         return next(createError(404, 'Resource not found'));
       }
       found.project = req.project;
+      stripHiddenVoteScore(found, req.canIncludeVoteCount);
       await attachModeratorOnlyExtraDataKeys(found);
+      if (req.query.includeLinks) {
+        found.links = await resourceLinks.listLinks({
+          projectId: found.projectId,
+          resourceId: found.id,
+          user: req.user,
+        });
+      }
       if (req.query.includePoll) {
         // TODO: naar poll hooks
         if (found.poll) found.poll.countVotes(!req.query.includeVotes);
@@ -624,13 +746,11 @@ function loadResource(req, res, next) {
 }
 
 function checkResourceEditable(req, res, next) {
-  if (
-    !(
-      req.project.config &&
-      req.project.config.resources &&
-      req.project.config.resources.canAddNewResources
-    )
-  ) {
+  if (!(
+    req.project.config &&
+    req.project.config.resources &&
+    req.project.config.resources.canAddNewResources
+  )) {
     if (!req.results.dataValues.publishDate) {
       return next(
         createError(
@@ -656,11 +776,25 @@ function detectChangedToPublished(req, res, next) {
   next();
 }
 
+function snapshotModBreaks(req, res, next) {
+  req.previousModBreakIds = snapshotModBreakIds(req.results.modBreaks);
+  req.previousModBreakDescriptions = snapshotModBreakDescriptions(
+    req.results.modBreaks
+  );
+  next();
+}
+
 function updateResource(req, res, next) {
   var resource = req.results;
 
   if (!(resource && resource.can && resource.can('update')))
     return next(new Error('You cannot update this Resource'));
+
+  try {
+    captureLinkSelection(req);
+  } catch (err) {
+    return next(err);
+  }
 
   if (req.body.location) {
     try {
@@ -686,9 +820,12 @@ function updateResource(req, res, next) {
     ...req.body,
   };
 
-  if (!userhasModeratorRights(req.user)) {
+  if (!hasRole(req.user, ['editor', 'moderator'])) {
     delete data.modBreaks;
   }
+
+  const urlError = normalizeExtraDataUrl(data);
+  if (urlError) return next(urlError);
 
   resource
     .authorizeData(data, 'update')
@@ -736,6 +873,7 @@ async function updateResourceTags(req, res, next) {
             if (found.poll) found.poll.countVotes(!req.query.includeVotes);
           }
           found.project = req.project;
+          stripHiddenVoteScore(found, req.canIncludeVoteCount);
           await attachModeratorOnlyExtraDataKeys(found);
           req.results = found;
           next();
@@ -778,6 +916,7 @@ async function updateResourceStatuses(req, res, next) {
             if (found.poll) found.poll.countVotes(!req.query.includeVotes);
           }
           found.project = req.project;
+          stripHiddenVoteScore(found, req.canIncludeVoteCount);
           await attachModeratorOnlyExtraDataKeys(found);
           req.results = found;
           next();
@@ -797,7 +936,9 @@ async function sendUpdateNotifications(req, res, next) {
         userId: req.user.id,
         resourceId: req.results.id,
       },
-    });
+    }).catch(
+      logNotificationError('Error sending admin notification for resource:')
+    );
   }
   if (req.changedToPublished) {
     db.Notification.create({
@@ -807,9 +948,37 @@ async function sendUpdateNotifications(req, res, next) {
         userId: req.user.id,
         resourceId: req.results.id,
       },
-    });
+    }).catch(
+      logNotificationError('Error sending user notification for resource:')
+    );
   }
+
+  const newModBreaks = findNewModBreaks(
+    req.previousModBreakIds,
+    req.results?.modBreaks
+  );
+  const changedModBreaks = findChangedModBreaks(
+    req.previousModBreakDescriptions,
+    req.results?.modBreaks
+  );
+
+  sendModBreakNotifications({
+    db,
+    req,
+    newModBreaks,
+    changedModBreaks,
+  });
+
   next();
+}
+
+async function submitUpdateLinkRequests(req, res, next) {
+  try {
+    await submitLinkRequests(req, 'update');
+    next();
+  } catch (err) {
+    next(err);
+  }
 }
 
 function deleteResource(req, res, next) {
@@ -843,7 +1012,7 @@ async function deleteMultipleResources(req, res, next) {
 
   try {
     const resources = await db.Resource.scope(...req.scope).findAll({
-      where: { id: ids },
+      where: { id: ids, projectId: req.params.projectId },
     });
 
     if (resources.length === 0) {
@@ -853,15 +1022,15 @@ async function deleteMultipleResources(req, res, next) {
     }
 
     for (const resource of resources) {
-      if (!resource.can || !resource.can('delete')) {
+      if (!resource.can || !resource.can('delete', req.user)) {
         return next(
-          new Error(`You cannot delete resource with ID ${resource.id}`)
+          createError(403, `You cannot delete resource with ID ${resource.id}`)
         );
       }
     }
 
     await db.Resource.destroy({
-      where: { id: ids },
+      where: { id: resources.map((resource) => resource.id) },
     });
 
     res.json({ message: 'Resources deleted successfully' });
@@ -886,7 +1055,7 @@ async function duplicateResources(req, res, next) {
   try {
     req.scope.push('includeTags', 'includeStatuses');
     const resources = await db.Resource.scope(...req.scope).findAll({
-      where: { id: ids },
+      where: { id: ids, projectId: req.params.projectId },
     });
 
     if (resources.length === 0) {
@@ -896,9 +1065,12 @@ async function duplicateResources(req, res, next) {
     }
 
     for (const resource of resources) {
-      if (!resource.can || !resource.can('create')) {
+      if (!resource.can || !resource.can('create', req.user)) {
         return next(
-          new Error(`You cannot duplicate resource with ID ${resource.id}`)
+          createError(
+            403,
+            `You cannot duplicate resource with ID ${resource.id}`
+          )
         );
       }
     }
@@ -939,16 +1111,57 @@ async function duplicateResources(req, res, next) {
       })
     );
 
-    res.json(duplicatedResources);
+    res.json(duplicatedResources.map((resource) => resource.toJSON(req.user)));
   } catch (error) {
     next(error);
   }
+}
+
+function loadSharedResource(req, res, next) {
+  let resourceId = parseInt(req.params.resourceId) || 0;
+
+  db.Resource.scope(...req.scope)
+    .findOne({
+      where: { id: resourceId, projectId: req.params.projectId },
+    })
+    .then((found) => {
+      if (!found) {
+        return next(createError(404, 'Resource not found'));
+      }
+      found.project = req.project;
+      if (!found.can || !found.can('view', req.user)) {
+        return next(createError(404, 'Resource not found'));
+      }
+      req.resource = found;
+      req.results = found;
+      next();
+    })
+    .catch(next);
+}
+
+function respondSharedResource(req, res, next) {
+  const resource = req.results;
+  const images = Array.isArray(resource.images) ? resource.images : [];
+  const imageUrls = images
+    .map((image) => (image && image.url ? image.url : null))
+    .filter(Boolean);
+
+  res.json({
+    id: resource.id,
+    title: resource.title,
+    summary: resource.summary,
+    image: imageUrls[0] || null,
+    images: imageUrls,
+    url: (req.project && req.project.url) || null,
+  });
 }
 
 module.exports = {
   setResourceScope,
   // markers
   listMarkers,
+  loadSharedResource,
+  respondSharedResource,
   // list
   listResources,
   respondResults,
@@ -960,16 +1173,19 @@ module.exports = {
   applyDefaultStatuses,
   applyDefaultTags,
   refetchCreatedResource,
+  submitCreateLinkRequests,
   sendCreateNotifications,
   // single
   loadResource,
   checkResourceEditable,
   captureTags,
   detectChangedToPublished,
+  snapshotModBreaks,
   updateResource,
   updateResourceTags,
   updateResourceStatuses,
   sendUpdateNotifications,
+  submitUpdateLinkRequests,
   deleteResource,
   // multiple
   deleteMultipleResources,

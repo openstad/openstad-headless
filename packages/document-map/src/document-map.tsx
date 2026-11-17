@@ -9,9 +9,10 @@ import { FormValue } from '@openstad-headless/form/src/form';
 import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { LikeWidgetProps, Likes } from '@openstad-headless/likes/src/likes';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { MultiSelect } from '@openstad-headless/ui/src';
+import { MultiSelect, headingLevels } from '@openstad-headless/ui/src';
 import { Spacer } from '@openstad-headless/ui/src';
 import SelectField from '@openstad-headless/ui/src/form-elements/select';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
@@ -31,7 +32,7 @@ import '@utrecht/design-tokens/dist/root.css';
 import { CRS, Icon, LatLngBoundsLiteral } from 'leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import {
   ImageOverlay,
   MapContainer,
@@ -51,6 +52,7 @@ import { characterLimitError } from './lib/character-limit-error';
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
     projectId?: string;
+    widgetId?: number;
     resourceId?: string;
     resourceIdRelativePath?: string;
     documentWidth?: number;
@@ -89,6 +91,7 @@ export type DocumentMapProps = BaseProps &
     displayResourceDescription?: string;
     displayResourceTitle?: string;
     displayResourceSummary?: string;
+    headingLevel?: number;
     infoPopupContent?: string;
     likeWidget?: Omit<
       LikeWidgetProps,
@@ -151,6 +154,7 @@ function DocumentMap({
   displayResourceDescription = 'no',
   displayResourceTitle = 'yes',
   displayResourceSummary = 'yes',
+  headingLevel = 2,
   infoPopupContent = 'Op deze afbeelding kun je reacties plaatsen. Klik op de afbeelding om een reactie toe te voegen. Klik op een marker om de bijbehorende reacties te bekijken.',
   largeDoc = false,
   loginText = 'Inloggen om deel te nemen aan de discussie',
@@ -175,6 +179,12 @@ function DocumentMap({
   hideToggleMarkers = false,
   ...props
 }: DocumentMapProps) {
+  // ponytail: de widget staat ingebed onder de <h1> van de CMS-pagina, dus nooit
+  // zelf een h1 (WCAG 1.3.1). Redacteur kan het niveau in de admin zetten.
+  const [hTitle, hSection] = headingLevels(headingLevel);
+
+  const instanceId = useId();
+
   const [sort, setSort] = useState<string | undefined>(
     defaultSorting || 'createdAt_asc'
   );
@@ -490,7 +500,7 @@ function DocumentMap({
         }
         setIsBoundsSet(true);
       }
-    }, [map, bounds, isBoundsSet]);
+    }, [map, bounds, entireDocumentVisible, isBoundsSet]);
 
     return null;
   };
@@ -542,12 +552,10 @@ function DocumentMap({
             props.commentsWidget?.overwriteEmailAddress
               ? props.commentsWidget.overwriteEmailAddress
               : '',
+          // the api resolves the notification recipient from this widget's config
+          widgetId: props.widgetId,
           embeddedUrl: window.location.href,
         });
-
-        if (goToLastPage && displayPagination) {
-          goToLastPage();
-        }
 
         const addNewCommentToComments = [...filteredComments, newComment];
         const newIndex = newComment?.id;
@@ -603,7 +611,7 @@ function DocumentMap({
             : '')
       );
     }
-  }, []);
+  }, [relativePathPrepend]);
 
   let args = {
     canComment:
@@ -635,7 +643,7 @@ function DocumentMap({
     if (resource.extraData?.originalId) {
       setOriginalID(resource.extraData?.originalId);
     }
-  }, [resource]);
+  }, [resource, statusId]);
 
   if (canComment === false) args.canComment = canComment;
 
@@ -643,6 +651,7 @@ function DocumentMap({
     id: string;
     index: number;
     color: string;
+    label?: string;
   }
 
   const [overridePage, setoverridePage] = useState<number | undefined>(
@@ -674,7 +683,8 @@ function DocumentMap({
       );
       if (typeof currentComment === 'number' && currentComment >= 0) {
         const commentPage = Math.floor(currentComment / itemsPerPage);
-        setoverridePage(commentPage);
+        setoverridePage(undefined);
+        requestAnimationFrame(() => setoverridePage(commentPage));
       }
     }
 
@@ -739,10 +749,18 @@ function DocumentMap({
     id,
     index,
     color,
+    label,
     ...props
   }) => {
     const markerRef = useRef<any>(null);
     const isDefaultColor = color === '#555588';
+
+    useEffect(() => {
+      const el = markerRef.current?.getElement?.();
+      if (el && label) {
+        el.setAttribute('aria-label', label);
+      }
+    }, [label]);
 
     return (
       <Marker
@@ -867,12 +885,11 @@ function DocumentMap({
   };
 
   const modalRef = useRef<HTMLDivElement | null>(null);
+  const infoTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [manualFocus, setManualFocus] = useState(false);
 
   const setModalOpen = (state: boolean) => {
     setIsModalOpen(state);
-    setManualFocus(state);
   };
 
   const trapFocus = (event: KeyboardEvent) => {
@@ -918,6 +935,76 @@ function DocumentMap({
     updateMapBounds(hasOpenPopup);
   }, [bounds, hasOpenPopup]);
 
+  // ponytail: toetsenbord/single-pointer alternatief voor slepen + reactie plaatsen (WCAG 2.1.1, 2.5.7)
+  const PAN_STEP_PX = 100;
+  const panMapBy = (x: number, y: number) => {
+    mapRef.current?.panBy([x, y], { animate: true });
+  };
+  const placeCommentAtCenter = () => {
+    const map = mapRef.current;
+    if (map) setPopupPosition(map.getCenter());
+  };
+  const [controlsOpen, setControlsOpen] = useState(false);
+  const controlsPanelId = `${instanceId}-map-controls`;
+  const controlsToggleRef = useRef<HTMLButtonElement>(null);
+  const controlsToggleName =
+    !!args.canComment && !isDefinitive
+      ? 'Afbeelding verschuiven of reactie plaatsen'
+      : 'Afbeelding verschuiven';
+  const mapInstructionsId = `${instanceId}-map-instructions`;
+  const controlsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!controlsOpen) return;
+
+    const handleDocumentEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setControlsOpen(false);
+      if (controlsRef.current?.contains(document.activeElement)) {
+        controlsToggleRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('keydown', handleDocumentEscape);
+    return () => {
+      document.removeEventListener('keydown', handleDocumentEscape);
+    };
+  }, [controlsOpen]);
+
+  // ponytail: focus de reactie-textarea zodra de popup opent, zodat de keyboard-flow doorloopt (2.1.1).
+  // Wie niet is ingelogd krijgt geen textarea maar een inlogtekst met knop; dan
+  // stond er niets om te focussen en bleef de focus achter op de kaart.
+  useEffect(() => {
+    if (!popupPosition) return;
+    const t = setTimeout(() => {
+      const inhoud = document.querySelector('.leaflet-popup-content');
+      const doel =
+        (document.getElementById('commentBox') as HTMLElement | null) ||
+        (inhoud?.querySelector(
+          'button, a[href], textarea, input, select'
+        ) as HTMLElement | null) ||
+        (document.querySelector(
+          '.leaflet-popup .leaflet-popup-close-button'
+        ) as HTMLElement | null);
+      doel?.focus();
+    }, 50);
+    return () => clearTimeout(t);
+  }, [popupPosition]);
+
+  // ponytail: bij een geopende marker-popup focus direct in de popup zetten i.p.v. op de
+  // zoom-/info-knoppen die in de DOM ervóór staan (WCAG 2.4.3 focusvolgorde).
+  useEffect(() => {
+    if (popupPosition || !popupComment) return;
+    const t = setTimeout(() => {
+      (
+        document.querySelector(
+          '.leaflet-popup .leaflet-popup-close-button'
+        ) as HTMLElement | null
+      )?.focus();
+    }, 50);
+    return () => clearTimeout(t);
+  }, [popupComment, popupPosition]);
+
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -939,19 +1026,22 @@ function DocumentMap({
     };
   }, [isModalOpen]);
 
-  // Focus management when modal opens
+  const modalWasOpenRef = useRef(false);
   useEffect(() => {
-    if (isModalOpen && modalRef.current && manualFocus) {
+    if (isModalOpen && modalRef.current) {
       modalRef.current.focus();
     }
+    if (!isModalOpen && modalWasOpenRef.current) {
+      infoTriggerRef.current?.focus();
+    }
+    modalWasOpenRef.current = isModalOpen;
   }, [isModalOpen]);
 
   useEffect(() => {
     if (openInfoPopupOnInit === 'yes') {
       setIsModalOpen(true);
-      setManualFocus(false);
     }
-  }, []);
+  }, [openInfoPopupOnInit]);
 
   const [showButton, setShowButton] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -994,7 +1084,6 @@ function DocumentMap({
   const votingEnabled = configVotingEnabled && args.canComment;
 
   // const [goToPage, setGoToPage] = useState<((page:number) => void) | null>(null);
-  const [goToLastPage, setGoToLastPage] = useState<(() => void) | null>(null);
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
 
@@ -1028,19 +1117,21 @@ function DocumentMap({
         <div className="resource-info-full">
           <section className="content-intro">
             {displayResourceTitle === 'yes' && resource.title ? (
-              <Heading level={1}>{resource.title}</Heading>
+              <Heading level={hTitle}>{resource.title}</Heading>
             ) : null}
             {displayResourceSummary === 'yes' && resource.summary ? (
-              <Heading
-                level={2}
-                appearance="utrecht-heading-4"
+              <Paragraph
+                className="osc-summary"
                 dangerouslySetInnerHTML={{
-                  __html: resource.summary,
-                }}></Heading>
+                  __html: sanitizeHtml(resource.summary),
+                }}
+              />
             ) : null}
             {displayResourceDescription === 'yes' && resource.description ? (
               <Paragraph
-                dangerouslySetInnerHTML={{ __html: resource.description }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(resource.description),
+                }}
               />
             ) : null}
           </section>
@@ -1084,20 +1175,22 @@ function DocumentMap({
             {displayResourceInfo === 'left' && (
               <section className="content-intro">
                 {displayResourceTitle === 'yes' && resource.title ? (
-                  <Heading level={1}>{resource.title}</Heading>
+                  <Heading level={hTitle}>{resource.title}</Heading>
                 ) : null}
                 {displayResourceSummary === 'yes' && resource.summary ? (
-                  <Heading
-                    level={2}
-                    appearance="utrecht-heading-4"
+                  <Paragraph
+                    className="osc-summary"
                     dangerouslySetInnerHTML={{
-                      __html: resource.summary,
-                    }}></Heading>
+                      __html: sanitizeHtml(resource.summary),
+                    }}
+                  />
                 ) : null}
                 {displayResourceDescription === 'yes' &&
                 resource.description ? (
                   <Paragraph
-                    dangerouslySetInnerHTML={{ __html: resource.description }}
+                    dangerouslySetInnerHTML={{
+                      __html: sanitizeHtml(resource.description),
+                    }}
                   />
                 ) : null}
               </section>
@@ -1109,25 +1202,36 @@ function DocumentMap({
           <div className="content-container mobileonly">
             <section className="content-intro">
               {displayResourceTitle === 'yes' && resource.title ? (
-                <Heading level={1}>{resource.title}</Heading>
+                <Heading level={hTitle}>{resource.title}</Heading>
               ) : null}
               {displayResourceSummary === 'yes' && resource.summary ? (
-                <Heading
-                  level={2}
-                  appearance="utrecht-heading-4"
+                <Paragraph
+                  className="osc-summary"
                   dangerouslySetInnerHTML={{
-                    __html: resource.summary,
-                  }}></Heading>
+                    __html: sanitizeHtml(resource.summary),
+                  }}
+                />
               ) : null}
               {displayResourceDescription === 'yes' && resource.description ? (
                 <Paragraph
-                  dangerouslySetInnerHTML={{ __html: resource.description }}
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeHtml(resource.description),
+                  }}
                 />
               ) : null}
             </section>
           </div>
         )}
-        <div className="document-container">
+        <div
+          className="document-container"
+          role="application"
+          aria-label="Interactieve afbeelding"
+          aria-describedby={mapInstructionsId}>
+          <p id={mapInstructionsId} className="sr-only">
+            Verschuif de afbeelding met de pijltjestoetsen wanneer de afbeelding
+            focus heeft. Gebruik de knop {controlsToggleName} om de afbeelding
+            met losse knoppen te bedienen.
+          </p>
           <MapContainer
             ref={mapRef}
             center={[0, 0]}
@@ -1170,6 +1274,11 @@ function DocumentMap({
                       index={comment?.id}
                       position={comment.location}
                       color={documentMapIconColor}
+                      label={
+                        comment?.description
+                          ? `Reactie: ${comment.description.substring(0, 80)}`
+                          : `Reactie ${comment?.id}`
+                      }
                     />
                   );
                 })}
@@ -1235,13 +1344,17 @@ function DocumentMap({
                         ) => {
                           return (
                             <div key={group.type}>
-                              <FormLabel htmlFor={group.type}>
+                              <FormLabel
+                                {...(group && group.multiple
+                                  ? { id: group.type }
+                                  : { htmlFor: group.type })}>
                                 {group.label}
                               </FormLabel>
 
                               {group && group.multiple ? (
                                 <MultiSelect
                                   id={group.type}
+                                  legend={group.label || ''}
                                   label={'Selecteer een optie'}
                                   onItemSelected={(optionValue: string) => {
                                     const value = parseInt(optionValue, 10);
@@ -1339,13 +1452,94 @@ function DocumentMap({
               )}
           </MapContainer>
 
+          {/* ponytail: kruisje toont waar "Reactie plaatsen" landt (2.1.1) */}
+          {controlsOpen &&
+            !popupPosition &&
+            !!args.canComment &&
+            !isDefinitive && (
+              <div className="osc-map-crosshair" aria-hidden="true">
+                <span />
+              </div>
+            )}
+
+          {/* ponytail: single-pointer/keyboard pan-knoppen (2.5.7) + reactie-plaats-knop (2.1.1) */}
+          <div
+            className="osc-map-controls"
+            role="group"
+            aria-label="Kaartbediening"
+            ref={controlsRef}>
+            <button
+              type="button"
+              ref={controlsToggleRef}
+              className="osc-map-controls-toggle"
+              aria-expanded={controlsOpen}
+              aria-controls={controlsPanelId}
+              aria-label={controlsToggleName}
+              onClick={() => setControlsOpen((open) => !open)}>
+              <i
+                className={
+                  controlsOpen ? 'ri-close-line' : 'ri-drag-move-2-line'
+                }
+                aria-hidden="true"></i>
+            </button>
+            {controlsOpen && (
+              <div id={controlsPanelId} className="osc-map-controls-panel">
+                <div className="osc-map-compass">
+                  <button
+                    type="button"
+                    className="osc-map-pan osc-map-pan--up"
+                    aria-label="Kaart naar boven verplaatsen"
+                    onClick={() => panMapBy(0, -PAN_STEP_PX)}>
+                    <span aria-hidden="true">↑</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="osc-map-pan osc-map-pan--left"
+                    aria-label="Kaart naar links verplaatsen"
+                    onClick={() => panMapBy(-PAN_STEP_PX, 0)}>
+                    <span aria-hidden="true">←</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="osc-map-pan osc-map-pan--right"
+                    aria-label="Kaart naar rechts verplaatsen"
+                    onClick={() => panMapBy(PAN_STEP_PX, 0)}>
+                    <span aria-hidden="true">→</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="osc-map-pan osc-map-pan--down"
+                    aria-label="Kaart naar onderen verplaatsen"
+                    onClick={() => panMapBy(0, PAN_STEP_PX)}>
+                    <span aria-hidden="true">↓</span>
+                  </button>
+                </div>
+                {!popupPosition && !!args.canComment && !isDefinitive && (
+                  <button
+                    type="button"
+                    className="osc-map-place-comment"
+                    onClick={placeCommentAtCenter}>
+                    Reactie plaatsen
+                    <span className="sr-only">
+                      {' '}
+                      op het midden van de afbeelding
+                    </span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
           {!!args.canComment && (
             <>
               <Button
+                ref={infoTriggerRef}
                 className={`info-trigger ${
                   infoPopupButtonText ? 'button-has-text' : ''
                 }`}
                 appearance="primary-action-button"
+                aria-expanded={isModalOpen}
+                aria-controls={`${instanceId}-info-panel`}
                 onClick={() => setModalOpen(true)}>
                 <i className="ri-information-line"></i>
                 {infoPopupButtonText && (
@@ -1360,10 +1554,11 @@ function DocumentMap({
                 className="modal-overlay"
                 aria-hidden={isModalOpen ? 'false' : 'true'}>
                 <div
+                  id={`${instanceId}-info-panel`}
                   ref={modalRef}
                   className="modal"
                   role="dialog"
-                  aria-labelledby="modal-title"
+                  aria-labelledby={`${instanceId}-modal-title`}
                   aria-modal="true"
                   tabIndex={-1}>
                   <Button
@@ -1373,7 +1568,9 @@ function DocumentMap({
                     <i className="ri-close-fill"></i>
                     <span>Info venster sluiten</span>
                   </Button>
-                  <Heading level={3}>Hoe werkt het?</Heading>
+                  <Heading level={3} id={`${instanceId}-modal-title`}>
+                    Hoe werkt het?
+                  </Heading>
                   <Spacer size={1} />
                   <Paragraph>{infoPopupContent}</Paragraph>
                 </div>
@@ -1388,11 +1585,11 @@ function DocumentMap({
             {!hideToggleMarkers && (
               <div className="toggleMarkers">
                 <Checkbox
-                  id="toggleMarkers"
+                  id={`${instanceId}-toggleMarkers`}
                   defaultChecked
                   onChange={() => setToggleMarker(!toggleMarker)}
                 />
-                <FormLabel htmlFor="toggleMarkers">
+                <FormLabel htmlFor={`${instanceId}-toggleMarkers`}>
                   {' '}
                   <Paragraph>{addMarkerText}</Paragraph>{' '}
                 </FormLabel>
@@ -1403,6 +1600,7 @@ function DocumentMap({
                 <Likes
                   {...props}
                   resourceId={resourceId || ''}
+                  titleHeadingLevel={hSection}
                   title={props.likeWidget?.title}
                   yesLabel={props.likeWidget?.yesLabel}
                   noLabel={props.likeWidget?.noLabel}
@@ -1443,23 +1641,25 @@ function DocumentMap({
           <section className="content-intro desktoponly">
             {displayResourceTitle === 'yes' && resource.title ? (
               <>
-                <Heading level={1} appearance="utrecht-heading-2">
+                <Heading level={hTitle} appearance="utrecht-heading-2">
                   {resource.title}
                 </Heading>
                 <Spacer size={1} />
               </>
             ) : null}
             {displayResourceSummary === 'yes' && resource.summary ? (
-              <Heading
-                level={2}
-                appearance="utrecht-heading-4"
+              <Paragraph
+                className="osc-summary"
                 dangerouslySetInnerHTML={{
-                  __html: resource.summary,
-                }}></Heading>
+                  __html: sanitizeHtml(resource.summary),
+                }}
+              />
             ) : null}
             {displayResourceDescription === 'yes' && resource.description ? (
               <Paragraph
-                dangerouslySetInnerHTML={{ __html: resource.description }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(resource.description),
+                }}
               />
             ) : null}
           </section>
@@ -1532,7 +1732,6 @@ function DocumentMap({
               closedText={closedText}
               itemsPerPage={itemsPerPage}
               displayPagination={displayPagination}
-              onGoToLastPage={setGoToLastPage}
               overridePage={overridePage}
               onOverridePageConsumed={() => setoverridePage(undefined)}
               overrideSort={sort}
@@ -1546,19 +1745,21 @@ function DocumentMap({
         <div className="resource-info-full">
           <section className="content-intro">
             {displayResourceTitle === 'yes' && resource.title ? (
-              <Heading level={1}>{resource.title}</Heading>
+              <Heading level={hTitle}>{resource.title}</Heading>
             ) : null}
             {displayResourceSummary === 'yes' && resource.summary ? (
-              <Heading
-                level={2}
-                appearance="utrecht-heading-4"
+              <Paragraph
+                className="osc-summary"
                 dangerouslySetInnerHTML={{
-                  __html: resource.summary,
-                }}></Heading>
+                  __html: sanitizeHtml(resource.summary),
+                }}
+              />
             ) : null}
             {displayResourceDescription === 'yes' && resource.description ? (
               <Paragraph
-                dangerouslySetInnerHTML={{ __html: resource.description }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(resource.description),
+                }}
               />
             ) : null}
           </section>
@@ -1567,8 +1768,9 @@ function DocumentMap({
 
       <button
         className={`back-to-top ${showButton ? 'show' : ''}`}
-        onClick={scrollToTop}>
-        <i className="ri-arrow-up-line"></i>
+        onClick={scrollToTop}
+        aria-label="Terug naar boven">
+        <i className="ri-arrow-up-line" aria-hidden="true"></i>
       </button>
 
       <NotificationProvider />

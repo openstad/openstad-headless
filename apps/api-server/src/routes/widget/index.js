@@ -13,9 +13,14 @@ const reactRuntimePath = path.resolve(
   '../../../dist/openstad-react-runtime.js'
 );
 router.get('/react-runtime.js', (req, res) => {
-  res.setHeader('Content-Type', 'application/javascript');
-  res.setHeader('Cache-Control', 'public, max-age=86400');
-  res.sendFile(reactRuntimePath);
+  // Cache headers via sendFile options so they only apply to the success
+  // path; a cached error response would break widgets for max-age long.
+  res.sendFile(reactRuntimePath, {
+    headers: {
+      'Content-Type': 'application/javascript',
+      'Cache-Control': 'public, max-age=86400',
+    },
+  });
 });
 
 module.exports = router;

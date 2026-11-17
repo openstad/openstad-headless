@@ -33,6 +33,13 @@ import { ArgumentWidgetTabProps } from '.';
 
 const formSchema = z.object({
   resourceId: z.string().optional(),
+  resourceIdRelativePath: z
+    .string()
+    .optional()
+    .refine(
+      (value) => !value || value.includes('[id]'),
+      'Specificeer een [id] veld'
+    ),
   sentiment: z.string(),
   useSentiments: z.array(z.string()).optional(),
   itemsPerPage: z.coerce.number(),
@@ -69,7 +76,10 @@ export default function ArgumentsGeneral({
   const form = useForm<finalSchemaInfer>({
     resolver: zodResolver<any>(finalSchema),
     defaultValues: {
-      resourceId: props.resourceId,
+      resourceId: props?.resourceId || undefined,
+      resourceIdRelativePath: props?.resourceId
+        ? ''
+        : props?.resourceIdRelativePath || '',
       sentiment: props.sentiment || 'for',
       useSentiments: sentimentList(props.useSentiments),
       itemsPerPage: props?.itemsPerPage || 9999,
@@ -115,9 +125,38 @@ export default function ArgumentsGeneral({
               items={resources}
               keyForValue="id"
               label={(resource) => `${resource.id} ${resource.title}`}
-              onFieldChanged={props.onFieldChanged}
-              noSelection="Niet koppelen (gebruik queryparam openstadResourceId)"
+              onFieldChanged={(key, value) => {
+                if (value) {
+                  form.setValue('resourceIdRelativePath', '');
+                }
+                props.onFieldChanged(key, value);
+              }}
+              noSelection="Niet koppelen - beschrijf het path of gebruik queryparam openstadResourceId"
             />
+          )}
+
+          {conditionallyRenderField(
+            'resourceIdRelativePath',
+            !form.watch('resourceId') ? (
+              <FormField
+                control={form.control}
+                name="resourceIdRelativePath"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Geen specifieke inzending gekoppeld?</FormLabel>
+                    <FormDescription className="italic">
+                      Beschrijf hoe de inzending gehaald wordt uit de url:
+                      (/pad/naar/[id]) of laat leeg om terug te vallen op
+                      ?openstadResourceId
+                    </FormDescription>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            ) : null
           )}
 
           {conditionallyRenderField(

@@ -1,4 +1,5 @@
 import { FormValue } from '@openstad-headless/form/src/form';
+import { toHtmlId } from '@openstad-headless/lib/to-html-id';
 import {
   AccordionProvider,
   Button,
@@ -12,10 +13,11 @@ import {
   Paragraph,
   RadioButton,
 } from '@utrecht/component-library-react';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 
+import { ClickableImage } from '../../clickable-image';
 import { InfoImage } from '../../infoImage';
-import RteContent from '../../rte-formatting/rte-content';
+import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
 import { Spacer } from '../../spacer';
 
 export type ImageChoiceFieldProps = {
@@ -29,7 +31,7 @@ export type ImageChoiceFieldProps = {
   disabled?: boolean;
   type?: string;
   onChange?: (
-    e: { name: string; value: FormValue },
+    e: { name: string; value: FormValue; isInitial?: boolean },
     triggerSetLastKey?: boolean
   ) => void;
   showMoreInfo?: boolean;
@@ -89,6 +91,8 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
   maxChoices,
   maxChoicesMessage,
 }) => {
+  const idKey = toHtmlId(fieldKey);
+
   let initialValue = [];
 
   try {
@@ -121,13 +125,17 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
     }
   };
 
+  const didInitRef = useRef(false);
   useEffect(() => {
     if (onChange) {
       onChange({
         name: fieldKey,
         value: JSON.stringify(selectedChoices),
+        // The first emit is the mount initialisation, not a user interaction.
+        isInitial: !didInitRef.current,
       });
     }
+    didInitRef.current = true;
   }, [selectedChoices]);
 
   class HtmlContent extends React.Component<{ html: any }> {
@@ -153,14 +161,15 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
   return (
     <div className={`question`}>
       <Fieldset
-        aria-invalid={checkInvalid}
-        aria-describedby={`${randomId}_error`}>
+        invalid={fieldInvalid}
+        aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}>
         {title && (
           <FieldsetLegend>
             <RteContent
               content={title}
               unwrapSingleRootDiv={true}
               forceInline={true}
+              inlineComponent={InlineParagraph}
             />
           </FieldsetLegend>
         )}
@@ -205,15 +214,21 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
               <FormField type="radio" key={index}>
                 <Paragraph className="utrecht-form-field__label utrecht-form-field__label--radio">
                   <FormLabel
-                    htmlFor={`${fieldKey}_${index}`}
+                    htmlFor={`${idKey}_${index}`}
                     type="radio"
                     className={isSelected ? 'selected' : ''}>
                     <figure>
-                      <img src={choice.imageSrc} alt={choice.imageAlt} />
+                      <ClickableImage
+                        clickable={imageClickable}
+                        src={choice.imageSrc}
+                        alt={choice.imageAlt}
+                        variant="overlay">
+                        <img src={choice.imageSrc} alt={choice.imageAlt} />
+                      </ClickableImage>
                       <figcaption>
                         <ChoiceComponent
                           className="radio-field-input"
-                          id={`${fieldKey}_${index}`}
+                          id={`${idKey}_${index}`}
                           name={fieldKey}
                           required={fieldRequired}
                           onChange={() => {
@@ -247,6 +262,11 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
                               />
                             </>
                           )}
+                        {/* ponytail: hier stond een "✓ Gekozen"-badge voor 1.4.1.
+                            Die hoorde bij de beeldkiezer (het dilemma-vraagtype)
+                            en staat daar nu; hier was hij dubbelop, want de
+                            gekozen afbeelding krijgt al een rand van 3px waar de
+                            andere er geen heeft — dat is geen kleurverschil. */}
                       </figcaption>
                     </figure>
                   </FormLabel>
@@ -280,6 +300,7 @@ const ImageChoiceField: FC<ImageChoiceFieldProps> = ({
 
               <Button
                 appearance="primary-action-button"
+                tabIndex={!isInfoVisible ? -1 : undefined}
                 onClick={() => {
                   setIsInfoVisible(false);
                 }}>

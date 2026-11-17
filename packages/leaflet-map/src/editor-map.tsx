@@ -22,6 +22,7 @@ const EditorMap = ({
   fieldRequired = false,
   overrideDefaultValue = {},
   defaultValue = {},
+  searchLocation = undefined,
   ...props
 }: PropsWithChildren<EditorMapWidgetProps>) => {
   const isValidLocation = (
@@ -48,6 +49,26 @@ const EditorMap = ({
   }, [JSON.stringify(initialValue)]);
 
   parseLocation(currentEditorMarker); // unify location format
+
+  useEffect(() => {
+    if (
+      searchLocation &&
+      typeof searchLocation.lat === 'number' &&
+      typeof searchLocation.lng === 'number'
+    ) {
+      setCurrentEditorMarker((current) => ({
+        ...current,
+        lat: searchLocation.lat,
+        lng: searchLocation.lng,
+      }));
+      if (onChange) {
+        onChange({
+          name: fieldName,
+          value: { lat: searchLocation.lat, lng: searchLocation.lng },
+        });
+      }
+    }
+  }, [searchLocation]);
 
   let [currentCenter, setCurrentCenter] = useState(center);
 
@@ -98,6 +119,7 @@ const EditorMap = ({
         onMarkerClick={removeMarker}
         zoomAfterInit={false}
         autoZoomAndCenter="area"
+        panToLocation={searchLocation}
       />
 
       <input

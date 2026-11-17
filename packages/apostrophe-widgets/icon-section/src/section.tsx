@@ -7,7 +7,7 @@ import {
   Paragraph,
 } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import React from 'react';
+import React, { useId } from 'react';
 import { createRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
 
@@ -20,55 +20,70 @@ interface Item {
   expanded: string;
 }
 
-const renderCards = (items) => {
+const renderCards = (items, idPrefix: string) => {
   return (
     <div className="icon-section-grid">
-      <div className="container u-small-dropdowns">
+      <ul className="container u-small-dropdowns icon-section-list" role="list">
         {items.map((item: any, index: number) => {
+          // ponytail: prefix per widget-instance — meerdere icon-sections op één
+          // pagina gaven anders allemaal dezelfde id's, waardoor aria-labelledby
+          // naar de kop van de eerste sectie wees (WCAG 1.3.1)
+          const headingId = `${idPrefix}-heading-${index}`;
+          const isBlank =
+            typeof item.target === 'undefined' || item.target !== false;
           const linkProps = item.href
             ? {
                 href: item.href,
-                target:
-                  typeof item.target !== 'undefined' && item.target === false
-                    ? '_self'
-                    : '_blank',
+                target: isBlank ? '_blank' : '_self',
+                ...(isBlank ? { rel: 'noopener noreferrer' } : {}),
               }
             : {};
 
           if (item.linkScreenReaderText) {
             linkProps['aria-label'] = item.linkScreenReaderText;
+          } else if (item.title && item.linkText) {
+            linkProps['aria-label'] = `${item.linkText} over ${item.title}`;
           }
 
           return (
-            <article className="icon-section-card" key={index}>
-              {item.image && (
-                <Image
-                  alt={item.imageAlt}
-                  height={item.image.height}
-                  width={item.image.width}
-                  src={item.image._urls.full}
-                />
-              )}
-              <div className="icon-section-content">
-                {item.title && <Heading3>{item.title}</Heading3>}
-                {item.description && <Paragraph>{item.description}</Paragraph>}
-                {item.href && (
-                  <div>
-                    <Link {...linkProps}>{item.linkText}</Link>
-                  </div>
+            <li key={index}>
+              <article
+                className="icon-section-card"
+                aria-labelledby={item.title ? headingId : undefined}>
+                {item.image && (
+                  <Image
+                    alt={item.imageAlt || ''}
+                    height={item.image.height}
+                    width={item.image.width}
+                    src={item.image._urls.full}
+                  />
                 )}
-              </div>
-            </article>
+                <div className="icon-section-content">
+                  {item.title && (
+                    <Heading3 id={headingId}>{item.title}</Heading3>
+                  )}
+                  {item.description && (
+                    <Paragraph>{item.description}</Paragraph>
+                  )}
+                  {item.href && (
+                    <div>
+                      <Link {...linkProps}>{item.linkText}</Link>
+                    </div>
+                  )}
+                </div>
+              </article>
+            </li>
           );
         })}
-      </div>
+      </ul>
     </div>
   );
 };
 
 function IconSection({ content, expandable, expandablelabel, expanded }: Item) {
+  const idPrefix = useId();
   const items = JSON.parse(content);
-  const renderedCards = renderToString(renderCards(items));
+  const renderedCards = renderToString(renderCards(items, idPrefix));
   return (
     <section className="icon-section">
       {expandable === 'true' ? (

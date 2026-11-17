@@ -7,6 +7,10 @@ import { act } from 'react';
 import { type Root, createRoot } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('next/router', () => ({
+  useRouter: () => ({ query: {}, events: { on() {}, off() {}, emit() {} } }),
+}));
+
 // React's `act` needs this flag to suppress its "not wrapped in act" warning.
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
 

@@ -1,5 +1,5 @@
 # Image used for building dependencies
-FROM node:24-trixie-slim AS builder
+FROM node:24.22.1-trixie-slim AS builder
 ENV GITHUB_REPOSITORY=openstad/openstad-headless
 
 LABEL org.opencontainers.image.source=https://github.com/${GITHUB_REPOSITORY}
@@ -55,7 +55,7 @@ RUN npm ci --include=optional --safe-chain-skip-minimum-package-age
 RUN npm run build --if-present -w packages/plugin-loader
 
 # Minimal target for update-lock. It only serves to update the lock file.
-FROM node:24-trixie-slim AS update-lock
+FROM node:24.22.1-trixie-slim AS update-lock
 WORKDIR /opt/openstad-headless
 RUN npm update -g npm
 # Install safe-chain so --safe-chain-skip-minimum-package-age is recognized when updating the lock file
@@ -79,17 +79,20 @@ RUN npm cache clean --force
 
 # Remove all folders from ./apps except the one specified by APP
 RUN find ./apps -mindepth 1 -maxdepth 1 -type d ! -name "${APP}" -exec rm -rf {} +
-RUN npm prune --ws
+# Prune reinstalls from the reviewed lock file; like npm ci it may skip the
+# safe-chain minimum-age check when it needs to re-download tarballs.
+RUN npm prune --ws --safe-chain-skip-minimum-package-age
 RUN if [ "${APP}" = "image-server" ]; then \
-      SHARP_VERSION="$(node -p "require('./package-lock.json').packages['node_modules/sharp'].version")"; \
-      BUILD_ARCH="$(uname -m)"; \
+      SHARP_VERSION="$(node -p "const p=require('./package-lock.json').packages; const s=p['node_modules/image-steam/node_modules/sharp']||p['node_modules/sharp']; if(!s||!s.version) throw new Error('sharp not in lockfile'); s.version")" && \
+      [ -n "${SHARP_VERSION}" ] && \
+      BUILD_ARCH="$(uname -m)" && \
       SHARP_CPU="$(case "${BUILD_ARCH}" in \
         amd64|x86_64) echo "x64" ;; \
         arm64|aarch64) echo "arm64" ;; \
         armv7l|armv6l) echo "arm" ;; \
         *) echo "${BUILD_ARCH}" ;; \
-      esac)"; \
-      npm install --no-save --package-lock=false --include=optional --os=linux --libc=glibc --cpu="${SHARP_CPU}" "sharp@${SHARP_VERSION}" && \
+      esac)" && \
+      npm install --no-save --package-lock=false --include=optional --os=linux --libc=glibc --cpu="${SHARP_CPU}" --safe-chain-skip-minimum-package-age "sharp@${SHARP_VERSION}" && \
       node -e "require('sharp')"; \
     fi
 
@@ -123,22 +126,23 @@ ARG OPENSTAD_VERSION
 ENV OPENSTAD_VERSION=$OPENSTAD_VERSION
 ENV NEXT_PUBLIC_OPENSTAD_VERSION=$OPENSTAD_VERSION
 RUN npm run build --if-present -w $WORKSPACE
-RUN npm prune --ws --production
+RUN npm prune --ws --production --safe-chain-skip-minimum-package-age
 RUN if [ "${APP}" = "image-server" ]; then \
-      SHARP_VERSION="$(node -p "require('./package-lock.json').packages['node_modules/sharp'].version")"; \
-      BUILD_ARCH="$(uname -m)"; \
+      SHARP_VERSION="$(node -p "const p=require('./package-lock.json').packages; const s=p['node_modules/image-steam/node_modules/sharp']||p['node_modules/sharp']; if(!s||!s.version) throw new Error('sharp not in lockfile'); s.version")" && \
+      [ -n "${SHARP_VERSION}" ] && \
+      BUILD_ARCH="$(uname -m)" && \
       SHARP_CPU="$(case "${BUILD_ARCH}" in \
         amd64|x86_64) echo "x64" ;; \
         arm64|aarch64) echo "arm64" ;; \
         armv7l|armv6l) echo "arm" ;; \
         *) echo "${BUILD_ARCH}" ;; \
-      esac)"; \
-      npm install --no-save --package-lock=false --include=optional --os=linux --libc=glibc --cpu="${SHARP_CPU}" "sharp@${SHARP_VERSION}" && \
+      esac)" && \
+      npm install --no-save --package-lock=false --include=optional --os=linux --libc=glibc --cpu="${SHARP_CPU}" --safe-chain-skip-minimum-package-age "sharp@${SHARP_VERSION}" && \
       node -e "require('sharp')"; \
     fi
 
 # Release image
-FROM node:24-trixie-slim AS release
+FROM node:24.22.1-trixie-slim AS release
 ARG APP
 ARG PORT
 ARG NODE_ENV

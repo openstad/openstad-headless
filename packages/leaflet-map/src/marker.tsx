@@ -1,5 +1,5 @@
-import type { LeafletMouseEvent } from 'leaflet';
-import React from 'react';
+import type { Marker as LeafletMarkerType, LeafletMouseEvent } from 'leaflet';
+import React, { useEffect, useRef } from 'react';
 import { Marker as LeafletMarker } from 'react-leaflet';
 // @ts-ignore
 import { useMap } from 'react-leaflet/hooks';
@@ -22,15 +22,19 @@ export default function Marker({
   onMouseUp = undefined,
   onDragStart = undefined,
   onDragEnd = undefined,
+  title = undefined,
   ...props
 }: MarkerProps) {
   const map = useMap();
+  const markerRef = useRef<LeafletMarkerType | null>(null);
 
   // icon
+  let iconTitle: string | undefined;
   if (icon) {
     try {
       icon = JSON.parse(icon as string);
     } catch (err) {}
+    iconTitle = (icon as any)?.title;
     addToClassname(icon, 'osc-map-marker', { before: true });
     isFaded
       ? addToClassname(icon, 'osc-map-marker-faded')
@@ -94,9 +98,19 @@ export default function Marker({
 
   let draggable = eventHandlers['dragstart'] || eventHandlers['dragend'];
 
+  const ariaLabel = title || iconTitle || 'Locatie pin';
+
+  useEffect(() => {
+    const el = markerRef.current?.getElement?.();
+    if (el) {
+      el.setAttribute('aria-label', ariaLabel);
+    }
+  }, [ariaLabel]);
+
   return isVisible && typeof lat === 'number' && typeof lng === 'number' ? (
     <LeafletMarker
       {...props}
+      ref={markerRef}
       draggable={!!draggable}
       eventHandlers={eventHandlers}
       icon={icon}

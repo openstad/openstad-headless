@@ -90,7 +90,6 @@ module.exports = function (db, sequelize, DataTypes) {
             // by default return anonymous role if none of the conditions are met
             let roleToReturn;
             // only for create and update check if allowed, the other option, view and list
-            // for now its ok if a the public sees the role
             // for fields no DELETE action exists
             if (action === 'create' || action === 'update') {
               // if user is allowed to update all status
@@ -103,10 +102,23 @@ module.exports = function (db, sequelize, DataTypes) {
               ) {
                 roleToReturn = actionUserRole;
               } else {
-                roleToReturn = fallBackRole;
+                // not allowed: leave the role unchanged instead of demoting
+                roleToReturn = undefined;
               }
             } else {
-              roleToReturn = actionUserRole;
+              // view/list: only privileged callers or the user themselves see the real role;
+              // everyone else gets a neutral value so roles cannot be harvested/enumerated
+              const isPrivileged = userHasRole(user, 'moderator');
+              const isSelf =
+                !!user &&
+                !!self &&
+                ((user.id && user.id === self.id) ||
+                  (user.idpUser &&
+                    self.idpUser &&
+                    user.idpUser.identifier &&
+                    user.idpUser.identifier === self.idpUser.identifier));
+              roleToReturn =
+                isPrivileged || isSelf ? actionUserRole : fallBackRole;
             }
             return roleToReturn;
           },
@@ -156,6 +168,21 @@ module.exports = function (db, sequelize, DataTypes) {
         },
         set: function (value) {
           this.setDataValue('nickName', sanitize.noTags(value));
+        },
+      },
+
+      projectDisplayName: {
+        type: DataTypes.STRING(64),
+        allowNull: true,
+        defaultValue: null,
+        auth: {
+          listableBy: ['moderator', 'owner'],
+          viewableBy: ['moderator', 'owner'],
+          createableBy: ['moderator', 'owner'],
+          updateableBy: ['moderator', 'owner'],
+        },
+        set: function (value) {
+          this.setDataValue('projectDisplayName', sanitize.noTags(value));
         },
       },
 
@@ -304,9 +331,10 @@ module.exports = function (db, sequelize, DataTypes) {
         get: function () {
           // this should use project.config.allowUseOfNicknames but that implies loading the project for every time a user is shown which would be too slow
           // therefore createing nicknames is dependendt on project.config.allowUseOfNicknames; once you have created a nickName it will be shown here no matter what
+          let projectDisplayName = this.getDataValue('projectDisplayName');
           let nickName = this.getDataValue('nickName');
           let name = this.name;
-          return nickName || name || undefined;
+          return projectDisplayName || nickName || name || undefined;
         },
       },
 
@@ -640,6 +668,7 @@ module.exports = function (db, sequelize, DataTypes) {
         extraData: {},
         email: null,
         nickName: null,
+        projectDisplayName: null,
         name: anonymizedName,
         firstname: null,
         lastname: null,
@@ -694,22 +723,21 @@ module.exports = function (db, sequelize, DataTypes) {
       return valid;
     },
 
-    canUpdate: function (self, user) {
+    canUpdate: function (user, self) {
+      // copy the base functionality
       self = self || this;
 
-      // The user can either be the one being updated or the one making the update. The user possessing the auth key is the one making the update.
-      if (user?.auth) {
-        self = user;
-        user = self;
-      }
-
+      if (!user) user = self.auth && self.auth.user;
       if (!user || !user.role) user = { role: 'all' };
 
       let valid = userHasRole(
-        self,
+        user,
         self.auth && self.auth.updateableBy,
         self.id
       );
+
+      // roles are project-local: only superusers act on users of other projects
+      valid = valid && isSameProjectOrSuperuser(user, self);
 
       // extra: isOwner through user on different project
       valid =
@@ -717,9 +745,11 @@ module.exports = function (db, sequelize, DataTypes) {
         (self.idpUser &&
           user.idpUser &&
           self.idpUser.identifier &&
-          self.idpUser.identifier == user.idpUser.identifier);
+          self.idpUser.identifier == user.idpUser.identifier &&
+          self.idpUser.provider == user.idpUser.provider);
 
-      valid = valid && userHasRole(self, user.role);
+      // extra: geen acties op users met meer rechten dan je zelf hebt
+      valid = valid && userHasRole(user, self.role);
 
       return valid;
     },
@@ -740,6 +770,8 @@ module.exports = function (db, sequelize, DataTypes) {
       // extra: admin on different project
       valid = valid && userHasRole(user, 'admin');
 
+      valid = valid && isSameProjectOrSuperuser(user, self);
+
       // extra: geen acties op users met meer rechten dan je zelf hebt
       valid = valid && userHasRole(user, self.role);
 
@@ -748,6 +780,12 @@ module.exports = function (db, sequelize, DataTypes) {
   };
 
   return User;
+
+  function isSameProjectOrSuperuser(user, self) {
+    if (userHasRole(user, 'superuser')) return true;
+    if (user.projectId == null || self.projectId == null) return true;
+    return user.projectId == self.projectId;
+  }
 
   function beforeValidateHook(instance, options) {
     return new Promise((resolve, reject) => {

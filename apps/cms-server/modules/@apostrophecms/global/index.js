@@ -162,7 +162,20 @@ module.exports = {
       logoAltText: {
         type: 'string',
         label: 'Logo alt text',
-        default: 'Afbeelding van het logo, link naar de homepage',
+        help: 'Beschrijf wat er op het logo staat, bijvoorbeeld de naam van de gemeente. Leeg laten gebruikt automatisch de sitenaam.',
+      },
+
+      logoLinkTitle: {
+        type: 'string',
+        label: 'Logo link titel',
+        help: 'Vertelt bezoekers waar de logolink naartoe gaat.',
+        default: 'Terug naar homepage',
+      },
+
+      logoLink: {
+        type: 'string',
+        label: 'Logo link (optioneel)',
+        help: 'Standaard linkt het logo naar de homepage. Vul hier een eigen URL in (bijv. https://example.com) om daarvan af te wijken.',
       },
 
       footerLogo: {
@@ -455,6 +468,8 @@ module.exports = {
           'hideSiteTitle',
           'siteLogo',
           'logoAltText',
+          'logoLink',
+          'logoLinkTitle',
           'bannerStatus',
           'bannerStatusText',
         ],

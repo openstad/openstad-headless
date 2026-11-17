@@ -105,9 +105,9 @@ router
 // -------------------
 router
   .route('/:projectId(\\d+)/export')
-  .all(auth.can('Project', 'view'))
+  .all(auth.can('Project', 'update'))
   .all(ctrl.loadProjectForExport)
-  .get(auth.can('Project', 'view'))
+  .get(auth.can('Project', 'update'))
   .get(auth.useReqUser)
   .get(ctrl.viewProject);
 

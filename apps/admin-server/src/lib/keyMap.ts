@@ -16,7 +16,7 @@ export const keyMap: Record<string, string> = {
   progress: 'Voortgang',
   isSpam: 'Waarschijnlijk spam',
   statuses: 'Statussen',
-  modBreaks: 'Moderatie berichten',
+  modBreaks: 'Officiële reacties',
   images: 'Afbeeldingen',
   documents: 'Documenten',
   'extraData.embeddedUrl': 'Embedded URL',
@@ -33,9 +33,12 @@ export const keyMap: Record<string, string> = {
 };
 
 // mapping from humanReadable to backendKey
-export const reverseKeyMap: Record<string, string> = Object.fromEntries(
-  Object.entries(keyMap).map(([backend, humanReadable]) => [
-    humanReadable,
-    backend,
-  ])
-);
+export const reverseKeyMap: Record<string, string> = {
+  'Moderatie berichten': 'modBreaks',
+  ...Object.fromEntries(
+    Object.entries(keyMap).map(([backend, humanReadable]) => [
+      humanReadable,
+      backend,
+    ])
+  ),
+};

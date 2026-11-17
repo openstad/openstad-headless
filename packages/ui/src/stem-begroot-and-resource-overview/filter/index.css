@@ -10,6 +10,16 @@
   );
 }
 
+.form-element-hint {
+  margin: 0 0 12px;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(
+    --nlds-budget-resources-filter-hint-color,
+    var(--utrecht-form-field-description-color, #6b6b6b)
+  );
+}
+
 .osc-resources-filter > div,
 .osc-resources-filter > button {
   flex-shrink: 1;
@@ -100,12 +110,12 @@
   }
 }
 
-.osc.--compact #stem-begroot-filter .active-tags ul {
+.osc.--compact .osc-filter-section .active-tags ul {
   flex-direction: row;
 }
 
 /* Collapsible filter styles */
-#stem-begroot-filter:has(.toggle-filters-button)
+.osc-filter-section:has(.toggle-filters-button)
   .osc-resources-filter.osc-flex-columned {
   flex-direction: row;
 }

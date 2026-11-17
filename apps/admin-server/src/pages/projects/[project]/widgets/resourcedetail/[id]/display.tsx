@@ -9,25 +9,29 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail/src/resource-detail';
+import { useRouter } from 'next/router';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 type ShareOption =
-  | 'facebook'
-  | 'x'
-  | 'mail'
-  | 'whatsapp'
-  | 'linkedin'
-  | 'copylink';
+  'facebook' | 'x' | 'mail' | 'whatsapp' | 'linkedin' | 'copylink';
 const shareOptions: [ShareOption, ...ShareOption[]] = [
   'facebook',
   'x',
@@ -54,6 +58,7 @@ const shareItems: ShareItem[] = shareOptions.map((value) => ({
 }));
 
 const formSchema = z.object({
+  headingLevel: z.coerce.number().optional(),
   displayImage: z.boolean(),
   displayImageDescription: z.boolean(),
   displayTitle: z.boolean(),
@@ -62,6 +67,7 @@ const formSchema = z.object({
   displayDescriptionExpandable_expandBeforeText: z.string().optional(),
   displayDescriptionExpandable_expandAfterText: z.string().optional(),
   displayDescriptionExpandable_visibleLines: z.string().optional(),
+  descriptionHeadingLevel: z.string().optional(),
   displaySummary: z.boolean(),
   displayUser: z.boolean(),
   displayDate: z.boolean(),
@@ -81,6 +87,8 @@ const formSchema = z.object({
   displayDeleteButton: z.boolean().optional(),
   displayDeleteEditButtonOnTop: z.boolean().optional(),
   displayTimeline: z.boolean().optional(),
+  collapseTagType: z.string().optional(),
+  collapseTagLabel: z.string().optional(),
   selectedSocialShareOptions: z.array(z.enum(shareOptions)).optional(),
 });
 
@@ -95,11 +103,22 @@ export default function WidgetResourceDetailDisplay(
     props.updateConfig({ ...props, ...values });
   }
 
+  const router = useRouter();
+  const { project } = router.query;
+  const { data: allTags } = useTags(project as string);
+  const tagTypes: string[] = Array.isArray(allTags)
+    ? allTags.reduce((types: string[], tag: any) => {
+        if (tag?.type && !types.includes(tag.type)) types.push(tag.type);
+        return types;
+      }, [])
+    : [];
+
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
+      headingLevel: props?.headingLevel || 2,
       displayImage: undefinedToTrueOrProp(props?.displayImage),
       displayImageDescription: undefinedToTrueOrProp(
         props?.displayImageDescription
@@ -112,6 +131,7 @@ export default function WidgetResourceDetailDisplay(
         props?.displayDescriptionExpandable_expandAfterText || 'Lees minder',
       displayDescriptionExpandable_visibleLines:
         props?.displayDescriptionExpandable_visibleLines || '4',
+      descriptionHeadingLevel: props?.descriptionHeadingLevel || '3',
       displayTitle: undefinedToTrueOrProp(props?.displayTitle),
       displaySummary: undefinedToTrueOrProp(props?.displaySummary),
       displayDescription: undefinedToTrueOrProp(props?.displayDescription),
@@ -134,6 +154,8 @@ export default function WidgetResourceDetailDisplay(
       displayDeleteEditButtonOnTop:
         props?.displayDeleteEditButtonOnTop || false,
       displayTimeline: props?.displayTimeline || false,
+      collapseTagType: props?.collapseTagType ?? '',
+      collapseTagLabel: props?.collapseTagLabel ?? '',
       selectedSocialShareOptions:
         typeof props?.selectedSocialShareOptions === 'undefined'
           ? defaultShareValues
@@ -154,6 +176,39 @@ export default function WidgetResourceDetailDisplay(
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="headingLevel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Kopniveau van de titel</FormLabel>
+                <Select
+                  value={String(field.value ?? 2)}
+                  onValueChange={(e) => field.onChange(Number(e))}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Kies kopniveau" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="1">Kop 1 (h1)</SelectItem>
+                    <SelectItem value="2">Kop 2 (h2)</SelectItem>
+                    <SelectItem value="3">Kop 3 (h3)</SelectItem>
+                    <SelectItem value="4">Kop 4 (h4)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormDescription>
+                  Kies zo dat de titel aansluit op de koppen eromheen. Kop 1
+                  alleen als deze widget de hoofdinhoud van de pagina is — dat
+                  is bijvoorbeeld het geval als &quot;Inzending titel gebruiken
+                  als paginatitel&quot; aanstaat. Er mag maar één h1 per pagina
+                  zijn, dus niet doen als de pagina zelf al een titelkop heeft
+                  of als er meerdere van deze widgets op één pagina staan.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           <FormField
             control={form.control}
             name="displayImage"
@@ -315,6 +370,39 @@ export default function WidgetResourceDetailDisplay(
                 )}
               </div>
             )}
+            {form.watch('displayDescription') && (
+              <FormField
+                control={form.control}
+                name="descriptionHeadingLevel"
+                render={({ field }) => (
+                  <FormItem className="mt-4">
+                    <FormLabel>Heading-niveau opmaak in beschrijving</FormLabel>
+                    <FormDescription>
+                      Bepaalt als welk kopniveau een &apos;Heading&apos; uit de
+                      tekstopmaak van de inzender wordt weergegeven.
+                    </FormDescription>
+                    <Select
+                      onValueChange={(value) => {
+                        field.onChange(value);
+                        props.onFieldChanged(field.name, value);
+                      }}
+                      value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecteer een optie" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value={'2'}>Heading 2 (H2)</SelectItem>
+                        <SelectItem value={'3'}>Heading 3 (H3)</SelectItem>
+                        <SelectItem value={'4'}>Heading 4 (H4)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
           </div>
           <FormField
             control={form.control}
@@ -339,6 +427,76 @@ export default function WidgetResourceDetailDisplay(
               </FormItem>
             )}
           />
+
+          {form.watch('displayTags') && (
+            <div className="bg-stone-100 p-4 rounded-md border border-stone-200 col-span-full lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="collapseTagType"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Tag type samenvouwen bij volledige selectie
+                    </FormLabel>
+                    <FormDescription>
+                      Wanneer een inzending álle tags van dit type heeft, wordt
+                      in plaats van alle losse tags één label getoond.
+                    </FormDescription>
+                    <Select
+                      value={field.value || ''}
+                      onValueChange={(value) => {
+                        const next = value === 'none' ? '' : value;
+                        field.onChange(next);
+                        props.onFieldChanged?.('collapseTagType', next);
+                      }}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Geen" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="none">Geen</SelectItem>
+                        {tagTypes.map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {!!form.watch('collapseTagType') && (
+                <FormField
+                  control={form.control}
+                  name="collapseTagLabel"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Label bij volledige selectie (terugval)
+                      </FormLabel>
+                      <FormDescription>
+                        Standaard wordt het &apos;Selecteer alles&apos;-label
+                        uit het formulier gebruikt. Dit veld wordt alleen
+                        gebruikt als dat formulier-label niet is ingesteld.
+                      </FormDescription>
+                      <FormControl>
+                        <Input
+                          type="text"
+                          {...field}
+                          onChange={(e) => {
+                            onFieldChange(field.name, e.target.value);
+                            field.onChange(e);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+          )}
 
           <FormField
             control={form.control}
@@ -428,7 +586,9 @@ export default function WidgetResourceDetailDisplay(
                 <FormLabel>Tijdlijn weergeven</FormLabel>
                 <FormDescription>
                   Tijdlijn items worden per resource beheerd in het tabblad
-                  Tijdlijn bij de resource.
+                  Tijdlijn bij de resource. Toont ook de tijdlijn die de
+                  indiener heeft ingevuld via een tijdlijn-vraag in het
+                  inzendingformulier.
                 </FormDescription>
                 {YesNoSelect(field, props)}
                 <FormMessage />

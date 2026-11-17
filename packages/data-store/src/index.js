@@ -14,6 +14,7 @@ import useDatalayer from './hooks/use-datalayer.js';
 import useEnqueteResultCount from './hooks/use-enquete-result-count';
 import useMarkers from './hooks/use-markers.js';
 import useProjectVotedUsersCount from './hooks/use-project-voted-users-count';
+import useResourceLinks from './hooks/use-resource-links';
 import useResource from './hooks/use-resource.js';
 import useResources from './hooks/use-resources.js';
 import useStatuses from './hooks/use-statuses.js';
@@ -22,6 +23,7 @@ import useTags from './hooks/use-tags.js';
 import useUserActivity from './hooks/use-user-activity';
 import useUserVote from './hooks/use-user-vote.js';
 import useWidget from './hooks/use-widget';
+import useWidgets from './hooks/use-widgets';
 import mergeData from './merge-data';
 
 const windowGlobal = typeof window !== 'undefined' ? window : {};
@@ -52,8 +54,10 @@ function DataStore(props = {}) {
   self.useEnqueteResultCount = useEnqueteResultCount.bind(self);
   self.useChoiceGuideResultCount = useChoiceGuideResultCount.bind(self);
   self.useProjectVotedUsersCount = useProjectVotedUsersCount.bind(self);
+  self.useResourceLinks = useResourceLinks.bind(self);
   self.useUserActivity = useUserActivity.bind(self);
   self.useWidget = useWidget.bind(self);
+  self.useWidgets = useWidgets.bind(self);
 
   // current user
   const {

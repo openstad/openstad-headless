@@ -38,6 +38,8 @@ const formSchema = z.object({
   title: z.string(),
   description: z.string(),
   afterSubmitUrl: z.string().optional(),
+  closeFormAfterSubmit: z.boolean().optional(),
+  closedFormMessage: z.string().optional(),
   minCharactersWarning: z
     .string()
     .optional()
@@ -49,11 +51,16 @@ const formSchema = z.object({
   minCharactersError: z
     .string()
     .optional()
-    .default('Tekst moet minimaal {minCharacters} karakters bevatten'),
+    .default('De tekst mag niet korter zijn dan {minCharacters} tekens'),
   maxCharactersError: z
     .string()
     .optional()
-    .default('Tekst moet maximaal {maxCharacters} karakters bevatten'),
+    .default('De tekst mag niet langer zijn dan {maxCharacters} tekens'),
+  isQuiz: z.boolean().optional(),
+  confirmAnswerMessage: z
+    .string()
+    .optional()
+    .default('Bevestig eerst je antwoord voordat je verdergaat.'),
   enableDraftPersistence: z.boolean().optional(),
   draftRetentionHours: z.coerce.number().optional(),
   showMinMaxAfterBlur: z.boolean().optional().default(false),
@@ -77,16 +84,22 @@ export default function WidgetEnqueteGeneral(
       title: props?.title || '',
       description: props?.description || '',
       afterSubmitUrl: props.afterSubmitUrl || '',
+      closeFormAfterSubmit: props.closeFormAfterSubmit ?? false,
+      closedFormMessage: props.closedFormMessage ?? '',
       minCharactersWarning:
         props.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
       maxCharactersWarning:
         props.maxCharactersWarning || 'Je hebt nog {maxCharacters} tekens over',
       minCharactersError:
         props.minCharactersError ||
-        'Tekst moet minimaal {minCharacters} karakters bevatten',
+        'De tekst mag niet korter zijn dan {minCharacters} tekens',
       maxCharactersError:
         props.maxCharactersError ||
-        'Tekst moet maximaal {maxCharacters} karakters bevatten',
+        'De tekst mag niet langer zijn dan {maxCharacters} tekens',
+      isQuiz: props?.isQuiz ?? false,
+      confirmAnswerMessage:
+        props.confirmAnswerMessage ||
+        'Bevestig eerst je antwoord voordat je verdergaat.',
       enableDraftPersistence: props.enableDraftPersistence ?? false,
       draftRetentionHours: props.draftRetentionHours ?? 24,
       maxCharactersOverWarning:
@@ -151,6 +164,52 @@ export default function WidgetEnqueteGeneral(
 
           <FormField
             control={form.control}
+            name="closeFormAfterSubmit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Formulier sluiten na inzending</FormLabel>
+                <FormDescription>
+                  Na een inzending vervangt een bevestiging het formulier. Dit
+                  wordt onthouden in de browser van de bezoeker. Beheerders en
+                  redacteuren zien het formulier altijd.
+                </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.watch('closeFormAfterSubmit') && (
+            <FormField
+              control={form.control}
+              name="closedFormMessage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bevestigingstekst na inzending</FormLabel>
+                  <FormDescription>
+                    Onder deze tekst staan de datum en tijd van de inzending.
+                    Laat leeg voor de standaardtekst: &quot;Je antwoord is
+                    ontvangen. Je kunt deze enquête maar één keer
+                    invullen.&quot;
+                  </FormDescription>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={field.value ?? ''}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        onFieldChange(field.name, e.target.value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          <FormField
+            control={form.control}
             name="description"
             render={({ field }) => (
               <FormItem>
@@ -168,6 +227,49 @@ export default function WidgetEnqueteGeneral(
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="isQuiz"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Quizmodus inschakelen</FormLabel>
+                <FormDescription>
+                  Zet quiz- en feedbackopties aan. Per vraag kun je daarna
+                  instellen welke feedback bezoekers zien nadat ze een antwoord
+                  bevestigen.
+                </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.watch('isQuiz') && (
+            <FormField
+              control={form.control}
+              name="confirmAnswerMessage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Melding bij niet-bevestigd antwoord</FormLabel>
+                  <FormDescription>
+                    Tekst die verschijnt wanneer een bezoeker verder wil zonder
+                    een goed/fout-antwoord te bevestigen.
+                  </FormDescription>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        onFieldChange(field.name, e.target.value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}

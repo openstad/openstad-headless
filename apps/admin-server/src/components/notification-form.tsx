@@ -20,6 +20,7 @@ import { Heading } from '@/components/ui/typography';
 import useNotificationTemplate from '@/hooks/use-notification-template';
 import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { applyFilters } from '@/lib/nunjucks-filters';
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { zodResolver } from '@hookform/resolvers/zod';
 import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
@@ -27,6 +28,7 @@ import nunjucks from 'nunjucks';
 import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import useSWR from 'swr';
 import * as z from 'zod';
 
 import {
@@ -266,6 +268,55 @@ const initialDataCommentReplyNotification = `<mjml>
 </mjml>
 `;
 
+// Mirrors apps/api-server/src/notifications/default-templates/new comment - admin
+const initialDataCommentAdminNotification = `<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column width="200px">
+        <mj-image src="{{ imagePath }}/logo-openstad.png"></mj-image>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+      <mj-column width="600px">
+        <mj-image src="{{ imagePath }}/mail-header.jpg"></mj-image>
+      </mj-column>
+    </mj-section>
+    <mj-section>
+      <mj-column width="500px">
+        {% if parentComment %}
+          <mj-text font-size="20px" font-family="Helvetica Neue">Er is een nieuwe reactie op een reactie geplaatst.</mj-text>
+          <mj-text>Beste administrator,</mj-text>
+          <mj-text color="#525252">Op de resource {{ resource.title }} is er zojuist gereageerd op een eerdere reactie.</mj-text>
+          <mj-text color="#525252"><em>Oorspronkelijke reactie:</em></mj-text>
+          <mj-text color="#525252">{{ parentComment.description }}</mj-text>
+          <mj-text color="#525252"><em>Nieuwe reactie:</em></mj-text>
+          <mj-text color="#525252">{{ comment.description }}</mj-text>
+        {% else %}
+          <mj-text font-size="20px" font-family="Helvetica Neue">Er is een nieuwe reactie geplaatst.</mj-text>
+          <mj-text>Beste administrator,</mj-text>
+          <mj-text color="#525252">Op de resource {{ resource.title }} is er zojuist een nieuwe reactie geplaatst.</mj-text>
+          <mj-text color="#525252"><em>Reactie:</em></mj-text>
+          <mj-text color="#525252">{{ comment.description }}</mj-text>
+        {% endif %}
+        {% if redirectUrl %}
+          <mj-button background-color="#12B886" href="{{ redirectUrl }}">Weergeven</mj-button>
+        {% endif %}
+      </mj-column>
+    </mj-section>
+    {% if redirectUrl %}
+      <mj-section>
+        <mj-column width="400px">
+          <mj-text>Of gebruik deze link in je browser:</mj-text>
+        </mj-column>
+        <mj-column>
+          <mj-text>{{ redirectUrl }}</mj-text>
+        </mj-column>
+      </mj-section>
+    {% endif %}
+  </mj-body>
+</mjml>
+`;
+
 const initialDataEnqueteSubmissionAdmin = `<mjml>
   <mj-body background-color="#f6f6f7">
     <mj-section background-color="#ffffff" padding="20px">
@@ -339,6 +390,49 @@ const initialDataAccountExpiry = `<mjml>
         </mj-body>
     </mjml>`;
 
+const initialDataModBreakNotification = `<mjml>
+  <mj-head>
+    <mj-attributes>
+      <mj-all font-family="Helvetica Neue, Helvetica, Arial, sans-serif" />
+      <mj-text font-size="15px" line-height="1.6" color="#333333" />
+      <mj-divider border-width="1px" border-color="#dddddd" />
+    </mj-attributes>
+  </mj-head>
+  <mj-body background-color="#f4f4f4">
+    <mj-section background-color="#ffffff" padding="32px 24px">
+      <mj-column>
+        {% if logo %}
+        <mj-image src="{{logo}}" align="left" width="160px" alt="" padding-bottom="16px" />
+        {% endif %}
+        <mj-text><h1 style="font-size:22px;font-weight:bold;line-height:1.3;margin:0">{% if newModBreaks and newModBreaks.length %}Er is een officiële reactie geplaatst.{% else %}Een officiële reactie is aangepast.{% endif %}</h1></mj-text>
+        <mj-divider />
+        <mj-text>Beste {{ user.name }},</mj-text>
+        {% if newModBreaks and newModBreaks.length %}
+        <mj-text padding-bottom="0">De redactie heeft een bericht geplaatst bij {% if isResourceOwner === false %}de inzending "{{ resource.title }}" waarop u heeft gereageerd{% else %}uw inzending "{{ resource.title }}"{% endif %}:</mj-text>
+        {% for mb in newModBreaks %}
+        <mj-text font-style="italic">{{ mb.description | safe }}{% set mbAuthor = mb.authorName or project.config.resources.modbreakTitle %}{% if mbAuthor %} - {{ mbAuthor }}{% endif %}</mj-text>
+        {% endfor %}
+        {% endif %}
+        {% if changedModBreaks and changedModBreaks.length %}
+        <mj-text padding-bottom="0">De redactie heeft een bericht bij {% if isResourceOwner === false %}de inzending "{{ resource.title }}" waarop u heeft gereageerd{% else %}uw inzending "{{ resource.title }}"{% endif %} aangepast:</mj-text>
+        {% for mb in changedModBreaks %}
+        <mj-text font-style="italic">{{ mb.description | safe }}{% set mbAuthor = mb.authorName or project.config.resources.modbreakTitle %}{% if mbAuthor %} - {{ mbAuthor }}{% endif %}</mj-text>
+        {% endfor %}
+        {% endif %}
+        {% if redirectUrl %}
+        <mj-button background-color="#12B886" href="{{ redirectUrl }}" align="left">Weergeven</mj-button>
+        <mj-text font-size="13px" color="#777777">Of gebruik deze link in je browser: <a href="{{ redirectUrl }}">{{ redirectUrl }}</a></mj-text>
+        {% endif %}
+        <mj-divider />
+        <mj-text align="center" font-size="13px" color="#777777">Dit is een automatisch bericht. Antwoorden op deze e-mail is niet mogelijk.</mj-text>
+        {% if unsubscribeUrl %}
+        <mj-text align="center" font-size="12px" color="#999999">Wilt u geen e-mails meer ontvangen? <a href="{{ unsubscribeUrl }}">Uitschrijven</a></mj-text>
+        {% endif %}
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>`;
+
 type Props = {
   type:
     | 'login email'
@@ -350,7 +444,12 @@ type Props = {
     | 'new enquete - admin'
     | 'new enquete - user'
     | 'notification comment - user'
-    | 'notification comment reply - user';
+    | 'notification comment reply - user'
+    | 'new comment - admin'
+    | 'contact message - user'
+    | 'new modbreak - user feedback'
+    | (string & {});
+  typeLabel?: string;
   engine?: 'email' | 'sms';
   id?: string;
   label?: string;
@@ -358,7 +457,7 @@ type Props = {
   body?: string;
 };
 
-const notificationTypes = {
+const notificationTypes: Record<string, string> = {
   'login email': 'Inloggen via e-mail',
   'login sms': 'Inloggen via sms',
   'new published resource - user feedback':
@@ -377,6 +476,10 @@ const notificationTypes = {
     'Nieuwe reactie op een inzending - Notificatie naar de gebruiker',
   'notification comment reply - user':
     'Nieuwe reactie op een reactie - Notificatie naar de gebruiker',
+  'new comment - admin': 'Nieuwe reactie - Notificatie naar de admin',
+  'contact message - user': 'Contactbericht - Notificatie naar de indiener',
+  'new modbreak - user feedback':
+    'Officiële reactie geplaatst - Notificatie naar de gebruiker',
 };
 
 const formSchema = z.object({
@@ -404,6 +507,7 @@ const formSchema = z.object({
 
 export function NotificationForm({
   type,
+  typeLabel,
   engine,
   id,
   label,
@@ -413,11 +517,21 @@ export function NotificationForm({
   const router = useRouter();
   const project = router.query.project as string;
   const { data, create, update } = useNotificationTemplate(project as string);
-  const notificationTitle = notificationTypes[type];
+  const notificationTitle = typeLabel || notificationTypes[type] || type;
   // A stored template is updated, everything else is created. Keyed on the id
   // so a stored template with an empty label cannot take the create path and
   // POST a duplicate.
   const isExistingTemplate = !!id;
+  const projectNumber = validateProjectNumber(project);
+  const { data: defaultTemplate, isLoading: loadingDefaultTemplate } = useSWR<{
+    subject?: string;
+    body?: string;
+  }>(
+    !isExistingTemplate && projectNumber && type
+      ? `/api/openstad/notification/project/${projectNumber}/template/default/${encodeURIComponent(type)}`
+      : null,
+    { shouldRetryOnError: false }
+  );
 
   type MailContextType = {
     user: { name: string; fullName: string };
@@ -456,6 +570,7 @@ export function NotificationForm({
 
   const defaultValueBody =
     body ||
+    defaultTemplate?.body ||
     (type === 'new published resource - user feedback'
       ? initialDataResourceSubmission
       : '') ||
@@ -468,17 +583,32 @@ export function NotificationForm({
     (type === 'notification comment reply - user'
       ? initialDataCommentReplyNotification
       : '') ||
-    (type === 'user account about to expire' ? initialDataAccountExpiry : '');
+    (type === 'new comment - admin'
+      ? initialDataCommentAdminNotification
+      : '') ||
+    (type === 'user account about to expire' ? initialDataAccountExpiry : '') ||
+    (type === 'new modbreak - user feedback'
+      ? initialDataModBreakNotification
+      : '');
 
   const defaults = React.useCallback(
     () => ({
       engine: engine || 'email',
-      label: label || '',
-      subject: subject || '',
+      label: label || (isExistingTemplate ? '' : notificationTitle),
+      subject: subject || defaultTemplate?.subject || '',
       body: defaultValueBody,
     }),
     // `type` feeds `defaultValueBody`, so it belongs here as well.
-    [engine, label, subject, type, defaultValueBody]
+    [
+      engine,
+      label,
+      subject,
+      type,
+      defaultValueBody,
+      defaultTemplate,
+      notificationTitle,
+      isExistingTemplate,
+    ]
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -489,10 +619,7 @@ export function NotificationForm({
   const { watch } = form;
   const fieldValue = watch('body'); // Assuming 'engine' is the name of the field you're interested in
 
-  // Guarded on `id`: only an existing template gets its values from SWR and can
-  // therefore land mid-edit. A create instance never receives them, so its form
-  // keeps the `defaultValues` it mounted with and typing in it is never reset.
-  useSyncFormDefaults(form, defaults, id);
+  useSyncFormDefaults(form, defaults, id || defaultTemplate);
 
   const [templateData, setTemplateData] = useState(defaultValueBody || '');
   const [mjmlHtml, setMjmlHtml] = useState('');
@@ -588,6 +715,10 @@ export function NotificationForm({
     save,
     label: notificationTitle,
   });
+
+  if (loadingDefaultTemplate) {
+    return <p className="py-6 text-muted-foreground">Laden...</p>;
+  }
 
   return (
     <div>

@@ -1,8 +1,8 @@
 import { FormValue } from '@openstad-headless/form/src/form';
 import type { BaseProps } from '@openstad-headless/types';
+import { ClickableImage } from '@openstad-headless/ui/src';
 import { Button, Heading, Paragraph } from '@utrecht/component-library-react';
 import React, {
-  FC,
   useCallback,
   useEffect,
   useId,
@@ -10,6 +10,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { createPortal } from 'react-dom';
 
 import './swipe.scss';
 
@@ -33,12 +34,18 @@ export type SwipeProps = {
   onSwipeLeft?: (card: SwipeCard) => void;
   showButtons?: boolean;
   enableKeyboard?: boolean;
+  imageClickable?: boolean;
   fieldKey: string;
   type?: string;
   required?: boolean;
   overrideDefaultValue?: FormValue;
   onChange?: (
-    e: { name: string; value: FormValue },
+    e: {
+      name: string;
+      value: FormValue;
+      isInitial?: boolean;
+      interactionKey?: string;
+    },
     triggerSetLastKey?: boolean
   ) => void;
   agreeText?: string;
@@ -51,19 +58,22 @@ type valueObject = Array<{
   explanation?: string;
 }>;
 
-const SwipeField: FC<SwipeWidgetProps> = ({
+const hasInfoContent = (value?: string): boolean => !!value?.trim();
+
+function SwipeField({
   cards = [],
   onSwipeLeft,
   onSwipeRight,
   showButtons = true,
   enableKeyboard = true,
+  imageClickable = false,
   required = false,
   onChange,
   fieldKey,
   overrideDefaultValue,
   agreeText = 'Eens',
   disagreeText = 'Oneens',
-}) => {
+}: SwipeWidgetProps) {
   // Generate unique ID for this component instance
   const componentId = useId();
 
@@ -131,6 +141,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   // Track if we've already initialized from overrideDefaultValue to prevent loops
   const hasInitialized = useRef(false);
+  // Mount detection + marking whether the next emit is an explanation.
+  const didInitRef = useRef(false);
+  const pendingExplanationRef = useRef(false);
   // Track the cards this component was initialized with
   const initializedCardIds = useRef<Set<string>>(componentCardIds);
   const [isFinished, setIsFinished] = useState(false);
@@ -169,6 +182,19 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   const getUnansweredCards = useCallback(() => {
     return swipeCards.filter((card) => !swipeAnswers[card.id]);
   }, [swipeCards, swipeAnswers]);
+
+  const removeCurrentCard = useCallback(() => {
+    setInfoVisibleCardId(null);
+
+    const timeout = setTimeout(() => {
+      const remainingUnanswered = getUnansweredCards();
+      if (remainingUnanswered.length === 0) {
+        setIsFinished(true);
+      }
+    }, 0);
+
+    return () => clearTimeout(timeout);
+  }, [getUnansweredCards]);
 
   const moveToPrevious = useCallback(() => {
     const answeredCards = swipeCards.filter((card) => swipeAnswers[card.id]);
@@ -224,27 +250,30 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     return answeredCardIds.length > 0;
   }, [swipeAnswers]);
 
-  const completeSwipe = useCallback((card: SwipeCard, direction: string) => {
-    // First phase: swipe animation (200ms)
-    setTimeout(() => {
-      setSwipeAnswers((prev) => ({
-        ...prev,
-        [card.id]: direction,
-      }));
-
-      // Start fadeout animation
-      setIsFadingOut(true);
-      setSwipeDirection(null);
-
-      // Second phase: fadeout animation (300ms)
+  const completeSwipe = useCallback(
+    (card: SwipeCard, direction: string) => {
+      // First phase: swipe animation (200ms)
       setTimeout(() => {
-        removeCurrentCard();
-        setIsAnimating(false);
-        setAnimationType(null);
-        setIsFadingOut(false);
-      }, 300);
-    }, 200);
-  }, []);
+        setSwipeAnswers((prev) => ({
+          ...prev,
+          [card.id]: direction,
+        }));
+
+        // Start fadeout animation
+        setIsFadingOut(true);
+        setSwipeDirection(null);
+
+        // Second phase: fadeout animation (300ms)
+        setTimeout(() => {
+          removeCurrentCard();
+          setIsAnimating(false);
+          setAnimationType(null);
+          setIsFadingOut(false);
+        }, 300);
+      }, 200);
+    },
+    [removeCurrentCard]
+  );
 
   const closeExplanationDialog = useCallback(() => {
     setIsDialogClosing(true);
@@ -273,7 +302,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         }, 300);
       }, 200);
     }, 200);
-  }, [pendingSwipe]);
+  }, [pendingSwipe, removeCurrentCard]);
 
   // Detect when cards change (new swipe component with different cards)
   useEffect(() => {
@@ -390,41 +419,22 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         }
       }
     },
-    [
-      getUnansweredCards,
-      isAnimating,
-      onSwipeRight,
-      completeSwipe,
-      agreeText,
-      disagreeText,
-    ]
+    [getUnansweredCards, isAnimating, onSwipeRight, completeSwipe, agreeText]
   );
 
-  useEffect(() => {
-    if (!enableKeyboard) return;
-
-    const handleKeyPress = (event: KeyboardEvent) => {
+  const handleCardKeyDown = useCallback(
+    (event: React.KeyboardEvent) => {
+      if (!enableKeyboard) return;
       if (event.key === 'ArrowLeft') {
+        event.preventDefault();
         handleSwipeLeft();
-      } else if (event.key === 'ArrowRight') {
+      } else if (event.key === 'ArrowRight' || event.key === 'Enter') {
+        event.preventDefault();
         handleSwipeRight();
       }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [enableKeyboard, handleSwipeLeft, handleSwipeRight]);
-
-  const removeCurrentCard = () => {
-    setInfoVisibleCardId(null);
-
-    setTimeout(() => {
-      const remainingUnanswered = getUnansweredCards();
-      if (remainingUnanswered.length === 0) {
-        setIsFinished(true);
-      }
-    }, 0);
-  };
+    },
+    [enableKeyboard, handleSwipeLeft, handleSwipeRight]
+  );
 
   const cleanupDragState = useCallback(
     (element: Element | null, pointerId?: number) => {
@@ -706,6 +716,8 @@ const SwipeField: FC<SwipeWidgetProps> = ({
   };
 
   const handleExplanationChange = (cardId: string, explanation: string) => {
+    // Mark that the next emit concerns an explanation interaction.
+    pendingExplanationRef.current = true;
     setExplanations((prev) => ({
       ...prev,
       [cardId]: explanation,
@@ -738,7 +750,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
     setIsFadingOut(false);
     setPendingSwipe(null);
     setShowExplanationDialog(false);
-  }, [swipeCards, swipeAnswers, fieldKey]);
+  }, [swipeCards, swipeAnswers]);
 
   useEffect(() => {
     if (onChange) {
@@ -751,8 +763,20 @@ const SwipeField: FC<SwipeWidgetProps> = ({
         }))
         .filter((item) => item.answer !== undefined);
 
-      onChange({ name: fieldKey, value: combinedAnswers });
+      const isInitial = !didInitRef.current;
+      const isExplanation = pendingExplanationRef.current;
+      pendingExplanationRef.current = false;
+
+      onChange({
+        name: fieldKey,
+        value: combinedAnswers,
+        ...(isInitial ? { isInitial: true } : {}),
+        ...(isExplanation
+          ? { interactionKey: `${fieldKey}::explanation` }
+          : {}),
+      });
     }
+    didInitRef.current = true;
   }, [swipeAnswers, explanations]);
 
   const unansweredCards = getUnansweredCards();
@@ -824,6 +848,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                     <div className="swipe-summary-explanation">
                       <textarea
                         id={`explanation-${card.id}`}
+                        aria-label={`Korte uitleg (niet verplicht) bij: ${card.title}`}
                         placeholder="Voeg een korte uitleg (niet verplicht) toe..."
                         value={explanations[card.id] || ''}
                         onChange={(e) =>
@@ -846,7 +871,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
 
   return (
     <>
-      <div className="swipe-progress">
+      <div className="swipe-progress" aria-live="polite" aria-atomic="true">
         <span>
           {currentIndex + 1} van {swipeCards.length}
         </span>
@@ -893,6 +918,7 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                     style={{ zIndex, ...(transform ? { transform } : {}) }}
                     {...(isTop
                       ? {
+                          onKeyDown: handleCardKeyDown,
                           onPointerDown: handlePointerDown,
                           onPointerMove: handlePointerMove,
                           onPointerUp: handlePointerUp,
@@ -910,10 +936,16 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                     aria-describedby={`swipe-card-desc-${card.id}`}>
                     {card.image && (
                       <div className="swipe-card-image">
-                        <img
+                        <ClickableImage
+                          clickable={imageClickable}
                           src={card.image}
                           alt={card.title || `afbeelding voor: ${card.title}`}
-                        />
+                          variant="overlay">
+                          <img
+                            src={card.image}
+                            alt={card.title || `afbeelding voor: ${card.title}`}
+                          />
+                        </ClickableImage>
                       </div>
                     )}
                     <div className="swipe-card-content">
@@ -943,12 +975,15 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                       </div>
                     )}
                   </div>
-                  {card.infoField && (
+                  {hasInfoContent(card.infoField) && (
                     <div
                       className="info-card"
                       aria-hidden={
                         infoVisibleCardId !== card.id ? 'true' : 'false'
                       }
+                      {...(infoVisibleCardId !== card.id
+                        ? { inert: 'true' as any }
+                        : {})}
                       onClick={() => {
                         setInfoVisibleCardId(null);
                       }}>
@@ -958,6 +993,9 @@ const SwipeField: FC<SwipeWidgetProps> = ({
                         <Paragraph>{card.infoField}</Paragraph>
                         <Button
                           appearance="primary-action-button"
+                          tabIndex={
+                            infoVisibleCardId !== card.id ? -1 : undefined
+                          }
                           onClick={() => {
                             setInfoVisibleCardId(null);
                           }}>
@@ -1001,21 +1039,22 @@ const SwipeField: FC<SwipeWidgetProps> = ({
             </div>
 
             <div className="swipe-middle-actions">
-              <button
-                className="swipe-info-btn"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setInfoVisibleCardId(
-                    infoVisibleCardId === currentCardId ? null : currentCardId
-                  );
-                }}
-                disabled={!unansweredCards[0]?.infoField}
-                aria-label="Toon info">
-                <span className="sr-only">Toon info</span>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
-                  <path d="M320 112C434.9 112 528 205.1 528 320C528 434.9 434.9 528 320 528C205.1 528 112 434.9 112 320C112 205.1 205.1 112 320 112zM320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM280 400C266.7 400 256 410.7 256 424C256 437.3 266.7 448 280 448L360 448C373.3 448 384 437.3 384 424C384 410.7 373.3 400 360 400L352 400L352 312C352 298.7 341.3 288 328 288L280 288C266.7 288 256 298.7 256 312C256 325.3 266.7 336 280 336L304 336L304 400L280 400zM320 256C337.7 256 352 241.7 352 224C352 206.3 337.7 192 320 192C302.3 192 288 206.3 288 224C288 241.7 302.3 256 320 256z" />
-                </svg>
-              </button>
+              {hasInfoContent(unansweredCards[0]?.infoField) && (
+                <button
+                  className="swipe-info-btn"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setInfoVisibleCardId(
+                      infoVisibleCardId === currentCardId ? null : currentCardId
+                    );
+                  }}
+                  aria-label="Toon info">
+                  <span className="sr-only">Toon info</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640">
+                    <path d="M320 112C434.9 112 528 205.1 528 320C528 434.9 434.9 528 320 528C205.1 528 112 434.9 112 320C112 205.1 205.1 112 320 112zM320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM280 400C266.7 400 256 410.7 256 424C256 437.3 266.7 448 280 448L360 448C373.3 448 384 437.3 384 424C384 410.7 373.3 400 360 400L352 400L352 312C352 298.7 341.3 288 328 288L280 288C266.7 288 256 298.7 256 312C256 325.3 266.7 336 280 336L304 336L304 400L280 400zM320 256C337.7 256 352 241.7 352 224C352 206.3 337.7 192 320 192C302.3 192 288 206.3 288 224C288 241.7 302.3 256 320 256z" />
+                  </svg>
+                </button>
+              )}
               <button
                 className="swipe-skip-btn"
                 onClick={(e) => (e.preventDefault(), moveToNext())}
@@ -1030,41 +1069,56 @@ const SwipeField: FC<SwipeWidgetProps> = ({
           </div>
         )}
 
-        {showExplanationDialog && (
-          <div
-            className={`explanation-dialog ${
-              isDialogClosing ? 'explanation-dialog--closing' : ''
-            }`}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="explanation-dialog-title">
-            <div className="explanation-dialog-content">
-              <Heading level={3} id="explanation-dialog-title">
-                Korte uitleg
-              </Heading>
-              <Paragraph>Zodat we beter begrijpen wat belangrijk is.</Paragraph>
-              <textarea
-                autoFocus
-                placeholder="Ik maak deze keuze, omdat..."
-                rows={5}
-                value={explanations[currentCardId] || ''}
-                onChange={(e) =>
-                  handleExplanationChange(String(currentCardId), e.target.value)
-                }
-              />
-              <Button
-                appearance="primary-action-button"
-                onClick={closeExplanationDialog}>
-                Antwoord verzenden
-              </Button>
-              <Button
-                appearance="secondary-action-button"
-                onClick={closeExplanationDialog}>
-                Overslaan
-              </Button>
-            </div>
-          </div>
-        )}
+        {showExplanationDialog &&
+          // ponytail: via portal in document.body zodat de fixed-modal niet gevangen wordt
+          // door de transform op de swipe-kaarten (anders rekent 95% t.o.v. een bredere
+          // voorouder en loopt de dialog buiten beeld op 320px — WCAG 1.4.10).
+          createPortal(
+            // .openstad-wrapper zodat de geprefixte widget-CSS (`.openstad .explanation-dialog`)
+            // ook in de portal (buiten de widget-DOM) matcht.
+            <div className="openstad osc">
+              <div
+                className={`explanation-dialog ${
+                  isDialogClosing ? 'explanation-dialog--closing' : ''
+                }`}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="explanation-dialog-title">
+                <div className="explanation-dialog-content">
+                  <Heading level={3} id="explanation-dialog-title">
+                    Korte uitleg
+                  </Heading>
+                  <Paragraph>
+                    Zodat we beter begrijpen wat belangrijk is.
+                  </Paragraph>
+                  <textarea
+                    autoFocus
+                    aria-label="Korte uitleg bij je keuze"
+                    placeholder="Ik maak deze keuze, omdat..."
+                    rows={5}
+                    value={explanations[currentCardId] || ''}
+                    onChange={(e) =>
+                      handleExplanationChange(
+                        String(currentCardId),
+                        e.target.value
+                      )
+                    }
+                  />
+                  <Button
+                    appearance="primary-action-button"
+                    onClick={closeExplanationDialog}>
+                    Antwoord verzenden
+                  </Button>
+                  <Button
+                    appearance="secondary-action-button"
+                    onClick={closeExplanationDialog}>
+                    Overslaan
+                  </Button>
+                </div>
+              </div>
+            </div>,
+            document.body
+          )}
       </div>
       <button
         className="swipe-back-button"
@@ -1076,6 +1130,6 @@ const SwipeField: FC<SwipeWidgetProps> = ({
       </button>
     </>
   );
-};
+}
 export { SwipeField };
 export default SwipeField;

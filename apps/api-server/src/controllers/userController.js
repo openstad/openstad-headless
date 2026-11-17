@@ -11,9 +11,11 @@ const Sequelize = require('sequelize');
 const { Op } = Sequelize;
 const createError = require('http-errors');
 const merge = require('merge');
+const config = require('config');
 const db = require('../db');
 const authSettings = require('../util/auth-settings');
 const hasRole = require('../lib/sequelize-authorization/lib/hasRole');
+const { applyUserSearchFilter } = require('../lib/user-search-filter');
 const { dedupeUsersByIdentity } = require('../services/userDeduplication');
 const { computeUnsubscribeHash } = require('../services/userUnsubscribe');
 
@@ -24,6 +26,7 @@ const filterBody = (req, res, next) => {
     'password',
     'name',
     'nickName',
+    'projectDisplayName',
     'email',
     'phoneNumber',
     'address',
@@ -34,8 +37,6 @@ const filterBody = (req, res, next) => {
     'detailsViewableByRole',
     'firstname',
     'lastname',
-    'twoFactorToken',
-    'twoFactorConfigured',
     'emailNotificationConsent',
     'autoAddToNewProjects',
   ];
@@ -57,6 +58,96 @@ const filterBody = (req, res, next) => {
 
   next();
 };
+
+const IDENTITY_FIELDS = ['email', 'password', 'name', 'phoneNumber'];
+
+function isSameIdentity(a, b) {
+  return !!(
+    a?.identifier &&
+    a.identifier === b?.identifier &&
+    a.provider === b?.provider
+  );
+}
+
+function isSamePerson(req, target) {
+  return !!(
+    (req.user?.id && req.user.id === target.id) ||
+    isSameIdentity(req.user?.idpUser, target.idpUser)
+  );
+}
+
+async function canManageIdentity(req, target) {
+  const identifier = target?.idpUser?.identifier;
+  if (!identifier) return true;
+  if (hasRole(req.user, 'superuser')) return true;
+  if (isSameIdentity(req.user?.idpUser, target.idpUser)) return true;
+
+  const linkedUsers = await db.User.findAll({
+    where: {
+      idpUser: { identifier, provider: target.idpUser.provider },
+      projectId: { [Op.not]: 0 },
+    },
+  });
+  const existingProjects = await db.Project.findAll({
+    where: { id: { [Op.in]: linkedUsers.map((u) => u.projectId) } },
+    attributes: ['id'],
+  });
+  const existingProjectIds = new Set(existingProjects.map((p) => p.id));
+
+  return linkedUsers
+    .filter((u) => existingProjectIds.has(u.projectId))
+    .every((u) => u.can('update', req.user));
+}
+
+async function authorizeIdentityData(req, target, userData) {
+  const data = merge.recursive(true, userData);
+  target.authorizeData(data, 'update', req.user);
+  if (!hasRole(req.user, 'editor') && !isSamePerson(req, target))
+    delete data.password;
+  if (!(await canManageIdentity(req, target))) {
+    for (const field of IDENTITY_FIELDS) delete data[field];
+  }
+  return data;
+}
+
+async function getAdminAuthConfig() {
+  const adminProject = await db.Project.findByPk(config.admin.projectId);
+  return authSettings.config({ project: adminProject, useAuth: 'default' });
+}
+
+async function getIdentityAuthConfig(req, target) {
+  if (!hasRole(req.user, 'superuser') && !isSamePerson(req, target))
+    return req.authConfig;
+  return getAdminAuthConfig();
+}
+
+async function guardIdentityChanges(req, res, next) {
+  try {
+    const target = req.results;
+    for (const field of IDENTITY_FIELDS) {
+      if (
+        typeof req.body[field] !== 'undefined' &&
+        (req.body[field] || null) === (target[field] || null)
+      )
+        delete req.body[field];
+    }
+    if (!req.body.password) delete req.body.password;
+
+    const changesIdentity = IDENTITY_FIELDS.some(
+      (field) => typeof req.body[field] !== 'undefined'
+    );
+    if (changesIdentity && !(await canManageIdentity(req, target)))
+      return next(
+        createError(
+          403,
+          'Only a superuser can change the name, email, phone number or password of a user in multiple projects'
+        )
+      );
+    return next();
+  } catch (err) {
+    return next(err);
+  }
+}
 
 // ----------------------------------------------------------------------------
 // Shared middleware
@@ -118,6 +209,10 @@ async function unsubscribe(req, res, next) {
     if (!user) return next(new Error('Users: user not found'));
 
     const projectId = user.projectId;
+
+    if (!process.env.USER_ID_SALT)
+      return next(new Error('Users: unsubscribe is not configured'));
+
     const hashedUserId = computeUnsubscribeHash(userId, projectId);
 
     if (hashedUserId !== userHash)
@@ -195,6 +290,8 @@ function listUsers(req, res, next) {
     req.query.uniqueByIdpUser !== '0' &&
     !hasByIdpUserFilter;
   const shouldExcludeAnonymous = req.query.excludeAnonymous === '1';
+  const shouldHideMembersWithoutEmail =
+    req.query.hideMembersWithoutEmail === '1';
 
   dbQuery.where = {
     ...req.queryConditions,
@@ -204,6 +301,14 @@ function listUsers(req, res, next) {
   if (shouldExcludeAnonymous) {
     dbQuery.where.role = { [Op.not]: 'anonymous' };
   }
+  if (shouldHideMembersWithoutEmail) {
+    const isNotMemberOrHasEmail = {
+      [Op.or]: [{ role: { [Op.ne]: 'member' } }, { email: { [Op.ne]: '' } }],
+    };
+    dbQuery.where[Op.and] = (dbQuery.where[Op.and] || []).concat(
+      isNotMemberOrHasEmail
+    );
+  }
 
   if (shouldDedupeByIdpUser) {
     delete dbQuery.offset;
@@ -211,18 +316,8 @@ function listUsers(req, res, next) {
     delete dbQuery.pageSize;
   }
 
-  const q =
-    req.query.q && typeof req.query.q === 'string' ? req.query.q.trim() : '';
-  if (q) {
-    const like =
-      '%' +
-      String(q).replace(/[\\%_]/g, (m) => (m === '\\' ? '\\\\' : '\\' + m)) +
-      '%';
-    dbQuery.where[Op.or] = [
-      { name: { [Op.like]: like } },
-      { email: { [Op.like]: like } },
-      { postcode: { [Op.like]: like } },
-    ];
+  if (hasRole(req.user, 'moderator')) {
+    applyUserSearchFilter(dbQuery.where, req.query.q);
   }
 
   db.User.scope(...req.scope)
@@ -251,6 +346,10 @@ function respondResults(req, res, next) {
   res.json(req.results);
 }
 
+function respondCreatedUser(req, res, next) {
+  return res.json(req.results.toJSON(req.user));
+}
+
 // ----------------------------------------------------------------------------
 // Create user  (POST /)
 // ----------------------------------------------------------------------------
@@ -261,14 +360,15 @@ function requireProject(req, res, next) {
 }
 
 function requireCanCreateUsers(req, res, next) {
-  if (
-    !(
-      ['admin', 'editor'].includes(req.body?.role) || // Allow admin/editor creation for projects that have ended
-      (req.project.config &&
-        req.project.config.users &&
-        req.project.config.users.canCreateNewUsers)
-    )
-  )
+  const mayCreateRoleForEndedProject =
+    ['admin', 'editor'].includes(req.body?.role) &&
+    hasRole(req.user, req.body.role);
+  if (!(
+    mayCreateRoleForEndedProject ||
+    (req.project.config &&
+      req.project.config.users &&
+      req.project.config.users.canCreateNewUsers)
+  ))
     return next(createError(401, 'Gebruikers mogen niet aangemaakt worden'));
   return next();
 }
@@ -368,6 +468,7 @@ async function createUser(req, res, next) {
     role: req.body.role || req.oAuthUser.role || 'member',
     lastLogin: Date.now(),
     emailNotificationConsent: null,
+    privacyConsentAt: null,
   };
 
   db.User.authorizeData(data, 'create', req.user)
@@ -379,7 +480,7 @@ async function createUser(req, res, next) {
           authConfig: req.authConfig,
           userData: {
             id: req.oAuthUser.idpUser.identifier,
-            role: req.body.role,
+            role: req.body.role ? result.role : undefined,
           },
         });
       return next();
@@ -407,31 +508,58 @@ async function createUser(req, res, next) {
 // Two-factor
 // ----------------------------------------------------------------------------
 
+function withTwoFactorTarget(req, res, next) {
+  const where = { id: parseInt(req.params.userId) };
+  if (req.params.projectId) where.projectId = req.params.projectId;
+
+  return db.User.scope(...req.scope)
+    .findOne({ where })
+    .then((found) => {
+      if (!found) throw createError(404, 'User not found');
+      req.results = found;
+      next();
+      return null;
+    })
+    .catch(next);
+}
+
+async function canManageTwoFactor(req, res, next) {
+  try {
+    if (
+      !(req.results && req.results.can && req.results.can('update')) ||
+      !(await canManageIdentity(req, req.results))
+    )
+      return next(
+        createError(403, 'You cannot manage two factor for this User')
+      );
+    return next();
+  } catch (err) {
+    return next(err);
+  }
+}
+
 async function getTwoFactorStatus(req, res, next) {
   try {
-    const userId = parseInt(req.params.userId);
+    const identifier = req.results.idpUser?.identifier;
+    if (!identifier) return res.json({ twoFactorEnabled: false });
 
-    const apiUser = await db.User.findOne({ where: { id: userId } });
-    if (!apiUser) {
-      return res.status(404).json({ error: 'API user not found' });
+    const authConfig = await getAdminAuthConfig();
+    const adapter = await authSettings.adapter({ authConfig });
+
+    let authUser;
+    try {
+      authUser = await adapter.service.fetchUserData({
+        authConfig,
+        userId: identifier,
+      });
+    } catch (err) {
+      if (err?.message === 'Auth server user lookup returned 404') {
+        return res.json({ twoFactorEnabled: false });
+      }
+      throw err;
     }
 
-    // auth server settings
-    req.authConfig = await authSettings.config({
-      project: req.project,
-      useAuth: req.query.useAuth || 'default',
-    });
-    req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
-
-    // fetch auth user
-    const authUser = await req.adapter.service.fetchUserData({
-      authConfig: req.authConfig,
-      userId: apiUser.idpUser.identifier,
-    });
-
-    // return true if twoFactorConfigured equals 1
-    const isTwoFactorConfigured = authUser?.twoFactorConfigured === 1;
-    res.json({ twoFactorEnabled: isTwoFactorConfigured });
+    res.json({ twoFactorEnabled: authUser?.twoFactorConfigured === 1 });
   } catch (err) {
     next(err);
   }
@@ -439,24 +567,17 @@ async function getTwoFactorStatus(req, res, next) {
 
 async function resetTwoFactor(req, res, next) {
   try {
-    const userId = parseInt(req.params.userId);
+    const user = req.results;
 
-    const user = await db.User.findOne({ where: { id: userId } });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-
-    // auth server settings
     req.authConfig = await authSettings.config({
       project: req.project,
       useAuth: req.query.useAuth || 'default',
     });
     req.adapter = await authSettings.adapter({ authConfig: req.authConfig });
 
-    // Reset two-factor authentication in the auth database
     if (user.idpUser?.identifier && req.adapter.service.updateUser) {
       await req.adapter.service.updateUser({
-        authConfig: req.authConfig,
+        authConfig: await getIdentityAuthConfig(req, user),
         userData: {
           id: user.idpUser.identifier,
           twoFactorToken: null,
@@ -567,14 +688,19 @@ function parseAnonymizeUserName(req, res, next) {
 
 async function anonymizeTargetUser(req, res, next) {
   let result;
-  if (
-    !(
-      req.targetUser &&
-      req.targetUser.can &&
-      req.targetUser.can('update', req.user)
-    )
-  )
+  if (!(
+    req.targetUser &&
+    req.targetUser.can &&
+    req.targetUser.can('update', req.user)
+  ))
     return next(createError(403, 'You cannot update this User'));
+  if (req.params.all) {
+    const selected = (req.linkedUsers || []).filter(
+      (user) => !req.onlyUserIds || req.onlyUserIds.includes(user.id)
+    );
+    if (!selected.every((user) => user.can && user.can('update', req.user)))
+      return next(createError(403, 'You cannot update this User'));
+  }
   if (req.onlyUserIds && !req.onlyUserIds.includes(req.targetUser.id)) {
     req.results = {
       resources: [],
@@ -671,10 +797,14 @@ async function deleteOAuthUserIfNoneRemain(req, res, next) {
     });
     let adapter = await authSettings.adapter({ authConfig: req.authConfig });
     if (adapter.service.deleteUser) {
-      await adapter.service.deleteUser({
-        authConfig,
-        userData: { id: req.externalUserId },
-      });
+      adapter.service
+        .deleteUser({
+          authConfig,
+          userData: { id: req.externalUserId },
+        })
+        .catch((err) =>
+          console.error('Error deleting auth user after anonymizing user:', err)
+        );
     }
   } catch (err) {
     return next(err);
@@ -687,8 +817,7 @@ function attachUserToAnonymizeResults(req, res, next) {
   Object.keys(req.results).forEach((which) => {
     req.results[which] &&
       req.results[which].forEach((result) => {
-        result.auth = result.auth || {};
-        result.auth.user = req.user;
+        result.auth = { ...result.auth, user: req.user };
       });
   });
   return next();
@@ -701,17 +830,34 @@ function attachUserToAnonymizeResults(req, res, next) {
 function loadUser(req, res, next) {
   const userId = parseInt(req.params.userId, 10);
   if (!userId) return next(createError(400, 'Invalid user id'));
+  const where = { id: userId };
+  if (req.params.projectId) where.projectId = req.params.projectId;
   db.User.scope(...req.scope)
-    .findOne({
-      //where: {id: userId, projectId: req.params.projectId},
-      where: { id: userId },
-    })
+    .findOne({ where })
     .then((found) => {
       if (!found) throw new createError(404, 'User not found');
       req.results = found;
       next();
     })
     .catch(next);
+}
+
+function requireModeratorOrOwner(req, res, next) {
+  const user = req.user;
+  const target = req.results;
+  const isPrivileged = hasRole(user, 'moderator');
+  const isOwner =
+    (user && user.id && target && user.id === target.id) ||
+    (user &&
+      user.idpUser &&
+      target &&
+      target.idpUser &&
+      user.idpUser.identifier &&
+      user.idpUser.identifier === target.idpUser.identifier);
+  if (!isPrivileged && !isOwner) {
+    return next(createError(403, 'You cannot view this User'));
+  }
+  return next();
 }
 
 function checkUserUpdatable(req, res, next) {
@@ -735,11 +881,23 @@ async function updateUser(req, res, next) {
         req.results.idpUser.provider == req.authConfig.provider &&
         req.adapter.service.updateUser
       ) {
+        const authorizedData = await authorizeIdentityData(req, user, userData);
+        const id = user.idpUser.identifier;
+        const identityData = { id };
+        for (const field of IDENTITY_FIELDS) {
+          if (typeof authorizedData[field] !== 'undefined')
+            identityData[field] = authorizedData[field];
+          delete authorizedData[field];
+        }
+        if (Object.keys(identityData).length > 1) {
+          await req.adapter.service.updateUser({
+            authConfig: await getIdentityAuthConfig(req, user),
+            userData: identityData,
+          });
+        }
         updatedUserData = await req.adapter.service.updateUser({
           authConfig: req.authConfig,
-          userData: merge(true, userData, {
-            id: user.idpUser && user.idpUser.identifier,
-          }),
+          userData: merge(true, authorizedData, { id }),
         });
       }
 
@@ -747,38 +905,56 @@ async function updateUser(req, res, next) {
       let synchronizedUpdatedUserData = merge.recursive({}, updatedUserData);
       let userProjectSpecificFields = [
         'nickName',
+        'projectDisplayName',
         'role',
         'emailNotificationConsent',
         'privacyConsentAt',
+        'listableByRole',
+        'detailsViewableByRole',
+        'lastLogin',
+        'isNotifiedAboutAnonymization',
         'autoAddToNewProjects',
       ]; // todo: dit moet natuurlijk niet hier, maar dat is nu minder relevant
       for (let userProjectSpecificField of userProjectSpecificFields) {
         delete synchronizedUpdatedUserData[userProjectSpecificField];
       }
 
+      const idpUser = updatedUserData.idpUser || user.idpUser;
       let apiUsers = await db.User.scope(['includeProject']).findAll({
         where: {
           idpUser: {
-            identifier: updatedUserData.idpUser.identifier,
-            provider: updatedUserData.idpUser.provider,
+            identifier: idpUser.identifier,
+            provider: idpUser.provider,
           },
           projectId: { [Op.not]: 0 },
         },
       });
 
-      // A failing linked-user update fails the request, so the client knows
-      // the update did not fully succeed.
-      await Promise.all(
-        apiUsers.map((apiUser) => {
-          let data =
-            apiUser.projectId == req.params.projectId
-              ? updatedUserDataForProject
-              : synchronizedUpdatedUserData;
+      const existingProjects = await db.Project.findAll({
+        where: {
+          id: { [Op.in]: apiUsers.map((apiUser) => apiUser.projectId) },
+        },
+        attributes: ['id'],
+      });
+      const existingProjectIds = new Set(
+        existingProjects.map((project) => project.id)
+      );
 
-          if (!req.user.can('update', apiUser)) {
-            console.error(`Not authorized to update linked user ${apiUser.id}`);
-            return Promise.resolve();
+      const syncErrors = [];
+      await Promise.all(
+        apiUsers.map(async (apiUser) => {
+          if (!existingProjectIds.has(apiUser.projectId)) {
+            return;
           }
+          const isCurrentProject = apiUser.projectId == req.params.projectId;
+          let data = merge.recursive(
+            {},
+            isCurrentProject
+              ? updatedUserDataForProject
+              : synchronizedUpdatedUserData
+          );
+
+          if (!apiUser.can('update', req.user)) return;
 
           if (
             data?.idpUser &&
@@ -787,9 +963,21 @@ async function updateUser(req, res, next) {
           ) {
             data.idpUser.accesstoken = apiUser.idpUser.accesstoken;
           }
-          return apiUser.authorizeData(data, 'update', req.user).update(data);
+
+          try {
+            await apiUser.authorizeData(data, 'update', req.user).update(data);
+          } catch (err) {
+            syncErrors.push(err);
+          }
         })
       );
+
+      if (syncErrors.length) {
+        console.error(
+          `User update: one or more user records failed to update (${syncErrors.length}):`,
+          syncErrors.map((e) => e.message)
+        );
+      }
     } else {
       let apiUser = await db.User.scope(['includeProject']).findOne({
         where: {
@@ -805,6 +993,13 @@ async function updateUser(req, res, next) {
     return next();
   } catch (err) {
     console.log(err);
+    if (err.status === 403)
+      return next(
+        createError(
+          403,
+          'The auth server did not allow changing the name, email, phone number or password of this user'
+        )
+      );
     return next(createError(500, 'User update failed'));
   }
 }
@@ -844,13 +1039,17 @@ async function deleteUser(req, res, next) {
     });
     let adapter = await authSettings.adapter({ authConfig: req.authConfig });
     if (adapter.service.deleteUser) {
-      await adapter.service.deleteUser({
-        authConfig,
-        userData: {
-          id: user.idpUser.identifier,
-          provider: user.idpUser.provider,
-        },
-      });
+      adapter.service
+        .deleteUser({
+          authConfig,
+          userData: {
+            id: user.idpUser.identifier,
+            provider: user.idpUser.provider,
+          },
+        })
+        .catch((err) =>
+          console.error('Error deleting auth user after deleting user:', err)
+        );
     }
   }
 
@@ -892,7 +1091,10 @@ module.exports = {
   createOAuthUserIfMissing,
   ensureUserNotExists,
   createUser,
+  respondCreatedUser,
   // two-factor
+  withTwoFactorTarget,
+  canManageTwoFactor,
   getTwoFactorStatus,
   resetTwoFactor,
   // anonymize
@@ -908,7 +1110,9 @@ module.exports = {
   attachUserToAnonymizeResults,
   // single user
   loadUser,
+  requireModeratorOrOwner,
   checkUserUpdatable,
+  guardIdentityChanges,
   updateUser,
   respondUpdatedUser,
   deleteUser,

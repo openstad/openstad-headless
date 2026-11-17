@@ -8,6 +8,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import WidgetChoiceGuideChoiceOptions from '@/pages/projects/[project]/widgets/choiceguide/[id]/choiceOptions';
 import WidgetChoiceGuideItems from '@/pages/projects/[project]/widgets/choiceguide/[id]/items';
 import WidgetChoiceGuidePolygons from '@/pages/projects/[project]/widgets/choiceguide/[id]/polygons';
@@ -33,29 +34,22 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { previewConfig, onFieldChanged } = useWidgetDraft<ChoiceGuideProps>({
-    projectId,
-  });
+  const { widget, previewConfig, onFieldChanged } =
+    useWidgetDraft<ChoiceGuideProps>({
+      projectId,
+    });
 
   const tabUpdateConfig = ignoreTabSubmit;
 
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Keuzewijzer',
-            url: `/projects/${projectId}/widgets/keuzewijzer/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Keuzewijzer',
+          `/projects/${projectId}/widgets/keuzewijzer/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="form">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">

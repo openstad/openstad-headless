@@ -33,13 +33,13 @@ Templates combine mjml and nunjucks, and the aforementioned `data` field. Below 
 </mjml>
 ```
 
-Note: some types (currently 'new or updated comment - admin update') are saved with status queued; the above message creating and sending is then done from a cron job.
+Note: types that are not listed in the `immediateTypes` array in `models/Notification.js` are saved with status `queued`; the message creation and sending is then done from a cron job.
 
 ### Types
 
 Currently available types:
 
-- new or updated comment - admin update
+- new comment - admin
 - new concept resource - user feedback
 - new published resource - user feedback
 - new published resource - admin update

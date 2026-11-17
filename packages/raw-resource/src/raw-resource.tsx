@@ -65,11 +65,11 @@ function RawResource(props: RawResourceWidgetProps) {
       <Spacer size={2} />
       <section className="osc-raw-resource-container">
         {render && (
-          // this sets innerHTML, input is sanitized in widget.js
-          <div
-            dangerouslySetInnerHTML={{
-              __html: render,
-            }}></div>
+          // Raw templates are admin-authored widget config (trusted, may
+          // contain iframes/scripts on purpose). Untrusted variable values are
+          // sanitized inside renderRawTemplate.
+          // eslint-disable-next-line react/no-danger
+          <div dangerouslySetInnerHTML={{ __html: render }}></div>
         )}
       </section>
     </div>

@@ -143,7 +143,7 @@ module.exports = resultObject([
   {
     name: 'modbreakAuthor',
     type: 'string',
-    label: 'Author of the modbreaks',
+    label: 'Author of the official responses',
     required: false,
   },
   {
@@ -463,6 +463,22 @@ module.exports = resultObject([
         value: 'hideMenu',
         label: 'Hide the menu items',
         showFields: ['mainMenuItems'],
+      },
+    ],
+  },
+  {
+    name: 'mainMenuParentBehavior',
+    type: 'select',
+    label: 'How does a menu item with subpages behave?',
+    def: 'linkWithToggle',
+    choices: [
+      {
+        value: 'linkWithToggle',
+        label: 'Link with a separate expand button',
+      },
+      {
+        value: 'button',
+        label: 'One button; the page itself becomes the first submenu item',
       },
     ],
   },

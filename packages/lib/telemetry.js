@@ -33,7 +33,7 @@ function createTelemetry(config = {}) {
 
   function initialize() {
     if (!merged.enabled) {
-      console.log('OpenTelemetry is disabled');
+      console.error('OpenTelemetry is disabled');
       return;
     }
 
@@ -74,8 +74,8 @@ function createTelemetry(config = {}) {
       });
 
       sdk.start();
-      console.log(`OpenTelemetry initialized for ${merged.serviceName}`);
-      console.log(`Sending traces to: ${merged.otlpEndpoint}`);
+      console.error(`OpenTelemetry initialized for ${merged.serviceName}`);
+      console.error(`Sending traces to: ${merged.otlpEndpoint}`);
     } catch (error) {
       console.error('Failed to initialize OpenTelemetry:', error);
     }

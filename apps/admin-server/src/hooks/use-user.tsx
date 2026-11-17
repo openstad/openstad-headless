@@ -1,3 +1,4 @@
+import { throwApiError } from '@/lib/api-error';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 
@@ -44,7 +45,8 @@ export default function useUser() {
     });
     if (!res.ok) {
       console.error('Saving the user failed', res.status, res.statusText);
-      throw new Error(
+      await throwApiError(
+        res,
         'De gebruiker kon niet worden opgeslagen. Probeer het opnieuw.'
       );
     }

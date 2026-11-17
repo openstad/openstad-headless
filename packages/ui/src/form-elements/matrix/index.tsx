@@ -1,5 +1,6 @@
 import { Matrix } from '@openstad-headless/enquete/src/types/enquete-props';
 import { FormValue } from '@openstad-headless/form/src/form';
+import { toHtmlId } from '@openstad-headless/lib/to-html-id';
 import { Spacer } from '@openstad-headless/ui/src';
 import {
   AccordionProvider,
@@ -18,10 +19,10 @@ import {
   TableHeaderCell,
   TableRow,
 } from '@utrecht/component-library-react';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
-import RteContent from '../../rte-formatting/rte-content';
+import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
 import './matrix.css';
 
 export type MatrixFieldProps = {
@@ -34,7 +35,11 @@ export type MatrixFieldProps = {
   disabled?: boolean;
   type?: string;
   onChange?: (
-    e: { name: string; value: string | Record<number, never> | [] | string[] },
+    e: {
+      name: string;
+      value: string | Record<number, never> | [] | string[];
+      isInitial?: boolean;
+    },
     triggerSetLastKey?: boolean
   ) => void;
   showMoreInfo?: boolean;
@@ -58,6 +63,7 @@ export type MatrixFieldProps = {
   imageClickable?: boolean;
   nextPageText?: string;
   prevPageText?: string;
+  rowHeaderLabel?: string;
 };
 
 const MatrixField: FC<MatrixFieldProps> = ({
@@ -83,10 +89,13 @@ const MatrixField: FC<MatrixFieldProps> = ({
   images = [],
   createImageSlider = false,
   imageClickable = false,
+  rowHeaderLabel = 'Onderwerp',
 }) => {
   const initialValue = Array.isArray(overrideDefaultValue)
     ? (overrideDefaultValue as string[])
     : [];
+  const idKey = toHtmlId(fieldKey);
+
   const [selectedChoices, setSelectedChoices] =
     useState<string[]>(initialValue);
 
@@ -94,13 +103,17 @@ const MatrixField: FC<MatrixFieldProps> = ({
   const maxReached =
     maxChoicesNum > 0 && selectedChoices.length >= maxChoicesNum;
 
+  const didInitRef = useRef(false);
   useEffect(() => {
     if (onChange) {
       onChange({
         name: fieldKey,
         value: selectedChoices,
+        // The first emit is the mount initialisation, not a user interaction.
+        isInitial: !didInitRef.current,
       });
     }
+    didInitRef.current = true;
   }, [JSON.stringify(selectedChoices)]);
 
   class HtmlContent extends React.Component<{ html: any }> {
@@ -138,14 +151,15 @@ const MatrixField: FC<MatrixFieldProps> = ({
     <div className="question">
       <Fieldset
         role="group"
-        aria-invalid={fieldInvalid}
-        aria-describedby={`${randomId}_error`}>
+        invalid={fieldInvalid}
+        aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}>
         {title && (
           <FieldsetLegend>
             <RteContent
               content={title}
               unwrapSingleRootDiv={true}
               forceInline={true}
+              inlineComponent={InlineParagraph}
             />
           </FieldsetLegend>
         )}
@@ -184,15 +198,20 @@ const MatrixField: FC<MatrixFieldProps> = ({
         })}
 
         <Table
-          role="presentation"
           data-columns={matrix?.columns?.length || 0}
           data-rows={matrix?.rows?.length || 0}>
-          <TableHeader role="presentation">
+          <TableHeader>
             <TableRow>
-              <TableHeaderCell key={`column--1`}></TableHeaderCell>
+              {/* ponytail: hoekcel niet leeg laten (WCAG 1.3.1) — visueel verborgen label */}
+              <TableHeaderCell key={`column--1`} scope="col">
+                <span className="sr-only">{rowHeaderLabel}</span>
+              </TableHeaderCell>
 
               {matrix?.columns?.map((column, index) => (
-                <TableHeaderCell key={`column-${index}`}>
+                <TableHeaderCell
+                  key={`column-${index}`}
+                  id={`${idKey}-col-${index}`}
+                  scope="col">
                   <span className="column-text">{column?.text || ''}</span>
                 </TableHeaderCell>
               ))}
@@ -201,9 +220,12 @@ const MatrixField: FC<MatrixFieldProps> = ({
           <TableBody>
             {matrix?.rows?.map((row, ri) => (
               <TableRow>
-                <TableCell key={`row-${ri}`}>
+                <TableHeaderCell
+                  key={`row-${ri}`}
+                  id={`${idKey}-row-${ri}`}
+                  scope="row">
                   <span className="row-text">{row?.text || ''}</span>
-                </TableCell>
+                </TableHeaderCell>
 
                 {matrix?.columns?.map((column, ci) => {
                   const cellIndex =
@@ -219,14 +241,14 @@ const MatrixField: FC<MatrixFieldProps> = ({
                         <Paragraph
                           className={`utrecht-form-field__label utrecht-form-field__label--${type}`}>
                           <FormLabel
-                            htmlFor={`${fieldKey}_${cellIndex}`}
+                            htmlFor={`${idKey}_${cellIndex}`}
                             type={type}
                             className="--label-grid">
                             {matrixMultiple ? (
                               <>
                                 <Checkbox
                                   className="utrecht-form-field__input"
-                                  id={`${fieldKey}_${cellIndex}`}
+                                  id={`${idKey}_${cellIndex}`}
                                   name={`${fieldKey}_${rowIndex}`}
                                   value={cellIndex}
                                   required={fieldRequired}
@@ -239,8 +261,9 @@ const MatrixField: FC<MatrixFieldProps> = ({
                                     (maxReached &&
                                       !selectedChoices.includes(cellIndex))
                                   }
+                                  aria-labelledby={`${idKey}-row-${ri} ${idKey}-col-${ci}`}
                                 />
-                                <span className="cell-text">
+                                <span className="cell-text" aria-hidden="true">
                                   {column?.text || ''}
                                 </span>
                               </>
@@ -248,7 +271,7 @@ const MatrixField: FC<MatrixFieldProps> = ({
                               <>
                                 <RadioButton
                                   className="utrecht-form-field__input"
-                                  id={`${fieldKey}_${cellIndex}`}
+                                  id={`${idKey}_${cellIndex}`}
                                   name={`${fieldKey}_${rowIndex}`}
                                   value={cellIndex}
                                   required={fieldRequired}
@@ -257,8 +280,9 @@ const MatrixField: FC<MatrixFieldProps> = ({
                                   }
                                   disabled={disabled}
                                   checked={selectedChoices.includes(cellIndex)}
+                                  aria-labelledby={`${idKey}-row-${ri} ${idKey}-col-${ci}`}
                                 />
-                                <span className="cell-text">
+                                <span className="cell-text" aria-hidden="true">
                                   {column?.text || ''}
                                 </span>
                               </>

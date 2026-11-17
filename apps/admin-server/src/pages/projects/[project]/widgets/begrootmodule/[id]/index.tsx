@@ -8,6 +8,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import type { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
@@ -35,7 +36,7 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { previewConfig, onFieldChanged } =
+  const { widget, previewConfig, onFieldChanged } =
     useWidgetDraft<StemBegrootWidgetProps>({ projectId });
 
   const [activeTab, setActiveTab] = useState('display');
@@ -50,20 +51,12 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Begrootmodule',
-            url: `/projects/${projectId}/widgets/begrootmodule/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Begrootmodule',
+          `/projects/${projectId}/widgets/begrootmodule/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs value={activeTab} onValueChange={onTabChange}>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">

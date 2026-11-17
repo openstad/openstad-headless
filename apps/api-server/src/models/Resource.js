@@ -8,12 +8,30 @@ const co = require('co'),
   pick = require('lodash/pick');
 
 const sanitize = require('../util/sanitize');
+const {
+  normalizeImages,
+  normalizeDocuments,
+} = require('../lib/resource-media-fields');
 
 const merge = require('merge');
+
+function sanitizeTimelineUrl(url) {
+  if (!url) return '';
+  const trimmed = String(url).trim();
+  if (!trimmed) return '';
+  if (/^\/\//.test(trimmed)) return '';
+  if (/^(\/|\.\/|\.\.\/|#|\?)/.test(trimmed)) return trimmed;
+  const stripped = trimmed.replace(/[^\x21-\x7e]/g, '');
+  if (/^(https?:|mailto:|tel:)/i.test(stripped)) return trimmed;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(stripped)) return '';
+  return trimmed;
+}
 
 const commentVoteThreshold =
   config.resources && config.resources.commentVoteThreshold;
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
+const canBypassEditLock = require('../lib/can-bypass-edit-lock');
+const hasModBreakContent = require('../lib/has-mod-break-content');
 const roles = require('../lib/sequelize-authorization/lib/roles');
 const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
 const htmlToText = require('html-to-text');
@@ -21,6 +39,9 @@ const {
   hideEmailsForNormalUsers,
   filterModeratorOnlyExtraData,
 } = require('../services/resourceSerialization');
+const {
+  assertImageDescriptionsWithinLimit,
+} = require('../lib/image-description');
 
 module.exports = function (db, sequelize, DataTypes) {
   var Resource = sequelize.define(
@@ -75,6 +96,7 @@ module.exports = function (db, sequelize, DataTypes) {
       score: {
         type: DataTypes.DECIMAL(12, 11),
         auth: {
+          createableBy: 'editor',
           updateableBy: 'editor',
         },
         allowNull: false,
@@ -84,6 +106,7 @@ module.exports = function (db, sequelize, DataTypes) {
       sort: {
         type: DataTypes.INTEGER,
         auth: {
+          createableBy: 'editor',
           updateableBy: 'editor',
         },
         allowNull: false,
@@ -102,6 +125,7 @@ module.exports = function (db, sequelize, DataTypes) {
         ),
         defaultValue: 'all',
         auth: {
+          createableBy: 'editor',
           updateableBy: ['editor', 'owner'],
         },
         allowNull: true,
@@ -170,6 +194,7 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: !this.publishDate,
         validate: {
           textLength(value) {
+            if (value == null) return;
             let len = value.trim().length;
             let descriptionMinLength =
               (this.config &&
@@ -200,18 +225,29 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.JSON,
         allowNull: null,
         defaultValue: [],
+        set: function (value) {
+          this.setDataValue('images', normalizeImages(value));
+        },
+        validate: {
+          descriptionLength(value) {
+            assertImageDescriptionsWithinLimit(value);
+          },
+        },
       },
 
       documents: {
         type: DataTypes.JSON,
         allowNull: null,
         defaultValue: [],
+        set: function (value) {
+          this.setDataValue('documents', normalizeDocuments(value));
+        },
       },
 
       budget: {
         type: DataTypes.INTEGER,
         auth: {
-          updateableBy: 'editor',
+          updateableBy: ['admin', 'editor', 'owner', 'moderator'],
         },
         allowNull: true,
         set: function (budget) {
@@ -225,11 +261,81 @@ module.exports = function (db, sequelize, DataTypes) {
       timeline: {
         type: DataTypes.JSON,
         auth: {
-          createableBy: 'editor',
-          updateableBy: 'editor',
+          createableBy: 'all',
+          updateableBy: ['admin', 'editor', 'owner', 'moderator'],
         },
         allowNull: true,
         defaultValue: null,
+        set: function (value) {
+          if (!Array.isArray(value) || value.length === 0) {
+            this.setDataValue('timeline', null);
+            return;
+          }
+
+          const asString = (v) =>
+            typeof v === 'string' ? v : v == null ? '' : String(v);
+
+          const sanitized = value
+            .filter((item) => item && typeof item === 'object')
+            .map((item) => {
+              const links = Array.isArray(item.links)
+                ? item.links
+                    .filter((link) => link && typeof link === 'object')
+                    .map((link) => {
+                      const cleaned = {
+                        trigger: asString(link.trigger),
+                        title: link.title
+                          ? sanitize.noTags(asString(link.title).trim())
+                          : '',
+                        url: sanitizeTimelineUrl(link.url),
+                        openInNewWindow: !!link.openInNewWindow,
+                        kind:
+                          link.kind === 'document' || link.soort === 'document'
+                            ? 'document'
+                            : 'link',
+                      };
+                      if (link.documentName) {
+                        cleaned.documentName = sanitize.noTags(
+                          asString(link.documentName).trim()
+                        );
+                      }
+                      if (link.fileFormat) {
+                        cleaned.fileFormat = sanitize.noTags(
+                          asString(link.fileFormat).trim()
+                        );
+                      }
+                      if (link.fileSize) {
+                        cleaned.fileSize = sanitize.noTags(
+                          asString(link.fileSize).trim()
+                        );
+                      }
+                      return cleaned;
+                    })
+                : [];
+
+              const cleanedItem = {
+                trigger: asString(item.trigger),
+                activeFrom: /^\d{4}-\d{2}-\d{2}$/.test(
+                  asString(item.activeFrom)
+                )
+                  ? item.activeFrom
+                  : '',
+                title: item.title
+                  ? sanitize.noTags(asString(item.title).trim())
+                  : '',
+                description: item.description
+                  ? sanitize.content(asString(item.description).trim())
+                  : '',
+                links,
+              };
+              if (/^\d{4}-\d{2}-\d{2}$/.test(asString(item.activeTo))) {
+                cleanedItem.activeTo = item.activeTo;
+              }
+              return cleanedItem;
+            });
+
+          this.setDataValue('timeline', sanitized);
+        },
       },
 
       location: {
@@ -245,7 +351,7 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.JSON,
         auth: {
           createableBy: 'editor',
-          updateableBy: 'editor',
+          updateableBy: ['editor', 'moderator'],
         },
         allowNull: true,
         defaultValue: null,
@@ -254,20 +360,27 @@ module.exports = function (db, sequelize, DataTypes) {
             this.setDataValue('modBreaks', null);
             return;
           }
-          var sanitized = value.map(function (entry) {
-            return {
-              id: entry.id || crypto.randomUUID(),
-              description: entry.description
-                ? sanitize.content(entry.description.trim())
-                : '',
-              authorName: entry.authorName
-                ? sanitize.noTags(entry.authorName.trim())
-                : null,
-              modBreakDate: entry.modBreakDate || new Date().toISOString(),
-              createdAt: entry.createdAt || new Date().toISOString(),
-            };
-          });
-          this.setDataValue('modBreaks', sanitized);
+          var sanitized = value
+            .map(function (entry) {
+              return {
+                id: entry.id || crypto.randomUUID(),
+                description: entry.description
+                  ? sanitize.content(entry.description.trim())
+                  : '',
+                authorName: entry.authorName
+                  ? sanitize.noTags(entry.authorName.trim())
+                  : null,
+                modBreakDate: entry.modBreakDate || new Date().toISOString(),
+                createdAt: entry.createdAt || new Date().toISOString(),
+              };
+            })
+            .filter(function (entry) {
+              return hasModBreakContent(entry.description);
+            });
+          this.setDataValue(
+            'modBreaks',
+            sanitized.length > 0 ? sanitized : null
+          );
         },
       },
 
@@ -728,6 +841,7 @@ module.exports = function (db, sequelize, DataTypes) {
               'documentMapIconColor',
               'mapIcon',
               'listIcon',
+              'detailPageUrl',
             ],
             through: { attributes: [] },
             required: false,
@@ -965,6 +1079,7 @@ module.exports = function (db, sequelize, DataTypes) {
               'id',
               'role',
               'displayName',
+              'projectDisplayName',
               'nickName',
               'name',
               'email',
@@ -1044,13 +1159,7 @@ module.exports = function (db, sequelize, DataTypes) {
         }
         return {
           where: {
-            [db.Sequelize.Op.or]: [
-              ...projectIds.map((projectId) => {
-                return {
-                  projectId: projectId,
-                };
-              }),
-            ],
+            projectId: { [db.Sequelize.Op.in]: projectIds },
           },
         };
       },
@@ -1103,6 +1212,11 @@ module.exports = function (db, sequelize, DataTypes) {
       through: 'resource_statuses',
       constraints: false,
       onDelete: 'CASCADE',
+    });
+    this.hasMany(models.ResourceLink, {
+      as: 'outgoingLinks',
+      foreignKey: 'resourceId',
+      constraints: false,
     });
   };
 
@@ -1209,6 +1323,14 @@ module.exports = function (db, sequelize, DataTypes) {
       // er is ook al een createDateHumanized veld; waarom is dit er dan ook nog?
       data.createdAtText = moment(data.createdAt).format('LLL');
 
+      if (Array.isArray(self.links)) {
+        data.links = self.links;
+      }
+
+      if (self.linkRequests) {
+        data.linkRequests = self.linkRequests;
+      }
+
       // if user is not allowed to edit resource then remove phone key, otherwise publically available
       // needs to move to definition per key
       if (!canMutate(user, self) && data.extraData && data.extraData.phone) {
@@ -1310,7 +1432,10 @@ module.exports = function (db, sequelize, DataTypes) {
       false;
     if (
       !canEditAfterFirstLikeOrComment &&
-      !userHasRole(instance.auth && instance.auth.user, 'editor')
+      !canBypassEditLock(
+        instance.auth && instance.auth.user,
+        instance.changed()
+      )
     ) {
       let firstLikeSubmitted = await db.Vote.count({
         where: { resourceId: instance.id },

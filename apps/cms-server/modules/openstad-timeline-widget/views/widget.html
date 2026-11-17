@@ -5,7 +5,14 @@
 <div id="{{data.widget.containerId}}" class="timeline">
   {% for item in data.widget.items %}
   <div
-    class=" {{'timeline-period' if (item.period === true) or (item.period === 'period') else 'timeline-day' }}">
+    class=" {{'timeline-period' if (item.period === true) or (item.period === 'period') else 'timeline-day' }}"
+    {%
+    if
+    item.current
+    %}aria-current="step"
+    {%
+    endif
+    %}>
     <div>
       <h3>{{item.title}}</h3>
       {% if item.actionText %} {{item.actionText}} {% endif %} {% if item.links

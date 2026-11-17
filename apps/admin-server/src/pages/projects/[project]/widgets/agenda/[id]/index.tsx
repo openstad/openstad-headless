@@ -8,6 +8,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import type { AgendaWidgetProps } from '@openstad-headless/agenda/src/agenda';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -29,9 +30,10 @@ export default function WidgetAgenda({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { previewConfig, onFieldChanged } = useWidgetDraft<AgendaWidgetProps>({
-    projectId,
-  });
+  const { widget, previewConfig, onFieldChanged } =
+    useWidgetDraft<AgendaWidgetProps>({
+      projectId,
+    });
 
   const [activeTab, setActiveTab] = useState('general');
 
@@ -45,20 +47,12 @@ export default function WidgetAgenda({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Agenda',
-            url: `/projects/${projectId}/widgets/agenda/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Agenda',
+          `/projects/${projectId}/widgets/agenda/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs value={activeTab} onValueChange={onTabChange}>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
