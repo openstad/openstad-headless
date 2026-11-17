@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import request from 'supertest';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 process.env.NODE_CONFIG_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -12,6 +12,7 @@ process.env.NODE_CONFIG_DIR = path.resolve(
 process.env.SUPPRESS_NO_CONFIG_WARNING = '1';
 
 const require = createRequire(import.meta.url);
+const db = require('../../db');
 const templateRouter = require('./template');
 
 function createApp(user) {
@@ -57,5 +58,49 @@ describe('default notification template', () => {
 
     expect(res.status).not.toBe(200);
     expect(res.body.subject).toBeUndefined();
+  });
+});
+
+describe('mail styling for the preview', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function withProject(emailConfig) {
+    const project = db.Project.build({ id: 1, config: {}, emailConfig });
+    return vi.spyOn(db.Project, 'scope').mockReturnValue({
+      findByPk: async () => project,
+    });
+  }
+
+  it('returns the logo and accent color the mail will use', async () => {
+    const scope = withProject({
+      styling: {
+        logo: 'https://example.com/brand.png',
+        accentColor: '#d32f2f',
+      },
+    });
+
+    const res = await request(createApp(editor)).get(
+      '/project/1/template/styling'
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      logo: 'https://example.com/brand.png',
+      accentColor: '#d32f2f',
+    });
+    expect(scope).toHaveBeenCalledWith('includeConfig', 'includeEmailConfig');
+  });
+
+  it('does not return the styling to someone without rights', async () => {
+    withProject({ styling: { logo: 'https://example.com/brand.png' } });
+
+    const res = await request(createApp({ id: 2, role: 'member' })).get(
+      '/project/1/template/styling'
+    );
+
+    expect(res.status).not.toBe(200);
+    expect(res.body.logo).toBeUndefined();
   });
 });

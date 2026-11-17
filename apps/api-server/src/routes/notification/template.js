@@ -5,6 +5,7 @@ const router = express.Router({ mergeParams: true });
 const createError = require('http-errors');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const { loadDefaultTemplate } = require('../../models/NotificationMessage');
+const { mailStylingFor } = require('../../services/mail-styling');
 
 // scopes
 // ------
@@ -127,6 +128,24 @@ router
         res.json({ template: 'deleted' });
       })
       .catch(next);
+  });
+
+router
+  .route('/styling')
+  .get(auth.can('NotificationTemplate', 'list'))
+  .get(async function (req, res, next) {
+    try {
+      const project = await db.Project.scope(
+        'includeConfig',
+        'includeEmailConfig'
+      ).findByPk(req.params.projectId);
+      if (!project) {
+        throw createError(404, 'Project not found');
+      }
+      res.json(await mailStylingFor(project));
+    } catch (err) {
+      next(err);
+    }
   });
 
 router

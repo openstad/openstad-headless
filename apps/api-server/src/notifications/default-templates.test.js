@@ -28,6 +28,7 @@ describe('default template: user account about to expire', () => {
     projectUrl: 'https://voorbeeld.openstad.org',
     projectName: 'Voorbeeldproject',
     anonymizeDate: '01-01-2030',
+    styling: { accentColor: '#00325F' },
   };
 
   it('renders a non-empty mail body through nunjucks and mjml', async () => {
@@ -97,6 +98,7 @@ describe.each([
     const body = new nunjucks.Environment().renderString(template.body, {
       user: { name: 'Test' },
       project: { title: 'P' },
+      styling: { accentColor: '#00325F' },
       ...data,
     });
     return mjml2html(body);
@@ -138,6 +140,7 @@ describe('default template: new modbreak - user feedback', () => {
       project: { config: { resources: {} } },
       newModBreaks: [{ description: 'Let op', authorName: 'Redactie' }],
       logo: 'https://gemeente.nl/logo.png',
+      styling: { accentColor: '#00325F' },
       ...data,
     });
     return mjml2html(body);
@@ -240,4 +243,70 @@ describe('default templates: wording', () => {
       expect(result.html).toContain('inzending');
     }
   );
+});
+
+const MAILS_NOT_SENT_BY_THE_API = [
+  'login email',
+  'login sms',
+  'action',
+  'submission',
+];
+const apiMailTypes = templateTypes.filter(
+  (type) => !MAILS_NOT_SENT_BY_THE_API.includes(type)
+);
+
+async function renderApiMail(
+  type,
+  { logo = '', accentColor = '#d32f2f' } = {}
+) {
+  const { body } = extractTemplate(type);
+  const env = new nunjucks.Environment();
+  const mjml = env.renderString(body, {
+    logo,
+    styling: { logo, accentColor },
+    project: { title: 'Voorbeeldproject' },
+    resource: { title: 'Meer bomen' },
+    user: { name: 'Test Gebruiker' },
+    comment: { description: 'Goed idee' },
+    redirectUrl: 'https://voorbeeld.openstad.org/inzending',
+    newModBreaks: [{ description: 'Officiële reactie' }],
+  });
+  return mjml2html(mjml);
+}
+
+describe('default templates: mail styling', () => {
+  it.each(apiMailTypes)('%s has no broken image references', (type) => {
+    const { body } = extractTemplate(type);
+
+    expect(body).not.toMatch(
+      /imagePath|logo-openstad|mail-header|googleusercontent/
+    );
+  });
+
+  it.each(apiMailTypes)('%s renders without mjml errors', async (type) => {
+    const result = await renderApiMail(type, {
+      logo: 'https://example.com/brand.png',
+    });
+
+    expect(result.errors).toEqual([]);
+  });
+
+  it.each(apiMailTypes)(
+    '%s shows the logo only when there is one',
+    async (type) => {
+      const withLogo = await renderApiMail(type, {
+        logo: 'https://example.com/brand.png',
+      });
+      const withoutLogo = await renderApiMail(type);
+
+      expect(withLogo.html).toContain('src="https://example.com/brand.png"');
+      expect(withoutLogo.html).not.toContain('<img');
+    }
+  );
+
+  it.each(apiMailTypes)('%s uses the accent color', async (type) => {
+    const result = await renderApiMail(type);
+
+    expect(result.html.toLowerCase()).toContain('#d32f2f');
+  });
 });
