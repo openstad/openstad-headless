@@ -93,15 +93,4 @@ export function useWidgetsHook(projectId?: string) {
   return { ...widgetsSwr, createWidget, updateWidget, remove, duplicate };
 }
 
-export type Widget = {
-  id: number;
-  projectId: number;
-  description: string;
-
-  config: object;
-  type: string;
-
-  createdAt: string;
-  updatedAt: string;
-  deletedAt: string | null;
-};
+export type { ApiWidget as Widget } from '@openstad-headless/types';

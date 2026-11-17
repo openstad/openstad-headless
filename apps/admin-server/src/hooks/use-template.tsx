@@ -1,12 +1,6 @@
 import useSWR from 'swr';
 
-export type ProjectTemplate = {
-  id: number;
-  name: string;
-  data: any;
-  createdAt: string;
-  updatedAt: string;
-};
+export type { ApiTemplate as ProjectTemplate } from '@openstad-headless/types';
 
 export default function useTemplates() {
   const url = '/api/openstad/api/template';

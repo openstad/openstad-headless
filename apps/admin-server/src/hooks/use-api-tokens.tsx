@@ -1,27 +1,7 @@
+import type { ApiToken } from '@openstad-headless/types';
 import useSWR from 'swr';
 
-export type ApiTokenStatus = 'active' | 'expired' | 'revoked';
-
-export type ApiToken = {
-  id: number;
-  userId: number;
-  projectId: number;
-  name: string | null;
-  tokenPrefix: string;
-  lastFour: string;
-  // Every token expires; there is no "never expires" state.
-  expiresAt: string;
-  lastUsedAt: string | null;
-  createdAt: string;
-  status: ApiTokenStatus;
-  // Only present on the project-level overview endpoint
-  owner?: { id: number; name: string | null } | null;
-  // True when the token belongs to a superuser on the admin project and is
-  // shown in another project's overview (read-only there)
-  isSuperUserToken?: boolean;
-  // Only present immediately after creation
-  token?: string;
-};
+export type { ApiToken, ApiTokenStatus } from '@openstad-headless/types';
 
 export default function useApiTokens(projectId?: number, userId?: number) {
   const url =
