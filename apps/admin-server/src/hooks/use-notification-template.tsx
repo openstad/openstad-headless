@@ -1,3 +1,4 @@
+import { readSaved } from '@/lib/read-json';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
 
@@ -96,5 +97,41 @@ export default function useNotificationTemplate(projectId?: string) {
     }
   }
 
-  return { ...notificationTemplateSwr, create, update };
+  async function preview(payload: {
+    type: string;
+    engine: string;
+    subject: string;
+    body: string;
+  }): Promise<NotificationPreview> {
+    const res = await fetch(`${url}/preview`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    return readSaved(res, 'De preview kon niet worden gemaakt.');
+  }
+
+  async function remove(id: string) {
+    const res = await fetch(`${url}/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      throw new Error(
+        'De standaardversie kon niet worden teruggezet. Probeer het opnieuw.'
+      );
+    }
+    notificationTemplateSwr.mutate(
+      currentTemplates().filter(
+        (template: any) => String(template?.id) !== String(id)
+      )
+    );
+  }
+
+  return { ...notificationTemplateSwr, create, update, preview, remove };
 }
+
+export type NotificationPreview = {
+  subject: string;
+  html?: string;
+  text?: string;
+};

@@ -1,4 +1,5 @@
-import { fetchSessionUser } from '@/auth-context';
+import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -17,18 +18,17 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
-import useMailStyling, { MailStyling } from '@/hooks/use-mail-styling';
+import useMailStyling from '@/hooks/use-mail-styling';
 import useNotificationTemplate from '@/hooks/use-notification-template';
 import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
-import { applyFilters } from '@/lib/nunjucks-filters';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { zodResolver } from '@hookform/resolvers/zod';
 import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
-import nunjucks from 'nunjucks';
 import * as React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import useSWR from 'swr';
 import * as z from 'zod';
 
@@ -40,8 +40,20 @@ import {
   SelectValue,
 } from './ui/select';
 
-const nunjucksEnv = new nunjucks.Environment();
-applyFilters(nunjucksEnv);
+const PREVIEW_DELAY_MS = 400;
+const SMS_TYPES = ['login sms'];
+const EMPTY_PREVIEW = "<p style='text-align: center;'>Inhoud is leeg.</p>";
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function plainTextPreview(text: string) {
+  return `<pre style="white-space: pre-wrap; font-family: sans-serif;">${escapeHtml(text)}</pre>`;
+}
 
 const initialData = `<mjml>
     <mj-body>
@@ -517,7 +529,9 @@ export function NotificationForm({
 }: Props) {
   const router = useRouter();
   const project = router.query.project as string;
-  const { data, create, update } = useNotificationTemplate(project as string);
+  const { data, create, update, preview, remove } = useNotificationTemplate(
+    project as string
+  );
   const notificationTitle = typeLabel || notificationTypes[type] || type;
   // A stored template is updated, everything else is created. Keyed on the id
   // so a stored template with an empty label cannot take the create path and
@@ -534,53 +548,14 @@ export function NotificationForm({
     { shouldRetryOnError: false }
   );
 
-  type MailContextType = {
-    user: { name: string; fullName: string };
-    name: string;
-    loginurl: string;
-    imagePath: string;
-    resource: any;
-    logo?: string;
-    styling?: MailStyling;
-  };
-  const [mailContext, setMailContext] = useState<MailContextType>({
-    user: { name: 'Gebruiker', fullName: 'Gebruiker' },
-    name: 'Gebruiker',
-    loginurl: 'https://openstad.nl/login',
-    imagePath: process.env.EMAIL_ASSETS_URL || '',
-    resource: {
-      tags: [],
-    },
-  });
-
-  useEffect(() => {
-    async function setUserNameInMailContext() {
-      const user = await fetchSessionUser();
-
-      if (user && user.name) {
-        setMailContext((prev: MailContextType) => {
-          return {
-            ...prev,
-            user: { name: user.name, fullName: user.name },
-            name: user.name,
-          };
-        });
-      }
-    }
-
-    setUserNameInMailContext();
-  }, []);
+  const { data: restorableDefault } = useSWR<{ subject?: string }>(
+    isExistingTemplate && projectNumber && type
+      ? `/api/openstad/notification/project/${projectNumber}/template/default/${encodeURIComponent(type)}`
+      : null,
+    { shouldRetryOnError: false }
+  );
 
   const { data: mailStyling } = useMailStyling(project);
-
-  useEffect(() => {
-    if (!mailStyling) return;
-    setMailContext((prev: MailContextType) => ({
-      ...prev,
-      logo: mailStyling.logo,
-      styling: mailStyling,
-    }));
-  }, [mailStyling]);
 
   const defaultValueBody =
     body ||
@@ -607,7 +582,7 @@ export function NotificationForm({
 
   const defaults = React.useCallback(
     () => ({
-      engine: engine || 'email',
+      engine: engine || (SMS_TYPES.includes(type) ? 'sms' : 'email'),
       label: label || (isExistingTemplate ? '' : notificationTitle),
       subject: subject || defaultTemplate?.subject || '',
       body: defaultValueBody,
@@ -635,53 +610,46 @@ export function NotificationForm({
 
   useSyncFormDefaults(form, defaults, id || defaultTemplate);
 
-  const [mjmlHtml, setMjmlHtml] = useState('');
+  const subjectValue = watch('subject');
+  const engineValue = watch('engine');
 
+  const [previewHtml, setPreviewHtml] = useState('');
+  const [previewSubject, setPreviewSubject] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  async function convertMJMLToHTML(data: string) {
-    if (data === '') {
-      setMjmlHtml("<p style='text-align: center;'>Inhoud is leeg.</p>");
-      // Without this a render error from an earlier value would stay on screen
-      // and keep blocking this form's save.
-      setError(null);
-      return;
-    }
-
-    try {
-      const mjml2html = (await import('mjml-browser')).default;
-      const htmlOutput = (await mjml2html(data)).html;
-      setMjmlHtml(htmlOutput);
-      setError(null);
-    } catch (err) {
-      setError('Er is een fout opgetreden bij het renderen van de template.');
-    }
-  }
-
-  const handleOnChange = (e: any, field: any) => {
-    if (e.target.value.length > 0) {
-      try {
-        convertMJMLToHTML(
-          nunjucksEnv.renderString(e.target.value, mailContext)
-        );
-      } catch (err) {
-        setError('Er is een fout opgetreden bij het renderen van de template.');
-      }
-    }
-  };
-
   useEffect(() => {
+    if (!projectNumber) return;
     if (!fieldValue) {
-      // An emptied field has nothing to render; this also clears a stale error.
-      convertMJMLToHTML('');
+      setPreviewHtml(EMPTY_PREVIEW);
+      setPreviewSubject('');
+      setError(null);
       return;
     }
-    try {
-      convertMJMLToHTML(nunjucksEnv.renderString(fieldValue, mailContext));
-    } catch (err) {
-      setError('Er is een fout opgetreden bij het renderen van de template.');
-    }
-  }, [fieldValue, mailContext]);
+
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const result = await preview({
+          type,
+          engine: engineValue,
+          subject: subjectValue || '',
+          body: fieldValue,
+        });
+        if (cancelled) return;
+        setPreviewHtml(result.html ?? plainTextPreview(result.text || ''));
+        setPreviewSubject(result.subject);
+        setError(null);
+      } catch (previewError) {
+        if (cancelled) return;
+        setError((previewError as Error).message);
+      }
+    }, PREVIEW_DELAY_MS);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [projectNumber, fieldValue, subjectValue, engineValue, type, mailStyling]);
 
   const save = useCallback(async () => {
     // The save bar replaces `form.handleSubmit`, so the resolver has to be run
@@ -801,7 +769,6 @@ export function NotificationForm({
                           field.value.length > 0 ? field.value : body
                         }
                         rows={20}
-                        onKeyUpCapture={(e) => handleOnChange(e, field)}
                         {...field}
                       />
                     </FormControl>
@@ -810,12 +777,41 @@ export function NotificationForm({
                 )}
               />
               {error && <p className="text-red-500">{error}</p>}
+              {isExistingTemplate && restorableDefault && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={(e) => e.preventDefault()}>
+                  <ConfirmActionDialog
+                    buttonText="Herstel standaard"
+                    header="Standaardversie herstellen"
+                    message="Je eigen versie van deze e-mail wordt verwijderd. Daarna wordt de standaardversie verstuurd."
+                    confirmButtonText="Herstel standaard"
+                    cancelButtonText="Annuleren"
+                    confirmButtonVariant="destructive"
+                    onConfirmAccepted={async () => {
+                      try {
+                        await remove(id as string);
+                        toast.success('De standaardversie is hersteld.');
+                      } catch (removeError) {
+                        toast.error((removeError as Error).message);
+                      }
+                    }}
+                  />
+                </Button>
+              )}
             </form>
 
             <div className="p-4">
+              {previewSubject && (
+                <p className="mb-2 text-sm">
+                  <span className="font-medium">Onderwerp:</span>{' '}
+                  {previewSubject}
+                </p>
+              )}
               <iframe
                 className="email-iframe"
-                srcDoc={mjmlHtml}
+                srcDoc={previewHtml}
                 height={500}
                 width={500}></iframe>
             </div>

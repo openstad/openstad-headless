@@ -17,6 +17,7 @@ const templateRouter = require('./template');
 
 function createApp(user) {
   const app = express();
+  app.use(express.json());
   app.use((req, res, next) => {
     req.user = user;
     req.project = { id: 1 };
@@ -102,5 +103,148 @@ describe('mail styling for the preview', () => {
 
     expect(res.status).not.toBe(200);
     expect(res.body.logo).toBeUndefined();
+  });
+});
+
+describe('preview of a notification template', () => {
+  const fs = require('fs');
+  const defaultTemplatesDir = require('path').join(
+    __dirname,
+    '../../notifications/default-templates'
+  );
+
+  function defaultTemplate(type) {
+    const file = fs
+      .readFileSync(require('path').join(defaultTemplatesDir, type))
+      .toString();
+    return {
+      subject: file.match(/<subject>([\s\S]*)<\/subject>/)[1],
+      body: file.match(/<body>([\s\S]*)<\/body>/)[1],
+    };
+  }
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function withProject() {
+    const project = db.Project.build({
+      id: 1,
+      name: 'Voorbeeldproject',
+      title: 'Voorbeeldproject',
+      config: {},
+      emailConfig: {
+        styling: {
+          logo: 'https://example.com/brand.png',
+          accentColor: '#d32f2f',
+        },
+      },
+    });
+    vi.spyOn(db.Project, 'scope').mockReturnValue({
+      findByPk: async () => project,
+    });
+  }
+
+  function preview(user, payload) {
+    return request(createApp(user))
+      .post('/project/1/template/preview')
+      .send(payload);
+  }
+
+  it('renders a default mail with sample data and the project styling', async () => {
+    withProject();
+    const type = 'new published resource - user feedback';
+
+    const res = await preview(editor, {
+      type,
+      engine: 'email',
+      ...defaultTemplate(type),
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.subject).toBe('Nieuwe inzending op Voorbeeldproject');
+    expect(res.body.html).toContain('src="https://example.com/brand.png"');
+    expect(res.body.html.toLowerCase()).toContain('#d32f2f');
+    expect(res.body.html).toContain('Meer bomen in de straat');
+  });
+
+  it('greets the user by name in the login mail', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'login email',
+      engine: 'email',
+      ...defaultTemplate('login email'),
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.html).toContain('Beste Voorbeeld Gebruiker');
+    expect(res.body.html).not.toContain('[object Object]');
+  });
+
+  it('returns plain text for an sms', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'login sms',
+      engine: 'sms',
+      subject: '',
+      body: 'Je code is {{ code }}',
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.text).toBe('Je code is 123456');
+  });
+
+  it('answers 400 for a template that cannot be rendered', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'user account about to expire',
+      engine: 'email',
+      subject: 'Test',
+      body: '<mjml><mj-body>{% if %}</mj-body></mjml>',
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toContain('De template kan niet worden gerenderd');
+  });
+
+  it('does not run code injected into the template', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'user account about to expire',
+      engine: 'email',
+      subject: '{{ constructor.constructor("return 6*7")() }}',
+      body: '<mjml><mj-body><mj-section><mj-column><mj-text>x</mj-text></mj-column></mj-section></mj-body></mjml>',
+    });
+
+    expect(JSON.stringify(res.body)).not.toContain('42');
+  });
+
+  it('answers 400 for an unknown engine', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'login email',
+      engine: 'fax',
+      subject: '',
+      body: '',
+    });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('does not render a preview for someone without rights', async () => {
+    withProject();
+
+    const res = await preview(
+      { id: 2, role: 'member' },
+      { type: 'login email', engine: 'email', subject: 'x', body: 'x' }
+    );
+
+    expect(res.status).not.toBe(200);
+    expect(res.body.html).toBeUndefined();
   });
 });
