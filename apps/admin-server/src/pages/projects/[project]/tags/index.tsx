@@ -29,19 +29,19 @@ export default function ProjectTags({ preset }: { preset?: string }) {
       id: number;
       name: string;
       type?: string;
+      seqnr: number;
     }[];
 
-    const filterStartData = loadedTags?.sort((a, b) => {
+    const filterStartData = [...loadedTags].sort((a, b) => {
       const aType = a.type ?? '';
       const bType = b.type ?? '';
 
       if (aType < bType) return -1;
       if (aType > bType) return 1;
 
-      if (a.name < b.name) return -1;
-      if (a.name > b.name) return 1;
+      if (a.seqnr !== b.seqnr) return a.seqnr - b.seqnr;
 
-      return 0;
+      return a.id - b.id;
     });
 
     setFilterData(filterStartData);

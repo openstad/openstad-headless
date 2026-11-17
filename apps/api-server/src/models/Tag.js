@@ -36,6 +36,11 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.INTEGER,
         allowNull: false,
         default: 10,
+        validate: {
+          isInt: {
+            msg: 'Volgorde moet een geheel getal zijn',
+          },
+        },
       },
 
       addToNewResources: {
@@ -103,6 +108,16 @@ module.exports = function (db, sequelize, DataTypes) {
       },
 
       hooks: {
+        beforeValidate: async function (instance, options) {
+          const seqnrIsEmpty = [null, undefined, ''].includes(instance.seqnr);
+          if (!instance.isNewRecord || !seqnrIsEmpty) return;
+
+          const highestSeqnrInGroup = await db.Tag.max('seqnr', {
+            where: { type: instance.type },
+          });
+          instance.seqnr = (highestSeqnrInGroup ?? 0) + 10;
+        },
+
         afterCreate: function (instance, options) {
           seqnr.renumber({ model: db.Tag, where: { type: instance.type } });
         },
