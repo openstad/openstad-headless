@@ -1,5 +1,5 @@
 <!-- template: updated resource - user feedback -->
-<subject>updated resource - user feedback</subject>
+<subject>Je inzending op {{ project.title }} is aangepast</subject>
 <body>
   <mjml>
     <mj-body>
@@ -24,9 +24,9 @@
       </mj-raw>
       <mj-section>
         <mj-column width="500px">
-          <mj-text font-size="20px" font-family="Helvetica Neue">Er is een resource aangepast.</mj-text>
+          <mj-text font-size="20px" font-family="Helvetica Neue">Er is een inzending aangepast.</mj-text>
           <mj-text>Beste {{user.name}},</mj-text>
-          <mj-text color="#525252">U heeft recentelijk een van uw resources aangepast. U kunt hem hieronder direct bekijken:</mj-text>
+          <mj-text color="#525252">U heeft recentelijk een van uw inzendingen aangepast. U kunt deze hieronder direct bekijken:</mj-text>
           <mj-button background-color="#12B886" href="{{redirectUrl}}">Weergeven</mj-button>
         </mj-column>
       </mj-section>

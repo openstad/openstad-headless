@@ -286,7 +286,7 @@ const initialDataCommentAdminNotification = `<mjml>
         {% if parentComment %}
           <mj-text font-size="20px" font-family="Helvetica Neue">Er is een nieuwe reactie op een reactie geplaatst.</mj-text>
           <mj-text>Beste administrator,</mj-text>
-          <mj-text color="#525252">Op de resource {{ resource.title }} is er zojuist gereageerd op een eerdere reactie.</mj-text>
+          <mj-text color="#525252">Op de inzending {{ resource.title }} is er zojuist gereageerd op een eerdere reactie.</mj-text>
           <mj-text color="#525252"><em>Oorspronkelijke reactie:</em></mj-text>
           <mj-text color="#525252">{{ parentComment.description }}</mj-text>
           <mj-text color="#525252"><em>Nieuwe reactie:</em></mj-text>
@@ -294,7 +294,7 @@ const initialDataCommentAdminNotification = `<mjml>
         {% else %}
           <mj-text font-size="20px" font-family="Helvetica Neue">Er is een nieuwe reactie geplaatst.</mj-text>
           <mj-text>Beste administrator,</mj-text>
-          <mj-text color="#525252">Op de resource {{ resource.title }} is er zojuist een nieuwe reactie geplaatst.</mj-text>
+          <mj-text color="#525252">Op de inzending {{ resource.title }} is er zojuist een nieuwe reactie geplaatst.</mj-text>
           <mj-text color="#525252"><em>Reactie:</em></mj-text>
           <mj-text color="#525252">{{ comment.description }}</mj-text>
         {% endif %}
@@ -461,11 +461,11 @@ const notificationTypes: Record<string, string> = {
   'login email': 'Inloggen via e-mail',
   'login sms': 'Inloggen via sms',
   'new published resource - user feedback':
-    'Nieuwe resource gepubliceerd - Notificatie naar de gebruiker',
+    'Nieuwe inzending gepubliceerd - Notificatie naar de gebruiker',
   'new published resource - admin update':
-    'Nieuwe resource gepubliceerd - Notificatie naar de admin',
+    'Nieuwe inzending gepubliceerd - Notificatie naar de admin',
   'updated resource - user feedback':
-    'Resource bijgewerkt - Notificatie naar de gebruiker',
+    'Inzending bijgewerkt - Notificatie naar de gebruiker',
   'user account about to expire':
     'Gebruikersaccount staat op het punt te verlopen',
   'new enquete - admin':

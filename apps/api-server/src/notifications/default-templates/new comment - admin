@@ -30,7 +30,7 @@
           >
           <mj-text>Beste administrator,</mj-text>
           <mj-text color="#525252"
-            >Op de resource {{ resource.title }} is er zojuist gereageerd op een
+            >Op de inzending {{ resource.title }} is er zojuist gereageerd op een
             eerdere reactie.</mj-text
           >
           <mj-text color="#525252"><em>Oorspronkelijke reactie:</em></mj-text>
@@ -43,7 +43,7 @@
           >
           <mj-text>Beste administrator,</mj-text>
           <mj-text color="#525252"
-            >Op de resource {{ resource.title }} is er zojuist een nieuwe reactie
+            >Op de inzending {{ resource.title }} is er zojuist een nieuwe reactie
             geplaatst.</mj-text
           >
           <mj-text color="#525252"><em>Reactie:</em></mj-text>

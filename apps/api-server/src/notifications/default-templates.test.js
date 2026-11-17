@@ -193,3 +193,51 @@ describe('default template: new modbreak - user feedback', () => {
     expect(withoutLink.html).not.toContain('Uitschrijven');
   });
 });
+
+function visibleText(source) {
+  return source
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/\{\{[\s\S]*?\}\}/g, ' ')
+    .replace(/\{%[\s\S]*?%\}/g, ' ')
+    .replace(/<[^>]*>/g, ' ');
+}
+
+const templateTypes = fs.readdirSync(templatesDir);
+const submissionMailTypes = templateTypes.filter((type) =>
+  type.includes('resource')
+);
+
+describe('default templates: wording', () => {
+  it.each(templateTypes)('%s does not show the word resource', (type) => {
+    const { subject, body } = extractTemplate(type);
+
+    expect(visibleText(`${subject} ${body}`)).not.toMatch(/resource/i);
+  });
+
+  it.each(submissionMailTypes)(
+    '%s has a real subject instead of its type name',
+    (type) => {
+      const { subject } = extractTemplate(type);
+
+      expect(subject.trim()).not.toBe(type);
+    }
+  );
+
+  it.each(submissionMailTypes)(
+    '%s renders a subject and body that mention the inzending',
+    async (type) => {
+      const { subject, body } = extractTemplate(type);
+      const env = new nunjucks.Environment();
+      const data = {
+        project: { title: 'Voorbeeldproject' },
+        resource: { title: 'Meer bomen' },
+        user: { name: 'Test Gebruiker' },
+        redirectUrl: 'https://voorbeeld.openstad.org/inzending',
+      };
+
+      expect(env.renderString(subject, data)).toContain('Voorbeeldproject');
+      const result = await mjml2html(env.renderString(body, data));
+      expect(result.html).toContain('inzending');
+    }
+  );
+});

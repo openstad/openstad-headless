@@ -1,5 +1,5 @@
 <!-- template: new published resource - admin update -->
-<subject>Nieuwe resource op {{project.title}}</subject>
+<subject>Nieuwe inzending op {{project.title}}</subject>
 <body>
   <mjml>
     <mj-body background-color="#f6f6f7">
