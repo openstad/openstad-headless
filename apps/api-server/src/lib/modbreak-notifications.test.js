@@ -1,8 +1,8 @@
-import fs from 'fs';
 import nunjucks from 'nunjucks';
-import path from 'path';
 import { describe, expect, it, vi } from 'vitest';
 
+import { CONTENT_CATALOG } from '../notifications/content-catalog.js';
+import { buildContentMjml } from '../notifications/content-layout.js';
 import {
   buildResourceRedirectUrl,
   buildUnsubscribeUrl,
@@ -732,13 +732,8 @@ describe('sendModBreakNotifications', () => {
 });
 
 describe("default template 'new modbreak - user feedback'", () => {
-  const templatePath = path.join(
-    __dirname,
-    '../notifications/default-templates/new modbreak - user feedback'
-  );
-  const body = fs
-    .readFileSync(templatePath, 'utf8')
-    .match(/<body>((?:.|\r|\n)*)<\/body>/)[1];
+  const type = 'new modbreak - user feedback';
+  const body = buildContentMjml(type, CONTENT_CATALOG[type].content);
   const render = (data) => new nunjucks.Environment().renderString(body, data);
 
   it('renders the (already sanitized) modbreak HTML, not escaped markup', () => {
