@@ -288,7 +288,7 @@ export default function ProjectResources() {
                   />
                 </Button>
               </div>
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-4">
                 <p className="text-xs font-medium text-muted-foreground self-center">
                   Filter op:
                 </p>
