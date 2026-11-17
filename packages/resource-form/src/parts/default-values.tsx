@@ -62,6 +62,8 @@ export const defaultFormValues = [
     options: [],
     allowedTypes: ['image/*'],
     maxUploadSizeMB: 25,
+    allowImageDescription: false,
+    imageDescriptionLabel: 'Opmerking bij deze afbeelding',
     fieldType: 'imageUpload',
   },
   {

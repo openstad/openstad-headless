@@ -12,6 +12,7 @@ import {
 import ProjectResourceAuditLog from './audit-log';
 import ProjectResourceArguments from './comments';
 import ProjectResourceCreate from './info';
+import ProjectResourceLinks from './links';
 import ProjectResourcePreview from './preview';
 import ProjectResourceTimeline from './timeline';
 import ProjectResourceVotes from './votes';
@@ -53,6 +54,7 @@ export default function ProjectResource() {
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="info">Info</TabsTrigger>
               <TabsTrigger value="timeline">Tijdlijn</TabsTrigger>
+              <TabsTrigger value="links">Koppelingen</TabsTrigger>
               <TabsTrigger value="votes">Stemmen</TabsTrigger>
               <TabsTrigger value="comments">Reacties</TabsTrigger>
               <TabsTrigger value="createComment">Reactie plaatsen</TabsTrigger>
@@ -70,6 +72,9 @@ export default function ProjectResource() {
               forceMount
               className="p-0 data-[state=inactive]:hidden">
               <ProjectResourceTimeline />
+            </TabsContent>
+            <TabsContent value="links" className="p-0">
+              <ProjectResourceLinks />
             </TabsContent>
             <TabsContent value="votes" className="p-0">
               <ProjectResourceVotes />

@@ -1,3 +1,5 @@
+const { linkRichTextContent } = require('../../lib/link-rich-text-content');
+
 const contentWidgets = {
   '@apostrophecms/rich-text': {
     toolbar: [
@@ -60,5 +62,20 @@ module.exports = {
         max: 1,
       },
     },
+  },
+  extendMethods(self) {
+    return {
+      async output(_super, req, widget, options, _with) {
+        const content = linkRichTextContent(self.apos, widget.text);
+        const linkedWidget = {
+          ...widget,
+          text: {
+            ...widget.text,
+            items: [{ ...(widget.text?.items?.[0] || {}), content }],
+          },
+        };
+        return _super(req, linkedWidget, options, _with);
+      },
+    };
   },
 };

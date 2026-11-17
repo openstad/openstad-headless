@@ -6,9 +6,15 @@ module.exports = {
         className: 'bp-rich-text',
       },
     },
+    '@apostrophecms/oembed': {
+      options: {
+        minimumAllowlist: [],
+      },
+    },
     '@apostrophecms/global': {},
     asset: {},
     'default-page': {},
+    'sitemap-page': {},
     '@apostrophecms/blog': {},
     '@apostrophecms/blog-page': {},
     '@apostrophecms/import-export': {},
@@ -17,6 +23,7 @@ module.exports = {
     '@apostrophecms/anchors': {},
     '@apostrophecms/sitemap': {},
     'openstad-login': {},
+    'openstad-template-filters': {},
     'openstad-section-widget': {},
     'openstad-assets': {},
     'openstad-auth': {},
@@ -37,5 +44,6 @@ module.exports = {
     'openstad-carousel-widget': {},
     'openstad-blog-post-widget': {},
     'openstad-breadcrumbs-widget': {},
+    'openstad-iframe-widget': {},
   },
 };

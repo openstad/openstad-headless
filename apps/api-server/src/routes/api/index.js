@@ -30,6 +30,15 @@ router.use(
 );
 
 // resources
+router.use(
+  '/project/:projectId(\\d+)/resource/:resourceId(\\d+)/links',
+  require('./resource-links')
+);
+router.use(
+  '/project/:projectId(\\d+)/resource/:resourceId(\\d+)/contact',
+  require('./resource-contact')
+);
+router.use('/project/:projectId(\\d+)/link-options', require('./link-options'));
 router.use('/project/:projectId(\\d+)/resource', require('./resource'));
 //router.use( '/project/:projectId(\\d+)/resource', require('./resource.old') );
 
@@ -88,7 +97,6 @@ router.use(
   require('./widget-version')
 );
 router.use('/project/:projectId(\\d+)/widgets', require('./widget'));
-router.use('/project/:projectId(\\d+)/widgets/:id(\\d+)', require('./widget'));
 
 router.use('/project/:projectId(\\d+)/upload', require('./upload'));
 

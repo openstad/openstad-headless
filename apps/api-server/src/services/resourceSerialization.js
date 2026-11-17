@@ -42,7 +42,6 @@ function filterModeratorOnlyExtraData(
 ) {
   if (
     userRole &&
-    userRole !== 'all' &&
     !canViewModerator &&
     data.extraData &&
     typeof data.extraData === 'object'

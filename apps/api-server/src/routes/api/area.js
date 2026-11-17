@@ -148,7 +148,7 @@ router
       return next(new Error('You cannot update this area'));
 
     area
-      .authorizeData(area, 'update')
+      .authorizeData(req.body, 'update')
       .update({
         ...req.body,
       })

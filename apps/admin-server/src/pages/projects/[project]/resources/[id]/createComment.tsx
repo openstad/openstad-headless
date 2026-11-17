@@ -20,6 +20,8 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useComments from '@/hooks/use-comments';
+import { waitForNotificationStatus } from '@/lib/notification-status';
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -57,6 +59,26 @@ export default function ProjectResourceCreateArgument() {
   const notify = (message: string, icon: any) =>
     toast(message, { icon, duration: 8000 });
 
+  async function reportNotificationStatus(
+    projectNumber: number,
+    notificationId: number
+  ) {
+    const status = await waitForNotificationStatus(
+      projectNumber,
+      notificationId
+    );
+    if (status === 'sent') {
+      notify('Notificatie naar gebruiker is verzonden', '✅');
+    } else if (status === 'failed') {
+      notify('Notificatie naar gebruiker kon niet worden verzonden', '❌');
+    } else {
+      notify(
+        'Notificatie wordt nog verzonden. Controleer later of de gebruiker hem heeft ontvangen.',
+        '⏳'
+      );
+    }
+  }
+
   async function onSubmit(values: Formdata) {
     setDisableSubmit(false);
     let commentData: CreateCommentData = {
@@ -75,7 +97,18 @@ export default function ProjectResourceCreateArgument() {
       if (!newComment?.error) {
         notifySuccess();
 
-        if (values.confirmation) {
+        const projectNumber = validateProjectNumber(project);
+        if (
+          values.confirmation &&
+          newComment.confirmationNotificationId &&
+          projectNumber
+        ) {
+          notify('Notificatie naar gebruiker wordt verzonden', '⏳');
+          reportNotificationStatus(
+            projectNumber,
+            newComment.confirmationNotificationId
+          );
+        } else if (values.confirmation) {
           let icon = '✅',
             text = 'Notificatie naar gebruiker is verzonden';
           if (newComment.confirmationSent === false) {

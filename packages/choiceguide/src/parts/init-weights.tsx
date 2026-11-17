@@ -1,13 +1,13 @@
 // @ts-nocheck
-import { ChoiceOptions, WeightOverview } from '../props';
+import type { ChoiceOptions, WeightOverview } from '../props';
 
 export const InitializeWeights = (
-  items: any[],
-  choiceOptions: ChoiceOptions[],
+  items: Array<any>,
+  choiceOptions: Array<ChoiceOptions>,
   choicesType: string,
-  hiddenFields: string[]
+  hiddenFields: Array<string>
 ) => {
-  let weights: WeightOverview = {};
+  const weights: WeightOverview = {};
 
   if (!Array.isArray(items)) items = [];
 
@@ -18,8 +18,9 @@ export const InitializeWeights = (
   if (!Array.isArray(choiceOptions) || choiceOptions.length < 1) return {};
 
   choiceOptions.forEach((choiceOption) => {
-    if (!choiceOption) return;
-    const id = choiceOption.id;
+    const id = choiceOption?.id;
+    if (id === undefined || id === null) return;
+
     // Prevent prototype pollution. Needed for security warning #216.
     if (id === '__proto__' || id === 'constructor' || id === 'prototype')
       return;
@@ -42,7 +43,7 @@ export const InitializeWeights = (
 
       if (hiddenFields?.includes(triggerKey)) return;
 
-      // @ts-ignore
+      // @ts-expect-error
       if (
         itemWeights &&
         trigger &&

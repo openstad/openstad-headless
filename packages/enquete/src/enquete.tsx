@@ -2,6 +2,19 @@
 import DataStore from '@openstad-headless/data-store/src';
 import Form, { FormValue } from '@openstad-headless/form/src/form';
 import { FieldProps } from '@openstad-headless/form/src/props';
+import {
+  detectEnvironment,
+  mapQuestionType,
+  pushFormError,
+  pushFormStart,
+  pushFormStep,
+  pushFormSubmit,
+  pushQuestionInteract,
+} from '@openstad-headless/lib/gtm-datalayer';
+import type {
+  DisplayType,
+  FormStatus,
+} from '@openstad-headless/lib/gtm-datalayer';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import {
@@ -20,14 +33,46 @@ import NotificationService from '../../lib/NotificationProvider/notification-ser
 import hasRole from '../../lib/has-role';
 import RteContent from '../../ui/src/rte-formatting/rte-content';
 import './enquete.scss';
+import { buildQuestionIdMap, resolveQuestionId } from './gtm-helpers';
+import {
+  buildRandomizePerPage,
+  clearOrderSeed,
+  getOrderSeed,
+  getOrderStorageKey,
+  randomizeFieldsPerPage,
+} from './randomize-questions';
+import {
+  buildCustomScaleFieldOptions,
+  buildScaleChoices,
+  getScaleDefaultStep,
+  getScaleDisplay,
+  getScaleStepCount,
+} from './scale-steps';
+import {
+  formatSubmittedAt,
+  getSubmittedStorageKey,
+  isFormClosed,
+  readSubmittedAt,
+  readSubmittedFlag,
+  writeSubmittedFlag,
+} from './submitted-lock';
 import { EnquetePropsType } from './types/';
 
+const DEFAULT_CLOSED_FORM_MESSAGE =
+  'Je antwoord is ontvangen. Je kunt deze enquête maar één keer invullen.';
+
 // Helper types and functions for draft persistence
+
+type DraftFieldState = {
+  confirmed: string[];
+  touched: string[];
+};
 
 type EnqueteDraft = {
   data: Record<string, any>;
   updatedAt: number;
   version?: number;
+  fieldState?: DraftFieldState;
 };
 
 function getStorageKey(
@@ -43,14 +88,14 @@ function getStorageKey(
 }
 
 function loadDraft(key: string, retentionHours: number): EnqueteDraft | null {
-  if (
-    typeof window === 'undefined' ||
-    typeof window.localStorage === 'undefined'
-  ) {
-    return null;
-  }
-
   try {
+    if (
+      typeof window === 'undefined' ||
+      typeof window.localStorage === 'undefined'
+    ) {
+      return null;
+    }
+
     const raw = window.localStorage.getItem(key);
     if (!raw) return null;
 
@@ -78,21 +123,26 @@ function loadDraft(key: string, retentionHours: number): EnqueteDraft | null {
   }
 }
 
-function saveDraft(key: string, data: Record<string, any>): void {
-  if (
-    typeof window === 'undefined' ||
-    typeof window.localStorage === 'undefined'
-  ) {
-    return;
-  }
-
+function saveDraft(
+  key: string,
+  data: Record<string, any>,
+  fieldState?: DraftFieldState
+): void {
   const draft: EnqueteDraft = {
     data,
     updatedAt: Date.now(),
     version: 1,
+    fieldState,
   };
 
   try {
+    if (
+      typeof window === 'undefined' ||
+      typeof window.localStorage === 'undefined'
+    ) {
+      return;
+    }
+
     window.localStorage.setItem(key, JSON.stringify(draft));
   } catch {
     // ignore storage failures
@@ -100,14 +150,14 @@ function saveDraft(key: string, data: Record<string, any>): void {
 }
 
 function clearDraft(key: string): void {
-  if (
-    typeof window === 'undefined' ||
-    typeof window.localStorage === 'undefined'
-  ) {
-    return;
-  }
-
   try {
+    if (
+      typeof window === 'undefined' ||
+      typeof window.localStorage === 'undefined'
+    ) {
+      return;
+    }
+
     window.localStorage.removeItem(key);
   } catch {
     // ignore
@@ -126,10 +176,41 @@ function Enquete(props: EnqueteWidgetProps) {
   const [savedDraft, setSavedDraft] = useState<Record<string, unknown> | null>(
     null
   );
+  const [savedFieldState, setSavedFieldState] =
+    useState<DraftFieldState | null>(null);
   const [draftChecked, setDraftChecked] = useState(false);
   const latestValuesRef = useRef<Record<string, unknown> | null>(null);
+  const latestFieldStateRef = useRef<DraftFieldState | undefined>(undefined);
   const saveTimeoutRef = useRef<number | null>(null);
   const formStartTimeRef = useRef<number>(Date.now());
+  const formStartFiredRef = useRef(false);
+  const interactedFieldsRef = useRef<Set<string>>(new Set());
+  // Skip the form_step when loading the first page; it only fires on
+  // the first interaction (together with form_start).
+  const stepMountSkippedRef = useRef(false);
+  const submittingRef = useRef(false);
+  const outroSubmittedRef = useRef(false);
+  const [outroSubmitted, setOutroSubmitted] = useState(false);
+  const closedBlockRef = useRef<HTMLDivElement>(null);
+  const focusClosedBlockRef = useRef(false);
+  const [formKey, setFormKey] = useState(0);
+
+  const submittedStorageKey = getSubmittedStorageKey(
+    props.projectId,
+    props.widgetId
+  );
+  const [submittedFlag, setSubmittedFlag] = useState<boolean>(() =>
+    readSubmittedFlag(submittedStorageKey)
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const onPageShow = () => {
+      if (readSubmittedFlag(submittedStorageKey)) setSubmittedFlag(true);
+    };
+    window.addEventListener('pageshow', onPageShow);
+    return () => window.removeEventListener('pageshow', onPageShow);
+  }, [submittedStorageKey]);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -145,11 +226,20 @@ function Enquete(props: EnqueteWidgetProps) {
       return;
     }
 
+    if (props.closeFormAfterSubmit && readSubmittedFlag(submittedStorageKey)) {
+      setDraftChecked(true);
+      return;
+    }
+
     const retentionHours = props.draftRetentionHours ?? 24;
     const draft = loadDraft(storageKey, retentionHours);
     if (draft && draft.data) {
       setSavedDraft(draft.data);
       latestValuesRef.current = draft.data;
+      if (draft.fieldState) {
+        setSavedFieldState(draft.fieldState);
+        latestFieldStateRef.current = draft.fieldState;
+      }
     }
     setDraftChecked(true);
   }, [
@@ -157,6 +247,8 @@ function Enquete(props: EnqueteWidgetProps) {
     props.widgetId,
     props.enableDraftPersistence,
     props.draftRetentionHours,
+    props.closeFormAfterSubmit,
+    submittedStorageKey,
   ]);
 
   const { create: createSubmission } = datastore.useSubmissions({
@@ -166,14 +258,27 @@ function Enquete(props: EnqueteWidgetProps) {
   const {
     data: currentUser,
     // error: currentUserError,
-    // isLoading: currentUserIsLoading,
+    isLoading: currentUserIsLoading,
   } = datastore.useCurrentUser({ ...props });
 
   const formOnlyVisibleForUsers =
     (!!props.formVisibility && props.formVisibility === 'users') ||
     !props.formVisibility;
 
-  async function onSubmit(formData: Record<string, unknown>) {
+  async function onSubmit(formData: Record<string, unknown>): Promise<boolean> {
+    if (props.closeFormAfterSubmit && outroSubmittedRef.current) return false;
+    if (submittingRef.current) return false;
+    submittingRef.current = true;
+    try {
+      return await submitEnquete(formData);
+    } finally {
+      submittingRef.current = false;
+    }
+  }
+
+  async function submitEnquete(
+    formData: Record<string, unknown>
+  ): Promise<boolean> {
     // Filter out pagination fields
     const nonPaginationFields = formFields.filter(
       (field) => field.type !== 'pagination'
@@ -221,9 +326,24 @@ function Enquete(props: EnqueteWidgetProps) {
       0
     );
 
-    const result = await createSubmission(formData, props.widgetId);
+    let result: any;
+    try {
+      result = await createSubmission(formData, props.widgetId);
+    } catch {
+      result = null;
+    }
+
+    if (!result) {
+      NotificationService.addNotification(
+        'Verzenden is niet gelukt. Probeer het opnieuw.',
+        'error'
+      );
+      return false;
+    }
 
     if (result) {
+      pushFormSubmit(getTrackingContext());
+
       console.log(
         `[enquete] submitted: widgetId=${props.widgetId} submissionId=${result.id}`
       );
@@ -239,6 +359,35 @@ function Enquete(props: EnqueteWidgetProps) {
         );
         clearDraft(storageKey);
         latestValuesRef.current = null;
+        latestFieldStateRef.current = undefined;
+      }
+
+      if (typeof window !== 'undefined') {
+        clearOrderSeed(
+          getOrderStorageKey(
+            props.projectId,
+            props.widgetId,
+            window.location.pathname
+          )
+        );
+      }
+
+      const isYouthOutroFlow =
+        (formFields[formFields.length - 1] as any)?.infoBlockStyle ===
+        'youth-outro';
+
+      if (props.closeFormAfterSubmit) {
+        writeSubmittedFlag(submittedStorageKey);
+        if (props.afterSubmitUrl || !isYouthOutroFlow) {
+          if (!props.afterSubmitUrl && !isYouthOutroFlow) {
+            focusClosedBlockRef.current = true;
+          }
+          setSubmittedFlag(true);
+        }
+        if (isYouthOutroFlow && !props.afterSubmitUrl) {
+          outroSubmittedRef.current = true;
+          setOutroSubmitted(true);
+        }
       }
 
       if (props.afterSubmitUrl) {
@@ -251,9 +400,23 @@ function Enquete(props: EnqueteWidgetProps) {
         ) {
           // if the page is youth outro, fire confetti
           fireConfetti();
+        } else if (
+          !isYouthOutroFlow &&
+          (!props.closeFormAfterSubmit || hasRole(currentUser, 'editor'))
+        ) {
+          setSavedDraft(null);
+          setSavedFieldState(null);
+          formStartFiredRef.current = false;
+          formStartTimeRef.current = Date.now();
+          interactedFieldsRef.current = new Set();
+          if (currentPage !== 0) stepMountSkippedRef.current = false;
+          setCurrentPage(0);
+          setFormKey((key) => key + 1);
         }
       }
     }
+
+    return true;
   }
 
   const formFields: FieldProps[] = [];
@@ -273,6 +436,7 @@ function Enquete(props: EnqueteWidgetProps) {
         routingSelectedQuestion: item.routingSelectedQuestion || '',
         routingSelectedAnswer: item.routingSelectedAnswer || '',
         trigger: item.trigger || '',
+        excludeFromRandomize: item.excludeFromRandomize || false,
       };
       const draftValue =
         item.fieldKey && savedDraft && savedDraft[item.fieldKey] !== undefined
@@ -296,10 +460,10 @@ function Enquete(props: EnqueteWidgetProps) {
             'Nog minimaal {minCharacters} tekens';
           fieldData['maxCharactersError'] =
             props?.maxCharactersError ||
-            'Tekst moet maximaal {maxCharacters} karakters bevatten';
+            'De tekst mag niet langer zijn dan {maxCharacters} tekens';
           fieldData['minCharactersError'] =
             props?.minCharactersError ||
-            'Tekst moet minimaal {minCharacters} karakters bevatten';
+            'De tekst mag niet korter zijn dan {minCharacters} tekens';
           fieldData['showMinMaxAfterBlur'] =
             props?.showMinMaxAfterBlur || false;
           fieldData['maxCharactersOverWarning'] =
@@ -326,14 +490,36 @@ function Enquete(props: EnqueteWidgetProps) {
                 isOtherOption: option.titles[0].isOtherOption,
                 defaultValue: option.titles[0].defaultValue,
                 trigger: option.trigger || '',
+                ...(props.isQuiz
+                  ? {
+                      isCorrect: option.titles[0].isCorrect,
+                      feedbackText: option.titles[0].feedbackText,
+                    }
+                  : {}),
               };
             });
+          }
+
+          if (props.isQuiz) {
+            fieldData['feedbackMode'] = item.feedbackMode;
+            fieldData['feedbackText'] = item.feedbackText;
+            fieldData['feedbackCorrect'] = item.feedbackCorrect;
+            fieldData['feedbackIncorrect'] = item.feedbackIncorrect;
+            fieldData['instantFeedback'] = [
+              'multiplechoice',
+              'multiple',
+            ].includes(item.questionType || '')
+              ? item.instantFeedback || false
+              : false;
           }
 
           if (draftValue !== undefined) {
             // For radiobox, draftValue is a single string; for checkbox, array of strings.
             fieldData['defaultValue'] = draftValue;
-          } else if (configuredDefault.length > 0) {
+          } else if (
+            configuredDefault.length > 0 &&
+            !fieldData['instantFeedback']
+          ) {
             fieldData['defaultValue'] =
               item.questionType === 'multiplechoice'
                 ? configuredDefault[0]
@@ -346,6 +532,40 @@ function Enquete(props: EnqueteWidgetProps) {
           if (item.maxChoicesMessage) {
             fieldData['maxChoicesMessage'] = item.maxChoicesMessage;
           }
+          if (item.minChoices) {
+            fieldData['minChoices'] = item.minChoices;
+          }
+          if (item.minChoicesMessage) {
+            fieldData['minChoicesMessage'] = item.minChoicesMessage;
+          }
+
+          break;
+        }
+        case 'dropdown': {
+          fieldData['type'] = 'select';
+          fieldData['randomizeItems'] = item.randomizeItems || false;
+
+          const configuredDefault: string[] = [];
+          if (item.options && item.options.length > 0) {
+            fieldData['choices'] = item.options.map((option) => {
+              if (option.titles[0].defaultValue) {
+                configuredDefault.push(option.titles[0].key);
+              }
+              return {
+                value: option.titles[0].key,
+                label: option.titles[0].key,
+                isOtherOption: option.titles[0].isOtherOption,
+                defaultValue: option.titles[0].defaultValue,
+                trigger: option.trigger || '',
+              };
+            });
+          }
+
+          if (draftValue !== undefined) {
+            fieldData['defaultValue'] = draftValue;
+          } else if (configuredDefault.length > 0) {
+            fieldData['defaultValue'] = configuredDefault[0];
+          }
 
           break;
         }
@@ -353,6 +573,7 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['type'] = 'imageChoice';
           fieldData['multiple'] = item.multiple || false;
           fieldData['infoField'] = item.infoField || '';
+          fieldData['imageClickable'] = item?.imageClickable || false;
 
           if (item.options && item.options.length > 0) {
             fieldData['choices'] = item.options.map((option) => {
@@ -395,6 +616,16 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['imageUrl'] = props?.imageUrl;
           fieldData['multiple'] = item.multiple;
           fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
+          fieldData['imageCropEnabled'] = item.imageCropEnabled || false;
+          fieldData['imageCropRequired'] = item.imageCropRequired || false;
+          fieldData['imageCropRatioWidth'] =
+            item.imageCropRatioWidth ||
+            props?.project?.imageCropRatioWidth ||
+            16;
+          fieldData['imageCropRatioHeight'] =
+            item.imageCropRatioHeight ||
+            props?.project?.imageCropRatioHeight ||
+            9;
           break;
         case 'documentUpload':
           fieldData['type'] = 'documentUpload';
@@ -403,40 +634,48 @@ function Enquete(props: EnqueteWidgetProps) {
           break;
         case 'scale': {
           fieldData['type'] = 'tickmark-slider';
-          fieldData['showSmileys'] = item.showSmileys;
+          const scaleDisplay = getScaleDisplay(item);
+          const stepCount = getScaleStepCount(item);
+          fieldData['showSmileys'] = scaleDisplay === 'smileys';
+          fieldData['clickableSteps'] = true;
 
-          const labelOptions = [
-            <Icon icon="ri-emotion-unhappy-line" key={1} />,
-            <Icon icon="ri-emotion-sad-line" key={2} />,
-            <Icon icon="ri-emotion-normal-line" key={3} />,
-            <Icon icon="ri-emotion-happy-line" key={4} />,
-            <Icon icon="ri-emotion-laugh-line" key={5} />,
-          ];
+          if (scaleDisplay === 'smileys') {
+            const labelOptions = [
+              <Icon icon="ri-emotion-unhappy-line" key={1} />,
+              <Icon icon="ri-emotion-sad-line" key={2} />,
+              <Icon icon="ri-emotion-normal-line" key={3} />,
+              <Icon icon="ri-emotion-happy-line" key={4} />,
+              <Icon icon="ri-emotion-laugh-line" key={5} />,
+            ];
 
-          if (props.formStyle === 'youth') {
-            labelOptions[0] = <span key={1}>😡</span>;
-            labelOptions[1] = <span key={2}>🙁</span>;
-            labelOptions[2] = <span key={3}>😐</span>;
-            labelOptions[3] = <span key={4}>😀</span>;
-            labelOptions[4] = <span key={5}>😍</span>;
+            if (props.formStyle === 'youth') {
+              labelOptions[0] = <span key={1}>😡</span>;
+              labelOptions[1] = <span key={2}>🙁</span>;
+              labelOptions[2] = <span key={3}>😐</span>;
+              labelOptions[3] = <span key={4}>😀</span>;
+              labelOptions[4] = <span key={5}>😍</span>;
+            }
+
+            fieldData['fieldOptions'] = labelOptions.map((label, index) => ({
+              value: (index + 1).toString(),
+              label,
+            }));
+          } else if (scaleDisplay === 'custom') {
+            fieldData['fieldOptions'] = buildCustomScaleFieldOptions(
+              item.scaleSteps
+            );
+          } else {
+            fieldData['fieldOptions'] = Array.from(
+              { length: stepCount },
+              (_, index) => ({
+                value: (index + 1).toString(),
+                label: (index + 1).toString(),
+              })
+            );
           }
 
-          fieldData['fieldOptions'] = labelOptions.map((label, index) => {
-            const currentValue = index + 1;
-            return {
-              value: currentValue.toString(),
-              label: item.showSmileys ? label : currentValue,
-            };
-          });
-
-          fieldData['choices'] = labelOptions.map((label, index) => {
-            const currentValue = index + 1;
-            return {
-              value: currentValue.toString(),
-              label: currentValue.toString(),
-              trigger: `scale-${currentValue}`,
-            };
-          });
+          fieldData['choices'] = buildScaleChoices(stepCount);
+          fieldData['defaultValue'] = getScaleDefaultStep(item, stepCount);
 
           // TickmarkSlider uses overrideDefaultValue (string) for its initial value
           if (
@@ -445,6 +684,19 @@ function Enquete(props: EnqueteWidgetProps) {
             draftValue !== ''
           ) {
             fieldData['overrideDefaultValue'] = String(draftValue);
+          }
+
+          fieldData['infoImage'] = item?.image || '';
+          fieldData['imageAlt'] = item?.imageAlt || '';
+          fieldData['imageDescription'] = item?.imageDescription || '';
+          fieldData['images'] = item?.images || [];
+          fieldData['createImageSlider'] = item?.createImageSlider || false;
+          fieldData['imageClickable'] = item?.imageClickable || false;
+
+          if (props.isQuiz) {
+            fieldData['feedbackMode'] = item.feedbackMode;
+            fieldData['feedbackText'] = item.feedbackText;
+            fieldData['scaleFeedback'] = item.scaleFeedback;
           }
           break;
         }
@@ -461,11 +713,15 @@ function Enquete(props: EnqueteWidgetProps) {
             fieldData['allowedPolygons'] = props.allowedPolygons;
           }
 
+          fieldData['enableAddressSearch'] = !!item.enableAddressSearch;
+
           break;
         case 'pagination':
           fieldData['type'] = 'pagination';
           fieldData['prevPageText'] = item?.prevPageText || '1';
           fieldData['nextPageText'] = item?.nextPageText || '2';
+          fieldData['stepName'] = item?.stepName || '';
+          fieldData['randomizeQuestions'] = item?.randomizeQuestions || false;
           break;
         case 'sort':
           fieldData['options'] = item?.options || [];
@@ -488,10 +744,12 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['createImageSlider'] = item?.createImageSlider || false;
           fieldData['imageClickable'] = item?.imageClickable || false;
           fieldData['images'] = item?.images || [];
+          fieldData['headingLevel'] = item?.headingLevel || 3;
           break;
         case 'swipe':
           fieldData['type'] = 'swipe';
           fieldData['required'] = item?.fieldRequired || false;
+          fieldData['imageClickable'] = item?.imageClickable || false;
           fieldData['cards'] = item?.options?.map((card) => {
             return {
               id: card.trigger,
@@ -511,6 +769,7 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['type'] = 'dilemma';
           fieldData['title'] = item?.title || '';
           fieldData['required'] = item?.fieldRequired || false;
+          fieldData['imageClickable'] = item?.imageClickable || false;
           fieldData['infoField'] = item?.infoField || '';
           fieldData['infofieldExplanation'] =
             item?.infofieldExplanation || false;
@@ -538,6 +797,7 @@ function Enquete(props: EnqueteWidgetProps) {
           fieldData['videoUrl'] = item?.videoUrl || '';
           fieldData['videoSubtitle'] = item?.videoSubtitle;
           fieldData['videoLang'] = item?.videoLang;
+          fieldData['videoLoop'] = item?.videoLoop !== false;
           break;
         case 'matrix':
           fieldData['type'] = 'matrix';
@@ -584,13 +844,176 @@ function Enquete(props: EnqueteWidgetProps) {
     formFields.length,
   ];
 
+  const [orderSeed] = useState<number>(() =>
+    getOrderSeed(
+      getOrderStorageKey(
+        props.projectId,
+        props.widgetId,
+        typeof window !== 'undefined' ? window.location.pathname : ''
+      )
+    )
+  );
+
+  const randomizePerPage = buildRandomizePerPage({
+    fields: formFields,
+    paginationPositions: paginationFieldPositions,
+  });
+
+  const orderedFormFields = randomizeFieldsPerPage({
+    fields: formFields,
+    startPositions: pageFieldStartPositions,
+    endPositions: pageFieldEndPositions,
+    randomizePerPage,
+    seed: orderSeed,
+  });
+
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const handleValuesChange = (values: Record<string, unknown>) => {
+  // Positional question_id map (qid1..qidN) based on the question order.
+  const questionIdMap = buildQuestionIdMap(props.items);
+
+  const getTrackingContext = () => ({
+    environment: detectEnvironment(props.gtmEnvironment),
+    formId: `fid${props.widgetId || '0'}`,
+    formName: props.title || '',
+    displayType: (isFullscreen ? 'fullscreen' : 'standard') as DisplayType,
+    memberId: (currentUser as any)?.id
+      ? String((currentUser as any).id)
+      : undefined,
+  });
+
+  const getStepInfo = (pageIndex: number) => {
+    const status: FormStatus =
+      pageIndex === 0
+        ? 'started'
+        : pageIndex >= totalPages - 1
+          ? 'final_step'
+          : 'in_progress';
+
+    // Dedicated, stable step name: the pagination item that introduces a
+    // page carries the name of that next page (page 1 = the
+    // pagination before page 1, etc.). Falls back to "Stap N" when no
+    // name is set, so the name does not move along with the first question.
+    const paginationFields = formFields.filter((f) => f.type === 'pagination');
+    const configuredName =
+      pageIndex > 0
+        ? (paginationFields[pageIndex - 1] as any)?.stepName
+        : undefined;
+    const formStepName =
+      (typeof configuredName === 'string' && configuredName.trim()) ||
+      `Stap ${pageIndex + 1}`;
+
+    return {
+      formStep: pageIndex + 1,
+      formStepName,
+      formStepTotal: totalPages,
+      formStatus: status,
+    };
+  };
+
+  // Fires form_start once and then the form_step of the current page,
+  // so form_step comes together with form_start (not on load).
+  const ensureFormStarted = () => {
+    if (formStartFiredRef.current) return;
+    formStartFiredRef.current = true;
+    pushFormStart(getTrackingContext());
+    pushFormStep({ ...getTrackingContext(), ...getStepInfo(currentPage) });
+  };
+
+  useEffect(() => {
+    if (!draftChecked) return;
+
+    // The first run is loading page 1; we skip that form_step.
+    if (!stepMountSkippedRef.current) {
+      stepMountSkippedRef.current = true;
+      return;
+    }
+
+    // Navigation to a next step. Should the user navigate without
+    // interaction, we still start the form here (form_start first).
+    if (!formStartFiredRef.current) {
+      ensureFormStarted();
+      return;
+    }
+    pushFormStep({ ...getTrackingContext(), ...getStepInfo(currentPage) });
+  }, [currentPage, draftChecked]);
+
+  const handleFieldInteraction = (interactionKey: string) => {
+    // form_start (+ form_step of the current page) fires on the first real
+    // user interaction, before the first question_interact event.
+    ensureFormStarted();
+
+    if (interactedFieldsRef.current.has(interactionKey)) return;
+    interactedFieldsRef.current.add(interactionKey);
+
+    const { baseKey, questionId, isExplanation } = resolveQuestionId(
+      questionIdMap,
+      interactionKey
+    );
+
+    const item = props.items?.find((i) => i.fieldKey === baseKey);
+    if (
+      !item ||
+      !questionId ||
+      item.questionType === 'pagination' ||
+      item.questionType === 'none'
+    )
+      return;
+
+    pushQuestionInteract({
+      ...getTrackingContext(),
+      ...getStepInfo(currentPage),
+      questionId,
+      questionName: isExplanation
+        ? `${item.title || ''} (explanation)`
+        : item.title || '',
+      questionType: mapQuestionType(item.questionType || '', item.showSmileys),
+    });
+  };
+
+  const handleValidationErrors = (
+    errors: Array<{ fieldKey: string; errorMessage: string | null }>
+  ) => {
+    const context = getTrackingContext();
+    const stepInfo = getStepInfo(currentPage);
+
+    errors.forEach(({ fieldKey, errorMessage }) => {
+      const item = props.items?.find((i) => i.fieldKey === fieldKey);
+
+      pushFormError({
+        ...context,
+        ...stepInfo,
+        questionId: item
+          ? questionIdMap[fieldKey] || context.formId
+          : context.formId,
+        questionName: item?.title || context.formName,
+        questionType: item
+          ? mapQuestionType(item.questionType || '', item.showSmileys)
+          : 'form_error',
+        formErrorText: errorMessage || 'Validation error',
+        formErrorType: errorMessage?.toLowerCase().includes('verplicht')
+          ? 'required_field'
+          : 'invalid_input',
+      });
+    });
+  };
+
+  const handleValuesChange = (
+    values: Record<string, unknown>,
+    _hiddenFields?: string[],
+    fieldState?: { confirmed: string[]; touched: string[] }
+  ) => {
     if (typeof window === 'undefined') return;
+
+    // form_start has been moved to handleFieldInteraction so it only fires on
+    // a real user interaction, not on the mount initialisation.
+
     if (props.enableDraftPersistence !== true) return;
 
     latestValuesRef.current = values;
+    if (fieldState) {
+      latestFieldStateRef.current = fieldState;
+    }
 
     if (saveTimeoutRef.current !== null) {
       window.clearTimeout(saveTimeoutRef.current);
@@ -602,7 +1025,11 @@ function Enquete(props: EnqueteWidgetProps) {
 
     saveTimeoutRef.current = window.setTimeout(() => {
       if (latestValuesRef.current) {
-        saveDraft(storageKey, latestValuesRef.current);
+        saveDraft(
+          storageKey,
+          latestValuesRef.current,
+          latestFieldStateRef.current
+        );
       }
     }, delay);
   };
@@ -615,8 +1042,28 @@ function Enquete(props: EnqueteWidgetProps) {
     };
   }, []);
 
+  const formClosed = isFormClosed({
+    flag: submittedFlag,
+    closeFormAfterSubmit: props.closeFormAfterSubmit,
+    canBypass: hasRole(currentUser, 'editor'),
+  });
+  useEffect(() => {
+    if (formClosed && focusClosedBlockRef.current) {
+      focusClosedBlockRef.current = false;
+      closedBlockRef.current?.focus({ preventScroll: true });
+    }
+  }, [formClosed]);
+  const waitingForUser =
+    !!props.closeFormAfterSubmit && submittedFlag && currentUserIsLoading;
+  const closedMessage = (props.closedFormMessage || '').trim()
+    ? (props.closedFormMessage as string)
+    : DEFAULT_CLOSED_FORM_MESSAGE;
+  const submittedAt = formClosed ? readSubmittedAt(submittedStorageKey) : null;
+
   return (
-    <div className={`osc${isFullscreen ? ' --fullscreen' : ''}`}>
+    <div
+      className={`osc${isFullscreen ? ' --fullscreen' : ''}`}
+      data-form-name={props.title || ''}>
       <div className="container">
         {formOnlyVisibleForUsers && !hasRole(currentUser, 'member') && (
           <>
@@ -673,7 +1120,10 @@ function Enquete(props: EnqueteWidgetProps) {
           </div>
         )}
 
-        <div className={`osc-enquete-item-content --${props.formStyle}`}>
+        <div
+          className={`osc-enquete-item-content --${props.formStyle}${
+            outroSubmitted ? ' --outro-submitted' : ''
+          }`}>
           {props.displayTitle && props.title && (
             <RteContent
               content={props.title}
@@ -681,18 +1131,45 @@ function Enquete(props: EnqueteWidgetProps) {
               unwrapSingleRootDiv={true}
             />
           )}
-          <div className="osc-enquete-item-description">
-            {props.displayDescription && props.description && (
-              <RteContent
-                content={props.description}
-                unwrapSingleRootDiv={true}
-              />
-            )}
-          </div>
-          {draftChecked && (
+          {formClosed ? (
+            <div
+              className="form-container osc-enquete-closed"
+              role="status"
+              tabIndex={-1}
+              ref={closedBlockRef}>
+              <div>
+                <div className="osc-enquete-closed-message">
+                  <RteContent
+                    content={closedMessage}
+                    unwrapSingleRootDiv={true}
+                  />
+                </div>
+                {submittedAt && (
+                  <time
+                    className="osc-enquete-closed-date"
+                    dateTime={new Date(submittedAt).toISOString()}>
+                    {formatSubmittedAt(submittedAt)}
+                  </time>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="osc-enquete-item-description">
+              {props.displayDescription && props.description && (
+                <RteContent
+                  content={props.description}
+                  unwrapSingleRootDiv={true}
+                />
+              )}
+            </div>
+          )}
+          {draftChecked && !formClosed && !waitingForUser && (
             <Form
+              key={formKey}
               {...props}
-              fields={formFields}
+              allowResetAfterSubmit={false}
+              navigateAfterSubmitSuccess={!!props.closeFormAfterSubmit}
+              fields={orderedFormFields}
               formStyle={props.formStyle || 'default'}
               getValuesOnChange={handleValuesChange}
               submitDisabled={
@@ -710,6 +1187,10 @@ function Enquete(props: EnqueteWidgetProps) {
               totalFieldCount={totalFieldCount}
               totalPages={totalPages}
               initialValues={initialValues}
+              initialConfirmedFields={savedFieldState?.confirmed}
+              initialTouchedFields={savedFieldState?.touched}
+              onFieldInteraction={handleFieldInteraction}
+              onValidationErrors={handleValidationErrors}
             />
           )}
         </div>

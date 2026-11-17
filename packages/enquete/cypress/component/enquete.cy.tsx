@@ -437,3 +437,97 @@ describe('Enquete Draft Persistence', () => {
     });
   });
 });
+
+describe('Enquete Instant Feedback', () => {
+  const createQuizConfig = (instantFeedback: boolean): EnqueteWidgetProps => ({
+    api: { url: 'http://localhost:31410' },
+    projectId: '1',
+    widgetId: 100,
+    title: 'Quiz',
+    displayTitle: true,
+    formVisibility: 'always',
+    isQuiz: true,
+    items: [
+      {
+        key: '',
+        trigger: '1',
+        fieldKey: 'quizField',
+        title: 'Quiz Question',
+        questionType: 'multiplechoice',
+        fieldRequired: false,
+        instantFeedback,
+        options: [
+          {
+            trigger: '0',
+            titles: [{ key: 'Correct answer', isCorrect: true }],
+          },
+          {
+            trigger: '1',
+            titles: [{ key: 'Preselected answer', defaultValue: true }],
+          },
+        ],
+        matrix: { rows: [], columns: [] },
+      },
+    ],
+  });
+
+  it('ignores a configured default value when instantFeedback is on', () => {
+    cy.mount(<Enquete {...createQuizConfig(true)} />);
+    cy.get('input[type="radio"]').should('exist');
+    cy.get('input[type="radio"]:checked').should('have.length', 0);
+  });
+
+  it('still applies a configured default value when instantFeedback is off', () => {
+    cy.mount(<Enquete {...createQuizConfig(false)} />);
+    cy.get('input[type="radio"][value="Preselected answer"]').should(
+      'be.checked'
+    );
+  });
+
+  const createCheckboxQuizConfig = (
+    instantFeedback: boolean
+  ): EnqueteWidgetProps => ({
+    api: { url: 'http://localhost:31410' },
+    projectId: '1',
+    widgetId: 100,
+    title: 'Quiz',
+    displayTitle: true,
+    formVisibility: 'always',
+    isQuiz: true,
+    items: [
+      {
+        key: '',
+        trigger: '1',
+        fieldKey: 'quizField',
+        title: 'Quiz Question',
+        questionType: 'multiple',
+        fieldRequired: false,
+        instantFeedback,
+        options: [
+          {
+            trigger: '0',
+            titles: [{ key: 'Correct answer', isCorrect: true }],
+          },
+          {
+            trigger: '1',
+            titles: [{ key: 'Preselected answer', defaultValue: true }],
+          },
+        ],
+        matrix: { rows: [], columns: [] },
+      },
+    ],
+  });
+
+  it('ignores a configured default value for an instant checkbox question', () => {
+    cy.mount(<Enquete {...createCheckboxQuizConfig(true)} />);
+    cy.get('input[type="checkbox"]').should('exist');
+    cy.get('input[type="checkbox"]:checked').should('have.length', 0);
+  });
+
+  it('still applies a configured default value for a non-instant checkbox question', () => {
+    cy.mount(<Enquete {...createCheckboxQuizConfig(false)} />);
+    cy.get('input[type="checkbox"][value="Preselected answer"]').should(
+      'be.checked'
+    );
+  });
+});

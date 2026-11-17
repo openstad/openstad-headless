@@ -128,10 +128,14 @@ export default function CreateUserGeneral() {
         const response = await fetch(
           `/api/openstad/api/project/${user.projectId}/user/${user.id}/two-factor-status`
         );
+        if (!response.ok) {
+          const errorBody = await response.json().catch(() => null);
+          throw new Error(errorBody?.message || response.statusText);
+        }
         const data = await response.json();
         setIsTwoFactorEnabled(data.twoFactorEnabled);
-      } catch (error) {
-        toast.error('Failed to fetch two-factor status');
+      } catch (error: any) {
+        toast.error(`Failed to fetch two-factor status: ${error?.message}`);
       }
     }
 
@@ -161,17 +165,23 @@ export default function CreateUserGeneral() {
 
   async function handleResetTwoFactor() {
     try {
-      await fetch(
+      const response = await fetch(
         `/api/openstad/api/project/${user.projectId}/user/${user.id}/reset-two-factor`,
         {
           method: 'PUT',
         }
       );
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        throw new Error(errorBody?.message || response.statusText);
+      }
 
       setIsTwoFactorEnabled(false);
       toast.success('Two-factor authentication reset succesvol');
-    } catch (error) {
-      toast.error('Two-factor authenticatie kon niet worden gereset');
+    } catch (error: any) {
+      toast.error(
+        `Two-factor authenticatie kon niet worden gereset: ${error?.message}`
+      );
     }
   }
 

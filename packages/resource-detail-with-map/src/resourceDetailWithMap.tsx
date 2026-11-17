@@ -5,9 +5,11 @@ import { ResourceDetailMap } from '@openstad-headless/leaflet-map/src/resource-d
 import { ResourceDetailMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-detail-map-widget-props';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Carousel, Image } from '@openstad-headless/ui/src';
+import { Carousel, Image, headingLevels } from '@openstad-headless/ui/src';
+import RenderContent from '@openstad-headless/ui/src/rte-formatting/rte-formatting';
 import '@utrecht/component-library-css';
 import { Heading, Paragraph } from '@utrecht/component-library-react';
 import { Button, ButtonLink } from '@utrecht/component-library-react';
@@ -18,25 +20,30 @@ import { ShareLinks } from '../../apostrophe-widgets/share-links/src/share-links
 import './resourceDetailWithMap.css';
 
 type booleanProps = {
-  [K in
-    | 'displayImage'
-    | 'displayTitle'
-    | 'displaySummary'
-    | 'displayDescription'
-    | 'displayUser'
-    | 'displayDate'
-    | 'displayBudget'
-    | 'displayLocation'
-    | 'displayLikes'
-    | 'displayTags'
-    | 'displayStatus'
-    | 'displayDocuments'
-    | 'displaySocials']: boolean | undefined;
+  [
+    K in
+      | 'displayImage'
+      | 'displayTitle'
+      | 'displaySummary'
+      | 'displayDescription'
+      | 'displayUser'
+      | 'displayDate'
+      | 'displayBudget'
+      | 'displayLocation'
+      | 'displayBudgetDocuments'
+      | 'displayLikes'
+      | 'displayTags'
+      | 'displayStatus'
+      | 'displayDocuments'
+      | 'displaySocials'
+  ]: boolean | undefined;
 };
 
 export type ResourceDetailWidgetProps = {
+  headingLevel?: number;
   documentsTitle?: string;
   documentsDesc?: string;
+  descriptionHeadingLevel?: string;
 } & BaseProps &
   ProjectSettingProps & {
     projectId?: string;
@@ -83,8 +90,11 @@ function ResourceDetailWithMap({
   countButton = undefined,
   ctaButton = undefined,
   backUrl = '/',
+  descriptionHeadingLevel = '3',
+  headingLevel = undefined,
   ...props
 }: ResourceDetailWidgetProps) {
+  const [hTitle, hSection] = headingLevels(headingLevel);
   let resourceId: string | undefined = String(
     getResourceId({
       resourceId: parseInt(props.resourceId || ''),
@@ -225,16 +235,18 @@ function ResourceDetailWithMap({
 
             {displayTitle && resource.title && (
               <Heading
-                level={1}
+                level={hTitle}
                 appearance="utrecht-heading-2"
-                dangerouslySetInnerHTML={{ __html: resource.title }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(resource.title),
+                }}
               />
             )}
             <div className="osc-resource-detail-content-item-row">
               {displayUser && resource?.user?.displayName && (
                 <div>
                   <Heading
-                    level={2}
+                    level={hSection}
                     appearance="utrecht-heading-6"
                     className="osc-resource-detail-content-item-title">
                     Ingediend door
@@ -247,7 +259,7 @@ function ResourceDetailWithMap({
               {displayDate && resource.startDateHumanized && (
                 <div>
                   <Heading
-                    level={2}
+                    level={hSection}
                     appearance="utrecht-heading-6"
                     className="osc-resource-detail-content-item-title">
                     Datum
@@ -260,7 +272,7 @@ function ResourceDetailWithMap({
               {displayBudget && resource.budget && (
                 <div>
                   <Heading
-                    level={2}
+                    level={hSection}
                     appearance="utrecht-heading-6"
                     className="osc-resource-detail-content-item-title">
                     Budget
@@ -274,14 +286,20 @@ function ResourceDetailWithMap({
             <div className="resource-detail-content">
               {displaySummary && (
                 <Heading
-                  level={2}
+                  level={hSection}
                   appearance="utrecht-heading-4"
-                  dangerouslySetInnerHTML={{ __html: resource.summary }}
+                  dangerouslySetInnerHTML={{
+                    __html: sanitizeHtml(resource.summary),
+                  }}
                 />
               )}
               {displayDescription && (
                 <Paragraph
-                  dangerouslySetInnerHTML={{ __html: resource.description }}
+                  dangerouslySetInnerHTML={{
+                    __html: RenderContent(resource.description, {
+                      headingBaseLevel: Number(descriptionHeadingLevel) || 3,
+                    }),
+                  }}
                 />
               )}
             </div>

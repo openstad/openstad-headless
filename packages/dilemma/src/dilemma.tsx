@@ -1,7 +1,17 @@
-import { FormValue } from '@openstad-headless/form/src/form';
+import type { FormValue } from '@openstad-headless/form/src/form';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import type { BaseProps } from '@openstad-headless/types';
+import { ClickableImage } from '@openstad-headless/ui/src';
 import { Button, Heading, Paragraph } from '@utrecht/component-library-react';
-import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  FC,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import './dilemma.scss';
 
@@ -29,6 +39,7 @@ export type DilemmaProps = {
   title?: string;
   infoField?: string;
   infofieldExplanation?: boolean;
+  imageClickable?: boolean;
   setCurrentPage?: any;
   currentPage?: number;
   dilemmas?: DilemmaCard[];
@@ -37,7 +48,12 @@ export type DilemmaProps = {
   required?: boolean;
   overrideDefaultValue?: FormValue;
   onChange?: (
-    e: { name: string; value: FormValue },
+    e: {
+      name: string;
+      value: FormValue;
+      isInitial?: boolean;
+      interactionKey?: string;
+    },
     triggerSetLastKey?: boolean
   ) => void;
 };
@@ -48,10 +64,20 @@ type valueObject = Array<{
   explanation?: string;
 }>;
 
+const hasInfoContent = (value?: string): boolean => {
+  if (!value || !value.trim()) return false;
+
+  const doc = new DOMParser().parseFromString(sanitizeHtml(value), 'text/html');
+  const text = (doc.body.textContent || '').trim();
+
+  return text.length > 0 || !!doc.body.querySelector('img, video');
+};
+
 const DilemmaField: FC<DilemmaFieldProps> = ({
   title,
   infoField,
   infofieldExplanation,
+  imageClickable = false,
   dilemmas = [],
   setCurrentPage,
   currentPage = 0,
@@ -61,6 +87,8 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   overrideDefaultValue,
   ...props
 }) => {
+  const instanceId = useId();
+
   const dilemmaCards = useMemo(
     () => (dilemmas.length > 0 ? dilemmas : []),
     [dilemmas]
@@ -90,8 +118,14 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   >({});
 
   const [infoDialog, setInfoDialog] = useState<boolean>(false);
+  const [interacted, setInteracted] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [showExplanationDialog, setShowExplanationDialog] =
     useState<boolean>(false);
+  // Mount detection + marking whether the next emit is an explanation.
+  const didInitRef = useRef(false);
+  const pendingExplanationRef = useRef(false);
+
   const [explanations, setExplanations] = useState<Record<string, string>>(
     initialAnswersExplanation
   );
@@ -102,11 +136,20 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
   const unansweredDilemmas = getUnansweredDilemmas();
   const currentDilemma = unansweredDilemmas[currentDilemmaIndex] || null;
+  const showInfo = useMemo(
+    () => hasInfoContent(currentDilemma?.infoField),
+    [currentDilemma?.infoField]
+  );
+
+  useEffect(() => {
+    setInfoDialog(false);
+  }, [currentDilemma?.id]);
 
   const handleOptionSelect = useCallback(
     (option: 'a' | 'b') => {
       if (!currentDilemma) return;
 
+      setInteracted(true);
       const optionToSet = option === selectedOption ? null : option;
       setSelectedOption(optionToSet);
     },
@@ -134,6 +177,8 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     }
 
     setSelectedOption(null);
+    setInteracted(false);
+    setSubmitted(false);
 
     // Find next unanswered dilemma index
     const unanswered = dilemmaCards.filter((d) => !newAnswers[d.id]);
@@ -153,6 +198,29 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     previousAnswers,
     fieldKey,
   ]);
+
+  const handleSkip = useCallback(() => {
+    if (!currentDilemma) return;
+
+    const newAnswers = {
+      ...dilemmaAnswers,
+      [currentDilemma.id]: 'skipped',
+    };
+    setDilemmaAnswers(newAnswers);
+    setSelectedOption(null);
+    setPreviousAnswers((prev) => {
+      const updated = { ...prev };
+      delete updated[currentDilemma.id];
+      return updated;
+    });
+
+    const unanswered = dilemmaCards.filter((d) => !newAnswers[d.id]);
+    if (unanswered.length > 0) {
+      setCurrentDilemmaIndex(0);
+    } else {
+      setIsFinished(true);
+    }
+  }, [currentDilemma, dilemmaAnswers, dilemmaCards]);
 
   const moveToPrevious = useCallback(() => {
     const answeredDilemmas = dilemmaCards.filter(
@@ -177,6 +245,8 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     }));
 
     setSelectedOption(null);
+    setInteracted(false);
+    setSubmitted(false);
 
     const futureUnanswered = dilemmaCards.filter(
       (dilemma) => !newDilemmaAnswers[dilemma.id]
@@ -209,7 +279,10 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
     if (!answerToUse && previousAnswers[currentDilemma?.id]) {
       answerToUse = previousAnswers[currentDilemma.id] as 'a' | 'b';
     }
-    if (!answerToUse || !currentDilemma) return;
+    if (!answerToUse || !currentDilemma) {
+      setSubmitted(true);
+      return;
+    }
 
     if (currentDilemma.infofieldExplanation) {
       setShowExplanationDialog(true);
@@ -245,6 +318,8 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
   };
 
   const handleExplanationChange = (dilemmaId: string, explanation: string) => {
+    // Mark that the next emit concerns an explanation interaction.
+    pendingExplanationRef.current = true;
     setExplanations((prev) => ({
       ...prev,
       [dilemmaId]: explanation,
@@ -304,8 +379,20 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         })
         .filter((item) => item.answer !== undefined);
 
-      onChange({ name: fieldKey, value: combinedAnswers });
+      const isInitial = !didInitRef.current;
+      const isExplanation = pendingExplanationRef.current;
+      pendingExplanationRef.current = false;
+
+      onChange({
+        name: fieldKey,
+        value: combinedAnswers,
+        ...(isInitial ? { isInitial: true } : {}),
+        ...(isExplanation
+          ? { interactionKey: `${fieldKey}::explanation` }
+          : {}),
+      });
     }
+    didInitRef.current = true;
   }, [dilemmaAnswers, explanations]);
 
   useEffect(() => {
@@ -314,11 +401,15 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
     const unanswered = getUnansweredDilemmas();
     setIsFinished(unanswered.length === 0);
-  }, [dilemmas, dilemmaCards, getUnansweredDilemmas]);
+  }, [
+    dilemmas,
+    dilemmaCards,
+    getUnansweredDilemmas,
+    setCurrentDilemmaIndex,
+    setSelectedOption,
+    setIsFinished,
+  ]);
 
-  useEffect(() => {
-    console.log('test');
-  }, []);
   if (isFinished || unansweredDilemmas.length === 0) {
     return (
       <div
@@ -352,9 +443,11 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
                     <div className="dilemma-summary-content">
                       <div className="dilemma-summary-option">
                         <button
+                          type="button"
                           className={`dilemma-summary-btn ${
                             answer === 'a' ? 'active' : ''
                           }`}
+                          aria-pressed={answer === 'a'}
                           onClick={(e) => (
                             e.preventDefault(),
                             handleAnswerChange(dilemma.id, 'a')
@@ -374,9 +467,11 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
 
                       <div className="dilemma-summary-option">
                         <button
+                          type="button"
                           className={`dilemma-summary-btn ${
                             answer === 'b' ? 'active' : ''
                           }`}
+                          aria-pressed={answer === 'b'}
                           onClick={(e) => (
                             e.preventDefault(),
                             handleAnswerChange(dilemma.id, 'b')
@@ -423,20 +518,31 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
       className={`dilemma-field ${infofieldExplanation ? '--explanation' : ''}`}
       role="region"
       aria-label="Dilemma keuze"
-      aria-invalid={
-        required && !dilemmaAnswers[currentDilemma.id] ? 'true' : 'false'
-      }
       data-required={required}>
       <div className="dilemma-intro">
-        <Heading level={2} dangerouslySetInnerHTML={{ __html: title || '' }} />
-        <div className="dilemma-progress">
-          <span>
+        <Heading
+          level={2}
+          id={`${instanceId}-dilemma-titel-${currentDilemma.id}`}
+          dangerouslySetInnerHTML={{ __html: sanitizeHtml(title || '') }}
+        />
+        <div
+          className="dilemma-progress"
+          role="status"
+          aria-label={`Stap ${currentIndex + 1} van ${dilemmas.length}`}>
+          <span aria-hidden="true">
             {currentIndex + 1} van {dilemmas.length}
           </span>
         </div>
       </div>
 
-      <div className="dilemma-options">
+      {/* ponytail: de twee opties delen al een name en zijn dus één radiogroep —
+          je wisselt ertussen met de pijltjestoetsen, niet met Tab. Alleen was dat
+          nergens aangekondigd: zonder groep hoor je "keuze A" zonder de vraag en
+          zonder "1 van 2". Vandaar de expliciete radiogroup met de vraag als naam. */}
+      <div
+        className="dilemma-options"
+        role="radiogroup"
+        aria-labelledby={`${instanceId}-dilemma-titel-${currentDilemma.id}`}>
         <span className="dilemma-label" aria-hidden="true">
           <span>OF</span>
         </span>
@@ -456,22 +562,41 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
               selectedOption === 'a' ||
               (!selectedOption && previousAnswers[currentDilemma.id] === 'a')
             }
+            aria-invalid={
+              required &&
+              submitted &&
+              !selectedOption &&
+              !previousAnswers[currentDilemma.id]
+                ? 'true'
+                : undefined
+            }
             onChange={() => handleOptionSelect('a')}
             onClick={() => handleOptionSelect('a')}
           />
           <label htmlFor={`option-${currentDilemma.id}-a`}>
             <figure className="dilemma-option-image">
-              <img src={currentDilemma.a.image} alt={currentDilemma.a.title} />
+              <ClickableImage
+                clickable={imageClickable}
+                src={currentDilemma.a.image}
+                alt={currentDilemma.a.title}
+                variant="overlay">
+                <img
+                  src={currentDilemma.a.image}
+                  alt={currentDilemma.a.title}
+                />
+              </ClickableImage>
             </figure>
             <div className="dilemma-option-content">
               <Heading
                 level={3}
                 appearance="utrecht-heading-4"
-                dangerouslySetInnerHTML={{ __html: currentDilemma.a.title }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(currentDilemma.a.title),
+                }}
               />
               <Paragraph
                 dangerouslySetInnerHTML={{
-                  __html: currentDilemma.a.description,
+                  __html: sanitizeHtml(currentDilemma.a.description),
                 }}
               />
             </div>
@@ -493,22 +618,41 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
               selectedOption === 'b' ||
               (!selectedOption && previousAnswers[currentDilemma.id] === 'b')
             }
+            aria-invalid={
+              required &&
+              submitted &&
+              !selectedOption &&
+              !previousAnswers[currentDilemma.id]
+                ? 'true'
+                : undefined
+            }
             onChange={() => handleOptionSelect('b')}
             onClick={() => handleOptionSelect('b')}
           />
           <label htmlFor={`option-${currentDilemma.id}-b`}>
             <figure className="dilemma-option-image">
-              <img src={currentDilemma.b.image} alt={currentDilemma.b.title} />
+              <ClickableImage
+                clickable={imageClickable}
+                src={currentDilemma.b.image}
+                alt={currentDilemma.b.title}
+                variant="overlay">
+                <img
+                  src={currentDilemma.b.image}
+                  alt={currentDilemma.b.title}
+                />
+              </ClickableImage>
             </figure>
             <div className="dilemma-option-content">
               <Heading
                 level={3}
                 appearance="utrecht-heading-4"
-                dangerouslySetInnerHTML={{ __html: currentDilemma.b.title }}
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(currentDilemma.b.title),
+                }}
               />
               <Paragraph
                 dangerouslySetInnerHTML={{
-                  __html: currentDilemma.b.description,
+                  __html: sanitizeHtml(currentDilemma.b.description),
                 }}
               />
             </div>
@@ -516,15 +660,36 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         </div>
       </div>
 
+      {required &&
+        submitted &&
+        !selectedOption &&
+        !previousAnswers[currentDilemma.id] && (
+          <p role="alert" className="sr-only">
+            Maak een keuze voordat je verder gaat.
+          </p>
+        )}
+
       <div className="dilemma-actions">
         <button
-          className="more-info-btn dilemma-info-button"
-          onClick={(e) => (e.preventDefault(), setInfoDialog(true))}
+          className="dilemma-skip-button"
+          onClick={(e) => (e.preventDefault(), handleSkip())}
+          disabled={required}
           type="button"
-          disabled={!currentDilemma?.infoField}
-          aria-expanded={infoDialog}>
-          <span>Info</span>
+          aria-label="Dit dilemma overslaan">
+          <span>Overslaan</span>
         </button>
+
+        {showInfo && (
+          <button
+            className="more-info-btn dilemma-info-button"
+            onClick={(e) => (e.preventDefault(), setInfoDialog(true))}
+            type="button"
+            aria-expanded={infoDialog}
+            aria-controls={`${instanceId}-dilemma-info-panel`}
+            aria-label="Meer informatie over deze vraag">
+            <span aria-hidden="true">Info</span>
+          </button>
+        )}
 
         <div className="dilemma-navigation-buttons">
           <button
@@ -557,9 +722,9 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
           className="explanation-dialog"
           role="dialog"
           aria-modal="true"
-          aria-labelledby="explanation-dialog-title">
+          aria-labelledby={`${instanceId}-explanation-dialog-title`}>
           <div className="explanation-dialog-content">
-            <Heading level={3} id="explanation-dialog-title">
+            <Heading level={3} id={`${instanceId}-explanation-dialog-title`}>
               Korte uitleg
             </Heading>
             <Paragraph>Zodat we beter begrijpen wat belangrijk is.</Paragraph>
@@ -589,21 +754,30 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         </div>
       )}
 
-      <div className="info-card dilemma-info-field" aria-hidden={!infoDialog}>
-        <div className="info-card-container">
-          <Paragraph
-            dangerouslySetInnerHTML={{
-              __html: currentDilemma?.infoField || '',
-            }}
-          />
-          <button
-            className="utrecht-button utrecht-button--primary-action"
-            type="button"
-            onClick={(e) => (e.preventDefault(), setInfoDialog(false))}>
-            Snap ik
-          </button>
+      {showInfo && (
+        <div
+          id={`${instanceId}-dilemma-info-panel`}
+          className="info-card dilemma-info-field"
+          aria-hidden={infoDialog ? 'false' : 'true'}
+          {...(!infoDialog ? { inert: 'true' as any } : {})}
+          onClick={() => setInfoDialog(false)}>
+          <div
+            className="info-card-container"
+            onClick={(e) => e.stopPropagation()}>
+            <Paragraph
+              dangerouslySetInnerHTML={{
+                __html: sanitizeHtml(currentDilemma?.infoField || ''),
+              }}
+            />
+            <button
+              className="utrecht-button utrecht-button--primary-action"
+              type="button"
+              onClick={(e) => (e.preventDefault(), setInfoDialog(false))}>
+              Snap ik
+            </button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

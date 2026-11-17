@@ -10,6 +10,9 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
+const {
+  restrictModeratorOnlyBody,
+} = require('../../lib/restrict-moderator-only-body');
 const ctrl = require('../../controllers/resourceController');
 
 const router = express.Router({ mergeParams: true });
@@ -28,6 +31,13 @@ router
     })
   )
   .get(ctrl.respondResults);
+
+router
+  .route('/:resourceId(\\d+)/share')
+  .get(rateLimiter())
+  .all(ctrl.loadSharedResource)
+  .get(auth.can('Resource', 'view'))
+  .get(ctrl.respondSharedResource);
 
 router
   .route('/')
@@ -64,6 +74,7 @@ router
   .post(ctrl.applyDefaultStatuses)
   .post(ctrl.applyDefaultTags)
   .post(ctrl.refetchCreatedResource)
+  .post(ctrl.submitCreateLinkRequests)
   // TODO: Add notifications
   .post(auth.useReqUser)
   .post(ctrl.sendCreateNotifications);
@@ -83,14 +94,17 @@ router
   // update resource
   // -----------
   .put(auth.useReqUser)
+  .put(restrictModeratorOnlyBody)
   .put(ctrl.checkResourceEditable)
   .put(ctrl.captureTags)
   .put(ctrl.detectChangedToPublished)
+  .put(ctrl.snapshotModBreaks)
   .put(rateLimiter(), ctrl.updateResource)
   .put(ctrl.updateResourceTags)
   .put(ctrl.stripStatusesIfCannotMutate)
   .put(ctrl.updateResourceStatuses)
   .put(ctrl.sendUpdateNotifications)
+  .put(ctrl.submitUpdateLinkRequests)
   .put(auth.useReqUser)
   .put(ctrl.respondResults)
 
@@ -111,6 +125,7 @@ router
 // Duplicate multiple resources
 router
   .route('/duplicate')
+  .post(auth.can('Resource', 'update'))
   .post(auth.useReqUser)
   .post(rateLimiter(), ctrl.duplicateResources);
 

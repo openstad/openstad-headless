@@ -130,69 +130,83 @@ function Swipe({
             {slide.description && <p>{slide.description}</p>}
           </div>
           {slide.questionType === 'multiple' && (
-            <ul className="swiper-video-question-list">
-              {slide.options?.map((q, key) => {
-                const fieldKey = `${slide.id || slide.trigger}_multiple`;
-                const isChecked = (formAnswers[fieldKey] || []).includes(
-                  q.titles[0].key
-                );
+            <fieldset className="swiper-video-question-group">
+              <legend className="swiper-video-question-legend">
+                {slide.title}
+              </legend>
+              <ul className="swiper-video-question-list">
+                {slide.options?.map((q, key) => {
+                  const fieldKey = `${slide.id || slide.trigger}_multiple`;
+                  const isChecked = (formAnswers[fieldKey] || []).includes(
+                    q.titles[0].key
+                  );
 
-                return (
-                  <li key={q.id}>
-                    <input
-                      type="checkbox"
-                      id={`${slide.id || slide.trigger}_${q.titles[0].key}`}
-                      name={fieldKey}
-                      value={q.titles[0].key}
-                      checked={isChecked}
-                      onChange={(e) =>
-                        updateMultipleAnswer(
-                          fieldKey,
-                          q.titles[0].key,
-                          e.target.checked
-                        )
-                      }
-                    />
-                    <label
-                      htmlFor={`${slide.id || slide.trigger}_${
-                        q.titles[0].key
-                      }`}>
-                      <span>{String.fromCharCode(97 + key).toUpperCase()}</span>{' '}
-                      {q.titles[0].key}
-                    </label>
-                  </li>
-                );
-              })}
-            </ul>
+                  return (
+                    <li key={q.id}>
+                      <input
+                        type="checkbox"
+                        id={`${slide.id || slide.trigger}_${q.titles[0].key}`}
+                        name={fieldKey}
+                        value={q.titles[0].key}
+                        checked={isChecked}
+                        onChange={(e) =>
+                          updateMultipleAnswer(
+                            fieldKey,
+                            q.titles[0].key,
+                            e.target.checked
+                          )
+                        }
+                      />
+                      <label
+                        htmlFor={`${slide.id || slide.trigger}_${
+                          q.titles[0].key
+                        }`}>
+                        <span>
+                          {String.fromCharCode(97 + key).toUpperCase()}
+                        </span>{' '}
+                        {q.titles[0].key}
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+            </fieldset>
           )}
 
           {slide.questionType === 'multiplechoice' && (
-            <ul className="swiper-video-question-list --radiofield">
-              {slide.options?.map((q, key) => {
-                const fieldKey = `${slide.id || slide.trigger}_multiplechoice`;
-                const isChecked = formAnswers[fieldKey] === q.titles[0].key;
+            <fieldset className="swiper-video-question-group">
+              <legend className="swiper-video-question-legend">
+                {slide.title}
+              </legend>
+              <ul className="swiper-video-question-list --radiofield">
+                {slide.options?.map((q, key) => {
+                  const fieldKey = `${slide.id || slide.trigger}_multiplechoice`;
+                  const isChecked = formAnswers[fieldKey] === q.titles[0].key;
 
-                return (
-                  <li key={q.id}>
-                    <input
-                      type="radio"
-                      id={`${slide.id || slide.trigger}_${q.titles[0].key}`}
-                      name={fieldKey}
-                      value={q.titles[0].key}
-                      checked={isChecked}
-                      onChange={(e) => updateAnswer(fieldKey, e.target.value)}
-                    />
-                    <label
-                      htmlFor={`${slide.id || slide.trigger}_${
-                        q.titles[0].key
-                      }`}>
-                      <span>{String.fromCharCode(97 + key).toUpperCase()}</span>{' '}
-                      {q.titles[0].key}
-                    </label>
-                  </li>
-                );
-              })}
-            </ul>
+                  return (
+                    <li key={q.id}>
+                      <input
+                        type="radio"
+                        id={`${slide.id || slide.trigger}_${q.titles[0].key}`}
+                        name={fieldKey}
+                        value={q.titles[0].key}
+                        checked={isChecked}
+                        onChange={(e) => updateAnswer(fieldKey, e.target.value)}
+                      />
+                      <label
+                        htmlFor={`${slide.id || slide.trigger}_${
+                          q.titles[0].key
+                        }`}>
+                        <span>
+                          {String.fromCharCode(97 + key).toUpperCase()}
+                        </span>{' '}
+                        {q.titles[0].key}
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+            </fieldset>
           )}
 
           {slide.questionType === 'swipe' && (
@@ -243,18 +257,22 @@ function Swipe({
                           </>
                         ) as any)
                       : '1',
+                    ariaValueText: 'Heel slecht',
                   },
                   {
                     value: '2',
                     label: slide.showSmileys ? ((<div>🙁</div>) as any) : '2',
+                    ariaValueText: 'Slecht',
                   },
                   {
                     value: '3',
                     label: slide.showSmileys ? ((<div>😐</div>) as any) : '3',
+                    ariaValueText: 'Neutraal',
                   },
                   {
                     value: '4',
                     label: slide.showSmileys ? ((<div>😀</div>) as any) : '4',
+                    ariaValueText: 'Goed',
                   },
                   {
                     value: '5',
@@ -266,6 +284,7 @@ function Swipe({
                           </>
                         ) as any)
                       : '5',
+                    ariaValueText: 'Heel goed',
                   },
                 ]}
                 fieldRequired={false}

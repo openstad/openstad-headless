@@ -18,6 +18,7 @@ import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { sanitizeImageUrl } from '@openstad-headless/lib/sanitize';
 import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
 import { Spacer } from '@openstad-headless/ui/src';
 import { X } from 'lucide-react';
@@ -134,7 +135,26 @@ export default function WidgetMultiProjectSettings(
               control={form.control}
               name="selectedProjects"
               render={({ field }) => {
-                const isChecked = field.value?.some((p) => p.id === project.id);
+                const projectIndex = field.value?.findIndex(
+                  (p) => p.id === project.id
+                );
+                const isChecked =
+                  projectIndex !== undefined && projectIndex >= 0;
+                const markerIconUrl = isChecked
+                  ? sanitizeImageUrl(
+                      form.getValues(
+                        `selectedProjects.${projectIndex}.overviewMarkerIcon`
+                      )
+                    )
+                  : undefined;
+                const overviewImageUrl = isChecked
+                  ? sanitizeImageUrl(
+                      form.getValues(
+                        `selectedProjects.${projectIndex}.overviewImage`
+                      )
+                    )
+                  : undefined;
+
                 return (
                   <FormItem
                     className={
@@ -198,7 +218,7 @@ export default function WidgetMultiProjectSettings(
                                   Toon dit project zelf als tegel in het
                                   overzicht
                                 </FormLabel>
-                                {YesNoSelect(field, props)}
+                                {YesNoSelect(field, {})}
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -231,7 +251,7 @@ export default function WidgetMultiProjectSettings(
                                   project zelf getoond als tegel in het
                                   overzicht, zonder de inzendingen.
                                 </FormDescription>
-                                {YesNoSelect(field, props)}
+                                {YesNoSelect(field, {})}
                                 <FormMessage />
                               </FormItem>
                             )}
@@ -514,26 +534,14 @@ export default function WidgetMultiProjectSettings(
                                 }}
                               />
 
-                              {!!form.getValues(
-                                `selectedProjects.${
-                                  field.value?.findIndex(
-                                    (p) => p.id === project.id
-                                  ) ?? 0
-                                }.overviewMarkerIcon`
-                              ) ? (
+                              {markerIconUrl ? (
                                 <div
                                   style={{
                                     position: 'relative',
                                     height: '140px',
                                   }}>
                                   <img
-                                    src={form.getValues(
-                                      `selectedProjects.${
-                                        field.value?.findIndex(
-                                          (p) => p.id === project.id
-                                        ) ?? 0
-                                      }.overviewMarkerIcon`
-                                    )}
+                                    src={markerIconUrl}
                                     style={{
                                       position: 'relative',
                                       width: 'auto',
@@ -566,26 +574,14 @@ export default function WidgetMultiProjectSettings(
                                 <div></div>
                               )}
 
-                              {!!form.getValues(
-                                `selectedProjects.${
-                                  field.value?.findIndex(
-                                    (p) => p.id === project.id
-                                  ) ?? 0
-                                }.overviewImage`
-                              ) && (
+                              {overviewImageUrl && (
                                 <div
                                   style={{
                                     position: 'relative',
                                     height: '140px',
                                   }}>
                                   <img
-                                    src={form.getValues(
-                                      `selectedProjects.${
-                                        field.value?.findIndex(
-                                          (p) => p.id === project.id
-                                        ) ?? 0
-                                      }.overviewImage`
-                                    )}
+                                    src={overviewImageUrl}
                                     style={{
                                       position: 'relative',
                                       width: 'auto',

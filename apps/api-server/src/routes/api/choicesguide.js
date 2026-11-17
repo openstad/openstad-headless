@@ -316,7 +316,7 @@ router
   .delete(function (req, res, next) {
     const { choicesGuideId } = req.params;
     db.ChoicesGuideResult.destroy({
-      where: { id: choicesGuideId },
+      where: { id: choicesGuideId, projectId: req.params.projectId },
     })
       .then(() => {
         res.json({ message: 'ChoiceGuide result deleted successfully.' });

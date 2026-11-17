@@ -10,19 +10,28 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import { UploadDocument } from '@/hooks/upload-document';
+import useMaxUploadSizeMb from '@/hooks/use-max-upload-size';
 import type { ItemsUpdater } from '@/hooks/useDraftItems';
 import { useOpenItemDraft } from '@/hooks/useOpenItemDraft';
 import {
   applySelectedOptionEdit,
   mergeSelectedItem,
 } from '@/lib/open-item-merge';
+import { UploadError } from '@/lib/upload-limits';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { formatDutchDate } from '@openstad-headless/lib/timeline-dates';
+import {
+  formatFileSize,
+  getFileFormat,
+} from '@openstad-headless/ui/src/lib/format-file-size';
 import * as Switch from '@radix-ui/react-switch';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 export interface AgendaItem {
@@ -30,7 +39,7 @@ export interface AgendaItem {
   trigger: string;
   title?: string;
   description: string;
-  active: boolean;
+  active?: boolean;
   highlighted?: boolean;
   activeFrom?: string;
   activeTo?: string;
@@ -43,6 +52,11 @@ export interface AgendaLink {
   title: string;
   url: string;
   openInNewWindow: boolean;
+  kind?: 'link' | 'document';
+  soort?: 'link' | 'document';
+  documentName?: string;
+  fileFormat?: string;
+  fileSize?: string;
 }
 
 interface AgendaItemsEditorProps {
@@ -56,8 +70,8 @@ const formSchema = z.object({
   trigger: z.string(),
   title: z.string(),
   description: z.string(),
-  active: z.boolean(),
-  highlighted: z.boolean(),
+  active: z.boolean().optional(),
+  highlighted: z.boolean().optional(),
   activeFrom: z.string().optional(),
   activeTo: z.string().optional(),
   links: z
@@ -67,6 +81,10 @@ const formSchema = z.object({
         title: z.string(),
         url: z.string(),
         openInNewWindow: z.boolean(),
+        kind: z.enum(['link', 'document']).optional(),
+        documentName: z.string().optional(),
+        fileFormat: z.string().optional(),
+        fileSize: z.string().optional(),
       })
     )
     .optional(),
@@ -119,7 +137,15 @@ function handleMovementOrDeletion(
   return sorted;
 }
 
-const linkFields = { title: '', url: '', openInNewWindow: false };
+const linkFields = {
+  title: '',
+  url: '',
+  openInNewWindow: false,
+  kind: 'link',
+  documentName: undefined,
+  fileFormat: undefined,
+  fileSize: undefined,
+};
 
 type OpenItemState = {
   links: AgendaLink[];
@@ -161,6 +187,9 @@ export function AgendaItemsEditor({
   showActiveDates = false,
   timelineMode = false,
 }: AgendaItemsEditorProps) {
+  const router = useRouter();
+  const { project } = router.query;
+  const maxUploadSizeMb = useMaxUploadSizeMb();
   const [links, setLinks] = useState<AgendaLink[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
@@ -195,17 +224,21 @@ export function AgendaItemsEditor({
   });
 
   function openItem(item: AgendaItem) {
+    const normalizedLinks = (item.links || []).map((link) => ({
+      ...link,
+      kind: link.kind ?? link.soort,
+    }));
     form.reset({
       trigger: item.trigger,
       title: item.title || '',
       description: item.description,
-      active: item.active,
+      active: item.active ?? true,
       highlighted: item.highlighted || false,
       activeFrom: toDateInputValue(item.activeFrom),
       activeTo: toDateInputValue(item.activeTo),
-      links: item.links || [],
+      links: normalizedLinks,
     });
-    setLinks((item.links || []).map(withId));
+    setLinks(normalizedLinks.map(withId));
     setLink(null);
     setSelectedItemId(item.id ?? null);
   }
@@ -280,22 +313,20 @@ export function AgendaItemsEditor({
   function handleAddLink(values: FormData) {
     if (selectedLink) {
       setLinks((currentLinks) =>
-        currentLinks.map((link) =>
-          link.id === selectedLink.id
-            ? {
-                ...link,
-                title:
-                  values.links?.find((l) => l.trigger === link.trigger)
-                    ?.title || '',
-                url:
-                  values.links?.find((l) => l.trigger === link.trigger)?.url ||
-                  '',
-                openInNewWindow:
-                  values.links?.find((l) => l.trigger === link.trigger)
-                    ?.openInNewWindow || false,
-              }
-            : link
-        )
+        currentLinks.map((link) => {
+          if (link.id !== selectedLink.id) return link;
+          const v = values.links?.find((l) => l.trigger === link.trigger);
+          return {
+            ...link,
+            title: v?.title || '',
+            url: v?.url || '',
+            openInNewWindow: v?.openInNewWindow || false,
+            kind: v?.kind || link.kind || link.soort || 'link',
+            documentName: v?.documentName ?? link.documentName,
+            fileFormat: v?.fileFormat ?? link.fileFormat,
+            fileSize: v?.fileSize ?? link.fileSize,
+          };
+        })
       );
       setLink(null);
     } else {
@@ -303,12 +334,17 @@ export function AgendaItemsEditor({
         (max, l) => Math.max(max, parseInt(l.trigger) || 0),
         -1
       );
-      const newLink = {
+      const draftLink = values.links?.[links.length];
+      const newLink: AgendaLink = {
         id: generateId(),
         trigger: `${maxLinkTrigger + 1}`,
-        title: values.links?.[links.length]?.title || '',
-        url: values.links?.[links.length]?.url || '',
-        openInNewWindow: values.links?.[links.length]?.openInNewWindow || false,
+        title: draftLink?.title || '',
+        url: draftLink?.url || '',
+        openInNewWindow: draftLink?.openInNewWindow || false,
+        kind: draftLink?.kind || 'link',
+        documentName: draftLink?.documentName,
+        fileFormat: draftLink?.fileFormat,
+        fileSize: draftLink?.fileSize,
       };
       setLinks((currentLinks) => [...currentLinks, newLink]);
     }
@@ -361,7 +397,7 @@ export function AgendaItemsEditor({
   const selectedLinkIndex = links.findIndex(
     (link) => link.id === selectedLink?.id
   );
-  const activeLink =
+  const activeLinkIndex =
     selectedLinkIndex !== -1 ? selectedLinkIndex : links.length;
 
   return (
@@ -435,9 +471,34 @@ export function AgendaItemsEditor({
                   <Heading size="xl">Links</Heading>
                   <Separator className="mt-2" />
                   <FormField
-                    key={`title-${activeLink}`}
+                    key={`kind-${activeLinkIndex}`}
                     control={form.control}
-                    name={`links.${activeLink}.title`}
+                    name={`links.${activeLinkIndex}.kind`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Soort</FormLabel>
+                        <select
+                          className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                          value={field.value || 'link'}
+                          onChange={(e) => {
+                            field.onChange(e.target.value);
+                            form.setValue(`links.${activeLinkIndex}.url`, '');
+                            form.setValue(
+                              `links.${activeLinkIndex}.documentName`,
+                              undefined
+                            );
+                          }}>
+                          <option value="link">Link</option>
+                          <option value="document">Document</option>
+                        </select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    key={`title-${activeLinkIndex}`}
+                    control={form.control}
+                    name={`links.${activeLinkIndex}.title`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Link titel</FormLabel>
@@ -446,22 +507,103 @@ export function AgendaItemsEditor({
                       </FormItem>
                     )}
                   />
+                  {form.watch(`links.${activeLinkIndex}.kind`) ===
+                  'document' ? (
+                    <FormItem>
+                      <FormLabel>Document</FormLabel>
+                      {maxUploadSizeMb !== null && (
+                        <FormDescription>
+                          Maximale bestandsgrootte: {maxUploadSizeMb} MB
+                        </FormDescription>
+                      )}
+                      <Input
+                        type="file"
+                        accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            const uploaded = await UploadDocument(
+                              file,
+                              project as string
+                            );
+                            if (uploaded?.url) {
+                              form.setValue(
+                                `links.${activeLinkIndex}.url`,
+                                uploaded.url
+                              );
+                              form.setValue(
+                                `links.${activeLinkIndex}.documentName`,
+                                uploaded.name || file.name
+                              );
+                              form.setValue(
+                                `links.${activeLinkIndex}.fileFormat`,
+                                getFileFormat(file.name)
+                              );
+                              form.setValue(
+                                `links.${activeLinkIndex}.fileSize`,
+                                file.size > 0
+                                  ? formatFileSize(file.size)
+                                  : undefined
+                              );
+                            }
+                          } catch (error) {
+                            toast.error(
+                              error instanceof UploadError
+                                ? error.message
+                                : 'Document uploaden mislukt. Probeer het opnieuw.'
+                            );
+                          }
+                        }}
+                      />
+                      {form.watch(`links.${activeLinkIndex}.documentName`) ? (
+                        <div className="flex items-center gap-2 mt-1 text-sm">
+                          <span className="text-muted-foreground">
+                            Huidig bestand:
+                          </span>
+                          <a
+                            href={form.watch(`links.${activeLinkIndex}.url`)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary underline">
+                            {form.watch(
+                              `links.${activeLinkIndex}.documentName`
+                            )}
+                          </a>
+                          <button
+                            type="button"
+                            className="text-destructive underline"
+                            onClick={() => {
+                              form.setValue(`links.${activeLinkIndex}.url`, '');
+                              form.setValue(
+                                `links.${activeLinkIndex}.documentName`,
+                                ''
+                              );
+                            }}>
+                            Verwijder
+                          </button>
+                        </div>
+                      ) : null}
+                      <FormMessage />
+                    </FormItem>
+                  ) : (
+                    <FormField
+                      key={`url-${activeLinkIndex}`}
+                      control={form.control}
+                      name={`links.${activeLinkIndex}.url`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Link URL</FormLabel>
+                          <Input {...field} value={field.value ?? ''} />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                   <FormField
-                    key={`url-${activeLink}`}
+                    key={`openInNewWindow-${activeLinkIndex}`}
                     control={form.control}
-                    name={`links.${activeLink}.url`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Link URL</FormLabel>
-                        <Input {...field} value={field.value ?? ''} />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    key={`openInNewWindow-${activeLink}`}
-                    control={form.control}
-                    name={`links.${activeLink}.openInNewWindow`}
+                    name={`links.${activeLinkIndex}.openInNewWindow`}
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Open in nieuw venster</FormLabel>
@@ -599,28 +741,30 @@ export function AgendaItemsEditor({
                       )}
                     />
                   )}
-                  <FormField
-                    control={form.control}
-                    name="highlighted"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Extra uitlichten</FormLabel>
-                        <FormDescription>
-                          Dit item wordt weergegeven als een gekleurd blok met
-                          de primaire kleuren.
-                        </FormDescription>
-                        <Switch.Root
-                          className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                          onCheckedChange={(e: boolean) => {
-                            field.onChange(e);
-                          }}
-                          checked={field.value}>
-                          <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                        </Switch.Root>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {!timelineMode && (
+                    <FormField
+                      control={form.control}
+                      name="highlighted"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Extra uitlichten</FormLabel>
+                          <FormDescription>
+                            Dit item wordt weergegeven als een gekleurd blok met
+                            de primaire kleuren.
+                          </FormDescription>
+                          <Switch.Root
+                            className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
+                            onCheckedChange={(e: boolean) => {
+                              field.onChange(e);
+                            }}
+                            checked={field.value}>
+                            <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+                          </Switch.Root>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                   {showActiveDates && (
                     <>
                       <FormField

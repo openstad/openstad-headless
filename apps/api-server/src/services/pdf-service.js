@@ -6,7 +6,7 @@
 
 function stripHtml(str) {
   if (typeof str !== 'string') return '';
-  let result = str;
+  let result = str.replace(/&nbsp;|\u00a0/gi, ' ');
   let prev;
   do {
     prev = result;
@@ -42,12 +42,14 @@ function sanitizeAnswer(str) {
     preserved.push(match);
     return `%%LINK${preserved.length - 1}%%`;
   });
+  result = result.replace(/<\/(p|li|h[1-6])>|<br\s*\/?>/gi, '\n');
   let prev;
   do {
     prev = result;
     result = result.replace(/<[^>]*>/g, '');
   } while (result !== prev);
   result = result.trim();
+  result = result.replace(/[ \t]*\n+[ \t]*/g, '<br/>');
   preserved.forEach((link, i) => {
     result = result.replace(`%%LINK${i}%%`, link);
   });
@@ -188,8 +190,27 @@ async function generatePdf(htmlString) {
   return Buffer.from(arrayBuffer);
 }
 
+function urlOrigin(url) {
+  try {
+    return new URL(url).origin;
+  } catch (err) {
+    return null;
+  }
+}
+
+function isImageServerUrl(url) {
+  const origin = urlOrigin(url);
+  if (!origin) return false;
+  return [process.env.IMAGE_APP_URL, process.env.IMAGE_APP_URL_INTERNAL]
+    .filter(Boolean)
+    .some((imageServerUrl) => urlOrigin(imageServerUrl) === origin);
+}
+
 async function fetchImageAsDataUrl(url) {
   if (!url || url.startsWith('data:')) return url;
+  if (!isImageServerUrl(url)) {
+    throw new Error(`Image is not hosted on the image server: ${url}`);
+  }
   // Replace external image URL with internal Docker URL for container-to-container fetch
   let fetchUrl = url;
   if (process.env.IMAGE_APP_URL && process.env.IMAGE_APP_URL_INTERNAL) {

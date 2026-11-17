@@ -398,3 +398,7 @@ ul.admin-overview > li > a {
 .leaflet-container {
   isolation: isolate;
 }
+
+#widget-preview-container .leaflet-container {
+  isolation: auto;
+}

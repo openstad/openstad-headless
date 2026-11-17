@@ -2,12 +2,14 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { canLikeResource, hasRole } from '@openstad-headless/lib';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
+import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
 import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import {
   Paginator,
   Spacer,
   Stepper,
   fireConfetti,
+  headingLevels,
 } from '@openstad-headless/ui/src';
 import { Filters } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
 import '@utrecht/component-library-css';
@@ -39,6 +41,7 @@ import { Step3Success } from './step-3-success';
 import { Step4 } from './step-4';
 import { createSelectedResourcesStorage } from './utils/selected-resources-storage';
 import { buildTagGroups } from './utils/tag-groups';
+import { createVoteCompletedStorage } from './utils/vote-completed-storage';
 import { createVotePendingStorage } from './utils/vote-pending-storage';
 
 type TagTypeSingle = {
@@ -73,6 +76,7 @@ export type StemBegrootWidgetProps = BaseProps &
     displayTitle?: boolean;
     displaySummary?: boolean;
     displayDescription?: boolean;
+    clickableImage?: boolean;
     displayTagFilters?: boolean;
     tagGroups?: Array<{ type: string; label?: string; multiple: boolean }>;
     defaultSorting?: string;
@@ -85,6 +89,7 @@ export type StemBegrootWidgetProps = BaseProps &
     onlyIncludeTagIds: string;
     onlyIncludeStatusIds?: string;
     resourceListColumns?: number;
+    headingLevel?: number;
     showInfoMenu?: boolean;
     isSimpleView?: boolean;
     step1Title: string;
@@ -99,6 +104,10 @@ export type StemBegrootWidgetProps = BaseProps &
     budgetRemainingTitle?: string;
     resetText?: string;
     applyText?: string;
+    searchLabel?: string;
+    displaySearchHint?: boolean;
+    searchHint?: string;
+    displaySearchPlaceholder?: boolean;
     searchPlaceholder?: string;
     step1Tab?: string;
     step2Tab?: string;
@@ -127,6 +136,7 @@ function StemBegroot({
   onlyIncludeTagIds = '',
   onlyIncludeStatusIds = '',
   resourceListColumns = 3,
+  headingLevel = 2,
   step1Tab = '',
   step2Tab = '',
   step3Tab = '',
@@ -145,6 +155,10 @@ function StemBegroot({
   displayModBreak = false,
   ...props
 }: StemBegrootWidgetProps) {
+  // ponytail: widget staat onder de <h1> van de CMS-pagina → nooit zelf een h1;
+  // sub-secties volgen de titel zodat er geen niveau wordt overgeslagen (1.3.1)
+  const [hTitle, hSection] = headingLevels(headingLevel);
+
   // Initialize storage instances with project ID
   const votePendingStorage = React.useMemo(
     () => createVotePendingStorage(props.projectId),
@@ -153,6 +167,11 @@ function StemBegroot({
 
   const selectedResourcesStorage = React.useMemo(
     () => createSelectedResourcesStorage(props.projectId),
+    [props.projectId]
+  );
+
+  const voteCompletedStorage = React.useMemo(
+    () => createVoteCompletedStorage(props.projectId),
     [props.projectId]
   );
 
@@ -618,10 +637,7 @@ function StemBegroot({
         );
         const submitted = await submitVoteAndCleanup();
         if (submitted) {
-          if (props.showConfetti) {
-            fireConfetti();
-          }
-          setCurrentStep(4);
+          await moveToStep4AndLogout();
         }
       })();
     }
@@ -958,6 +974,54 @@ function StemBegroot({
     ? filteredResources
     : resources?.records || [];
 
+  useEffect(() => {
+    const shouldShowStep4 = voteCompletedStorage.consumeShowStep4AfterLogout();
+    if (shouldShowStep4) {
+      setCurrentStep(4);
+      if (props.showConfetti) {
+        fireConfetti();
+      }
+    }
+  }, [voteCompletedStorage, props.showConfetti]);
+
+  function clearPlanSelection() {
+    votePendingStorage.clearAllVotePending();
+    selectedResourcesStorage.clearSelectedResources();
+    setSelectedResources([]);
+    setTagCounter((prevTagCounter) =>
+      prevTagCounter.map((tagObj) => {
+        const tagName = Object.keys(tagObj)[0];
+        return {
+          [tagName]: {
+            ...tagObj[tagName],
+            current: 0,
+            selectedResources: [],
+          },
+        };
+      })
+    );
+  }
+
+  async function moveToStep4AndLogout() {
+    clearPlanSelection();
+
+    if (!currentUser?.logout) {
+      setCurrentStep(4);
+      if (props.showConfetti) {
+        fireConfetti();
+      }
+      return;
+    }
+
+    voteCompletedStorage.setState({ showStep4AfterLogout: true });
+
+    const currentUrl = new URL(location.href);
+    const params = currentUrl.searchParams;
+    params.delete('openstadlogintoken');
+
+    await currentUser.logout({ url: currentUrl.toString() });
+  }
+
   const computeCanAddMore = useCallback((): boolean => {
     let canAddMore = true;
 
@@ -1040,6 +1104,52 @@ function StemBegroot({
     }
   };
 
+  const stepsRef = useRef<HTMLDivElement | null>(null);
+  const scrollToSteps = () => {
+    if (stepsRef.current) {
+      const targetPosition =
+        stepsRef.current.getBoundingClientRect().top + window.scrollY;
+
+      window.scrollTo({
+        top: targetPosition,
+        behavior: 'smooth',
+      });
+    }
+  };
+
+  const prevStepRef = useRef(currentStep);
+  useEffect(() => {
+    if (prevStepRef.current !== currentStep) {
+      prevStepRef.current = currentStep;
+      scrollToSteps();
+    }
+  }, [currentStep]);
+
+  const isInitialStepRef = useRef(true);
+  useEffect(() => {
+    if (isInitialStepRef.current) {
+      isInitialStepRef.current = false;
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      if (step1ContainerRef.current) {
+        const heading = step1ContainerRef.current.querySelector(
+          'h1, h2, h3, h4, h5, h6, [role="heading"]'
+        );
+        if (heading) {
+          (heading as HTMLElement).setAttribute('tabindex', '-1');
+          (heading as HTMLElement).focus();
+        } else {
+          step1ContainerRef.current.setAttribute('tabindex', '-1');
+          step1ContainerRef.current.focus();
+        }
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [currentStep]);
+
   // Keep previous totalPages while loading to prevent UI flicker
   const totalPagesRef = useRef(1);
   if (!isLoading && resources?.metadata?.pageCount) {
@@ -1096,22 +1206,20 @@ function StemBegroot({
     );
   }, [activeTagTab]);
 
-  useEffect(() => {
-    console.log('Curr step', currentStep);
-  }, [currentStep]);
-
   return (
     <>
       <StemBegrootResourceDetailDialog
+        headingLevel={hSection}
         areaId={props.map.areaId}
         displayPriceLabel={props.displayPriceLabel}
         displayRanking={props.displayRanking}
-        showVoteCount={props.showVoteCount}
+        showVoteCount={props.showVoteCount && !!props.votes?.isViewable}
         showOriginalResource={props.showOriginalResource ?? true}
         originalResourceUrl={props.originalResourceUrl}
         displayTitle={props.displayTitle ?? true}
         displaySummary={props.displaySummary ?? true}
         displayDescription={props.displayDescription ?? true}
+        clickableImage={props.clickableImage ?? false}
         resources={resourcesToUse}
         resourceBtnEnabled={resourceSelectable}
         resourceBtnTextHandler={createItemBtnString}
@@ -1179,15 +1287,18 @@ function StemBegroot({
       />
 
       <div className="osc">
-        <Stepper
-          currentStep={currentStep}
-          steps={steps}
-          isSimpleView={props.isSimpleView}
-        />
+        <div ref={stepsRef}>
+          <Stepper
+            currentStep={currentStep}
+            steps={steps}
+            isSimpleView={props.isSimpleView}
+          />
+        </div>
         <Spacer size={1} />
 
-        {props.votes.voteType === 'budgeting' ||
-        props?.votes?.voteType === 'budgetingPerTag' ? (
+        {(props.votes.voteType === 'budgeting' ||
+          props?.votes?.voteType === 'budgetingPerTag') &&
+        currentStep !== 4 ? (
           <>
             {usedBudgetList}
             <Spacer size={1.5} />
@@ -1199,7 +1310,9 @@ function StemBegroot({
             <div className="vote-per-theme-container">
               <div
                 className="vote-per-theme-intro"
-                dangerouslySetInnerHTML={{ __html: step0 }}></div>
+                dangerouslySetInnerHTML={{
+                  __html: sanitizeHtml(step0),
+                }}></div>
               <div className="themes-container">
                 {tagsToDisplay.map((tag: string) => (
                   <div className="theme" key={tag}>
@@ -1224,6 +1337,7 @@ function StemBegroot({
                 budgetChosenTitle={props.budgetChosenTitle}
                 budgetRemainingTitle={props.budgetRemainingTitle}
                 step1Title={props.step1Title}
+                headingLevel={hSection}
                 resourceCardTitle={props.resourceCardTitle}
                 introText={props.step1}
                 showInfoMenu={props.showInfoMenu}
@@ -1304,6 +1418,7 @@ function StemBegroot({
             <>
               <Spacer size={1.5} />
               <BegrotenSelectedOverview
+                headingLevel={hSection}
                 panelTitle={props.panelTitle}
                 budgetChosenTitle={props.budgetChosenTitle}
                 budgetRemainingTitle={props.budgetRemainingTitle}
@@ -1329,6 +1444,7 @@ function StemBegroot({
 
           {currentStep === 2 ? (
             <Step3
+              headingLevel={hSection}
               loginUrl={`${props?.login?.url}`}
               step3={props.step3 || ''}
               stemCodeTitle={props.stemCodeTitle}
@@ -1340,13 +1456,17 @@ function StemBegroot({
           ) : null}
 
           {currentStep === 3 ? (
-            <Step3Success step3success={props.step3success || ''} />
+            <Step3Success
+              headingLevel={hSection}
+              step3success={props.step3success || ''}
+            />
           ) : null}
 
           <Spacer size={1} />
 
           {currentStep === 4 ? (
             <Step4
+              headingLevel={hSection}
               loginUrl={`${props?.login?.url}`}
               thankMessage={props.thankMessage || ''}
               voteMessage={props.voteMessage || ''}
@@ -1394,6 +1514,13 @@ function StemBegroot({
                 <Button
                   appearance="primary-action-button"
                   onClick={async () => {
+                    if (currentStep === 4) {
+                      clearPlanSelection();
+                      voteCompletedStorage.clearState();
+                      setCurrentStep(startingStep);
+                      return;
+                    }
+
                     if (currentStep === 0) {
                       if (
                         props.votes.voteType === 'countPerTag' ||
@@ -1449,21 +1576,17 @@ function StemBegroot({
                     if (currentStep === 3) {
                       const submitted = await submitVoteAndCleanup();
                       if (submitted) {
-                        if (props.showConfetti) {
-                          fireConfetti();
-                        }
-                        setCurrentStep(4);
+                        await moveToStep4AndLogout();
                       }
-                    } else if (currentStep === 4) {
-                      const currentUrl = new URL(location.href);
-                      const params = currentUrl.searchParams;
-                      params.delete('openstadlogintoken');
-                      await currentUser.logout({ url: currentUrl.toString() });
                     } else {
                       setCurrentStep(currentStep + 1);
                     }
                   }}
                   disabled={(() => {
+                    if (currentStep === 4) {
+                      return false;
+                    }
+
                     if (
                       props.votes.voteType === 'count' &&
                       selectedResources.length < props.votes.minResources
@@ -1554,7 +1677,7 @@ function StemBegroot({
             <StemBegrootResourceList
               header={
                 <>
-                  <Heading level={1} appearance="utrecht-heading-3">
+                  <Heading level={hTitle} appearance="utrecht-heading-3">
                     {overviewTitle || 'Plannen'}
                   </Heading>
                   <Spacer size={1} />
@@ -1567,6 +1690,10 @@ function StemBegroot({
                       displaySorting={props.displaySorting || false}
                       displaySearch={props.displaySearch || false}
                       displayTagFilters={props.displayTagFilters || false}
+                      searchLabel={props.searchLabel || 'Zoeken'}
+                      displaySearchHint={props.displaySearchHint || false}
+                      searchHint={props.searchHint || ''}
+                      displaySearchPlaceholder={props.displaySearchPlaceholder}
                       searchPlaceholder={props.searchPlaceholder || 'Zoeken'}
                       resetText={props.resetText || 'Reset'}
                       applyText={props.applyText || 'Toepassen'}
@@ -1611,11 +1738,12 @@ function StemBegroot({
               }}
               displayPriceLabel={props.displayPriceLabel}
               displayRanking={props.displayRanking}
-              showVoteCount={props.showVoteCount}
+              showVoteCount={props.showVoteCount && !!props.votes?.isViewable}
               showOriginalResource={props.showOriginalResource ?? true}
               originalResourceUrl={props.originalResourceUrl}
               displayTitle={props.displayTitle ?? true}
               displaySummary={props.displaySummary ?? true}
+              clickableImage={props.clickableImage ?? false}
               resourceListColumns={resourceListColumns || 3}
               onResourcePrimaryClicked={(resource) => {
                 votePendingStorage.clearAllVotePending();

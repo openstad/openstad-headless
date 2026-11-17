@@ -67,6 +67,7 @@ module.exports = {
       createMiddlewareApplier,
     } = require('./services/plugin-loader-init');
     var { pluginMiddleware, pluginRoutes } = initPluginLoader();
+    require('./services/plugin-extensions').init();
     var applyPluginMiddleware = createMiddlewareApplier(
       this.app,
       pluginMiddleware

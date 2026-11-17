@@ -150,6 +150,7 @@ function ChoiceGuideResults(props: ChoiceGuideResultsProps) {
             displayTitle={props?.displayTitle}
             displayDescription={props?.displayDescription}
             displayImage={props?.displayImage}
+            imageClickable={props?.imageClickable}
           />
         )}
       </div>
@@ -167,6 +168,7 @@ function ChoiceGuideResults(props: ChoiceGuideResultsProps) {
               displayDescription={true}
               displayImage={true}
               displayScore={false}
+              imageClickable={props?.imageClickable}
             />
           ))}
         </div>

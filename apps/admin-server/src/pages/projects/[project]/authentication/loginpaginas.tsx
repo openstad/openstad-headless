@@ -75,6 +75,19 @@ const formSchema = z.object({
   SMS2Label: z.string().optional(),
   SMS2ButtonText: z.string().optional(),
   SMS2HelpText: z.string().optional(),
+  SMSText: z
+    .string()
+    .optional()
+    .refine((value) => !value || value.includes('[[code]]'), {
+      message: 'De tekst moet [[code]] bevatten.',
+    }),
+  // KPN requires an alphanumeric sender of max 11 characters
+  SMSSender: z
+    .string()
+    .regex(/^[a-zA-Z0-9]{0,11}$/, {
+      message: 'Maximaal 11 letters of cijfers, zonder spaties.',
+    })
+    .optional(),
   LocalTitle: z.string().optional(),
   LocalDescription: z.string().optional(),
   LocalEmailLabel: z.string().optional(),
@@ -216,6 +229,16 @@ export default function ProjectAuthentication() {
           ?.smsCodeHelpText ||
         authTypeDefaults?.Phonenumber?.smsCodeHelpText ||
         '',
+      SMSText:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
+          ?.smsCodeText ||
+        authTypeDefaults?.Phonenumber?.smsCodeText ||
+        '',
+      SMSSender:
+        data?.config?.auth?.provider?.openstad?.config?.authTypes?.Phonenumber
+          ?.smsCodeSender ||
+        authTypeDefaults?.Phonenumber?.smsCodeSender ||
+        '',
       LocalTitle:
         data?.config?.auth?.provider?.openstad?.config?.authTypes?.Local
           ?.title ||
@@ -314,6 +337,8 @@ export default function ProjectAuthentication() {
                 smsCodeLabel: values.SMS2Label,
                 smsCodeButtonText: values.SMS2ButtonText,
                 smsCodeHelpText: values.SMS2HelpText,
+                smsCodeText: values.SMSText,
+                smsCodeSender: values.SMSSender,
               },
               Local: {
                 title: values.LocalTitle,
@@ -826,6 +851,45 @@ export default function ProjectAuthentication() {
                           <FormControl>
                             <Input placeholder="Voer knoptekst in" {...field} />
                           </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="SMSText"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>SMS-tekst</FormLabel>
+                          <FormControl>
+                            <Textarea placeholder="Code: [[code]]" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            De tekst van de sms met de inlogcode. [[code]] is
+                            verplicht en wordt vervangen door de code.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="SMSSender"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Afzender</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="OpenStad"
+                              maxLength={11}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Maximaal 11 letters of cijfers, zonder spaties.
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}

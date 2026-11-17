@@ -5,7 +5,7 @@ import { Button, ButtonLink } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { PropsWithChildren, useEffect } from 'react';
+import { PropsWithChildren, useEffect, useRef } from 'react';
 import React, { useState } from 'react';
 
 import { loadWidget } from '../../lib/load-widget';
@@ -157,6 +157,7 @@ const ResourceOverviewMap = ({
           : '';
 
       // Set the resource name
+      marker.title = resource.title ?? 'Locatie pin';
       marker.icon = {
         title: resource.title ?? 'Locatie pin',
       };
@@ -277,16 +278,6 @@ const ResourceOverviewMap = ({
     maxZoom: props?.map?.maxZoom ? parseInt(props.map.maxZoom) : 20,
   };
 
-  const skipMarkers = () => {
-    const nextFocus: HTMLButtonElement | null = document.querySelectorAll(
-      '.leaflet-control-zoom-in'
-    )[0] as HTMLButtonElement;
-
-    if (nextFocus) {
-      nextFocus.focus();
-    }
-  };
-
   if (!!props?.map && typeof props?.map === 'object') {
     props.map = {
       ...props.map,
@@ -304,12 +295,6 @@ const ResourceOverviewMap = ({
 
   return (polygon.length > 0 && center) || !Number(areaId) ? (
     <div className="map-container--buttons">
-      <Button
-        appearance="primary-action-button"
-        className="skip-link"
-        onClick={skipMarkers}>
-        Sla kaart over
-      </Button>
       <BaseMap
         {...props}
         {...zoom}

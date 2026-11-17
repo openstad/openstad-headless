@@ -11,18 +11,21 @@ telemetryManager.initialize();
 setupGracefulShutdown(telemetryManager);
 
 const apostrophe = require('apostrophe');
+const dayjs = require('dayjs');
+require('dayjs/locale/nl');
+dayjs.locale('nl');
 const express = require('express');
 const app = express();
 const _ = require('lodash');
 const projectService = require('./services/projects');
 const aposConfig = require('./lib/apos-config');
+const { resolveSitePrefix } = require('./lib/resolve-site-prefix');
 const { refresh } = require('less');
 const REFRESH_PROJECTS_INTERVAL = 60000 * 5;
 const Url = require('node:url');
 const messageStreaming = require('./services/message-streaming');
 
 const compression = require('compression');
-const basicAuth = require('express-basic-auth');
 const path = require('node:path');
 
 let projects = {};
@@ -189,7 +192,9 @@ function cleanUpProjects() {
 async function doStartServer(domain, req, res) {
   if (!apostropheServer[domain]) {
     console.log('Starting up project: ', domain);
-    apostropheServer[domain] = await run(domain, projects[domain], {});
+    apostropheServer[domain] = await run(domain, projects[domain], {
+      sitePrefix: req && req.sitePrefix,
+    });
     apostropheServer[domain].app.set('trust proxy', true);
     apostropheServer[domain].app(req, res);
     return Promise.resolve();
@@ -227,7 +232,7 @@ async function run(id, projectData, options, callback) {
     _id: id,
     shortName: 'openstad-' + projectData.id,
     mongo: {},
-    prefix: projectData.sitePrefix ? '/' + projectData.sitePrefix : false,
+    prefix: options && options.sitePrefix ? '/' + options.sitePrefix : false,
     modules: {
       ...aposConfig.modules,
       '@apostrophecms/express': {
@@ -250,6 +255,9 @@ async function run(id, projectData, options, callback) {
     const dbName = (dbPrefix + project.shortName).substring(0, 63);
 
     project.mongo.uri = process.env.MONGODB_URI.replace('{database}', dbName);
+    project.modules['@apostrophecms/db'] = {
+      options: { uri: project.mongo.uri },
+    };
   }
 
   const config = project;
@@ -421,12 +429,14 @@ app.use(function (req, res, next) {
  * if openstad.org exists of course.
  */
 app.use('/:sitePrefix', function (req, res, next) {
-  const domainAndPath = req.openstadDomain + '/' + req.params.sitePrefix;
-
-  const site = projects[domainAndPath] ? projects[domainAndPath] : false;
+  const site = resolveSitePrefix({
+    projects,
+    openstadDomain: req.openstadDomain,
+    sitePrefix: req.params.sitePrefix,
+    alreadyResolved: Boolean(req.sitePrefix),
+  });
 
   if (site) {
-    site.sitePrefix = req.params.sitePrefix;
     req.sitePrefix = req.params.sitePrefix;
     req.site = site;
 
@@ -451,24 +461,11 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use((req, res, next) => {
-  if (
-    req.site &&
-    req.site.config?.basicAuth?.active &&
-    req.site.config?.basicAuth?.username &&
-    req.site.config?.basicAuth?.password
-  ) {
-    return basicAuth({
-      users: {
-        [req.site.config.basicAuth.username]:
-          req.site.config.basicAuth.password,
-      },
-      challenge: true,
-    })(req, res, next);
-  }
+const { escapeHtml, createSiteAccessGate } = require('./lib/site-access-gate');
 
-  next();
-});
+const parseSiteAccessBody = express.urlencoded({ extended: false });
+
+app.use(createSiteAccessGate({ parseBody: parseSiteAccessBody }));
 
 app.use('/:privileged(admin)?/login', function (req, res, next) {
   const domainAndPath =
@@ -543,16 +540,6 @@ app.use(async function (req, res, next) {
       projects[completeDomain],
       req.forceRestart
     );
-  }
-
-  function escapeHtml(input) {
-    return String(input)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;')
-      .replace(/`/g, '&#96;');
   }
 
   // fallback to generic 404

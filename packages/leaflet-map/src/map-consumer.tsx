@@ -1,4 +1,6 @@
 // @ts-ignore
+import { useEffect } from 'react';
+// @ts-ignore
 import { useMap } from 'react-leaflet/hooks';
 
 declare global {
@@ -14,7 +16,8 @@ export function useMapRef(mapId: string) {
   let val = window.oscMap[mapId];
 
   function setMapRef(ref: object) {
-    if (val.map) return;
+    // ponytail: altijd de actuele instance bewaren; een stale ref na remount gaf
+    // een leak + kon een verwijderde kaart teruggeven.
     window.oscMap[mapId].map = ref;
   }
 
@@ -30,6 +33,13 @@ export function MapConsumer({ mapId }: MapConsumerProps) {
 
   let [, setMapRef] = useMapRef(mapId);
   setMapRef(map);
+
+  // ponytail: wis de globale cache bij unmount, anders blijft een stale Leaflet-instance hangen.
+  useEffect(() => {
+    return () => {
+      if (window.oscMap) delete window.oscMap[mapId];
+    };
+  }, [mapId]);
 
   return null;
 }

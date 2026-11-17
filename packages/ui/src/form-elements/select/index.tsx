@@ -1,4 +1,6 @@
 import { FormValue } from '@openstad-headless/form/src/form';
+import { stripHtmlTags } from '@openstad-headless/lib/strip-html-tags';
+import { toHtmlId } from '@openstad-headless/lib/to-html-id';
 import { MultiSelect, Spacer } from '@openstad-headless/ui/src';
 import {
   AccordionProvider,
@@ -11,15 +13,37 @@ import {
 } from '@utrecht/component-library-react';
 import React, { useState } from 'react';
 import { FC } from 'react';
+import { useEffect, useId, useMemo } from 'react';
 
 import { InfoImage } from '../../infoImage';
-import RteContent from '../../rte-formatting/rte-content';
+import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
+import TextInput from '../text';
+
+const shuffleArray = <T,>(array: T[]): T[] => {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+};
 
 export type SelectFieldProps = {
   overrideDefaultValue?: FormValue;
   title?: string;
   description?: string;
-  choices?: string[] | [{ value: string; label: string }];
+  choices?:
+    | string[]
+    | [
+        {
+          value: string;
+          label: string;
+          isOtherOption?: boolean;
+          defaultValue?: boolean;
+          trigger?: string;
+        },
+      ];
+  randomizeItems?: boolean;
   fieldRequired?: boolean;
   requiredWarning?: string;
   fieldKey: string;
@@ -55,6 +79,7 @@ const SelectField: FC<SelectFieldProps> = ({
   title,
   description,
   choices = [],
+  randomizeItems = false,
   fieldKey,
   defaultOption = 'Selecteer een optie',
   fieldRequired = false,
@@ -73,13 +98,62 @@ const SelectField: FC<SelectFieldProps> = ({
   createImageSlider = false,
   imageClickable = false,
 }) => {
-  choices = choices.map((choice) => {
-    if (typeof choice === 'string') {
-      return { value: choice, label: choice };
-    } else {
-      return choice;
+  const idKey = toHtmlId(fieldKey);
+
+  const multiSelectId = useId();
+
+  type NormalizedChoice = {
+    value: string;
+    label: string;
+    isOtherOption?: boolean;
+    trigger?: string;
+  };
+
+  const normalizedChoices: NormalizedChoice[] = useMemo(
+    () =>
+      choices.map((choice) => {
+        if (typeof choice === 'string') {
+          return { value: choice, label: choice };
+        } else {
+          return choice;
+        }
+      }),
+    [choices]
+  );
+
+  const [displayChoices, setDisplayChoices] =
+    useState<NormalizedChoice[]>(normalizedChoices);
+  const [otherOptionValues, setOtherOptionValues] = useState<{
+    [key: string]: string;
+  }>({});
+
+  useEffect(() => {
+    if (multiple || !randomizeItems) {
+      setDisplayChoices(normalizedChoices);
+      return;
     }
-  }) as [{ value: string; label: string }];
+
+    const storageKey = `randomizedChoices_${fieldKey}`;
+    const stored = sessionStorage.getItem(storageKey);
+    if (stored) {
+      setDisplayChoices(JSON.parse(stored));
+    } else {
+      const shuffled = shuffleArray(normalizedChoices);
+      setDisplayChoices(shuffled);
+      sessionStorage.setItem(storageKey, JSON.stringify(shuffled));
+    }
+  }, [normalizedChoices, fieldKey, multiple, randomizeItems]);
+
+  useEffect(() => {
+    const initialOtherOptionValues: { [key: string]: string } = {};
+    displayChoices?.forEach((choice, index) => {
+      if (choice?.isOtherOption) {
+        const id = choice.trigger || `${index}`;
+        initialOtherOptionValues[`${fieldKey}_${id}_other`] = '';
+      }
+    });
+    setOtherOptionValues(initialOtherOptionValues);
+  }, [displayChoices, fieldKey]);
 
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
@@ -100,14 +174,37 @@ const SelectField: FC<SelectFieldProps> = ({
 
   const [selected, setSelected] = useState<string | string[]>(initialValue);
 
+  const selectedChoiceIndex = displayChoices.findIndex(
+    (choice) => choice.value === selected
+  );
+  const selectedChoice =
+    selectedChoiceIndex > -1 ? displayChoices[selectedChoiceIndex] : undefined;
+
+  const handleOtherOptionChange = (e: { name: string; value: string }) => {
+    setOtherOptionValues({
+      ...otherOptionValues,
+      [e.name]: e.value,
+    });
+    if (onChange) {
+      onChange(
+        {
+          name: e.name,
+          value: e.value,
+        },
+        false
+      );
+    }
+  };
+
   return (
     <FormField type="select">
       {title && (
-        <FormLabel htmlFor={fieldKey}>
+        <FormLabel {...(multiple ? { id: multiSelectId } : { htmlFor: idKey })}>
           <RteContent
             content={title}
             unwrapSingleRootDiv={true}
             forceInline={true}
+            inlineComponent={InlineParagraph}
           />
         </FormLabel>
       )}
@@ -148,8 +245,9 @@ const SelectField: FC<SelectFieldProps> = ({
         {multiple ? (
           <MultiSelect
             label={defaultOption}
-            id={fieldKey}
-            options={choices.map((choice) => ({
+            legend={stripHtmlTags(title || '')}
+            id={multiSelectId}
+            options={displayChoices.map((choice) => ({
               value: choice.value,
               label: choice.label,
               checked: Array.isArray(selected)
@@ -176,7 +274,7 @@ const SelectField: FC<SelectFieldProps> = ({
           <Select
             className="form-item"
             name={fieldKey}
-            id={fieldKey}
+            id={idKey}
             required={fieldRequired}
             onChange={(e) => {
               setSelected(e.target.value);
@@ -186,18 +284,64 @@ const SelectField: FC<SelectFieldProps> = ({
                   value: e.target.value,
                 });
               }
+
+              const newChoiceIndex = displayChoices.findIndex(
+                (choice) => choice.value === e.target.value
+              );
+              const newChoice =
+                newChoiceIndex > -1
+                  ? displayChoices[newChoiceIndex]
+                  : undefined;
+              const newTrigger = newChoice?.trigger || `${newChoiceIndex}`;
+
+              const updatedOtherOptionValues = { ...otherOptionValues };
+              Object.keys(updatedOtherOptionValues).forEach((key) => {
+                if (key !== `${fieldKey}_${newTrigger}_other`) {
+                  updatedOtherOptionValues[key] = '';
+                  if (onChange) {
+                    onChange(
+                      {
+                        name: key,
+                        value: '',
+                      },
+                      false
+                    );
+                  }
+                }
+              });
+              setOtherOptionValues(updatedOtherOptionValues);
             }}
             disabled={disabled}
             aria-invalid={fieldInvalid}
-            aria-describedby={`${randomId}_error`}
+            aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}
             value={selected}>
             <SelectOption value="">{defaultOption}</SelectOption>
-            {choices?.map((value, index) => (
+            {displayChoices?.map((value, index) => (
               <SelectOption key={index} value={value && value.value}>
                 {value && value.label}
               </SelectOption>
             ))}
           </Select>
+        )}
+        {!multiple && selectedChoice?.isOtherOption && (
+          <div className="select-other-option">
+            <TextInput
+              type="text"
+              // @ts-ignore
+              onChange={(e: { name: string; value: string }) =>
+                handleOtherOptionChange(e)
+              }
+              fieldKey={`${fieldKey}_${
+                selectedChoice.trigger || selectedChoiceIndex
+              }_other`}
+              title={selectedChoice.label || 'Anders, namelijk'}
+              placeholder="Vul hier uw antwoord in"
+              fieldInvalid={false}
+              randomId={`${idKey}_${
+                selectedChoice.trigger || selectedChoiceIndex
+              }`}
+            />
+          </div>
         )}
       </Paragraph>
     </FormField>

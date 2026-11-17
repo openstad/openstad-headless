@@ -1,6 +1,5 @@
 var config = require('config');
 var CronJob = require('cron').CronJob;
-var extend = require('lodash/extend');
 var util = require('./util');
 
 module.exports = {
@@ -11,10 +10,13 @@ module.exports = {
     util.invokeDir('./cron', function (jobDef, fileName) {
       try {
         var job = new CronJob(
-          extend({}, jobDef, {
-            timeZone: config.get('timeZone'),
-            start: true,
-          })
+          jobDef.cronTime,
+          jobDef.onTick,
+          jobDef.onComplete || null,
+          true,
+          config.get('timeZone'),
+          null,
+          jobDef.runOnInit !== undefined ? jobDef.runOnInit : false
         );
         jobs.set(fileName, job);
       } catch (e) {

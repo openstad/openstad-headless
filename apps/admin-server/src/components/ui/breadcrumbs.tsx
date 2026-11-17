@@ -8,7 +8,7 @@ import { Paragraph } from './typography';
 
 export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: any }) {
   return (
-    <div className="flex flex-row items-center">
+    <div className="flex flex-row flex-wrap items-center">
       {breadcrumbs.map(
         (breadcrumb: any, index: number, { length }: { length: any }) => (
           <React.Fragment key={index}>
@@ -20,10 +20,9 @@ export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: any }) {
             <Link href={breadcrumb.url}>
               <Paragraph
                 className={cn(
-                  'whitespace-nowrap text-ellipsis overflow-hidden',
                   index + 1 === length
-                    ? ''
-                    : ' max-w-[60px] md:max-w-none text-muted-foreground'
+                    ? 'break-words'
+                    : 'whitespace-nowrap text-ellipsis overflow-hidden max-w-[60px] md:max-w-none text-muted-foreground'
                 )}>
                 {breadcrumb.name}
               </Paragraph>

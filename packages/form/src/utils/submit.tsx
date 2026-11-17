@@ -4,6 +4,11 @@ import { FormValue } from '../form';
 import type { CombinedFieldPropsWithType } from '../props';
 import { getSchemaForField } from './validation.js';
 
+export type SubmitResult = {
+  firstErrorKey: string | null;
+  errors: { [key: string]: string | null };
+};
+
 export const handleSubmit = (
   fields: Array<CombinedFieldPropsWithType>,
   formValues: { [p: string]: FormValue },
@@ -11,10 +16,13 @@ export const handleSubmit = (
     React.SetStateAction<{ [p: string]: string | null }>
   >,
   routingHiddenFields: string[],
-  submitHandler: (values: { [p: string]: FormValue }) => void,
+  submitHandler: (values: {
+    [p: string]: FormValue;
+  }) => void | boolean | Promise<void | boolean>,
   pageHandler: (() => void) | null = null,
-  submitBeforeLastPage?: boolean
-): string | null => {
+  submitBeforeLastPage?: boolean,
+  navigateAfterSubmitSuccess?: boolean
+): SubmitResult => {
   const errors: { [key: string]: string | null } = {};
   let firstErrorKey: string | null = null;
 
@@ -59,7 +67,10 @@ export const handleSubmit = (
   setFormErrors(errors);
 
   if (Object.values(errors).every((error) => error === null)) {
-    if (pageHandler) pageHandler();
+    const deferNavigation =
+      !!pageHandler && !!submitBeforeLastPage && !!navigateAfterSubmitSuccess;
+
+    if (pageHandler && !deferNavigation) pageHandler();
 
     if (!pageHandler || submitBeforeLastPage) {
       const valuesToSubmit: { [key: string]: FormValue } = {};
@@ -68,10 +79,17 @@ export const handleSubmit = (
           valuesToSubmit[key] = value;
         }
       }
-      submitHandler(valuesToSubmit);
+      const result = submitHandler(valuesToSubmit);
+      if (deferNavigation && pageHandler) {
+        Promise.resolve(result)
+          .then((success) => {
+            if (success === true) pageHandler();
+          })
+          .catch(() => {});
+      }
     }
-    return null;
+    return { firstErrorKey: null, errors };
   }
 
-  return firstErrorKey;
+  return { firstErrorKey, errors };
 };

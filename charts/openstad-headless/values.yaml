@@ -314,6 +314,8 @@ api:
     secretStoreName: "gcp-secret-store"
     # Cooldown in seconds between manual retry triggers per project
     retryCooldownSeconds: 60
+  # GTM dataLayer environment tag (prod, acc, test)
+  gtmEnvironment: prod
   # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
   otelServiceName: openstad-api-server
   otelExporterOtlpEndpoint: http://openstad-otel-collector:4317
@@ -400,6 +402,7 @@ image:
     ccRequests: 100
   hqOriginalMaxPixels: 160000
   disableWebpConversion: false
+  maxFileUploadSizeMB: 25
   # OpenTelemetry (env: OTEL_SERVICE_NAME, OTEL_EXPORTER_OTLP_ENDPOINT) - override per deployment
   otelServiceName: openstad-image-server
   otelExporterOtlpEndpoint: http://openstad-otel-collector:4317

@@ -34,8 +34,7 @@ router
 
 router
   .route('/widgets/:widgetId(\\d+)/count')
-  .get(auth.can('Submission', 'list'))
-  .get(function (req, res, next) {
+  .get(rateLimiter(), function (req, res, next) {
     const widgetId = parseInt(req.params.widgetId);
     if (!widgetId) return next(createError(404, 'Widget not found'));
 
@@ -128,7 +127,6 @@ router
     req.sendConfirmationToUser = data.submittedData.confirmationUser || false;
     req.userEmailAddress = data.submittedData.userEmailAddress || '';
     req.sendConfirmationToAdmin = data.submittedData.confirmationAdmin || false;
-    req.overwriteEmailAddress = data.submittedData.overwriteEmailAddress || '';
     req.widgetId = data.widgetId;
 
     delete data.submittedData.confirmationUser;
@@ -150,7 +148,8 @@ router
     db.Submission.authorizeData(data, 'create', req.user)
       .create(data)
       .then((result) => {
-        res.json(result);
+        // Fresh instance: serialize against the requesting user explicitly.
+        res.json(result.toJSON(req.user));
         req.results = result;
         return next();
       });
@@ -161,9 +160,16 @@ router
     const sendConfirmationToUser = req.sendConfirmationToUser;
     const userEmailAddress = req.userEmailAddress;
     const sendConfirmationToAdmin = req.sendConfirmationToAdmin;
-    const overwriteEmailAddress = req.overwriteEmailAddress;
 
     if (sendConfirmationToAdmin) {
+      // recipients come from the widget config; the request must not pick them
+      const widget = req.widgetId
+        ? await db.Widget.findOne({
+            where: { id: req.widgetId, projectId: req.project.id },
+          })
+        : null;
+      const overwriteEmailAddress =
+        widget?.config?.confirmation?.overwriteEmailAddress || '';
       const emailReceivers = overwriteEmailAddress
         .split(',')
         .map((email) => email.trim())
@@ -182,7 +188,9 @@ router
         type: 'new enquete - admin',
         projectId: req.project.id,
         data: notificationData,
-      });
+      }).catch((err) =>
+        console.error('Error sending admin notification for submission:', err)
+      );
     }
 
     if (sendConfirmationToUser) {
@@ -202,7 +210,9 @@ router
       }
 
       if (userEmailAddress || notificationData.data.userId) {
-        db.Notification.create(notificationData);
+        db.Notification.create(notificationData).catch((err) =>
+          console.error('Error sending user notification for submission:', err)
+        );
       }
     }
   });
@@ -267,10 +277,14 @@ router
   .put(auth.useReqUser)
   .put(rateLimiter(), function (req, res, next) {
     var submission = req.results;
-    if (!(submission && submission.can && submission.can('update')))
-      return next(new Error('You cannot update this submission'));
+    if (!(submission && submission.can && submission.can('update', req.user)))
+      return next(createError(403, 'You cannot update this submission'));
+    // Identity fields are not editable
+    const { projectId, userId, widgetId, ...data } = req.body;
+
     submission
-      .update(req.body)
+      .authorizeData(data, 'update')
+      .update(data)
       .then((result) => {
         res.json(result);
       })

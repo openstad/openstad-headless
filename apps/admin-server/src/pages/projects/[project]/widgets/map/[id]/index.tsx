@@ -7,6 +7,7 @@ import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 
@@ -58,20 +59,12 @@ export default function WidgetMap({ apiUrl }: WithApiUrlProps) {
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Map',
-            url: `/projects/${projectId}/widgets/map/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Map',
+          `/projects/${projectId}/widgets/map/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs value={activeTab} onValueChange={onTabChange}>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">

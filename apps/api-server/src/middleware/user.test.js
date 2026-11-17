@@ -73,8 +73,13 @@ describe('user middleware', () => {
     });
   });
 
-  describe('upload path with authorization header', () => {
+  describe('upload path with authorization header and the legacy bypass enabled', () => {
+    afterEach(() => {
+      delete process.env.API_UPLOAD_LEGACY_AUTH_BYPASS;
+    });
+
     it('replaces authorization with upload-service JWT and proceeds', async () => {
+      process.env.API_UPLOAD_LEGACY_AUTH_BYPASS = 'true';
       authSettings.config = vi.fn().mockResolvedValue({
         provider: {},
         adapter: 'openstad',
@@ -146,7 +151,7 @@ describe('user middleware', () => {
       expect(next).toHaveBeenCalledWith();
     });
 
-    it('calls next with a TokenExpiredError on an expired JWT', async () => {
+    it('calls next with a 401 error on an expired JWT', async () => {
       authSettings.config = vi.fn().mockResolvedValue({
         provider: {},
         adapter: 'openstad',
@@ -173,7 +178,7 @@ describe('user middleware', () => {
       expect(next).toHaveBeenCalledTimes(1);
       const error = next.mock.calls[0][0];
       expect(error).toBeInstanceOf(Error);
-      expect(error.name).toBe('TokenExpiredError');
+      expect(error.status).toBe(401);
       expect(req.user).toBeUndefined();
     });
 

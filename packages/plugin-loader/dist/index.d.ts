@@ -29,6 +29,25 @@ export interface PluginApiSection {
         directory: string;
     };
     envVars?: string[];
+    linkRequestHandler?: {
+        handler: string;
+    };
+    contactHandlers?: Array<{
+        key: string;
+        label: string;
+        handler: string;
+    }>;
+    sources?: Array<{
+        key: string;
+        label: string;
+        handler: string;
+    }>;
+    notifications?: Array<{
+        type: string;
+        label: string;
+        template: string;
+        immediate?: boolean;
+    }>;
 }
 export interface PluginAdminSection {
     bundle?: {
@@ -69,4 +88,11 @@ export interface PluginEntry {
     enabled: boolean;
     config?: Record<string, unknown>;
 }
+/**
+ * Resolves a manifest-supplied relative path against a plugin's own directory.
+ *
+ * @returns The resolved absolute path, or `null` when `relPath` is absolute or
+ *   escapes `pluginDir`.
+ */
+export declare function resolvePluginFile(pluginDir: string, relPath: string): string | null;
 //# sourceMappingURL=index.d.ts.map

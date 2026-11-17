@@ -86,6 +86,27 @@ type FormData = {
     description?: string | undefined;
   };
 };
+
+// ponytail: een readonly <input> kan zijn waarde niet afbreken, dus bij 200%
+// zoom valt een lange naam of e-mailadres buiten het vakje en is er geen enkele
+// manier om de rest te zien — de pagina scrollt niet horizontaal (1.4.4/1.4.10).
+// Tekst loopt wél door op een volgende regel. Bewerken gebeurt in een echt
+// invoerveld; dit is alleen de kijkmodus.
+function ReadonlyField({
+  label,
+  value,
+}: {
+  label: string | undefined;
+  value: string | undefined;
+}) {
+  return (
+    <div className="account-readonly-field">
+      <Paragraph className="account-readonly-field__label">{label}</Paragraph>
+      <Paragraph className="account-readonly-field__value">{value}</Paragraph>
+    </div>
+  );
+}
+
 function Account({
   allowNickname = false,
   minLength = 2,
@@ -283,7 +304,7 @@ function Account({
   }
 
   return (
-    <section className="account osc">
+    <section className="account osc" aria-label="Accountgegevens">
       {currentUserIsLoading ? null : !hasRole(currentUser, 'member') ? (
         <>
           <Banner className="big">
@@ -315,17 +336,15 @@ function Account({
             {Object.entries(formData).map(
               (field, index) =>
                 field[0] === 'email' && (
-                  <FormFieldTextbox
-                    label={field[1].label}
-                    name={field[1].label}
-                    description="Niet aanpasbaar"
-                    placeholder={field[1].label}
-                    maxLength={maxLength}
-                    minLength={minLength}
-                    value={userFormData?.email?.value}
-                    readOnly
-                    key={index}
-                  />
+                  <div key={index}>
+                    <ReadonlyField
+                      label={field[1].label}
+                      value={userFormData?.email?.value as string}
+                    />
+                    <Paragraph className="utrecht-form-field-description">
+                      Niet aanpasbaar
+                    </Paragraph>
+                  </div>
                 )
             )}
           </div>
@@ -371,29 +390,49 @@ function Account({
                       </FormField>
                     </Fieldset>
                   )
-                : field[0] !== 'nickname' && field[0] !== 'email' && (
-                    <FormFieldTextbox
-                      label={field[1].label}
-                      name={field[1].label}
-                      placeholder={field[1].label}
-                      maxLength={maxLength}
-                      minLength={minLength}
-                      value={field[1].value as string}
-                      onChange={(e) => {
-                        const target = e.target as HTMLInputElement; // Type assertion
-                        setUserFormData((prev) => ({
-                          ...prev,
-                          [field[0]]: {
-                            label: target.name,
-                            value: target.value,
-                            description: field[1].description,
-                          },
-                        }));
-                      }}
-                      readOnly={!canEditUser}
-                      key={index}
-                    />
-                  );
+                : field[0] !== 'nickname' &&
+                    field[0] !== 'email' &&
+                    (!canEditUser ? (
+                      <ReadonlyField
+                        label={field[1].label}
+                        value={field[1].value as string}
+                        key={index}
+                      />
+                    ) : (
+                      <FormFieldTextbox
+                        label={field[1].label}
+                        name={field[1].label}
+                        placeholder={field[1].label}
+                        // ponytail: autocomplete-doel per persoonsgegeven-veld (1.3.5)
+                        autoComplete={
+                          {
+                            name: 'name',
+                            naam: 'name',
+                            straatnaam: 'street-address',
+                            huisnummer: 'address-line2',
+                            postalCode: 'postal-code',
+                            postcode: 'postal-code',
+                            city: 'address-level2',
+                            plaats: 'address-level2',
+                          }[field[0] as string]
+                        }
+                        maxLength={maxLength}
+                        minLength={minLength}
+                        value={field[1].value as string}
+                        onChange={(e) => {
+                          const target = e.target as HTMLInputElement; // Type assertion
+                          setUserFormData((prev) => ({
+                            ...prev,
+                            [field[0]]: {
+                              label: target.name,
+                              value: target.value,
+                              description: field[1].description,
+                            },
+                          }));
+                        }}
+                        key={index}
+                      />
+                    ));
             })}
 
             {allowUserEdit && (
@@ -417,10 +456,18 @@ function Account({
 
               {Object.entries(formData).map(
                 (field, index) =>
-                  field[0] === 'nickname' && (
+                  field[0] === 'nickname' &&
+                  (!canEditNickname ? (
+                    <ReadonlyField
+                      label={field[1].label}
+                      value={userFormData?.nickname?.value as string}
+                      key={index}
+                    />
+                  ) : (
                     <FormFieldTextbox
                       label={field[1].label}
                       name={field[1].label}
+                      autoComplete="username"
                       maxLength={maxLength}
                       minLength={minLength}
                       placeholder={field[1].label}
@@ -436,10 +483,9 @@ function Account({
                           },
                         });
                       }}
-                      readOnly={!canEditNickname}
                       key={index}
                     />
-                  )
+                  ))
               )}
 
               {allowUserEdit && (

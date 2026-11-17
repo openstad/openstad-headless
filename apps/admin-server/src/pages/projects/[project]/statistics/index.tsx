@@ -86,6 +86,10 @@ const statCards = [
     key: 'choicesguideresultsCountTotal',
     label: 'Hoeveelheid keuzewijzer inzendingen',
   },
+  {
+    key: 'enqueteSubmissionsCountTotal',
+    label: 'Hoeveelheid enquête inzendingen',
+  },
 ];
 
 const charts = [
@@ -97,6 +101,10 @@ const charts = [
   {
     key: 'usersVotedPerDay',
     label: 'Hoeveelheid gebruikers die hebben gestemd per dag',
+  },
+  {
+    key: 'enqueteSubmissionsPerDay',
+    label: 'Hoeveelheid enquête inzendingen per dag',
   },
 ];
 

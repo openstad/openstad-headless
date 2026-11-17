@@ -27,7 +27,7 @@ describe('filterModeratorOnlyExtraData', () => {
     alwaysPublicExtraDataKeys: ['originalId', 'ranking'],
   };
 
-  it('does not filter when the user role is "all"', () => {
+  it('filters for the unidentified viewer with role "all"', () => {
     const data = { extraData: { intern: 'x', naam: 'y' } };
     filterModeratorOnlyExtraData(data, {
       ...base,
@@ -35,7 +35,7 @@ describe('filterModeratorOnlyExtraData', () => {
       canViewModerator: false,
       hasResourceFormConfig: true,
     });
-    expect(data.extraData).toEqual({ intern: 'x', naam: 'y' });
+    expect(data.extraData).toEqual({ naam: 'y' });
   });
 
   it('does not filter when the user may view moderator data', () => {

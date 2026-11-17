@@ -55,6 +55,7 @@ const formSchema = z.object({
   voteAfterLoggingIn: z.boolean().optional(),
   displayModBreak: z.boolean().optional(),
   showConfetti: z.boolean().optional(),
+  clickableImage: z.boolean().optional(),
 });
 
 type Formdata = z.infer<typeof formSchema>;
@@ -97,6 +98,7 @@ export default function BegrootmoduleDisplay(
       voteAfterLoggingIn: props.voteAfterLoggingIn || false,
       displayModBreak: props.displayModBreak || false,
       showConfetti: props.showConfetti || false,
+      clickableImage: props.clickableImage || false,
     },
   });
 
@@ -136,6 +138,20 @@ export default function BegrootmoduleDisplay(
             render={({ field }) => (
               <FormItem className="col-span-1">
                 <FormLabel>Weergeef de volgorde</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="clickableImage"
+            render={({ field }) => (
+              <FormItem className="col-span-1">
+                <FormLabel>
+                  Moeten de afbeeldingen uitvergroot worden als erop geklikt
+                  wordt?
+                </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -273,7 +289,7 @@ export default function BegrootmoduleDisplay(
             name="displayModBreak"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Toon de ModBreak</FormLabel>
+                <FormLabel>Toon officiële reacties</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

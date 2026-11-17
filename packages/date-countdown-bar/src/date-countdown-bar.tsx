@@ -3,16 +3,12 @@ import useInterval from '@rooks/use-interval';
 import '@utrecht/component-library-css';
 import { Paragraph } from '@utrecht/component-library-react';
 import '@utrecht/design-tokens/dist/root.css';
-import {
-  differenceInDays,
-  differenceInHours,
-  differenceInMinutes,
-  parseISO,
-} from 'date-fns';
+import { parseISO } from 'date-fns';
 import { useEffect, useState } from 'react';
 import React from 'react';
 
 import './date-countdown-bar.css';
+import { type TimeLeft, getTimeLeft } from './get-time-left';
 
 export type DateCountdownBarWidgetProps = {
   beforeText?: string;
@@ -33,13 +29,11 @@ function DateCountdownBar({
   showHours = true,
   showMinutes = true,
 }: DateCountdownBarWidgetProps) {
-  const zone = 'Europe/Amsterdam';
-
-  const [timeLeft, setTimeLeft] = useState<{
-    days: number;
-    hours: number;
-    minutes: number;
-  }>({ days: 0, hours: 0, minutes: 0 });
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+  });
 
   const [selectedDateISO, setDateISO] = useState<string>(date || '');
 
@@ -70,7 +64,6 @@ function DateCountdownBar({
     }
   }, [selectedDateISO]);
 
-  // Every second update the calculated days, hours and minutes
   useInterval(
     () => {
       if (selectedDateISO) {
@@ -83,19 +76,7 @@ function DateCountdownBar({
 
   // Calculate the time left for the day/hour/minutes until the given date
   const calculateTime = (eventDate: string): void => {
-    // const today = new Date().toISOString().replace();
-    const startDate: Date = new Date();
-    const endDate: Date = parseISO(eventDate);
-
-    const daysDifference = differenceInDays(endDate, startDate);
-    const hoursDifference = differenceInHours(endDate, startDate) % 24;
-    const minutesDifference = differenceInMinutes(endDate, startDate) % 60;
-
-    setTimeLeft({
-      days: Math.max(0, daysDifference),
-      hours: Math.max(0, hoursDifference),
-      minutes: Math.max(0, minutesDifference),
-    });
+    setTimeLeft(getTimeLeft(new Date(), parseISO(eventDate)));
   };
 
   const padNumber = (nr: number): string => {
@@ -118,36 +99,46 @@ function DateCountdownBar({
         </Paragraph>
       ) : null}
 
-      <div className="osc-countdown-bar-nr-container">
-        <div className="osc-countdown-bar-nr-left">
+      <div
+        className="osc-countdown-bar-nr-container"
+        role="timer"
+        aria-live="polite"
+        aria-atomic="true">
+        <span className="sr-only">
+          {`Resterende tijd: ${timeLeft.days} dagen${showHours ? `, ${timeLeft.hours} uren` : ''}${showMinutes && timeLeft.minutes > 0 ? `, ${timeLeft.minutes} minuten` : ''}`}
+        </span>
+        <div className="osc-countdown-bar-nr-left" aria-hidden="true">
           <Paragraph>
             <span className="nr-left-title amount">
               {renderAmount(padNumber(timeLeft.days))}
             </span>
-            {showLabels && <span className="nr-left-label">Dagen</span>}
+            {showLabels ? <span className="nr-left-label">Dagen</span> : null}
           </Paragraph>
         </div>
-        {showHours && (
-          <div className="osc-countdown-bar-nr-left">
+        {showHours ? (
+          <div className="osc-countdown-bar-nr-left" aria-hidden="true">
             <Paragraph>
               <span className="nr-left-title amount">
                 {renderAmount(padNumber(timeLeft.hours))}
               </span>
-              {showLabels && <span className="nr-left-label">Uren</span>}
+              {showLabels ? <span className="nr-left-label">Uren</span> : null}
             </Paragraph>
           </div>
-        )}
-        {showMinutes &&
-          (timeLeft.minutes > 0 ? (
-            <div className="osc-countdown-bar-nr-left">
+        ) : null}
+        {showMinutes ? (
+          timeLeft.minutes > 0 ? (
+            <div className="osc-countdown-bar-nr-left" aria-hidden="true">
               <Paragraph>
                 <span className="nr-left-title amount">
                   {renderAmount(padNumber(timeLeft.minutes))}
                 </span>
-                {showLabels && <span className="nr-left-label">Minuten</span>}
+                {showLabels ? (
+                  <span className="nr-left-label">Minuten</span>
+                ) : null}
               </Paragraph>
             </div>
-          ) : null)}
+          ) : null
+        ) : null}
       </div>
       {afterTextParam.length > 0 ? (
         <Paragraph className="osc-countdown-bar-text --start">

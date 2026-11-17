@@ -128,7 +128,7 @@ article.comment-item.selected {
   border: 1px solid var(--utrecht-button-secondary-action-border-color, #ff0021);
 }
 
-.osc-comments-paginator .osc-paginator {
+.osc-comments-paginator .osc-paginator-list {
   justify-content: center;
 }
 

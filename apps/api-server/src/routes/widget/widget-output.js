@@ -4,6 +4,22 @@ const config = require('config');
 
 const reactCheck = require('../../util/react-check');
 
+const ALLOWED_WIDGET_FILE_EXT = ['.js', '.css'];
+
+// Widget file names originate from static widgetDefinitions, but are treated as
+// untrusted (the scanner sees them as DB-influenced). Only allow plain relative
+// .js/.css paths so a crafted name can't traverse the filesystem.
+function assertSafeWidgetFile(file) {
+  if (
+    typeof file !== 'string' ||
+    file.includes('..') ||
+    file.startsWith('/') ||
+    !ALLOWED_WIDGET_FILE_EXT.some((ext) => file.endsWith(ext))
+  ) {
+    throw new Error(`Unsafe widget file path rejected: ${file}`);
+  }
+}
+
 // Builds the IIFE javascript that is served for a widget. Kept free of any
 // database dependencies so it can be unit tested in isolation.
 function getWidgetJavascriptOutput(
@@ -28,6 +44,7 @@ function getWidgetJavascriptOutput(
   // TODO: Fix this, it's a hack to get the ChoiceGuide to work
   if (widgetSettings.componentName === 'ChoiceGuide') {
     widgetSettings.js.forEach((file) => {
+      assertSafeWidgetFile(file);
       const filePath = path.resolve(
         __dirname,
         '../../../../../packages/choiceguide',
@@ -41,6 +58,7 @@ function getWidgetJavascriptOutput(
     });
 
     widgetSettings.css.forEach((file) => {
+      assertSafeWidgetFile(file);
       const filePath = path.resolve(
         __dirname,
         '../../../../../packages/choiceguide',
@@ -54,6 +72,7 @@ function getWidgetJavascriptOutput(
     });
   } else if (widgetSettings.componentName === 'DistributionModule') {
     widgetSettings.js.forEach((file) => {
+      assertSafeWidgetFile(file);
       const filePath = path.resolve(
         __dirname,
         '../../../../../packages/distribution-module',
@@ -67,6 +86,7 @@ function getWidgetJavascriptOutput(
     });
 
     widgetSettings.css.forEach((file) => {
+      assertSafeWidgetFile(file);
       const filePath = path.resolve(
         __dirname,
         '../../../../../packages/distribution-module',
@@ -80,6 +100,7 @@ function getWidgetJavascriptOutput(
     });
   } else if (widgetSettings.componentName === 'MultiProjectResourceOverview') {
     widgetSettings.js.forEach((file) => {
+      assertSafeWidgetFile(file);
       const filePath = path.resolve(
         __dirname,
         '../../../../../packages/multi-project-resource-overview',
@@ -93,6 +114,7 @@ function getWidgetJavascriptOutput(
     });
 
     widgetSettings.css.forEach((file) => {
+      assertSafeWidgetFile(file);
       const filePath = path.resolve(
         __dirname,
         '../../../../../packages/multi-project-resource-overview',
@@ -106,6 +128,7 @@ function getWidgetJavascriptOutput(
     });
   } else {
     widgetSettings.js.forEach((file) => {
+      assertSafeWidgetFile(file);
       widgetOutput += fs.readFileSync(
         require.resolve(`${widgetSettings.packageName}/${file}`),
         'utf8'
@@ -113,6 +136,7 @@ function getWidgetJavascriptOutput(
     });
 
     widgetSettings.css.forEach((file) => {
+      assertSafeWidgetFile(file);
       css += fs.readFileSync(
         require.resolve(`${widgetSettings.packageName}/${file}`),
         'utf8'

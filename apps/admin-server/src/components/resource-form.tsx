@@ -1,3 +1,4 @@
+import { ImageCropDialog } from '@/components/image-crop-dialog';
 import ImageGalleryStyle from '@/components/image-gallery-style';
 import MapInput from '@/components/maps/leaflet-input';
 import { MapErrorBoundary } from '@/components/maps/map-error-boundary';
@@ -31,19 +32,29 @@ import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
 import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  defaultAddressSearchTexts,
+  renderFoundAddressText,
+} from '@openstad-headless/lib/address-search-texts';
+import { buildImagePreviewUrl } from '@openstad-headless/lib/image-crop/crop-url';
+import {
+  EMPTY_MODBREAK_MESSAGE,
+  hasModBreakContent,
+} from '@openstad-headless/ui/src/form-elements/modbreak/normalize-modbreaks';
 import cloneDeep from 'lodash/cloneDeep';
 import {
   ArrowDown,
   ArrowLeft,
   ArrowRight,
   ArrowUp,
+  Crop,
   Plus,
   X,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { FieldErrors, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
 
@@ -58,6 +69,8 @@ const TrixEditor = dynamic(
     ),
   { ssr: false }
 );
+
+const THUMB_MAX_SIZE = 480;
 
 const onlyNumbersMessage = 'Dit veld mag alleen nummers bevatten';
 const minError = (field: string, nr: number) =>
@@ -94,9 +107,13 @@ const baseSchema = z.object({
     .array(
       z.object({
         id: z.string(),
-        description: z.string().default(''),
+        description: z
+          .string()
+          .default('')
+          .refine(hasModBreakContent, EMPTY_MODBREAK_MESSAGE),
         authorName: z.string().optional().default(''),
         modBreakDate: z.string().optional().default(''),
+        createdAt: z.string().optional(),
       })
     )
     .optional()
@@ -118,7 +135,12 @@ const baseSchema = z.object({
   document: z.string().optional(),
   documents: z
     .array(
-      z.object({ url: z.string().optional(), name: z.string().optional() })
+      z.object({
+        url: z.string().optional(),
+        name: z.string().optional(),
+        size: z.number().optional(),
+        mimeType: z.string().optional(),
+      })
     )
     .optional()
     .default([]),
@@ -272,6 +294,7 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
                 ? mb.modBreakDate.slice(0, 16)
                 : mb.modBreakDate + 'T00:00'
               : '',
+            createdAt: mb.createdAt,
           }))
           .sort(
             (a: any, b: any) =>
@@ -395,9 +418,26 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
 
   const { allowNextNavigation } = useSaveController();
 
+  const [modBreakPage, setModBreakPage] = React.useState(0);
+  const modBreaksPerPage = 5;
+
+  const showFirstInvalidModBreak = useCallback(
+    (errors: FieldErrors<FormType>) => {
+      if (!Array.isArray(errors.modBreaks)) return false;
+      const firstInvalidIndex = errors.modBreaks.findIndex(Boolean);
+      if (firstInvalidIndex < 0) return false;
+      setModBreakPage(Math.floor(firstInvalidIndex / modBreaksPerPage));
+      return true;
+    },
+    []
+  );
+
   const save = useCallback(async () => {
     const valid = await validateForSave(form);
     if (!valid) {
+      if (showFirstInvalidModBreak(form.formState.errors)) {
+        throw new Error(EMPTY_MODBREAK_MESSAGE);
+      }
       throw new Error('Controleer de gemarkeerde velden.');
     }
     // `getValues()` hands out the raw input. Only the schema applies the
@@ -435,6 +475,7 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
     form,
     schema,
     buildSubmitValues,
+    showFirstInvalidModBreak,
     onFormSubmit,
     mutate,
     id,
@@ -502,10 +543,13 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
     fields: imageFields,
     remove: removeImage,
     swap: swapImage,
+    update: updateImage,
   } = useFieldArray({
     control: form.control,
     name: 'images',
   });
+
+  const [cropImageIndex, setCropImageIndex] = useState(-1);
 
   const { fields: documentFields, remove: removeFile } = useFieldArray({
     control: form.control,
@@ -522,8 +566,6 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
     name: 'modBreaks',
   });
 
-  const [modBreakPage, setModBreakPage] = React.useState(0);
-  const modBreaksPerPage = 5;
   const modBreakPageCount = Math.max(
     1,
     Math.ceil(modBreakFields.length / modBreaksPerPage)
@@ -532,6 +574,10 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
     modBreakPage * modBreaksPerPage,
     (modBreakPage + 1) * modBreaksPerPage
   );
+
+  const onInvalid = (errors: FieldErrors<FormType>) => {
+    if (showFirstInvalidModBreak(errors)) toast.error(EMPTY_MODBREAK_MESSAGE);
+  };
 
   const moveUpModBreak = (index: number) => {
     if (index <= 0) return;
@@ -572,6 +618,77 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
     [form]
   );
 
+  const [addressPostcode, setAddressPostcode] = useState('');
+  const [addressHuisnummer, setAddressHuisnummer] = useState('');
+  const [addressLookupStatus, setAddressLookupStatus] = useState<
+    'idle' | 'loading' | 'found' | 'notfound' | 'error'
+  >('idle');
+  const [foundAddress, setFoundAddress] = useState<{
+    straat: string;
+    huisnummer: string;
+    woonplaats: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const cleanPostcode = addressPostcode.replace(/\s+/g, '').toUpperCase();
+    const cleanHuisnummer = addressHuisnummer.trim();
+
+    if (
+      !/^[1-9][0-9]{3}[A-Z]{2}$/.test(cleanPostcode) ||
+      cleanHuisnummer === ''
+    ) {
+      setAddressLookupStatus('idle');
+      setFoundAddress(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => {
+      setAddressLookupStatus('loading');
+
+      fetch(
+        `/api/address-lookup?postcode=${cleanPostcode}&huisnummer=${encodeURIComponent(cleanHuisnummer)}`,
+        { signal: controller.signal }
+      )
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`Address lookup failed with status ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          const result = data?.results?.[0];
+          if (!result) {
+            setFoundAddress(null);
+            setAddressLookupStatus('notfound');
+            return;
+          }
+
+          const lat = parseFloat(result.latitude);
+          const lng = parseFloat(result.longitude);
+          if (Number.isFinite(lat) && Number.isFinite(lng)) {
+            setFoundAddress(result);
+            setAddressLookupStatus('found');
+            form.setValue('location', JSON.stringify({ lat, lng }));
+          } else {
+            setFoundAddress(null);
+            setAddressLookupStatus('error');
+          }
+        })
+        .catch((err) => {
+          if (err.name !== 'AbortError') {
+            setAddressLookupStatus('error');
+            setFoundAddress(null);
+          }
+        });
+    }, 400);
+
+    return () => {
+      clearTimeout(timeout);
+      controller.abort();
+    };
+  }, [addressPostcode, addressHuisnummer, form]);
+
   // Editing an existing resource: hold the form back until it has arrived.
   // Rendering the empty form first lets a keystroke in the loading window win
   // the dirty guard, which then keeps the required title/summary/description
@@ -598,7 +715,7 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
           onSubmit={
             useGlobalSave
               ? (e) => e.preventDefault()
-              : form.handleSubmit(onSubmit)
+              : form.handleSubmit(onSubmit, onInvalid)
           }
           className="lg:w-3/3 grid grid-cols-2 lg:auto-rows-fit gap-10">
           <FormField
@@ -707,8 +824,8 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
                         }}>
                         <div className="image-container">
                           <img
-                            src={url}
-                            alt={url}
+                            src={buildImagePreviewUrl(url, THUMB_MAX_SIZE)}
+                            alt={`Afbeelding ${index + 1}`}
                             onClick={() => {
                               if (index === imageIndexOpen) {
                                 setImageIndexOpen(-1);
@@ -727,6 +844,15 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
                           }}
                           className="absolute left-0 top-0">
                           <X size={24} aria-hidden="true" />
+                        </Button>
+                        <Button
+                          type="button"
+                          aria-label="Afbeelding bijsnijden"
+                          onClick={() => {
+                            setCropImageIndex(index);
+                          }}
+                          className="absolute right-0 top-0 z-10">
+                          <Crop size={24} />
                         </Button>
 
                         <div
@@ -773,6 +899,19 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
                   })}
                 </section>
               </div>
+            )}
+            {cropImageIndex >= 0 && imageFields[cropImageIndex] && (
+              <ImageCropDialog
+                imageUrl={imageFields[cropImageIndex].url}
+                onClose={() => setCropImageIndex(-1)}
+                onSave={(url) => {
+                  updateImage(cropImageIndex, {
+                    ...form.getValues(`images.${cropImageIndex}`),
+                    url,
+                  });
+                  setCropImageIndex(-1);
+                }}
+              />
             )}
           </div>
 
@@ -965,6 +1104,53 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
           /> */}
 
           <div className="col-span-full lg:col-span-1 flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <p className="text-sm font-medium">
+                Zoek locatie op postcode en huisnummer
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Postcode"
+                  aria-label="Postcode"
+                  value={addressPostcode}
+                  onChange={(e) => setAddressPostcode(e.target.value)}
+                  className="max-w-[140px]"
+                />
+                <Input
+                  placeholder="Huisnummer"
+                  aria-label="Huisnummer"
+                  value={addressHuisnummer}
+                  onChange={(e) => setAddressHuisnummer(e.target.value)}
+                  className="max-w-[120px]"
+                />
+              </div>
+              <div aria-live="polite" className="text-sm">
+                {addressLookupStatus === 'loading' && (
+                  <span>Adres zoeken...</span>
+                )}
+                {addressLookupStatus === 'found' && foundAddress && (
+                  <span>
+                    {renderFoundAddressText(
+                      projectData?.config?.map?.addressSearchFoundText ||
+                        defaultAddressSearchTexts.foundText,
+                      foundAddress
+                    )}
+                  </span>
+                )}
+                {addressLookupStatus === 'notfound' && (
+                  <span>
+                    {projectData?.config?.map?.addressSearchNotFoundText ||
+                      defaultAddressSearchTexts.notFoundText}
+                  </span>
+                )}
+                {addressLookupStatus === 'error' && (
+                  <span>
+                    {projectData?.config?.map?.addressSearchErrorText ||
+                      defaultAddressSearchTexts.errorText}
+                  </span>
+                )}
+              </div>
+            </div>
             <FormField
               control={form.control}
               name="location"
@@ -1012,7 +1198,7 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
           <Separator className="lg:col-span-2 my-6" />
 
           <div className="lg:col-span-2 col-span-2">
-            <Heading size="xl">Modbreaks</Heading>
+            <Heading size="xl">Officiële reacties</Heading>
             {!modbreakTitle && (
               <p className="text-sm text-orange-600 mb-4">
                 Geen standaardnaam ingesteld.{' '}
@@ -1040,11 +1226,11 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
                 })
               }>
               <Plus size={16} className="mr-2" />
-              Modbreak toevoegen
+              Officiële reactie toevoegen
             </Button>
             {modBreakFields.length === 0 && (
               <p className="text-sm text-muted-foreground mb-4">
-                Nog geen modbreaks toegevoegd.
+                Nog geen officiële reacties toegevoegd.
               </p>
             )}
             {visibleModBreaks.map((field, pageIndex) => {
@@ -1053,7 +1239,7 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
                 <div key={field.id} className="border rounded-md p-4 mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium">
-                      Modbreak {index + 1}
+                      Officiële reactie {index + 1}
                     </span>
                     <div className="flex items-center gap-1">
                       <Button

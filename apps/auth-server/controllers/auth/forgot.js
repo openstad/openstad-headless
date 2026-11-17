@@ -15,6 +15,10 @@ const authLocalConfig = require('../../config/auth').get('Local');
 const authForgotConfig = require('../../config/auth').get('Forgot');
 const authResetConfig = require('../../config/auth').get('Reset');
 const { logAuthEvent } = require('../../middleware/auditLog');
+const sanitize = require('../../utils/sanitize');
+
+const encodedRedirect = (req) =>
+  req.redirectUri ? encodeURIComponent(req.redirectUri) : '';
 
 exports.forgot = (req, res) => {
   const config = req.client.config ? req.client.config : {};
@@ -24,20 +28,20 @@ exports.forgot = (req, res) => {
       : {};
 
   res.render('auth/forgot/forgot', {
-    title: configAuthType.title ? configAuthType.title : authForgotConfig.title,
-    description: configAuthType.description
-      ? configAuthType.description
-      : authForgotConfig.description,
-    backToLoginText: configAuthType.backToLoginText
-      ? configAuthType.backToLoginText
-      : authForgotConfig.backToLoginText,
-    label: configAuthType.label ? configAuthType.label : authForgotConfig.label,
-    buttonText: configAuthType.buttonText
-      ? configAuthType.buttonText
-      : authForgotConfig.buttonText,
-    clientId: req.client.clientId,
-    client: req.client,
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    title: sanitize.plainText(configAuthType.title || authForgotConfig.title),
+    description: sanitize.plainText(
+      configAuthType.description || authForgotConfig.description
+    ),
+    backToLoginText: sanitize.plainText(
+      configAuthType.backToLoginText || authForgotConfig.backToLoginText
+    ),
+    label: sanitize.plainText(configAuthType.label || authForgotConfig.label),
+    buttonText: sanitize.plainText(
+      configAuthType.buttonText || authForgotConfig.buttonText
+    ),
+    clientId: sanitize.plainText(req.client.clientId),
+    client: sanitize.client(req.client),
+    redirectUrl: encodedRedirect(req),
   });
 };
 
@@ -49,16 +53,18 @@ exports.reset = (req, res) => {
       : authResetConfig;
 
   res.render('auth/forgot/reset', {
-    title: configAuthType.title,
-    description: configAuthType.description,
-    buttonText: configAuthType.buttonText,
-    labelConfirmPassword: configAuthType.labelConfirmPassword,
-    labelNewPassword: configAuthType.labelNewPassword,
-    labelEmail: configAuthType.labelEmail,
-    token: req.query.token,
-    clientId: req.client.clientId,
-    client: req.client,
-    redirectUrl: encodeURIComponent(req.query.redirect_uri),
+    title: sanitize.plainText(configAuthType.title),
+    description: sanitize.plainText(configAuthType.description),
+    buttonText: sanitize.plainText(configAuthType.buttonText),
+    labelConfirmPassword: sanitize.plainText(
+      configAuthType.labelConfirmPassword
+    ),
+    labelNewPassword: sanitize.plainText(configAuthType.labelNewPassword),
+    labelEmail: sanitize.plainText(configAuthType.labelEmail),
+    token: sanitize.plainText(String(req.query.token || '')),
+    clientId: sanitize.plainText(req.client.clientId),
+    client: sanitize.client(req.client),
+    redirectUrl: encodedRedirect(req),
   });
 };
 
@@ -93,7 +99,7 @@ exports.postReset = (req, res, next) => {
             authLocalConfig.loginUrl +
               `?clientId=${
                 req.client.clientId
-              }&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+              }&redirect_uri=${encodedRedirect(req)}`
           );
         })
         .catch((err) => {
@@ -119,7 +125,7 @@ exports.postForgot = (req, res, next) => {
           '/auth/local/forgot' +
             '?clientId=' +
             req.client.clientId +
-            `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+            `&redirect_uri=${encodedRedirect(req)}`
         );
       }
 
@@ -131,7 +137,7 @@ exports.postForgot = (req, res, next) => {
       return password.formatResetLink(
         req.client,
         req.user,
-        encodeURIComponent(req.query.redirect_uri)
+        encodedRedirect(req)
       );
     })
     .then((url) => {
@@ -142,7 +148,7 @@ exports.postForgot = (req, res, next) => {
       res.redirect(
         '/auth/local/forgot?clientId=' +
           req.client.clientId +
-          `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+          `&redirect_uri=${encodedRedirect(req)}`
       );
     })
     .catch((err) => {
@@ -153,7 +159,7 @@ exports.postForgot = (req, res, next) => {
       res.redirect(
         '/auth/local/forgot?clientId=' +
           req.client.clientId +
-          `&redirect_uri=${encodeURIComponent(req.query.redirect_uri)}`
+          `&redirect_uri=${encodedRedirect(req)}`
       );
     });
 

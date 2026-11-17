@@ -149,14 +149,37 @@ function loadProjectForExport(req, res, next) {
       model: db.Resource,
       include: [
         { model: db.Tag },
-        { model: db.Vote },
-        { model: db.Comment, as: 'commentsFor' },
-        { model: db.Comment, as: 'commentsAgainst' },
-        { model: db.Comment, as: 'commentsNoSentiment' },
+        { model: db.Vote, separate: true },
+        {
+          model: db.Comment,
+          as: 'commentsFor',
+          where: { sentiment: 'for' },
+          required: false,
+          separate: true,
+          scope: false,
+          include: db.Comment.options.defaultScope.include,
+        },
+        {
+          model: db.Comment,
+          as: 'commentsAgainst',
+          where: { sentiment: 'against' },
+          required: false,
+          separate: true,
+          scope: false,
+          include: db.Comment.options.defaultScope.include,
+        },
+        {
+          model: db.Comment,
+          as: 'commentsNoSentiment',
+          where: { sentiment: 'no sentiment' },
+          required: false,
+          separate: true,
+          scope: false,
+          include: db.Comment.options.defaultScope.include,
+        },
         { model: db.Poll, as: 'poll' },
       ],
     },
-    { model: db.Tag },
     { model: db.Status },
   ]);
 }
@@ -340,7 +363,11 @@ async function listProjects(req, res, next) {
     }
 
     // now find the corresponding projects
-    let result = await db.Project.scope(req.scope).findAndCountAll({
+    const listScope = req.scope.includes('getBasicInformation')
+      ? req.scope.filter((scopeName) => scopeName !== 'excludeConfig')
+      : req.scope;
+
+    let result = await db.Project.scope(listScope).findAndCountAll({
       offset: req.dbQuery.offset,
       limit: req.dbQuery.limit,
       where,
@@ -355,7 +382,7 @@ async function listProjects(req, res, next) {
         return {
           id: p.id,
           createdAt: p.createdAt,
-          tags: p?.config?.project?.tags || '',
+          tags: p?.safeConfig?.project?.tags || '',
         };
       });
     }
@@ -444,8 +471,9 @@ async function prepareDuplicationPayload(req, res, next) {
   }
 
   // create an oauth client if nessecary
+  req.body.config = req.body.config || {};
   let project = {
-    config: req.body.config || {},
+    config: req.body.config,
   };
   try {
     project.name = project?.name || req.body?.name || '';
@@ -479,6 +507,8 @@ async function prepareDuplicationPayload(req, res, next) {
             authConfig,
             project,
           });
+          project.config.auth = project.config.auth || {};
+          project.config.auth.provider = project.config.auth.provider || {};
           project.config.auth.provider[authConfig.provider] =
             project.config.auth.provider[authConfig.provider] || {};
           project.config.auth.provider[authConfig.provider].clientId =
@@ -907,7 +937,7 @@ async function updateAuthClients(req, res, next) {
 
 async function updateProjectRecord(req, res, next) {
   const project = await db.Project.findOne({ where: { id: req.results.id } });
-  if (!(project && project.can && project.can('update')))
+  if (!(project && project.can && project.can('update', req.user)))
     return next(new Error('You cannot update this project'));
 
   req.pendingMessages = [
@@ -944,7 +974,7 @@ async function updateProjectRecord(req, res, next) {
   }
 
   project
-    .authorizeData(req.body, 'update')
+    .authorizeData(req.body, 'update', req.user)
     .update(updateBody)
     .then(async (result) => {
       req.results = result;
@@ -1033,7 +1063,15 @@ async function anonymizeAllUsers(req, res, next) {
     if (req.params.willOrDo == 'do') {
       result.message = 'Ok';
 
-      req.project.doAnonymizeAllUsers([...result.users], req.query.useAuth);
+      req.project
+        .doAnonymizeAllUsers(
+          [...result.users],
+          [...result.externalUserIds],
+          req.query.useAuth
+        )
+        .catch((err) => {
+          console.error('error in doAnonymizeAllUsers', err);
+        });
     }
     next();
   } catch (err) {
@@ -1049,8 +1087,7 @@ function attachUserToAnonymizeResults(req, res, next) {
       req.results[which].forEach &&
       req.results[which].forEach((result) => {
         if (typeof result == 'object') {
-          result.auth = result.auth || {};
-          result.auth.user = req.user;
+          result.auth = { ...result.auth, user: req.user };
         }
       });
   });

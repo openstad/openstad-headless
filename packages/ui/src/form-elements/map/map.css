@@ -44,3 +44,33 @@
   border-inline-start: 4px solid #d00;
   background: #fff3f3;
 }
+
+.address-search {
+  margin-block-end: 12px;
+}
+
+.address-search-fields {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.address-search-fields .form-element {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.address-search-postcode {
+  flex: 1 1 140px;
+  max-width: 200px;
+}
+
+.address-search-huisnummer {
+  flex: 1 1 100px;
+  max-width: 140px;
+}
+
+.address-search-feedback {
+  margin-block-start: 4px;
+}

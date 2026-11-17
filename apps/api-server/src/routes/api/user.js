@@ -50,13 +50,21 @@ router
    * Required for CodeQL check
    */
   .post(rateLimiter(), ctrl.createUser)
-  .post(ctrl.respondResults);
+  .post(ctrl.respondCreatedUser);
 
-// get user's two-factor status
-// --------------
-router.get('/:userId/two-factor-status', ctrl.getTwoFactorStatus);
+router
+  .route('/:userId(\\d+)/two-factor-status')
+  .all(ctrl.withTwoFactorTarget)
+  .all(auth.useReqUser)
+  .all(ctrl.canManageTwoFactor)
+  .get(ctrl.getTwoFactorStatus);
 
-router.put('/:userId/reset-two-factor', ctrl.resetTwoFactor);
+router
+  .route('/:userId(\\d+)/reset-two-factor')
+  .all(ctrl.withTwoFactorTarget)
+  .all(auth.useReqUser)
+  .all(ctrl.canManageTwoFactor)
+  .put(ctrl.resetTwoFactor);
 
 // anonymize user
 // --------------
@@ -82,8 +90,8 @@ router
 
   // view user
   // ---------
-  .get(auth.can('User', 'view'))
   .get(auth.useReqUser)
+  .get(ctrl.requireModeratorOrOwner)
   .get(ctrl.respondResults)
 
   // update user
@@ -91,6 +99,7 @@ router
   .put(auth.useReqUser)
   .put(ctrl.filterBody)
   .put(ctrl.checkUserUpdatable)
+  .put(ctrl.guardIdentityChanges)
   .put(ctrl.loadAuthAdapter)
   .put(rateLimiter(), ctrl.updateUser)
   .put(ctrl.respondUpdatedUser)

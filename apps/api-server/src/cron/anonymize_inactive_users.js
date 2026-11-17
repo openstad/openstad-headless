@@ -20,6 +20,10 @@ module.exports = {
         let projects = await db.Project.findAll();
 
         for (const project of projects) {
+          if (!project?.config?.anonymize?.allowAnonymizeUsersAfterInactivity) {
+            continue;
+          }
+
           let users = await db.User.findAll({
             where: {
               projectId: project.id,
@@ -55,8 +59,7 @@ module.exports = {
                     user.email,
                     user.lastLogin
                   );
-                  // anonymize user
-                  user.doAnonymize();
+                  await user.doAnonymize();
                 }
               } else {
                 // send notification logic
@@ -80,7 +83,7 @@ module.exports = {
 
                   const anonymizeDate = new Date(
                     lastLoginTime +
-                      warnUsersAfterXDaysOfInactivity * 24 * 60 * 60 * 1000
+                      anonymizeUsersAfterXDaysOfInactivity * 24 * 60 * 60 * 1000
                   );
 
                   const dateInDDMMYYYY = (date) => {
@@ -90,7 +93,7 @@ module.exports = {
                     return `${day}-${month}-${year}`;
                   };
 
-                  db.Notification.create({
+                  await db.Notification.create({
                     type: 'user account about to expire',
                     projectId: project.id,
                     data: {
@@ -100,7 +103,9 @@ module.exports = {
                       anonymizeDate: dateInDDMMYYYY(anonymizeDate),
                     },
                   });
-                  user.update({ isNotifiedAboutAnonymization: new Date() });
+                  await user.update({
+                    isNotifiedAboutAnonymization: new Date(),
+                  });
                 }
               }
             }

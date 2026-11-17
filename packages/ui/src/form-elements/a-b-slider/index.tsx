@@ -8,8 +8,9 @@ import {
   Paragraph,
   Strong,
 } from '@utrecht/component-library-react';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 
+import { ClickableImage } from '../../clickable-image';
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
 import { Spacer } from '../../spacer';
@@ -36,7 +37,12 @@ export type RangeSliderProps = {
   disabled?: boolean;
   type?: string;
   onChange?: (
-    e: { name: string; value: FormValue | valueObject },
+    e: {
+      name: string;
+      value: FormValue | valueObject;
+      isInitial?: boolean;
+      interactionKey?: string;
+    },
     triggerSetLastKey?: boolean
   ) => void;
   showMoreInfo?: boolean;
@@ -150,7 +156,8 @@ const RangeSlider: FC<RangeSliderProps> = ({
 
   const changeValue = (
     key: 'value' | 'skipQuestion' | 'skipQuestionExplanation',
-    newValue: any
+    newValue: any,
+    options?: { isInitial?: boolean; interactionKey?: string }
   ) => {
     const currValue: valueObject = { ...value };
 
@@ -166,20 +173,32 @@ const RangeSlider: FC<RangeSliderProps> = ({
       onChange({
         name: fieldKey,
         value: currValue,
+        ...(options?.isInitial ? { isInitial: true } : {}),
+        ...(options?.interactionKey
+          ? { interactionKey: options.interactionKey }
+          : {}),
       });
     }
 
     setValue(currValue);
   };
 
+  const didInitRef = useRef(false);
   useEffect(() => {
     setFieldDisabled(skipSelected);
-    changeValue('skipQuestion', skipSelected);
+    // The first emit is the mount initialisation, not a user interaction.
+    changeValue('skipQuestion', skipSelected, {
+      isInitial: !didInitRef.current,
+    });
+    didInitRef.current = true;
   }, [skipSelected]);
 
   const handleInputChange = (event: { name: string; value: FormValue }) => {
     const { value } = event;
-    changeValue('skipQuestionExplanation', value || '');
+    // Track explanation separately as question_interact with an 'explanation' suffix.
+    changeValue('skipQuestionExplanation', value || '', {
+      interactionKey: `${fieldKey}::explanation`,
+    });
   };
 
   return (
@@ -231,7 +250,12 @@ const RangeSlider: FC<RangeSliderProps> = ({
               {descriptionA && <HtmlContent html={descriptionA} />}
               {!!imageA && (
                 <figure>
-                  <img src={imageA} alt={`${titleA} - ${descriptionA}`} />
+                  <ClickableImage
+                    clickable={imageClickable}
+                    src={imageA}
+                    alt={`${titleA} - ${descriptionA}`}>
+                    <img src={imageA} alt={`${titleA} - ${descriptionA}`} />
+                  </ClickableImage>
                 </figure>
               )}
             </div>
@@ -245,7 +269,12 @@ const RangeSlider: FC<RangeSliderProps> = ({
               {descriptionB && <HtmlContent html={descriptionB} />}
               {!!imageB && (
                 <figure>
-                  <img src={imageB} alt={`${titleB} - ${descriptionB}`} />
+                  <ClickableImage
+                    clickable={imageClickable}
+                    src={imageB}
+                    alt={`${titleB} - ${descriptionB}`}>
+                    <img src={imageB} alt={`${titleB} - ${descriptionB}`} />
+                  </ClickableImage>
                 </figure>
               )}
             </div>
@@ -267,10 +296,17 @@ const RangeSlider: FC<RangeSliderProps> = ({
             setRangeValue(parseInt(e.target.value) as any);
             changeValue('value', e.target.value);
           }}
-          aria-label={`Selecteer een waarde tussen 1 en 100 voor ${titleA} en ${titleB}`}
+          aria-label={`Selecteer een waarde tussen ${titleA || 'Optie A'} en ${titleB || 'Optie B'}${title ? ` voor ${title}` : ''}`}
+          aria-valuetext={
+            rangeValue === 50
+              ? 'Neutraal'
+              : rangeValue < 50
+                ? `${(50 - rangeValue) * 2}% richting ${titleA || labelA || 'Optie A'}`
+                : `${(rangeValue - 50) * 2}% richting ${titleB || labelB || 'Optie B'}`
+          }
           disabled={disabled || fieldDisabled}
           aria-invalid={fieldInvalid}
-          aria-describedby={`${randomId}_error`}
+          aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}
         />
         <div
           className={`slider_line-container ${getSliderClass(rangeValue)}`}
@@ -279,11 +315,10 @@ const RangeSlider: FC<RangeSliderProps> = ({
         </div>
       </div>
 
-      <Paragraph
-        id="a-b-description"
-        className="a-b-description visually-hidden">
-        Deze slider vertegenwoordigt de waarde voor {titleA} aan de linkerkant
-        en de waarde voor {titleB} aan de rechterkant.
+      {/* ponytail: id weg — nergens naar verwezen en dubbel bij twee sliders (1.3.1) */}
+      <Paragraph className="a-b-description visually-hidden">
+        Deze slider vertegenwoordigt de waarde voor {titleA || 'Optie A'} aan de
+        linkerkant en de waarde voor {titleB || 'Optie B'} aan de rechterkant.
       </Paragraph>
       <div className="a-b-label-container">
         <Paragraph className="a-b-label label-a">

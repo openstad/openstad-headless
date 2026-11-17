@@ -64,6 +64,7 @@ module.exports = function (req, res, next) {
     'Content-Type, Authorization, Content-Length, X-Requested-With, x-http-method-override'
   );
   res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Expose-Headers', 'WWW-Authenticate');
 
   if (process.env.NODE_ENV != 'development') {
     res.header('Content-type', 'application/json; charset=utf-8');

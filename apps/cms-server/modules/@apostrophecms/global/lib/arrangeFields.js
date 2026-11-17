@@ -78,6 +78,7 @@ module.exports = [
     label: 'Hoofdmenu',
     fields: [
       'arrangeMainMenu',
+      'mainMenuParentBehavior',
       'displayLoginTopLink',
       'mainMenuItems',
       'ctaButtonText',

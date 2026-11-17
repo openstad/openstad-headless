@@ -1,4 +1,8 @@
 import { stripHtmlTags } from '@openstad-headless/lib/strip-html-tags';
+import {
+  EMPTY_MODBREAK_MESSAGE,
+  hasModBreakContent,
+} from '@openstad-headless/ui/src/form-elements/modbreak/normalize-modbreaks';
 import { z } from 'zod';
 
 import { CombinedFieldPropsWithType } from '../props';
@@ -43,13 +47,19 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
         const requiredWarning =
           field.requiredWarning || 'Het veld' + fieldTitle + 'is verplicht';
 
+        // ponytail: 3.3.1 wil dat de melding benoemt wát er mis is. "Vul een
+        // geldig e-mailadres in" is een opdracht — na het invullen leest dat
+        // als "je hebt niks ingevuld". Zelfde tekst als de auth-server al
+        // gebruikt (jquery.validate.nl.js), zodat het formulier en de login
+        // hetzelfde zeggen.
         const emailWarning =
-          (field as any)?.emailError || 'Vul een geldig e-mailadres in';
+          (field as any)?.emailError ||
+          'Dit is geen geldig e-mailadres. Gebruik het formaat naam@domein.nl.';
 
         const max = toMaxInt((field as any)?.maxCharacters);
         let maxWarning =
           field.maxCharactersError ||
-          'Tekst moet maximaal {maxCharacters} karakters bevatten';
+          'De tekst mag niet langer zijn dan {maxCharacters} tekens';
         maxWarning = maxWarning.replace('{maxCharacters}', String(max));
 
         if (field.fieldRequired) {
@@ -84,7 +94,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
 
       let minWarning =
         field.minCharactersError ||
-        'Tekst moet minimaal {minCharacters} karakters bevatten';
+        'De tekst mag niet korter zijn dan {minCharacters} tekens';
 
       if (field.fieldRequired && min == 0) {
         min = 1;
@@ -96,7 +106,7 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
 
       let maxWarning =
         field.maxCharactersError ||
-        'Tekst moet maximaal {maxCharacters} karakters bevatten';
+        'De tekst mag niet langer zijn dan {maxCharacters} tekens';
       maxWarning = maxWarning.replace('{maxCharacters}', String(max));
 
       if (field.fieldRequired) {
@@ -109,29 +119,74 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
         return schema.optional();
       }
 
-    case 'checkbox':
-      if (typeof field.fieldRequired !== 'undefined' && field.fieldRequired) {
+    case 'checkbox': {
+      const minChoicesNum = toMinInt(field.minChoices);
+      const isRequired =
+        typeof field.fieldRequired !== 'undefined' && field.fieldRequired;
+
+      if (minChoicesNum > 0) {
+        const minMessage = field.minChoicesMessage
+          ? field.minChoicesMessage.replace(
+              '{minChoices}',
+              String(minChoicesNum)
+            )
+          : `Selecteer minimaal ${minChoicesNum} opties.`;
+        return z.preprocess(
+          (value) => (value === undefined || value === null ? '' : value),
+          z.string().refine(
+            (value) => {
+              try {
+                const parsed = JSON.parse(value || '[]');
+                return Array.isArray(parsed) && parsed.length >= minChoicesNum;
+              } catch {
+                return false;
+              }
+            },
+            { message: minMessage }
+          )
+        );
+      }
+
+      if (isRequired) {
         return z
           .string()
           .min(
             3,
             field.requiredWarning || 'Het veld' + fieldTitle + 'is verplicht'
           );
-      } else {
-        return undefined;
       }
+
+      return undefined;
+    }
     case 'documentUpload':
-    case 'imageUpload':
-      if (typeof field.fieldRequired !== 'undefined' && field.fieldRequired) {
-        return z
-          .array(fileSchema)
-          .min(
-            1,
-            field.requiredWarning || 'Het veld' + fieldTitle + 'is verplicht'
-          );
-      } else {
+    case 'imageUpload': {
+      const isFieldRequired =
+        typeof field.fieldRequired !== 'undefined' && field.fieldRequired;
+      const isCropRequired =
+        field.type === 'imageUpload' &&
+        !!(field as any).imageCropEnabled &&
+        !!(field as any).imageCropRequired;
+
+      if (!isFieldRequired && !isCropRequired) {
         return undefined;
       }
+
+      let uploadSchema = z.array(fileSchema);
+      if (isFieldRequired) {
+        uploadSchema = uploadSchema.min(
+          1,
+          field.requiredWarning || 'Het veld' + fieldTitle + 'is verplicht'
+        );
+      }
+      if (isCropRequired) {
+        return uploadSchema.refine(
+          (uploads) => uploads.every((upload) => upload.url.includes('/:/cr=')),
+          { message: 'Snijd de afbeelding(en) eerst bij.' }
+        );
+      }
+
+      return uploadSchema;
+    }
     case 'map':
       const mapSchema = z.object({
         lat: z.number().optional(),
@@ -201,6 +256,57 @@ export const getSchemaForField = (field: CombinedFieldPropsWithType) => {
     // Therefore, we don't need validation here.
     case 'range':
       return undefined;
+
+    case 'timeline':
+      if (typeof field.fieldRequired !== 'undefined' && field.fieldRequired) {
+        const timelineLinkSchema = z
+          .object({
+            url: z.string(),
+            title: z.string().optional(),
+            kind: z.enum(['link', 'document']).optional(),
+          })
+          .passthrough();
+        const timelineItemSchema = z
+          .object({
+            activeFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+            title: z.string().optional(),
+            description: z.string().optional(),
+            links: z.array(timelineLinkSchema).optional(),
+          })
+          .passthrough();
+        return z
+          .array(timelineItemSchema)
+          .min(
+            1,
+            'requiredWarning' in field && field.requiredWarning
+              ? field.requiredWarning
+              : 'Het veld' + fieldTitle + 'is verplicht'
+          );
+      }
+      return undefined;
+
+    case 'resourceLink':
+      if (typeof field.fieldRequired !== 'undefined' && field.fieldRequired) {
+        return z
+          .array(z.object({ source: z.string(), id: z.string() }).passthrough())
+          .min(
+            1,
+            'requiredWarning' in field && field.requiredWarning
+              ? field.requiredWarning
+              : 'Het veld' + fieldTitle + 'is verplicht'
+          );
+      }
+      return undefined;
+
+    case 'modbreak':
+      return z
+        .any()
+        .refine(
+          (items) =>
+            !Array.isArray(items) ||
+            items.every((item) => hasModBreakContent(item?.description)),
+          EMPTY_MODBREAK_MESSAGE
+        );
 
     default:
       return undefined;

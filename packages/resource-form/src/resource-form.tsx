@@ -7,11 +7,30 @@ import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { Banner, Button, Spacer } from '@openstad-headless/ui/src/index.js';
 import { Heading } from '@utrecht/component-library-react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import hasRole from '../../lib/has-role';
 import RteContent from '../../ui/src/rte-formatting/rte-content';
+import {
+  canManageModBreaks as computeCanManageModBreaks,
+  isRestrictedToModBreaks,
+} from './parts/can-manage-modbreaks.js';
 import { InitializeFormFields } from './parts/init-fields.js';
+import { LinkConfirmDialog } from './parts/link-confirm-dialog';
+import {
+  type LinkPayload,
+  type LinkValue,
+  buildLinkPayload,
+  buildPrefill,
+  extractLinkValues,
+  getLinkFields,
+  itemsToFetch,
+  linkKey,
+  needsLinkConfirmation,
+  restoreLinkValues,
+  withoutUnavailableLinkFields,
+} from './parts/link-selection';
+import { moveFieldToColumn } from './parts/move-field-to-column.js';
 import type { ResourceFormWidgetProps } from './props.js';
 
 const getExistingValue = (fieldKey, resource, multiple) => {
@@ -87,25 +106,138 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     resourceId: resourceId || undefined,
   });
 
-  const initialFormFields = InitializeFormFields(props.items, props);
+  const availableItems = useMemo(
+    () =>
+      withoutUnavailableLinkFields(
+        props.items,
+        props.pluginCapabilities?.linkRequests
+      ),
+    [props.items, props.pluginCapabilities?.linkRequests]
+  );
+  const initialFormFields = InitializeFormFields(availableItems, props);
   type FormField = { fieldKey?: string; [key: string]: any };
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [fillDefaults, setFillDefaults] = useState(false);
   const [currentPage, setCurrentPage] = useState<number>(0);
 
+  const linkFields = useMemo(
+    () => getLinkFields(availableItems),
+    [JSON.stringify(availableItems)]
+  );
+  const [linkPrefill, setLinkPrefill] = useState<Record<string, LinkValue[]>>(
+    {}
+  );
+  const [linkPrefillLoaded, setLinkPrefillLoaded] = useState(false);
+  const [pendingLinkSubmit, setPendingLinkSubmit] = useState<{
+    formData: any;
+    valuesByField: Record<string, LinkValue[]>;
+    payload: LinkPayload;
+  } | null>(null);
+  const [formKey, setFormKey] = useState(0);
+  const [restoredFormValues, setRestoredFormValues] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
+  const canManageModBreaks = computeCanManageModBreaks(
+    currentUser,
+    canEdit,
+    existingResource?.id
+  );
+
+  const isModeratorOnly = isRestrictedToModBreaks(
+    currentUser,
+    existingResource?.userId
+  );
+
   useEffect(() => {
     if (isLoading) return;
 
+    if (!canEdit || !existingResource?.id || linkFields.length === 0) {
+      setLinkPrefillLoaded(true);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const selection = await datastore.api.links.fetchSelection({
+          projectId: props.projectId,
+          resourceId: existingResource.id,
+        });
+        const idsBySource = itemsToFetch(selection);
+        const itemsByKey = {};
+        for (const [source, ids] of Object.entries(idsBySource)) {
+          const items = await datastore.api.links.fetchItems({
+            projectId: props.projectId,
+            source,
+            ids,
+          });
+          (items || []).forEach((item) => {
+            itemsByKey[linkKey({ source, id: String(item.id) })] = item;
+          });
+        }
+        if (!cancelled) {
+          setLinkPrefill(buildPrefill(selection, linkFields, itemsByKey));
+        }
+      } catch (e: any) {
+        console.error(
+          `[resource-form] loading links failed: resourceId=${existingResource.id} error=${e?.message}`
+        );
+        NotificationService.addNotification(
+          'De bestaande koppelingen konden niet worden geladen',
+          'error'
+        );
+      } finally {
+        if (!cancelled) setLinkPrefillLoaded(true);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoading, canEdit, existingResource?.id, linkFields]);
+
+  useEffect(() => {
+    if (isLoading || currentUserIsLoading || !linkPrefillLoaded) return;
+
+    const visibleFields = canManageModBreaks
+      ? isModeratorOnly
+        ? initialFormFields.filter((field) => field.type === 'modbreak')
+        : initialFormFields
+      : initialFormFields.filter((field) => field.type !== 'modbreak');
+
+    const withLinkContext = (field) =>
+      field.type === 'resourceLink'
+        ? {
+            ...field,
+            excludeResourceId: existingResource?.id
+              ? String(existingResource.id)
+              : undefined,
+            ...(linkPrefill[field.fieldKey]
+              ? { defaultValue: linkPrefill[field.fieldKey] }
+              : {}),
+          }
+        : field;
+
     if (canEdit) {
-      const updatedFormFields = initialFormFields.map((field) => {
+      const updatedFormFields = visibleFields.map((field) => {
         type FieldsWithMultiple = FieldProps & { multiple?: boolean };
         const fieldWithMultiple = field as FieldsWithMultiple;
 
-        const existingValue = getExistingValue(
-          field.fieldKey,
-          existingResource,
-          fieldWithMultiple?.multiple
-        );
+        const existingValue =
+          field.type === 'timeline'
+            ? existingResource?.timeline
+            : field.type === 'modbreak'
+              ? existingResource?.modBreaks
+              : getExistingValue(
+                  field.fieldKey,
+                  existingResource,
+                  fieldWithMultiple?.multiple
+                );
+
+        if (field.type === 'resourceLink') {
+          return withLinkContext(field);
+        }
 
         return existingValue
           ? { ...field, defaultValue: existingValue }
@@ -113,25 +245,34 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
       });
 
       setFormFields(updatedFormFields);
-    } else if (
-      JSON.stringify(formFields) !== JSON.stringify(initialFormFields)
-    ) {
-      setFormFields(initialFormFields);
+    } else {
+      const fieldsWithContext = visibleFields.map(withLinkContext);
+      if (JSON.stringify(formFields) !== JSON.stringify(fieldsWithContext)) {
+        setFormFields(fieldsWithContext);
+      }
     }
 
     setFillDefaults(true);
   }, [
     JSON.stringify(existingResource),
     JSON.stringify(initialFormFields),
+    JSON.stringify(linkPrefill),
+    linkPrefillLoaded,
     isLoading,
+    canManageModBreaks,
+    canEdit,
+    currentUserIsLoading,
   ]);
 
   const notifySuccess = () =>
     NotificationService.addNotification('Inzending indienen gelukt', 'success');
   const notifySuccessEdit = () =>
     NotificationService.addNotification('Inzending bewerken gelukt', 'success');
-  const notifyFailed = () =>
-    NotificationService.addNotification('Inzending indienen mislukt', 'error');
+  const notifyFailed = (message?: string) =>
+    NotificationService.addNotification(
+      message || 'Inzending indienen mislukt',
+      'error'
+    );
   const notifyFailedEdit = (message: string) =>
     NotificationService.addNotification(message, 'error');
 
@@ -244,6 +385,21 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
       }
     }
 
+    moveFieldToColumn(
+      extraData,
+      configuredFormData,
+      props.items,
+      'timeline',
+      'timeline'
+    );
+    moveFieldToColumn(
+      extraData,
+      configuredFormData,
+      props.items,
+      'modbreak',
+      'modBreaks'
+    );
+
     configuredFormData.extraData = extraData;
     configuredFormData.publishDate = publish ? new Date() : '';
     configuredFormData.confirmationUser = confirmationUser;
@@ -284,23 +440,94 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
     ? saveButton || 'Opslaan'
     : submitButton || 'Versturen';
 
+  const notifyLinkRequestError = (result) => {
+    if (result?.linkRequests?.error) {
+      NotificationService.addNotification(
+        'Koppelverzoeken konden niet worden verstuurd',
+        'error'
+      );
+    }
+  };
+
   async function onSubmit(formData: any) {
     setDisableSubmit(true);
+    const { formData: formDataWithoutLinks, valuesByField } = extractLinkValues(
+      formData,
+      linkFields
+    );
+    const payload = buildLinkPayload(
+      valuesByField,
+      editMode ? linkPrefill : {}
+    );
+    const hasLinkChanges =
+      payload.added.length > 0 || payload.removed.length > 0;
+
+    if (
+      needsLinkConfirmation(payload) &&
+      props.linkRequests?.confirmEnabled !== false
+    ) {
+      setPendingLinkSubmit({
+        formData: formDataWithoutLinks,
+        valuesByField,
+        payload,
+      });
+      return;
+    }
+
+    await submitResource(formDataWithoutLinks, hasLinkChanges ? payload : null);
+  }
+
+  async function onConfirmLinks(messages: Record<string, string>) {
+    if (!pendingLinkSubmit) return;
+    const { formData: pendingFormData, valuesByField } = pendingLinkSubmit;
+    setPendingLinkSubmit(null);
+    await submitResource(
+      pendingFormData,
+      buildLinkPayload(valuesByField, editMode ? linkPrefill : {}, messages)
+    );
+  }
+
+  function onCancelLinks() {
+    if (pendingLinkSubmit) {
+      setRestoredFormValues(
+        restoreLinkValues(
+          pendingLinkSubmit.formData,
+          linkFields,
+          editMode ? linkPrefill : {}
+        )
+      );
+      setFormKey((key) => key + 1);
+    }
+    setPendingLinkSubmit(null);
+    setDisableSubmit(false);
+  }
+
+  async function submitResource(
+    formData: any,
+    linkPayload: LinkPayload | null
+  ) {
     formData.embeddedUrl = window.location.href;
     const finalFormData = configureFormData(formData, true);
     finalFormData.__timeToSubmitMs = Math.max(
       Date.now() - formStartTimeRef.current,
       0
     );
+    if (linkPayload) {
+      finalFormData.links = linkPayload.links;
+      if (editMode && linkPayload.removedLinks.length > 0) {
+        finalFormData.removedLinks = linkPayload.removedLinks;
+      }
+    }
 
     try {
       if (editMode) {
         try {
-          await existingResource.update(finalFormData);
+          const updated = await existingResource.update(finalFormData);
           console.log(
             `[resource-form] updated: resourceId=${existingResource.id}`
           );
           notifySuccessEdit();
+          notifyLinkRequestError(updated);
           redirectAfterSaveOrCreate(existingResource, true);
         } catch (e) {
           console.error(
@@ -320,6 +547,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
           `[resource-form] created: resourceId=${result.id} widgetId=${props.widgetId}`
         );
         notifySuccess();
+        notifyLinkRequestError(result);
         redirectAfterSaveOrCreate(result);
       }
       setDisableSubmit(false);
@@ -327,7 +555,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
       console.error(
         `[resource-form] create failed: widgetId=${props.widgetId} error=${e?.message}`
       );
-      notifyFailed();
+      notifyFailed(e?.message);
       setDisableSubmit(false);
     }
   }
@@ -415,6 +643,7 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
           </>
         ) : (
           <Form
+            key={formKey}
             fields={formFields}
             submitHandler={onSubmit}
             submitText={submitButtonText}
@@ -429,8 +658,23 @@ function ResourceFormWidget(props: ResourceFormWidgetProps) {
             totalPages={totalPages}
             totalFieldCount={totalFieldCount}
             {...props}
+            {...(restoredFormValues
+              ? { initialValues: restoredFormValues }
+              : {})}
           />
         )}
+        <LinkConfirmDialog
+          open={!!pendingLinkSubmit}
+          added={pendingLinkSubmit?.payload.added || []}
+          removed={pendingLinkSubmit?.payload.removed || []}
+          title={props.linkRequests?.confirmTitle || undefined}
+          description={props.linkRequests?.confirmDescription || undefined}
+          revokeTitle={props.linkRequests?.revokeTitle || undefined}
+          revokeDescription={props.linkRequests?.revokeDescription || undefined}
+          messageLabel={props.linkRequests?.messageLabel || undefined}
+          onConfirm={onConfirmLinks}
+          onCancel={onCancelLinks}
+        />
         <NotificationProvider />
       </div>
     </div>
