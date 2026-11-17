@@ -357,7 +357,7 @@ export default function ProjectResources() {
                     Gestemd op nee
                   </button>
                 </ListHeading>
-                <div className="hidden lg:flex lg:col-span-1 items-center gap-1">
+                <div className="hidden lg:flex lg:col-span-1 items-center gap-1 flex-wrap">
                   <ListHeading>
                     <button
                       className={getSortButtonClass('score')}
