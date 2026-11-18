@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -20,6 +19,8 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
+import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
@@ -49,6 +50,7 @@ const formSchema = z.object({
   width: z.string().optional(),
   height: z.string().optional(),
   mapAriaLabel: z.string().optional(),
+  displayMarkers: z.boolean().optional(),
 });
 
 type SchemaKey = keyof typeof formSchema.shape;
@@ -79,7 +81,13 @@ export default function WidgetResourcesMapMap(
       width: props?.width || '',
       height: props?.height || '',
       mapAriaLabel: props?.mapAriaLabel || '',
+      displayMarkers: undefinedToTrueOrProp(props?.displayMarkers),
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Kaart',
   });
 
   const { data: tags } = useTags(props.projectId);
@@ -357,7 +365,19 @@ export default function WidgetResourcesMapMap(
             )}
           />
 
-          <Button type="submit">Opslaan</Button>
+          {props?.supportsMarkerToggle && (
+            <FormField
+              control={form.control}
+              name="displayMarkers"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Toon locatie markers van inzendingen</FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </form>
       </Form>
     </div>

@@ -21,6 +21,7 @@ const authSettings = require('../../util/auth-settings');
 const userRouter = require('./user');
 
 let found = true;
+let targetIdpUser = { identifier: 'idp-93', provider: 'openstad' };
 
 const updateUser = vi.fn(async () => ({}));
 const fetchUserData = vi.fn(async () => ({ twoFactorConfigured: 1 }));
@@ -32,7 +33,7 @@ function targetUser() {
   return {
     id: 93,
     role: 'admin',
-    idpUser: { identifier: 'idp-93', provider: 'openstad' },
+    idpUser: targetIdpUser,
     auth: Object.create(db.User.auth),
     can,
     toString: () => 'SequelizeInstance:user',
@@ -46,8 +47,13 @@ db.User.scope = () => ({
 // The target identity has no user records in other projects.
 db.User.findAll = async () => [targetUser()];
 db.Project.findAll = async () => [];
+const adminProject = { id: 'admin-project' };
+db.Project.findByPk = vi.fn(async () => adminProject);
 
-authSettings.config = async () => ({});
+const adminAuthConfig = { clientId: 'admin-client' };
+authSettings.config = vi.fn(async ({ project }) =>
+  project === adminProject ? adminAuthConfig : {}
+);
 authSettings.adapter = async () => ({ service: { updateUser, fetchUserData } });
 
 function createApp(user) {
@@ -74,6 +80,7 @@ describe('two-factor routes require authorization', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     found = true;
+    targetIdpUser = { identifier: 'idp-93', provider: 'openstad' };
   });
 
   // The target is an admin, so a moderator must not reach it either: you cannot
@@ -155,5 +162,51 @@ describe('two-factor routes require authorization', () => {
 
     expect(res.status).not.toBe(200);
     expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it('reads the status with the auth config of the admin project', async () => {
+    const res = await request(createApp(admin)).get(
+      '/project/1/user/93/two-factor-status'
+    );
+
+    expect(res.status).toBe(200);
+    expect(fetchUserData).toHaveBeenCalledWith({
+      authConfig: adminAuthConfig,
+      userId: 'idp-93',
+    });
+  });
+
+  it('reports no two-factor for a user without an identity', async () => {
+    targetIdpUser = undefined;
+    const res = await request(createApp(admin)).get(
+      '/project/1/user/93/two-factor-status'
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ twoFactorEnabled: false });
+    expect(fetchUserData).not.toHaveBeenCalled();
+  });
+
+  it('reports no two-factor when the auth server does not know the user', async () => {
+    fetchUserData.mockRejectedValueOnce(
+      new Error('Auth server user lookup returned 404')
+    );
+    const res = await request(createApp(admin)).get(
+      '/project/1/user/93/two-factor-status'
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ twoFactorEnabled: false });
+  });
+
+  it('still fails on other auth server errors', async () => {
+    fetchUserData.mockRejectedValueOnce(
+      new Error('Cannot connect to auth server')
+    );
+    const res = await request(createApp(admin)).get(
+      '/project/1/user/93/two-factor-status'
+    );
+
+    expect(res.status).toBe(500);
   });
 });

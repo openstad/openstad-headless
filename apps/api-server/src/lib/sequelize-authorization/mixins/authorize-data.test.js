@@ -52,3 +52,50 @@ describe('authorizeData on update keeps records in their project', () => {
     expect(body.projectId).toBeUndefined();
   });
 });
+
+describe('authorizeData on create keeps editor-only fields out of public submissions', () => {
+  const anonymous = { role: 'anonymous' };
+  const member = { role: 'member', id: 7 };
+
+  it('drops score, sort and viewableByRole from an anonymous resource create', () => {
+    const body = {
+      title: 'Idea',
+      budget: 500,
+      score: 9.5,
+      sort: 98765,
+      viewableByRole: 'admin',
+    };
+
+    db.Resource.authorizeData(body, 'create', anonymous);
+
+    expect(body.title).toBe('Idea');
+    expect(body.budget).toBe(500);
+    expect(body.score).toBeUndefined();
+    expect(body.sort).toBeUndefined();
+    expect(body.viewableByRole).toBeUndefined();
+  });
+
+  it('keeps score, sort and viewableByRole for an editor resource create', () => {
+    const body = {
+      title: 'Idea',
+      score: 0.5,
+      sort: 2,
+      viewableByRole: 'member',
+    };
+
+    db.Resource.authorizeData(body, 'create', editor);
+
+    expect(body.score).toBe(0.5);
+    expect(body.sort).toBe(2);
+    expect(body.viewableByRole).toBe('member');
+  });
+
+  it('drops score from a member comment create', () => {
+    const body = { description: 'Reply', score: 9.5 };
+
+    db.Comment.authorizeData(body, 'create', member);
+
+    expect(body.description).toBe('Reply');
+    expect(body.score).toBeUndefined();
+  });
+});

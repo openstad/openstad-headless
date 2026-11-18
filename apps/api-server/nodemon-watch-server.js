@@ -22,7 +22,7 @@ let restarting = null;
 nodemon({
   script: 'server.js',
   ext: 'js,ts,tsx,css',
-  ignore: [`${packageDirectory}/**/dist/*`],
+  ignore: [`${packageDirectory}/**/dist/*`, `${packageDirectory}/*/types/**`],
   watch: [headlessDirectory],
 })
   .on('start', async () => {

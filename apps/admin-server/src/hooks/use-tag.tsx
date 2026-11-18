@@ -1,3 +1,4 @@
+import { throwApiError } from '@/lib/api-error';
 import useSWR from 'swr';
 
 import { validateProjectNumber } from '../lib/validateProjectNumber';
@@ -29,8 +30,9 @@ export default function useTags(projectId?: string, id?: string) {
     useDifferentSubmitAddress: boolean | undefined,
     newSubmitAddress: string | undefined,
     defaultResourceImage: string | undefined,
-    documentMapIconColor: string | undefined
-  ) {
+    documentMapIconColor: string | undefined,
+    detailPageUrl: string | undefined
+  ): Promise<any | null> {
     const res = await fetch(url, {
       method: 'PUT',
       headers: {
@@ -52,8 +54,13 @@ export default function useTags(projectId?: string, id?: string) {
         newSubmitAddress,
         defaultResourceImage,
         documentMapIconColor,
+        detailPageUrl,
       }),
     });
+
+    if (!res.ok) {
+      await throwApiError(res, 'De tag kon niet worden opgeslagen.');
+    }
 
     return await res.json();
   }

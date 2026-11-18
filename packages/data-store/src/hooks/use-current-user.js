@@ -28,6 +28,8 @@ export default function useCurrentUser(props) {
   );
 
   async function getCurrentUser() {
+    if (self.projectId === undefined || self.projectId === null) return {};
+
     const storage = new LocalStorage(props);
 
     // jwt in url: use and remove from url
@@ -131,7 +133,6 @@ export default function useCurrentUser(props) {
 
         if (!openStadUser?.id) {
           console.log('[osc-auth] token not accepted, continuing anonymous');
-          delete self.api.currentUserJWT;
           storage.remove('openStadUser');
           return {};
         }
@@ -146,7 +147,6 @@ export default function useCurrentUser(props) {
         return openStadUser;
       } catch (err) {
         console.log(`[osc-auth] user fetch failed: ${err?.message}`);
-        delete self.api.currentUserJWT;
         storage.remove('openStadUser');
         return {};
       }

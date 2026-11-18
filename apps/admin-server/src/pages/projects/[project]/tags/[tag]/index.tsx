@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -12,10 +13,15 @@ import {
 import InfoDialog from '@/components/ui/info-hover';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  useRegisterFormSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Heading } from '@/components/ui/typography';
 import useTag from '@/hooks/use-tag';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
@@ -23,7 +29,6 @@ import { useRouter } from 'next/router';
 import * as React from 'react';
 import { useCallback, useEffect } from 'react';
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 const formSchema = z.object({
@@ -37,10 +42,11 @@ const formSchema = z.object({
   mapIcon: z.string().optional(),
   mapIconUploader: z.string().optional(),
   listIcon: z.string().optional(),
-  useDifferentSubmitAddress: z.any(),
+  useDifferentSubmitAddress: z.boolean().optional(),
   image: z.string().optional(),
   defaultResourceImage: z.string().optional(),
   documentMapIconColor: z.string().optional(),
+  detailPageUrl: z.string().optional(),
   newSubmitAddress: z.string().optional(),
   emails: z.array(z.object({ address: z.string() })).optional(),
 });
@@ -57,7 +63,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
   const defaults = useCallback(
     () => ({
       name: data?.name || null,
-      type: data?.type || null,
+      type: data?.type || '',
       seqnr: data?.seqnr || null,
       addToNewResources: data?.addToNewResources || false,
       backgroundColor: data?.backgroundColor || undefined,
@@ -66,9 +72,10 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
       mapIcon: data?.mapIcon || undefined,
       mapIconUploader: '',
       listIcon: data?.listIcon || undefined,
-      useDifferentSubmitAddress: undefinedToTrueOrProp(
-        data?.useDifferentSubmitAddress
-      ),
+      useDifferentSubmitAddress:
+        data?.useDifferentSubmitAddress === null
+          ? false
+          : undefinedToTrueOrProp(data?.useDifferentSubmitAddress),
       emails: data?.newSubmitAddress
         ? data.newSubmitAddress
             .split(',')
@@ -76,6 +83,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
         : [{ address: '' }],
       defaultResourceImage: data?.defaultResourceImage || '',
       documentMapIconColor: data?.documentMapIconColor || '#555588',
+      detailPageUrl: data?.detailPageUrl || '',
     }),
     [data]
   );
@@ -84,7 +92,28 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
     defaultValues: defaults(),
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: 'emails',
+  });
+
+  useEffect(() => {
+    const useDifferentSubmitAddress = form.watch('useDifferentSubmitAddress');
+
+    if (!useDifferentSubmitAddress) {
+      form.setValue('newSubmitAddress', '');
+    }
+  }, [form.watch('useDifferentSubmitAddress')]);
+
+  useSyncFormDefaults(form, defaults, data);
+
+  const save = useCallback(async () => {
+    const valid = await validateForSave(form);
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
+
     if (
       values.useDifferentSubmitAddress &&
       values.emails !== undefined &&
@@ -109,31 +138,15 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
       values.useDifferentSubmitAddress,
       values.newSubmitAddress,
       values.defaultResourceImage,
-      values.documentMapIconColor
+      values.documentMapIconColor,
+      values.detailPageUrl
     );
-    if (tag) {
-      toast.success('Tag aangepast!');
-    } else {
-      toast.error('Er is helaas iets mis gegaan.');
+    if (!tag) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+  }, [form, updateTag]);
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: 'emails',
-  });
-
-  useEffect(() => {
-    const useDifferentSubmitAddress = form.watch('useDifferentSubmitAddress');
-
-    if (!useDifferentSubmitAddress) {
-      form.setValue('newSubmitAddress', '');
-    }
-  }, [form.watch('useDifferentSubmitAddress')]);
-
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  useRegisterFormSave(form, save);
 
   return (
     <div>
@@ -183,9 +196,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                 <Form {...form}>
                   <Heading size="xl">Tag Aanpassen</Heading>
                   <Separator className="my-4" />
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-4">
+                  <div className="lg:w-1/2 grid grid-cols-1 gap-4">
                     <FormField
                       control={form.control}
                       name="name"
@@ -245,10 +256,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                         </FormItem>
                       )}
                     />
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
-                  </form>
+                  </div>
                 </Form>
               </div>
             </TabsContent>
@@ -257,9 +265,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                 <Form {...form}>
                   <Heading size="xl">Tag weergave</Heading>
                   <Separator className="my-4" />
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-4">
+                  <div className="lg:w-1/2 grid grid-cols-1 gap-4">
                     <FormField
                       control={form.control}
                       name="backgroundColor"
@@ -312,7 +318,9 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                             typeof imageResult.url !== 'undefined'
                               ? imageResult.url
                               : '';
-                          form.setValue('mapIcon', result);
+                          form.setValue('mapIcon', result, {
+                            shouldDirty: true,
+                          });
                           form.resetField('mapIconUploader');
                           form.trigger('mapIcon');
                         }}
@@ -330,7 +338,9 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                                 <Button
                                   color="red"
                                   onClick={() => {
-                                    form.setValue('mapIcon', '');
+                                    form.setValue('mapIcon', '', {
+                                      shouldDirty: true,
+                                    });
                                   }}
                                   className="absolute right-0 top-0">
                                   <X size={24} />
@@ -350,6 +360,30 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                           <FormLabel>Resource overview icon</FormLabel>
                           <FormControl>
                             <Input placeholder="" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="detailPageUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Adres van de detailpagina</FormLabel>
+                          <FormDescription>
+                            Waar inzendingen met deze tag naartoe linken.
+                            Gebruik [id] voor het nummer. Een pad zoals
+                            /stadmaker?openstadResourceId=[id] komt achter de
+                            project-URL; een volledige URL wordt zo gebruikt.
+                            Heeft een inzending meer tags met een adres, dan
+                            geldt de eerste in de volgorde van tags.
+                          </FormDescription>
+                          <FormControl>
+                            <Input
+                              placeholder="/inzending?openstadResourceId=[id]"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -394,10 +428,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                         }}
                       />
                     )}
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
-                  </form>
+                  </div>
                 </Form>
               </div>
             </TabsContent>
@@ -408,9 +439,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                   <Form {...form}>
                     <Heading size="xl">Notificatie opties</Heading>
                     <Separator className="my-4" />
-                    <form
-                      onSubmit={form.handleSubmit(onSubmit)}
-                      className="lg:w-1/2 grid grid-cols-1 gap-4">
+                    <div className="lg:w-1/2 grid grid-cols-1 gap-4">
                       <FormField
                         control={form.control}
                         name="useDifferentSubmitAddress"
@@ -468,10 +497,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                           </button>
                         </>
                       )}
-                      <Button className="w-fit col-span-full" type="submit">
-                        Opslaan
-                      </Button>
-                    </form>
+                    </div>
                   </Form>
                 </div>
               </TabsContent>
@@ -482,9 +508,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                 <Form {...form}>
                   <Heading size="xl">Afbeelding opties</Heading>
                   <Separator className="my-4" />
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-4">
+                  <div className="lg:w-1/2 grid grid-cols-1 gap-4">
                     <ImageUploader
                       form={form}
                       project={isGlobal ? '0' : (project as string)}
@@ -496,7 +520,9 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                           typeof imageResult.url !== 'undefined'
                             ? imageResult.url
                             : '';
-                        form.setValue('defaultResourceImage', result);
+                        form.setValue('defaultResourceImage', result, {
+                          shouldDirty: true,
+                        });
                         form.resetField('image');
                         form.trigger('defaultResourceImage');
                       }}
@@ -516,7 +542,9 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                             <Button
                               color="red"
                               onClick={() => {
-                                form.setValue('defaultResourceImage', '');
+                                form.setValue('defaultResourceImage', '', {
+                                  shouldDirty: true,
+                                });
                               }}
                               style={{
                                 position: 'absolute',
@@ -529,11 +557,7 @@ export default function ProjectTagEdit({ preset }: { preset?: string }) {
                         )}
                       </section>
                     </div>
-
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
-                  </form>
+                  </div>
                 </Form>
               </div>
             </TabsContent>

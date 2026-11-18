@@ -70,6 +70,9 @@ let moduleDefinitions = {
         'De tekst mag niet korter zijn dan {minCharacters} tekens',
       maxCharactersWarning: 'Je hebt nog {maxCharacters} tekens over',
       minCharactersWarning: 'Nog minimaal {minCharacters} tekens',
+      closeFormAfterSubmit: false,
+      closedFormMessage:
+        'Je antwoord is ontvangen. Je kunt deze enquête maar één keer invullen.',
     },
   },
   rawresource: {
@@ -146,6 +149,12 @@ let moduleDefinitions = {
       displayLocationHint: false,
       locationHint: 'Typ een postcode en kies een adres uit de lijst.',
       locationPlaceholder: '',
+      displayStreetFilter: false,
+      streetFilterLabel: 'Straat',
+      displayStreetFilterHint: false,
+      streetFilterHint:
+        'Toont ideeën die aan deze straat liggen. Zoek je ideeën in de buurt? Gebruik dan het postcodefilter.',
+      streetFilterPlaceholder: '',
       includeOrExcludeTagIds: 'include',
       includeOrExcludeStatusIds: 'include',
       resourceOverviewMapWidget: {
@@ -358,7 +367,6 @@ let moduleDefinitions = {
       textActiveSearch: 'Bekijk de tekstresultaten voor [zoekterm]',
       displayTagFilters: false,
       tagGroups: [],
-      displayTagGroupName: false,
       displaySorting: false,
       defaultSorting: 'random',
       sorting: [],
@@ -494,6 +502,12 @@ let moduleDefinitions = {
       displayLocationHint: false,
       locationHint: 'Typ een postcode en kies een adres uit de lijst.',
       locationPlaceholder: '',
+      displayStreetFilter: false,
+      streetFilterLabel: 'Straat',
+      displayStreetFilterHint: false,
+      streetFilterHint:
+        'Toont ideeën die aan deze straat liggen. Zoek je ideeën in de buurt? Gebruik dan het postcodefilter.',
+      streetFilterPlaceholder: '',
       includeOrExcludeTagIds: 'include',
       includeOrExcludeStatusIds: 'include',
       resourceOverviewMapWidget: {

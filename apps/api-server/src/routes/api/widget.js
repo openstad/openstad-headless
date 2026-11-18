@@ -6,6 +6,7 @@ const sanitize = require('../../util/sanitize');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const getWidgetSettings = require('../widget/widget-settings');
 const createError = require('http-errors');
+const { snapshotWidgetVersion } = require('../../services/widget-version');
 router.all('*', function (req, res, next) {
   req.scope = [];
   return next();
@@ -212,26 +213,34 @@ router
     res.json(widget);
   })
 
-  // Update widget
   .put(auth.useReqUser)
-  .put(rateLimiter(), function (req, res, next) {
-    const widget = req.widget;
-    if (!(widget && widget.can && widget.can('update', req.user)))
-      return next(createError(403, 'You cannot update this widget'));
+  .put(rateLimiter(), async function (req, res, next) {
+    try {
+      const widget = req.widget;
+      if (!(widget && widget.can && widget.can('update', req.user)))
+        return next(createError(403, 'You cannot update this widget'));
 
-    const config = { ...widget.config, ...(req.body?.config || {}) };
-    const description = req.body?.description ?? widget.description;
-    const typesToSanitize = ['rawresource', 'resourceoverview'];
+      const config = { ...widget.config, ...(req.body?.config || {}) };
+      const description = req.body?.description ?? widget.description;
+      const typesToSanitize = ['rawresource', 'resourceoverview'];
 
-    // Sanitize the incoming value, not the stored one
-    if (typesToSanitize.includes(widget.type) && config.rawInput) {
-      config.rawInput = sanitize.content(config.rawInput);
+      if (typesToSanitize.includes(widget.type) && config.rawInput) {
+        config.rawInput = sanitize.rawInput(config.rawInput);
+      }
+
+      const result = await db.sequelize.transaction(async (transaction) => {
+        const updated = await widget.update(
+          { config, description },
+          { transaction }
+        );
+        await snapshotWidgetVersion(updated, req.user, {}, { transaction });
+        return updated;
+      });
+
+      return res.json(result);
+    } catch (err) {
+      return next(err);
     }
-
-    widget
-      .update({ config, description })
-      .then((result) => res.json(result))
-      .catch(next);
   })
 
   // delete widget

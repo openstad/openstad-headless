@@ -32,6 +32,7 @@ export default {
       statuses,
       excludeStatuses,
       tagGroups,
+      streets,
       lat,
       lng,
       maxDistance,
@@ -64,6 +65,10 @@ export default {
 
     if (Array.isArray(tagGroups) && tagGroups.length > 0) {
       params.append('tagGroups', JSON.stringify(tagGroups));
+    }
+
+    if (Array.isArray(streets) && streets.length > 0) {
+      params.append('streets', JSON.stringify(streets));
     }
 
     if (lat != null && lng != null && maxDistance) {

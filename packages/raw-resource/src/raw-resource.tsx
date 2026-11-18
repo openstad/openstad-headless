@@ -17,7 +17,6 @@ export type RawResourceWidgetProps = BaseProps &
     resourceId?: string;
     resourceIdRelativePath?: string;
     rawInput?: string;
-    stylingClasses?: { label: string; value: string }[];
   };
 
 function RawResource(props: RawResourceWidgetProps) {
@@ -58,11 +57,6 @@ function RawResource(props: RawResourceWidgetProps) {
     ? datastore.useResource(updatedProps)
     : { data: null };
 
-  const stylingClasses =
-    updatedProps.stylingClasses
-      ?.map((stylingClass) => stylingClass.value)
-      .join(' ') || '';
-
   let render = renderRawTemplate(updatedProps, resource, resourceId, true);
   render = render.replace(/&amp;amp;/g, '&');
 
@@ -75,9 +69,7 @@ function RawResource(props: RawResourceWidgetProps) {
           // contain iframes/scripts on purpose). Untrusted variable values are
           // sanitized inside renderRawTemplate.
           // eslint-disable-next-line react/no-danger
-          <div
-            className={stylingClasses}
-            dangerouslySetInnerHTML={{ __html: render }}></div>
+          <div dangerouslySetInnerHTML={{ __html: render }}></div>
         )}
       </section>
     </div>

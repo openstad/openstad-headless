@@ -8,10 +8,12 @@ import commentsByProject from './commentsByProject';
 import datalayer from './datalayer';
 import enqueteResultCount from './enqueteResultCount';
 import fetchx from './fetch';
+import links from './links';
 import markers from './markers';
 import projectVotedUsersCount from './projectVotedUsersCount';
 import resource from './resource';
 import resourceMarkers from './resource-markers';
+import resourceStreets from './resource-streets';
 import resources from './resources';
 import statuses from './statuses';
 import submissions from './submissions';
@@ -99,6 +101,10 @@ function API(props = {}) {
     fetch: resourceMarkers.fetch.bind(self),
   };
 
+  self.resourceStreets = {
+    fetch: resourceStreets.fetch.bind(self),
+  };
+
   self.choicesguide = {
     fetch: choicesguide.fetch.bind(self),
     create: choicesguide.create.bind(self),
@@ -155,6 +161,14 @@ function API(props = {}) {
   self.userVote = {
     fetch: userVote.fetch.bind(self),
     submitVote: userVote.submitVote.bind(self),
+  };
+
+  self.links = {
+    fetchOptions: links.fetchOptions.bind(self),
+    fetchItems: links.fetchItems.bind(self),
+    fetchSelection: links.fetchSelection.bind(self),
+    fetchLinks: links.fetchLinks.bind(self),
+    sendContact: links.sendContact.bind(self),
   };
 
   self.userActivity = {

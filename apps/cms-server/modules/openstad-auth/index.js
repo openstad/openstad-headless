@@ -6,10 +6,6 @@
 const Url = require('url');
 const expressSession = require('express-session');
 
-const generateRandomPassword = () => {
-  return require('crypto').randomBytes(64).toString('hex');
-};
-
 function removeURLParameter(url, parameter) {
   // prefer to use l.search if you have a location/link object
   const urlparts = url.split('?');
@@ -144,6 +140,7 @@ module.exports = {
             };
 
             const THIRTY_SECONDS = 30 * 1000;
+            const GRACE_MS = 5 * 60 * 1000;
             const date = new Date().getTime();
             const dateToCheck = req.session.openStadlastJWTCheck
               ? new Date(req.session.openStadlastJWTCheck)
@@ -158,6 +155,7 @@ module.exports = {
             ) {
               setUserData(req, next);
             } else {
+              let user;
               try {
                 let response = await fetch(url, {
                   headers: {
@@ -166,33 +164,42 @@ module.exports = {
                     'Cache-Control': 'no-cache',
                   },
                 });
-                if (!response.ok) {
-                  throw new Error('Fetch failed');
-                }
-
-                let user = await response.json();
-
-                if (user && Object.keys(user).length > 0 && user.id) {
-                  req.session.openstadUser = user;
-                  req.session.openStadlastJWTCheck = new Date().getTime();
-                  console.log(
-                    `[${new Date().toISOString()}][cms-auth] user authenticated: userId=${user.id} role=${user.role} projectId=${req.project?.id}`
-                  );
-
-                  req.session.save(() => {
-                    setUserData(req, next);
-                  });
+                if (response.status === 429 || response.status >= 500) {
+                  throw new Error(`API responded with ${response.status}`);
+                } else if (!response.ok) {
+                  // Any other 4xx: token rejected, handled below as a logout
+                  user = {};
                 } else {
-                  console.log(
-                    `[${new Date().toISOString()}][cms-auth] invalid user data from API, destroying session: projectId=${req.project?.id}`
-                  );
-                  req.session.destroy(() => {
-                    res.redirect('/');
-                  });
+                  user = await response.json();
                 }
               } catch (err) {
+                // Transient failure (5xx, 429, network): keep the session and
+                // retry on the next request. Destroying it here logs the user
+                // out of the CMS over an API hiccup. The cached user is only
+                // trusted for a short grace window after the last good check.
                 console.log(
-                  `[${new Date().toISOString()}][cms-auth] user validation failed, destroying session: projectId=${req.project?.id} error=${err?.message}`
+                  `[${new Date().toISOString()}][cms-auth] user validation failed, keeping session: projectId=${req.project?.id} error=${err?.message}`
+                );
+                const withinGrace =
+                  date - (req.session.openStadlastJWTCheck || 0) < GRACE_MS;
+                return req.session.openstadUser && withinGrace
+                  ? setUserData(req, next)
+                  : next();
+              }
+
+              if (user && Object.keys(user).length > 0 && user.id) {
+                req.session.openstadUser = user;
+                req.session.openStadlastJWTCheck = new Date().getTime();
+                console.log(
+                  `[${new Date().toISOString()}][cms-auth] user authenticated: userId=${user.id} role=${user.role} projectId=${req.project?.id}`
+                );
+
+                req.session.save(() => {
+                  setUserData(req, next);
+                });
+              } else {
+                console.log(
+                  `[${new Date().toISOString()}][cms-auth] invalid user data from API, destroying session: projectId=${req.project?.id}`
                 );
                 req.session.destroy(() => {
                   res.redirect('/');
@@ -262,7 +269,6 @@ module.exports = {
           const userData = {
             username: username, // easy way to keep the username unique is using the email, wont be used anyway
             title: email,
-            password: generateRandomPassword(), // generate a random password since apostrophe expects it
             firstName: firstName,
             lastName: lastName,
             email: email,
@@ -270,39 +276,41 @@ module.exports = {
             type: '@apostrophecms/user',
           };
 
-          /**
-           * See if user already exists
-           */
-          if (aposUser) {
-            userData._id = aposUser._id;
-          }
-
-          // update or inster depending on if user exists
-          const insertOrUpdate = aposUser
-            ? self.apos.user.update
-            : self.apos.user.insert;
-
           // In case user relogs in the data gets updated
           // one downside, if the user's admin or editor rights are revoked,
           // this will only go into effect after logging out
           try {
-            await insertOrUpdate(taskReq, userData);
+            if (aposUser) {
+              // Merge into the existing doc: update() replaces the whole
+              // document. Never send a password on update: Apostrophe sets
+              // loginInvalidBefore on every password change, which logs the
+              // user out of all their other sessions.
+              Object.assign(aposUser, userData);
+              await self.apos.user.update(taskReq, aposUser);
+            } else {
+              // Apostrophe generates a random password on insert when none
+              // is given; it is never used for login
+              aposUser = await self.apos.user.insert(taskReq, userData);
+            }
           } catch (e) {
-            console.log('error', e);
+            console.log(
+              `[${new Date().toISOString()}][cms-auth] apostrophe user save error: ${e?.message}`
+            );
+            return next(e);
           }
 
           // session data gets cleared in the login; backup openstad values
           let bak = {
             openstadUser: req.session.openstadUser,
             openstadLoginToken: req.session.openstadLoginToken,
-            openstadLastJWTCheck: req.session.openstadLastJWTCheck,
+            openStadlastJWTCheck: req.session.openStadlastJWTCheck,
           };
 
           try {
             await req.login(aposUser, () => {
               req.session.openstadUser = bak.openstadUser;
               req.session.openstadLoginToken = bak.openstadLoginToken;
-              req.session.openstadLastJWTCheck = bak.openstadLastJWTCheck;
+              req.session.openStadlastJWTCheck = bak.openStadlastJWTCheck;
               res.redirect(req.url);
             });
           } catch (e) {

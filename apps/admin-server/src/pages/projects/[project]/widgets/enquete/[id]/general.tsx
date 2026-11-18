@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -13,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -38,6 +38,8 @@ const formSchema = z.object({
   title: z.string(),
   description: z.string(),
   afterSubmitUrl: z.string().optional(),
+  closeFormAfterSubmit: z.boolean().optional(),
+  closedFormMessage: z.string().optional(),
   minCharactersWarning: z
     .string()
     .optional()
@@ -82,6 +84,8 @@ export default function WidgetEnqueteGeneral(
       title: props?.title || '',
       description: props?.description || '',
       afterSubmitUrl: props.afterSubmitUrl || '',
+      closeFormAfterSubmit: props.closeFormAfterSubmit ?? false,
+      closedFormMessage: props.closedFormMessage ?? '',
       minCharactersWarning:
         props.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
       maxCharactersWarning:
@@ -106,6 +110,10 @@ export default function WidgetEnqueteGeneral(
   });
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Algemeen',
+  });
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -147,16 +155,58 @@ export default function WidgetEnqueteGeneral(
                   <Input
                     {...field}
                     placeholder="bijvoorbeeld /enquetes/[id] of laat leeg voor geen redirect"
-                    onChange={(e) => {
-                      field.onChange(e);
-                      onFieldChange(field.name, e.target.value);
-                    }}
                   />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="closeFormAfterSubmit"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Formulier sluiten na inzending</FormLabel>
+                <FormDescription>
+                  Na een inzending vervangt een bevestiging het formulier. Dit
+                  wordt onthouden in de browser van de bezoeker. Beheerders en
+                  redacteuren zien het formulier altijd.
+                </FormDescription>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {form.watch('closeFormAfterSubmit') && (
+            <FormField
+              control={form.control}
+              name="closedFormMessage"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bevestigingstekst na inzending</FormLabel>
+                  <FormDescription>
+                    Onder deze tekst staan de datum en tijd van de inzending.
+                    Laat leeg voor de standaardtekst: &quot;Je antwoord is
+                    ontvangen. Je kunt deze enquête maar één keer
+                    invullen.&quot;
+                  </FormDescription>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      value={field.value ?? ''}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        onFieldChange(field.name, e.target.value);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}
@@ -247,15 +297,7 @@ export default function WidgetEnqueteGeneral(
                   Aantal uren dat een concept bewaard blijft in de browser.
                 </FormDescription>
                 <FormControl>
-                  <Input
-                    type="number"
-                    min={1}
-                    {...field}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      onFieldChange(field.name, e.target.value);
-                    }}
-                  />
+                  <Input type="number" min={1} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -363,10 +405,6 @@ export default function WidgetEnqueteGeneral(
               </FormItem>
             )}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

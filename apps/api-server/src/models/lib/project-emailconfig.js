@@ -52,9 +52,25 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         type: 'boolean',
         default: false,
       },
+      sendUpdatedResourceUserEmail: {
+        type: 'boolean',
+        default: false,
+      },
       sendCommentAdminEmail: {
         type: 'boolean',
         default: false,
+      },
+      sendModBreakNotification: {
+        type: 'boolean',
+        default: false,
+      },
+      sendModBreakNotificationToCommenters: {
+        type: 'boolean',
+        default: false,
+      },
+      modBreakNotificationResourcePath: {
+        type: 'string',
+        default: '',
       },
       pdfAttachmentEnabled: {
         type: 'boolean',

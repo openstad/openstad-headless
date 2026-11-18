@@ -10,8 +10,11 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { useDraftItems } from '@/hooks/useDraftItems';
+import { useOpenItemDraft } from '@/hooks/useOpenItemDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
-import { generateId, withId } from '@/lib/widget-item-helpers';
+import { mergeSelectedItem } from '@/lib/open-item-merge';
+import { generateId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { DistributionModuleProps } from '@openstad-headless/distribution-module/src/distribution-module';
 import {
@@ -19,7 +22,7 @@ import {
   Option,
 } from '@openstad-headless/enquete/src/types/enquete-props';
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -35,7 +38,10 @@ export default function WidgetDistributionModuleItems(
   props: DistributionModuleProps & EditFieldProps<DistributionModuleProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, commitItems] = useDraftItems<Item>(
+    props.items,
+    props.onFieldChanged
+  );
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
     ? items.find((i) => i.id === selectedItemId) || null
@@ -46,7 +52,7 @@ export default function WidgetDistributionModuleItems(
     if (selectedItem) {
       const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
 
-      setItems((currentItems) =>
+      commitItems((currentItems) =>
         currentItems.map((item) =>
           item.id === selectedItem.id
             ? { ...item, ...valuesWithoutTrigger }
@@ -55,7 +61,7 @@ export default function WidgetDistributionModuleItems(
       );
       setSelectedItemId(null);
     } else {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
           (max, i) => Math.max(max, parseInt(i.trigger) || 0),
           0
@@ -90,32 +96,39 @@ export default function WidgetDistributionModuleItems(
     defaultValues: defaults(),
   });
 
-  const itemsInitialized = React.useRef(false);
-  useEffect(() => {
-    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
-      itemsInitialized.current = true;
-      setItems(props.items.map(withId));
-    }
-  }, [props?.items]);
+  function mergeOpenItem(
+    currentItems: Item[],
+    selectedId: string,
+    values: FormData
+  ) {
+    const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+    return mergeSelectedItem(
+      currentItems,
+      selectedId,
+      valuesWithoutTrigger as Partial<Item>
+    );
+  }
 
-  const { onFieldChanged } = props;
-  useEffect(() => {
-    if (onFieldChanged) {
-      onFieldChanged('items', items);
-    }
-  }, [items]);
+  const { releaseOpenItem } = useOpenItemDraft<Item, FormData, null>({
+    form,
+    openId: selectedItem?.id ?? null,
+    state: null,
+    items,
+    commitItems,
+    merge: mergeOpenItem,
+    label: 'Items',
+  });
 
-  // Sets form to selected item values when item is selected
-  useEffect(() => {
-    if (selectedItem) {
-      form.reset({
-        trigger: selectedItem.trigger,
-        title: selectedItem.title || '',
-        description: selectedItem.description || '',
-        placeholder: selectedItem.placeholder || '',
-      });
-    }
-  }, [selectedItemId, form]);
+  function openItem(item: Item) {
+    form.reset({
+      trigger: item.trigger,
+      title: item.title || '',
+      key: item.key || '',
+      description: item.description || '',
+      placeholder: item.placeholder || '',
+    });
+    setSelectedItemId(item.id ?? null);
+  }
 
   const handleAction = (
     actionType: 'moveUp' | 'moveDown' | 'delete',
@@ -123,7 +136,7 @@ export default function WidgetDistributionModuleItems(
     isItemAction: boolean // Determines if the action is for items or options
   ) => {
     if (isItemAction) {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         return handleMovementOrDeletion(
           currentItems,
           actionType,
@@ -171,10 +184,6 @@ export default function WidgetDistributionModuleItems(
     return sorted;
   }
 
-  function handleSaveItems() {
-    props.updateConfig({ ...props, items });
-  }
-
   function resetForm() {
     form.reset(defaults());
     setSelectedItemId(null);
@@ -219,9 +228,11 @@ export default function WidgetDistributionModuleItems(
                             </span>
                             <span
                               className="gap-2 py-3 px-2 w-full"
-                              onClick={() =>
-                                setSelectedItemId(item.id ?? null)
-                              }>
+                              onClick={() => {
+                                if (selectedItem?.id === item.id) return;
+                                if (!releaseOpenItem()) return;
+                                openItem(item);
+                              }}>
                               {`${item.title || 'Geen titel'}`}
                             </span>
                             <span className="gap-2 py-3 px-2">
@@ -236,14 +247,6 @@ export default function WidgetDistributionModuleItems(
                         ))
                     : 'Geen items'}
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={() => handleSaveItems()}>
-                  Configuratie opslaan
-                </Button>
               </div>
             </div>
 
@@ -303,27 +306,38 @@ export default function WidgetDistributionModuleItems(
               <div>
                 <div className="flex gap-2">
                   {selectedItem && (
-                    <Button
-                      className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                      type="button"
-                      onClick={() => {
-                        resetForm();
-                      }}>
-                      Annuleer
-                    </Button>
+                    <>
+                      <Button
+                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                        type="button"
+                        onClick={() => {
+                          resetForm();
+                        }}>
+                        Annuleer
+                      </Button>
+                      <Button
+                        className="w-fit mt-4"
+                        type="button"
+                        onClick={() => {
+                          if (!releaseOpenItem()) return;
+                          resetForm();
+                        }}>
+                        Nieuw item
+                      </Button>
+                    </>
                   )}
 
-                  <Button
-                    className="w-fit mt-4"
-                    type="submit"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      onSubmit(form.getValues());
-                    }}>
-                    {selectedItem
-                      ? 'Sla wijzigingen op'
-                      : 'Voeg item toe aan lijst'}
-                  </Button>
+                  {!selectedItem && (
+                    <Button
+                      className="w-fit mt-4"
+                      type="submit"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onSubmit(form.getValues());
+                      }}>
+                      Voeg item toe aan lijst
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
