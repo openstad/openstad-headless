@@ -62,6 +62,7 @@ const formSchema = z.object({
   displayImage: z.boolean(),
   displayImageDescription: z.boolean(),
   displayTitle: z.boolean(),
+  displayModBreak: z.boolean().optional(),
   displayDescription: z.boolean(),
   displayDescriptionExpandable: z.boolean(),
   displayDescriptionExpandable_expandBeforeText: z.string().optional(),
@@ -133,6 +134,7 @@ export default function WidgetResourceDetailDisplay(
         props?.displayDescriptionExpandable_visibleLines || '4',
       descriptionHeadingLevel: props?.descriptionHeadingLevel || '3',
       displayTitle: undefinedToTrueOrProp(props?.displayTitle),
+      displayModBreak: undefinedToTrueOrProp(props?.displayModBreak),
       displaySummary: undefinedToTrueOrProp(props?.displaySummary),
       displayDescription: undefinedToTrueOrProp(props?.displayDescription),
       displayUser: undefinedToTrueOrProp(props?.displayUser),
@@ -237,6 +239,17 @@ export default function WidgetResourceDetailDisplay(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Titel weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="displayModBreak"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Officiële reactie weergeven</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

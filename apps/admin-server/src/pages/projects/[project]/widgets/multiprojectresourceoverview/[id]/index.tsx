@@ -118,6 +118,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                           updatePreview,
                           widgetName: 'multiprojectresourceoverview',
                         })}
+                        supportsMarkerToggle={true}
                       />
                     </TabsContent>
                     <TabsContent value="buttons" className="p-0">

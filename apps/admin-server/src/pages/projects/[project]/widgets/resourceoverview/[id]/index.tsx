@@ -117,6 +117,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                           subWidgetKey: 'resourceOverviewMapWidget',
                           updatePreview,
                         })}
+                        supportsMarkerToggle={true}
                       />
                     </TabsContent>
                     <TabsContent value="buttons" className="p-0">

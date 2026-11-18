@@ -20,8 +20,8 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
-import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
@@ -39,6 +39,7 @@ const formSchema = z.object({
   titleMaxLength: z.coerce.number(),
   displayDescription: z.boolean(),
   descriptionMaxLength: z.coerce.number(),
+  displayImage: z.boolean().optional(),
   displaySummary: z.boolean(),
   summaryMaxLength: z.coerce.number(),
   displayStatusLabel: z.boolean(),
@@ -102,6 +103,7 @@ export default function WidgetResourceOverviewDisplay(
       titleMaxLength: props?.titleMaxLength || 20,
       displayDescription: props?.displayDescription || false,
       descriptionMaxLength: props?.descriptionMaxLength || 20,
+      displayImage: undefinedToTrueOrProp(props?.displayImage),
       displaySummary: props?.displaySummary || false,
       summaryMaxLength: props?.summaryMaxLength || 30,
       displayArguments: props?.displayArguments || false,
@@ -661,6 +663,18 @@ export default function WidgetResourceOverviewDisplay(
                 <FormControl>
                   <Input type="number" {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayImage"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Afbeelding weergeven</FormLabel>
+                {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
             )}
