@@ -57,7 +57,10 @@ export default function ProjectCommentEdit() {
       throw new Error('Controleer de gemarkeerde velden.');
     }
     const values = formSchema.parse(form.getValues());
-    const comment = await updateComment(values.description, values.label);
+    const comment = await updateComment({
+      description: values.description,
+      label: values.label,
+    });
     if (!comment) {
       throw new Error('Er is helaas iets mis gegaan.');
     }

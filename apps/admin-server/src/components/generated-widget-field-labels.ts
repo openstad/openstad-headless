@@ -482,6 +482,7 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     displayImageDescription: 'Beschrijving van de afbeelding tonen',
     displayLikes: 'Toon de likes widget',
     displayLocation: 'Plaats weergeven',
+    displayModBreak: 'Officiële reactie weergeven',
     displaySocials: 'Delen via social media opties weergeven',
     displayStatus: 'Gekoppelde statussen weergeven',
     displayStatusBar: 'De balk met statussen weergeven bij de afbeelding?',
@@ -605,6 +606,7 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     displayDescription: 'Beschrijving inzending weergeven',
     displayDocuments: 'Geüploade documenten weergeven',
     displayEditLink: 'Aanpas-link weergeven voor moderators',
+    displayImage: 'Afbeelding weergeven',
     displayLabel: 'Label weergeven',
     displayLikeButton: 'Like button weergeven in de dialog',
     displayLocationFilter: 'Locatie filter weergeven',
@@ -670,6 +672,7 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     buttonText: 'Knoptekst',
     color: 'Kleur',
     customUrl: 'Aangepaste URL',
+    displayMarkers: 'Toon locatie markers van inzendingen',
     enableOnOffSwitching:
       'Wil je dat het mogelijk is om de kaartlagen aan en uit te zetten?',
     height: 'Hoogte',

@@ -15,7 +15,11 @@ function allowContainerReuse(L: typeof import('leaflet')) {
     const container = (
       typeof id === 'string' ? document.getElementById(id) : id
     ) as ReusableContainer | null;
+    // Strict Mode double-mounts: fully detach the stale instance, otherwise two
+    // live maps stack on one container and drags turn into clicks.
     if (container && container._leaflet_id) {
+      L.DomEvent.off(container);
+      container.innerHTML = '';
       container._leaflet_id = undefined;
     }
     return initContainer.call(this, id);
