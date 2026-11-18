@@ -4,12 +4,12 @@ import {
   AccordionProvider,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
 } from '@utrecht/component-library-react';
 import React, { FC, useEffect, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
+import { FormFieldLabel } from '../form-field-label';
 import './style.css';
 
 export type TickmarkSliderProps = {
@@ -123,7 +123,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
 
   return (
     <div className="a-b-slider-container">
-      <Paragraph className="utrecht-form-field__label">
+      <FormFieldLabel>
         <FormLabel htmlFor={`a-to-b-range--${index}`}>
           <RteContent
             content={title}
@@ -131,7 +131,7 @@ const TickmarkSlider: FC<TickmarkSliderProps> = ({
             forceInline={true}
           />
         </FormLabel>
-      </Paragraph>
+      </FormFieldLabel>
       {description && (
         <>
           <FormFieldDescription>

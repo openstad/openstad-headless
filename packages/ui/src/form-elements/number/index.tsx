@@ -4,13 +4,13 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
   Textbox,
 } from '@utrecht/component-library-react';
 import React, { FC, useEffect, useState } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
+import { FormFieldLabel } from '../form-field-label';
 import './style.css';
 
 export type NumberInputProps = {
@@ -123,7 +123,7 @@ const NumberInput: FC<NumberInputProps> = ({
   return (
     <FormField type="text">
       {title && (
-        <Paragraph className="utrecht-form-field__label">
+        <FormFieldLabel>
           <FormLabel htmlFor={randomID}>
             <RteContent
               content={title}
@@ -131,7 +131,7 @@ const NumberInput: FC<NumberInputProps> = ({
               forceInline={true}
             />
           </FormLabel>
-        </Paragraph>
+        </FormFieldLabel>
       )}
       {description && (
         <>
