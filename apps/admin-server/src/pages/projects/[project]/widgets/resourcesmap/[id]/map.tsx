@@ -348,8 +348,6 @@ export default function WidgetResourcesMapMap(
               )}
             />
           )}
-
-          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>
