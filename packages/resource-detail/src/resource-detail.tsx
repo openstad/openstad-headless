@@ -200,7 +200,6 @@ function ResourceDetail({
   displayBudget = true,
   displayLocation = true,
   displayLocationAddress = false,
-  displayBudgetDocuments = true,
   displayLikes = true,
   displayTags = true,
   displayStatus = true,

@@ -19,3 +19,10 @@ docker-compose.override.yml
 apps/*/package-lock.json
 /packages/ui/dist
 .worktrees
+
+# Test coverage reports
+coverage/
+
+# AI agent docs are tracked (override developers' global gitignores)
+!AGENTS.md
+!.ai
