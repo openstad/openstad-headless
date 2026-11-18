@@ -161,6 +161,19 @@ admin:
         more_set_headers "X-Xss-Protection: 1";
         more_set_headers "Referrer-Policy: same-origin";
         more_set_headers "X-Robots-Tag: noindex, nofollow";
+    # Restrict access to the admin ingress to a list of IP addresses / CIDR ranges.
+    # Leave sourceRange empty to allow all traffic (default).
+    # - nginx:   sets the `nginx.ingress.kubernetes.io/whitelist-source-range` annotation
+    # - traefik: creates an `ipAllowList` Middleware and adds it to the ingress
+    allowlist:
+      sourceRange: []
+      #  - 127.0.0.1/32
+      #  - 192.168.0.0/24
+      # Traefik only: how the client IP is determined when Traefik runs behind
+      # another proxy / load balancer, e.g. `depth: 1` to use the last
+      # X-Forwarded-For entry. With nginx this is configured on the controller
+      # itself (use-forwarded-headers / proxy-real-ip-cidr).
+      ipStrategy: {}
     extraLabels: {}
     hosts: []
     ingressClassName:  # defaults to global.ingress.type
