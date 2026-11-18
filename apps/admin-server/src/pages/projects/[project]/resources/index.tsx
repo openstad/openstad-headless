@@ -462,7 +462,7 @@ export default function ProjectResources() {
                     <Paragraph className="my-auto -mr-16 lg:mr-0">
                       {resource.id}
                     </Paragraph>
-                    <Paragraph className="my-auto -mr-16 lg:mr-0">
+                    <Paragraph className="my-auto -mr-16 lg:mr-0 min-w-0 [overflow-wrap:anywhere]">
                       <span className="inline-flex items-center gap-2">
                         {resource.title}
                         {resource.isSpam ? (
