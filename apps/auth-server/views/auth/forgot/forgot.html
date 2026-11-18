@@ -4,7 +4,7 @@
 
 <div class="card">
   <div class="upper-box card-body">
-      <form method="POST" action="?&clientId={{clientId}}&redirect_uri={{redirectUrl}}">
+      <form method="POST" action="?&clientId={{clientId}}&redirect_uri={{redirectUrl}}" data-single-submit>
          <input type="hidden" name="_csrf" value="{{csrfToken}}" />
         <h1>
             {{title if title else 'Wachtwoord vergeten'}}
@@ -18,7 +18,7 @@
           <label for="input_field"> {{label if label else 'E-mail:'}} </label>
           <input type="email" name="email" id="email" placeholder="Email" class="form-input" required autofocus id="input_field">
         </div>
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn btn-primary" data-loading-text="{{sendingText if sendingText else 'Bezig met versturen…'}}">
             {{buttonText if buttonText else 'Stuur e-mail'}}
         </button>
       </form>
@@ -32,5 +32,19 @@
        {{backToLoginText if backToLoginText else 'Terug naar inloggen'}}
    </a>
 </p>
+
+<script>
+  // Sending the mail takes a moment; stop a second click from queueing a second e-mail.
+  (function () {
+    var form = document.querySelector('form[data-single-submit]');
+    if (!form) return;
+    form.addEventListener('submit', function (e) {
+      if (form.dataset.submitted) { e.preventDefault(); return; }
+      form.dataset.submitted = '1';
+      var btn = form.querySelector('button[type=submit]');
+      if (btn) { btn.disabled = true; btn.setAttribute('aria-busy', 'true'); btn.textContent = btn.getAttribute('data-loading-text') || btn.textContent; }
+    });
+  })();
+</script>
 
 {% endblock %}
