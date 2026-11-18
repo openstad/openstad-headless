@@ -20,8 +20,8 @@ function cleanLabel(raw) {
     .replace(/<[^>]*>/g, ' ')
     .replace(/&quot;/g, '"')
     .replace(/&apos;|&#0?39;/g, "'")
-    .replace(/&amp;/g, '&')
     .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
     .replace(/\s+/g, ' ')
     .trim();
 }

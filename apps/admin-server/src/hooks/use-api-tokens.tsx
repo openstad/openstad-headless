@@ -1,3 +1,4 @@
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
 
 export type ApiTokenStatus = 'active' | 'expired' | 'revoked';
@@ -67,17 +68,18 @@ export default function useApiTokens(projectId?: number, userId?: number) {
 }
 
 export function useProjectApiTokens(projectId?: string | number) {
-  const url = projectId
-    ? `/api/openstad/api/project/${projectId}/api-token`
+  const projectNumber = validateProjectNumber(projectId?.toString());
+  const url = projectNumber
+    ? `/api/openstad/api/project/${projectNumber}/api-token`
     : null;
 
   const swr = useSWR<ApiToken[]>(url);
 
   async function revokeToken(tokenId: number) {
-    if (!projectId) throw new Error('Project ontbreekt');
+    if (!projectNumber) throw new Error('Project ontbreekt');
 
     const res = await fetch(
-      `/api/openstad/api/project/${projectId}/api-token/${tokenId}`,
+      `/api/openstad/api/project/${projectNumber}/api-token/${tokenId}`,
       { method: 'DELETE' }
     );
 
