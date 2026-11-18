@@ -997,7 +997,7 @@ const BaseMap = ({
             {locationProx &&
               locationProx.lat &&
               locationProx.lng &&
-              locationProx.proximity && (
+              !!locationProx.proximity && (
                 <Circle
                   center={[
                     parseFloat(locationProx.lat),
