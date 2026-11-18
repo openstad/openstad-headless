@@ -15,7 +15,7 @@
         {% if logo %}
         <mj-image src="{{logo}}" align="left" width="160px" alt="" padding-bottom="16px" />
         {% endif %}
-        <mj-text><h1 style="font-size:22px;font-weight:bold;line-height:1.3;margin:0">Bericht ontvangen over een inzending</h1></mj-text>
+        <mj-text><h1 style="color:{{ styling.accentColor }};font-size:22px;font-weight:bold;line-height:1.3;margin:0">Bericht ontvangen over een inzending</h1></mj-text>
         <mj-divider />
         <mj-text>
           Beste {{user.name}},<br/>

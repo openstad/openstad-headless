@@ -15,7 +15,7 @@
         {% if logo %}
         <mj-image src="{{logo}}" align="left" width="160px" alt="" padding-bottom="16px" />
         {% endif %}
-        <mj-text><h1 style="font-size:22px;font-weight:bold;line-height:1.3;margin:0">{% if newModBreaks and newModBreaks.length %}Er is een officiële reactie geplaatst.{% else %}Een officiële reactie is aangepast.{% endif %}</h1></mj-text>
+        <mj-text><h1 style="color:{{ styling.accentColor }};font-size:22px;font-weight:bold;line-height:1.3;margin:0">{% if newModBreaks and newModBreaks.length %}Er is een officiële reactie geplaatst.{% else %}Een officiële reactie is aangepast.{% endif %}</h1></mj-text>
         <mj-divider />
         <mj-text>Beste {{ user.name }},</mj-text>
         {% if newModBreaks and newModBreaks.length %}
@@ -31,7 +31,7 @@
         {% endfor %}
         {% endif %}
         {% if redirectUrl %}
-        <mj-button background-color="#12B886" href="{{ redirectUrl }}" align="left">Weergeven</mj-button>
+        <mj-button background-color="{{ styling.accentColor }}" href="{{ redirectUrl }}" align="left">Weergeven</mj-button>
         <mj-text font-size="13px" color="#777777">Of gebruik deze link in je browser: <a href="{{ redirectUrl }}">{{ redirectUrl }}</a></mj-text>
         {% endif %}
         <mj-divider />

@@ -17,6 +17,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import useMailStyling, { MailStyling } from '@/hooks/use-mail-styling';
 import useNotificationTemplate from '@/hooks/use-notification-template';
 import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { applyFilters } from '@/lib/nunjucks-filters';
@@ -539,6 +540,8 @@ export function NotificationForm({
     loginurl: string;
     imagePath: string;
     resource: any;
+    logo?: string;
+    styling?: MailStyling;
   };
   const [mailContext, setMailContext] = useState<MailContextType>({
     user: { name: 'Gebruiker', fullName: 'Gebruiker' },
@@ -567,6 +570,17 @@ export function NotificationForm({
 
     setUserNameInMailContext();
   }, []);
+
+  const { data: mailStyling } = useMailStyling(project);
+
+  useEffect(() => {
+    if (!mailStyling) return;
+    setMailContext((prev: MailContextType) => ({
+      ...prev,
+      logo: mailStyling.logo,
+      styling: mailStyling,
+    }));
+  }, [mailStyling]);
 
   const defaultValueBody =
     body ||
@@ -621,14 +635,11 @@ export function NotificationForm({
 
   useSyncFormDefaults(form, defaults, id || defaultTemplate);
 
-  const [templateData, setTemplateData] = useState(defaultValueBody || '');
   const [mjmlHtml, setMjmlHtml] = useState('');
-
-  let mailTemplate: any = nunjucksEnv.renderString(templateData, mailContext);
 
   const [error, setError] = useState<string | null>(null);
 
-  async function convertMJMLToHTML(data = mailTemplate) {
+  async function convertMJMLToHTML(data: string) {
     if (data === '') {
       setMjmlHtml("<p style='text-align: center;'>Inhoud is leeg.</p>");
       // Without this a render error from an earlier value would stay on screen
@@ -646,10 +657,6 @@ export function NotificationForm({
       setError('Er is een fout opgetreden bij het renderen van de template.');
     }
   }
-
-  useEffect(() => {
-    convertMJMLToHTML();
-  }, [mailContext]);
 
   const handleOnChange = (e: any, field: any) => {
     if (e.target.value.length > 0) {
@@ -674,7 +681,7 @@ export function NotificationForm({
     } catch (err) {
       setError('Er is een fout opgetreden bij het renderen van de template.');
     }
-  }, [fieldValue]);
+  }, [fieldValue, mailContext]);
 
   const save = useCallback(async () => {
     // The save bar replaces `form.handleSubmit`, so the resolver has to be run

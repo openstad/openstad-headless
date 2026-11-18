@@ -6,9 +6,12 @@
     <!-- Main section for the email content -->
     <mj-section background-color="#ffffff" padding="20px">
       <mj-column>
+        {% if logo %}
+        <mj-image src="{{ logo }}" width="150px"></mj-image>
+        {% endif %}
 
         <!-- Title of the email -->
-        <mj-text font-size="20px" color="#333333" font-family="Helvetica" align="center">
+        <mj-text font-size="20px" color="{{ styling.accentColor }}" font-family="Helvetica" align="center">
           Je hebt een nieuwe reactie ontvangen
         </mj-text>
 
