@@ -6,6 +6,7 @@ export type ResourceListOptions = {
   sort?: string;
   searchField?: string;
   searchTerm?: string;
+  tags?: Array<number>;
 };
 
 type UseResourcesConfig = {
@@ -51,6 +52,7 @@ export default function useResources(
         : 'text';
     params.set(`search[${searchField}]`, options.searchTerm.trim());
   }
+  options?.tags?.forEach((tagId) => params.append('tags', String(tagId)));
 
   const url = `${baseUrl}?${params.toString()}`;
 
