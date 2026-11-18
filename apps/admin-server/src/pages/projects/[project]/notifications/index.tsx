@@ -299,6 +299,7 @@ export default function ProjectNotifications() {
                         label={template.label}
                         subject={template.subject}
                         body={template.body}
+                        content={template.content}
                       />
                     </div>
                   ))}
