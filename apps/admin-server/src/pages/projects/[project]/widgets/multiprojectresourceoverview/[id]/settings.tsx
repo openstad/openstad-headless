@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useProjectList from '@/hooks/use-project-list';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,7 +22,7 @@ import { sanitizeImageUrl } from '@openstad-headless/lib/sanitize';
 import { MultiProjectResourceOverviewProps } from '@openstad-headless/multi-project-resource-overview/src/multi-project-resource-overview';
 import { Spacer } from '@openstad-headless/ui/src';
 import { X } from 'lucide-react';
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -29,6 +30,9 @@ const formSchema = z.object({
   selectedProjects: z
     .array(
       z.object({
+        // any: admin stores a numeric project.id while the widget prop types
+        // this as string — reconciling that mismatch is out of scope for #1641.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         id: z.any(),
         name: z.string(),
         detailPageLink: z.string().optional(),
@@ -53,9 +57,7 @@ const formSchema = z.object({
 
 export default function WidgetMultiProjectSettings(
   props: MultiProjectResourceOverviewProps &
-    EditFieldProps<MultiProjectResourceOverviewProps> & {
-      updatePreview: (config: MultiProjectResourceOverviewProps) => void;
-    }
+    EditFieldProps<MultiProjectResourceOverviewProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
 
@@ -72,7 +74,7 @@ export default function WidgetMultiProjectSettings(
       includeProjectsInOverview:
         props.includeProjectsInOverview === true
           ? true
-          : project.includeProjectsInOverview,
+          : (project.includeProjectsInOverview ?? true),
       excludeResourcesInOverview:
         props.excludeResourcesInOverview === true
           ? true
@@ -85,29 +87,28 @@ export default function WidgetMultiProjectSettings(
     defaultValues,
   });
 
-  async function onSubmit(values: FormData) {
-    const updatedValues = {
-      ...values,
-      selectedProjects:
-        values.selectedProjects?.map((project) => ({
-          ...project,
-          id: project.id || 0,
-          overviewSortDate:
-            project.overviewSortDate instanceof Date
-              ? project.overviewSortDate.toISOString()
-              : project.overviewSortDate,
-        })) || [],
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Instellingen multi project',
+  });
 
-      // Turn off for backwards compatibility. If the value was set, it has been set in selectedProjects
-      includeProjectsInOverview: false,
-      excludeResourcesInOverview: false,
-    };
-    const saved = await props.updateConfig({ ...props, ...updatedValues });
-
-    if (saved) {
-      props.updatePreview({ ...props, ...updatedValues });
-    }
-  }
+  const hasLegacyFlags =
+    props.includeProjectsInOverview === true ||
+    props.excludeResourcesInOverview === true;
+  const { onFieldChanged } = props;
+  const legacyFlagsMovedRef = useRef(false);
+  useEffect(() => {
+    if (!hasLegacyFlags || !onFieldChanged) return;
+    const subscription = form.watch((_values, { name }) => {
+      if (!name?.startsWith('selectedProjects')) return;
+      if (legacyFlagsMovedRef.current) return;
+      legacyFlagsMovedRef.current = true;
+      onFieldChanged('selectedProjects', form.getValues('selectedProjects'));
+      onFieldChanged('includeProjectsInOverview', false);
+      onFieldChanged('excludeResourcesInOverview', false);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, hasLegacyFlags, onFieldChanged]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -126,7 +127,7 @@ export default function WidgetMultiProjectSettings(
         </FormDescription>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(event) => event.preventDefault()}
           className="lg:w-full grid grid-cols-1 gap-4">
           {projects?.map((project: any) => (
             <FormField
@@ -549,6 +550,8 @@ export default function WidgetMultiProjectSettings(
                                     }}
                                   />
                                   <Button
+                                    type="button"
+                                    aria-label="Afbeelding verwijderen"
                                     color="red"
                                     onClick={() => {
                                       form.setValue(
@@ -564,7 +567,7 @@ export default function WidgetMultiProjectSettings(
                                       );
                                     }}
                                     className="absolute left-0 top-0 p-1">
-                                    <X size={24} />
+                                    <X size={24} aria-hidden="true" />
                                   </Button>
                                 </div>
                               ) : (
@@ -587,6 +590,8 @@ export default function WidgetMultiProjectSettings(
                                     }}
                                   />
                                   <Button
+                                    type="button"
+                                    aria-label="Afbeelding verwijderen"
                                     color="red"
                                     onClick={() => {
                                       form.setValue(
@@ -600,7 +605,7 @@ export default function WidgetMultiProjectSettings(
                                       form.resetField('imageProjectUpload');
                                     }}
                                     className="absolute left-0 top-0 p-1">
-                                    <X size={24} />
+                                    <X size={24} aria-hidden="true" />
                                   </Button>
                                 </div>
                               )}
@@ -613,9 +618,6 @@ export default function WidgetMultiProjectSettings(
               }}
             />
           ))}
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

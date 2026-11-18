@@ -117,12 +117,29 @@ const TrixEditor: React.FC<{
   const onBlurRef = useRef(onBlur);
   const valueRef = useRef(value);
   const isFocusedRef = useRef(false);
+  // Set while a value is loaded into the editor programmatically. Trix
+  // normalises that HTML and fires a change event for it, which is not a user
+  // edit and must not be reported to the parent form.
+  const isLoadingValueRef = useRef(false);
+  const loadingValueTimeoutRef = useRef<number | null>(null);
 
   const targetBlankHrefsRef = useRef<Set<string>>(new Set());
 
   const idRef = useRef(
     `trix-editor-${Math.random().toString(36).substring(2, 9)}`
   );
+
+  const loadValueIntoEditor = (html: string) => {
+    if (loadingValueTimeoutRef.current !== null) {
+      window.clearTimeout(loadingValueTimeoutRef.current);
+    }
+    isLoadingValueRef.current = true;
+    editorInstance.current.loadHTML(html);
+    loadingValueTimeoutRef.current = window.setTimeout(() => {
+      isLoadingValueRef.current = false;
+      loadingValueTimeoutRef.current = null;
+    }, 0);
+  };
 
   useEffect(() => {
     (async () => {
@@ -240,11 +257,13 @@ const TrixEditor: React.FC<{
 
       if (valueRef.current && editorInstance.current) {
         targetBlankHrefsRef.current = getTargetBlankHrefs(valueRef.current);
-        editorInstance.current.loadHTML(valueRef.current);
+        loadValueIntoEditor(valueRef.current);
       }
     };
 
     const handleTrixChange = () => {
+      if (isLoadingValueRef.current) return;
+
       let html = inputEl.value;
 
       if (targetBlankHrefsRef.current.size > 0) {
@@ -322,6 +341,11 @@ const TrixEditor: React.FC<{
       inputEl.removeEventListener('input', handleTrixChange);
       editorEl.removeEventListener('trix-focus', handleTrixFocus);
       editorEl.removeEventListener('trix-blur', handleTrixBlur);
+      if (loadingValueTimeoutRef.current !== null) {
+        window.clearTimeout(loadingValueTimeoutRef.current);
+        loadingValueTimeoutRef.current = null;
+      }
+      isLoadingValueRef.current = false;
     };
   }, []);
 
@@ -333,7 +357,7 @@ const TrixEditor: React.FC<{
     if (newHrefs.size > 0) {
       newHrefs.forEach((h) => targetBlankHrefsRef.current.add(h));
     }
-    editorInstance.current.loadHTML(value || '');
+    loadValueIntoEditor(value || '');
   }, [value]);
 
   return (

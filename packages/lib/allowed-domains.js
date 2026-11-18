@@ -18,11 +18,15 @@ function parseHost(value) {
   }
 }
 
+function toggleWww(host) {
+  return host.startsWith('www.') ? host.slice(4) : 'www.' + host;
+}
+
 function addWithParents(list, host) {
   if (!host) return;
-  list.push(host);
-  for (const parent of getParentDomains(host)) {
-    list.push(parent);
+  for (const domain of [host, ...getParentDomains(host)]) {
+    list.push(domain);
+    list.push(toggleWww(domain));
   }
 }
 
@@ -39,6 +43,7 @@ function expandDomains(domains) {
 module.exports = {
   getParentDomains,
   parseHost,
+  toggleWww,
   addWithParents,
   expandDomains,
 };

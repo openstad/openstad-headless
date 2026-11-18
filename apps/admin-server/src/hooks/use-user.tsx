@@ -1,3 +1,4 @@
+import { throwApiError } from '@/lib/api-error';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 
@@ -43,8 +44,11 @@ export default function useUser() {
       body: JSON.stringify({ ...body }),
     });
     if (!res.ok) {
-      const errorBody = await res.json().catch(() => null);
-      throw new Error(errorBody?.message || 'User update failed');
+      console.error('Saving the user failed', res.status, res.statusText);
+      await throwApiError(
+        res,
+        'De gebruiker kon niet worden opgeslagen. Probeer het opnieuw.'
+      );
     }
 
     return await res.json();
@@ -65,7 +69,10 @@ export default function useUser() {
         anonymizeUserName: body.anonymizeUserName,
       }),
     });
-    if (!res.ok) throw new Error('User anonymization failed');
+    if (!res.ok) {
+      console.error('Anonymizing the user failed', res.status, res.statusText);
+      throw new Error('De gebruiker kon niet worden geanonimiseerd.');
+    }
 
     return await res.json();
   }

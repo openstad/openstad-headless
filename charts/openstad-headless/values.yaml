@@ -514,6 +514,10 @@ secrets:
   api:
     jwtSecret:
     dbNameKey:
+    # Salt for the reporting API's pseudonymous user ids. Leave empty to have a
+    # random one generated; set it explicitly to keep pseudonyms stable when the
+    # secret is recreated.
+    reportPseudonymSecret:
   auth:
     sessionSecret:
     phoneHashSalt:
@@ -580,6 +584,7 @@ secrets:
   cdn:
     zipCodeAutofillApiUrl: https://openstad-cdn.nl/api/autofill.php?query=
     zipCodeApiUrl: https://openstad-cdn.nl/api/postcode.php?postcode=
+    zipCodeReverseApiUrl: https://openstad-cdn.nl/api/reverse.php
   ### Mail server secretes
   mail:
     # Set this to `ms-graph` to use Microsoft Graph API for mail sending

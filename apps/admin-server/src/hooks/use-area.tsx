@@ -1,3 +1,4 @@
+import { throwApiError } from '@/lib/api-error';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
 
@@ -14,7 +15,7 @@ export default function useArea(areaId?: string) {
     hidePolygon = false,
     tagIds: number[] = [],
     tagIdsOutside: number[] = []
-  ) {
+  ): Promise<any | null> {
     const res = await fetch(url, {
       method: 'PUT',
       headers: {
@@ -28,6 +29,10 @@ export default function useArea(areaId?: string) {
         tagIdsOutside,
       }),
     });
+
+    if (!res.ok) {
+      await throwApiError(res, 'De polygoon kon niet worden opgeslagen.');
+    }
 
     return await res.json();
   }

@@ -2,6 +2,65 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    projects: ['apps/*', 'packages/*', 'packages/apostrophe-widgets/*'],
+    // Reference each app's config file explicitly. A bare directory glob
+    // (e.g. 'apps/*') does NOT load the nested vitest.config.ts, so per-project
+    // `env` (NODE_CONFIG_DIR) and `exclude` settings are silently dropped.
+    // Pointing at the config files makes those settings take effect.
+    projects: [
+      'apps/api-server/vitest.config.ts',
+      'apps/auth-server/vitest.config.ts',
+      'apps/cms-server/vitest.config.ts',
+      'apps/mcp-server/vitest.config.ts',
+      'apps/admin-server/vitest.config.ts',
+      'apps/image-server',
+      'packages/*',
+      'packages/apostrophe-widgets/*',
+    ],
+    // Coverage MUST be configured at the workspace root: in Vitest projects mode
+    // per-project `coverage` blocks are ignored, so the thresholds below are the
+    // single source of truth that gates CI.
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'lcov'],
+      // Scope coverage to the critical flows that currently have dedicated tests
+      // (issue #1642). Add a file here once it gains real test coverage so the
+      // threshold reflects intentionally-tested code rather than the whole repo.
+      include: [
+        'apps/api-server/src/middleware/user.js',
+        'apps/api-server/src/middleware/project.js',
+        'apps/api-server/src/lib/deadlock-retry.js',
+        'apps/api-server/src/lib/sequelize-authorization/lib/hasRole.js',
+        'apps/api-server/src/lib/sequelize-authorization/middleware/index.js',
+        'apps/api-server/src/routes/api/vote.js',
+        'apps/api-server/src/routes/api/pending-budget-vote.js',
+        'apps/api-server/src/routes/api/resource.js',
+        // #1640 PR1: project route split into services (each unit-tested).
+        'apps/api-server/src/services/projectDuplication.js',
+        'apps/api-server/src/services/authClientSync.js',
+        'apps/api-server/src/services/projectCertificates.js',
+        // #1640 PR3: resource route split into services (each unit-tested).
+        'apps/api-server/src/services/resourceExtraData.js',
+        'apps/api-server/src/services/resourceTagsStatuses.js',
+        // #1640 PR4: user route split into services (each unit-tested).
+        'apps/api-server/src/services/userDeduplication.js',
+        'apps/api-server/src/services/userUnsubscribe.js',
+        // #1640 PR5: business logic extracted from the Resource/User models.
+        'apps/api-server/src/services/resourceSerialization.js',
+        'apps/api-server/src/services/userRoles.js',
+        'apps/auth-server/controllers/oauth/oauth2.js',
+        'apps/auth-server/controllers/oauth/allowed-domains.js',
+        'apps/auth-server/controllers/auth/local.js',
+        'apps/auth-server/controllers/auth/url.js',
+      ],
+      // Baseline gate per issue #1642 (start at 20% lines). A failing threshold
+      // fails `vitest run --coverage`, which blocks the CI build. Ratchet upwards
+      // as coverage improves.
+      thresholds: {
+        lines: 20,
+        statements: 20,
+        functions: 20,
+        branches: 20,
+      },
+    },
   },
 });

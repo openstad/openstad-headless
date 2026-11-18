@@ -19,6 +19,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import useComment from '@/hooks/use-comment';
 import useComments from '@/hooks/use-comments';
 import { waitForNotificationStatus } from '@/lib/notification-status';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
@@ -49,7 +50,13 @@ type CreateCommentData = {
 export default function ProjectResourceCreateArgument() {
   const router = useRouter();
   const { project } = router.query;
+  const editCommentId = router.query.editCommentId as string | undefined;
+  const isEditMode = !!editCommentId;
   const { data, createComment } = useComments(project as string);
+  const { data: editingComment, updateComment } = useComment(
+    project as string,
+    editCommentId
+  );
   const [disableSubmit, setDisableSubmit] = useState(false);
 
   const notifySuccess = () => toast.success('Reactie succesvol geplaatst');
@@ -81,6 +88,32 @@ export default function ProjectResourceCreateArgument() {
 
   async function onSubmit(values: Formdata) {
     setDisableSubmit(false);
+
+    if (isEditMode) {
+      try {
+        const updated = await updateComment({
+          description: values.description,
+          sentiment: values.sentiment,
+        });
+
+        if (!updated?.error) {
+          toast.success('Reactie succesvol aangepast');
+          const { editCommentId: _editCommentId, ...restQuery } = router.query;
+          router.push({ query: { ...restQuery, tab: 'comments' } }, undefined, {
+            shallow: true,
+          });
+        } else {
+          notifyFailed(updated?.error);
+        }
+      } catch (err: any) {
+        console.log(err);
+        notifyError();
+      } finally {
+        setDisableSubmit(false);
+      }
+      return;
+    }
+
     let commentData: CreateCommentData = {
       ...values,
       projectId: project as string,
@@ -122,10 +155,15 @@ export default function ProjectResourceCreateArgument() {
 
           notify(text, icon);
         }
+
+        const { parentId: _parentId, ...restQuery } = router.query;
+        router.push({ query: { ...restQuery, tab: 'comments' } }, undefined, {
+          shallow: true,
+        });
       } else {
         notifyFailed(newComment?.error);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.log(err);
       notifyError();
     } finally {
@@ -137,7 +175,7 @@ export default function ProjectResourceCreateArgument() {
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       description: '',
-      sentiment: 'for',
+      sentiment: 'no sentiment',
       confirmation: false,
       parentId: '',
     },
@@ -149,10 +187,23 @@ export default function ProjectResourceCreateArgument() {
     }
   }, [router.query.parentId]);
 
+  useEffect(() => {
+    if (isEditMode && editingComment) {
+      form.reset({
+        description: editingComment.description,
+        sentiment: editingComment.sentiment,
+        confirmation: false,
+        parentId: '',
+      });
+    }
+  }, [isEditMode, editingComment]);
+
   return (
     <div className="p-6 bg-white rounded-md">
       <Form {...form}>
-        <Heading size="xl">Plaats een reactie</Heading>
+        <Heading size="xl">
+          {isEditMode ? 'Reactie bewerken' : 'Plaats een reactie'}
+        </Heading>
         <Separator className="my-4" />
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -162,13 +213,13 @@ export default function ProjectResourceCreateArgument() {
             name="sentiment"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Sentiment</FormLabel>
+                <FormLabel>Soort reactie</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  value={field.value || 'for'}>
+                  value={field.value || 'no sentiment'}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Voor" />
+                      <SelectValue placeholder="Neutraal" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -182,51 +233,56 @@ export default function ProjectResourceCreateArgument() {
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="confirmation"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Bevestingingsmail verzenden?</FormLabel>
-                <FormDescription>
-                  Wil je een bevestigingsmail sturen naar de gebruiker die de
-                  inzending heeft ingediend? De gebruiker ontvangt dit alleen
-                  als hij/zij toestemming heeft gegeven voor e-mailnotificaties.
-                </FormDescription>
-                <Select
-                  onValueChange={(e: string) => field.onChange(e === 'true')}
-                  value={field.value ? 'true' : 'false'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Nee" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="false">Nee</SelectItem>
-                    <SelectItem value="true">Ja</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {!isEditMode && (
+            <FormField
+              control={form.control}
+              name="confirmation"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bevestingingsmail verzenden?</FormLabel>
+                  <FormDescription>
+                    Wil je een bevestigingsmail sturen naar de gebruiker die de
+                    inzending heeft ingediend? De gebruiker ontvangt dit alleen
+                    als hij/zij toestemming heeft gegeven voor
+                    e-mailnotificaties.
+                  </FormDescription>
+                  <Select
+                    onValueChange={(e: string) => field.onChange(e === 'true')}
+                    value={field.value ? 'true' : 'false'}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Nee" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="false">Nee</SelectItem>
+                      <SelectItem value="true">Ja</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
-          <FormField
-            control={form.control}
-            name="parentId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Reageer op reactie ID</FormLabel>
-                <FormDescription>
-                  Vul hier het ID in van de reactie waarop je wilt reageren.
-                </FormDescription>
-                <FormControl>
-                  <Input {...field} type="number" placeholder="0" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {!isEditMode && (
+            <FormField
+              control={form.control}
+              name="parentId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Reageer op reactie ID</FormLabel>
+                  <FormDescription>
+                    Vul hier het ID in van de reactie waarop je wilt reageren.
+                  </FormDescription>
+                  <FormControl>
+                    <Input {...field} type="number" placeholder="0" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
 
           <FormField
             control={form.control}
@@ -246,7 +302,7 @@ export default function ProjectResourceCreateArgument() {
             className="w-fit col-span-full"
             type="submit"
             disabled={disableSubmit}>
-            Opslaan
+            Reactie plaatsen
           </Button>
         </form>
       </Form>
