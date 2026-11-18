@@ -24,6 +24,7 @@ import useChoiceGuideWidgets from '@/hooks/use-choice-guide-widgets';
 import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
 import { WidgetVersion, useWidgetVersions } from '@/hooks/use-widget-versions';
+import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import {
   IdEntity,
   formatDate,
@@ -229,20 +230,24 @@ export default function WidgetVersionHistory({
   ]);
 
   useEffect(() => {
+    const projectNumber = validateProjectNumber(projectId);
+    if (!projectNumber) return;
     const ids = new Set<string>();
     [selectedConfig, baseConfig, prevVersionConfig].forEach((c) => {
       if (c && typeof c === 'object' && c.resourceId != null)
         idsFromValue(c.resourceId).forEach((rid) => ids.add(rid));
     });
     const missing = Array.from(ids).filter(
-      (rid) => resourceMap[rid] === undefined
+      (rid) => /^\d+$/.test(rid) && resourceMap[rid] === undefined
     );
     if (missing.length === 0) return;
 
     let active = true;
     Promise.all(
       missing.map((rid) =>
-        fetch(`/api/openstad/api/project/${projectId}/resource/${rid}`)
+        fetch(
+          `/api/openstad/api/project/${projectNumber}/resource/${Number(rid)}`
+        )
           .then((r) => (r.ok ? r.json() : null))
           .then(
             (d) => [rid, d && d.title ? d.title : `#${rid}`] as [string, string]
