@@ -4,8 +4,8 @@ const normalizeEmail = require('./normalizeEmail');
 
 describe('normalizeEmail', () => {
   test('trims and lower-cases', () => {
-    expect(normalizeEmail('  Tosh@Example.NL ')).toBe('tosh@example.nl');
-    expect(normalizeEmail('\ttosh@example.nl\n')).toBe('tosh@example.nl');
+    expect(normalizeEmail('  User@Example.COM ')).toBe('user@example.com');
+    expect(normalizeEmail('\tuser@example.com\n')).toBe('user@example.com');
   });
   test('leaves non-strings alone', () => {
     expect(normalizeEmail(undefined)).toBeUndefined();

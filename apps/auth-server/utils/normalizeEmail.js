@@ -3,7 +3,7 @@
  *
  * Phones capitalise the first letter and add a space after autocomplete, and
  * copy-paste brings leading spaces. Without normalising, the same person can
- * exist twice ("Tosh@..." next to "tosh@...") and a login with a leading space
+ * exist twice ("User@..." next to "user@...") and a login with a leading space
  * fails even though the address is right. Passwords are never touched.
  */
 function normalizeEmail(value) {
