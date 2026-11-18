@@ -54,6 +54,7 @@ const formSchema = z.object({
   }),
   fromName: z.string().optional(),
   sendUpdatedResourceAdminEmail: z.boolean().optional(),
+  sendUpdatedResourceUserEmail: z.boolean().optional(),
   sendCommentAdminEmail: z.boolean().optional(),
   sendModBreakNotification: z.boolean().optional(),
   sendModBreakNotificationToCommenters: z.boolean().optional(),
@@ -84,6 +85,8 @@ export default function ProjectSettingsNotifications({
         data?.emailConfig?.[category]?.projectmanagerAddress || null,
       sendUpdatedResourceAdminEmail:
         data?.emailConfig?.[category]?.sendUpdatedResourceAdminEmail || false,
+      sendUpdatedResourceUserEmail:
+        data?.emailConfig?.[category]?.sendUpdatedResourceUserEmail || false,
       sendCommentAdminEmail:
         data?.emailConfig?.[category]?.sendCommentAdminEmail || false,
       sendModBreakNotification:
@@ -123,6 +126,8 @@ export default function ProjectSettingsNotifications({
         fromName: values.fromName,
         sendUpdatedResourceAdminEmail:
           values.sendUpdatedResourceAdminEmail || false,
+        sendUpdatedResourceUserEmail:
+          values.sendUpdatedResourceUserEmail || false,
         sendCommentAdminEmail: values.sendCommentAdminEmail || false,
         sendModBreakNotification: values.sendModBreakNotification || false,
         sendModBreakNotificationToCommenters:
@@ -240,6 +245,39 @@ export default function ProjectSettingsNotifications({
                         />
                         <Label htmlFor={field.name} className="cursor-pointer">
                           E-mail sturen naar beheerder als een inzending is
+                          bijgewerkt
+                        </Label>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="sendUpdatedResourceUserEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Notificatie naar indiener bij bewerken van inzendingen
+                    </FormLabel>
+                    <FormDescription>
+                      Standaard uitgeschakeld. Bij inschakelen krijgt de
+                      indiener een e-mail als iemand anders de inzending
+                      wijzigt. Alleen als de indiener e-mailnotificaties heeft
+                      toegestaan.
+                    </FormDescription>
+                    <FormControl>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={field.name}
+                          checked={field.value}
+                          onCheckedChange={(checked) =>
+                            field.onChange(Boolean(checked))
+                          }
+                        />
+                        <Label htmlFor={field.name} className="cursor-pointer">
+                          E-mail sturen naar indiener als een inzending is
                           bijgewerkt
                         </Label>
                       </div>
