@@ -1,1 +1,5 @@
+if git diff --cached --name-only | grep -qE 'apps/admin-server/.*/widgets/'; then
+  node apps/admin-server/scripts/generate-field-labels.js
+  git add apps/admin-server/src/components/generated-widget-field-labels.ts
+fi
 npx lint-staged

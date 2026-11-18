@@ -39,10 +39,6 @@ export default function ProjectNotifications() {
       .map((definition) => [definition.type, definition.label])
   );
 
-  const [typeDefinitions, setTypeDefinitions] = React.useState<
-    Record<string, any[]>
-  >({});
-
   const router = useRouter();
   const project = router.query.project as string;
   const { data } = useNotificationTemplate(project as string);
@@ -63,20 +59,20 @@ export default function ProjectNotifications() {
   dan wordt deze toegevoegd via de variabele {{user.name}}.
   Hieronder worden per bruikbaar onderdeel alle variabelen opgenoemd.`;
 
-  React.useEffect(() => {
-    const currentTypeDefinitions: Record<string, any[]> = Object.fromEntries(
+  const typeDefinitions = React.useMemo(() => {
+    const grouped: Record<string, any[]> = Object.fromEntries(
       notificationTypes.map((definition) => [definition.type, []])
     );
 
     if (Array.isArray(data)) {
       data.forEach((template) => {
-        if (template.type in currentTypeDefinitions) {
-          currentTypeDefinitions[template.type].push(template);
+        if (template.type in grouped) {
+          grouped[template.type].push(template);
         }
       });
     }
 
-    setTypeDefinitions(currentTypeDefinitions);
+    return grouped;
   }, [data, JSON.stringify(notificationTypes)]);
 
   return (

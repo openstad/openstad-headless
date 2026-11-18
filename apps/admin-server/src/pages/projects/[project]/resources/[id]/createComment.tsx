@@ -163,7 +163,7 @@ export default function ProjectResourceCreateArgument() {
       } else {
         notifyFailed(newComment?.error);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.log(err);
       notifyError();
     } finally {
@@ -302,7 +302,7 @@ export default function ProjectResourceCreateArgument() {
             className="w-fit col-span-full"
             type="submit"
             disabled={disableSubmit}>
-            Opslaan
+            Reactie plaatsen
           </Button>
         </form>
       </Form>

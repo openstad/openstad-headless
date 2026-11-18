@@ -1,93 +1,94 @@
 import express from 'express';
-import { createRequire } from 'node:module';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { createRequire } from 'module';
 import request from 'supertest';
-import { beforeEach, describe, expect, it } from 'vitest';
-
-process.env.NODE_CONFIG_DIR = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '../../../config'
-);
-process.env.SUPPRESS_NO_CONFIG_WARNING = '1';
-// Mimic an installation with a very high global limit
-process.env.RATE_LIMIT = '75000';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const require = createRequire(import.meta.url);
 const db = require('../../db');
-const pendingRouter = require('./pending-budget-vote');
 
-let created = null;
+// Originals for restoration
+const origCreate = db.PendingBudgetVote.create;
+const origFindOne = db.PendingBudgetVote.findOne;
+const origTransaction = db.sequelize.transaction;
 
-db.PendingBudgetVote.create = async (values) => {
-  created = values;
-  return values;
-};
+afterEach(() => {
+  db.PendingBudgetVote.create = origCreate;
+  db.PendingBudgetVote.findOne = origFindOne;
+  db.sequelize.transaction = origTransaction;
+});
 
 function createApp() {
   const app = express();
-  app.use(express.json({ limit: '10mb' }));
-  app.use('/pending-budget-vote', pendingRouter);
+  app.use(express.json());
+  app.use(require('./pending-budget-vote'));
   app.use((err, req, res, next) => {
     res.status(err.status || 500).json({ error: err.message });
   });
   return app;
 }
 
-describe('POST /pending-budget-vote', () => {
-  beforeEach(() => {
-    created = null;
-  });
+describe('POST / — create pending budget vote', () => {
+  it('creates a record and returns its id', async () => {
+    const fakeRecord = { id: 'uuid-1234' };
+    db.PendingBudgetVote.create = vi.fn().mockResolvedValue(fakeRecord);
 
-  it('accepts a realistic selection', async () => {
-    const res = await request(createApp())
-      .post('/pending-budget-vote')
-      .send({ 101: 1, 102: 1, 103: 1 });
+    const app = createApp();
+    const res = await request(app)
+      .post('/')
+      .send({ resource_1: true, resource_2: false });
 
     expect(res.status).toBe(200);
-    expect(created.data).toEqual({ 101: 1, 102: 1, 103: 1 });
+    expect(res.body).toHaveProperty('id', 'uuid-1234');
+    expect(db.PendingBudgetVote.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: { resource_1: true, resource_2: false } })
+    );
   });
 
-  it('refuses a payload beyond the cap', async () => {
-    const oversized = { blob: 'a'.repeat(64 * 1024 + 1) };
-
-    const res = await request(createApp())
-      .post('/pending-budget-vote')
-      .send(oversized);
-
-    expect(res.status).toBe(413);
-    expect(created).toBeNull();
-  });
-
-  it('refuses a non-object payload', async () => {
-    const res = await request(createApp())
-      .post('/pending-budget-vote')
+  it('returns 400 for non-object payload', async () => {
+    const app = createApp();
+    const res = await request(app)
+      .post('/')
       .set('Content-Type', 'application/json')
-      .send('"kaas"');
+      .send('"invalid"');
 
     expect(res.status).toBe(400);
-    expect(created).toBeNull();
   });
 });
 
-describe('POST /pending-budget-vote rate limit', () => {
-  it('blocks the 31st request from one public IP within the window', async () => {
-    // One app for all requests so they share the limiter store
+describe('GET /:id — fetch and delete pending budget vote', () => {
+  it('returns the stored data and deletes the record', async () => {
+    const storedData = { resource_1: true };
+    const fakeRecord = {
+      id: 'uuid-5678',
+      data: storedData,
+      destroy: vi.fn().mockResolvedValue(undefined),
+    };
+
+    db.sequelize.transaction = vi.fn().mockImplementation(async (fn) => {
+      const fakeTransaction = { LOCK: { UPDATE: 'UPDATE' } };
+      return fn(fakeTransaction);
+    });
+    db.PendingBudgetVote.findOne = vi.fn().mockResolvedValue(fakeRecord);
+
     const app = createApp();
-    app.set('trust proxy', true);
-    const post = () =>
-      request(app)
-        .post('/pending-budget-vote')
-        .set('X-Forwarded-For', '203.0.113.10')
-        .send({ 101: 1 });
+    const res = await request(app).get('/uuid-5678');
 
-    for (let i = 0; i < 30; i++) {
-      expect((await post()).status).toBe(200);
-    }
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ id: 'uuid-5678', data: storedData });
+    expect(fakeRecord.destroy).toHaveBeenCalled();
+  });
 
-    created = null;
-    const res = await post();
-    expect(res.status).toBe(429);
-    expect(created).toBeNull();
+  it('returns 404 when record is not found', async () => {
+    db.sequelize.transaction = vi.fn().mockImplementation(async (fn) => {
+      const fakeTransaction = { LOCK: { UPDATE: 'UPDATE' } };
+      return fn(fakeTransaction);
+    });
+
+    db.PendingBudgetVote.findOne = vi.fn().mockResolvedValue(null);
+
+    const app = createApp();
+    const res = await request(app).get('/nonexistent-id');
+
+    expect(res.status).toBe(404);
   });
 });

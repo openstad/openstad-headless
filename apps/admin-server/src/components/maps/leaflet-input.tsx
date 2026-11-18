@@ -1,9 +1,8 @@
+import { loadReactLeaflet } from '@/components/maps/load-react-leaflet';
 import useArea from '@/hooks/use-area';
 import { useProject } from '@/hooks/use-project';
 import 'leaflet/dist/leaflet.css';
 import React, { useEffect, useMemo, useState } from 'react';
-
-import { allowLeafletContainerReuse } from './allow-leaflet-container-reuse';
 
 interface LeafletComponents {
   MapContainer: React.ComponentType<any>;
@@ -88,9 +87,7 @@ const MapInput: React.FC<MapComponentProps> = ({
     if (typeof window !== 'undefined') {
       setIsSSR(false);
 
-      import('leaflet').then((L) => allowLeafletContainerReuse(L));
-
-      import('react-leaflet')
+      loadReactLeaflet()
         .then((leaflet) => {
           setLeafletComponents(leaflet);
         })

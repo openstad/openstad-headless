@@ -1,5 +1,4 @@
 import { fetchSessionUser } from '@/auth-context';
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -9,19 +8,26 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  rebaselineAfterSave,
+  useLooseFormDirty,
+  useRegisterSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useNotificationTemplate from '@/hooks/use-notification-template';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { applyFilters } from '@/lib/nunjucks-filters';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { zodResolver } from '@hookform/resolvers/zod';
+import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
 import nunjucks from 'nunjucks';
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import useSWR from 'swr';
 import * as z from 'zod';
 
@@ -512,13 +518,16 @@ export function NotificationForm({
   const project = router.query.project as string;
   const { data, create, update } = useNotificationTemplate(project as string);
   const notificationTitle = typeLabel || notificationTypes[type] || type;
-  const isExisting = !!(label && subject && body !== undefined);
+  // A stored template is updated, everything else is created. Keyed on the id
+  // so a stored template with an empty label cannot take the create path and
+  // POST a duplicate.
+  const isExistingTemplate = !!id;
   const projectNumber = validateProjectNumber(project);
   const { data: defaultTemplate, isLoading: loadingDefaultTemplate } = useSWR<{
     subject?: string;
     body?: string;
   }>(
-    !isExisting && projectNumber && type
+    !isExistingTemplate && projectNumber && type
       ? `/api/openstad/notification/project/${projectNumber}/template/default/${encodeURIComponent(type)}`
       : null,
     { shouldRetryOnError: false }
@@ -585,11 +594,21 @@ export function NotificationForm({
   const defaults = React.useCallback(
     () => ({
       engine: engine || 'email',
-      label: label || (isExisting ? '' : notificationTitle),
+      label: label || (isExistingTemplate ? '' : notificationTitle),
       subject: subject || defaultTemplate?.subject || '',
       body: defaultValueBody,
     }),
-    [engine, label, subject, body, defaultTemplate, notificationTitle]
+    // `type` feeds `defaultValueBody`, so it belongs here as well.
+    [
+      engine,
+      label,
+      subject,
+      type,
+      defaultValueBody,
+      defaultTemplate,
+      notificationTitle,
+      isExistingTemplate,
+    ]
   );
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -600,39 +619,7 @@ export function NotificationForm({
   const { watch } = form;
   const fieldValue = watch('body'); // Assuming 'engine' is the name of the field you're interested in
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (label && subject && body !== undefined) {
-      const template = await update(
-        id as string,
-        values.label,
-        values.subject,
-        values.body
-      );
-      if (template) {
-        toast.success('Template aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } else {
-      const template = await create(
-        project,
-        values.engine,
-        type,
-        values.label,
-        values.subject,
-        values.body
-      );
-      if (template) {
-        toast.success('Template aangemaakt!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    }
-  }
+  useSyncFormDefaults(form, defaults, id || defaultTemplate);
 
   const [templateData, setTemplateData] = useState(defaultValueBody || '');
   const [mjmlHtml, setMjmlHtml] = useState('');
@@ -644,6 +631,9 @@ export function NotificationForm({
   async function convertMJMLToHTML(data = mailTemplate) {
     if (data === '') {
       setMjmlHtml("<p style='text-align: center;'>Inhoud is leeg.</p>");
+      // Without this a render error from an earlier value would stay on screen
+      // and keep blocking this form's save.
+      setError(null);
       return;
     }
 
@@ -674,14 +664,57 @@ export function NotificationForm({
   };
 
   useEffect(() => {
-    if (fieldValue) {
-      try {
-        convertMJMLToHTML(nunjucksEnv.renderString(fieldValue, mailContext));
-      } catch (err) {
-        setError('Er is een fout opgetreden bij het renderen van de template.');
-      }
+    if (!fieldValue) {
+      // An emptied field has nothing to render; this also clears a stale error.
+      convertMJMLToHTML('');
+      return;
+    }
+    try {
+      convertMJMLToHTML(nunjucksEnv.renderString(fieldValue, mailContext));
+    } catch (err) {
+      setError('Er is een fout opgetreden bij het renderen van de template.');
     }
   }, [fieldValue]);
+
+  const save = useCallback(async () => {
+    // The save bar replaces `form.handleSubmit`, so the resolver has to be run
+    // here: without it invalid values would be saved without any message.
+    const valid = await validateForSave(form);
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    if (error) {
+      throw new Error(
+        'De inhoud kan niet worden gerenderd. Corrigeer de MJML-template.'
+      );
+    }
+    const sent = cloneDeep(form.getValues());
+    const values = formSchema.parse(sent);
+    try {
+      if (isExistingTemplate) {
+        await update(id as string, values.label, values.subject, values.body);
+      } else {
+        await create(
+          project,
+          values.engine,
+          type,
+          values.label,
+          values.subject,
+          values.body
+        );
+      }
+    } catch (requestError) {
+      throw new Error('Opslaan is mislukt. Probeer het opnieuw.');
+    }
+    rebaselineAfterSave(form, sent);
+  }, [create, error, form, id, isExistingTemplate, project, type, update]);
+
+  const formDirty = useLooseFormDirty(form);
+  useRegisterSave({
+    isDirty: formDirty,
+    save,
+    label: notificationTitle,
+  });
 
   if (loadingDefaultTemplate) {
     return <p className="py-6 text-muted-foreground">Laden...</p>;
@@ -694,8 +727,8 @@ export function NotificationForm({
           <Heading size="xl">{notificationTitle}</Heading>
           <Separator className="my-4" />
           <div className="grid grid-cols-2">
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              {label && subject && body !== undefined ? null : (
+            <form onSubmit={(e) => e.preventDefault()} className="space-y-4">
+              {isExistingTemplate ? null : (
                 <FormField
                   control={form.control}
                   name="engine"
@@ -769,9 +802,6 @@ export function NotificationForm({
                   </FormItem>
                 )}
               />
-              <Button type="submit" disabled={!!error}>
-                Opslaan
-              </Button>
               {error && <p className="text-red-500">{error}</p>}
             </form>
 

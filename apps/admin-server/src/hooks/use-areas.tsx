@@ -1,3 +1,4 @@
+import { readCreated } from '@/lib/read-json';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
 
@@ -28,7 +29,7 @@ export default function useAreas(projectId?: string) {
         tagIdsOutside,
       }),
     });
-    return await res.json();
+    return readCreated(res, 'De polygoon kon niet worden aangemaakt.');
   }
 
   async function removeArea(id: number) {

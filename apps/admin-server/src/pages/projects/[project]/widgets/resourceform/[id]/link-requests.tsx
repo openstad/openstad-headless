@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -12,12 +11,14 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import usePluginCapabilities from '@/hooks/use-plugin-capabilities';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LINK_CONFIRM_TEXTS } from '@openstad-headless/resource-form/src/parts/link-confirm-texts';
+import { ResourceFormWidgetProps } from '@openstad-headless/resource-form/src/props';
 import dynamic from 'next/dynamic';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -43,42 +44,40 @@ const formSchema = z.object({
   messageLabel: z.string().optional(),
 });
 
-export default function WidgetResourceFormLinkRequests() {
+export default function WidgetResourceFormLinkRequests(
+  props: ResourceFormWidgetProps & EditFieldProps<ResourceFormWidgetProps>
+) {
   type FormData = z.infer<typeof formSchema>;
   const category = 'linkRequests';
   const { capabilities, error: capabilitiesError } = usePluginCapabilities();
-  const { data: widget, updateConfig } = useWidgetConfig<any>();
 
-  const defaults = useCallback(
-    () => ({
-      confirmEnabled: widget?.config?.[category]?.confirmEnabled !== false,
-      confirmTitle: widget?.config?.[category]?.confirmTitle || '',
-      confirmDescription: widget?.config?.[category]?.confirmDescription || '',
-      revokeTitle: widget?.config?.[category]?.revokeTitle || '',
-      revokeDescription: widget?.config?.[category]?.revokeDescription || '',
-      messageLabel: widget?.config?.[category]?.messageLabel || '',
-    }),
-    [widget?.config]
-  );
+  const linkRequests = props[category];
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      confirmEnabled: linkRequests?.confirmEnabled !== false,
+      confirmTitle: linkRequests?.confirmTitle || '',
+      confirmDescription: linkRequests?.confirmDescription || '',
+      revokeTitle: linkRequests?.revokeTitle || '',
+      revokeDescription: linkRequests?.revokeDescription || '',
+      messageLabel: linkRequests?.messageLabel || '',
+    },
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  const { onFieldChanged } = props;
+  const pushToDraft = useCallback(
+    (name: string, value: any) =>
+      onFieldChanged?.(`${category}.${name}`, value),
+    [onFieldChanged, category]
+  );
+  useSyncDraftForm(form, pushToDraft, {
+    schema: formSchema,
+    prefix: category,
+    label: 'Koppelverzoeken',
+  });
 
-  async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
-  }
-
-  const hasConfig = !!widget?.config?.[category];
+  const hasConfig = !!linkRequests;
   if (!capabilities.linkRequests && !hasConfig && !capabilitiesError) {
     return null;
   }
@@ -95,7 +94,7 @@ export default function WidgetResourceFormLinkRequests() {
           </p>
         ) : null}
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(event) => event.preventDefault()}
           className="lg:w-2/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
@@ -214,9 +213,6 @@ export default function WidgetResourceFormLinkRequests() {
               />
             </>
           ) : null}
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>
