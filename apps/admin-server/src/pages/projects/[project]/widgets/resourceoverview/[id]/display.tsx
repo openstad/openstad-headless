@@ -60,6 +60,11 @@ const formSchema = z.object({
   displayLocationHint: z.boolean().optional(),
   locationHint: z.string().optional(),
   locationPlaceholder: z.string().optional(),
+  displayStreetFilter: z.boolean().optional(),
+  streetFilterLabel: z.string().optional(),
+  displayStreetFilterHint: z.boolean().optional(),
+  streetFilterHint: z.string().optional(),
+  streetFilterPlaceholder: z.string().optional(),
   listTabTitle: z.string().optional(),
   mapTabTitle: z.string().optional(),
   autoApply: z.boolean().optional(),
@@ -125,6 +130,13 @@ export default function WidgetResourceOverviewDisplay(
       displayLocationHint: props?.displayLocationHint || false,
       locationHint: props?.locationHint || '',
       locationPlaceholder: props?.locationPlaceholder || '',
+      displayStreetFilter: props?.displayStreetFilter === true,
+      streetFilterLabel: props?.streetFilterLabel || 'Straat',
+      displayStreetFilterHint: props?.displayStreetFilterHint || false,
+      streetFilterHint:
+        props?.streetFilterHint ||
+        'Toont ideeën die aan deze straat liggen. Zoek je ideeën in de buurt? Gebruik dan het postcodefilter.',
+      streetFilterPlaceholder: props?.streetFilterPlaceholder || '',
       listTabTitle:
         typeof props?.listTabTitle === 'undefined'
           ? 'Lijst'
@@ -415,6 +427,90 @@ export default function WidgetResourceOverviewDisplay(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Tekst voor postcodeveld placeholder</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayStreetFilter"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Straatfilter weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="streetFilterLabel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Label voor het straatfilter</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="displayStreetFilterHint"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hint onder het straatfilter weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="streetFilterHint"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hinttekst voor het straatfilter</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="streetFilterPlaceholder"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tekst voor straatfilter placeholder</FormLabel>
                 <FormControl>
                   <Input
                     {...field}

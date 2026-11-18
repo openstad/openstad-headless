@@ -239,6 +239,13 @@ spec:
                 key: zipCodeApiUrl
                 name: {{ template "openstad.cdn.secret.fullname" . }}
 
+          - name: ZIPCODE_REVERSE_API_URL
+            valueFrom:
+              secretKeyRef:
+                key: zipCodeReverseApiUrl
+                name: {{ template "openstad.cdn.secret.fullname" . }}
+                optional: true
+
           - name: BASE_DOMAIN
             value: {{ .Values.host.base }}
 
@@ -630,6 +637,13 @@ spec:
                 secretKeyRef:
                   key: zipCodeApiUrl
                   name: {{ template "openstad.cdn.secret.fullname" . }}
+
+            - name: ZIPCODE_REVERSE_API_URL
+              valueFrom:
+                secretKeyRef:
+                  key: zipCodeReverseApiUrl
+                  name: {{ template "openstad.cdn.secret.fullname" . }}
+                  optional: true
 
             - name: BASE_DOMAIN
               value: {{ .Values.host.base }}

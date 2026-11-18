@@ -25,6 +25,7 @@ const {
   getValidStatuses,
   getOnlyIds,
 } = require('../services/resourceTagsStatuses');
+const { collectStreets } = require('../lib/resource-streets');
 const { stripVisibilityScope } = require('../lib/resource-create-scope');
 const { normalizeContributedUrl } = require('../util/normalize-url');
 const resourceLinks = require('../services/resource-links');
@@ -288,6 +289,18 @@ function listMarkers(req, res, next) {
       req.results = resources;
       return next();
     })
+    .catch(next);
+}
+
+// ----------------------------------------------------------------------------
+// Streets  (GET /streets)
+// ----------------------------------------------------------------------------
+
+function listStreets(req, res, next) {
+  req.scope.push('markerFields');
+  db.Resource.scope(...req.scope)
+    .findAll({ where: { projectId: req.params.projectId, deletedAt: null } })
+    .then((resources) => res.json(collectStreets(resources)))
     .catch(next);
 }
 
@@ -1158,6 +1171,9 @@ function respondSharedResource(req, res, next) {
 
 module.exports = {
   setResourceScope,
+  userhasModeratorRights,
+  // streets
+  listStreets,
   // markers
   listMarkers,
   loadSharedResource,

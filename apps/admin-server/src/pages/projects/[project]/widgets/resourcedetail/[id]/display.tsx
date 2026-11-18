@@ -74,6 +74,7 @@ const formSchema = z.object({
   displayDate: z.boolean(),
   displayBudget: z.boolean(),
   displayLocation: z.boolean(),
+  displayLocationAddress: z.boolean().optional(),
   displayTags: z.boolean(),
   displaySocials: z.boolean(),
   displayStatus: z.boolean(),
@@ -141,6 +142,7 @@ export default function WidgetResourceDetailDisplay(
       displayDate: undefinedToTrueOrProp(props?.displayDate),
       displayBudget: undefinedToTrueOrProp(props?.displayBudget),
       displayLocation: undefinedToTrueOrProp(props?.displayLocation),
+      displayLocationAddress: props?.displayLocationAddress || false,
       displayTags: undefinedToTrueOrProp(props?.displayTags),
       displaySocials: undefinedToTrueOrProp(props?.displaySocials),
       displayStatus: undefinedToTrueOrProp(props?.displayStatus),
@@ -423,6 +425,19 @@ export default function WidgetResourceDetailDisplay(
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Plaats weergeven</FormLabel>
+                {YesNoSelect(field, props)}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="displayLocationAddress"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Adres (straat en woonplaats) weergeven bij plaats
+                </FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>

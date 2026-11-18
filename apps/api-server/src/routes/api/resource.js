@@ -9,6 +9,7 @@ const express = require('express');
 const auth = require('../../middleware/sequelize-authorization-middleware');
 const pagination = require('../../middleware/pagination');
 const searchInResults = require('../../middleware/search-in-results');
+const filterByStreets = require('../../middleware/filter-by-streets');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const {
   restrictModeratorOnlyBody,
@@ -25,12 +26,29 @@ router
   .get(auth.can('Resource', 'list'))
   .get(ctrl.listMarkers)
   .get(auth.useReqUser)
+  .get(filterByStreets)
   .get(
     searchInResults({
-      searchfields: ['id', 'title', 'summary', 'description', 'createdAt'],
+      searchfields: [
+        'id',
+        'title',
+        'summary',
+        'description',
+        'createdAt',
+        'location.address.street',
+        'location.address.city',
+        'tags.name',
+        'statuses.name',
+        'statuses.label',
+      ],
     })
   )
   .get(ctrl.respondResults);
+
+router
+  .route('/streets')
+  .get(auth.can('Resource', 'list'))
+  .get(ctrl.listStreets);
 
 router
   .route('/:resourceId(\\d+)/share')
@@ -48,9 +66,10 @@ router
   .get(pagination.init)
   .get(ctrl.listResources)
   .get(auth.useReqUser)
+  .get(filterByStreets)
   .get(
     searchInResults({
-      searchfields: [
+      searchfields: (req) => [
         'id',
         'title',
         'summary',
@@ -58,6 +77,14 @@ router
         'createdAt',
         'yes',
         'no',
+        'location.address.street',
+        'location.address.city',
+        'tags.name',
+        'statuses.name',
+        'statuses.label',
+        ...(ctrl.userhasModeratorRights(req.user)
+          ? ['user.displayName', 'user.name', 'user.email']
+          : []),
       ],
     })
   )

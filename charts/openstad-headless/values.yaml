@@ -584,6 +584,7 @@ secrets:
   cdn:
     zipCodeAutofillApiUrl: https://openstad-cdn.nl/api/autofill.php?query=
     zipCodeApiUrl: https://openstad-cdn.nl/api/postcode.php?postcode=
+    zipCodeReverseApiUrl: https://openstad-cdn.nl/api/reverse.php
   ### Mail server secretes
   mail:
     # Set this to `ms-graph` to use Microsoft Graph API for mail sending
