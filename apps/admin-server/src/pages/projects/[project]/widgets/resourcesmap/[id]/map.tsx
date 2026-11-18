@@ -96,6 +96,9 @@ export default function WidgetResourcesMapMap(
     label: 'Kaart',
   });
 
+  const showMarkerPreview =
+    props.showMarkerPreviewSetting && form.watch('displayMarkers') !== false;
+
   const { data: tags } = useTags(props.projectId);
 
   const [tagGroupNames, setGroupedNames] = useState<string[]>([]);
@@ -187,7 +190,7 @@ export default function WidgetResourcesMapMap(
             )}
           />
 
-          {props.showMarkerPreviewSetting ? (
+          {showMarkerPreview ? (
             <FormField
               control={form.control}
               name="markerPreviewCard"
@@ -203,7 +206,7 @@ export default function WidgetResourcesMapMap(
             />
           ) : null}
 
-          {props.showMarkerPreviewSetting && form.watch('markerPreviewCard') ? (
+          {showMarkerPreview && form.watch('markerPreviewCard') ? (
             <FormField
               control={form.control}
               name="markerPreviewButtonText"
