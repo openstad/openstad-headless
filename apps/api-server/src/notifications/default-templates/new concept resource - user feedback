@@ -1,5 +1,5 @@
 <!-- template: new concept resource - user feedback -->
-<subject>new concept resource - user feedback</subject>
+<subject>Concept van je inzending op {{ project.title }}</subject>
 <body>
   <mjml>
     <mj-body>
@@ -23,9 +23,9 @@
       </mj-raw>
       <mj-section>
         <mj-column width="500px">
-          <mj-text font-size="20px" font-family="Helvetica Neue">Er is een nieuwe resource-concept aangemaakt.</mj-text>
+          <mj-text font-size="20px" font-family="Helvetica Neue">Er is een concept van een inzending aangemaakt.</mj-text>
           <mj-text>Beste {{user.name}},</mj-text>
-          <mj-text color="#525252">Bedankt voor het aanmaken van het concept voor een resource! U kunt hem hieronder direct bekijken:</mj-text>
+          <mj-text color="#525252">Bedankt voor het aanmaken van een concept van een inzending! U kunt het hieronder direct bekijken:</mj-text>
           <mj-button background-color="#EC0000" href="{{redirectUrl}}">Weergeven</mj-button>
         </mj-column>
       </mj-section>

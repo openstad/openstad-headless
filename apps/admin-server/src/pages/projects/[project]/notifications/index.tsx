@@ -201,7 +201,7 @@ export default function ProjectNotifications() {
                         <br />
                         <p>
                           Voor een overzicht van ingevulde waardes van een
-                          resource kan dit gebruikt worden:
+                          inzending kan dit gebruikt worden:
                           <br />
                           &#123;&#123; submissionContent | safe &#125;&#125;
                         </p>
