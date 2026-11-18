@@ -7,6 +7,10 @@ let router = express.Router({ mergeParams: true });
 router.use(bruteForce.globalMiddleware);
 router.post('*', bruteForce.postMiddleware);
 
+// NOTE: the reporting-token scope guard and field filter are mounted globally
+// in Server.js (before all routes), so they apply here too — no per-router
+// mount needed.
+
 // vote
 router.use('/project/:projectId(\\d+)/vote', require('./vote'));
 

@@ -11,6 +11,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import {
+  useRegisterFormSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -21,14 +25,14 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Heading } from '@/components/ui/typography';
 import useStatus from '@/hooks/use-status';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X } from 'lucide-react';
 import { useRouter } from 'next/router';
 import * as React from 'react';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 const formSchema = z.object({
@@ -40,7 +44,6 @@ const formSchema = z.object({
   label: z.string().optional(),
   mapIcon: z.string().optional(),
   mapIconUploader: z.string().optional(),
-  listIcon: z.string().optional(),
   canLike: z.boolean().optional(),
   editableByUser: z.boolean().optional(),
   canComment: z.boolean().optional(),
@@ -64,7 +67,6 @@ export default function ProjectStatusEdit() {
       label: data?.label || undefined,
       mapIcon: data?.mapIcon || undefined,
       mapIconUploader: '',
-      listIcon: data?.listIcon || undefined,
       canLike: data?.extraFunctionality?.canLike ?? true,
       editableByUser: data?.extraFunctionality?.editableByUser ?? true,
       canComment: data?.extraFunctionality?.canComment ?? true,
@@ -77,7 +79,14 @@ export default function ProjectStatusEdit() {
     defaultValues: defaults(),
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  useSyncFormDefaults(form, defaults, data);
+
+  const save = useCallback(async () => {
+    const valid = await validateForSave(form);
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
     const status = await updateStatus(
       values.name,
       values.seqnr,
@@ -86,23 +95,18 @@ export default function ProjectStatusEdit() {
       values.color,
       values.label,
       values.mapIcon,
-      values.listIcon,
       {
         editableByUser: values.editableByUser,
         canComment: values.canComment,
         canLike: values.canLike,
       }
     );
-    if (status) {
-      toast.success('Status aangepast!');
-    } else {
-      toast.error('Er is helaas iets mis gegaan.');
+    if (!status) {
+      throw new Error('Er is helaas iets mis gegaan.');
     }
-  }
+  }, [form, updateStatus]);
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  useRegisterFormSave(form, save);
 
   const colors = [
     { value: 'FFFFFF', label: 'Wit' },
@@ -158,9 +162,7 @@ export default function ProjectStatusEdit() {
                 <Form {...form}>
                   <Heading size="xl">Status Aanpassen</Heading>
                   <Separator className="my-4" />
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-4">
+                  <div className="lg:w-1/2 grid grid-cols-1 gap-4">
                     <FormField
                       control={form.control}
                       name="name"
@@ -201,10 +203,7 @@ export default function ProjectStatusEdit() {
                         </FormItem>
                       )}
                     />
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
-                  </form>
+                  </div>
                 </Form>
               </div>
             </TabsContent>
@@ -213,9 +212,7 @@ export default function ProjectStatusEdit() {
                 <Form {...form}>
                   <Heading size="xl">Status weergave</Heading>
                   <Separator className="my-4" />
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-4">
+                  <div className="lg:w-1/2 grid grid-cols-1 gap-4">
                     <FormField
                       control={form.control}
                       name="backgroundColor"
@@ -323,7 +320,9 @@ export default function ProjectStatusEdit() {
                             typeof imageResult.url !== 'undefined'
                               ? imageResult.url
                               : '';
-                          form.setValue('mapIcon', result);
+                          form.setValue('mapIcon', result, {
+                            shouldDirty: true,
+                          });
                           form.resetField('mapIconUploader');
                           form.trigger('mapIcon');
                         }}
@@ -341,7 +340,9 @@ export default function ProjectStatusEdit() {
                                 <Button
                                   color="red"
                                   onClick={() => {
-                                    form.setValue('mapIcon', '');
+                                    form.setValue('mapIcon', '', {
+                                      shouldDirty: true,
+                                    });
                                   }}
                                   className="absolute right-0 top-0">
                                   <X size={24} />
@@ -352,24 +353,7 @@ export default function ProjectStatusEdit() {
                         )}
                       </div>
                     </div>
-
-                    <FormField
-                      control={form.control}
-                      name="listIcon"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Resource overview icon</FormLabel>
-                          <FormControl>
-                            <Input placeholder="" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
-                  </form>
+                  </div>
                 </Form>
               </div>
             </TabsContent>
@@ -382,9 +366,7 @@ export default function ProjectStatusEdit() {
                     Op basis van de statuses van een resource kunnen functies
                     aan en uit staan
                   </p>
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="lg:w-1/2 grid grid-cols-1 gap-4">
+                  <div className="lg:w-1/2 grid grid-cols-1 gap-4">
                     <FormField
                       control={form.control}
                       name="editableByUser"
@@ -469,10 +451,7 @@ export default function ProjectStatusEdit() {
                         </FormItem>
                       )}
                     />
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
-                  </form>
+                  </div>
                 </Form>
               </div>
             </TabsContent>

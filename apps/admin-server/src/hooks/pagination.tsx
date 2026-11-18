@@ -61,7 +61,7 @@ export default function usePagination() {
   }
 
   function reset() {
-    const query = router.query as any;
+    const query = router.query as Record<string, string>;
     delete query.page;
     router.push(`${router.pathname}?${new URLSearchParams(query).toString()}`);
   }

@@ -112,55 +112,53 @@ exports.postReset = (req, res, next) => {
 };
 
 exports.postForgot = (req, res, next) => {
+  const backToForgot = () =>
+    res.redirect(
+      '/auth/local/forgot?clientId=' +
+        req.client.clientId +
+        `&redirect_uri=${encodedRedirect(req)}`
+    );
+  // The same message whether or not the address is known, so the form cannot
+  // be used to find out which e-mail addresses have an account.
+  const sentMessage =
+    'Als dit e-mailadres bij ons bekend is, hebben we je een e-mail gestuurd met een link om je wachtwoord te resetten. Kijk ook in je spam-map.';
+
+  const email = String(req.body.email || '').trim();
+  if (!email) {
+    req.flash('error', { msg: 'Vul je e-mailadres in.' });
+    return backToForgot();
+  }
+
   /**
    * Check if user exists
    */
-  db.User.findOne({ where: { email: req.body.email } })
+  db.User.findOne({ where: { email } })
     .then((user) => {
       if (!user) {
-        req.flash('error', {
-          msg: 'Het is niet gelukt om de e-mail te versturen!',
-        });
-        res.redirect(
-          '/auth/local/forgot' +
-            '?clientId=' +
-            req.client.clientId +
-            `&redirect_uri=${encodedRedirect(req)}`
-        );
+        req.flash('success', { msg: sentMessage });
+        return backToForgot();
       }
 
       req.user = user;
-      return password.invalidateTokensForUser(req.user.id);
-    })
-    .then(() => {
-      console.log('req.query.redirect_uri', req.query.redirect_uri);
-      return password.formatResetLink(
-        req.client,
-        req.user,
-        encodedRedirect(req)
-      );
-    })
-    .then((url) => {
-      return sendEmail(url, req.user, req.client);
-    })
-    .then(() => {
-      req.flash('success', { msg: 'We hebben een e-mail naar je verstuurd' });
-      res.redirect(
-        '/auth/local/forgot?clientId=' +
-          req.client.clientId +
-          `&redirect_uri=${encodedRedirect(req)}`
-      );
+      return password
+        .invalidateTokensForUser(user.id)
+        .then(() =>
+          password.formatResetLink(req.client, user, encodedRedirect(req))
+        )
+        .then((url) => sendEmail(url, user, req.client))
+        .then(() => {
+          req.flash('success', { msg: sentMessage });
+          return backToForgot();
+        });
     })
     .catch((err) => {
       console.log(
         `[${new Date().toISOString()}][auth] password reset error: ${err?.message}`
       );
-      req.flash('error', { msg: 'E-mail adres is niet bekend bij ons.' });
-      res.redirect(
-        '/auth/local/forgot?clientId=' +
-          req.client.clientId +
-          `&redirect_uri=${encodedRedirect(req)}`
-      );
+      req.flash('error', {
+        msg: 'Het versturen van de e-mail is niet gelukt. Probeer het later opnieuw of neem contact op met de beheerder.',
+      });
+      return backToForgot();
     });
 
   /**
@@ -209,7 +207,8 @@ exports.postForgot = (req, res, next) => {
         headerImage: false,
         emailButtonText: configReset.emailButtonText,
         emailDescriptionText: configReset.emailDescriptionText,
-        emailValidTimeText: configReset.emailValidTimeText,
+        emailValidTimeText:
+          configReset.emailValidTimeText || 'Deze link is 1 uur geldig.',
         emailSalutationText: configReset.emailSalutationText,
         emailTitleText: configReset.emailTitleText,
         emaiLinkExplanationText: configReset.emaiLinkExplanationText,
