@@ -43,8 +43,11 @@ export const Dialog = ({
           <RadixDialog.Overlay className="osc-DialogOverlay" />
           <RadixDialog.Content
             className={`osc osc-DialogContent ${className}`}
-            aria-label={ariaLabelledBy ? undefined : ariaLabel}
-            aria-labelledby={ariaLabelledBy}>
+            {...(ariaLabelledBy
+              ? { 'aria-labelledby': ariaLabelledBy }
+              : ariaLabel
+                ? { 'aria-label': ariaLabel }
+                : {})}>
             <div>
               <RadixDialog.Close asChild>
                 <IconButton
@@ -62,3 +65,23 @@ export const Dialog = ({
     </RadixDialog.Root>
   );
 };
+
+export const DialogTitle = ({
+  children,
+  className = '',
+}: PropsWithChildren<{ className?: string }>) => (
+  <RadixDialog.Title className={`osc-DialogTitle ${className}`.trim()}>
+    {children}
+  </RadixDialog.Title>
+);
+
+export const DialogDescription = ({
+  children,
+  className = '',
+}: PropsWithChildren<{ className?: string }>) => (
+  <RadixDialog.Description
+    asChild
+    className={`osc-DialogDescription ${className}`.trim()}>
+    <div>{children}</div>
+  </RadixDialog.Description>
+);

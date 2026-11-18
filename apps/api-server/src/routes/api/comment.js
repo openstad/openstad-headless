@@ -336,17 +336,19 @@ router
 
         if (!notificationType) throw new Error('No valid notification type');
 
-        db.Notification.create({
-          type: notificationType,
-          projectId: req.project.id,
-          to: receiver,
-          data: commentData,
-        }).catch((err) =>
-          console.error('Error sending notification email for comment:', err)
+        const notification = await db.Notification.create(
+          {
+            type: notificationType,
+            projectId: req.project.id,
+            to: receiver,
+            data: commentData,
+          },
+          { sendInBackground: true }
         );
-        confirmationSent = true;
+        req.results.confirmationNotificationId = notification.id;
       } catch (e) {
-        console.error('Error sending notification email for comment:', e);
+        console.log('Error sending notification email for comment:', e);
+        confirmationSent = undefined;
       }
     }
 
@@ -442,7 +444,8 @@ router
       .authorizeData(req.body, 'update')
       .update(req.body)
       .then(async (result) => {
-        if (!comment.location && !comment.parentId) {
+        // Only touch tags when the client sends them; partial updates must not wipe them.
+        if (!comment.location && !comment.parentId && 'tags' in req.body) {
           let tags = req.body.tags || [];
           if (!Array.isArray(tags)) tags = [tags];
           tags = tags.filter((tag) => !Number.isNaN(parseInt(tag)));

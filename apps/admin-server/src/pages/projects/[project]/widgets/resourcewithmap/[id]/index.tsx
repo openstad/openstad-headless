@@ -1,13 +1,14 @@
 import AuditLogTable from '@/components/audit-log-table';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import WidgetVersionHistory from '@/components/widget-version-history';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import { extractConfig } from '@/lib/sub-widget-helper';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import { ResourceOverviewWidgetProps } from '@openstad-headless/resource-overview/src/resource-overview';
 import { useRouter } from 'next/router';
 import React from 'react';
@@ -41,47 +42,28 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<ResourceOverviewWidgetProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<ResourceOverviewWidgetProps>({
-      projectId,
-    });
+  const { widget, previewConfig, updatePreview, onFieldChanged } =
+    useWidgetDraft<ResourceOverviewWidgetProps>({ projectId });
+
+  const tabUpdateConfig = ignoreTabSubmit;
 
   const totalPropPackageOverview = {
     ...widget?.config,
     ...previewConfig,
-    updateConfig: (config: ResourceOverviewWidgetProps) =>
-      updateConfig({ ...widget.config, ...config }),
-
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
+    updateConfig: tabUpdateConfig,
+    onFieldChanged,
     projectId,
   };
 
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Interactieve kaart',
-            url: `/projects/${projectId}/widgets/resourcewithmap/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Interactieve kaart',
+          `/projects/${projectId}/widgets/resourcewithmap/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="resources">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
@@ -89,6 +71,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
             {previewConfig ? (
               <>
@@ -164,7 +147,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -177,7 +159,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -190,7 +171,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -203,7 +183,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -216,7 +195,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -229,7 +207,6 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                         >({
                           previewConfig,
                           subWidgetKey: 'resourceOverviewMapWidget',
-                          updateConfig,
                           updatePreview,
                         })}
                       />
@@ -248,17 +225,19 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                 projectId={projectId as string}
               />
             </TabsContent>
-          </Tabs>
-
-          <div className="py-6 mt-6 bg-white rounded-md">
-            {previewConfig ? (
-              <WidgetPreview
-                type="resourcewithmap"
-                config={previewConfig}
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
                 projectId={projectId as string}
               />
-            ) : null}
-          </div>
+            </TabsContent>
+          </Tabs>
+
+          <WidgetEditorPreview
+            type="resourcewithmap"
+            config={previewConfig}
+            projectId={projectId as string}
+          />
         </div>
       </PageLayout>
     </div>

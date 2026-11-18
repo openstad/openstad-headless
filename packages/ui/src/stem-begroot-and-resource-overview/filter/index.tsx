@@ -10,6 +10,7 @@ import PostcodeAutoFill from '../../location';
 import './index.css';
 import { MultiSelectTagFilter } from './multiselect-tag-filter';
 import { SelectTagFilter } from './select-tag-filter';
+import { StreetFilter, StreetOption } from './street-filter';
 
 type Filter = {
   tags: Array<number>;
@@ -18,6 +19,7 @@ type Filter = {
   page: number;
   pageSize: number;
   location: PostcodeAutoFillLocation;
+  streets: Array<StreetOption>;
 };
 
 export type PostcodeAutoFillLocation =
@@ -67,6 +69,12 @@ type Props = {
   displayLocationHint?: boolean;
   locationHint?: string;
   locationPlaceholder?: string;
+  displayStreetFilter?: boolean;
+  streetFilterLabel?: string;
+  displayStreetFilterHint?: boolean;
+  streetFilterHint?: string;
+  streetFilterPlaceholder?: string;
+  streetOptions?: Array<StreetOption>;
   displayCollapsibleFilter?: boolean;
   closeFiltersOnAutoApply?: boolean;
 };
@@ -101,6 +109,7 @@ export function Filters({
     page: 0,
     pageSize: props.itemsPerPage || 20,
     location: undefined,
+    streets: [],
   };
 
   const defaultSelectedOptions: { [key: string]: any } = {};
@@ -226,6 +235,16 @@ export function Filters({
     });
     if (autoApply) {
       handleSubmit(undefined, { ...filter, location }, activeTags);
+    }
+  }
+
+  function setStreets(streets: Array<StreetOption>) {
+    updateFilter({
+      ...filter,
+      streets,
+    });
+    if (autoApply) {
+      handleSubmit(undefined, { ...filter, streets }, activeTags);
     }
   }
 
@@ -553,6 +572,18 @@ export function Filters({
           />
         ) : null}
 
+        {props.displayStreetFilter ? (
+          <StreetFilter
+            options={props.streetOptions || []}
+            selected={filter.streets || []}
+            onChange={setStreets}
+            label={props.streetFilterLabel}
+            displayHint={props.displayStreetFilterHint}
+            hint={props.streetFilterHint}
+            placeholder={props.streetFilterPlaceholder}
+          />
+        ) : null}
+
         <div className="button-group">
           <Button
             appearance="secondary-action-button"
@@ -610,7 +641,8 @@ export function Filters({
     props.displayTagFilters ||
     props.displaySearch ||
     props.displaySorting ||
-    props.displayLocationFilter
+    props.displayLocationFilter ||
+    props.displayStreetFilter
   ) ? null : (
     <section ref={sectionRef} className="osc-filter-section">
       <form

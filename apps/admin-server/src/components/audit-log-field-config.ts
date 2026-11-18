@@ -13,7 +13,7 @@ export const FIELD_LABELS: Record<string, string> = {
   images: 'Afbeeldingen',
   location: 'Locatie',
   budget: 'Budget',
-  modBreaks: 'Modbreaks',
+  modBreaks: 'Officiële reacties',
   statuses: 'Statussen',
   tags: 'Tags',
   general: 'Algemeen',
@@ -36,6 +36,7 @@ export const FIELD_LABELS: Record<string, string> = {
   matrix: 'Matrix (rijen/kolommen)',
   questionType: 'Type antwoorden',
   randomizeQuestions: 'Vragen op deze pagina willekeurig',
+  excludeFromRandomize: 'Vraag blijft op zijn plek bij willekeurige volgorde',
   scaleDisplay: 'Weergave schaalvraag',
   scaleSteps: 'Stappen schaalvraag',
   type: 'Type',
@@ -54,6 +55,8 @@ export const FIELD_LABELS: Record<string, string> = {
   imageCropRequired: 'Bijsnijden verplicht',
   imageCropRatioWidth: 'Verhouding breedte',
   imageCropRatioHeight: 'Verhouding hoogte',
+  allowImageDescription: 'Opmerking bij afbeelding toestaan',
+  imageDescriptionLabel: 'Label van het opmerkingveld',
   maxChoices: 'Maximaal te selecteren opties',
   maxChoicesMessage: 'Maximaal aantal bereikt melding',
   showSmileys: 'Smileys tonen',
@@ -94,6 +97,11 @@ export const FIELD_LABELS: Record<string, string> = {
   displayMap: 'Kaart weergeven',
   displayAsTabs: 'Als tabs weergeven',
   displayLocationFilter: 'Locatie filter weergeven',
+  displayStreetFilter: 'Straatfilter weergeven',
+  streetFilterLabel: 'Label voor het straatfilter',
+  displayStreetFilterHint: 'Hint onder het straatfilter weergeven',
+  streetFilterHint: 'Hinttekst voor het straatfilter',
+  streetFilterPlaceholder: 'Tekst voor straatfilter placeholder',
   displayTitle: 'Titel weergeven',
   displayDescription: 'Beschrijving weergeven',
   descriptionHeadingLevel: 'Heading-niveau opmaak beschrijving',
@@ -116,7 +124,7 @@ export const FIELD_LABELS: Record<string, string> = {
   displayTagGroupName: 'Tag groep naam tonen',
   displayRanking: 'Ranking weergeven',
   displayPriceLabel: 'Prijslabel weergeven',
-  displayModBreak: 'Modbreak weergeven',
+  displayModBreak: 'Officiële reacties weergeven',
   clickableImage: 'Afbeelding klikbaar',
   displayDislike: 'Dislike button tonen',
   showProgressBar: 'Voortgangsbalk weergeven',
@@ -251,11 +259,24 @@ export const VALUE_LABELS: Record<string, Record<string, string>> = {
   },
   questionType: QUESTION_TYPES,
   type: QUESTION_TYPES,
+  interactionType: { default: 'Standaard', direct: 'Direct naar URL' },
+  markerInteractionType: { default: 'Standaard', direct: 'Direct naar URL' },
+  direction: { horizontal: 'Naast elkaar', vertical: 'Onder elkaar' },
+  formVisibility: {
+    always: 'Iedereen',
+    users: 'Ingelogde gebruikers en admins',
+  },
+  formStyle: { default: 'Standaard', youth: 'Jongeren widgets' },
+  numberingStyle: {
+    none: 'Geen opsomming',
+    decimal: 'Decimale nummers',
+    alphabetical: 'Alfabetische letters',
+    roman: 'Romeinse cijfers',
+  },
 };
 
 const HIDDEN_ITEM_FIELDS = new Set([
   'trigger',
-  'key',
   'key1',
   'key2',
   'key_b',
@@ -276,7 +297,24 @@ const HIDDEN_ITEM_FIELDS = new Set([
   'tags',
 ]);
 
+export const INTERNAL_FIELDS = new Set([
+  'id',
+  'trigger',
+  'uuid',
+  'widgetId',
+  'projectId',
+  'datalayer',
+]);
+
+export function isInternalField(key: string): boolean {
+  return INTERNAL_FIELDS.has(key);
+}
+
+export function isHiddenItemField(key: string): boolean {
+  return INTERNAL_FIELDS.has(key) || HIDDEN_ITEM_FIELDS.has(key);
+}
+
 export function getItemDisplayFields(item: any): string[] {
   if (!item || typeof item !== 'object') return [];
-  return Object.keys(item).filter((k) => !HIDDEN_ITEM_FIELDS.has(k));
+  return Object.keys(item).filter((k) => !isHiddenItemField(k));
 }

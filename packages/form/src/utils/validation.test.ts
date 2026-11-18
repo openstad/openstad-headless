@@ -126,6 +126,35 @@ describe('getSchemaForField: text/email variant', () => {
   });
 });
 
+describe('getSchemaForField: modbreak', () => {
+  const field: any = {
+    type: 'modbreak',
+    title: 'Modbreak',
+    fieldKey: 'modBreaks',
+  };
+
+  test('accepts no modbreaks and modbreaks with content', () => {
+    const schema = getSchemaForField(field)!;
+    expect(schema.safeParse(undefined).success).toBe(true);
+    expect(schema.safeParse([]).success).toBe(true);
+    expect(
+      schema.safeParse([{ description: '<div>Let op</div>' }]).success
+    ).toBe(true);
+  });
+
+  test('rejects a modbreak without content', () => {
+    const schema = getSchemaForField(field)!;
+    const result = schema.safeParse([
+      { description: '<div>Let op</div>' },
+      { description: '<ul><li><br></li></ul>' },
+    ]);
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0].message).toBe(
+      'Vul de inhoud in of verwijder de lege officiële reactie.'
+    );
+  });
+});
+
 describe('getSchemaForField: text numeric coercion', () => {
   test('accepts string min/max without throwing', () => {
     const field: any = {
@@ -141,5 +170,36 @@ describe('getSchemaForField: text numeric coercion', () => {
     expect(() => schema!.parse('ab')).not.toThrow();
     expect(() => schema!.parse('a')).toThrow();
     expect(() => schema!.parse('abcdef')).toThrow();
+  });
+});
+
+describe('resourceLink validation', () => {
+  const field = {
+    type: 'resourceLink',
+    fieldKey: 'links',
+    title: 'Koppel stadmaker(s)',
+  } as any;
+
+  test('is optional unless required', () => {
+    expect(getSchemaForField(field)).toBeUndefined();
+  });
+
+  test('requires at least one selected item when required', () => {
+    const schema = getSchemaForField({
+      ...field,
+      fieldRequired: true,
+      requiredWarning: 'Kies minimaal een stadmaker',
+    });
+
+    let message: string | null = null;
+    try {
+      schema!.parse([]);
+    } catch (e) {
+      message = firstZodIssueMessage(e);
+    }
+    expect(message).toBe('Kies minimaal een stadmaker');
+    expect(() =>
+      schema!.parse([{ source: 'openstad', id: '2', label: 'Arno' }])
+    ).not.toThrow();
   });
 });

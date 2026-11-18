@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -21,25 +20,31 @@ import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useResources from '@/hooks/use-resources';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { RawResourceWidgetProps } from '@openstad-headless/raw-resource/src/raw-resource';
 import { useRouter } from 'next/router';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-const formSchema = z.object({
-  resourceId: z.string(),
-  rawInput: z.string(),
-  resourceIdRelativePath: z
-    .string()
-    .optional()
-    .refine(
-      (value) => !value || value.includes('[id]'),
-      'Specificeer een [id] veld'
-    ),
-});
+const formSchema = z
+  .object({
+    resourceId: z.string(),
+    rawInput: z.string(),
+    resourceIdRelativePath: z.string().optional(),
+  })
+  .superRefine((values, ctx) => {
+    const path = values.resourceIdRelativePath;
+    if (values.resourceId === '' && path && !path.includes('[id]')) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['resourceIdRelativePath'],
+        message: 'Specificeer een [id] veld',
+      });
+    }
+  });
 
 export default function WidgetRawGeneral(
   props: RawResourceWidgetProps & EditFieldProps<RawResourceWidgetProps>
@@ -68,9 +73,10 @@ export default function WidgetRawGeneral(
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Algemeen',
+  });
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -163,7 +169,7 @@ export default function WidgetRawGeneral(
                     <li className="ml-4">{`{{budget}}`}</li>
                     <li className="ml-4">{`{{extraData}}`}</li>
                     <li className="ml-4">{`{{location}}`}</li>
-                    <li className="ml-4">{`{{modBreaksHtml}} -> Gerenderde HTML van alle modbreaks`}</li>
+                    <li className="ml-4">{`{{modBreaksHtml}} -> Gerenderde HTML van alle officiële reacties`}</li>
                     <li className="ml-4">{`{{modBreaks}}`}</li>
                     <li className="ml-4">{`{{modBreaks[0].description}}, {{modBreaks[0].authorName}}, {{modBreaks[0].modBreakDateHumanized}}`}</li>
                     <li className="ml-4">{`{{progress}}`}</li>
@@ -206,9 +212,6 @@ export default function WidgetRawGeneral(
               </FormItem>
             )}
           />
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

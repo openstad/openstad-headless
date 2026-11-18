@@ -11,7 +11,9 @@ import {
   AccordionProvider,
   FormField,
   FormFieldDescription,
+  FormLabel,
   Paragraph,
+  Textbox,
 } from '@utrecht/component-library-react';
 import {
   FilePondErrorDescription,
@@ -32,15 +34,21 @@ import RteContent from '../../rte-formatting/rte-content';
 import { Spacer } from '../../spacer';
 import ImageCropDialog from './image-crop-dialog';
 import './image-upload.css';
+import {
+  MockImageFile,
+  buildImageValue,
+  removeDescription,
+  toDescriptionEntries,
+  toDescriptionKey,
+  toMockImages,
+  toUploadedImageName,
+} from './value';
 
 registerPlugin(
   FilePondPluginImageExifOrientation,
   FilePondPluginImagePreview,
   FilePondPluginFileValidateType
 );
-
-const sanitizeFileName = (fileName: string) =>
-  fileName.replace(/[^a-z0-9_\-]/gi, '_').replace(/_+/g, '_');
 
 const THUMB_MAX_SIZE = 480;
 
@@ -109,18 +117,6 @@ const filePondSettings = {
   maxParallelUploads: 1,
 };
 
-type MockImageFile = {
-  source: string;
-  options: {
-    type: string;
-    file: {
-      name: string;
-      size: number;
-      type: string;
-    };
-  };
-};
-
 export type ImageUploadProps = {
   title: string;
   overrideDefaultValue?: FormValue;
@@ -136,11 +132,14 @@ export type ImageUploadProps = {
   imageCropRequired?: boolean;
   imageCropRatioWidth?: number;
   imageCropRatioHeight?: number;
+  allowImageDescription?: boolean;
+  imageDescriptionLabel?: string;
+  imageDescriptionMaxLength?: number;
   type?: string;
   onChange?: (
     e: {
       name: string;
-      value: { name: string; url: string }[];
+      value: { name: string; url: string; description?: string }[];
       isInitial?: boolean;
     },
     triggerSetLastKey?: boolean
@@ -189,6 +188,9 @@ const ImageUploadField: FC<ImageUploadProps> = ({
   images = [],
   createImageSlider = false,
   imageClickable = false,
+  allowImageDescription = false,
+  imageDescriptionLabel = 'Opmerking bij deze afbeelding',
+  imageDescriptionMaxLength = 500,
   ...props
 }) => {
   const datastore = new DataStore(props);
@@ -200,24 +202,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
   const notifyFailed = (message: string) =>
     NotificationService.addNotification(message, 'error');
 
-  const initialValue: MockImageFile[] =
-    overrideDefaultValue && Array.isArray(overrideDefaultValue)
-      ? (overrideDefaultValue as { url: string; name: string }[]).map(
-          (item: { url: string; name: string }) => {
-            return {
-              source: item.url,
-              options: {
-                type: 'local',
-                file: {
-                  name: item.name,
-                  size: 1,
-                  type: '*',
-                },
-              },
-            };
-          }
-        )
-      : [];
+  const initialValue: MockImageFile[] = toMockImages(overrideDefaultValue);
 
   const [files, setImages] = useState<FilePondFile[]>([]);
   const [mockImages, setMockImages] = useState<MockImageFile[]>(initialValue);
@@ -280,7 +265,8 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     const pondFile = pondRef.current
       ?.getFiles()
       ?.find(
-        (item: FilePondFile) => sanitizeFileName(item.file.name) === target.name
+        (item: FilePondFile) =>
+          toUploadedImageName(item.file.name) === target.name
       );
     if (pondFile) {
       pondRef.current.removeFile(pondFile.id);
@@ -289,6 +275,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
       );
     }
     setUploadedImages((prev) => prev.filter((image, i) => i !== index));
+    setDescriptions((prev) => removeDescription(prev, target.url));
   };
 
   const discardCropTarget = () => {
@@ -329,6 +316,16 @@ const ImageUploadField: FC<ImageUploadProps> = ({
     advanceCropQueue();
   };
 
+  const initialDescriptions: Record<string, string> = {};
+  for (const mockImage of initialValue) {
+    if (mockImage.description !== undefined) {
+      initialDescriptions[toDescriptionKey(mockImage.source)] =
+        mockImage.description;
+    }
+  }
+  const [descriptions, setDescriptions] =
+    useState<Record<string, string>>(initialDescriptions);
+
   class HtmlContent extends React.Component<{ html: any }> {
     render() {
       let { html } = this.props;
@@ -338,11 +335,11 @@ const ImageUploadField: FC<ImageUploadProps> = ({
 
   const didInitRef = useRef(false);
   useEffect(() => {
-    const images = [...uploadedImages];
-    for (let i = 0; i < mockImages.length; i++) {
-      const mockImage = mockImages[i];
-      images.push({ name: mockImage.options.file.name, url: mockImage.source });
-    }
+    const images = buildImageValue({
+      uploadedImages,
+      mockImages,
+      descriptions,
+    });
 
     if (onChange) {
       onChange({
@@ -353,7 +350,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
       });
     }
     didInitRef.current = true;
-  }, [uploadedImages, mockImages]);
+  }, [uploadedImages, mockImages, descriptions]);
 
   const acceptAttribute = allowedTypes ? allowedTypes : '';
 
@@ -387,6 +384,14 @@ const ImageUploadField: FC<ImageUploadProps> = ({
   }, []);
 
   const finalImages = Array.from(new Set([...mockImages, ...files]));
+
+  const showCardList = imageCropEnabled || allowImageDescription;
+
+  const imageEntries = toDescriptionEntries(
+    mockImages,
+    uploadedImages,
+    files.map((item) => item.file.name)
+  );
 
   return (
     <FormField type="text">
@@ -458,14 +463,16 @@ const ImageUploadField: FC<ImageUploadProps> = ({
             setImages(imagesExceptMockedImages);
           }}
           allowMultiple={multiple}
-          allowImagePreview={!imageCropEnabled}
+          allowImagePreview={!showCardList}
           server={{
             process: {
               url: props?.imageUrl + '/images',
               method: 'POST',
-              headers: {
-                Authorization: 'Bearer ' + datastore.api?.currentUserJWT,
-              },
+              headers: datastore.api?.currentUserJWT
+                ? {
+                    Authorization: 'Bearer ' + datastore.api.currentUserJWT,
+                  }
+                : {},
               onload: (response: any) => {
                 const currentImages = [...uploadedImages];
                 currentImages.push(JSON.parse(response)[0]);
@@ -492,7 +499,7 @@ const ImageUploadField: FC<ImageUploadProps> = ({
             const fileName = file?.file?.name;
 
             if (!!fileName) {
-              const uploadImageFileName = sanitizeFileName(fileName);
+              const uploadImageFileName = toUploadedImageName(fileName);
               const uploadedIndex = uploadedImages.findIndex(
                 (item) => item.name === uploadImageFileName
               );
@@ -502,11 +509,15 @@ const ImageUploadField: FC<ImageUploadProps> = ({
               );
 
               if (mockIndex >= 0) {
+                if (mockImages[mockIndex].source !== file.source) return;
                 pruneCropQueue('mock', mockIndex);
                 const updatedMockImages = mockImages.filter(
                   (item) => item.options.file.name !== fileName
                 );
                 setMockImages(updatedMockImages);
+                setDescriptions((prev) =>
+                  removeDescription(prev, mockImages[mockIndex].source)
+                );
                 return;
               }
 
@@ -517,6 +528,9 @@ const ImageUploadField: FC<ImageUploadProps> = ({
                 (item) => item.name !== uploadImageFileName
               );
               setUploadedImages(updatedImages);
+              setDescriptions((prev) =>
+                removeDescription(prev, uploadedImages[uploadedIndex].url)
+              );
 
               const updatedFiles = files.filter(
                 (item) => item.file.name !== fileName
@@ -552,64 +566,87 @@ const ImageUploadField: FC<ImageUploadProps> = ({
           aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}
           {...filePondSettings}
         />
-        {imageCropEnabled &&
-          (mockImages.length > 0 || uploadedImages.length > 0) && (
-            <div className="image-crop-list">
-              {[
-                ...mockImages.map((mockImage, index) => ({
-                  url: mockImage.source,
-                  name: mockImage.options.file.name,
-                  kind: 'mock' as const,
-                  index,
-                })),
-                ...uploadedImages.map((image, index) => ({
-                  url: image.url,
-                  name: image.name,
-                  kind: 'uploaded' as const,
-                  index,
-                })),
-              ].map((entry) => {
-                const { baseUrl, hasCrop } = parseImageCropUrl(entry.url);
-                return (
-                  <div
-                    className="image-crop-list-row"
-                    key={`${entry.kind}-${entry.url}`}>
-                    <img
-                      src={buildImagePreviewUrl(entry.url, THUMB_MAX_SIZE)}
-                      alt=""
-                      className="image-crop-list-thumb"
-                      style={{
-                        width: thumbHeight * thumbRatio,
-                        height: thumbHeight,
-                      }}
-                    />
+        {showCardList && imageEntries.length > 0 && (
+          <div className="image-crop-list">
+            {imageEntries.map((entry) => {
+              const { baseUrl, hasCrop } = parseImageCropUrl(entry.url);
+              const inputId = `${randomId}-image-description-${entry.kind}-${entry.index}`;
+              const remark = descriptions[toDescriptionKey(entry.url)] ?? '';
+              return (
+                <div
+                  className="image-crop-list-row"
+                  key={`${entry.kind}-${entry.index}-${toDescriptionKey(entry.url)}`}>
+                  <img
+                    src={buildImagePreviewUrl(entry.url, THUMB_MAX_SIZE)}
+                    alt=""
+                    className="image-crop-list-thumb"
+                    style={{
+                      width: thumbHeight * thumbRatio,
+                      height: thumbHeight,
+                    }}
+                  />
+                  <div className="image-crop-list-body">
                     <span className="image-crop-list-name">{entry.name}</span>
-                    <SecondaryButton
-                      type="button"
-                      aria-label={`Afbeelding ${entry.name} bijsnijden`}
-                      onClick={(event) => {
-                        cropOpenerRef.current = event.currentTarget;
-                        setCropQueue([
-                          { kind: entry.kind, index: entry.index },
-                        ]);
-                      }}>
-                      {hasCrop ? 'Bijsnijden aanpassen' : 'Bijsnijden'}
-                    </SecondaryButton>
-                    {hasCrop && !imageCropRequired && (
-                      <SecondaryButton
-                        type="button"
-                        aria-label={`Herstel origineel van ${entry.name}`}
-                        onClick={() =>
-                          updateImageUrl(entry.kind, entry.index, baseUrl)
-                        }>
-                        Herstel origineel
-                      </SecondaryButton>
+                    {imageCropEnabled && (
+                      <div className="image-crop-list-actions">
+                        <SecondaryButton
+                          type="button"
+                          aria-label={`Afbeelding ${entry.name} bijsnijden`}
+                          onClick={(event) => {
+                            cropOpenerRef.current = event.currentTarget;
+                            setCropQueue([
+                              { kind: entry.kind, index: entry.index },
+                            ]);
+                          }}>
+                          {hasCrop ? 'Bijsnijden aanpassen' : 'Bijsnijden'}
+                        </SecondaryButton>
+                        {hasCrop && !imageCropRequired && (
+                          <SecondaryButton
+                            type="button"
+                            aria-label={`Herstel origineel van ${entry.name}`}
+                            onClick={() =>
+                              updateImageUrl(entry.kind, entry.index, baseUrl)
+                            }>
+                            Herstel origineel
+                          </SecondaryButton>
+                        )}
+                      </div>
+                    )}
+                    {allowImageDescription && (
+                      <div className="image-crop-list-remark">
+                        <FormLabel htmlFor={inputId}>
+                          {imageDescriptionLabel} ({entry.name})
+                        </FormLabel>
+                        <Textbox
+                          id={inputId}
+                          name={`${fieldKey}-image-description-${entry.kind}-${entry.index}`}
+                          type="text"
+                          maxLength={imageDescriptionMaxLength}
+                          value={remark}
+                          aria-describedby={`${inputId}-counter`}
+                          onChange={(
+                            e: React.ChangeEvent<HTMLInputElement>
+                          ) => {
+                            const nextValue = e.target.value;
+                            setDescriptions((prev) => ({
+                              ...prev,
+                              [toDescriptionKey(entry.url)]: nextValue,
+                            }));
+                          }}
+                        />
+                        <span
+                          id={`${inputId}-counter`}
+                          className="image-crop-list-counter">
+                          {remark.length} / {imageDescriptionMaxLength}
+                        </span>
+                      </div>
                     )}
                   </div>
-                );
-              })}
-            </div>
-          )}
+                </div>
+              );
+            })}
+          </div>
+        )}
         {cropTarget &&
           (() => {
             const targetUrl =

@@ -1,4 +1,5 @@
 import { FormValue } from '@openstad-headless/form/src/form';
+import { toHtmlId } from '@openstad-headless/lib/to-html-id';
 import { Spacer } from '@openstad-headless/ui/src';
 import {
   AccordionProvider,
@@ -16,15 +17,7 @@ import { useEffect } from 'react';
 import { InfoImage } from '../../infoImage';
 import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
 import TextInput from '../text';
-
-const shuffleArray = <T,>(array: T[]): T[] => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
+import { getRandomizedDisplayChoices } from '../utils/randomized-choices';
 
 export type RadioboxFieldProps = {
   title: string;
@@ -94,6 +87,8 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
   confirmed = false,
   optionFeedback = {},
 }) => {
+  const idKey = toHtmlId(fieldKey);
+
   let initialValue = (defaultValue as string) || '';
   initialValue = overrideDefaultValue
     ? (overrideDefaultValue as string)
@@ -124,19 +119,11 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
         )
       : [];
 
-    if (randomizeItems) {
-      const storageKey = `randomizedChoices_${fieldKey}`;
-      const stored = sessionStorage.getItem(storageKey);
-      if (stored) {
-        setDisplayChoices(JSON.parse(stored));
-      } else {
-        const shuffled = shuffleArray(normalizedChoices);
-        setDisplayChoices(shuffled);
-        sessionStorage.setItem(storageKey, JSON.stringify(shuffled));
-      }
-    } else {
-      setDisplayChoices(normalizedChoices);
-    }
+    setDisplayChoices(
+      randomizeItems
+        ? getRandomizedDisplayChoices(normalizedChoices, fieldKey)
+        : normalizedChoices
+    );
   }, [choices, fieldKey, randomizeItems]);
 
   useEffect(() => {
@@ -203,7 +190,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
     <div className="question">
       <Fieldset
         role="radiogroup"
-        aria-invalid={checkInvalid}
+        invalid={fieldInvalid}
         // ponytail: fieldInvalid, niet checkInvalid. checkInvalid betekent
         // "verplicht en nog leeg" en is dus al waar bij het laden, terwijl
         // form.tsx het foutelement pas rendert als er echt een melding is.
@@ -271,12 +258,12 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                 <Paragraph
                   className={`utrecht-form-field__label utrecht-form-field__label--radio${feedbackClass}`}>
                   <FormLabel
-                    htmlFor={`${fieldKey}_${index}`}
+                    htmlFor={`${idKey}_${index}`}
                     type="radio"
                     className="--label-grid">
                     <RadioButton
                       className="utrecht-form-field__input"
-                      id={`${fieldKey}_${index}`}
+                      id={`${idKey}_${index}`}
                       name={fieldKey}
                       required={fieldRequired}
                       onChange={() => {
@@ -323,7 +310,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                     fieldKey={`${fieldKey}_${choice.trigger || index}_other`}
                     title=""
                     fieldInvalid={false}
-                    randomId={`${fieldKey}_${choice.trigger || index}`}
+                    randomId={`${idKey}_${choice.trigger || index}`}
                   />
                 </div>
               )}

@@ -4,6 +4,7 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const router = express.Router({ mergeParams: true });
 const createError = require('http-errors');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
+const { loadDefaultTemplate } = require('../../models/NotificationMessage');
 
 // scopes
 // ------
@@ -126,6 +127,25 @@ router
         res.json({ template: 'deleted' });
       })
       .catch(next);
+  });
+
+router
+  .route('/default/:type')
+  .get(auth.can('NotificationTemplate', 'list'))
+  .get(async function (req, res, next) {
+    try {
+      const template = await loadDefaultTemplate(req.params.type);
+      if (!template) {
+        throw createError(404, 'No default template for this type');
+      }
+      res.json({
+        type: req.params.type,
+        subject: template.subject.trim(),
+        body: template.body.trim(),
+      });
+    } catch (err) {
+      next(err);
+    }
   });
 
 module.exports = router;

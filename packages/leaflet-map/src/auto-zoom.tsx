@@ -1,4 +1,5 @@
 import DataStore from '@openstad-headless/data-store/src';
+import type { BaseProps } from '@openstad-headless/types';
 import type { Map as LeafletMap } from 'leaflet';
 import { LatLng, latLngBounds } from 'leaflet';
 import React from 'react';
@@ -11,7 +12,7 @@ import type { AreaShape } from './types/area-props';
 import type { LocationType } from './types/location';
 import type { MarkerProps } from './types/marker-props';
 
-type AutoZoomProps = {
+type AutoZoomProps = Pick<BaseProps, 'projectId' | 'api'> & {
   autoZoomAndCenter?: 'area' | 'markers';
   area?: AreaShape;
   areaId?: number | string | false;
@@ -67,6 +68,8 @@ export function AutoZoom({
   center,
   zoomAfterInit = true,
   customPolygonIds,
+  projectId,
+  api,
 }: AutoZoomProps) {
   const map: LeafletMap = useMap();
   const hasInitialZoomed = useRef(false);
@@ -75,7 +78,7 @@ export function AutoZoom({
   const hasCustomPolygons =
     Array.isArray(customPolygonIds) && customPolygonIds.length > 0;
 
-  const datastore = new DataStore({});
+  const datastore = new DataStore({ projectId, api, config: { api } });
   const { data: customPolygonAreas } = datastore.useAreas(
     hasCustomPolygons ? { ids: customPolygonIds } : undefined
   );

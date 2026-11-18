@@ -17,17 +17,29 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  useRegisterFormSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import useAdminProjectId from '@/hooks/use-admin-project-id';
 import useUser from '@/hooks/use-user';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
+import { emptiedUserEmail } from '@/lib/auth-email-check';
 import { zodResolver } from '@hookform/resolvers/zod';
+import * as Switch from '@radix-ui/react-switch';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  email: z.string().email('Geen geldig e-mailadres').optional(),
+  // A user without an e-mail address keeps an empty field, which would fail
+  // `.email()` and block every save on this page.
+  email: z
+    .union([z.string().email('Geen geldig e-mailadres'), z.literal('')])
+    .optional(),
   name: z.string().optional(),
   phoneNumber: z.string().optional(),
   address: z.string().optional(),
@@ -57,6 +69,35 @@ export default function CreateUserGeneral() {
   let user = data;
   if (Array.isArray(data)) user = data[0];
 
+  const rows = Array.isArray(data) ? data : data ? [data] : [];
+  const adminProjectId = useAdminProjectId();
+  const adminProjectUser = rows.find(
+    (u: any) => u?.projectId === adminProjectId
+  );
+  const canAutoAddToNewProjects =
+    !!adminProjectUser && ['admin', 'editor'].includes(adminProjectUser.role);
+  const [autoAddToNewProjects, setAutoAddToNewProjects] = useState(false);
+
+  useEffect(() => {
+    setAutoAddToNewProjects(!!adminProjectUser?.autoAddToNewProjects);
+  }, [adminProjectUser?.autoAddToNewProjects]);
+
+  async function handleAutoAddChange(checked: boolean) {
+    setAutoAddToNewProjects(checked);
+    try {
+      await updateUser({
+        id: adminProjectUser.id,
+        projectId: adminProjectUser.projectId,
+        autoAddToNewProjects: checked,
+      });
+      await mutate();
+      toast.success('Instelling opgeslagen');
+    } catch (err: unknown) {
+      setAutoAddToNewProjects(!checked);
+      toast.error('Instelling kon niet worden opgeslagen');
+    }
+  }
+
   const defaults = useCallback(
     () => ({
       email: user?.email || '',
@@ -78,9 +119,7 @@ export default function CreateUserGeneral() {
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  useSyncFormDefaults(form, defaults, data);
 
   // Fetch two-factor status
   useEffect(() => {
@@ -89,11 +128,14 @@ export default function CreateUserGeneral() {
         const response = await fetch(
           `/api/openstad/api/project/${user.projectId}/user/${user.id}/two-factor-status`
         );
-        if (!response.ok) throw new Error(response.statusText);
+        if (!response.ok) {
+          const errorBody = await response.json().catch(() => null);
+          throw new Error(errorBody?.message || response.statusText);
+        }
         const data = await response.json();
         setIsTwoFactorEnabled(data.twoFactorEnabled);
-      } catch (error) {
-        toast.error('Failed to fetch two-factor status');
+      } catch (error: any) {
+        toast.error(`Failed to fetch two-factor status: ${error?.message}`);
       }
     }
 
@@ -102,14 +144,24 @@ export default function CreateUserGeneral() {
     }
   }, [user]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      await updateUser({ ...values, id: user.id, projectId: user.projectId });
-      toast.success('User is bijgewerkt');
-    } catch (err: any) {
-      toast.error(err.message || 'User kon niet worden bijgewerkt');
+  const save = useCallback(async () => {
+    const valid = await validateForSave(form);
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
     }
-  }
+    const values = formSchema.parse(form.getValues());
+    const emptied = emptiedUserEmail(user, values);
+    if (emptied) throw new Error(emptied);
+    const { email, ...rest } = values;
+    await updateUser({
+      ...rest,
+      ...(email ? { email } : {}),
+      id: user.id,
+      projectId: user.projectId,
+    });
+  }, [form, updateUser, user]);
+
+  useRegisterFormSave(form, save, { label: 'Algemene instellingen' });
 
   async function handleResetTwoFactor() {
     try {
@@ -119,12 +171,17 @@ export default function CreateUserGeneral() {
           method: 'PUT',
         }
       );
-      if (!response.ok) throw new Error(response.statusText);
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => null);
+        throw new Error(errorBody?.message || response.statusText);
+      }
 
       setIsTwoFactorEnabled(false);
       toast.success('Two-factor authentication reset succesvol');
-    } catch (error) {
-      toast.error('Two-factor authenticatie kon niet worden gereset');
+    } catch (error: any) {
+      toast.error(
+        `Two-factor authenticatie kon niet worden gereset: ${error?.message}`
+      );
     }
   }
 
@@ -143,8 +200,11 @@ export default function CreateUserGeneral() {
       toast.success('Gebruiker is geanonimiseerd');
       setIsAnonymizeDialogOpen(false);
       setIsAnonymizeConfirmed(false);
-    } catch (error: any) {
-      toast.error(error?.message || 'Gebruiker kon niet worden geanonimiseerd');
+    } catch (error: unknown) {
+      toast.error(
+        (error instanceof Error && error.message) ||
+          'Gebruiker kon niet worden geanonimiseerd'
+      );
     } finally {
       setIsAnonymizing(false);
     }
@@ -158,7 +218,7 @@ export default function CreateUserGeneral() {
         <Heading size="xl">Algemene instellingen</Heading>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(e) => e.preventDefault()}
           className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4 auto-rows-auto">
           <FormField
             control={form.control}
@@ -299,12 +359,34 @@ export default function CreateUserGeneral() {
               </FormItem>
             )}
           />
-
-          <Button className="col-span-full w-fit" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
+
+      {canAutoAddToNewProjects && (
+        <>
+          <Separator className="my-4" />
+          <div>
+            <Heading size="lg">Nieuwe projecten</Heading>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Voeg deze gebruiker bij het aanmaken of dupliceren van een project
+              automatisch toe als beheerder. De rechten kunnen daarna per
+              project worden aangepast of ingetrokken.
+            </p>
+            <label
+              htmlFor="auto-add-to-new-projects"
+              className="mt-4 block text-sm font-medium leading-none">
+              Automatisch toevoegen aan nieuwe projecten
+            </label>
+            <Switch.Root
+              id="auto-add-to-new-projects"
+              className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default mt-2"
+              checked={autoAddToNewProjects}
+              onCheckedChange={handleAutoAddChange}>
+              <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
+            </Switch.Root>
+          </div>
+        </>
+      )}
 
       <Separator className="my-4" />
 

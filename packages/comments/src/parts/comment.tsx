@@ -14,7 +14,7 @@ import { useState } from 'react';
 import hasRole from '../../../lib/has-role';
 import { CommentWidgetContext } from '../comments';
 import '../index.css';
-import { CommentProps } from '../types/comment-props';
+import type { CommentProps } from '../types/comment-props';
 import { AuthorBadge } from './author-badge';
 import CommentForm from './comment-form.js';
 

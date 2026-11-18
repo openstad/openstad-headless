@@ -1,14 +1,15 @@
 import AuditLogTable from '@/components/audit-log-table';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import WidgetVersionHistory from '@/components/widget-version-history';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
 import { extractConfig } from '@/lib/sub-widget-helper';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { ResourceDetailWidgetProps } from '@openstad-headless/resource-detail-with-map/src/resourceDetailWithMap';
 import { useRouter } from 'next/router';
@@ -35,12 +36,10 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<ResourceDetailWidgetProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<ResourceDetailWidgetProps>({
-      projectId,
-    });
+  const { widget, previewConfig, updatePreview, onFieldChanged } =
+    useWidgetDraft<ResourceDetailWidgetProps>({ projectId });
+
+  const tabUpdateConfig = ignoreTabSubmit;
 
   const totalPropPackageMap: ResourceOverviewMapWidgetProps &
     EditFieldProps<ResourceOverviewMapWidgetProps> = {
@@ -52,36 +51,20 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
     markerIcon: {
       // provide default values for the markerIcon properties
     },
-    updateConfig: (config: ResourceOverviewMapWidgetProps) =>
-      updateConfig({ ...(widget?.config || {}), ...config }),
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
+    updateConfig: ignoreTabSubmit,
+    onFieldChanged,
     projectId,
   };
 
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Inzending interactieve kaart',
-            url: `/projects/${projectId}/widgets/resourcedetail/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Inzending interactieve kaart',
+          `/projects/${projectId}/widgets/resourcedetail/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="resources">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
@@ -90,6 +73,7 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="likes">Likes widget</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
 
             <TabsContent value="resources">
@@ -102,17 +86,8 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   {previewConfig && (
                     <WidgetResourceDetailGeneral
                       {...previewConfig}
-                      updateConfig={(config) =>
-                        updateConfig({ ...widget.config, ...config })
-                      }
-                      onFieldChanged={(key, value) => {
-                        if (previewConfig) {
-                          updatePreview({
-                            ...previewConfig,
-                            [key]: value,
-                          });
-                        }
-                      }}
+                      updateConfig={tabUpdateConfig}
+                      onFieldChanged={onFieldChanged}
                     />
                   )}
                 </TabsContent>
@@ -120,17 +95,8 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   {previewConfig && (
                     <WidgetResourceDetailDisplay
                       {...previewConfig}
-                      updateConfig={(config) =>
-                        updateConfig({ ...widget.config, ...config })
-                      }
-                      onFieldChanged={(key, value) => {
-                        if (previewConfig) {
-                          updatePreview({
-                            ...previewConfig,
-                            [key]: value,
-                          });
-                        }
-                      }}
+                      updateConfig={tabUpdateConfig}
+                      onFieldChanged={onFieldChanged}
                     />
                   )}
                 </TabsContent>
@@ -161,7 +127,6 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                   >({
                     subWidgetKey: 'likeWidget',
                     previewConfig: previewConfig,
-                    updateConfig,
                     updatePreview,
                   })}
                 />
@@ -177,18 +142,19 @@ export default function WidgetResourceDetail({ apiUrl }: WithApiUrlProps) {
                 projectId={projectId as string}
               />
             </TabsContent>
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
+                projectId={projectId as string}
+              />
+            </TabsContent>
           </Tabs>
-          <div className="container py-6 mt-6 bg-white rounded-md">
-            {previewConfig && (
-              <>
-                <WidgetPreview
-                  type="resourcedetailwithmap"
-                  config={previewConfig}
-                  projectId={projectId as string}
-                />
-              </>
-            )}
-          </div>
+          <WidgetEditorPreview
+            type="resourcedetailwithmap"
+            config={previewConfig}
+            projectId={projectId as string}
+            className="container py-6 mt-6 bg-white rounded-md"
+          />
         </div>
       </PageLayout>
     </div>

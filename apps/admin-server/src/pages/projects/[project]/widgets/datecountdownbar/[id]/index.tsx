@@ -1,12 +1,13 @@
 import AuditLogTable from '@/components/audit-log-table';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import WidgetVersionHistory from '@/components/widget-version-history';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import type { DateCountdownBarWidgetProps } from '@openstad-headless/date-countdown-bar/src/date-countdown-bar';
 import { useRouter } from 'next/router';
 import React from 'react';
@@ -27,54 +28,33 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<DateCountdownBarWidgetProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<DateCountdownBarWidgetProps>({});
-
-  const totalPropPackage = {
-    ...widget?.config,
-    updateConfig: (config: DateCountdownBarWidgetProps) =>
-      updateConfig({ ...widget.config, ...config }),
-
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
-    projectId,
-  };
+  const { widget, previewConfig, onFieldChanged } =
+    useWidgetDraft<DateCountdownBarWidgetProps>({});
 
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Aftelbalk',
-            url: `/projects/${projectId}/widgets/datecountdownbar/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Aftelbalk',
+          `/projects/${projectId}/widgets/datecountdownbar/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="general">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md h-fit flex flex-wrap overflow-auto">
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig ? (
-                <CountdownBarGeneral {...totalPropPackage} {...previewConfig} />
+                <CountdownBarGeneral
+                  {...previewConfig}
+                  updateConfig={ignoreTabSubmit}
+                  onFieldChanged={onFieldChanged}
+                />
               ) : null}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
@@ -87,17 +67,19 @@ export default function WidgetDateCountdownBar({ apiUrl }: WithApiUrlProps) {
                 projectId={projectId as string}
               />
             </TabsContent>
-          </Tabs>
-
-          <div className="py-6 mt-6 bg-white rounded-md">
-            {previewConfig ? (
-              <WidgetPreview
-                type="datecountdownbar"
-                config={previewConfig}
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
                 projectId={projectId as string}
               />
-            ) : null}
-          </div>
+            </TabsContent>
+          </Tabs>
+
+          <WidgetEditorPreview
+            type="datecountdownbar"
+            config={previewConfig}
+            projectId={projectId as string}
+          />
         </div>
       </PageLayout>
     </div>

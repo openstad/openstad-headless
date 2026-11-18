@@ -16,6 +16,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import {
+  rebaselineAfterSave,
+  useLooseFormDirty,
+  useRegisterSave,
+  useSaveController,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
@@ -23,12 +30,18 @@ import { useProject } from '@/hooks/use-project';
 import useResource from '@/hooks/use-resource';
 import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   defaultAddressSearchTexts,
   renderFoundAddressText,
 } from '@openstad-headless/lib/address-search-texts';
 import { buildImagePreviewUrl } from '@openstad-headless/lib/image-crop/crop-url';
+import {
+  EMPTY_MODBREAK_MESSAGE,
+  hasModBreakContent,
+} from '@openstad-headless/ui/src/form-elements/modbreak/normalize-modbreaks';
+import cloneDeep from 'lodash/cloneDeep';
 import {
   ArrowDown,
   ArrowLeft,
@@ -40,8 +53,8 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useFieldArray, useForm } from 'react-hook-form';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { FieldErrors, useFieldArray, useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
 
@@ -88,15 +101,19 @@ const baseSchema = z.object({
     .optional(),
 
   startDate: z.date(),
-  publishDate: z.date().optional(),
+  publishDate: z.date().nullable().optional(),
 
   modBreaks: z
     .array(
       z.object({
         id: z.string(),
-        description: z.string().default(''),
+        description: z
+          .string()
+          .default('')
+          .refine(hasModBreakContent, EMPTY_MODBREAK_MESSAGE),
         authorName: z.string().optional().default(''),
         modBreakDate: z.string().optional().default(''),
+        createdAt: z.string().optional(),
       })
     )
     .optional()
@@ -173,9 +190,11 @@ type FormType = z.infer<typeof baseSchema>;
 
 type Props = {
   onFormSubmit: (body: FormType) => Promise<any>;
+  /** Register with the global header save bar instead of rendering a bottom submit button. */
+  useGlobalSave?: boolean;
 };
 
-export default function ResourceForm({ onFormSubmit }: Props) {
+export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
   const router = useRouter();
   const { project, id } = router.query;
   const { data: projectData } = useProject();
@@ -258,8 +277,10 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       startDate: existingData?.startDate
         ? new Date(existingData?.startDate)
         : new Date(),
-      publishDate: existingData?.publishDate
-        ? new Date(existingData.publishDate)
+      publishDate: existingData
+        ? existingData.publishDate
+          ? new Date(existingData.publishDate)
+          : null
         : new Date(),
 
       modBreaks:
@@ -273,6 +294,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 ? mb.modBreakDate.slice(0, 16)
                 : mb.modBreakDate + 'T00:00'
               : '',
+            createdAt: mb.createdAt,
           }))
           .sort(
             (a: any, b: any) =>
@@ -288,6 +310,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
       document: '',
       documents: existingData?.documents || [],
       extraData: {
+        ...(existingData?.extraData || {}),
         originalId: existingData?.extraData?.originalId || undefined,
         locationIndependent:
           existingData?.extraData?.locationIndependent || false,
@@ -334,48 +357,149 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     return () => clearTimeout(timeoutId);
   }, [pendingUserId, project, existingData?.userId]);
 
+  // One schema instance for both the resolver and `save`: the header save has
+  // to parse with exactly what `trigger()` validated against, or the two could
+  // disagree and `parse` would throw a raw ZodError into the save bar.
+  const schema = useMemo(
+    () => formSchema(titleLimits, summaryLimits, descriptionLimits),
+    [
+      titleLimits.min,
+      titleLimits.max,
+      summaryLimits.min,
+      summaryLimits.max,
+      descriptionLimits.min,
+      descriptionLimits.max,
+    ]
+  );
+
   const form = useForm<FormType>({
-    resolver: zodResolver<any>(
-      formSchema(titleLimits, summaryLimits, descriptionLimits)
-    ),
+    resolver: zodResolver<any>(schema),
     defaultValues: defaults(),
   });
 
-  function onSubmit(values: FormType) {
-    // Capture the location-independent flag from the checkbox before the
-    // CodeEditor state potentially overwrites the whole extraData object below.
-    const locationIndependent = !!values.extraData?.locationIndependent;
+  const buildSubmitValues = useCallback(
+    (values: FormType) => {
+      // Capture the location-independent flag from the checkbox before the
+      // CodeEditor state potentially overwrites the whole extraData object below.
+      const locationIndependent = !!values.extraData?.locationIndependent;
 
-    // Add extraData if its valid JSON
-    try {
-      if (extraData !== values.extraData) {
-        values.extraData = JSON.parse(extraData);
+      // Add extraData if its valid JSON
+      try {
+        if (extraData !== values.extraData) {
+          values.extraData = JSON.parse(extraData);
+        }
+      } catch (e) {}
+
+      // Re-apply the location-independent flag so it survives the JSON overwrite.
+      if (values.extraData && typeof values.extraData === 'object') {
+        values.extraData.locationIndependent = locationIndependent;
       }
-    } catch (e) {}
 
-    // Re-apply the location-independent flag so it survives the JSON overwrite.
-    if (values.extraData && typeof values.extraData === 'object') {
-      values.extraData.locationIndependent = locationIndependent;
-    }
+      return values;
+    },
+    [extraData]
+  );
 
-    onFormSubmit(values)
+  function onSubmit(values: FormType) {
+    const finalValues = buildSubmitValues(values);
+
+    onFormSubmit(finalValues)
       .then(() => {
         toast.success(`Plan successvol ${id ? 'aangepast' : 'aangemaakt'}`);
         router.push(`/projects/${project}/resources`);
 
         // SWR reload
-        const url = `/api/openstad/api/project/${project}/resource/${id}`;
-        mutate(url);
+        mutate();
       })
       .catch((e) => {
         toast.error(`Plan kon niet ${id ? 'aangepast' : 'aangemaakt'} worden`);
       });
   }
 
+  const { allowNextNavigation } = useSaveController();
+
+  const [modBreakPage, setModBreakPage] = React.useState(0);
+  const modBreaksPerPage = 5;
+
+  const showFirstInvalidModBreak = useCallback(
+    (errors: FieldErrors<FormType>) => {
+      if (!Array.isArray(errors.modBreaks)) return false;
+      const firstInvalidIndex = errors.modBreaks.findIndex(Boolean);
+      if (firstInvalidIndex < 0) return false;
+      setModBreakPage(Math.floor(firstInvalidIndex / modBreaksPerPage));
+      return true;
+    },
+    []
+  );
+
+  const save = useCallback(async () => {
+    const valid = await validateForSave(form);
+    if (!valid) {
+      if (showFirstInvalidModBreak(form.formState.errors)) {
+        throw new Error(EMPTY_MODBREAK_MESSAGE);
+      }
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    // `getValues()` hands out the raw input. Only the schema applies the
+    // `z.coerce` on budget, userId and originalId, and the removed submit
+    // button got that for free from `handleSubmit` — so the header save has to
+    // parse as well, or those fields persist as strings.
+    const sent = cloneDeep(form.getValues());
+    const finalValues = buildSubmitValues(schema.parse(sent) as FormType);
+    // The save bar shows a thrown message as-is, and the resource hooks throw
+    // English or network errors, so replace them with the message the removed
+    // submit button showed.
+    try {
+      await onFormSubmit(finalValues);
+    } catch {
+      throw new Error(
+        `Inzending kon niet ${id ? 'aangepast' : 'aangemaakt'} worden`
+      );
+    }
+
+    rebaselineAfterSave(form, sent);
+
+    // SWR reload
+    await mutate();
+
+    // Creating leaves this page for the list, the way the removed submit
+    // button did; editing stays put. Without allowNextNavigation the
+    // unsaved-changes guard would block the redirect, because the cleared
+    // baseline only reaches the controller on a later render.
+    if (!id) {
+      allowNextNavigation();
+      toast.success('Inzending succesvol aangemaakt');
+      router.push(`/projects/${project}/resources`);
+    }
+  }, [
+    form,
+    schema,
+    buildSubmitValues,
+    showFirstInvalidModBreak,
+    onFormSubmit,
+    mutate,
+    id,
+    project,
+    router,
+    allowNextNavigation,
+  ]);
+
+  const isDirty = useLooseFormDirty(form);
+  useRegisterSave({
+    enabled: !!useGlobalSave,
+    isDirty,
+    save,
+  });
+
+  // Edit: re-baseline on the stored resource, but never over unsaved input. A
+  // background revalidation landing mid-edit would otherwise reset the form and
+  // clear the dirty flag the header bar reads.
+  useSyncFormDefaults(form, defaults, existingData);
+
   useEffect(() => {
-    if (existingData) {
-      form.reset(defaults());
-    } else {
+    // The edit path is handled by useSyncFormDefaults above; this only seeds a
+    // brand-new resource with the project's default tags and statuses.
+    if (!existingData) {
       let resetValues: { tags?: number[]; statuses?: number[] } = {};
       if (projectData?.config?.resources?.defaultTagIds) {
         const selectedTags = form.getValues('tags') || [];
@@ -442,8 +566,6 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     name: 'modBreaks',
   });
 
-  const [modBreakPage, setModBreakPage] = React.useState(0);
-  const modBreaksPerPage = 5;
   const modBreakPageCount = Math.max(
     1,
     Math.ceil(modBreakFields.length / modBreaksPerPage)
@@ -452,6 +574,10 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     modBreakPage * modBreaksPerPage,
     (modBreakPage + 1) * modBreaksPerPage
   );
+
+  const onInvalid = (errors: FieldErrors<FormType>) => {
+    if (showFirstInvalidModBreak(errors)) toast.error(EMPTY_MODBREAK_MESSAGE);
+  };
 
   const moveUpModBreak = (index: number) => {
     if (index <= 0) return;
@@ -484,7 +610,8 @@ export default function ResourceForm({ onFormSubmit }: Props) {
           JSON.stringify({
             lat: parseFloat(formatted[0]),
             lng: parseFloat(formatted[1]),
-          })
+          }),
+          { shouldDirty: true }
         );
       }
     },
@@ -562,6 +689,22 @@ export default function ResourceForm({ onFormSubmit }: Props) {
     };
   }, [addressPostcode, addressHuisnummer, form]);
 
+  // Editing an existing resource: hold the form back until it has arrived.
+  // Rendering the empty form first lets a keystroke in the loading window win
+  // the dirty guard, which then keeps the required title/summary/description
+  // blank and leaves the page unsaveable.
+  if (id && !existingData) {
+    return (
+      <div className="p-6 bg-white rounded-md">
+        <p>
+          {error
+            ? 'De inzending kon niet worden geladen.'
+            : 'De inzending wordt geladen...'}
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 bg-white rounded-md">
       <ImageGalleryStyle />
@@ -569,7 +712,11 @@ export default function ResourceForm({ onFormSubmit }: Props) {
         <Heading size="xl">{id ? 'Aanpassen' : 'Toevoegen'}</Heading>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={
+            useGlobalSave
+              ? (e) => e.preventDefault()
+              : form.handleSubmit(onSubmit, onInvalid)
+          }
           className="lg:w-3/3 grid grid-cols-2 lg:auto-rows-fit gap-10">
           <FormField
             control={form.control}
@@ -625,7 +772,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             onImageUploaded={(imageResult) => {
               let array = [...(form.getValues('images') || [])];
               array.push(imageResult);
-              form.setValue('images', array);
+              form.setValue('images', array, { shouldDirty: true });
               form.resetField('image');
               form.trigger('images');
             }}
@@ -648,7 +795,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
             onDocumentUploaded={(documentResult) => {
               let array = [...(form.getValues('documents') || [])];
               array.push(documentResult);
-              form.setValue('documents', array);
+              form.setValue('documents', array, { shouldDirty: true });
               form.resetField('document');
               form.trigger('documents');
             }}
@@ -689,12 +836,14 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                           />
                         </div>
                         <Button
+                          type="button"
+                          aria-label="Afbeelding verwijderen"
                           color="red"
                           onClick={() => {
                             removeImage(index);
                           }}
                           className="absolute left-0 top-0">
-                          <X size={24} />
+                          <X size={24} aria-hidden="true" />
                         </Button>
                         <Button
                           type="button"
@@ -778,12 +927,14 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                       <div key={id} className="relative flex flex-wrap">
                         <div className="relative flex">
                           <Button
+                            type="button"
+                            aria-label="Bestand verwijderen"
                             color="red"
                             onClick={() => {
                               removeFile(index);
                             }}
                             className="relative right-0 top-0 p-1">
-                            <X size={24} />
+                            <X size={24} aria-hidden="true" />
                           </Button>
                           <p>
                             <a
@@ -813,7 +964,9 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                             ) {
                               array[index].name = e.target.value;
 
-                              form.setValue('documents', array);
+                              form.setValue('documents', array, {
+                                shouldDirty: true,
+                              });
                               form.trigger('documents');
                             }
                           }}
@@ -875,12 +1028,20 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                   />
                 </FormControl>
                 {existingData?.user && (
-                  <FormDescription className="text-sm text-gray-600">
-                    Huidige gebruiker:{' '}
-                    {existingData.user.displayName ||
-                      existingData.user.name ||
-                      'Onbekend'}
-                    {existingData.user.email && ` (${existingData.user.email})`}
+                  <FormDescription className="mt-2 flex flex-wrap items-baseline gap-x-1 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-base">
+                    <span className="font-medium text-gray-500">
+                      Huidige gebruiker:
+                    </span>
+                    <span className="font-semibold text-gray-900">
+                      {existingData.user.displayName ||
+                        existingData.user.name ||
+                        'Onbekend'}
+                    </span>
+                    {existingData.user.email && (
+                      <span className="text-gray-600">
+                        ({existingData.user.email})
+                      </span>
+                    )}
                   </FormDescription>
                 )}
                 {isLoadingTargetUser && (
@@ -889,17 +1050,25 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                   </FormDescription>
                 )}
                 {targetUser && !isLoadingTargetUser && (
-                  <FormDescription className="text-sm text-blue-600">
-                    Nieuwe gebruiker:{' '}
-                    {targetUser.displayName || targetUser.name || 'Onbekend'}
-                    {targetUser.email && ` (${targetUser.email})`}
+                  <FormDescription className="mt-2 flex flex-wrap items-baseline gap-x-1 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-base">
+                    <span className="font-medium text-blue-500">
+                      Nieuwe gebruiker:
+                    </span>
+                    <span className="font-semibold text-blue-900">
+                      {targetUser.displayName || targetUser.name || 'Onbekend'}
+                    </span>
+                    {targetUser.email && (
+                      <span className="text-blue-700">
+                        ({targetUser.email})
+                      </span>
+                    )}
                   </FormDescription>
                 )}
                 {pendingUserId &&
                   !isLoadingTargetUser &&
                   !targetUser &&
                   pendingUserId !== existingData?.userId && (
-                    <FormDescription className="text-sm text-red-600">
+                    <FormDescription className="mt-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-base font-semibold text-red-700">
                       Gebruiker niet gevonden
                     </FormDescription>
                   )}
@@ -1045,7 +1214,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
           <Separator className="lg:col-span-2 my-6" />
 
           <div className="lg:col-span-2 col-span-2">
-            <Heading size="xl">Modbreaks</Heading>
+            <Heading size="xl">Officiële reacties</Heading>
             {!modbreakTitle && (
               <p className="text-sm text-orange-600 mb-4">
                 Geen standaardnaam ingesteld.{' '}
@@ -1073,11 +1242,11 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 })
               }>
               <Plus size={16} className="mr-2" />
-              Modbreak toevoegen
+              Officiële reactie toevoegen
             </Button>
             {modBreakFields.length === 0 && (
               <p className="text-sm text-muted-foreground mb-4">
-                Nog geen modbreaks toegevoegd.
+                Nog geen officiële reacties toegevoegd.
               </p>
             )}
             {visibleModBreaks.map((field, pageIndex) => {
@@ -1086,7 +1255,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                 <div key={field.id} className="border rounded-md p-4 mb-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm font-medium">
-                      Modbreak {index + 1}
+                      Officiële reactie {index + 1}
                     </span>
                     <div className="flex items-center gap-1">
                       <Button
@@ -1221,6 +1390,7 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               label="Publiceer datum van de resource"
               description="Als er geen publiceer datum is zal de resource worden opgeslagen als concept. Dit houdt in dat de resource niet zichtbaar zal zijn op de site."
               withReset
+              resetValue={null}
             />
           </div>
           <div className="col-span-full lg:col-span-1">
@@ -1251,7 +1421,8 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                   'tags',
                   checked
                     ? [...values, tag.id]
-                    : values.filter((id) => id !== tag.id)
+                    : values.filter((id) => id !== tag.id),
+                  { shouldDirty: true }
                 );
               }}
             />
@@ -1273,7 +1444,8 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                   'statuses',
                   checked
                     ? [...values, status.id]
-                    : values.filter((id) => id !== status.id)
+                    : values.filter((id) => id !== status.id),
+                  { shouldDirty: true }
                 );
               }}
             />
@@ -1299,7 +1471,9 @@ export default function ResourceForm({ onFormSubmit }: Props) {
                       onValueChange={(value) => {
                         try {
                           const parsedValue = JSON.parse(value); // Parse the JSON to make sure it's valid
-                          form.setValue('extraData', parsedValue); // Set the value of the field
+                          form.setValue('extraData', parsedValue, {
+                            shouldDirty: true,
+                          });
                           setExtraData(JSON.stringify(parsedValue));
                         } catch (error) {}
                       }}
@@ -1309,9 +1483,11 @@ export default function ResourceForm({ onFormSubmit }: Props) {
               )}
             />
           </div>
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
+          {!useGlobalSave && (
+            <Button className="w-fit col-span-full" type="submit">
+              Opslaan
+            </Button>
+          )}
         </form>
       </Form>
     </div>

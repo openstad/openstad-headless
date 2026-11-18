@@ -1,17 +1,63 @@
+import { loadReactLeaflet } from '@/components/maps/load-react-leaflet';
+import useArea from '@/hooks/use-area';
+import { useProject } from '@/hooks/use-project';
 import 'leaflet/dist/leaflet.css';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 interface LeafletComponents {
   MapContainer: React.ComponentType<any>;
   TileLayer: React.ComponentType<any>;
   Marker: React.ComponentType<any>;
+  Polygon: React.ComponentType<any>;
   useMapEvents: (events: { [key: string]: (e: any) => void }) => void;
+  useMap: () => any;
 }
 
 interface MapComponentProps {
   onSelectLocation?: (location: string) => void;
   field: any;
   center?: { lat: number; lng: number };
+}
+
+function flattenLatLngs(input: any): Array<{ lat: number; lng: number }> {
+  if (!Array.isArray(input)) return [];
+  if (
+    input.length > 0 &&
+    typeof input[0]?.lat === 'number' &&
+    typeof input[0]?.lng === 'number'
+  ) {
+    return input;
+  }
+  return input.flatMap((item: any) => flattenLatLngs(item));
+}
+
+function getBoundsFromPolygon(
+  polygon: any
+): [[number, number], [number, number]] | null {
+  const points = flattenLatLngs(polygon);
+  if (!points.length) return null;
+  const lats = points.map((p) => p.lat);
+  const lngs = points.map((p) => p.lng);
+  return [
+    [Math.min(...lats), Math.min(...lngs)],
+    [Math.max(...lats), Math.max(...lngs)],
+  ];
+}
+
+function FitToPolygon({
+  bounds,
+  useMap,
+}: {
+  bounds: [[number, number], [number, number]] | null;
+  useMap: () => any;
+}) {
+  const map = useMap();
+  useEffect(() => {
+    if (bounds) {
+      map.fitBounds(bounds);
+    }
+  }, [bounds, map]);
+  return null;
 }
 
 const MapInput: React.FC<MapComponentProps> = ({
@@ -26,24 +72,22 @@ const MapInput: React.FC<MapComponentProps> = ({
   const [dynamicMarkerIcon, setDynamicMarkerIcon] =
     useState<React.ComponentType<any> | null>(null);
 
+  const { data: projectData } = useProject();
+  const rawAreaId = projectData?.config?.map?.areaId;
+  const areaId =
+    rawAreaId && String(rawAreaId) !== '0' ? String(rawAreaId) : undefined;
+  const { data: areaData } = useArea(areaId);
+  const polygon = areaData?.polygon;
+  const bounds = useMemo(
+    () => (polygon ? getBoundsFromPolygon(polygon) : null),
+    [polygon]
+  );
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsSSR(false);
 
-      import('leaflet').then((L) => {
-        const proto = L.Map.prototype as any;
-        const orig = proto._initContainer;
-        proto._initContainer = function (id: any) {
-          const container =
-            typeof id === 'string' ? document.getElementById(id) : id;
-          if (container && container._leaflet_id) {
-            container._leaflet_id = undefined;
-          }
-          return orig.call(this, id);
-        };
-      });
-
-      import('react-leaflet')
+      loadReactLeaflet()
         .then((leaflet) => {
           setLeafletComponents(leaflet);
         })
@@ -96,7 +140,8 @@ const MapInput: React.FC<MapComponentProps> = ({
     return <div>Kaart is aan het laden...</div>;
   }
 
-  const { MapContainer, TileLayer, Marker, useMapEvents } = leafletComponents;
+  const { MapContainer, TileLayer, Marker, Polygon, useMapEvents, useMap } =
+    leafletComponents;
 
   const MapEvents = () => {
     useMapEvents({
@@ -112,15 +157,22 @@ const MapInput: React.FC<MapComponentProps> = ({
       <MapContainer
         center={center}
         zoom={7}
-        scrollWheelZoom={false}
+        scrollWheelZoom={true}
         style={{ height: '600px', width: '100%' }}>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           referrerPolicy="no-referrer-when-downgrade"
         />
+        {polygon && (
+          <Polygon
+            positions={polygon}
+            pathOptions={{ color: '#3388ff', weight: 2, fillOpacity: 0.05 }}
+          />
+        )}
         {markerPosition && (
           <Marker position={markerPosition} icon={dynamicMarkerIcon} />
         )}
+        <FitToPolygon bounds={bounds} useMap={useMap} />
         <MapEvents />
       </MapContainer>
     </div>
