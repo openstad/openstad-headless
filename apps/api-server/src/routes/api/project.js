@@ -93,6 +93,7 @@ router
   // middleware/data-scope-admin-gate.js.
   .put(dataScopeAdminGate)
   .put(ctrl.updateProjectRecord)
+  .put(ctrl.syncCanCreateNewUsers)
   .put(ctrl.publishProjectUpdateMessages)
   .put(ctrl.respondUpdatedProject)
 

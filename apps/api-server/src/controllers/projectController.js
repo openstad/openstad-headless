@@ -940,6 +940,8 @@ async function updateProjectRecord(req, res, next) {
   if (!(project && project.can && project.can('update', req.user)))
     return next(new Error('You cannot update this project'));
 
+  req.canCreateNewUsersBeforeUpdate = project.config?.users?.canCreateNewUsers;
+
   req.pendingMessages = [
     { key: `project-${project.id}-update`, value: 'event' },
   ];
@@ -997,6 +999,35 @@ async function updateProjectRecord(req, res, next) {
       next(err);
       return null;
     });
+}
+
+async function syncCanCreateNewUsers(req, res, next) {
+  const project = req.results;
+  const canCreateNewUsers = project?.config?.users?.canCreateNewUsers;
+  const isSentInBody =
+    typeof req.body.config?.users?.canCreateNewUsers !== 'undefined';
+  if (!isSentInBody && canCreateNewUsers === req.canCreateNewUsersBeforeUpdate)
+    return next();
+
+  try {
+    let providers = await authSettings.providers({ project });
+    const syncedProviders = new Set();
+    for (let provider of providers) {
+      let authConfig = await authSettings.config({
+        project,
+        useAuth: provider,
+      });
+      if (syncedProviders.has(authConfig.provider)) continue;
+      syncedProviders.add(authConfig.provider);
+      let adapter = await authSettings.adapter({ authConfig });
+      if (adapter.service.updateClient) {
+        await adapter.service.updateClient({ authConfig, project });
+      }
+    }
+  } catch (err) {
+    console.log('[canCreateNewUsers] Could not sync auth client:', err.message);
+  }
+  return next();
 }
 
 async function publishProjectUpdateMessages(req, res, next) {
@@ -1272,6 +1303,7 @@ module.exports = {
   viewProject,
   updateAuthClients,
   updateProjectRecord,
+  syncCanCreateNewUsers,
   publishProjectUpdateMessages,
   respondUpdatedProject,
   deleteProject,
