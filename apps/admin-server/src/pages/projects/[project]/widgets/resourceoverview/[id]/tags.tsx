@@ -1,6 +1,5 @@
 import { CheckboxList } from '@/components/checkbox-list';
 import AccordionUI from '@/components/ui/accordion';
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -25,6 +24,7 @@ import { Spacer } from '@/components/ui/spacer';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import {
@@ -38,11 +38,11 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-const formSchema = z.object({
-  displayTagFilters: z.boolean(),
-  showActiveTags: z.boolean().optional(),
-  tagGroups: z
-    .array(
+const formSchema = z
+  .object({
+    displayTagFilters: z.boolean(),
+    showActiveTags: z.boolean().optional(),
+    tagGroups: z.array(
       z.object({
         type: z.string(),
         label: z.string().optional(),
@@ -50,14 +50,25 @@ const formSchema = z.object({
         projectId: z.string().optional(),
         inlineOptions: z.boolean().optional(),
       })
-    )
-    .refine((value) => value.some((item) => item), {
-      message: 'You have to select at least one item.',
-    }),
-  displayTagGroupName: z.boolean(),
-  filterBehavior: z.string().optional(),
-  onlyShowTheseTagIds: z.string().optional(),
-});
+    ),
+    filterBehavior: z.string().optional(),
+    onlyShowTheseTagIds: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    // Only require at least one tag group when the tag filter is actually
+    // enabled; otherwise the toggle can be turned off / groups cleared freely.
+    if (
+      data.displayTagFilters === true &&
+      (!data.tagGroups || data.tagGroups.length === 0)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['tagGroups'],
+        message:
+          "Selecteer minimaal één tag groep of schakel 'Filteren op tags weergeven' uit.",
+      });
+    }
+  });
 
 type Tag = {
   id: number;
@@ -95,10 +106,6 @@ export default function WidgetResourceOverviewTags(
     }
   }, [tags]);
 
-  async function onSubmit(values: FormData) {
-    props.updateConfig({ ...props, ...values });
-  }
-
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
@@ -106,9 +113,13 @@ export default function WidgetResourceOverviewTags(
       showActiveTags: props?.showActiveTags || false,
       filterBehavior: props?.filterBehavior || 'or',
       tagGroups: props.tagGroups || [],
-      displayTagGroupName: props?.displayTagGroupName || false,
       onlyShowTheseTagIds: props?.onlyShowTheseTagIds || '',
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Tags',
   });
 
   return (
@@ -117,7 +128,7 @@ export default function WidgetResourceOverviewTags(
         <Heading size="xl">Tags</Heading>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(e) => e.preventDefault()}
           className="lg:w-full grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
@@ -212,7 +223,7 @@ export default function WidgetResourceOverviewTags(
                                       (el) => el.type === groupName
                                     ) > -1
                                   }
-                                  onCheckedChange={(checked: any) => {
+                                  onCheckedChange={(checked) => {
                                     const projectId = tags.find(
                                       (tag: { type: string }) =>
                                         tag.type === groupName
@@ -221,7 +232,7 @@ export default function WidgetResourceOverviewTags(
                                     const updatedFields =
                                       handleTagCheckboxGroupChange(
                                         groupName,
-                                        checked,
+                                        checked === true,
                                         field.value,
                                         'type',
                                         projectId
@@ -257,6 +268,11 @@ export default function WidgetResourceOverviewTags(
                                   placeholder="Groep label"
                                   key={`${groupName}-label-input-field`}
                                   name={groupName}
+                                  value={
+                                    field.value.find(
+                                      (g) => g.type === groupName
+                                    )?.label ?? ''
+                                  }
                                   disabled={
                                     field.value.find(
                                       (g) => g.type === groupName
@@ -264,16 +280,17 @@ export default function WidgetResourceOverviewTags(
                                   }
                                   onChange={(e) => {
                                     const groups = field.value;
-
-                                    const groupIndex = groups.findIndex(
-                                      (g) => g.type === groupName
+                                    if (
+                                      !groups.some((g) => g.type === groupName)
+                                    )
+                                      return;
+                                    const next = groups.map((g) =>
+                                      g.type === groupName
+                                        ? { ...g, label: e.target.value }
+                                        : g
                                     );
-
-                                    const existingGroup = groups[groupIndex];
-                                    existingGroup.label = e.target.value;
-                                    groups[groupIndex] = existingGroup;
-                                    field.onChange(groups);
-                                    onFieldChange(field.name, groups);
+                                    field.onChange(next);
+                                    onFieldChange(field.name, next);
                                   }}
                                 />
                               </FormControl>
@@ -304,10 +321,10 @@ export default function WidgetResourceOverviewTags(
                                         el.type === groupName && el.multiple
                                     ) > -1
                                   }
-                                  onCheckedChange={(checked: any) => {
+                                  onCheckedChange={(checked) => {
                                     const groups = handleTagCheckboxGroupChange(
                                       groupName,
-                                      checked,
+                                      checked === true,
                                       field.value,
                                       'multiple'
                                     );
@@ -347,10 +364,10 @@ export default function WidgetResourceOverviewTags(
                                         el.inlineOptions
                                     ) > -1
                                   }
-                                  onCheckedChange={(checked: any) => {
+                                  onCheckedChange={(checked) => {
                                     const groups = handleTagCheckboxGroupChange(
                                       groupName,
-                                      checked,
+                                      checked === true,
                                       field.value,
                                       'inlineOptions'
                                     );
@@ -369,6 +386,7 @@ export default function WidgetResourceOverviewTags(
                     </>
                   ))}
                 </div>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -393,7 +411,7 @@ export default function WidgetResourceOverviewTags(
                     <CheckboxList
                       form={form}
                       fieldName="onlyShowTheseTagIds"
-                      fieldLabel=""
+                      fieldLabel="Toon alleen deze tags"
                       label={(t) => t.name}
                       keyForGrouping="type"
                       keyPerItem={(t) => `${t.id}`}
@@ -424,10 +442,6 @@ export default function WidgetResourceOverviewTags(
               },
             ]}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

@@ -1,16 +1,18 @@
 import AuditLogTable from '@/components/audit-log-table';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import WidgetVersionHistory from '@/components/widget-version-history';
+import { flushAllFields } from '@/hooks/useFieldDebounce';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import type { ResourceOverviewMapWidgetProps } from '@openstad-headless/leaflet-map/src/types/resource-overview-map-widget-props';
 import { BaseProps } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
@@ -30,6 +32,7 @@ export const getServerSideProps = withApiUrl;
 
 export type ResourceOverviewMapWidgetTabProps = {
   hideOverviewFields?: boolean;
+  supportsMarkerToggle?: boolean;
 } & Omit<ResourceOverviewMapWidgetProps, keyof Omit<BaseProps, 'projectId'>>;
 
 export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
@@ -37,54 +40,37 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<ResourceOverviewMapWidgetProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<ResourceOverviewMapWidgetProps>({
-      projectId,
-    });
+  const { widget, previewConfig, onFieldChanged } =
+    useWidgetDraft<ResourceOverviewMapWidgetProps>({ projectId });
+
+  const [activeTab, setActiveTab] = useState('map');
+
+  const onTabChange = (value: string) => {
+    flushAllFields();
+    setActiveTab(value);
+  };
+
+  const tabUpdateConfig = ignoreTabSubmit;
 
   const totalPropPackage = {
     ...widget?.config,
     ...previewConfig,
-    updateConfig: (config: ResourceOverviewMapWidgetProps) =>
-      updateConfig({ ...widget.config, ...config }),
-
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        let updatedConfig = {
-          ...previewConfig,
-          [key]: value,
-        };
-        if (key == 'categorize.categorizeByField')
-          updatedConfig.categorize = { categorizeByField: value };
-        if (key == 'clustering.isActive')
-          updatedConfig.clustering = { isActive: value };
-        updatePreview(updatedConfig);
-      }
-    },
+    updateConfig: tabUpdateConfig,
+    onFieldChanged,
     projectId,
   };
 
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Inzendingen kaart',
-            url: `/projects/${projectId}/widgets/resourcesmap/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Inzendingen kaart',
+          `/projects/${projectId}/widgets/resourcesmap/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
-          <Tabs defaultValue="map">
+          <Tabs value={activeTab} onValueChange={onTabChange}>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="map">Kaart</TabsTrigger>
               <TabsTrigger value="button">Knoppen</TabsTrigger>
@@ -94,11 +80,15 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="legend">Legenda</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
             {previewConfig ? (
               <>
                 <TabsContent value="map" className="p-0">
-                  <WidgetResourcesMapMap {...totalPropPackage} />
+                  <WidgetResourcesMapMap
+                    {...totalPropPackage}
+                    supportsMarkerToggle={true}
+                  />
                 </TabsContent>
                 <TabsContent value="button" className="p-0">
                   <WidgetResourcesMapButtons {...totalPropPackage} />
@@ -127,19 +117,20 @@ export default function WidgetResourcesMap({ apiUrl }: WithApiUrlProps) {
                 projectId={projectId as string}
               />
             </TabsContent>
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
+                projectId={projectId as string}
+              />
+            </TabsContent>
           </Tabs>
 
-          <div className="container py-6 mt-6 bg-white rounded-md">
-            {previewConfig && (
-              <>
-                <WidgetPreview
-                  type="resourcesmap"
-                  config={previewConfig}
-                  projectId={projectId as string}
-                />
-              </>
-            )}
-          </div>
+          <WidgetEditorPreview
+            type="resourcesmap"
+            config={previewConfig}
+            projectId={projectId as string}
+            className="container py-6 mt-6 bg-white rounded-md"
+          />
         </div>
       </PageLayout>
     </div>

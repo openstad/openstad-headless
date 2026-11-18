@@ -1,4 +1,5 @@
 const path = require('path');
+const { resolveProxyBodyLimit } = require('./proxy-body-limit');
 
 /** @type {import('next').NextConfig} */
 
@@ -14,6 +15,11 @@ const adminRemotePattern = (() => {
 
 const nextConfig = {
   poweredByHeader: false,
+  experimental: {
+    proxyClientMaxBodySize: resolveProxyBodyLimit(
+      process.env.MAX_FILE_UPLOAD_SIZE_MB
+    ),
+  },
   reactStrictMode: true,
   transpilePackages: ['@openstad-headless/*'],
   images: {

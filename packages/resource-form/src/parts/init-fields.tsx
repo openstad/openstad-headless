@@ -148,6 +148,10 @@ export const InitializeFormFields = (items, data) => {
             item.imageCropRatioHeight ||
             data.project?.imageCropRatioHeight ||
             9;
+          fieldData['allowImageDescription'] =
+            item.allowImageDescription ?? false;
+          fieldData['imageDescriptionLabel'] =
+            item.imageDescriptionLabel || 'Opmerking bij deze afbeelding';
           break;
         case 'documentUpload':
           fieldData['maxUploadSizeMB'] = item.maxUploadSizeMB ?? 25;
@@ -209,6 +213,18 @@ export const InitializeFormFields = (items, data) => {
         case 'timeline':
           fieldData['type'] = 'timeline';
           fieldData['allowedTypes'] = item.allowedTypes;
+          if (!fieldData['defaultValue']) {
+            fieldData['defaultValue'] = [];
+          }
+          break;
+        case 'resourceLink':
+          fieldData['type'] = 'resourceLink';
+          fieldData['linkSource'] = item.linkSource;
+          fieldData['linkTags'] = item.linkTags;
+          fieldData['defaultValue'] = [];
+          break;
+        case 'modbreak':
+          fieldData['type'] = 'modbreak';
           if (!fieldData['defaultValue']) {
             fieldData['defaultValue'] = [];
           }

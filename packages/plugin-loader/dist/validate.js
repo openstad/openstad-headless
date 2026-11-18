@@ -14,6 +14,25 @@ function isUnsafeFilePath(value) {
         return true;
     return value.split(/[\\/]/).includes('..');
 }
+const EXTENSION_KEY_PATTERN = /^[a-z0-9-]{1,64}$/;
+const RESERVED_SOURCE_KEY = 'openstad';
+function validateHandlerPath(errors, prefix, handler) {
+    if (!handler) {
+        errors.push(`${prefix}: missing required field "handler"`);
+    }
+    else if (isUnsafeFilePath(handler)) {
+        errors.push(`${prefix}: "handler" must be a relative path inside the plugin (got "${handler}")`);
+    }
+}
+function validateNamedHandler(errors, prefix, entry) {
+    if (typeof entry.key !== 'string' || !EXTENSION_KEY_PATTERN.test(entry.key)) {
+        errors.push(`${prefix}: "key" must match ${EXTENSION_KEY_PATTERN.toString()}`);
+    }
+    if (typeof entry.label !== 'string' || !entry.label) {
+        errors.push(`${prefix}: missing required field "label"`);
+    }
+    validateHandlerPath(errors, prefix, entry.handler);
+}
 /**
  * Validates a plugin manifest object.
  *
@@ -71,6 +90,44 @@ function validateManifest(manifest) {
                 }
                 else if (isUnsafeFilePath(mw.path)) {
                     errors.push(`api.middleware[${i}]: "path" must be a relative path inside the plugin (got "${mw.path}")`);
+                }
+            });
+        }
+        const linkRequestHandler = api.linkRequestHandler;
+        if (linkRequestHandler) {
+            validateHandlerPath(errors, 'api.linkRequestHandler', linkRequestHandler.handler);
+        }
+        if (Array.isArray(api.contactHandlers)) {
+            api.contactHandlers.forEach((contactHandler, i) => {
+                validateNamedHandler(errors, `api.contactHandlers[${i}]`, contactHandler);
+            });
+        }
+        if (Array.isArray(api.sources)) {
+            api.sources.forEach((source, i) => {
+                validateNamedHandler(errors, `api.sources[${i}]`, source);
+                if (source.key === RESERVED_SOURCE_KEY) {
+                    errors.push(`api.sources[${i}]: key "${RESERVED_SOURCE_KEY}" is reserved`);
+                }
+            });
+        }
+        if (Array.isArray(api.notifications)) {
+            api.notifications.forEach((notification, i) => {
+                const prefix = `api.notifications[${i}]`;
+                if (typeof notification.type !== 'string' || !notification.type) {
+                    errors.push(`${prefix}: missing required field "type"`);
+                }
+                if (typeof notification.label !== 'string' || !notification.label) {
+                    errors.push(`${prefix}: missing required field "label"`);
+                }
+                if (!notification.template) {
+                    errors.push(`${prefix}: missing required field "template"`);
+                }
+                else if (isUnsafeFilePath(notification.template)) {
+                    errors.push(`${prefix}: "template" must be a relative path inside the plugin (got "${notification.template}")`);
+                }
+                if (notification.immediate !== undefined &&
+                    typeof notification.immediate !== 'boolean') {
+                    errors.push(`${prefix}: "immediate" must be a boolean`);
                 }
             });
         }

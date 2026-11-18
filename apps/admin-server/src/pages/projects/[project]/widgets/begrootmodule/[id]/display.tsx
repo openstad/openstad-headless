@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -24,6 +23,7 @@ import { Heading } from '@/components/ui/typography';
 import { useProject } from '@/hooks/use-project';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -81,13 +81,13 @@ export default function BegrootmoduleDisplay(
       displayRanking: props.displayRanking || false,
       displayPriceLabel: props.displayPriceLabel || false,
       showVoteCount: props.showVoteCount || false,
-      notEnoughBudgetText: props.notEnoughBudgetText || 'Niet genoeg budget',
+      notEnoughBudgetText: props.notEnoughBudgetText ?? 'Niet genoeg budget',
       showOriginalResource: props.showOriginalResource || false,
       hideReadMore: props.hideReadMore || false,
       scrollWhenMaxReached: props.scrollWhenMaxReached || false,
       originalResourceUrl: props.originalResourceUrl || '',
       originalResourceText:
-        props.originalResourceText || 'Bekijk het originele ingediende plan',
+        props.originalResourceText ?? 'Bekijk het originele ingediende plan',
       resourceListColumns: props.resourceListColumns || 3,
       showInfoMenu:
         props.showInfoMenu === undefined ? true : props.showInfoMenu,
@@ -100,6 +100,11 @@ export default function BegrootmoduleDisplay(
       showConfetti: props.showConfetti || false,
       clickableImage: props.clickableImage || false,
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Weergave opties',
   });
 
   const router = useRouter();
@@ -284,7 +289,7 @@ export default function BegrootmoduleDisplay(
             name="displayModBreak"
             render={({ field }) => (
               <FormItem className="col-span-1">
-                <FormLabel>Toon de ModBreak</FormLabel>
+                <FormLabel>Toon officiële reacties</FormLabel>
                 {YesNoSelect(field, props)}
                 <FormMessage />
               </FormItem>
@@ -507,10 +512,6 @@ export default function BegrootmoduleDisplay(
               )}
             </>
           )}
-
-          <Button type="submit" className="w-fit col-span-full">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

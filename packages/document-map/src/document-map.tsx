@@ -47,6 +47,7 @@ import NotificationService from '../../lib/NotificationProvider/notification-ser
 import hasRole from '../../lib/has-role';
 import './document-map.css';
 import './gesture';
+import { characterLimitError } from './lib/character-limit-error';
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -499,7 +500,7 @@ function DocumentMap({
         }
         setIsBoundsSet(true);
       }
-    }, [map, bounds, isBoundsSet]);
+    }, [map, bounds, entireDocumentVisible, isBoundsSet]);
 
     return null;
   };
@@ -578,7 +579,15 @@ function DocumentMap({
         setIsSubmittingComment(false);
       }
     } else {
-      return;
+      setHelpText(
+        characterLimitError({
+          length: commentValue.length,
+          min: props.comments?.descriptionMinLength || 0,
+          max: props.comments?.descriptionMaxLength || Infinity,
+          minErrorText: props?.minCharactersError,
+          maxErrorText: props?.maxCharactersError,
+        })
+      );
     }
   };
 
@@ -602,7 +611,7 @@ function DocumentMap({
             : '')
       );
     }
-  }, []);
+  }, [relativePathPrepend]);
 
   let args = {
     canComment:
@@ -634,7 +643,7 @@ function DocumentMap({
     if (resource.extraData?.originalId) {
       setOriginalID(resource.extraData?.originalId);
     }
-  }, [resource]);
+  }, [resource, statusId]);
 
   if (canComment === false) args.canComment = canComment;
 
@@ -779,6 +788,9 @@ function DocumentMap({
               }
               setSelectedMarkerIndex(index);
               setSelectedCommentIndex(index);
+              if (!isPopupMarkerBehavior) {
+                scrollToComment(index);
+              }
             }
           },
           keydown: (e: L.LeafletKeyboardEvent) => {
@@ -793,6 +805,9 @@ function DocumentMap({
                 }
                 setSelectedMarkerIndex(index);
                 setSelectedCommentIndex(index);
+                if (!isPopupMarkerBehavior) {
+                  scrollToComment(index);
+                }
               }
             }
           },
@@ -1026,7 +1041,7 @@ function DocumentMap({
     if (openInfoPopupOnInit === 'yes') {
       setIsModalOpen(true);
     }
-  }, []);
+  }, [openInfoPopupOnInit]);
 
   const [showButton, setShowButton] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -1329,13 +1344,17 @@ function DocumentMap({
                         ) => {
                           return (
                             <div key={group.type}>
-                              <FormLabel htmlFor={group.type}>
+                              <FormLabel
+                                {...(group && group.multiple
+                                  ? { id: group.type }
+                                  : { htmlFor: group.type })}>
                                 {group.label}
                               </FormLabel>
 
                               {group && group.multiple ? (
                                 <MultiSelect
                                   id={group.type}
+                                  legend={group.label || ''}
                                   label={'Selecteer een optie'}
                                   onItemSelected={(optionValue: string) => {
                                     const value = parseInt(optionValue, 10);

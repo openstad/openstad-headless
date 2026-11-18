@@ -1,3 +1,4 @@
+import { CheckboxList } from '@/components/checkbox-list';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -21,11 +22,21 @@ import {
 } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
+import usePluginCapabilities from '@/hooks/use-plugin-capabilities';
 import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
+import { useDraftItems } from '@/hooks/useDraftItems';
+import { useOpenItemDraft } from '@/hooks/useOpenItemDraft';
 import { usePanelSwitchFocus } from '@/hooks/usePanelSwitchFocus';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
+import { fromCsvIds, toggleCsvId } from '@/lib/link-settings';
+import {
+  applySelectedMatrixEdit,
+  applySelectedOptionEdit,
+  fieldKeyError,
+  mergeSelectedItem,
+} from '@/lib/open-item-merge';
 import { generateId, withId } from '@/lib/widget-item-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -42,7 +53,7 @@ import {
 import { ArrowDown, ArrowUp, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -93,6 +104,8 @@ const formSchema = z.object({
     (val) => (val === '' || val === null ? undefined : val),
     z.coerce.number().int().positive().optional()
   ),
+  allowImageDescription: z.boolean().optional(),
+  imageDescriptionLabel: z.string().optional(),
   prevPageText: z.string().optional(),
   nextPageText: z.string().optional(),
   placeholder: z.string().optional(),
@@ -140,6 +153,8 @@ const formSchema = z.object({
   routingSelectedAnswer: z.union([z.string(), z.array(z.string())]).optional(),
   selectAll: z.boolean().optional(),
   selectAllLabel: z.string().optional(),
+  linkSource: z.string().optional(),
+  linkTags: z.string().optional(),
 });
 
 const matrixDefault = {
@@ -170,7 +185,10 @@ export default function WidgetResourceFormItems(
   props: ResourceFormWidgetProps & EditFieldProps<ResourceFormWidgetProps>
 ) {
   type FormData = z.infer<typeof formSchema>;
-  const [items, setItems] = useState<Item[]>([]);
+  const [items, commitItems] = useDraftItems<Item>(
+    props.items,
+    props.onFieldChanged
+  );
   const [options, setOptions] = useState<Option[]>([]);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const selectedItem = selectedItemId
@@ -181,6 +199,7 @@ export default function WidgetResourceFormItems(
   const panelRef = usePanelSwitchFocus(settingOptions);
   const [file, setFile] = useState<File>();
   const [isFieldKeyUnique, setIsFieldKeyUnique] = useState(true);
+  const [isModbreakTypeUnique, setIsModbreakTypeUnique] = useState(true);
   const [matrixOptions, setMatrixOptions] = useState<Matrix>(matrixDefault);
   const [matrixOption, setMatrixOption] = useState<
     (MatrixOption & { type: 'rows' | 'columns' }) | null
@@ -192,6 +211,39 @@ export default function WidgetResourceFormItems(
   const { data: allStatuses } = useStatuses(project as string);
   const { data: allTags } = useTags(project as string);
   const firstTagType = allTags?.[0]?.type ?? '';
+  const { capabilities, error: capabilitiesError } = usePluginCapabilities();
+
+  type OpenItemState = {
+    options: Option[];
+    matrixOptions: Matrix;
+    selectedOption: Option | null;
+    matrixOption: (MatrixOption & { type: 'rows' | 'columns' }) | null;
+  };
+
+  const optionFields = { titles: [], images: [] };
+
+  function mergeOpenItem(
+    currentItems: Item[],
+    selectedId: string,
+    values: FormData,
+    state: OpenItemState
+  ) {
+    const { trigger: _formTrigger, ...valuesWithoutTrigger } = values;
+    return mergeSelectedItem(currentItems, selectedId, {
+      ...valuesWithoutTrigger,
+      options: applySelectedOptionEdit(
+        state.options,
+        state.selectedOption,
+        values.options,
+        optionFields
+      ),
+      matrix: applySelectedMatrixEdit(
+        state.matrixOptions,
+        state.matrixOption,
+        values.matrix
+      ),
+    } as Partial<Item>);
+  }
 
   // adds item to items array if no item is selected, otherwise updates the selected item
   async function onSubmit(values: FormData) {
@@ -208,7 +260,7 @@ export default function WidgetResourceFormItems(
       }
       const hasTriggerChanges = Object.keys(triggerMap).length > 0;
 
-      setItems((currentItems) =>
+      commitItems((currentItems) =>
         currentItems.map((item) => {
           if (item.id === selectedItem.id) {
             return { ...item, ...valuesWithoutTrigger };
@@ -232,7 +284,7 @@ export default function WidgetResourceFormItems(
       );
       setSelectedItemId(null);
     } else {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         const maxTrigger = currentItems.reduce(
           (max, i) => Math.max(max, parseInt(i.trigger) || 0),
           0
@@ -264,6 +316,8 @@ export default function WidgetResourceFormItems(
             imageCropRequired: values.imageCropRequired || false,
             imageCropRatioWidth: values.imageCropRatioWidth,
             imageCropRatioHeight: values.imageCropRatioHeight,
+            allowImageDescription: values.allowImageDescription || false,
+            imageDescriptionLabel: values.imageDescriptionLabel || '',
             prevPageText: values.prevPageText || '',
             nextPageText: values.nextPageText || '',
             options: values.options || [],
@@ -274,6 +328,8 @@ export default function WidgetResourceFormItems(
             routingSelectedAnswer: values.routingSelectedAnswer || '',
             selectAll: values.selectAll || false,
             selectAllLabel: values.selectAllLabel || '',
+            linkSource: values.linkSource || '',
+            linkTags: values.linkTags || '',
           },
         ];
       });
@@ -417,6 +473,8 @@ export default function WidgetResourceFormItems(
     imageCropRequired: false,
     imageCropRatioWidth: undefined,
     imageCropRatioHeight: undefined,
+    allowImageDescription: false,
+    imageDescriptionLabel: '',
     prevPageText: '',
     nextPageText: '',
     options: [],
@@ -427,6 +485,8 @@ export default function WidgetResourceFormItems(
     routingSelectedAnswer: '',
     selectAll: false,
     selectAllLabel: '',
+    linkSource: '',
+    linkTags: '',
   });
 
   const form = useForm<FormData>({
@@ -434,71 +494,84 @@ export default function WidgetResourceFormItems(
     defaultValues: defaults(),
   });
 
-  const itemsInitialized = React.useRef(false);
-  useEffect(() => {
-    if (props?.items && props?.items?.length > 0 && !itemsInitialized.current) {
-      itemsInitialized.current = true;
-      setItems(props.items.map(withId));
-    }
-  }, [props?.items]);
+  const { releaseOpenItem } = useOpenItemDraft<Item, FormData, OpenItemState>({
+    form,
+    openId: selectedItem?.id ?? null,
+    state: { options, matrixOptions, selectedOption, matrixOption },
+    items,
+    commitItems,
+    merge: mergeOpenItem,
+    validate: (currentItems, selectedId, values) => {
+      if (values.type === 'tags' && !allTags?.length) {
+        return 'Geen tags gevonden om te selecteren';
+      }
+      if (!isModbreakTypeUnique) {
+        return 'Er kan maar één veld voor officiële reacties per formulier zijn';
+      }
+      if (['none', 'pagination'].includes(values.type || '')) return undefined;
+      return fieldKeyError(currentItems, selectedId, values.fieldKey);
+    },
+    label: 'Formulier velden',
+  });
 
-  const { onFieldChanged } = props;
-  useEffect(() => {
-    if (onFieldChanged) {
-      onFieldChanged('items', items);
-    }
-  }, [items]);
+  function buildFormValues(item: Item) {
+    return {
+      trigger: item.trigger,
+      title: item.title || '',
+      description: item.description || '',
+      placeholder: item.placeholder || '',
+      defaultValue: item.defaultValue || '',
+      type: item.type || '',
+      tags: item.tags || firstTagType,
+      fieldType: item.fieldType || '',
+      options: item.options || [],
+      fieldKey: item.fieldKey || '',
+      fieldRequired: item.fieldRequired || false,
+      onlyForModerator: item.onlyForModerator || false,
+      enableAddressSearch: item.enableAddressSearch || false,
+      minCharacters: item.minCharacters || '',
+      maxCharacters: item.maxCharacters || '',
+      maxChoices: item.maxChoices || '',
+      maxChoicesMessage: item.maxChoicesMessage || '',
+      variant: item.variant || '',
+      multiple: item.multiple || false,
+      maxUploadSizeMB: item.maxUploadSizeMB || 25,
+      imageCropEnabled: item.imageCropEnabled || false,
+      imageCropRequired: item.imageCropRequired || false,
+      imageCropRatioWidth: item.imageCropRatioWidth,
+      imageCropRatioHeight: item.imageCropRatioHeight,
+      allowImageDescription: item.allowImageDescription || false,
+      imageDescriptionLabel: item.imageDescriptionLabel || '',
+      prevPageText: item.prevPageText || '',
+      nextPageText: item.nextPageText || '',
+      matrix: item.matrix || matrixDefault,
+      matrixMultiple: item.matrixMultiple || false,
+      routingInitiallyHide: item.routingInitiallyHide || false,
+      routingSelectedQuestion: item.routingSelectedQuestion || '',
+      routingSelectedAnswer: item.routingSelectedAnswer || '',
+      selectAll: item.selectAll || false,
+      selectAllLabel:
+        typeof item.selectAllLabel === 'undefined'
+          ? 'Selecteer alles'
+          : item.selectAllLabel,
+      linkSource: item.linkSource || '',
+      linkTags: item.linkTags || '',
+    };
+  }
 
-  // Sets form to selected item values when item is selected
-  useEffect(() => {
-    if (selectedItem) {
-      form.reset({
-        trigger: selectedItem.trigger,
-        title: selectedItem.title || '',
-        description: selectedItem.description || '',
-        placeholder: selectedItem.placeholder || '',
-        defaultValue: selectedItem.defaultValue || '',
-        type: selectedItem.type || '',
-        tags: selectedItem.tags || firstTagType,
-        fieldType: selectedItem.fieldType || '',
-        options: selectedItem.options || [],
-        fieldKey: selectedItem.fieldKey || '',
-        fieldRequired: selectedItem.fieldRequired || false,
-        onlyForModerator: selectedItem.onlyForModerator || false,
-        enableAddressSearch: selectedItem.enableAddressSearch || false,
-        minCharacters: selectedItem.minCharacters || '',
-        maxCharacters: selectedItem.maxCharacters || '',
-        maxChoices: selectedItem.maxChoices || '',
-        maxChoicesMessage: selectedItem.maxChoicesMessage || '',
-        variant: selectedItem.variant || '',
-        multiple: selectedItem.multiple || false,
-        maxUploadSizeMB: selectedItem.maxUploadSizeMB || 25,
-        imageCropEnabled: selectedItem.imageCropEnabled || false,
-        imageCropRequired: selectedItem.imageCropRequired || false,
-        imageCropRatioWidth: selectedItem.imageCropRatioWidth,
-        imageCropRatioHeight: selectedItem.imageCropRatioHeight,
-        prevPageText: selectedItem.prevPageText || '',
-        nextPageText: selectedItem.nextPageText || '',
-        matrix: selectedItem.matrix || matrixDefault,
-        matrixMultiple: selectedItem.matrixMultiple || false,
-        routingInitiallyHide: selectedItem.routingInitiallyHide || false,
-        routingSelectedQuestion: selectedItem.routingSelectedQuestion || '',
-        routingSelectedAnswer: selectedItem.routingSelectedAnswer || '',
-        selectAll: selectedItem.selectAll || false,
-        selectAllLabel:
-          typeof selectedItem.selectAllLabel === 'undefined'
-            ? 'Selecteer alles'
-            : selectedItem.selectAllLabel,
-      });
-      setOptions((selectedItem.options || []).map(withId));
-      const matrix = selectedItem.matrix || matrixDefault;
-      setMatrixOptions({
-        ...matrix,
-        rows: (matrix.rows || []).map(withId),
-        columns: (matrix.columns || []).map(withId),
-      });
-    }
-  }, [selectedItemId, form]);
+  function openItem(item: Item) {
+    form.reset(buildFormValues(item));
+    setOptions((item.options || []).map(withId));
+    const matrix = item.matrix || matrixDefault;
+    setMatrixOptions({
+      ...matrix,
+      rows: (matrix.rows || []).map(withId),
+      columns: (matrix.columns || []).map(withId),
+    });
+    setOption(null);
+    setMatrixOption(null);
+    setSelectedItemId(item.id ?? null);
+  }
 
   useEffect(() => {
     if (selectedOption) {
@@ -531,7 +604,7 @@ export default function WidgetResourceFormItems(
     matrixType: 'rows' | 'columns' = 'rows'
   ) => {
     if (isItemAction) {
-      setItems((currentItems) => {
+      commitItems((currentItems) => {
         const index = currentItems.findIndex(
           (entry) => entry.trigger === clickedTrigger
         );
@@ -635,20 +708,6 @@ export default function WidgetResourceFormItems(
     return sorted;
   }
 
-  function handleSaveItems() {
-    const updatedProps = { ...props };
-
-    Object.keys(updatedProps).forEach((key: string) => {
-      if (key.startsWith('options.')) {
-        // @ts-ignore
-        delete updatedProps[key];
-      }
-    });
-
-    props.updateConfig({ ...updatedProps, items });
-    setMatrixOptions(matrixDefault);
-  }
-
   const hasOptions = () => {
     switch (form.watch('type')) {
       case 'checkbox':
@@ -679,13 +738,56 @@ export default function WidgetResourceFormItems(
     setSelectedItemId(null);
   }
 
+  function selectOption(option: Option) {
+    if (option.id === selectedOption?.id) return;
+    setOptions((currentOptions) =>
+      applySelectedOptionEdit(
+        currentOptions,
+        selectedOption,
+        form.getValues('options'),
+        optionFields
+      )
+    );
+    setOption(option);
+  }
+
+  function selectMatrixOption(
+    option: MatrixOption & { type: 'rows' | 'columns' }
+  ) {
+    if (option.id === matrixOption?.id && option.type === matrixOption?.type) {
+      return;
+    }
+    setMatrixOptions((currentMatrix) =>
+      applySelectedMatrixEdit(
+        currentMatrix,
+        matrixOption,
+        form.getValues('matrix')
+      )
+    );
+    setMatrixOption(option);
+  }
+
   function handleSaveOptions() {
-    form.setValue('options', options);
+    const editedOptions = applySelectedOptionEdit(
+      options,
+      selectedOption,
+      form.getValues('options'),
+      optionFields
+    );
+    setOptions(editedOptions);
+    form.setValue('options', editedOptions);
     setSettingOptions(false);
+    setOption(null);
   }
 
   function handleSaveMatrixOptions() {
-    form.setValue('matrix', matrixOptions);
+    const editedMatrix = applySelectedMatrixEdit(
+      matrixOptions,
+      matrixOption,
+      form.getValues('matrix')
+    );
+    setMatrixOptions(editedMatrix);
+    form.setValue('matrix', editedMatrix);
     setSettingOptions(false);
     setMatrixOption(null);
   }
@@ -696,9 +798,14 @@ export default function WidgetResourceFormItems(
     );
 
     if (defaultFormItem) {
-      if (form.watch('fieldKey') === '') {
-        form.setValue('fieldKey', defaultFormItem.fieldKey || '');
-      }
+      const savedFieldKey =
+        selectedItem?.type === defaultFormItem.type
+          ? selectedItem.fieldKey
+          : '';
+      form.setValue(
+        'fieldKey',
+        savedFieldKey || defaultFormItem.fieldKey || ''
+      );
       if (form.watch('title') === '') {
         form.setValue('title', defaultFormItem.title || '');
       }
@@ -739,9 +846,34 @@ export default function WidgetResourceFormItems(
         form.setValue('fieldKey', 'timeline');
       }
       form.setValue('fieldType', 'timeline');
+    } else if (form.watch('type') === 'resourceLink') {
+      form.setValue('fieldType', 'resourceLink');
+      if (!form.watch('linkSource')) {
+        form.setValue('linkSource', 'openstad');
+      }
+    } else if (form.watch('type') === 'modbreak') {
+      if (form.watch('fieldKey') === '') {
+        form.setValue('fieldKey', 'modBreaks');
+      }
+      form.setValue('fieldType', 'modbreak');
+      form.setValue('fieldRequired', false);
+      form.setValue('onlyForModerator', false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [form.watch('type')]);
+
+  useEffect(() => {
+    const subscription = form.watch((values, { name, type }) => {
+      if (name !== 'type' || type !== 'change') return;
+      const defaultItem = defaultFormValues.find(
+        (item) => item.type === values.type
+      );
+      if (defaultItem?.fieldType === 'text' && defaultItem.variant) {
+        form.setValue('variant', defaultItem.variant);
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   useEffect(() => {
     const type = form.watch('type');
@@ -761,6 +893,17 @@ export default function WidgetResourceFormItems(
       setIsFieldKeyUnique(isUnique);
     } else {
       setIsFieldKeyUnique(false);
+    }
+
+    if (type === 'modbreak') {
+      const isTypeUnique = items.every(
+        (item) =>
+          (selectedItem && item.id === selectedItem.id) ||
+          item.type !== 'modbreak'
+      );
+      setIsModbreakTypeUnique(isTypeUnique);
+    } else {
+      setIsModbreakTypeUnique(true);
     }
   }, [form.watch('fieldKey'), form.watch('type'), selectedItem]);
 
@@ -804,9 +947,9 @@ export default function WidgetResourceFormItems(
                             <span
                               className="gap-2 py-3 px-2 w-full"
                               onClick={() => {
-                                setSelectedItemId(item.id ?? null);
-                                setOptions([]);
-                                setMatrixOptions(matrixDefault);
+                                if (selectedItem?.id === item.id) return;
+                                if (!releaseOpenItem()) return;
+                                openItem(item);
                                 setSettingOptions(false);
                               }}>
                               <span
@@ -831,14 +974,6 @@ export default function WidgetResourceFormItems(
                         ))
                     : 'Geen items'}
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  className="w-fit mt-4"
-                  type="button"
-                  onClick={() => handleSaveItems()}>
-                  Configuratie opslaan
-                </Button>
               </div>
             </div>
 
@@ -903,7 +1038,7 @@ export default function WidgetResourceFormItems(
                                       <span
                                         className="py-3 px-2 w-full"
                                         onClick={() =>
-                                          setMatrixOption({
+                                          selectMatrixOption({
                                             ...option,
                                             type: matrixItem.type,
                                           })
@@ -965,7 +1100,7 @@ export default function WidgetResourceFormItems(
                             }>
                             {matrixOption &&
                             matrixOption.type === matrixItem.type
-                              ? 'Sla wijzigingen op'
+                              ? 'Nieuwe optie'
                               : 'Voeg optie toe aan lijst'}
                           </Button>
                         </div>
@@ -973,19 +1108,10 @@ export default function WidgetResourceFormItems(
                         {matrixItem.type === 'rows' && (
                           <div className="flex gap-2">
                             <Button
-                              className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                              type="button"
-                              onClick={() => {
-                                (setSettingOptions(() => !settingOptions),
-                                  setMatrixOption(null));
-                              }}>
-                              Annuleer
-                            </Button>
-                            <Button
                               className="w-fit mt-4"
                               type="button"
                               onClick={() => handleSaveMatrixOptions()}>
-                              Sla antwoordopties op
+                              Terug
                             </Button>
                           </div>
                         )}
@@ -1110,26 +1236,16 @@ export default function WidgetResourceFormItems(
                         type="button"
                         onClick={() => handleAddOption(form.getValues())}>
                         {selectedOption
-                          ? 'Sla wijzigingen op'
+                          ? 'Nieuwe optie'
                           : 'Voeg optie toe aan lijst'}
                       </Button>
                     </div>
                     <div className="flex gap-2">
                       <Button
-                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                        type="button"
-                        onClick={() => {
-                          (setSettingOptions(() => !settingOptions),
-                            setOption(null),
-                            setOptions([]));
-                        }}>
-                        Annuleer
-                      </Button>
-                      <Button
                         className="w-fit mt-4"
                         type="button"
                         onClick={() => handleSaveOptions()}>
-                        Sla antwoordopties op
+                        Terug
                       </Button>
                     </div>
                   </div>
@@ -1176,7 +1292,7 @@ export default function WidgetResourceFormItems(
                                 </span>
                                 <span
                                   className="py-3 px-2 w-full"
-                                  onClick={() => setOption(option)}>
+                                  onClick={() => selectOption(option)}>
                                   {option?.titles?.[0].key}
                                 </span>
                                 <span className="py-3 px-2">
@@ -1288,8 +1404,32 @@ export default function WidgetResourceFormItems(
                               <SelectItem value="timeline">
                                 Inzending: Tijdlijn
                               </SelectItem>
+                              <SelectItem
+                                value="resourceLink"
+                                disabled={!capabilities.linkRequests}>
+                                {capabilities.linkRequests
+                                  ? 'Inzending koppelen'
+                                  : 'Inzending koppelen (plugin niet actief)'}
+                              </SelectItem>
+                              <SelectItem
+                                value="modbreak"
+                                disabled={items.some(
+                                  (item) =>
+                                    item.type === 'modbreak' &&
+                                    (!selectedItem ||
+                                      item.id !== selectedItem.id)
+                                )}>
+                                Inzending: Officiële reactie
+                              </SelectItem>
                             </SelectContent>
                           </Select>
+                          {capabilitiesError ? (
+                            <p className="text-sm text-destructive">
+                              De plugin-instellingen konden niet worden geladen.
+                              Vraagtypes van plugins zijn daardoor niet
+                              beschikbaar.
+                            </p>
+                          ) : null}
                           <FormMessage />
                         </FormItem>
                       )}></FormField>
@@ -1390,6 +1530,8 @@ export default function WidgetResourceFormItems(
                               'select',
                               'matrix',
                               'timeline',
+                              'resourceLink',
+                              'modbreak',
                             ];
                             const type = form.watch('type');
                             const fieldKey = !nonStaticType.includes(type || '')
@@ -1404,12 +1546,19 @@ export default function WidgetResourceFormItems(
                                   ‘samenvatting’
                                 </em>
 
-                                <Input {...field} disabled={!!fieldKey} />
-                                {(!field.value || !isFieldKeyUnique) && (
+                                <Input
+                                  {...field}
+                                  disabled={!!fieldKey || type === 'modbreak'}
+                                />
+                                {(!field.value ||
+                                  !isFieldKeyUnique ||
+                                  !isModbreakTypeUnique) && (
                                   <FormMessage>
                                     {!field.value
                                       ? 'Key is verplicht'
-                                      : 'Key moet uniek zijn'}
+                                      : !isModbreakTypeUnique
+                                        ? 'Er kan maar één veld voor officiële reacties per formulier zijn'
+                                        : 'Key moet uniek zijn'}
                                   </FormMessage>
                                 )}
                               </FormItem>
@@ -1601,6 +1750,7 @@ export default function WidgetResourceFormItems(
                       'a-b-slider',
                       'sort',
                       'scale',
+                      'modbreak',
                     ].includes(form.watch('type') || '') && (
                       <FormField
                         control={form.control}
@@ -1907,6 +2057,88 @@ export default function WidgetResourceFormItems(
                       />
                     )}
 
+                    {(form.watch('type') === 'imageUpload' ||
+                      form.watch('type') === 'images') && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="allowImageDescription"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>
+                                Mag de indiener een opmerking bij een afbeelding
+                                zetten?
+                              </FormLabel>
+                              <Select
+                                onValueChange={(e: string) =>
+                                  field.onChange(e === 'true')
+                                }
+                                value={field.value ? 'true' : 'false'}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Kies een optie" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="true">Ja</SelectItem>
+                                  <SelectItem value="false">Nee</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {form.watch('allowImageDescription') && (
+                          <FormField
+                            control={form.control}
+                            name="imageDescriptionLabel"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>
+                                  Label van het opmerkingveld
+                                </FormLabel>
+                                <FormDescription>
+                                  <em className="text-xs">
+                                    Standaard: &quot;Opmerking bij deze
+                                    afbeelding&quot;.
+                                  </em>
+                                </FormDescription>
+                                <Input type="text" {...field} />
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        )}
+
+                        {form.watch('allowImageDescription') &&
+                          form.watch('fieldKey') !== 'images' && (
+                            <FormDescription>
+                              <em className="text-xs text-red-600">
+                                Let op: de opmerking wordt alleen opgeslagen in
+                                de eigen afbeeldingen-kolom van de inzending (en
+                                dus alleen op de detailpagina getoond) als de
+                                veldsleutel exact &quot;images&quot; is. Bij een
+                                andere veldsleutel komt de waarde in extraData
+                                terecht en wordt hij niet getoond.
+                              </em>
+                            </FormDescription>
+                          )}
+
+                        {form.watch('allowImageDescription') &&
+                          form.watch('fieldKey') === 'images' && (
+                            <FormDescription>
+                              <em className="text-xs text-red-600">
+                                Let op: de opmerking is openbaar. Ze wordt op de
+                                detailpagina onder de afbeelding getoond, tenzij
+                                &quot;Beschrijving van de afbeelding tonen&quot;
+                                in de detail-widget uit staat.
+                              </em>
+                            </FormDescription>
+                          )}
+                      </>
+                    )}
+
                     {['map', 'location'].includes(form.watch('type') || '') && (
                       <FormField
                         control={form.control}
@@ -2006,43 +2238,44 @@ export default function WidgetResourceFormItems(
                         />
                       )}
 
-                    {form.watch('type') !== 'pagination' && (
-                      <FormField
-                        control={form.control}
-                        name="onlyForModerator"
-                        render={({ field }) => {
-                          const type = form.watch('type');
+                    {form.watch('type') !== 'pagination' &&
+                      form.watch('type') !== 'modbreak' && (
+                        <FormField
+                          control={form.control}
+                          name="onlyForModerator"
+                          render={({ field }) => {
+                            const type = form.watch('type');
 
-                          return (
-                            <FormItem>
-                              <FormLabel>
-                                Wie mag de ingevulde waarde van dit veld zien?
-                              </FormLabel>
-                              <Select
-                                onValueChange={(e: string) =>
-                                  field.onChange(e === 'true')
-                                }
-                                value={field.value ? 'true' : 'false'}>
-                                <FormControl>
-                                  <SelectTrigger>
-                                    <SelectValue placeholder="Kies een optie" />
-                                  </SelectTrigger>
-                                </FormControl>
-                                <SelectContent>
-                                  <SelectItem value="false">
-                                    Iedereen
-                                  </SelectItem>
-                                  <SelectItem value="true">
-                                    Alleen admin gebruikers
-                                  </SelectItem>
-                                </SelectContent>
-                              </Select>
-                              <FormMessage />
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    )}
+                            return (
+                              <FormItem>
+                                <FormLabel>
+                                  Wie mag de ingevulde waarde van dit veld zien?
+                                </FormLabel>
+                                <Select
+                                  onValueChange={(e: string) =>
+                                    field.onChange(e === 'true')
+                                  }
+                                  value={field.value ? 'true' : 'false'}>
+                                  <FormControl>
+                                    <SelectTrigger>
+                                      <SelectValue placeholder="Kies een optie" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="false">
+                                      Iedereen
+                                    </SelectItem>
+                                    <SelectItem value="true">
+                                      Alleen admin gebruikers
+                                    </SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            );
+                          }}
+                        />
+                      )}
 
                     {[
                       'text',
@@ -2281,6 +2514,93 @@ export default function WidgetResourceFormItems(
                       </>
                     )}
 
+                    {form.watch('type') === 'resourceLink' && (
+                      <>
+                        <FormField
+                          control={form.control}
+                          name="linkSource"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Bron</FormLabel>
+                              <FormDescription>
+                                Waaruit kan de indiener kiezen? Nadat het
+                                formulier is verstuurd, wordt de andere kant om
+                                bevestiging gevraagd.
+                              </FormDescription>
+                              <Select
+                                onValueChange={field.onChange}
+                                value={field.value || 'openstad'}>
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="openstad">
+                                    Inzendingen in dit project
+                                  </SelectItem>
+                                  {capabilities.sources.map((source) => (
+                                    <SelectItem
+                                      key={source.key}
+                                      value={source.key}>
+                                      {source.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        {form.watch('linkSource') !== 'openstad' ? null : (
+                          <div>
+                            <FormLabel>Alleen inzendingen met tag</FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              Laat leeg om in alle inzendingen te zoeken.
+                              Bijvoorbeeld: alleen stadmakers.
+                            </p>
+                            <CheckboxList
+                              form={form}
+                              fieldName="linkTags"
+                              fieldLabel="Alleen inzendingen met tag"
+                              label={(tag: any) => tag.name}
+                              keyForGrouping="type"
+                              keyPerItem={(tag: any) => `${tag.id}`}
+                              items={allTags || []}
+                              selectedPredicate={(tag: any) =>
+                                fromCsvIds(form.getValues('linkTags')).includes(
+                                  `${tag.id}`
+                                )
+                              }
+                              onValueChange={(tag: any, checked: boolean) =>
+                                form.setValue(
+                                  'linkTags',
+                                  toggleCsvId(
+                                    form.getValues('linkTags'),
+                                    tag.id,
+                                    checked
+                                  )
+                                )
+                              }
+                            />
+                          </div>
+                        )}
+                        <FormField
+                          control={form.control}
+                          name="placeholder"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Placeholder zoekveld</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Zoeken..." {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </>
+                    )}
+
                     {form.watch('type') === 'timeline' && (
                       <div
                         style={{
@@ -2305,6 +2625,28 @@ export default function WidgetResourceFormItems(
                         De einddatum van elk item wordt automatisch afgeleid uit
                         de startdatum van het volgende item; het laatste item
                         houdt zijn eigen, eventueel lege einddatum.
+                      </div>
+                    )}
+
+                    {form.watch('type') === 'modbreak' && (
+                      <div
+                        style={{
+                          padding: '11px',
+                          borderLeft: '4px solid #3b82f6',
+                          backgroundColor: '#eff6ff',
+                          borderTopRightRadius: '5px',
+                          borderBottomRightRadius: '5px',
+                          fontSize: '14px',
+                        }}>
+                        <strong>
+                          Officiële reacties worden beheerd door beheerders
+                          (editor of moderator).
+                        </strong>
+                        <br />
+                        Alleen beheerders (editor of moderator) kunnen bij het
+                        bewerken van een inzending officiële reacties toevoegen,
+                        bewerken en verwijderen. Andere gebruikers zien dit veld
+                        niet.
                       </div>
                     )}
 
@@ -2348,31 +2690,49 @@ export default function WidgetResourceFormItems(
                 <div>
                   <div className="flex gap-2">
                     {selectedItem && (
+                      <>
+                        <Button
+                          className="w-fit mt-4 bg-secondary text-black hover:text-white"
+                          type="button"
+                          onClick={() => {
+                            resetForm();
+                          }}>
+                          Annuleer
+                        </Button>
+                        <Button
+                          className="w-fit mt-4"
+                          type="button"
+                          onClick={() => {
+                            if (!releaseOpenItem()) return;
+                            resetForm();
+                          }}>
+                          Nieuw item
+                        </Button>
+                      </>
+                    )}
+                    {!selectedItem && (
                       <Button
-                        className="w-fit mt-4 bg-secondary text-black hover:text-white"
-                        type="button"
-                        onClick={() => {
-                          resetForm();
-                        }}>
-                        Annuleer
+                        className="w-fit mt-4"
+                        type="submit"
+                        disabled={
+                          (form.watch('type') === 'tags' &&
+                            allTags.length === 0) ||
+                          !isModbreakTypeUnique ||
+                          ((!form.watch('fieldKey') || !isFieldKeyUnique) &&
+                            !['none', 'pagination'].includes(
+                              form.watch('type') || ''
+                            ))
+                        }>
+                        Voeg item toe aan lijst
                       </Button>
                     )}
-                    <Button
-                      className="w-fit mt-4"
-                      type="submit"
-                      disabled={
-                        (form.watch('type') === 'tags' &&
-                          allTags.length === 0) ||
-                        ((!form.watch('fieldKey') || !isFieldKeyUnique) &&
-                          !['none', 'pagination'].includes(
-                            form.watch('type') || ''
-                          ))
-                      }>
-                      {selectedItem
-                        ? 'Sla wijzigingen op'
-                        : 'Voeg item toe aan lijst'}
-                    </Button>
                   </div>
+                  {!isModbreakTypeUnique && (
+                    <FormMessage>
+                      Er kan maar één veld voor officiële reacties per formulier
+                      zijn
+                    </FormMessage>
+                  )}
                   {(!form.watch('fieldKey') || !isFieldKeyUnique) &&
                     !['none', 'pagination'].includes(
                       form.watch('type') || ''

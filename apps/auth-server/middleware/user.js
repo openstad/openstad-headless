@@ -1,5 +1,6 @@
 const { checkSchema, validationResult } = require('express-validator');
 const db = require('../db');
+const normalizeEmail = require('../utils/normalizeEmail');
 const userProfileValidation = require('../config/user').validation.profile;
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -29,7 +30,7 @@ exports.withAll = (req, res, next) => {
   // }
 
   if (req.query.email) {
-    where.email = req.query.email;
+    where.email = normalizeEmail(req.query.email);
   }
 
   db.User.findAll({ where, limit, offset, order: [['id', 'DESC']] })
@@ -54,6 +55,11 @@ exports.withOne = (req, res, next) => {
   db.User.scope(['includeUserRoles'])
     .findOne({ where: { id: userId } })
     .then((user) => {
+      if (!user) {
+        const err = new Error('User not found');
+        err.status = 404;
+        return next(err);
+      }
       req.userObject = user;
       next();
     })
@@ -85,8 +91,10 @@ exports.withRoleForClient = (req, res, next) => {
 };
 
 exports.withOneByEmail = (req, res, next) => {
-  const email = req.body.email ? req.body.email : req.query.email;
-  db.User.findOne({ where: { email: req.body.email } })
+  const email = normalizeEmail(
+    req.body.email ? req.body.email : req.query.email
+  );
+  db.User.findOne({ where: { email } })
     .then((user) => {
       req.userObject = user;
 

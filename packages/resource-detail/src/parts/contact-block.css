@@ -1,0 +1,86 @@
+.osc-contact-block {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-block: 2rem;
+  padding: 1.5rem;
+  background: var(
+    --nlds-resource-detail-cta-background-color,
+    var(--nlds-default-background-color, #f0f4f8)
+  );
+}
+
+.osc-contact-block-content {
+  flex: 1 1 20rem;
+}
+
+.osc-contact-block-status {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.osc-contact-block-status:empty {
+  display: none;
+}
+
+.osc-DialogContent > .osc-contact-block-dialog-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 0;
+}
+
+.osc-contact-block-dialog-body .utrecht-form-field + .utrecht-form-field {
+  margin-block-start: 0.75rem;
+}
+
+.osc-contact-block-dialog-body .utrecht-select,
+.osc-contact-block-dialog-body .utrecht-textarea {
+  max-inline-size: 100%;
+  inline-size: 100%;
+}
+
+.osc-contact-block-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-block-start: 1.5rem;
+}
+
+.osc-contact-block-error {
+  margin: 0;
+  color: var(
+    --nlds-resource-detail-contact-error-color,
+    var(--utrecht-form-field-invalid-color, #d52b1e)
+  );
+}
+
+.osc-contact-block-own-resources {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.osc-contact-block-own-resources .utrecht-form-fieldset__legend,
+.osc-contact-block-own-resources legend {
+  font-weight: var(--nlds-resource-detail-contact-legend-font-weight, bold);
+  margin-block-end: 0.25rem;
+}
+
+.osc-contact-block-own-resources-description {
+  margin-block-end: 0.75rem;
+}
+
+.osc-contact-block-own-resources .utrecht-form-field + .utrecht-form-field {
+  margin-block-start: 0.5rem;
+}
+
+.osc-contact-block-own-resources + .utrecht-form-field {
+  margin-block-start: 0.75rem;
+}
+
+.osc-contact-block-consent-description {
+  margin-block: 0.75rem 0.25rem;
+}

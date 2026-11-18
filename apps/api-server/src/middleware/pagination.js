@@ -8,6 +8,7 @@ module.exports = {
     }
     if (typeof req.query.page == 'undefined') return next();
     if (typeof req.query.search != 'undefined') return next(); // if search then pagination after the search
+    if (typeof req.query.streets != 'undefined') return next();
 
     let currentPage = parseInt(req.query.page) || 0;
 

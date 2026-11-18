@@ -1,3 +1,4 @@
+import { withoutDraftSync } from '@/lib/draft-sync-pause';
 import _ from 'lodash';
 import React, { Fragment, useEffect, useRef } from 'react';
 
@@ -59,7 +60,7 @@ export const CheckboxList = <T extends { [key: string]: any }>({
       const cleaned = ids.filter((id) => validKeys.has(id)).join(',');
       if (cleaned !== currentValue && cleaned !== prevCleanedRef.current) {
         prevCleanedRef.current = cleaned;
-        form.setValue(fieldName, cleaned);
+        withoutDraftSync(() => form.setValue(fieldName, cleaned));
       }
     } else if (Array.isArray(currentValue)) {
       const cleaned = currentValue.filter((id) =>
@@ -71,7 +72,7 @@ export const CheckboxList = <T extends { [key: string]: any }>({
         cleanedKey !== prevCleanedRef.current
       ) {
         prevCleanedRef.current = cleanedKey;
-        form.setValue(fieldName, cleaned);
+        withoutDraftSync(() => form.setValue(fieldName, cleaned));
       }
     }
   }, [items]);
@@ -92,7 +93,7 @@ export const CheckboxList = <T extends { [key: string]: any }>({
                     ? 'flex flex-col'
                     : 'flex flex-row flex-wrap'
                 }`}>
-                {items?.map((item: any) => (
+                {items?.map((item) => (
                   <FormField
                     key={keyPerItem(item)}
                     control={form.control}
@@ -105,8 +106,8 @@ export const CheckboxList = <T extends { [key: string]: any }>({
                           <FormControl>
                             <Checkbox
                               checked={selectedPredicate(item)}
-                              onCheckedChange={(checked: any) =>
-                                onValueChange(item, checked)
+                              onCheckedChange={(checked) =>
+                                onValueChange(item, checked === true)
                               }
                             />
                           </FormControl>
@@ -149,7 +150,7 @@ export const CheckboxList = <T extends { [key: string]: any }>({
                       <legend className="sr-only">{fieldLabel}</legend>
                       {items
                         ?.filter((t) => t[keyForGrouping] === groupName)
-                        .map((item: any) => {
+                        .map((item) => {
                           return (
                             <FormField
                               key={keyPerItem(item)}
@@ -163,8 +164,8 @@ export const CheckboxList = <T extends { [key: string]: any }>({
                                     <FormControl>
                                       <Checkbox
                                         checked={selectedPredicate(item)}
-                                        onCheckedChange={(checked: any) =>
-                                          onValueChange(item, checked)
+                                        onCheckedChange={(checked) =>
+                                          onValueChange(item, checked === true)
                                         }
                                       />
                                     </FormControl>

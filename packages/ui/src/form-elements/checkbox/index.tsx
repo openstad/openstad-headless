@@ -1,4 +1,5 @@
 import { FormValue } from '@openstad-headless/form/src/form';
+import { toHtmlId } from '@openstad-headless/lib/to-html-id';
 import { Spacer } from '@openstad-headless/ui/src';
 import {
   AccordionProvider,
@@ -15,15 +16,7 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 import { InfoImage } from '../../infoImage';
 import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
 import TextInput from '../text';
-
-const shuffleArray = <T,>(array: T[]): T[] => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
+import { getRandomizedDisplayChoices } from '../utils/randomized-choices';
 
 export type CheckboxFieldProps = {
   title: string;
@@ -106,6 +99,8 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
   instantFeedback = false,
   optionFeedback = {},
 }) => {
+  const idKey = toHtmlId(fieldKey);
+
   let initialValue = defaultValue || [];
   try {
     initialValue = overrideDefaultValue
@@ -145,19 +140,11 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
         )
       : [];
 
-    if (randomizeItems) {
-      const storageKey = `randomizedChoices_${fieldKey}`;
-      const stored = sessionStorage.getItem(storageKey);
-      if (stored) {
-        setDisplayChoices(JSON.parse(stored));
-      } else {
-        const shuffled = shuffleArray(normalizedChoices);
-        setDisplayChoices(shuffled);
-        sessionStorage.setItem(storageKey, JSON.stringify(shuffled));
-      }
-    } else {
-      setDisplayChoices(normalizedChoices);
-    }
+    setDisplayChoices(
+      randomizeItems
+        ? getRandomizedDisplayChoices(normalizedChoices, fieldKey)
+        : normalizedChoices
+    );
   }, [choices, fieldKey, randomizeItems]);
 
   useEffect(() => {
@@ -258,7 +245,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
     <div className="question">
       <Fieldset
         role="group"
-        aria-invalid={checkFieldValidation() ? 'false' : 'true'}
+        invalid={fieldInvalid}
         aria-describedby={fieldInvalid ? `${randomId}_error` : undefined}>
         {title && (
           <FieldsetLegend>
@@ -308,12 +295,12 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
           <FormField type="checkbox" key="select_all">
             <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
               <FormLabel
-                htmlFor={`${fieldKey}_select_all`}
+                htmlFor={`${idKey}_select_all`}
                 type="checkbox"
                 className="--label-grid">
                 <Checkbox
                   className="utrecht-form-field__input"
-                  id={`${fieldKey}_select_all`}
+                  id={`${idKey}_select_all`}
                   name={fieldKey}
                   value="select_all"
                   required={fieldRequired}
@@ -362,12 +349,12 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                 <Paragraph
                   className={`utrecht-form-field__label utrecht-form-field__label--checkbox${feedbackClass}`}>
                   <FormLabel
-                    htmlFor={`${fieldKey}_${index}`}
+                    htmlFor={`${idKey}_${index}`}
                     type="checkbox"
                     className="--label-grid">
                     <Checkbox
                       className="utrecht-form-field__input"
-                      id={`${fieldKey}_${index}`}
+                      id={`${idKey}_${index}`}
                       name={fieldKey}
                       value={choice && choice.value}
                       required={fieldRequired}
@@ -431,7 +418,7 @@ const CheckboxField: FC<CheckboxFieldProps> = ({
                         ]
                       }
                       fieldInvalid={false}
-                      randomId={`${fieldKey}_${choice.trigger || index}`}
+                      randomId={`${idKey}_${choice.trigger || index}`}
                     />
                   </div>
                 )}
