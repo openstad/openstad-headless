@@ -1024,10 +1024,10 @@ async function syncCanCreateNewUsers(req, res, next) {
         await adapter.service.updateClient({ authConfig, project });
       }
     }
-    return next();
   } catch (err) {
-    return next(err);
+    console.log('[canCreateNewUsers] Could not sync auth client:', err.message);
   }
+  return next();
 }
 
 async function publishProjectUpdateMessages(req, res, next) {

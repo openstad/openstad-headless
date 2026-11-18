@@ -163,4 +163,16 @@ describe('PUT project syncs canCreateNewUsers to the auth client', () => {
 
     expect(updateClient).not.toHaveBeenCalled();
   });
+
+  it('still saves and returns 200 when the auth client cannot be reached', async () => {
+    storeCanCreateNewUsers(true);
+    updateClient.mockRejectedValue(new Error('auth server down'));
+
+    const res = await request(createApp(admin))
+      .put(url)
+      .send({ config: { users: { canCreateNewUsers: false } } });
+
+    expect(res.status).toBe(200);
+    expect(updated?.config?.users?.canCreateNewUsers).toBe(false);
+  });
 });
