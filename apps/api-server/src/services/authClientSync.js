@@ -6,7 +6,6 @@
  * routes/api/project.js (#1640). These functions operate on plain config
  * objects / ids (no Express `req`), so they are unit-testable.
  */
-const merge = require('merge');
 const Sequelize = require('sequelize');
 const { Op } = Sequelize;
 const db = require('../db');
@@ -19,10 +18,7 @@ async function buildAuthProviderSyncConfig({
   sourceProject,
   fallbackProviderConfig = {},
 }) {
-  const providerConfigForSync = merge.recursive(
-    {},
-    fallbackProviderConfig || {}
-  );
+  const providerConfigForSync = structuredClone(fallbackProviderConfig || {});
   if (!sourceProject) return providerConfigForSync;
 
   const providers = await authSettings.providers({
