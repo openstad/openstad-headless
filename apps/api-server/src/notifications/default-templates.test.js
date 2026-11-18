@@ -310,3 +310,38 @@ describe('default templates: mail styling', () => {
     expect(result.html.toLowerCase()).toContain('#d32f2f');
   });
 });
+
+describe('default template: login email', () => {
+  async function renderLoginMail(logo) {
+    const { body } = extractTemplate('login email');
+    const authServerData = {
+      user: { name: 'Test Gebruiker', email: 'test@example.com' },
+      name: 'Test Gebruiker',
+      loginurl: 'https://voorbeeld.openstad.org/inloggen',
+      logo,
+      imagePath: 'https://auth.voorbeeld.openstad.org/email',
+    };
+    return mjml2html(
+      new nunjucks.Environment().renderString(body, authServerData)
+    );
+  }
+
+  it('greets the user by name instead of printing the user object', async () => {
+    const result = await renderLoginMail('');
+
+    expect(result.html).toContain('Beste Test Gebruiker');
+    expect(result.html).not.toContain('[object Object]');
+  });
+
+  it('shows the logo only when there is one and has no fixed images', async () => {
+    const withLogo = await renderLoginMail('https://example.com/brand.png');
+    const withoutLogo = await renderLoginMail('');
+
+    expect(extractTemplate('login email').body).not.toMatch(
+      /imagePath|logo-openstad|mail-header/
+    );
+    expect(withLogo.html).toContain('src="https://example.com/brand.png"');
+    expect(withoutLogo.html).not.toContain('<img');
+    expect(withLogo.errors).toEqual([]);
+  });
+});

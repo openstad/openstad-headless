@@ -39,12 +39,22 @@ module.exports = (db, sequelize, DataTypes) => {
     },
     {
       hooks: {
-        afterCreate: async function (instance, options) {
-          await updateAuthClient(instance, options);
+        afterCreate: async function (instance) {
+          await updateAuthClient(instance, {
+            subject: instance.subject,
+            body: instance.body,
+          });
         },
 
-        afterUpdate: async function (instance, options) {
-          await updateAuthClient(instance, options);
+        afterUpdate: async function (instance) {
+          await updateAuthClient(instance, {
+            subject: instance.subject,
+            body: instance.body,
+          });
+        },
+
+        afterDestroy: async function (instance) {
+          await updateAuthClient(instance, { subject: '', body: '' });
         },
       },
     }
@@ -65,7 +75,7 @@ module.exports = (db, sequelize, DataTypes) => {
   return NotificationTemplate;
 
   // temp solution: the auth serrver should use this notification service (https://github.com/openstad/openstad-headless/issues/256) but until then auth templates are updated here
-  async function updateAuthClient(instance, options) {
+  async function updateAuthClient(instance, { subject, body }) {
     if (instance.type != 'login email') return;
 
     let project;
@@ -84,14 +94,11 @@ module.exports = (db, sequelize, DataTypes) => {
         let newConfig = {
           config: {
             Url: {
-              emailSubject: instance.subject.replace(
+              emailSubject: subject.replace(
                 /\{\{\project.name}\}/,
                 project.name
               ),
-              emailTemplate: instance.body.replace(
-                /\{\{\project.name}\}/,
-                project.name
-              ),
+              emailTemplate: body.replace(/\{\{\project.name}\}/, project.name),
             },
           },
         };

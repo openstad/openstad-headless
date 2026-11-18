@@ -4,8 +4,14 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const router = express.Router({ mergeParams: true });
 const createError = require('http-errors');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
-const { loadDefaultTemplate } = require('../../models/NotificationMessage');
+const {
+  loadDefaultTemplate,
+  renderTemplate,
+} = require('../../models/NotificationMessage');
 const { mailStylingFor } = require('../../services/mail-styling');
+const { previewData } = require('../../notifications/preview-data');
+
+const PREVIEW_ENGINES = ['email', 'sms'];
 
 // scopes
 // ------
@@ -128,6 +134,53 @@ router
         res.json({ template: 'deleted' });
       })
       .catch(next);
+  });
+
+router
+  .route('/preview')
+  .post(auth.can('NotificationTemplate', 'create'))
+  .post(rateLimiter(), async function (req, res, next) {
+    const { type, engine, subject, body } = req.body;
+
+    if (!PREVIEW_ENGINES.includes(engine)) {
+      return next(createError(400, 'engine must be email or sms'));
+    }
+    if (typeof subject !== 'string' || typeof body !== 'string') {
+      return next(createError(400, 'subject and body must be strings'));
+    }
+
+    try {
+      const project = await db.Project.scope(
+        'includeConfig',
+        'includeEmailConfig'
+      ).findByPk(req.params.projectId);
+      if (!project) {
+        throw createError(404, 'Project not found');
+      }
+
+      const styling = await mailStylingFor(project);
+      let rendered;
+      try {
+        rendered = await renderTemplate(
+          { subject, body },
+          previewData({ project, styling }),
+          { engine, type, projectId: project.id }
+        );
+      } catch (err) {
+        throw createError(
+          400,
+          `De template kan niet worden gerenderd: ${err.message}`
+        );
+      }
+
+      res.json(
+        engine === 'email'
+          ? { subject: rendered.subject, html: rendered.body }
+          : { subject: rendered.subject, text: rendered.body }
+      );
+    } catch (err) {
+      next(err);
+    }
   });
 
 router
