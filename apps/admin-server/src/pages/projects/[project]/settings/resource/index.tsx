@@ -1,5 +1,4 @@
 import { CheckboxList } from '@/components/checkbox-list';
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -11,6 +10,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
 import {
+  useRegisterFormSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -21,12 +24,12 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useStatuses from '@/hooks/use-statuses';
 import useTags from '@/hooks/use-tags';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
-import toast from 'react-hot-toast';
 import * as z from 'zod';
 
 import { useProject } from '../../../../../hooks/use-project';
@@ -70,10 +73,6 @@ const formSchema = z.object({
   summaryMaxLength: z.coerce.number(),
   descriptionMinLength: z.coerce.number(),
   descriptionMaxLength: z.coerce.number(),
-  displayLocation: z.boolean(),
-  displayTheme: z.boolean(),
-  displayNeighbourhood: z.boolean(),
-  displayModbreak: z.boolean(),
   modbreakTitle: z.string().optional(),
   tagGroups: z.number().array().optional().default([]),
   statusGroups: z.number().array().optional().default([]),
@@ -116,11 +115,6 @@ export default function ProjectSettingsResource() {
         data?.config?.[category]?.descriptionMinLength || null,
       descriptionMaxLength:
         data?.config?.[category]?.descriptionMaxLength || null,
-      displayLocation: data?.config?.[category]?.displayLocation || false,
-      displayTheme: data?.config?.[category]?.displayTheme || false,
-      displayNeighbourhood:
-        data?.config?.[category]?.displayNeighbourhood || false,
-      displayModbreak: data?.config?.[category]?.displayModbreak || false,
       modbreakTitle: data?.config?.[category]?.modbreakTitle || null,
       tagGroups: data?.config?.resources?.defaultTagIds || [],
       statusGroups: data?.config?.resources?.defaultStatusIds || [],
@@ -137,50 +131,45 @@ export default function ProjectSettingsResource() {
     defaultValues: defaults(),
   });
 
-  React.useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  useSyncFormDefaults(form, defaults, data);
 
   const previewRatio =
     (form.watch('imageCropRatioWidth') || 16) /
     (form.watch('imageCropRatioHeight') || 9);
   const previewHeight = Math.min(40, 160 / previewRatio);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      const project = await updateProject({
-        [category]: {
-          canAddNewResources: values.canAddNewResources,
-          minimumYesVotes: values.minimumYesVotes,
-          titleMinLength: values.titleMinLength,
-          titleMaxLength: values.titleMaxLength,
-          summaryMinLength: values.summaryMinLength,
-          summaryMaxLength: values.summaryMaxLength,
-          descriptionMinLength: values.descriptionMinLength,
-          descriptionMaxLength: values.descriptionMaxLength,
-          displayLocation: values.displayLocation,
-          displayTheme: values.displayTheme,
-          displayNeighbourhood: values.displayNeighbourhood,
-          displayModbreak: values.displayModbreak,
-          modbreakTitle: values.modbreakTitle,
-          defaultTagIds: values.tagGroups || [],
-          defaultStatusIds: values.statusGroups || [],
-          canEditAfterFirstLikeOrComment: values.canEditAfterFirstLikeOrComment,
-        },
-        project: {
-          imageCropRatioWidth: values.imageCropRatioWidth,
-          imageCropRatioHeight: values.imageCropRatioHeight,
-        },
-      });
-      if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('could not update', error);
+  const save = React.useCallback(async () => {
+    const valid = await validateForSave(form);
+    if (!valid) {
+      throw new Error('Controleer de gemarkeerde velden.');
     }
-  }
+    const values = formSchema.parse(form.getValues());
+    const result = await updateProject({
+      [category]: {
+        canAddNewResources: values.canAddNewResources,
+        minimumYesVotes: values.minimumYesVotes,
+        titleMinLength: values.titleMinLength,
+        titleMaxLength: values.titleMaxLength,
+        summaryMinLength: values.summaryMinLength,
+        summaryMaxLength: values.summaryMaxLength,
+        descriptionMinLength: values.descriptionMinLength,
+        descriptionMaxLength: values.descriptionMaxLength,
+        modbreakTitle: values.modbreakTitle,
+        defaultTagIds: values.tagGroups || [],
+        defaultStatusIds: values.statusGroups || [],
+        canEditAfterFirstLikeOrComment: values.canEditAfterFirstLikeOrComment,
+      },
+      project: {
+        imageCropRatioWidth: values.imageCropRatioWidth,
+        imageCropRatioHeight: values.imageCropRatioHeight,
+      },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+  }, [form, updateProject]);
+
+  useRegisterFormSave(form, save);
 
   return (
     <div>
@@ -209,9 +198,7 @@ export default function ProjectSettingsResource() {
               afhankelijk van wat je wilt uitvragen voor dit project.
             </p>
             <br />
-            <form
-              onSubmit={form.handleSubmit(onSubmit)}
-              className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="lg:w-fit grid grid-cols-1 lg:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="canAddNewResources"
@@ -316,21 +303,6 @@ export default function ProjectSettingsResource() {
                   </FormItem>
                 )}
               />
-              {/* <FormField
-                control={form.control}
-                name="displayModbreak"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      Wordt het invoerveld voor de auteur van de officiële reactie
-                      weergegeven in het resource-formulier?
-                    </FormLabel>
-                    {YesNoSelect(field, {})}
-                    <FormMessage />
-                  </FormItem>
-                )}
-              /> */}
-
               <FormField
                 control={form.control}
                 name="modbreakTitle"
@@ -455,7 +427,8 @@ export default function ProjectSettingsResource() {
                     'tagGroups',
                     checked
                       ? [...values, tag.id]
-                      : values.filter((id) => id !== tag.id)
+                      : values.filter((id) => id !== tag.id),
+                    { shouldDirty: true }
                   );
                 }}
               />
@@ -480,15 +453,12 @@ export default function ProjectSettingsResource() {
                     'statusGroups',
                     checked
                       ? [...values, status.id]
-                      : values.filter((id) => id !== status.id)
+                      : values.filter((id) => id !== status.id),
+                    { shouldDirty: true }
                   );
                 }}
               />
-
-              <Button type="submit" className="w-fit col-span-full">
-                Opslaan
-              </Button>
-            </form>
+            </div>
           </Form>
         </div>
       </PageLayout>

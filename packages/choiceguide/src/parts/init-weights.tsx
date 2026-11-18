@@ -9,6 +9,8 @@ export const InitializeWeights = (
 ) => {
   const weights: WeightOverview = {};
 
+  if (!Array.isArray(items)) items = [];
+
   if (choicesType === 'plane') {
     choiceOptions = [{ id: 'plane' }];
   }
@@ -17,13 +19,14 @@ export const InitializeWeights = (
 
   choiceOptions.forEach((choiceOption) => {
     const id = choiceOption?.id;
-    if (id === undefined || id === null) return; // ponytail: skip empty/half-configured option entries
+    if (id === undefined || id === null) return;
 
     // Prevent prototype pollution. Needed for security warning #216.
     if (id === '__proto__' || id === 'constructor' || id === 'prototype')
       return;
 
     items.forEach((item) => {
+      if (!item) return;
       const itemType = item.type || '';
       const allowedTypes = [
         'radiobox',

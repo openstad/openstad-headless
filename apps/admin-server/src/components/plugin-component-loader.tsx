@@ -131,7 +131,7 @@ export default function PluginComponentLoader({
       // Clean up globals (IIFE var declarations are non-configurable, so use try/catch)
       try {
         const globalKey = `OpenStadPlugin_${pluginName}` as const;
-        (window as any)[globalKey] = undefined;
+        (window as unknown as Record<string, unknown>)[globalKey] = undefined;
       } catch (_) {}
       if (window.__openstad_plugin_props) {
         delete window.__openstad_plugin_props[pluginName];

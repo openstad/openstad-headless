@@ -51,8 +51,7 @@ export const calculateScoreForItem = (
     choiceOptionsArray = [{ id: 'plane' }];
   }
 
-  // ponytail: drop undefined/null when the widget has no choiceOption configured
-  choiceOptionsArray = choiceOptionsArray.filter(Boolean);
+  choiceOptionsArray = (choiceOptionsArray || []).filter(Boolean);
 
   choiceOptionsArray.forEach((option) => {
     Object.keys(weights[option.id] || {}).forEach((answerKey) => {
