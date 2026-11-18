@@ -12,13 +12,8 @@ export type ChoiceGuide = {
   noOfQuestionsToShow?: string;
   showPageCountAndCurrentPageInButton?: boolean;
   choicesType?: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden';
-  imageAspectRatio?: '16x9' | '1x1';
   choicesPreferenceMinColor?: string;
   choicesPreferenceMaxColor?: string;
-  choicesPreferenceTitle?: string;
-  choicesNoPreferenceYetTitle?: string;
-  choicesInBetweenPreferenceTitle?: string;
-  beforeUrl?: string;
   afterUrl?: string;
   introTitle?: string;
   introDescription?: string;
@@ -61,14 +56,10 @@ export type ChoiceGuideSidebarProps = {
   choicesType: 'default' | 'minus-to-plus-100' | 'plane' | 'hidden';
   choicesPreferenceMinColor?: string;
   choicesPreferenceMaxColor?: string;
-  choicesPreferenceTitle?: string;
-  choicesNoPreferenceYetTitle?: string;
-  choicesInBetweenPreferenceTitle?: string;
   startWithAllQuestionsAnswered: boolean;
   choiceOptions?: Array<ChoiceOptions>;
   scores?: Record<string, Score>;
   answers?: Record<string, Record<string, number>>;
-  imageAspectRatio?: '16x9' | '1x1';
   image?: string;
   showPageCountAndCurrentPageInButton?: boolean;
   weights?: WeightOverview;

@@ -97,6 +97,11 @@ export const FIELD_LABELS: Record<string, string> = {
   displayMap: 'Kaart weergeven',
   displayAsTabs: 'Als tabs weergeven',
   displayLocationFilter: 'Locatie filter weergeven',
+  displayStreetFilter: 'Straatfilter weergeven',
+  streetFilterLabel: 'Label voor het straatfilter',
+  displayStreetFilterHint: 'Hint onder het straatfilter weergeven',
+  streetFilterHint: 'Hinttekst voor het straatfilter',
+  streetFilterPlaceholder: 'Tekst voor straatfilter placeholder',
   displayTitle: 'Titel weergeven',
   displayDescription: 'Beschrijving weergeven',
   descriptionHeadingLevel: 'Heading-niveau opmaak beschrijving',
@@ -254,11 +259,24 @@ export const VALUE_LABELS: Record<string, Record<string, string>> = {
   },
   questionType: QUESTION_TYPES,
   type: QUESTION_TYPES,
+  interactionType: { default: 'Standaard', direct: 'Direct naar URL' },
+  markerInteractionType: { default: 'Standaard', direct: 'Direct naar URL' },
+  direction: { horizontal: 'Naast elkaar', vertical: 'Onder elkaar' },
+  formVisibility: {
+    always: 'Iedereen',
+    users: 'Ingelogde gebruikers en admins',
+  },
+  formStyle: { default: 'Standaard', youth: 'Jongeren widgets' },
+  numberingStyle: {
+    none: 'Geen opsomming',
+    decimal: 'Decimale nummers',
+    alphabetical: 'Alfabetische letters',
+    roman: 'Romeinse cijfers',
+  },
 };
 
 const HIDDEN_ITEM_FIELDS = new Set([
   'trigger',
-  'key',
   'key1',
   'key2',
   'key_b',
@@ -279,7 +297,24 @@ const HIDDEN_ITEM_FIELDS = new Set([
   'tags',
 ]);
 
+export const INTERNAL_FIELDS = new Set([
+  'id',
+  'trigger',
+  'uuid',
+  'widgetId',
+  'projectId',
+  'datalayer',
+]);
+
+export function isInternalField(key: string): boolean {
+  return INTERNAL_FIELDS.has(key);
+}
+
+export function isHiddenItemField(key: string): boolean {
+  return INTERNAL_FIELDS.has(key) || HIDDEN_ITEM_FIELDS.has(key);
+}
+
 export function getItemDisplayFields(item: any): string[] {
   if (!item || typeof item !== 'object') return [];
-  return Object.keys(item).filter((k) => !HIDDEN_ITEM_FIELDS.has(k));
+  return Object.keys(item).filter((k) => !isHiddenItemField(k));
 }

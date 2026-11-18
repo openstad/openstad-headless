@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { ReactNode, useEffect, useState } from 'react';
 
 import { Breadcrumbs } from './breadcrumbs';
+import { SaveBar } from './save-bar';
 import { Sidenav } from './sidenav';
 import { SidenavProject } from './sidenav-project';
 import { Heading } from './typography';
@@ -43,7 +44,7 @@ export function PageLayout({
     <main className="flex flex-row min-h-screen bg-muted">
       <Sidenav narrow={hasProjectSidenav} />
       {hasProjectSidenav ? <SidenavProject /> : null}
-      <section className="col-span-full w-full">
+      <section className="col-span-full w-full min-w-0">
         <header className="h-fit md:h-24 flex flex-col justify-center border-b border-border sticky top-0 z-10 bg-background">
           <div className="flex flex-col md:flex-row justify-between container p-6">
             <div
@@ -56,7 +57,10 @@ export function PageLayout({
               </Heading>
               <Breadcrumbs breadcrumbs={breadcrumbs} />
             </div>
-            {action}
+            <div className="flex flex-col md:flex-row md:items-center gap-4">
+              <SaveBar />
+              {action}
+            </div>
           </div>
         </header>
         {children}

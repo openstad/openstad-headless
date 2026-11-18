@@ -42,8 +42,11 @@ const ResourceOverviewMap = ({
   locationProx = undefined,
   givenResources,
   noFetch = false,
+  displayMarkers = true,
   selectedProjects = [],
   onMarkerClick,
+  selectedResourceId,
+  markerPreviewCard,
   ...props
 }: PropsWithChildren<ResourceOverviewMapWidgetProps>) => {
   const datastore = new DataStore({
@@ -58,13 +61,15 @@ const ResourceOverviewMap = ({
 
   const { data: resources } = datastore.useResources(
     {
-      projectId: noFetch ? undefined : props.projectId,
+      projectId:
+        noFetch || displayMarkers === false ? undefined : props.projectId,
       pageSize: 99999,
     },
     { suspense: false }
   );
 
-  const allResources = givenResources || resources?.records || [];
+  const allResources =
+    displayMarkers === false ? [] : givenResources || resources?.records || [];
   let categorizeByField = categorize?.categorizeByField;
   let categories: CategoriesType = {};
 
@@ -95,6 +100,9 @@ const ResourceOverviewMap = ({
       let marker: MarkerProps = {
         markerId: `resource-${resource.id || resource.uniqueId || index}`,
         location: resource?.location ? { ...resource.location } : undefined,
+        isSelected:
+          selectedResourceId !== undefined &&
+          String(resource.id) === String(selectedResourceId),
       };
       const markerLatLng: any = parseLocation(marker); // unify location format
       marker.lat = markerLatLng.lat;

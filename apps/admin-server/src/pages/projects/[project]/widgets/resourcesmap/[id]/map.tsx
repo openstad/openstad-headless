@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -20,6 +19,8 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
+import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
@@ -38,6 +39,8 @@ type Tag = {
 const formSchema = z.object({
   markerHref: z.string().optional(),
   mapCenterMode: z.enum(['', 'markers', 'area']).optional(),
+  markerPreviewCard: z.boolean().optional(),
+  markerPreviewButtonText: z.string().optional(),
   categorize: z.object({
     categorizeByField: z.string().optional(),
   }),
@@ -48,6 +51,8 @@ const formSchema = z.object({
   customUrl: z.string().optional(),
   width: z.string().optional(),
   height: z.string().optional(),
+  mapAriaLabel: z.string().optional(),
+  displayMarkers: z.boolean().optional(),
 });
 
 type SchemaKey = keyof typeof formSchema.shape;
@@ -61,7 +66,9 @@ export default function WidgetResourcesMapMap(
   type FormData = z.infer<typeof formSchema>;
 
   async function onSubmit(values: FormData) {
-    props.updateConfig({ ...props, ...values });
+    const { showMarkerPreviewSetting: _showMarkerPreviewSetting, ...config } =
+      props;
+    props.updateConfig({ ...config, ...values });
   }
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
@@ -71,14 +78,26 @@ export default function WidgetResourcesMapMap(
     defaultValues: {
       markerHref: props?.markerHref || '',
       mapCenterMode: props?.mapCenterMode || '',
+      markerPreviewCard: props?.markerPreviewCard || false,
+      markerPreviewButtonText: props?.markerPreviewButtonText || 'Lees meer',
       clustering: props?.clustering || {},
       categorize: props?.categorize || {},
       tilesVariant: props?.tilesVariant || '',
       customUrl: props?.customUrl || '',
       width: props?.width || '',
       height: props?.height || '',
+      mapAriaLabel: props?.mapAriaLabel || '',
+      displayMarkers: undefinedToTrueOrProp(props?.displayMarkers),
     },
   });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Kaart',
+  });
+
+  const showMarkerPreview =
+    props.showMarkerPreviewSetting && form.watch('displayMarkers') !== false;
 
   const { data: tags } = useTags(props.projectId);
 
@@ -115,6 +134,34 @@ export default function WidgetResourcesMapMap(
           className="space-y-4 lg:w-1/2">
           <FormField
             control={form.control}
+            name="mapAriaLabel"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Toegankelijke naam van de kaart</FormLabel>
+                <FormDescription>
+                  Deze naam leest voorleessoftware voor wanneer de kaart focus
+                  krijgt. Beschrijf wat de kaart toont, bijvoorbeeld &quot;Kaart
+                  met plannen Wijkbudget Bloemenbuurt&quot;. Leeg laten geeft
+                  &quot;Interactieve kaart&quot;.
+                </FormDescription>
+                <FormControl>
+                  <Input
+                    placeholder="Interactieve kaart"
+                    type="text"
+                    {...field}
+                    onChange={(e) => {
+                      onFieldChange(field.name, e.target.value);
+                      field.onChange(e);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="mapCenterMode"
             render={({ field }) => (
               <FormItem>
@@ -142,6 +189,45 @@ export default function WidgetResourcesMapMap(
               </FormItem>
             )}
           />
+
+          {showMarkerPreview ? (
+            <FormField
+              control={form.control}
+              name="markerPreviewCard"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Klik op een pin toont een voorbeeld in de kaart
+                  </FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
+
+          {showMarkerPreview && form.watch('markerPreviewCard') ? (
+            <FormField
+              control={form.control}
+              name="markerPreviewButtonText"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tekst van de knop in het voorbeeld</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      {...field}
+                      onChange={(e) => {
+                        onFieldChange(field.name, e.target.value);
+                        field.onChange(e);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
 
           {/*
           <FormField
@@ -327,7 +413,19 @@ export default function WidgetResourcesMapMap(
             )}
           />
 
-          <Button type="submit">Opslaan</Button>
+          {props?.supportsMarkerToggle && (
+            <FormField
+              control={form.control}
+              name="displayMarkers"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Toon locatie markers van inzendingen</FormLabel>
+                  {YesNoSelect(field, props)}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </form>
       </Form>
     </div>

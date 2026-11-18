@@ -51,15 +51,15 @@ export function MultiSelect({
     };
   }, []);
 
-  // ponytail: sluiten met muis was er al, met toetsenbord niet. Het menu bleef
-  // openstaan als de focus doorliep naar het volgende menu en overlapte dat dan
-  // bij 400% zoom — en was zelf niet te sluiten (WCAG 1.4.10 / 2.1.1).
+  // Closing with the mouse already worked, with the keyboard it didn't. The menu
+  // stayed open when focus moved on to the next menu, overlapping it at 400%
+  // zoom, and could not be closed itself (WCAG 1.4.10 / 2.1.1).
   const closeOnFocusLeave = (event: React.FocusEvent<HTMLDivElement>) => {
     if (inlineOptions) return;
     const next = event.relatedTarget as Node | null;
-    // Geen relatedTarget = focus ging nergens heen, bv. een klik op een optie
-    // (die is zelf niet focusbaar). Dan niet sluiten — buiten klikken wordt al
-    // door de mousedown-listener hierboven afgevangen.
+    // No relatedTarget = focus went nowhere, e.g. a click on an option (which
+    // is not focusable itself). Don't close then; clicks outside are already
+    // handled by the mousedown listener above.
     if (!next) return;
     if (containerRef.current?.contains(next)) return;
     setOpen(false);
@@ -114,20 +114,19 @@ export function MultiSelect({
           {options?.map((option, index) => {
             const checkboxId = `${id}-option-${index}`;
             return (
-              <div
-                onClick={() => {
-                  const value = option.value;
-                  const label = option.label;
-                  onItemSelected(value, label);
-                }}
-                key={`multi-select-item-${option.label}`}>
+              <div key={`multi-select-item-${option.label}`}>
                 <FormField type="checkbox">
                   <Paragraph className="utrecht-form-field__label utrecht-form-field__label--checkbox">
+                    {/* onChange on the checkbox, not onClick on the div: a click
+                        on the linked label bubbles up and is also forwarded to
+                        the checkbox, which toggled twice on the div. */}
                     <Checkbox
                       className="utrecht-form-field__input"
                       id={checkboxId}
                       checked={option.checked}
-                      aria-label={option.label}
+                      onChange={() =>
+                        onItemSelected(option.value, option.label)
+                      }
                     />
                     <FormLabel type="checkbox" htmlFor={checkboxId}>
                       {option.label}

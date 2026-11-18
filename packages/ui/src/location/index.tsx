@@ -13,6 +13,7 @@ const proximityOptions = [
   { label: '1 km', value: '1' },
   { label: '2 km', value: '2' },
   { label: '3 km', value: '3' },
+  { label: 'Onbeperkt', value: '0' },
 ];
 
 type Props = {

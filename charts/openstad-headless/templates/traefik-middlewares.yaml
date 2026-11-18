@@ -73,4 +73,24 @@ spec:
     regex: "^https?://www\\.(.*)"
     replacement: "https://${1}"
     permanent: true
+{{- if and .Values.admin.ingress.enabled (include "openstad.admin.ingress.allowlist" .) }}
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ include "openstad.fullname" . }}-admin-ip-allowlist
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "openstad.labels" . | nindent 4 }}
+spec:
+  ipAllowList:
+    sourceRange:
+    {{- range compact .Values.admin.ingress.allowlist.sourceRange }}
+      - {{ . | quote }}
+    {{- end }}
+    {{- with .Values.admin.ingress.allowlist.ipStrategy }}
+    ipStrategy:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+{{- end }}
 {{- end -}}

@@ -6,6 +6,7 @@ export type ResourceListOptions = {
   sort?: string;
   searchField?: string;
   searchTerm?: string;
+  tags?: Array<number>;
 };
 
 type UseResourcesConfig = {
@@ -51,6 +52,7 @@ export default function useResources(
         : 'text';
     params.set(`search[${searchField}]`, options.searchTerm.trim());
   }
+  options?.tags?.forEach((tagId) => params.append('tags', String(tagId)));
 
   const url = `${baseUrl}?${params.toString()}`;
 
@@ -82,7 +84,10 @@ export default function useResources(
       resourcesListSwr.mutate([...getExistingRecords(), data]);
       return data;
     } else {
-      throw new Error('Could not create the plan');
+      console.error('Creating the resource failed', res.status, res.statusText);
+      throw new Error(
+        'De inzending kon niet worden aangemaakt. Probeer het opnieuw.'
+      );
     }
   }
 
@@ -110,7 +115,7 @@ export default function useResources(
       resourcesListSwr.mutate(updatedList);
       return data;
     } else {
-      throw new Error('Could not update the plan');
+      throw new Error('De inzending kon niet worden opgeslagen.');
     }
   }
 

@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -9,41 +8,28 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ResourceFormWidgetProps } from '@openstad-headless/resource-form/src/props';
 import * as Switch from '@radix-ui/react-switch';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
-  resource: z.enum([
-    'resource',
-    'article',
-    'activeUser',
-    'resourceUser',
-    'submission',
-  ]),
-  formName: z.string(),
   redirectUrl: z.preprocess(
     (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val),
     z
       .string()
-      .refine((value) => /^(\/[^\s]*)|(https?:\/\/[^\s]*)$/i.test(value), {
-        message: 'Must be a valid URL or a relative path',
+      .refine((value) => /^(\/\S*|https?:\/\/\S*)$/i.test(value), {
+        message:
+          'Vul een volledige URL (https://…) of een pad op deze site (/…) in.',
       })
       .optional()
   ),
-  hideAdmin: z.boolean(),
   minCharactersWarning: z
     .string()
     .optional()
@@ -68,59 +54,46 @@ const formSchema = z.object({
 });
 
 type FormData = z.infer<typeof formSchema>;
-export default function WidgetResourceFormGeneral() {
+export default function WidgetResourceFormGeneral(
+  props: ResourceFormWidgetProps & EditFieldProps<ResourceFormWidgetProps>
+) {
   const category = 'general';
 
-  // should use the passed props widget, this is the old way and is not advised
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
-  const defaults = useCallback(
-    () => ({
-      resource: widget?.config?.[category]?.resource || 'resource',
-      formName: widget?.config?.[category]?.formName || '',
-      redirectUrl: widget?.config?.[category]?.redirectUrl || '',
-      hideAdmin: widget?.config?.[category]?.hideAdmin || false,
-      minCharactersWarning:
-        widget?.config?.[category]?.minCharactersWarning ||
-        'Nog minimaal {minCharacters} tekens',
-      maxCharactersWarning:
-        widget?.config?.[category]?.maxCharactersWarning ||
-        'Je hebt nog {maxCharacters} tekens over',
-      minCharactersError:
-        widget?.config?.[category]?.minCharactersError ||
-        'De tekst mag niet korter zijn dan {minCharacters} tekens',
-      maxCharactersError:
-        widget?.config?.[category]?.maxCharactersError ||
-        'De tekst mag niet langer zijn dan {maxCharacters} tekens',
-      showMinMaxAfterBlur:
-        widget?.config?.[category]?.showMinMaxAfterBlur || false,
-      maxCharactersOverWarning:
-        widget?.config?.[category]?.maxCharactersOverWarning ||
-        'Je hebt {overCharacters} tekens teveel',
-    }),
-    [widget?.config]
-  );
-
-  async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
-  }
+  const general = (props as any)[category] || {};
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      redirectUrl: general.redirectUrl || '',
+      minCharactersWarning:
+        general.minCharactersWarning || 'Nog minimaal {minCharacters} tekens',
+      maxCharactersWarning:
+        general.maxCharactersWarning ||
+        'Je hebt nog {maxCharacters} tekens over',
+      minCharactersError:
+        general.minCharactersError ||
+        'De tekst mag niet korter zijn dan {minCharacters} tekens',
+      maxCharactersError:
+        general.maxCharactersError ||
+        'De tekst mag niet langer zijn dan {maxCharacters} tekens',
+      showMinMaxAfterBlur: general.showMinMaxAfterBlur || false,
+      maxCharactersOverWarning:
+        general.maxCharactersOverWarning ||
+        'Je hebt {overCharacters} tekens teveel',
+    },
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  const { onFieldChanged } = props;
+  const pushToDraft = useCallback(
+    (name: string, value: any) =>
+      onFieldChanged?.(`${category}.${name}`, value),
+    [onFieldChanged, category]
+  );
+  useSyncDraftForm(form, pushToDraft, {
+    schema: formSchema,
+    prefix: category,
+    label: 'Algemeen',
+  });
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -128,52 +101,8 @@ export default function WidgetResourceFormGeneral() {
         <Heading size="xl">Algemeen</Heading>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(event) => event.preventDefault()}
           className="lg:w-3/4 grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="resource"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Soort inzending (vanuit de configuratie)</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Resource" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="resource">Inzending</SelectItem>
-                    <SelectItem value="article">Artikel</SelectItem>
-                    <SelectItem value="activeUser">
-                      Actieve gebruiker
-                    </SelectItem>
-                    <SelectItem value="resourceUser">
-                      Gebruiker van de inzending
-                    </SelectItem>
-                    <SelectItem value="submission">Oplevering</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="formName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Naam formulier</FormLabel>
-                <em className="text-xs">
-                  Deze moet uniek zijn binnen dit project.
-                </em>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
           <FormField
             control={form.control}
             name="redirectUrl"
@@ -190,30 +119,6 @@ export default function WidgetResourceFormGeneral() {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="hideAdmin"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Wordt de admin verborgen van het project na de eerste publieke
-                  actie?
-                </FormLabel>
-
-                <Switch.Root
-                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                  onCheckedChange={(e: boolean) => {
-                    field.onChange(e);
-                  }}
-                  checked={field.value}>
-                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                </Switch.Root>
-
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <FormField
             control={form.control}
             name="minCharactersWarning"
@@ -321,10 +226,6 @@ export default function WidgetResourceFormGeneral() {
               </FormItem>
             )}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

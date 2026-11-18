@@ -32,7 +32,8 @@
   );
 }
 
-.form-container figure img {
+.form-container figure img,
+.form-container .image-choice-figure img {
   max-height: 15rem;
   object-fit: cover;
 }

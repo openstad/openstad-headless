@@ -13,6 +13,7 @@ export default function Marker({
   lat = undefined,
   lng = undefined,
   isFaded = false,
+  isSelected = false,
   isVisible = true,
   icon = undefined,
   iconCreateFunction = undefined,
@@ -35,10 +36,14 @@ export default function Marker({
       icon = JSON.parse(icon as string);
     } catch (err) {}
     iconTitle = (icon as any)?.title;
-    addToClassname(icon, 'osc-map-marker', { before: true });
+    const iconClassTarget = (icon as any)?.options || icon;
+    addToClassname(iconClassTarget, 'osc-map-marker', { before: true });
     isFaded
-      ? addToClassname(icon, 'osc-map-marker-faded')
-      : removeFromClassName(icon, 'osc-map-marker-faded');
+      ? addToClassname(iconClassTarget, 'osc-map-marker-faded')
+      : removeFromClassName(iconClassTarget, 'osc-map-marker-faded');
+    isSelected
+      ? addToClassname(iconClassTarget, 'osc-map-marker-selected')
+      : removeFromClassName(iconClassTarget, 'osc-map-marker-selected');
   }
   icon = MarkerIcon({ icon, iconCreateFunction, defaultIcon });
 
@@ -94,6 +99,17 @@ export default function Marker({
         );
       };
     }
+  }
+
+  const handleClick = eventHandlers['click'];
+  if (handleClick) {
+    eventHandlers['keydown'] = (e: any) => {
+      const key = e?.originalEvent?.key;
+      if (key === 'Enter' || key === ' ') {
+        e.originalEvent.preventDefault();
+        handleClick(e);
+      }
+    };
   }
 
   let draggable = eventHandlers['dragstart'] || eventHandlers['dragend'];

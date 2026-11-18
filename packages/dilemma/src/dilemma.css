@@ -78,7 +78,7 @@
   .dilemma-options:has(input:checked)
   input:not(:checked)
   + label
-  figure {
+  .dilemma-option-image {
   scale: 0.98;
   opacity: 0.5;
 }
@@ -115,11 +115,16 @@
   .dilemma-option
   input:focus:focus-visible
   + label
-  figure {
+  .dilemma-option-image {
   outline: 2px dashed var(--dilemmaOptionOutlineColorActive);
   outline-offset: 2px;
 }
-.dilemma-field .dilemma-options .dilemma-option input:checked + label figure {
+.dilemma-field
+  .dilemma-options
+  .dilemma-option
+  input:checked
+  + label
+  .dilemma-option-image {
   outline-color: var(--dilemmaOptionOutlineColorActive);
   outline-width: var(--dilemmaOptionOutlineWidthActive);
   outline-offset: var(--dilemmaOptionOutlineOffsetActive);
@@ -136,7 +141,7 @@
   flex-direction: column;
   gap: 8px;
 }
-.dilemma-field .dilemma-options .dilemma-option figure {
+.dilemma-field .dilemma-options .dilemma-option .dilemma-option-image {
   margin: 0;
   padding: 0;
   aspect-ratio: var(--dilemmaOptionFigureAspectRatio);
@@ -149,7 +154,7 @@
     var(--dilemmaOptionOutlineColor);
   outline-offset: var(--dilemmaOptionOutlineOffset);
 }
-.dilemma-field .dilemma-options .dilemma-option figure img {
+.dilemma-field .dilemma-options .dilemma-option .dilemma-option-image img {
   width: 100%;
   height: 100%;
   max-width: unset;

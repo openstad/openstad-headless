@@ -149,6 +149,12 @@ let moduleDefinitions = {
       displayLocationHint: false,
       locationHint: 'Typ een postcode en kies een adres uit de lijst.',
       locationPlaceholder: '',
+      displayStreetFilter: false,
+      streetFilterLabel: 'Straat',
+      displayStreetFilterHint: false,
+      streetFilterHint:
+        'Toont ideeën die aan deze straat liggen. Zoek je ideeën in de buurt? Gebruik dan het postcodefilter.',
+      streetFilterPlaceholder: '',
       includeOrExcludeTagIds: 'include',
       includeOrExcludeStatusIds: 'include',
       resourceOverviewMapWidget: {
@@ -160,6 +166,8 @@ let moduleDefinitions = {
         displayDislike: false,
         showProgressBar: true,
         progressBarDescription: '',
+        markerPreviewCard: false,
+        markerPreviewButtonText: 'Lees meer',
       },
     },
   },
@@ -361,7 +369,6 @@ let moduleDefinitions = {
       textActiveSearch: 'Bekijk de tekstresultaten voor [zoekterm]',
       displayTagFilters: false,
       tagGroups: [],
-      displayTagGroupName: false,
       displaySorting: false,
       defaultSorting: 'random',
       sorting: [],
@@ -497,6 +504,12 @@ let moduleDefinitions = {
       displayLocationHint: false,
       locationHint: 'Typ een postcode en kies een adres uit de lijst.',
       locationPlaceholder: '',
+      displayStreetFilter: false,
+      streetFilterLabel: 'Straat',
+      displayStreetFilterHint: false,
+      streetFilterHint:
+        'Toont ideeën die aan deze straat liggen. Zoek je ideeën in de buurt? Gebruik dan het postcodefilter.',
+      streetFilterPlaceholder: '',
       includeOrExcludeTagIds: 'include',
       includeOrExcludeStatusIds: 'include',
       resourceOverviewMapWidget: {
@@ -507,6 +520,8 @@ let moduleDefinitions = {
         countButton: {
           show: false,
         },
+        markerPreviewCard: false,
+        markerPreviewButtonText: 'Lees meer',
       },
     },
   },

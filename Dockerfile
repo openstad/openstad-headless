@@ -27,6 +27,8 @@ ENV PATH="/root/.safe-chain/shims:/root/.safe-chain/bin:${PATH}"
 
 # Install app dependencies
 COPY --chown=node:node package*.json .
+# patch-package's postinstall (triggered by npm ci below) needs this present first
+COPY --chown=node:node patches/ ./patches
 # Bundle all packages during build, only the installed ones will persist
 COPY --chown=node:node packages/ ./packages
 COPY --chown=node:node apps/ ./apps

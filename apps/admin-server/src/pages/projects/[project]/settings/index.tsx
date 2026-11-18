@@ -18,16 +18,29 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageLayout } from '@/components/ui/page-layout';
+import {
+  rebaselineAfterSave,
+  useLooseFormDirty,
+  useRegisterSave,
+  validateForSave,
+} from '@/components/ui/save-controller';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
+import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
+import {
+  type WithCmsUrlProps,
+  withCmsUrl,
+} from '@/lib/server-side-props-definition';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { slugify } from '@openstad-headless/lib/slugify';
 import * as Switch from '@radix-ui/react-switch';
+import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
 import * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import * as z from 'zod';
@@ -35,15 +48,23 @@ import * as z from 'zod';
 import { useProject } from '../../../../hooks/use-project';
 import { getRuntimeMultiProjectLogin } from '../../../../lib/get-runtime-multi-project-login';
 
+const GENERAL_TAB = { tab: 'general', tabLabel: 'Projectinformatie' };
+const FIELD_LABELS: Record<string, string> = {
+  name: 'Projectnaam',
+  endDate: 'Einddatum',
+  url: 'Project URL',
+  basicAuthActive: 'Beveiliging met wachtwoord',
+  password: 'Wachtwoord',
+  projectToggle: 'Website aan/uit',
+};
+
 const formSchema = z
   .object({
     name: z.string().min(1, {
       message: 'De naam van een project mag niet leeg zijn!',
     }),
     password: z.string().optional(),
-    endDate: z.date().min(new Date(), {
-      message: 'De datum moet nog niet geweest zijn!',
-    }),
+    endDate: z.date(),
     // We don't want to restrict this URL too much
     url: z
       .string()
@@ -65,7 +86,28 @@ const formSchema = z
     }
   });
 
-export default function ProjectSettings() {
+type SettingsField = keyof z.infer<typeof formSchema>;
+
+function isNewPastEndDate(value: unknown, stored: unknown): boolean {
+  if (!(value instanceof Date)) return false;
+  if (stored && new Date(stored as string).getTime() === value.getTime()) {
+    return false;
+  }
+  return value.getTime() < Date.now();
+}
+
+export const getServerSideProps = withCmsUrl;
+
+// Default project URL = the CMS host with the slugified name as a subdirectory,
+// e.g. "cms.openstad.nl/mijn-wijk". Falls back to a bare slug if CMS_URL is unset.
+function buildDefaultUrl(cmsUrl: string, name: string): string {
+  const slug = slugify(name);
+  if (!slug) return '';
+  const host = cmsUrl.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+  return host ? `${host}/${slug}` : slug;
+}
+
+export default function ProjectSettings({ cmsUrl }: WithCmsUrlProps) {
   const router = useRouter();
   let { project } = router.query;
   const { data, isLoading, updateProject } = useProject([
@@ -92,11 +134,14 @@ export default function ProjectSettings() {
 
   const [checkboxInitial, setCheckboxInitial] = useState(true);
   const [showUrl, setShowUrl] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [projectHasEnded, setProjectHasEnded] = useState(false);
   const [basicAuthActive, setBasicAuthActive] = useState(false);
   const [basicAuthInitial, setBasicAuthInitial] = useState(true);
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('general');
+  const autoFilledUrl = useRef<string | undefined>(undefined);
 
   const defaults = useCallback(() => {
     const currentDate = new Date();
@@ -118,11 +163,7 @@ export default function ProjectSettings() {
     defaultValues: defaults(),
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-    // if(basicAuthActive !== data?.config?.basicAuth?.active)
-    //   setBasicAuthActive(data?.config?.basicAuth?.active);
-  }, [form, defaults]);
+  useSyncFormDefaults(form, defaults, data);
 
   useEffect(() => {
     if (!data) return;
@@ -131,7 +172,7 @@ export default function ProjectSettings() {
       const toggle = data?.config?.project?.projectToggle ?? !!data?.url;
       setShowUrl(toggle);
       setCheckboxInitial(false);
-      setProjectHasEnded(data?.config?.project?.projectHasEnded);
+      setProjectHasEnded(!!data?.config?.project?.projectHasEnded);
     }
 
     if (basicAuthInitial) {
@@ -140,9 +181,40 @@ export default function ProjectSettings() {
     }
   }, [data, checkboxInitial, basicAuthInitial, form]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  const formDirty = useLooseFormDirty(form);
+  const savedProjectHasEnded = !!data?.config?.project?.projectHasEnded;
+  const projectHasEndedDirty =
+    !checkboxInitial && !!projectHasEnded !== savedProjectHasEnded;
+
+  const save = useCallback(async () => {
+    const valid = await validateForSave(form);
+    const endDatePassed = isNewPastEndDate(
+      form.getValues('endDate'),
+      form.formState.defaultValues?.endDate
+    );
+    if (endDatePassed) {
+      form.setError('endDate', {
+        type: 'min',
+        message: 'De datum moet nog niet geweest zijn!',
+      });
+    }
+    if (!valid || endDatePassed) {
+      setActiveTab(GENERAL_TAB.tab);
+      const firstErrorField = Object.keys(FIELD_LABELS).find(
+        (field) => form.getFieldState(field as SettingsField).invalid
+      );
+      if (firstErrorField) {
+        throw new Error(
+          `Controleer het veld "${FIELD_LABELS[firstErrorField]}".`
+        );
+      }
+      throw new Error('Controleer de gemarkeerde velden.');
+    }
+    const values = formSchema.parse(form.getValues());
+    const sent = cloneDeep(form.getValues());
+    setIsSubmitting(true);
     try {
-      const project = await updateProject(
+      const result = await updateProject(
         {
           project: {
             endDate: values.endDate,
@@ -157,37 +229,36 @@ export default function ProjectSettings() {
         values.name,
         values.projectToggle ? values.url : ''
       );
-      if (project?.error) {
-        toast.error(project.error);
-      } else if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
+      if (!result) {
+        throw new Error('Er is helaas iets mis gegaan.');
       }
-    } catch (error) {
-      console.error('could not update', error);
-      toast.error('Er is helaas iets mis gegaan.');
-    }
-  }
 
-  async function saveProjectHasEnded(value: boolean) {
-    try {
-      const project = await updateProject({
-        project: {
-          projectHasEnded: value,
-        },
-      });
-      if (project?.error) {
-        toast.error(project.error);
-      } else if (project) {
-        toast.success('Project aangepast!');
-      } else {
-        toast.error('Er is helaas iets mis gegaan.');
-      }
-    } catch (error) {
-      console.error('could not update', error);
+      rebaselineAfterSave(form, sent);
+    } finally {
+      setIsSubmitting(false);
     }
-  }
+  }, [form, updateProject, data]);
+
+  const saveProjectHasEnded = useCallback(async () => {
+    const result = await updateProject({
+      project: { projectHasEnded: !!projectHasEnded },
+    });
+    if (!result) {
+      throw new Error('Er is helaas iets mis gegaan.');
+    }
+  }, [updateProject, projectHasEnded]);
+
+  useRegisterSave({
+    isDirty: formDirty,
+    save,
+    label: GENERAL_TAB.tabLabel,
+  });
+  useRegisterSave({
+    isDirty: projectHasEndedDirty,
+    save: saveProjectHasEnded,
+    label: 'Project beëindigen',
+  });
+
   async function archiveProject() {
     if (!data?.config?.project?.projectHasEnded) {
       toast.error(
@@ -280,7 +351,7 @@ export default function ProjectSettings() {
           ) : undefined
         }>
         <div className="container py-6">
-          <Tabs defaultValue="general">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="general">Projectinformatie</TabsTrigger>
               <TabsTrigger value="csp">Beveiligingsheaders</TabsTrigger>
@@ -294,9 +365,7 @@ export default function ProjectSettings() {
                 <Form {...form}>
                   <Heading size="xl">Projectinformatie</Heading>
                   <Separator className="my-4" />
-                  <form
-                    onSubmit={form.handleSubmit(onSubmit)}
-                    className="grid grid-cols-2 gap-x-4 gap-y-8">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-8">
                     <FormField
                       control={form.control}
                       name="name"
@@ -328,8 +397,35 @@ export default function ProjectSettings() {
                           <Switch.Root
                             className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                             onCheckedChange={(e: boolean) => {
+                              if (
+                                !e &&
+                                autoFilledUrl.current !== undefined &&
+                                form.getValues('url') === autoFilledUrl.current
+                              ) {
+                                form.setValue(
+                                  'url',
+                                  form.formState.defaultValues?.url ?? '',
+                                  { shouldValidate: true }
+                                );
+                              }
+                              if (!e) autoFilledUrl.current = undefined;
                               field.onChange(e);
                               setShowUrl(e);
+                              if (e && !form.getValues('url')) {
+                                const previous = data?.config?.project?.lastUrl;
+                                const nextUrl =
+                                  previous ||
+                                  buildDefaultUrl(
+                                    cmsUrl,
+                                    form.getValues('name') || ''
+                                  );
+                                if (nextUrl) {
+                                  form.setValue('url', nextUrl, {
+                                    shouldValidate: true,
+                                  });
+                                  autoFilledUrl.current = nextUrl;
+                                }
+                              }
                             }}
                             checked={field.value}>
                             <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
@@ -410,10 +506,13 @@ export default function ProjectSettings() {
                         />
                       </>
                     ) : null}
-                    <Button className="w-fit col-span-full" type="submit">
-                      Opslaan
-                    </Button>
-                  </form>
+                    {isSubmitting && showUrl && !!form.watch('url') && (
+                      <p className="col-span-full text-sm text-muted-foreground">
+                        Het aanmaken van de website kan enkele minuten duren.
+                        Laat dit venster open.
+                      </p>
+                    )}
+                  </div>
                 </Form>
               </div>
             </TabsContent>
@@ -562,11 +661,6 @@ export default function ProjectSettings() {
                       <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
                     </Switch.Root>
                   </div>
-                  <Button
-                    className="mt-4 w-fit"
-                    onClick={() => saveProjectHasEnded(projectHasEnded)}>
-                    Opslaan
-                  </Button>
                 </div>
               </div>
             </TabsContent>

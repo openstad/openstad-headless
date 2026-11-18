@@ -13,6 +13,7 @@ import markers from './markers';
 import projectVotedUsersCount from './projectVotedUsersCount';
 import resource from './resource';
 import resourceMarkers from './resource-markers';
+import resourceStreets from './resource-streets';
 import resources from './resources';
 import statuses from './statuses';
 import submissions from './submissions';
@@ -103,6 +104,10 @@ function API(props = {}) {
 
   self.resourceMarkers = {
     fetch: resourceMarkers.fetch.bind(self),
+  };
+
+  self.resourceStreets = {
+    fetch: resourceStreets.fetch.bind(self),
   };
 
   self.choicesguide = {
