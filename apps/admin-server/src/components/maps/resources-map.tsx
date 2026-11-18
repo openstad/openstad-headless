@@ -2,7 +2,7 @@ import { MapPoint, getPointsBounds } from '@/lib/resource-map-points';
 import 'leaflet/dist/leaflet.css';
 import React, { useEffect, useMemo, useState } from 'react';
 
-import { allowLeafletContainerReuse } from './allow-leaflet-container-reuse';
+import { loadReactLeaflet } from './load-react-leaflet';
 
 type Bounds = [[number, number], [number, number]];
 
@@ -31,11 +31,7 @@ export default function ResourcesMap({ points, onSelect }: Props) {
   const [leafletComponents, setLeafletComponents] = useState<any>(null);
 
   useEffect(() => {
-    import('leaflet')
-      .then((L) => {
-        allowLeafletContainerReuse(L);
-        return import('react-leaflet');
-      })
+    loadReactLeaflet()
       .then((leaflet) => setLeafletComponents(leaflet))
       .catch((error) => console.error('Failed to load react-leaflet', error));
   }, []);
