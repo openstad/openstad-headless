@@ -36,24 +36,12 @@ const roles = require('../lib/sequelize-authorization/lib/roles');
 const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
 const htmlToText = require('html-to-text');
 const {
+  hideEmailsForNormalUsers,
+  filterModeratorOnlyExtraData,
+} = require('../services/resourceSerialization');
+const {
   assertImageDescriptionsWithinLimit,
 } = require('../lib/image-description');
-
-function hideEmailsForNormalUsers(comments) {
-  return comments.map((comment) => {
-    delete comment.user.email;
-
-    if (comment.replies) {
-      comment.replies = comment.replies.map((reply) => {
-        delete reply.user.email;
-
-        return reply;
-      });
-    }
-
-    return comment;
-  });
-}
 
 module.exports = function (db, sequelize, DataTypes) {
   var Resource = sequelize.define(
@@ -852,6 +840,7 @@ module.exports = function (db, sequelize, DataTypes) {
               'defaultResourceImage',
               'documentMapIconColor',
               'mapIcon',
+              'listIcon',
               'detailPageUrl',
             ],
             through: { attributes: [] },
@@ -1322,6 +1311,7 @@ module.exports = function (db, sequelize, DataTypes) {
       delete data.hasResourceFormConfig;
       delete data.resourceFormFieldKeys;
       delete data.moderatorOnlyExtraDataKeys;
+      delete data.resourceFormFieldTypes;
       // dit zou nu dus gedefinieerd moeten worden op project.config, maar wegens backward compatible voor nu nog even hier:
       //
 
@@ -1356,38 +1346,14 @@ module.exports = function (db, sequelize, DataTypes) {
         ? self.resourceFormFieldKeys
         : [];
       const hasResourceFormConfig = !!self.hasResourceFormConfig;
-      // {role:'all'} is the unidentified viewer; strip hardest, not skip
-      if (
-        user &&
-        user.role &&
-        !canViewModeratorOnlyExtraData(user, self) &&
-        data.extraData &&
-        typeof data.extraData === 'object'
-      ) {
-        if (hasResourceFormConfig) {
-          Object.keys(data.extraData).forEach((key) => {
-            if (
-              !resourceFormFieldKeys.includes(key) &&
-              !alwaysPublicExtraDataKeys.includes(key)
-            ) {
-              delete data.extraData[key];
-            }
-          });
-        } else {
-          const preserved = {};
-          alwaysPublicExtraDataKeys.forEach((key) => {
-            if (data.extraData[key] !== undefined)
-              preserved[key] = data.extraData[key];
-          });
-          data.extraData = preserved;
-        }
-
-        moderatorOnlyExtraDataKeys.forEach((key) => {
-          if (!alwaysPublicExtraDataKeys.includes(key)) {
-            delete data.extraData[key];
-          }
-        });
-      }
+      data = filterModeratorOnlyExtraData(data, {
+        userRole: user && user.role,
+        canViewModerator: canViewModeratorOnlyExtraData(user, self),
+        hasResourceFormConfig,
+        resourceFormFieldKeys,
+        moderatorOnlyExtraDataKeys,
+        alwaysPublicExtraDataKeys,
+      });
 
       if (data.commentsAgainst) {
         data.commentsAgainst = hideEmailsForNormalUsers(data.commentsAgainst);

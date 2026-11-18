@@ -51,6 +51,7 @@ import React, {
 import { elipsizeHTML } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
 import { findResourceIndex } from './lib/find-resource-index';
+import { tagIcon } from './lib/tag-icon';
 import './resource-overview.css';
 
 export type ResourceOverviewWidgetProps = BaseProps &
@@ -120,7 +121,6 @@ export type ResourceOverviewWidgetProps = BaseProps &
       projectId?: any;
       inlineOptions?: boolean;
     }>;
-    displayTagGroupName?: boolean;
     displayBanner?: boolean;
     displayMap?: boolean;
     displayAsTabs?: boolean;
@@ -391,7 +391,7 @@ const defaultItemRenderer = (
     resourceFilteredTags && resourceFilteredTags.length > 0
       ? resourceFilteredTags[0]
       : null;
-  const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
+  const TagIconImage = tagIcon(firstTag);
   const selectedOpinion = resource?.userVote?.opinion;
   const showVoteCount = !!props.displayVote && !!props.votes?.isViewable;
 
@@ -638,10 +638,10 @@ const defaultItemRenderer = (
             )}
           />
 
-          {props.displayTagIcon && firstTag && MapIconImage && (
+          {props.displayTagIcon && firstTag && TagIconImage && (
             <div className="resource-card--link_tagicon">
               <Image
-                src={MapIconImage}
+                src={TagIconImage}
                 alt={
                   firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon'
                 }
@@ -822,10 +822,10 @@ const defaultItemRenderer = (
             )}
           />
 
-          {props.displayTagIcon && firstTag && MapIconImage && (
+          {props.displayTagIcon && firstTag && TagIconImage && (
             <div className="resource-card--link_tagicon">
               <Image
-                src={MapIconImage}
+                src={TagIconImage}
                 alt={
                   firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon'
                 }
@@ -932,11 +932,13 @@ function ResourceOverviewInner({
     api: props.api,
   });
 
-  const stringToArray = (str: string) => {
+  const stringToArray = (value: any) => {
+    if (value === null || value === undefined) return [];
+    const str = Array.isArray(value) ? value.join(',') : String(value);
     return str
-      .trim()
       .split(',')
-      .filter((t) => t && !isNaN(+t.trim()))
+      .map((t) => t.trim())
+      .filter((t) => t && !isNaN(+t))
       .map((t) => Number.parseInt(t));
   };
 
@@ -1566,7 +1568,7 @@ function ResourceOverviewInner({
               displayTagFilters={props.displayTagFilters || false}
               displaySearch={props.displaySearch || false}
               displayLocationFilter={props.displayLocationFilter || false}
-              searchPlaceholder={props.searchPlaceholder || 'Zoeken'}
+              searchPlaceholder={props.searchPlaceholder ?? 'Zoeken'}
               resetText={props.resetText || 'Reset'}
               applyText={props.applyText || 'Toepassen'}
               tagGroups={props.tagGroups || []}

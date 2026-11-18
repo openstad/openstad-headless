@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -21,6 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -97,7 +97,7 @@ export default function WidgetResourceOverviewDisplay(
       displayMap: props?.displayMap || false,
       displayAsTabs: props?.displayAsTabs || false,
       displayTitle: props?.displayTitle || false,
-      headingLevel: props?.headingLevel,
+      headingLevel: props?.headingLevel || '2',
       bannerText: props?.bannerText,
       titleMaxLength: props?.titleMaxLength || 20,
       displayDescription: props?.displayDescription || false,
@@ -111,8 +111,8 @@ export default function WidgetResourceOverviewDisplay(
       documentsTitle: props?.documentsTitle || '',
       documentsDesc: props?.documentsDesc || '',
       displayVariant: props?.displayVariant,
-      applyText: props?.applyText || 'Toepassen',
-      resetText: props?.resetText || 'Reset',
+      applyText: props?.applyText ?? 'Toepassen',
+      resetText: props?.resetText ?? 'Reset',
       displayLikeButton: props?.displayLikeButton || false,
       clickableImage: props?.clickableImage || false,
       displayBudget: props?.displayBudget !== false,
@@ -146,6 +146,11 @@ export default function WidgetResourceOverviewDisplay(
     },
   });
 
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Weergave',
+  });
+
   const { watch } = form;
   const displayBanner = watch('displayBanner');
   const displayMap = watch('displayMap');
@@ -170,14 +175,6 @@ export default function WidgetResourceOverviewDisplay(
       setGroupedNames(groupNames);
     }
   }, [tags]);
-
-  useEffect(() => {
-    if (displayTags && typeof props.dialogTagGroups === 'undefined') {
-      const allTagGroups = tagGroupNames;
-      form.setValue('dialogTagGroups', allTagGroups);
-      props.onFieldChanged('dialogTagGroups', allTagGroups);
-    }
-  }, [displayTags, tagGroupNames]);
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -535,14 +532,7 @@ export default function WidgetResourceOverviewDisplay(
                     Hoeveelheid karakters van de titel die getoond wordt
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => {
-                        onFieldChange(field.name, e.target.value);
-                        field.onChange(e);
-                      }}
-                    />
+                    <Input type="number" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -641,14 +631,7 @@ export default function WidgetResourceOverviewDisplay(
                   Hoeveelheid karakters van de samenvatting die getoond wordt
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
+                  <Input type="number" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -676,14 +659,7 @@ export default function WidgetResourceOverviewDisplay(
                   Hoeveelheid karakters van de beschrijving die getoond wordt
                 </FormLabel>
                 <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
+                  <Input type="number" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -830,88 +806,23 @@ export default function WidgetResourceOverviewDisplay(
             )}
           />
 
-          <Heading size="xl" className="col-span-full mt-6">
-            Dialog
-          </Heading>
-          <Separator
-            style={{ margin: '-10px 0 0' }}
-            className="my-4 col-span-full"
-          />
-
-          <FormField
-            control={form.control}
-            name="displayLikeButton"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Like button weergeven in de dialog</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="displayBudget"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Budget in dialog weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="clickableImage"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Moet de afbeelding in de dialog klikbaar zijn?
-                </FormLabel>
-                <FormDescription>
-                  Als je dit aanvinkt, wordt de afbeelding in de dialog klikbaar
-                  en wordt de afbeelding geopend in een nieuw tabblad.
-                </FormDescription>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="displayDocuments"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Geüploade documenten weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {displayDocuments && (
+          {props.displayType === 'cardgrid' && (
             <>
+              <Heading size="xl" className="col-span-full mt-6">
+                Dialog
+              </Heading>
+              <Separator
+                style={{ margin: '-10px 0 0' }}
+                className="my-4 col-span-full"
+              />
+
               <FormField
                 control={form.control}
-                name="documentsTitle"
+                name="displayLikeButton"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Welke titel moet er boven de download knop(pen) komen?
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        {...field}
-                        onChange={(e) => {
-                          onFieldChange(field.name, e.target.value);
-                          field.onChange(e);
-                        }}
-                      />
-                    </FormControl>
+                    <FormLabel>Like button weergeven in de dialog</FormLabel>
+                    {YesNoSelect(field, props)}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -919,104 +830,181 @@ export default function WidgetResourceOverviewDisplay(
 
               <FormField
                 control={form.control}
-                name="documentsDesc"
+                name="displayBudget"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
-                      Welke beschrijving moet er boven de download knop(pen)
-                      komen?
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        type="text"
-                        {...field}
-                        onChange={(e) => {
-                          onFieldChange(field.name, e.target.value);
-                          field.onChange(e);
-                        }}
-                      />
-                    </FormControl>
+                    <FormLabel>Budget in dialog weergeven</FormLabel>
+                    {YesNoSelect(field, props)}
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </>
-          )}
 
-          <FormField
-            control={form.control}
-            name="displayTags"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tags in dialog weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {displayTags && (
-            <FormField
-              control={form.control}
-              name="dialogTagGroups"
-              render={() => (
-                <FormItem className="col-span-full">
-                  <div>
+              <FormField
+                control={form.control}
+                name="clickableImage"
+                render={({ field }) => (
+                  <FormItem>
                     <FormLabel>
-                      Selecteer van welke tag groepen de tags getoond moeten
-                      worden in de dialog
+                      Moet de afbeelding in de dialog klikbaar zijn?
                     </FormLabel>
-                  </div>
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-2 items-center">
-                    {(tagGroupNames || []).map((groupName, index) => (
-                      <>
-                        <FormField
-                          key={`parent${groupName}`}
-                          control={form.control}
-                          name="dialogTagGroups"
-                          render={({ field }) => {
-                            return (
-                              <FormItem
-                                key={groupName}
-                                className="flex flex-row items-start space-x-3 space-y-0">
-                                <FormControl>
-                                  <Checkbox
-                                    checked={(field.value ?? []).includes(
-                                      groupName
-                                    )}
-                                    onCheckedChange={(checked: boolean) => {
-                                      let updatedFields = field.value ?? [];
-                                      if (checked) {
-                                        updatedFields = [
-                                          ...updatedFields,
-                                          groupName,
-                                        ];
-                                      } else {
-                                        updatedFields = updatedFields.filter(
-                                          (name) => name !== groupName
-                                        );
-                                      }
-                                      field.onChange(updatedFields);
-                                      props.onFieldChanged(
-                                        field.name,
-                                        updatedFields
-                                      );
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="font-normal">
-                                  {groupName}
-                                </FormLabel>
-                              </FormItem>
-                            );
-                          }}
-                        />
-                      </>
-                    ))}
-                  </div>
-                </FormItem>
+                    <FormDescription>
+                      Als je dit aanvinkt, wordt de afbeelding in de dialog
+                      klikbaar en wordt de afbeelding geopend in een nieuw
+                      tabblad.
+                    </FormDescription>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="displayDocuments"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Geüploade documenten weergeven</FormLabel>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {displayDocuments && (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="documentsTitle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Welke titel moet er boven de download knop(pen) komen?
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            {...field}
+                            onChange={(e) => {
+                              onFieldChange(field.name, e.target.value);
+                              field.onChange(e);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="documentsDesc"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Welke beschrijving moet er boven de download knop(pen)
+                          komen?
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="text"
+                            {...field}
+                            onChange={(e) => {
+                              onFieldChange(field.name, e.target.value);
+                              field.onChange(e);
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
               )}
-            />
+
+              <FormField
+                control={form.control}
+                name="displayTags"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tags in dialog weergeven</FormLabel>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {displayTags && (
+                <FormField
+                  control={form.control}
+                  name="dialogTagGroups"
+                  render={() => (
+                    <FormItem className="col-span-full">
+                      <div>
+                        <FormLabel>
+                          Selecteer van welke tag groepen de tags getoond moeten
+                          worden in de dialog
+                        </FormLabel>
+                      </div>
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-4 gap-y-2 items-center">
+                        {(tagGroupNames || []).map((groupName, index) => (
+                          <>
+                            <FormField
+                              key={`parent${groupName}`}
+                              control={form.control}
+                              name="dialogTagGroups"
+                              render={({ field }) => {
+                                return (
+                                  <FormItem
+                                    key={groupName}
+                                    className="flex flex-row items-start space-x-3 space-y-0">
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={
+                                          Array.isArray(field.value)
+                                            ? field.value.includes(groupName)
+                                            : true
+                                        }
+                                        onCheckedChange={(checked: boolean) => {
+                                          let updatedFields = Array.isArray(
+                                            field.value
+                                          )
+                                            ? field.value
+                                            : tagGroupNames;
+                                          if (checked) {
+                                            updatedFields = [
+                                              ...updatedFields,
+                                              groupName,
+                                            ];
+                                          } else {
+                                            updatedFields =
+                                              updatedFields.filter(
+                                                (name) => name !== groupName
+                                              );
+                                          }
+                                          field.onChange(updatedFields);
+                                          props.onFieldChanged(
+                                            field.name,
+                                            updatedFields
+                                          );
+                                        }}
+                                      />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                      {groupName}
+                                    </FormLabel>
+                                  </FormItem>
+                                );
+                              }}
+                            />
+                          </>
+                        ))}
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              )}
+            </>
           )}
 
           <Heading size="xl" className="col-span-full mt-6">
@@ -1074,10 +1062,6 @@ export default function WidgetResourceOverviewDisplay(
               )}
             />
           )}
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

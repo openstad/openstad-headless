@@ -361,7 +361,6 @@ let moduleDefinitions = {
       textActiveSearch: 'Bekijk de tekstresultaten voor [zoekterm]',
       displayTagFilters: false,
       tagGroups: [],
-      displayTagGroupName: false,
       displaySorting: false,
       defaultSorting: 'random',
       sorting: [],

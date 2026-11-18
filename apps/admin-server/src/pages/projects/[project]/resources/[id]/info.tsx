@@ -57,6 +57,7 @@ export default function ProjectResourceCreate() {
         </Alert>
       ) : null}
       <ResourceForm
+        useGlobalSave
         onFormSubmit={(values) => update(Number.parseInt(id as string), values)}
       />
     </div>
