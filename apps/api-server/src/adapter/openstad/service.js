@@ -3,6 +3,10 @@ const mapUserData = require('../../util/map-user-data');
 const authSettings = require('../../util/auth-settings');
 const config = require('config');
 const db = require('../../db');
+const {
+  readGlobalSettings,
+  authClientDefaults,
+} = require('../../services/global-settings');
 
 let service = {};
 
@@ -280,15 +284,18 @@ service.fetchClient = async function ({ authConfig, project }) {
 };
 
 service.createClient = async function ({ authConfig, project }) {
+  const globalDefaults = authClientDefaults(await readGlobalSettings());
   // sync only configuration that is used by the OpenStad auth server - compare updateConfig below
   let newConfig = {
+    ...globalDefaults,
     // requiredUserFields: project.config.usersrequiredUserFields
     users: {
       canCreateNewUsers: project.config.users?.canCreateNewUsers,
     },
     styling: {
-      logo: project.config.styling?.logo,
-      favicon: project.config.styling?.favicon,
+      logo: project.config.styling?.logo || globalDefaults.styling.logo,
+      favicon:
+        project.config.styling?.favicon || globalDefaults.styling.favicon,
       inlineCSS: project.config.styling?.inlineCSS,
       displayClientName: project.config.styling?.displayClientName,
     },
