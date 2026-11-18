@@ -82,7 +82,7 @@ multiProjectLogin: false
 # Express 'trust proxy' (TRUST_PROXY) on the api-server and the auth-server: the number of
 # proxies in front of the app. "1" fits a single ingress controller; add one for every extra
 # proxy, such as a CDN. An empty value trusts every proxy, which lets clients spoof their IP.
-trustProxy: "1"
+trustProxy: ""
 # Settings
 
 ##

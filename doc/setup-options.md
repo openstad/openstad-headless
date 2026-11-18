@@ -176,4 +176,4 @@ Sets Express' `trust proxy` on the api-server and the auth-server, which decides
 - An address or subnet list, for example `10.0.0.0/8, loopback`.
 - `false`: ignore `X-Forwarded-For`.
 
-In the Helm chart, set `trustProxy` (default `"1"`, for a single ingress controller); it is passed to the api-server and the auth-server. Add one for every extra proxy in front of the ingress, such as a CDN. An empty value trusts every proxy.
+In the Helm chart, set `trustProxy`; it is passed to the api-server and the auth-server. The default is empty, which trusts every proxy like before. Behind a single ingress controller use `"1"`, and add one for every extra proxy in front of the ingress, such as a CDN.
