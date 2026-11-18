@@ -2,6 +2,7 @@
 
 const { DataTypes } = require('sequelize');
 const sanitize = require('../utils/sanitize');
+const normalizeEmail = require('../utils/normalizeEmail');
 
 module.exports = (db, sequelize, Sequelize) => {
   let User = sequelize.define(
@@ -18,7 +19,7 @@ module.exports = (db, sequelize, Sequelize) => {
       email: {
         type: DataTypes.STRING,
         set: function (value) {
-          value = sanitize.noTags(value);
+          value = normalizeEmail(sanitize.noTags(value));
           this.setDataValue('email', value || null);
         },
       },

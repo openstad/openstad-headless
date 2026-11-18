@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   Form,
@@ -11,6 +10,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useAreas from '@/hooks/use-areas';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { EnqueteWidgetProps } from '@openstad-headless/enquete/src/enquete';
@@ -39,6 +39,11 @@ export default function WidgetEnquetePolygons(
     defaultValues: {
       allowedPolygons: props?.allowedPolygons || [],
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Polygonen',
   });
 
   const router = useRouter();
@@ -116,8 +121,6 @@ export default function WidgetEnquetePolygons(
               }}
             />
           )) || null}
-
-          <Button type="submit">Opslaan</Button>
         </form>
       </Form>
     </div>

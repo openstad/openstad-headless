@@ -5,7 +5,6 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
   Textarea,
   Textbox,
 } from '@utrecht/component-library-react';
@@ -14,6 +13,7 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 import { InfoImage } from '../../infoImage';
 import RteContent from '../../rte-formatting/rte-content';
 import { FieldVariant, purposeAttributes } from '../field-purpose';
+import { FormFieldLabel } from '../form-field-label';
 import { parseEditorHtml, stripTrailingBreaks } from './strip-trailing-breaks';
 import './style.css';
 
@@ -97,6 +97,7 @@ export type TextInputProps = {
   imageClickable?: boolean;
   showMinMaxAfterBlur?: boolean;
   maxCharactersOverWarning?: string;
+  'aria-labelledby'?: string;
 };
 
 const TrixEditor: React.FC<{
@@ -116,12 +117,29 @@ const TrixEditor: React.FC<{
   const onBlurRef = useRef(onBlur);
   const valueRef = useRef(value);
   const isFocusedRef = useRef(false);
+  // Set while a value is loaded into the editor programmatically. Trix
+  // normalises that HTML and fires a change event for it, which is not a user
+  // edit and must not be reported to the parent form.
+  const isLoadingValueRef = useRef(false);
+  const loadingValueTimeoutRef = useRef<number | null>(null);
 
   const targetBlankHrefsRef = useRef<Set<string>>(new Set());
 
   const idRef = useRef(
     `trix-editor-${Math.random().toString(36).substring(2, 9)}`
   );
+
+  const loadValueIntoEditor = (html: string) => {
+    if (loadingValueTimeoutRef.current !== null) {
+      window.clearTimeout(loadingValueTimeoutRef.current);
+    }
+    isLoadingValueRef.current = true;
+    editorInstance.current.loadHTML(html);
+    loadingValueTimeoutRef.current = window.setTimeout(() => {
+      isLoadingValueRef.current = false;
+      loadingValueTimeoutRef.current = null;
+    }, 0);
+  };
 
   useEffect(() => {
     (async () => {
@@ -239,11 +257,13 @@ const TrixEditor: React.FC<{
 
       if (valueRef.current && editorInstance.current) {
         targetBlankHrefsRef.current = getTargetBlankHrefs(valueRef.current);
-        editorInstance.current.loadHTML(valueRef.current);
+        loadValueIntoEditor(valueRef.current);
       }
     };
 
     const handleTrixChange = () => {
+      if (isLoadingValueRef.current) return;
+
       let html = inputEl.value;
 
       if (targetBlankHrefsRef.current.size > 0) {
@@ -321,6 +341,11 @@ const TrixEditor: React.FC<{
       inputEl.removeEventListener('input', handleTrixChange);
       editorEl.removeEventListener('trix-focus', handleTrixFocus);
       editorEl.removeEventListener('trix-blur', handleTrixBlur);
+      if (loadingValueTimeoutRef.current !== null) {
+        window.clearTimeout(loadingValueTimeoutRef.current);
+        loadingValueTimeoutRef.current = null;
+      }
+      isLoadingValueRef.current = false;
     };
   }, []);
 
@@ -332,7 +357,7 @@ const TrixEditor: React.FC<{
     if (newHrefs.size > 0) {
       newHrefs.forEach((h) => targetBlankHrefsRef.current.add(h));
     }
-    editorInstance.current.loadHTML(value || '');
+    loadValueIntoEditor(value || '');
   }, [value]);
 
   return (
@@ -374,6 +399,7 @@ const TextInput: FC<TextInputProps> = ({
   imageClickable = false,
   showMinMaxAfterBlur = false,
   maxCharactersOverWarning = 'Je hebt {overCharacters} tekens teveel',
+  'aria-labelledby': ariaLabelledBy,
 }) => {
   const variantMap = {
     'text input': Textbox,
@@ -516,7 +542,7 @@ const TextInput: FC<TextInputProps> = ({
   return (
     <FormField type="text">
       {title && (
-        <Paragraph className="utrecht-form-field__label">
+        <FormFieldLabel>
           <FormLabel htmlFor={randomId}>
             <RteContent
               content={title}
@@ -524,7 +550,7 @@ const TextInput: FC<TextInputProps> = ({
               forceInline={true}
             />
           </FormLabel>
-        </Paragraph>
+        </FormFieldLabel>
       )}
       {description && (
         <>
@@ -591,6 +617,7 @@ const TextInput: FC<TextInputProps> = ({
             setHasBlurred(true);
           }}
           autoComplete={purpose.autoComplete}
+          aria-labelledby={ariaLabelledBy}
           aria-describedby={
             [
               // ponytail: fieldInvalid komt uit form.tsx en is alleen waar als

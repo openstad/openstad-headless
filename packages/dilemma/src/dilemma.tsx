@@ -548,7 +548,7 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
         </span>
 
         <div
-          className={`dilemma-option${
+          className={`dilemma-option osc-clickable-image-anchor${
             previousAnswers[currentDilemma.id] === 'a'
               ? ' --previous-awnser'
               : ''
@@ -572,39 +572,44 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
             }
             onChange={() => handleOptionSelect('a')}
             onClick={() => handleOptionSelect('a')}
+            aria-labelledby={`option-${currentDilemma.id}-a-title`}
+            aria-describedby={
+              currentDilemma.a.description
+                ? `option-${currentDilemma.id}-a-description`
+                : undefined
+            }
           />
           <label htmlFor={`option-${currentDilemma.id}-a`}>
-            <figure className="dilemma-option-image">
-              <ClickableImage
-                clickable={imageClickable}
-                src={currentDilemma.a.image}
-                alt={currentDilemma.a.title}
-                variant="overlay">
-                <img
-                  src={currentDilemma.a.image}
-                  alt={currentDilemma.a.title}
-                />
-              </ClickableImage>
-            </figure>
-            <div className="dilemma-option-content">
-              <Heading
-                level={3}
-                appearance="utrecht-heading-4"
+            <span className="dilemma-option-image">
+              <img src={currentDilemma.a.image} alt={currentDilemma.a.title} />
+            </span>
+            <span className="dilemma-option-content">
+              <span
+                id={`option-${currentDilemma.id}-a-title`}
+                className="utrecht-heading-4"
                 dangerouslySetInnerHTML={{
                   __html: sanitizeHtml(currentDilemma.a.title),
                 }}
               />
-              <Paragraph
+              <span
+                id={`option-${currentDilemma.id}-a-description`}
+                className="utrecht-paragraph"
                 dangerouslySetInnerHTML={{
                   __html: sanitizeHtml(currentDilemma.a.description),
                 }}
               />
-            </div>
+            </span>
           </label>
+          <ClickableImage
+            clickable={imageClickable}
+            src={currentDilemma.a.image}
+            alt={currentDilemma.a.title}
+            variant="trigger"
+          />
         </div>
 
         <div
-          className={`dilemma-option${
+          className={`dilemma-option osc-clickable-image-anchor${
             previousAnswers[currentDilemma.id] === 'b'
               ? ' --previous-awnser'
               : ''
@@ -628,35 +633,40 @@ const DilemmaField: FC<DilemmaFieldProps> = ({
             }
             onChange={() => handleOptionSelect('b')}
             onClick={() => handleOptionSelect('b')}
+            aria-labelledby={`option-${currentDilemma.id}-b-title`}
+            aria-describedby={
+              currentDilemma.b.description
+                ? `option-${currentDilemma.id}-b-description`
+                : undefined
+            }
           />
           <label htmlFor={`option-${currentDilemma.id}-b`}>
-            <figure className="dilemma-option-image">
-              <ClickableImage
-                clickable={imageClickable}
-                src={currentDilemma.b.image}
-                alt={currentDilemma.b.title}
-                variant="overlay">
-                <img
-                  src={currentDilemma.b.image}
-                  alt={currentDilemma.b.title}
-                />
-              </ClickableImage>
-            </figure>
-            <div className="dilemma-option-content">
-              <Heading
-                level={3}
-                appearance="utrecht-heading-4"
+            <span className="dilemma-option-image">
+              <img src={currentDilemma.b.image} alt={currentDilemma.b.title} />
+            </span>
+            <span className="dilemma-option-content">
+              <span
+                id={`option-${currentDilemma.id}-b-title`}
+                className="utrecht-heading-4"
                 dangerouslySetInnerHTML={{
                   __html: sanitizeHtml(currentDilemma.b.title),
                 }}
               />
-              <Paragraph
+              <span
+                id={`option-${currentDilemma.id}-b-description`}
+                className="utrecht-paragraph"
                 dangerouslySetInnerHTML={{
                   __html: sanitizeHtml(currentDilemma.b.description),
                 }}
               />
-            </div>
+            </span>
           </label>
+          <ClickableImage
+            clickable={imageClickable}
+            src={currentDilemma.b.image}
+            alt={currentDilemma.b.title}
+            variant="trigger"
+          />
         </div>
       </div>
 

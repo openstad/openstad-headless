@@ -27,33 +27,26 @@ describe('<MultiSelect />', () => {
       .should('exist')
       .click();
     cy.get('.multiselect-container > div').should('have.length', 3);
-    cy.get('.multiselect-container > div').eq(0).click();
-    cy.get('.multiselect-container > div').eq(2).click();
+    cy.get('.multiselect-container label').eq(0).click();
+    cy.get('.multiselect-container input[type="checkbox"]').eq(2).click();
     cy.get('@onItemSelected').should('have.been.calledWith', 'option3');
   });
 
-  it('clicking only the option label text selects it exactly once', () => {
-    // Regression test: a <label htmlFor> pointing at the checkbox made the
-    // browser forward a second, synthetic click to the checkbox, which also
-    // bubbled to the row's onClick and double-fired onItemSelected, toggling
-    // the option back off in the same click.
+  // Regression (audit 24994): the label is linked via for/id, so clicking it
+  // also clicks the checkbox. That must result in a single selection.
+  it('selects exactly once when the label is clicked', () => {
     const onItemSelected = cy.stub().as('onItemSelected');
 
     cy.mount(
       <MultiSelect
-        id="test-multiselect"
+        id="themas"
         options={[{ value: 'option1', label: 'Option 1' }]}
         onItemSelected={onItemSelected}
       />
     );
 
-    cy.get('.multi-select button[test-id="multi-select-button"]').click();
+    cy.get('button[test-id="multi-select-button"]').click();
     cy.contains('label', 'Option 1').click();
-    cy.get('@onItemSelected').should('have.been.calledOnce');
-    cy.get('@onItemSelected').should(
-      'have.been.calledWith',
-      'option1',
-      'Option 1'
-    );
+    cy.get('@onItemSelected').should('have.been.calledOnceWith', 'option1');
   });
 });

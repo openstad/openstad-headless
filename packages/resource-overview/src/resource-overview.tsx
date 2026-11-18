@@ -30,6 +30,7 @@ import {
   Filters,
   PostcodeAutoFillLocation,
 } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter';
+import { StreetOption } from '@openstad-headless/ui/src/stem-begroot-and-resource-overview/filter/street-filter';
 import '@utrecht/component-library-css';
 import {
   Button,
@@ -50,6 +51,7 @@ import { elipsizeHTML } from '../../lib/ui-helpers';
 import { GridderResourceDetail } from './gridder-resource-detail';
 import { findResourceIndex } from './lib/find-resource-index';
 import { buildResourceDetailUrl } from './lib/resource-detail-url';
+import { tagIcon } from './lib/tag-icon';
 import { MapPreviewCard } from './parts/map-preview-card';
 import './resource-overview.css';
 
@@ -126,7 +128,6 @@ export type ResourceOverviewWidgetProps = BaseProps &
       projectId?: any;
       inlineOptions?: boolean;
     }>;
-    displayTagGroupName?: boolean;
     displayBanner?: boolean;
     displayMap?: boolean;
     displayAsTabs?: boolean;
@@ -158,6 +159,7 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayBudget?: boolean;
     displayTags?: boolean;
     displayTagIcon?: boolean;
+    displayImage?: boolean;
     displayOverviewTagGroups?: boolean;
     overviewTagGroups?: string[];
     dialogTagGroups?: string[];
@@ -189,6 +191,11 @@ export type ResourceOverviewWidgetProps = BaseProps &
     displayLocationHint?: boolean;
     locationHint?: string;
     locationPlaceholder?: string;
+    displayStreetFilter?: boolean;
+    streetFilterLabel?: string;
+    displayStreetFilterHint?: boolean;
+    streetFilterHint?: string;
+    streetFilterPlaceholder?: string;
     excludeResourcesInOverview?: boolean;
     filterBehavior?: string;
     filterBehaviorInclude?: string;
@@ -320,6 +327,7 @@ const defaultItemRenderer = (
       document.location
     );
 
+  const displayImage = props.displayImage !== false;
   const resourceImages =
     Array.isArray(resource.images) && resource.images.length > 0
       ? resource.images
@@ -390,7 +398,7 @@ const defaultItemRenderer = (
     resourceFilteredTags && resourceFilteredTags.length > 0
       ? resourceFilteredTags[0]
       : null;
-  const MapIconImage = firstTag && firstTag.mapIcon ? firstTag.mapIcon : false;
+  const TagIconImage = tagIcon(firstTag);
   const selectedOpinion = resource?.userVote?.opinion;
   const showVoteCount = !!props.displayVote && !!props.votes?.isViewable;
 
@@ -602,45 +610,47 @@ const defaultItemRenderer = (
             <TileFooter />
           )}
 
-          <Carousel
-            items={resourceImages}
-            buttonText={{
-              next: 'Volgende afbeelding',
-              previous: 'Vorige afbeelding',
-            }}
-            className="osc-carousel-container"
-            itemRenderer={(i) => (
-              <Image
-                src={i.url}
-                imageFooter={
-                  props.displayStatusLabel && (
-                    <div className={`${hasImages} ${statusClasses}`}>
-                      <Paragraph className="osc-resource-overview-content-item-status">
-                        {!!multiProjectLabel ? (
-                          <span className="status-label">
-                            {multiProjectLabel}
-                          </span>
-                        ) : (
-                          resourceFilteredStatuses?.map((statusTag: any) => (
-                            <span
-                              className="status-label"
-                              key={statusTag.label}>
-                              {statusTag.label}
+          {displayImage && (
+            <Carousel
+              items={resourceImages}
+              buttonText={{
+                next: 'Volgende afbeelding',
+                previous: 'Vorige afbeelding',
+              }}
+              className="osc-carousel-container"
+              itemRenderer={(i) => (
+                <Image
+                  src={i.url}
+                  imageFooter={
+                    props.displayStatusLabel && (
+                      <div className={`${hasImages} ${statusClasses}`}>
+                        <Paragraph className="osc-resource-overview-content-item-status">
+                          {!!multiProjectLabel ? (
+                            <span className="status-label">
+                              {multiProjectLabel}
                             </span>
-                          ))
-                        )}
-                      </Paragraph>
-                    </div>
-                  )
-                }
-              />
-            )}
-          />
+                          ) : (
+                            resourceFilteredStatuses?.map((statusTag: any) => (
+                              <span
+                                className="status-label"
+                                key={statusTag.label}>
+                                {statusTag.label}
+                              </span>
+                            ))
+                          )}
+                        </Paragraph>
+                      </div>
+                    )
+                  }
+                />
+              )}
+            />
+          )}
 
-          {props.displayTagIcon && firstTag && MapIconImage && (
+          {props.displayTagIcon && firstTag && TagIconImage && (
             <div className="resource-card--link_tagicon">
               <Image
-                src={MapIconImage}
+                src={TagIconImage}
                 alt={
                   firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon'
                 }
@@ -788,43 +798,45 @@ const defaultItemRenderer = (
             ) : null}
           </div>
 
-          <Carousel
-            items={resourceImages}
-            buttonText={{
-              next: 'Volgende afbeelding',
-              previous: 'Vorige afbeelding',
-            }}
-            className="osc-carousel-container"
-            itemRenderer={(i) => (
-              <Image
-                src={i.url}
-                imageFooter={
-                  props.displayStatusLabel && (
-                    <div className={`${hasImages} ${statusClasses}`}>
-                      <Paragraph className="osc-resource-overview-content-item-status">
-                        {!!multiProjectLabel ? (
-                          <span className="status-label">
-                            {multiProjectLabel}
-                          </span>
-                        ) : (
-                          resourceFilteredStatuses?.map((statusTag: any) => (
+          {displayImage && (
+            <Carousel
+              items={resourceImages}
+              buttonText={{
+                next: 'Volgende afbeelding',
+                previous: 'Vorige afbeelding',
+              }}
+              className="osc-carousel-container"
+              itemRenderer={(i) => (
+                <Image
+                  src={i.url}
+                  imageFooter={
+                    props.displayStatusLabel && (
+                      <div className={`${hasImages} ${statusClasses}`}>
+                        <Paragraph className="osc-resource-overview-content-item-status">
+                          {!!multiProjectLabel ? (
                             <span className="status-label">
-                              {statusTag.label}
+                              {multiProjectLabel}
                             </span>
-                          ))
-                        )}
-                      </Paragraph>
-                    </div>
-                  )
-                }
-              />
-            )}
-          />
+                          ) : (
+                            resourceFilteredStatuses?.map((statusTag: any) => (
+                              <span className="status-label">
+                                {statusTag.label}
+                              </span>
+                            ))
+                          )}
+                        </Paragraph>
+                      </div>
+                    )
+                  }
+                />
+              )}
+            />
+          )}
 
-          {props.displayTagIcon && firstTag && MapIconImage && (
+          {props.displayTagIcon && firstTag && TagIconImage && (
             <div className="resource-card--link_tagicon">
               <Image
-                src={MapIconImage}
+                src={TagIconImage}
                 alt={
                   firstTag.name ? `Icoon voor ${firstTag.name}` : 'Tag icoon'
                 }
@@ -931,11 +943,13 @@ function ResourceOverviewInner({
     api: props.api,
   });
 
-  const stringToArray = (str: string) => {
+  const stringToArray = (value: any) => {
+    if (value === null || value === undefined) return [];
+    const str = Array.isArray(value) ? value.join(',') : String(value);
     return str
-      .trim()
       .split(',')
-      .filter((t) => t && !isNaN(+t.trim()))
+      .map((t) => t.trim())
+      .filter((t) => t && !isNaN(+t))
       .map((t) => Number.parseInt(t));
   };
 
@@ -1011,6 +1025,7 @@ function ResourceOverviewInner({
   );
   const [randomSortKey, setRandomSortKey] = useState<number>(0);
   const [location, setLocation] = useState<PostcodeAutoFillLocation>(undefined);
+  const [streets, setStreets] = useState<Array<StreetOption>>([]);
 
   const [resources, setResources] = useState<Array<any>>([]);
   const [filteredResources, setFilteredResources] = useState<Array<any>>([]);
@@ -1050,7 +1065,7 @@ function ResourceOverviewInner({
     return tagsMap;
   }, [allTags]);
 
-  const apiTagGroups = useMemo(() => {
+  const apiIncludeTagGroups = useMemo(() => {
     const groups: number[][] = [];
 
     if (includeTags.length > 0) {
@@ -1069,6 +1084,12 @@ function ResourceOverviewInner({
       }
     }
 
+    return groups;
+  }, [filterBehaviorInclude, includeTags, groupedTags]);
+
+  const apiTagGroups = useMemo(() => {
+    const groups: number[][] = [...apiIncludeTagGroups];
+
     if (filterBehavior === 'and' && tags.length > 0) {
       Object.keys(groupedTags).forEach((tagType) => {
         const tagsOfType = groupedTags[tagType];
@@ -1082,7 +1103,7 @@ function ResourceOverviewInner({
     }
 
     return groups;
-  }, [filterBehavior, filterBehaviorInclude, tags, includeTags, groupedTags]);
+  }, [filterBehavior, tags, apiIncludeTagGroups, groupedTags]);
 
   const flatApiTags = useMemo(() => {
     if (filterBehavior === 'and') return [];
@@ -1104,6 +1125,7 @@ function ResourceOverviewInner({
     statuses: apiStatuses,
     excludeStatuses: apiExcludeStatuses,
     tagGroups: apiTagGroups,
+    streets,
     lat: location?.lat,
     lng: location?.lng,
     maxDistance: location?.proximity ? location.proximity * 1000 : undefined,
@@ -1118,6 +1140,15 @@ function ResourceOverviewInner({
           ? true
           : 'markers'
       : false,
+  });
+
+  const { data: streetOptions } = datastore.useResourceStreets({
+    projectId: props.projectId,
+    excludeTags: apiExcludeTags,
+    statuses: apiStatuses,
+    excludeStatuses: apiExcludeStatuses,
+    tagGroups: apiIncludeTagGroups,
+    enabled: !!props.displayStreetFilter,
   });
 
   const [resourceDetailIndex, setResourceDetailIndex] = useState<number>(0);
@@ -1297,7 +1328,16 @@ function ResourceOverviewInner({
 
   useEffect(() => {
     setPage(0);
-  }, [tags, statuses, search, sort, location, includeTags, excludeTags]);
+  }, [
+    tags,
+    statuses,
+    search,
+    sort,
+    location,
+    streets,
+    includeTags,
+    excludeTags,
+  ]);
 
   const { data: currentUser } = datastore.useCurrentUser({ ...props });
 
@@ -1443,7 +1483,8 @@ function ResourceOverviewInner({
     (props.displaySearch ||
       props.displaySorting ||
       props.displayTagFilters ||
-      props.displayLocationFilter);
+      props.displayLocationFilter ||
+      props.displayStreetFilter);
 
   const getDisplayVariant = (variant: string) => {
     if (!variant) {
@@ -1614,7 +1655,9 @@ function ResourceOverviewInner({
               displayTagFilters={props.displayTagFilters || false}
               displaySearch={props.displaySearch || false}
               displayLocationFilter={props.displayLocationFilter || false}
-              searchPlaceholder={props.searchPlaceholder || 'Zoeken'}
+              displayStreetFilter={props.displayStreetFilter || false}
+              streetOptions={streetOptions || []}
+              searchPlaceholder={props.searchPlaceholder ?? 'Zoeken'}
               resetText={props.resetText || 'Reset'}
               applyText={props.applyText || 'Toepassen'}
               tagGroups={props.tagGroups || []}
@@ -1643,6 +1686,7 @@ function ResourceOverviewInner({
                 }
                 setSearch(f.search.text);
                 setLocation(f.location);
+                setStreets(f.streets || []);
               }}
               preFilterTags={prefilterTagObj}
               displayCollapsibleFilter={displayCollapsibleFilter}

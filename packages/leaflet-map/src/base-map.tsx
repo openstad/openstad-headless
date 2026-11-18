@@ -23,8 +23,10 @@ import { Area, isPointInArea } from './area';
 import { AutoZoom } from './auto-zoom';
 import './css/base-map.css';
 import { InvalidateSizeOnResize } from './invalidate-size-on-resize';
+import { focusFirstTabbableAfter } from './lib/focus-after';
 import parseLocation from './lib/parse-location';
 import { sanitizeColor } from './lib/sanitize';
+import { MapAccessibleName } from './map-accessible-name';
 import { MapConsumer } from './map-consumer';
 import Marker from './marker';
 import MarkerClusterGroup from './marker-cluster-group';
@@ -110,7 +112,7 @@ function generateLineStyleSVG(features: any[]): string {
   return `data:image/svg+xml;base64,${btoa(svgParts.join(''))}`;
 }
 
-// RD naar WGS84 (lat, lon) conversie
+// RD to WGS84 (lat, lon) conversion
 const rdToWgs84 = (x: number, y: number) => {
   if (x < 1000) x *= 1000;
   if (y < 1000) y *= 1000;
@@ -372,9 +374,9 @@ const BaseMap = ({
   const customUrlSetting =
     tilesVariant === 'custom' ? props?.map?.customUrl : undefined;
 
-  // clustering geeft errors; ik begrijp niet waarom: het gebeurd alleen in de gebuilde widgets, niet in de dev componenten
-  // het lijkt een timing issue, waarbij niet alles in de juiste volgporde wordt geladen
-  // voor nu staat het dus uit
+  // clustering throws errors; unclear why: it only happens in the built widgets, not in the dev components
+  // it looks like a timing issue where not everything loads in the right order
+  // so it is disabled for now
   clustering = {
     isActive: false,
   };
@@ -616,7 +618,7 @@ const BaseMap = ({
 
   let clusterMarkers: MarkerProps[] = [];
 
-  // ToDo: waarom kan ik die niet gewoon als props meesturen
+  // ToDo: why can't these just be passed as props
   const tileLayerProps = {
     ...props,
     tilesVariant,
@@ -636,8 +638,8 @@ const BaseMap = ({
     }
   }, []);
 
-  // ponytail: elke kaart krijgt een skiplink — de markers zijn allemaal tabbaar,
-  // dus zonder deze link tab je door honderden pins voor je verder komt (2.4.1)
+  // Every map gets a skip link: all markers are tabbable, so without it you tab
+  // through hundreds of pins before you can move on (2.4.1)
   const skipTargetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -683,20 +685,20 @@ const BaseMap = ({
 
   const mapContainerRef = useRef<any>(null);
 
-  // ponytail: react-leaflet ruimt de Leaflet-instance niet op bij StrictMode/remount ->
-  // "Map container is already initialized"; verwijder 'm expliciet bij unmount.
+  // react-leaflet doesn't clean up the Leaflet instance on StrictMode/remount ->
+  // "Map container is already initialized"; remove it explicitly on unmount.
   useEffect(() => {
     return () => {
       try {
         mapContainerRef.current?.remove?.();
       } catch (e) {
-        /* al opgeruimd */
+        /* already cleaned up */
       }
       mapContainerRef.current = null;
     };
   }, []);
 
-  // ponytail: toetsenbord/single-pointer alternatief voor slepen + plaatsen (WCAG 2.1.1, 2.5.7)
+  // Keyboard/single-pointer alternative to dragging + placing (WCAG 2.1.1, 2.5.7)
   const PAN_STEP_PX = 100;
   const panMapBy = (x: number, y: number) => {
     mapContainerRef.current?.panBy([x, y], { animate: true });
@@ -807,15 +809,10 @@ const BaseMap = ({
       <button
         type="button"
         className="osc-map-skip-link"
-        onClick={() => skipTargetRef.current?.focus()}>
+        onClick={() => focusFirstTabbableAfter(skipTargetRef.current)}>
         Sla kaart over
       </button>
-      <div
-        className="map-container osc-map"
-        role="application"
-        aria-label="Interactieve kaart"
-        aria-describedby={mapInstructionsId}
-        ref={containerWrapperRef}>
+      <div className="map-container osc-map" ref={containerWrapperRef}>
         <p id={mapInstructionsId} className="sr-only">
           Verschuif de kaart met de pijltjestoetsen wanneer de kaart focus
           heeft. Gebruik de knop {controlsToggleName} om de kaart met losse
@@ -830,6 +827,10 @@ const BaseMap = ({
             scrollWheelZoom={scrollWheelZoom}
             zoom={zoom}>
             <MapConsumer mapId={mapId} />
+            <MapAccessibleName
+              label={props?.mapAriaLabel?.trim() || 'Interactieve kaart'}
+              describedBy={mapInstructionsId}
+            />
             <PanToLocation location={panToLocation} />
             <InvalidateSizeOnResize />
             <MapInteraction isTouch={isTouchDevice} />
@@ -1015,14 +1016,14 @@ const BaseMap = ({
           </MapContainer>
         )}
 
-        {/* ponytail: kruisje toont waar "Marker plaatsen" landt (2.1.1) */}
+        {/* Crosshair shows where "Marker plaatsen" will land (2.1.1) */}
         {controlsOpen && canPlaceViaKeyboard && (
           <div className="osc-map-crosshair" aria-hidden="true">
             <span />
           </div>
         )}
 
-        {/* ponytail: single-pointer/keyboard pan-knoppen (2.5.7) + plaats-knop (2.1.1) */}
+        {/* Single-pointer/keyboard pan buttons (2.5.7) + place button (2.1.1) */}
         <div
           className="osc-map-controls"
           role="group"
@@ -1090,9 +1091,9 @@ const BaseMap = ({
                   className="osc-map-place-comment"
                   onClick={placeAtCenter}>
                   Marker plaatsen
-                  {/* ponytail: zichtbare tekst zegt wát er gebeurt, de sr-only
-                  aanvulling wáár — het kruisje is voor AT niet zichtbaar. De
-                  toegankelijke naam bevat de zichtbare tekst, dus 2.5.3 blijft goed. */}
+                  {/* The visible text says what happens, the sr-only addition
+                  says where, since the crosshair is hidden from AT. The
+                  accessible name contains the visible text, so 2.5.3 still passes. */}
                   <span className="sr-only"> op het midden van de kaart</span>
                 </button>
               )}
@@ -1100,8 +1101,8 @@ const BaseMap = ({
           )}
         </div>
       </div>
-      {/* ponytail: buiten .osc-map — die heeft een vaste hoogte/aspect-ratio,
-          een melding erbinnen zou de kaart wegduwen of geclipt worden */}
+      {/* Outside .osc-map: it has a fixed height/aspect-ratio, so a message
+          inside it would push the map away or get clipped */}
       <div aria-live="polite" role="status" className="osc-map-status">
         {placeMessage}
       </div>

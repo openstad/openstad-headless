@@ -306,7 +306,10 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
         imageClickable: imageClickable,
       })}
 
-      <div className="utrecht-form-field__input">
+      <div
+        className="utrecht-form-field__input"
+        role={title ? 'group' : undefined}
+        aria-labelledby={title ? `${randomId}_label` : undefined}>
         <FilePond
           files={finalDocs as File[] | FilePondInitialFile[]}
           onupdatefiles={(fileItems: FilePondFile[]) => {
@@ -356,7 +359,6 @@ const DocumentUploadField: FC<DocumentUploadProps> = ({
             revert: null,
           }}
           id={randomId}
-          aria-labelledby={title ? `${randomId}_label` : undefined}
           required={fieldRequired}
           disabled={disabled}
           acceptedFileTypes={

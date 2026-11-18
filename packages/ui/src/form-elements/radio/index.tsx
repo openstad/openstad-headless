@@ -8,7 +8,6 @@ import {
   FormField,
   FormFieldDescription,
   FormLabel,
-  Paragraph,
   RadioButton,
 } from '@utrecht/component-library-react';
 import React, { FC, useState } from 'react';
@@ -16,16 +15,9 @@ import { useEffect } from 'react';
 
 import { InfoImage } from '../../infoImage';
 import RteContent, { InlineParagraph } from '../../rte-formatting/rte-content';
+import { FormFieldLabel } from '../form-field-label';
 import TextInput from '../text';
-
-const shuffleArray = <T,>(array: T[]): T[] => {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-};
+import { getRandomizedDisplayChoices } from '../utils/randomized-choices';
 
 export type RadioboxFieldProps = {
   title: string;
@@ -127,19 +119,11 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
         )
       : [];
 
-    if (randomizeItems) {
-      const storageKey = `randomizedChoices_${fieldKey}`;
-      const stored = sessionStorage.getItem(storageKey);
-      if (stored) {
-        setDisplayChoices(JSON.parse(stored));
-      } else {
-        const shuffled = shuffleArray(normalizedChoices);
-        setDisplayChoices(shuffled);
-        sessionStorage.setItem(storageKey, JSON.stringify(shuffled));
-      }
-    } else {
-      setDisplayChoices(normalizedChoices);
-    }
+    setDisplayChoices(
+      randomizeItems
+        ? getRandomizedDisplayChoices(normalizedChoices, fieldKey)
+        : normalizedChoices
+    );
   }, [choices, fieldKey, randomizeItems]);
 
   useEffect(() => {
@@ -205,7 +189,6 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
   return (
     <div className="question">
       <Fieldset
-        role="radiogroup"
         invalid={fieldInvalid}
         // ponytail: fieldInvalid, niet checkInvalid. checkInvalid betekent
         // "verplicht en nog leeg" en is dus al waar bij het laden, terwijl
@@ -271,8 +254,8 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
           return (
             <>
               <FormField type="radio" key={index}>
-                <Paragraph
-                  className={`utrecht-form-field__label utrecht-form-field__label--radio${feedbackClass}`}>
+                <FormFieldLabel
+                  className={`utrecht-form-field__label--radio${feedbackClass}`}>
                   <FormLabel
                     htmlFor={`${idKey}_${index}`}
                     type="radio"
@@ -293,7 +276,9 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                       value={choice && choice.value}
                       checked={selectedOption === choice.value}
                     />
-                    <span>{choice && choice.label}</span>
+                    <span id={`${idKey}_${index}_label`}>
+                      {choice && choice.label}
+                    </span>
                   </FormLabel>
                   {optionState === 'correct' && (
                     <span className="osc-feedback-badge --correct">
@@ -313,7 +298,7 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                       <span className="sr-only">Juist antwoord</span>
                     </span>
                   )}
-                </Paragraph>
+                </FormFieldLabel>
               </FormField>
               {choice.isOtherOption && selectedOption === choice.value && (
                 <div className="marginTop10 marginBottom15">
@@ -326,7 +311,8 @@ const RadioboxField: FC<RadioboxFieldProps> = ({
                     fieldKey={`${fieldKey}_${choice.trigger || index}_other`}
                     title=""
                     fieldInvalid={false}
-                    randomId={`${idKey}_${choice.trigger || index}`}
+                    randomId={`${idKey}_${choice.trigger || index}_other`}
+                    aria-labelledby={`${idKey}_${index}_label`}
                   />
                 </div>
               )}

@@ -6,6 +6,8 @@ import {
 import CommentComponent from '@openstad-headless/comments/src/parts/comment';
 import DataStore from '@openstad-headless/data-store/src';
 import { FormValue } from '@openstad-headless/form/src/form';
+import { focusFirstTabbableAfter } from '@openstad-headless/leaflet-map/src/lib/focus-after';
+import { MapAccessibleName } from '@openstad-headless/leaflet-map/src/map-accessible-name';
 import MarkerIcon from '@openstad-headless/leaflet-map/src/marker-icon';
 import { getResourceId } from '@openstad-headless/lib/get-resource-id';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
@@ -47,6 +49,7 @@ import NotificationService from '../../lib/NotificationProvider/notification-ser
 import hasRole from '../../lib/has-role';
 import './document-map.css';
 import './gesture';
+import { characterLimitError } from './lib/character-limit-error';
 
 export type DocumentMapProps = BaseProps &
   ProjectSettingProps & {
@@ -178,8 +181,8 @@ function DocumentMap({
   hideToggleMarkers = false,
   ...props
 }: DocumentMapProps) {
-  // ponytail: de widget staat ingebed onder de <h1> van de CMS-pagina, dus nooit
-  // zelf een h1 (WCAG 1.3.1). Redacteur kan het niveau in de admin zetten.
+  // The widget is embedded below the CMS page's <h1>, so it never renders an h1
+  // itself (WCAG 1.3.1). Editors can set the level in the admin.
   const [hTitle, hSection] = headingLevels(headingLevel);
 
   const instanceId = useId();
@@ -414,6 +417,7 @@ function DocumentMap({
   }, [docWidth, docHeight]);
 
   const contentRef = useRef<HTMLDivElement>(null);
+  const skipTargetRef = useRef<HTMLDivElement>(null);
   const [randomId, setRandomId] = useState('');
   const [helpText, setHelpText] = useState('');
 
@@ -578,7 +582,15 @@ function DocumentMap({
         setIsSubmittingComment(false);
       }
     } else {
-      return;
+      setHelpText(
+        characterLimitError({
+          length: commentValue.length,
+          min: props.comments?.descriptionMinLength || 0,
+          max: props.comments?.descriptionMaxLength || Infinity,
+          minErrorText: props?.minCharactersError,
+          maxErrorText: props?.maxCharactersError,
+        })
+      );
     }
   };
 
@@ -926,7 +938,7 @@ function DocumentMap({
     updateMapBounds(hasOpenPopup);
   }, [bounds, hasOpenPopup]);
 
-  // ponytail: toetsenbord/single-pointer alternatief voor slepen + reactie plaatsen (WCAG 2.1.1, 2.5.7)
+  // Keyboard/single-pointer alternative to dragging + placing a comment (WCAG 2.1.1, 2.5.7)
   const PAN_STEP_PX = 100;
   const panMapBy = (x: number, y: number) => {
     mapRef.current?.panBy([x, y], { animate: true });
@@ -962,9 +974,9 @@ function DocumentMap({
     };
   }, [controlsOpen]);
 
-  // ponytail: focus de reactie-textarea zodra de popup opent, zodat de keyboard-flow doorloopt (2.1.1).
-  // Wie niet is ingelogd krijgt geen textarea maar een inlogtekst met knop; dan
-  // stond er niets om te focussen en bleef de focus achter op de kaart.
+  // Focus the comment textarea once the popup opens, so the keyboard flow continues (2.1.1).
+  // Logged-out users get a login text with a button instead of a textarea; then
+  // there was nothing to focus and focus stayed behind on the map.
   useEffect(() => {
     if (!popupPosition) return;
     const t = setTimeout(() => {
@@ -982,8 +994,8 @@ function DocumentMap({
     return () => clearTimeout(t);
   }, [popupPosition]);
 
-  // ponytail: bij een geopende marker-popup focus direct in de popup zetten i.p.v. op de
-  // zoom-/info-knoppen die in de DOM ervóór staan (WCAG 2.4.3 focusvolgorde).
+  // When a marker popup opens, move focus into the popup instead of onto the
+  // zoom/info buttons that precede it in the DOM (WCAG 2.4.3 focus order).
   useEffect(() => {
     if (popupPosition || !popupComment) return;
     const t = setTimeout(() => {
@@ -1213,11 +1225,15 @@ function DocumentMap({
             </section>
           </div>
         )}
-        <div
-          className="document-container"
-          role="application"
-          aria-label="Interactieve afbeelding"
-          aria-describedby={mapInstructionsId}>
+        {/* Every pin is focusable; without a skip link you need hundreds of
+            tabs to reach the rest of the page (WCAG 2.4.1) */}
+        <button
+          type="button"
+          className="osc-map-skip-link"
+          onClick={() => focusFirstTabbableAfter(skipTargetRef.current)}>
+          Sla afbeelding over
+        </button>
+        <div className="document-container">
           <p id={mapInstructionsId} className="sr-only">
             Verschuif de afbeelding met de pijltjestoetsen wanneer de afbeelding
             focus heeft. Gebruik de knop {controlsToggleName} om de afbeelding
@@ -1237,6 +1253,10 @@ function DocumentMap({
                 : (bounds as LatLngBoundsLiteral)
             }>
             <MapEvents />
+            <MapAccessibleName
+              label="Interactieve afbeelding"
+              describedBy={mapInstructionsId}
+            />
             {filteredComments &&
               filteredComments
                 .filter((comment: any) => !!comment.location)
@@ -1443,7 +1463,7 @@ function DocumentMap({
               )}
           </MapContainer>
 
-          {/* ponytail: kruisje toont waar "Reactie plaatsen" landt (2.1.1) */}
+          {/* Crosshair shows where "Reactie plaatsen" will land (2.1.1) */}
           {controlsOpen &&
             !popupPosition &&
             !!args.canComment &&
@@ -1453,7 +1473,7 @@ function DocumentMap({
               </div>
             )}
 
-          {/* ponytail: single-pointer/keyboard pan-knoppen (2.5.7) + reactie-plaats-knop (2.1.1) */}
+          {/* Single-pointer/keyboard pan buttons (2.5.7) + place-comment button (2.1.1) */}
           <div
             className="osc-map-controls"
             role="group"
@@ -1569,6 +1589,11 @@ function DocumentMap({
             </>
           )}
         </div>
+        <div
+          ref={skipTargetRef}
+          tabIndex={-1}
+          className="osc-map-skip-target"
+        />
       </div>
       <div className="content document-map-info-container" ref={contentRef}>
         {!isDefinitive && (

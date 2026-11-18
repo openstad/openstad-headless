@@ -24,6 +24,35 @@ test:unit:cms
 test:unit:image
 ```
 
+#### Coverage
+
+Coverage is collected with the v8 provider and is configured **once at the repo
+root** in `vitest.config.ts`. Because Vitest ignores per-project `coverage`
+config in projects mode, the per-app config files do not define coverage.
+
+```bash
+npm run test:unit:coverage
+```
+
+This runs the full unit-test suite and enforces the coverage thresholds. The
+`coverage.include` list scopes measurement to the critical flows that have
+dedicated tests (auth middleware, OAuth2 domain allow-listing, votes, resource
+CRUD — see issue #1642); add a file there once it gains real coverage. The
+thresholds start at 20% lines (the baseline agreed in #1642) and should be
+ratcheted upwards as coverage grows.
+
+A failing threshold exits non-zero, which **blocks the CI build** — the
+`build-publish-docker` workflow runs `npm run test:unit:coverage` on every push
+and uploads the lcov report from `coverage/` as a build artifact.
+
+#### Critical-flow unit tests
+
+The api-server and auth-server have unit tests (vitest, DB mocked) for the most
+critical and most-changed flows: auth/token middleware, OAuth2 login (including
+the magic-login URL flow and domain allow-listing), votes (including budget and
+duplicate rules), and resource CRUD with permission checks. They run in a couple
+of seconds locally.
+
 ### Component Tests (Cypress)
 
 Component tests are written using Cypress. To run the component tests, use the following command from the root of the project:

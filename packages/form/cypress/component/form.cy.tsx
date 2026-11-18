@@ -1,4 +1,68 @@
+import { useState } from 'react';
+
 import Form from '../../src/form';
+
+const paginatedFields = (firstFieldRequired = false) => [
+  {
+    type: 'text',
+    title: 'Vraag een',
+    fieldKey: 'vraag1',
+    variant: 'text input',
+    fieldRequired: firstFieldRequired,
+  },
+  { type: 'pagination', fieldKey: 'pag1' },
+  {
+    type: 'text',
+    title: 'Vraag twee',
+    fieldKey: 'vraag2',
+    variant: 'text input',
+  },
+];
+
+function PaginatedForm({ fields }: { fields: Array<Record<string, unknown>> }) {
+  const [page, setPage] = useState(0);
+  return (
+    <div className="osc">
+      <div className="osc-enquete-item-content">
+        <Form
+          {...({
+            fields,
+            submitHandler: () => {},
+            submitText: 'Versturen',
+            prevPageText: 'Vorige',
+            nextPageText: 'Volgende',
+            title: '',
+            currentPage: page,
+            setCurrentPage: setPage,
+            totalPages: 2,
+            pageFieldStartPositions: [0, 2],
+            pageFieldEndPositions: [1, 3],
+          } as any)}
+        />
+      </div>
+    </div>
+  );
+}
+
+type ScrollCall = {
+  top?: number;
+  behavior?: ScrollBehavior;
+  formText: string;
+};
+
+const recordWindowScrolls = () => {
+  const calls: ScrollCall[] = [];
+  cy.window().then((win) => {
+    cy.stub(win, 'scrollTo').callsFake((options: ScrollToOptions) => {
+      calls.push({
+        top: options?.top,
+        behavior: options?.behavior,
+        formText: win.document.querySelector('form')?.textContent || '',
+      });
+    });
+  });
+  return calls;
+};
 
 describe('<Form />', () => {
   it('renders without crashing', () => {
@@ -230,5 +294,63 @@ describe('<Form />', () => {
     cy.get('button[type="submit"]').click();
     cy.contains('Bevestig eerst').should('not.exist');
     cy.get('@submit').should('have.been.called');
+  });
+
+  it('scrolls to the form top only after the next page has rendered', () => {
+    cy.mount(<PaginatedForm fields={paginatedFields()} />);
+    const calls = recordWindowScrolls();
+
+    cy.get('button[type="submit"]').click();
+    cy.contains('Vraag twee').should('exist');
+
+    cy.wrap(calls).should((recorded: ScrollCall[]) => {
+      expect(recorded).to.have.length.greaterThan(0);
+      recorded.forEach((call) => {
+        expect(call.formText).to.contain('Vraag twee');
+        expect(call.behavior).to.equal('smooth');
+      });
+    });
+  });
+
+  it('scrolls to the form top only after the previous page has rendered', () => {
+    cy.mount(<PaginatedForm fields={paginatedFields()} />);
+    cy.get('button[type="submit"]').click();
+    cy.contains('Vraag twee').should('exist');
+    const calls = recordWindowScrolls();
+
+    cy.get('.osc-prev-button').click();
+    cy.contains('Vraag een').should('exist');
+
+    cy.wrap(calls).should((recorded: ScrollCall[]) => {
+      expect(recorded).to.have.length.greaterThan(0);
+      recorded.forEach((call) => {
+        expect(call.formText).to.contain('Vraag een');
+        expect(call.behavior).to.equal('smooth');
+      });
+    });
+  });
+
+  it('scrolls smoothly to the form top when the page has validation errors', () => {
+    cy.mount(<PaginatedForm fields={paginatedFields(true)} />);
+    const calls = recordWindowScrolls();
+
+    cy.get('button[type="submit"]').click();
+    cy.contains('is verplicht').should('exist');
+    cy.contains('Vraag twee').should('not.exist');
+
+    cy.get('.osc-enquete-item-content').then(($container) => {
+      const container = $container[0];
+      const formTop =
+        container.getBoundingClientRect().top +
+        (container.ownerDocument.defaultView?.scrollY ?? 0);
+
+      cy.wrap(calls).should((recorded: ScrollCall[]) => {
+        expect(
+          recorded.some(
+            (call) => call.top === formTop && call.behavior === 'smooth'
+          )
+        ).to.equal(true);
+      });
+    });
   });
 });
