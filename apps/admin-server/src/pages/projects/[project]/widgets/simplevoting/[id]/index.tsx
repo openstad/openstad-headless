@@ -1,12 +1,13 @@
 import AuditLogTable from '@/components/audit-log-table';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import WidgetVersionHistory from '@/components/widget-version-history';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import BegrootmoduleDisplay from '@/pages/projects/[project]/widgets/begrootmodule/[id]/display';
 import WidgetStemBegrootInclude from '@/pages/projects/[project]/widgets/begrootmodule/[id]/include';
 import BegrootmoduleText from '@/pages/projects/[project]/widgets/begrootmodule/[id]/text';
@@ -34,47 +35,28 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<StemBegrootWidgetProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<StemBegrootWidgetProps>({
-      projectId,
-    });
+  const { widget, previewConfig, onFieldChanged } =
+    useWidgetDraft<StemBegrootWidgetProps>({ projectId });
+
+  const tabUpdateConfig = ignoreTabSubmit;
 
   const totalPropPackage = {
     ...widget?.config,
     ...previewConfig,
-    updateConfig: (config: StemBegrootWidgetProps) =>
-      updateConfig({ ...widget.config, ...config }),
-
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
+    updateConfig: tabUpdateConfig,
+    onFieldChanged,
     projectId,
   };
 
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Stemmodule',
-            url: `/projects/${projectId}/widgets/simple-voting/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Stemmodule',
+          `/projects/${projectId}/widgets/simple-voting/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="display">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
@@ -88,6 +70,7 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
 
             {previewConfig ? (
@@ -128,17 +111,20 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
                 projectId={projectId as string}
               />
             </TabsContent>
-          </Tabs>
-
-          <div className="container py-6 mt-6 bg-white rounded-md">
-            {previewConfig && (
-              <WidgetPreview
-                type="simplevoting"
-                config={previewConfig}
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
                 projectId={projectId as string}
               />
-            )}
-          </div>
+            </TabsContent>
+          </Tabs>
+
+          <WidgetEditorPreview
+            type="simplevoting"
+            config={previewConfig}
+            projectId={projectId as string}
+            className="container py-6 mt-6 bg-white rounded-md"
+          />
         </div>
       </PageLayout>
     </div>

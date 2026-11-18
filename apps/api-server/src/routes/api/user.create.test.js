@@ -42,13 +42,13 @@ db.User.create = async (data) => {
   return createdUser();
 };
 
-function createApp(user) {
+function createApp(user, canCreateNewUsers = true, oAuthExtra = {}) {
   const app = express();
   app.use(express.json());
   app.use((req, res, next) => {
     req.user = user;
-    req.project = { id: 1, config: { users: { canCreateNewUsers: true } } };
-    req.oAuthUser = { idpUser: oAuthIdentity, role: 'member' };
+    req.project = { id: 1, config: { users: { canCreateNewUsers } } };
+    req.oAuthUser = { idpUser: oAuthIdentity, role: 'member', ...oAuthExtra };
     next();
   });
   app.use('/project/:projectId(\\d+)/user', userRouter);
@@ -73,6 +73,40 @@ describe('POST create user serializes the response for the requester', () => {
 
     expect(res.status).toBe(200);
     expect(res.body.idpUser).toEqual(oAuthIdentity);
+  });
+
+  it('does not let a moderator bypass canCreateNewUsers by requesting a higher role', async () => {
+    const res = await request(createApp({ role: 'moderator', id: 8 }, false))
+      .post(url)
+      .send({ email: 'nieuw@example.com', role: 'admin' });
+
+    expect(res.status).toBe(401);
+    expect(created).toBeNull();
+  });
+
+  it('still lets an admin create an admin when canCreateNewUsers is off', async () => {
+    const res = await request(createApp(admin, false))
+      .post(url)
+      .send({ email: 'nieuw@example.com', role: 'admin' });
+
+    expect(res.status).toBe(200);
+  });
+
+  // The auth server stores consent per client ({ [clientId]: date }); that
+  // object in the DATE column failed with 422 "null is not a valid date".
+  it('does not copy the per-client consent of the auth server into the new user', async () => {
+    const res = await request(
+      createApp(admin, true, {
+        privacyConsentAt: { 19: '2026-10-20T12:45:29.492Z' },
+        emailNotificationConsent: { 19: true },
+      })
+    )
+      .post(url)
+      .send({ email: 'nieuw@example.com' });
+
+    expect(res.status).toBe(200);
+    expect(created.privacyConsentAt).toBeNull();
+    expect(created.emailNotificationConsent).toBeNull();
   });
 
   it('still strips idpUser for an unprivileged viewer (hardening intact)', () => {

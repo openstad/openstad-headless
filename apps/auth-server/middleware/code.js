@@ -1,6 +1,7 @@
 const db = require('../db');
 const generateCode = require('../utils/generateCode');
 const Tasks = require('../memoryStorage/tasks');
+const { isAdminClient } = require('./admin');
 
 exports.withAll = (req, res, next) => {
   const isExport = req.query.export === 'true';
@@ -61,9 +62,16 @@ exports.withAll = (req, res, next) => {
 
 exports.withOne = (req, res, next) => {
   const codeId = req.body.codeId ? req.body.codeId : req.params.codeId;
+  const where = { id: codeId };
+  if (!isAdminClient(req.user)) where.clientId = req.user?.id;
 
-  db.UniqueCode.findOne({ where: { id: codeId } })
+  db.UniqueCode.findOne({ where })
     .then((code) => {
+      if (!code) {
+        const err = new Error('Unique code not found');
+        err.status = 404;
+        return next(err);
+      }
       req.code = code;
       next();
     })

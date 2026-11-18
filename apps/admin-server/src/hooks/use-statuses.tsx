@@ -1,3 +1,4 @@
+import { readCreated } from '@/lib/read-json';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
 
@@ -29,7 +30,7 @@ export default function useStatus(projectId?: string) {
       }),
     });
 
-    return await res.json();
+    return readCreated(res, 'De status kon niet worden aangemaakt.');
   }
 
   async function removeStatus(id: number) {

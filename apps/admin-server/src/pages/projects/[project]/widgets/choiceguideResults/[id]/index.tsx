@@ -1,11 +1,12 @@
 import AuditLogTable from '@/components/audit-log-table';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import WidgetVersionHistory from '@/components/widget-version-history';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import { ChoiceGuideResultsProps } from '@openstad-headless/choiceguide-results/src/props';
 import { useRouter } from 'next/router';
 import React from 'react';
@@ -26,52 +27,34 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<ChoiceGuideResultsProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<ChoiceGuideResultsProps>({
-      projectId,
-    });
+  const { widget, previewConfig, onFieldChanged } =
+    useWidgetDraft<ChoiceGuideResultsProps>({ projectId });
+
+  const tabUpdateConfig = ignoreTabSubmit;
 
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Keuzewijzer resultaat',
-            url: `/projects/${projectId}/widgets/keuzewijzer/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Keuzewijzer resultaat',
+          `/projects/${projectId}/widgets/keuzewijzer/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="settings">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="settings">Instellingen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
             <TabsContent value="settings" className="p-0">
               {previewConfig ? (
                 <ChoiceGuideResultSettings
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               ) : null}
             </TabsContent>
@@ -82,6 +65,12 @@ export default function WidgetChoiceGuide({ apiUrl }: WithApiUrlProps) {
               <AuditLogTable
                 modelName="widgets"
                 modelId={id as string}
+                projectId={projectId as string}
+              />
+            </TabsContent>
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
                 projectId={projectId as string}
               />
             </TabsContent>

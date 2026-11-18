@@ -10,6 +10,7 @@ const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 const defaultCan = require('../lib/sequelize-authorization/mixins/can');
 const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
 const roles = require('../lib/sequelize-authorization/lib/roles');
+const userRoles = require('../services/userRoles');
 
 // For detecting throwaway accounts in the email address validation.
 var emailBlackList = require('../../config/mail_blacklist');
@@ -101,7 +102,8 @@ module.exports = function (db, sequelize, DataTypes) {
               ) {
                 roleToReturn = actionUserRole;
               } else {
-                roleToReturn = fallBackRole;
+                // not allowed: leave the role unchanged instead of demoting
+                roleToReturn = undefined;
               }
             } else {
               // view/list: only privileged callers or the user themselves see the real role;
@@ -391,6 +393,20 @@ module.exports = function (db, sequelize, DataTypes) {
         defaultValue: null,
       },
 
+      // Only meaningful on the admin project (config.admin.projectId) row:
+      // flagged admins/editors are auto-added as admin to newly created projects
+      autoAddToNewProjects: {
+        type: DataTypes.BOOLEAN,
+        auth: {
+          listableBy: ['moderator', 'owner'],
+          viewableBy: ['moderator', 'owner'],
+          createableBy: 'admin',
+          updateableBy: 'admin',
+        },
+        allowNull: false,
+        defaultValue: false,
+      },
+
       privacyConsentAt: {
         type: DataTypes.DATE,
         auth: {
@@ -556,19 +572,19 @@ module.exports = function (db, sequelize, DataTypes) {
   };
 
   User.prototype.isUnknown = function () {
-    return this.role === 'unknown';
+    return userRoles.isUnknown(this.role);
   };
 
   User.prototype.isAnonymous = function () {
-    return this.role === 'anonymous';
+    return userRoles.isAnonymous(this.role);
   };
 
   User.prototype.isMember = function () {
-    return this.role !== 'unknown' && this.role !== 'anonymous';
+    return userRoles.isMember(this.role);
   };
 
   User.prototype.isAdmin = function () {
-    return this.role === 'admin' || this.role === 'su';
+    return userRoles.isAdmin(this.role);
   };
 
   User.prototype.isLoggedIn = function () {
@@ -720,13 +736,17 @@ module.exports = function (db, sequelize, DataTypes) {
         self.id
       );
 
+      // roles are project-local: only superusers act on users of other projects
+      valid = valid && isSameProjectOrSuperuser(user, self);
+
       // extra: isOwner through user on different project
       valid =
         valid ||
         (self.idpUser &&
           user.idpUser &&
           self.idpUser.identifier &&
-          self.idpUser.identifier == user.idpUser.identifier);
+          self.idpUser.identifier == user.idpUser.identifier &&
+          self.idpUser.provider == user.idpUser.provider);
 
       // extra: geen acties op users met meer rechten dan je zelf hebt
       valid = valid && userHasRole(user, self.role);
@@ -750,6 +770,8 @@ module.exports = function (db, sequelize, DataTypes) {
       // extra: admin on different project
       valid = valid && userHasRole(user, 'admin');
 
+      valid = valid && isSameProjectOrSuperuser(user, self);
+
       // extra: geen acties op users met meer rechten dan je zelf hebt
       valid = valid && userHasRole(user, self.role);
 
@@ -758,6 +780,12 @@ module.exports = function (db, sequelize, DataTypes) {
   };
 
   return User;
+
+  function isSameProjectOrSuperuser(user, self) {
+    if (userHasRole(user, 'superuser')) return true;
+    if (user.projectId == null || self.projectId == null) return true;
+    return user.projectId == self.projectId;
+  }
 
   function beforeValidateHook(instance, options) {
     return new Promise((resolve, reject) => {

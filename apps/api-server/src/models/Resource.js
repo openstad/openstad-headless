@@ -30,25 +30,19 @@ function sanitizeTimelineUrl(url) {
 const commentVoteThreshold =
   config.resources && config.resources.commentVoteThreshold;
 const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
+const canBypassEditLock = require('../lib/can-bypass-edit-lock');
+const hasModBreakContent = require('../lib/has-mod-break-content');
+const { resolveLocationAddress } = require('../lib/location-address');
 const roles = require('../lib/sequelize-authorization/lib/roles');
 const getExtraDataConfig = require('../lib/sequelize-authorization/lib/getExtraDataConfig');
 const htmlToText = require('html-to-text');
-
-function hideEmailsForNormalUsers(comments) {
-  return comments.map((comment) => {
-    delete comment.user.email;
-
-    if (comment.replies) {
-      comment.replies = comment.replies.map((reply) => {
-        delete reply.user.email;
-
-        return reply;
-      });
-    }
-
-    return comment;
-  });
-}
+const {
+  hideEmailsForNormalUsers,
+  filterModeratorOnlyExtraData,
+} = require('../services/resourceSerialization');
+const {
+  assertImageDescriptionsWithinLimit,
+} = require('../lib/image-description');
 
 module.exports = function (db, sequelize, DataTypes) {
   var Resource = sequelize.define(
@@ -103,6 +97,7 @@ module.exports = function (db, sequelize, DataTypes) {
       score: {
         type: DataTypes.DECIMAL(12, 11),
         auth: {
+          createableBy: 'editor',
           updateableBy: 'editor',
         },
         allowNull: false,
@@ -112,6 +107,7 @@ module.exports = function (db, sequelize, DataTypes) {
       sort: {
         type: DataTypes.INTEGER,
         auth: {
+          createableBy: 'editor',
           updateableBy: 'editor',
         },
         allowNull: false,
@@ -130,6 +126,7 @@ module.exports = function (db, sequelize, DataTypes) {
         ),
         defaultValue: 'all',
         auth: {
+          createableBy: 'editor',
           updateableBy: ['editor', 'owner'],
         },
         allowNull: true,
@@ -198,6 +195,7 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: !this.publishDate,
         validate: {
           textLength(value) {
+            if (value == null) return;
             let len = value.trim().length;
             let descriptionMinLength =
               (this.config &&
@@ -230,6 +228,11 @@ module.exports = function (db, sequelize, DataTypes) {
         defaultValue: [],
         set: function (value) {
           this.setDataValue('images', normalizeImages(value));
+        },
+        validate: {
+          descriptionLength(value) {
+            assertImageDescriptionsWithinLimit(value);
+          },
         },
       },
 
@@ -349,7 +352,7 @@ module.exports = function (db, sequelize, DataTypes) {
         type: DataTypes.JSON,
         auth: {
           createableBy: 'editor',
-          updateableBy: 'editor',
+          updateableBy: ['editor', 'moderator'],
         },
         allowNull: true,
         defaultValue: null,
@@ -358,20 +361,27 @@ module.exports = function (db, sequelize, DataTypes) {
             this.setDataValue('modBreaks', null);
             return;
           }
-          var sanitized = value.map(function (entry) {
-            return {
-              id: entry.id || crypto.randomUUID(),
-              description: entry.description
-                ? sanitize.content(entry.description.trim())
-                : '',
-              authorName: entry.authorName
-                ? sanitize.noTags(entry.authorName.trim())
-                : null,
-              modBreakDate: entry.modBreakDate || new Date().toISOString(),
-              createdAt: entry.createdAt || new Date().toISOString(),
-            };
-          });
-          this.setDataValue('modBreaks', sanitized);
+          var sanitized = value
+            .map(function (entry) {
+              return {
+                id: entry.id || crypto.randomUUID(),
+                description: entry.description
+                  ? sanitize.content(entry.description.trim())
+                  : '',
+                authorName: entry.authorName
+                  ? sanitize.noTags(entry.authorName.trim())
+                  : null,
+                modBreakDate: entry.modBreakDate || new Date().toISOString(),
+                createdAt: entry.createdAt || new Date().toISOString(),
+              };
+            })
+            .filter(function (entry) {
+              return hasModBreakContent(entry.description);
+            });
+          this.setDataValue(
+            'modBreaks',
+            sanitized.length > 0 ? sanitized : null
+          );
         },
       },
 
@@ -481,6 +491,7 @@ module.exports = function (db, sequelize, DataTypes) {
         // onderstaand is een workaround: bij een delete wordt wel de validatehook aangeroepen, maar niet de beforeValidate hook. Dat lijkt een bug.
         beforeValidate: beforeValidateHook,
         beforeDestroy: beforeValidateHook,
+        beforeSave: deriveLocationAddressHook,
 
         afterCreate: function (instance, options) {},
 
@@ -831,6 +842,8 @@ module.exports = function (db, sequelize, DataTypes) {
               'defaultResourceImage',
               'documentMapIconColor',
               'mapIcon',
+              'listIcon',
+              'detailPageUrl',
             ],
             through: { attributes: [] },
             required: false,
@@ -1202,6 +1215,11 @@ module.exports = function (db, sequelize, DataTypes) {
       constraints: false,
       onDelete: 'CASCADE',
     });
+    this.hasMany(models.ResourceLink, {
+      as: 'outgoingLinks',
+      foreignKey: 'resourceId',
+      constraints: false,
+    });
   };
 
   let canMutate = function (user, self) {
@@ -1295,6 +1313,7 @@ module.exports = function (db, sequelize, DataTypes) {
       delete data.hasResourceFormConfig;
       delete data.resourceFormFieldKeys;
       delete data.moderatorOnlyExtraDataKeys;
+      delete data.resourceFormFieldTypes;
       // dit zou nu dus gedefinieerd moeten worden op project.config, maar wegens backward compatible voor nu nog even hier:
       //
 
@@ -1305,6 +1324,14 @@ module.exports = function (db, sequelize, DataTypes) {
 
       // er is ook al een createDateHumanized veld; waarom is dit er dan ook nog?
       data.createdAtText = moment(data.createdAt).format('LLL');
+
+      if (Array.isArray(self.links)) {
+        data.links = self.links;
+      }
+
+      if (self.linkRequests) {
+        data.linkRequests = self.linkRequests;
+      }
 
       // if user is not allowed to edit resource then remove phone key, otherwise publically available
       // needs to move to definition per key
@@ -1321,38 +1348,14 @@ module.exports = function (db, sequelize, DataTypes) {
         ? self.resourceFormFieldKeys
         : [];
       const hasResourceFormConfig = !!self.hasResourceFormConfig;
-      // {role:'all'} is the unidentified viewer; strip hardest, not skip
-      if (
-        user &&
-        user.role &&
-        !canViewModeratorOnlyExtraData(user, self) &&
-        data.extraData &&
-        typeof data.extraData === 'object'
-      ) {
-        if (hasResourceFormConfig) {
-          Object.keys(data.extraData).forEach((key) => {
-            if (
-              !resourceFormFieldKeys.includes(key) &&
-              !alwaysPublicExtraDataKeys.includes(key)
-            ) {
-              delete data.extraData[key];
-            }
-          });
-        } else {
-          const preserved = {};
-          alwaysPublicExtraDataKeys.forEach((key) => {
-            if (data.extraData[key] !== undefined)
-              preserved[key] = data.extraData[key];
-          });
-          data.extraData = preserved;
-        }
-
-        moderatorOnlyExtraDataKeys.forEach((key) => {
-          if (!alwaysPublicExtraDataKeys.includes(key)) {
-            delete data.extraData[key];
-          }
-        });
-      }
+      data = filterModeratorOnlyExtraData(data, {
+        userRole: user && user.role,
+        canViewModerator: canViewModeratorOnlyExtraData(user, self),
+        hasResourceFormConfig,
+        resourceFormFieldKeys,
+        moderatorOnlyExtraDataKeys,
+        alwaysPublicExtraDataKeys,
+      });
 
       if (data.commentsAgainst) {
         data.commentsAgainst = hideEmailsForNormalUsers(data.commentsAgainst);
@@ -1414,6 +1417,17 @@ module.exports = function (db, sequelize, DataTypes) {
 
   return Resource;
 
+  async function deriveLocationAddressHook(instance) {
+    if (!instance.isNewRecord && !instance.changed('location')) return;
+    const location = await resolveLocationAddress({
+      location: instance.get('location'),
+      previous: instance.previous('location'),
+      isNewRecord: instance.isNewRecord,
+      reverseApiUrl: process.env.ZIPCODE_REVERSE_API_URL,
+    });
+    instance.set('location', location);
+  }
+
   async function beforeValidateHook(instance, options) {
     // add project config
     let projectConfig = config;
@@ -1431,7 +1445,10 @@ module.exports = function (db, sequelize, DataTypes) {
       false;
     if (
       !canEditAfterFirstLikeOrComment &&
-      !userHasRole(instance.auth && instance.auth.user, 'editor')
+      !canBypassEditLock(
+        instance.auth && instance.auth.user,
+        instance.changed()
+      )
     ) {
       let firstLikeSubmitted = await db.Vote.count({
         where: { resourceId: instance.id },

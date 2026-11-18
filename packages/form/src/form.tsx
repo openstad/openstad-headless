@@ -9,8 +9,10 @@ import ImageUploadField from '@openstad-headless/ui/src/form-elements/image-uplo
 import InfoField from '@openstad-headless/ui/src/form-elements/info';
 import MapField from '@openstad-headless/ui/src/form-elements/map';
 import MatrixField from '@openstad-headless/ui/src/form-elements/matrix';
+import ModbreakField from '@openstad-headless/ui/src/form-elements/modbreak';
 import NumberInput from '@openstad-headless/ui/src/form-elements/number';
 import RadioboxField from '@openstad-headless/ui/src/form-elements/radio';
+import ResourceLinkField from '@openstad-headless/ui/src/form-elements/resource-link';
 import SelectField from '@openstad-headless/ui/src/form-elements/select';
 import SortField from '@openstad-headless/ui/src/form-elements/sort';
 import TextInput from '@openstad-headless/ui/src/form-elements/text';
@@ -60,6 +62,7 @@ function Form({
   secondaryHandler = () => {},
   getValuesOnChange = () => {},
   allowResetAfterSubmit = true,
+  navigateAfterSubmitSuccess = false,
   currentPage,
   setCurrentPage,
   prevPage,
@@ -239,6 +242,19 @@ function Form({
 
     const shouldGoToNextPage = hasPages && hasSetCurrentPage;
 
+    if (!shouldGoToNextPage) {
+      scrollTop();
+    }
+
+    const scrollToErrors = (errorKeys: string[]) => {
+      if (shouldGoToNextPage) {
+        scrollTop();
+      }
+      if (formRef.current) {
+        scrollToFirstError(formRef.current, errorKeys);
+      }
+    };
+
     if (isNumber && isTotalNumber && shouldGoToNextPage) {
       allowResetAfterSubmit = false;
       pageHandler = () => setCurrentPage(currentPage + 1);
@@ -275,9 +291,7 @@ function Form({
         newErrors[f.fieldKey] = confirmAnswerMessage;
       });
       setFormErrors((prev) => ({ ...prev, ...newErrors }));
-      if (formRef.current) {
-        scrollToFirstError(formRef.current, Object.keys(newErrors));
-      }
+      scrollToErrors(Object.keys(newErrors));
       return;
     }
 
@@ -288,7 +302,8 @@ function Form({
       routingHiddenFields,
       submitHandler,
       pageHandler,
-      submitBeforeLastPage
+      submitBeforeLastPage,
+      navigateAfterSubmitSuccess
     );
 
     if (firstErrorKey && onValidationErrors) {
@@ -299,14 +314,11 @@ function Form({
     }
 
     if (firstErrorKey) {
-      if (formRef.current) {
-        scrollToFirstError(
-          formRef.current,
-          Object.keys(validationErrors).filter(
-            (key) => validationErrors[key] !== null
-          )
-        );
-      }
+      scrollToErrors(
+        Object.keys(validationErrors).filter(
+          (key) => validationErrors[key] !== null
+        )
+      );
     } else if (allowResetAfterSubmit) {
       resetForm();
     }
@@ -455,6 +467,16 @@ function Form({
         top: elementPosition,
         behavior: 'smooth',
       });
+
+      const scrollRoot = formWidget.closest('.osc') ?? formWidget;
+      scrollRoot.querySelectorAll<HTMLElement>('*').forEach((element) => {
+        if (element.scrollTop > 0) {
+          const overflowY = window.getComputedStyle(element).overflowY;
+          if (overflowY === 'auto' || overflowY === 'scroll') {
+            element.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        }
+      });
     }
   };
 
@@ -467,6 +489,8 @@ function Form({
       return;
     }
     if (typeof currentPage !== 'number' || !formRef.current) return;
+
+    requestAnimationFrame(() => scrollTop());
 
     const firstQuestion = formRef.current.querySelector(
       '.question'
@@ -508,6 +532,8 @@ function Form({
     dilemma: DilemmaField as React.ComponentType<ComponentFieldProps>,
     video: VideoField as React.ComponentType<ComponentFieldProps>,
     timeline: TimelineField as React.ComponentType<ComponentFieldProps>,
+    resourceLink: ResourceLinkField as React.ComponentType<ComponentFieldProps>,
+    modbreak: ModbreakField as React.ComponentType<ComponentFieldProps>,
   };
 
   const isFieldAnswered = (field: any): boolean => {
@@ -600,7 +626,6 @@ function Form({
                 className="osc-prev-button"
                 onClick={() => {
                   setCurrentPage && setCurrentPage(currentPage - 1);
-                  scrollTop();
                 }}>
                 {currentPrevLabel || 'vorige'}
               </Button>
@@ -814,10 +839,9 @@ function Form({
                 appearance="secondary-action-button"
                 type="button"
                 className="osc-prev-button"
-                aria-label={prevPageText || 'vorige'}
+                aria-label={currentPrevLabel || 'vorige'}
                 onClick={() => {
                   setCurrentPage && setCurrentPage(currentPage - 1);
-                  scrollTop();
                 }}>
                 <span>{currentPrevLabel || 'vorige'}</span>
               </Button>
@@ -827,10 +851,7 @@ function Form({
               type="submit"
               disabled={submitDisabled}
               data-label="Overslaan"
-              aria-label={submitText}
-              onClick={() => {
-                scrollTop();
-              }}>
+              aria-label={currentButtonLabel}>
               <span>{currentButtonLabel}</span>
             </Button>
           </div>

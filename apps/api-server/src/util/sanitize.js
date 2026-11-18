@@ -44,6 +44,7 @@ var allSafeTags = {
     'nav',
     'section',
     // Text content
+    'article',
     'center',
     'dd',
     'div',
@@ -124,6 +125,13 @@ var allSafeTags = {
     },
   },
 };
+var rawInputTags = {
+  ...allSafeTags,
+  allowedAttributes: {
+    ...allSafeTags.allowedAttributes,
+    '*': [...allSafeTags.allowedAttributes['*'], 'id', 'style'],
+  },
+};
 
 module.exports = {
   title: function (text) {
@@ -148,5 +156,8 @@ module.exports = {
   },
   noTags: function (text) {
     return sanitizeIfNotNull(text, noTags);
+  },
+  rawInput: function (text) {
+    return sanitizeIfNotNull(text, rawInputTags);
   },
 };

@@ -1,14 +1,15 @@
 import AuditLogTable from '@/components/audit-log-table';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import WidgetVersionHistory from '@/components/widget-version-history';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
 } from '@/lib/server-side-props-definition';
+import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import { LikeWidgetProps } from '@openstad-headless/likes/src/likes';
 import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
 import { useRouter } from 'next/router';
@@ -29,52 +30,36 @@ export default function WidgetLikes({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } = useWidgetConfig<LikeWidgetTabProps>();
-  const { previewConfig, updatePreview } = useWidgetPreview<LikeWidgetTabProps>(
-    {
+  const { widget, previewConfig, onFieldChanged } =
+    useWidgetDraft<LikeWidgetTabProps>({
       projectId,
-    }
-  );
+    });
+
+  const tabUpdateConfig = ignoreTabSubmit;
 
   return (
     <div>
       <PageLayout
-        breadcrumbs={[
-          {
-            name: 'Projecten',
-            url: '/projects',
-          },
-          {
-            name: 'Widgets',
-            url: `/projects/${projectId}/widgets`,
-          },
-          {
-            name: 'Likes',
-            url: `/projects/${projectId}/widgets/likes/${id}`,
-          },
-        ]}>
+        breadcrumbs={widgetBreadcrumbs(
+          projectId,
+          'Likes',
+          `/projects/${projectId}/widgets/likes/${id}`,
+          widget?.description
+        )}>
         <div className="container py-6">
           <Tabs defaultValue="display">
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="display">Instellingen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
             <TabsContent value="display" className="p-0">
               {previewConfig ? (
                 <LikesDisplay
                   {...previewConfig}
-                  updateConfig={(config) =>
-                    updateConfig({ ...widget.config, ...config })
-                  }
-                  onFieldChanged={(key, value) => {
-                    if (previewConfig) {
-                      updatePreview({
-                        ...previewConfig,
-                        [key]: value,
-                      });
-                    }
-                  }}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
                 />
               ) : null}
             </TabsContent>
@@ -88,17 +73,19 @@ export default function WidgetLikes({ apiUrl }: WithApiUrlProps) {
                 projectId={projectId as string}
               />
             </TabsContent>
-          </Tabs>
-
-          <div className="py-6 mt-6 bg-white rounded-md">
-            {previewConfig ? (
-              <WidgetPreview
-                type="likes"
-                config={previewConfig}
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
                 projectId={projectId as string}
               />
-            ) : null}
-          </div>
+            </TabsContent>
+          </Tabs>
+
+          <WidgetEditorPreview
+            type="likes"
+            config={previewConfig}
+            projectId={projectId as string}
+          />
         </div>
       </PageLayout>
     </div>

@@ -1,11 +1,12 @@
 // @ts-ignore
 //@ts-ignore D.type def missing, will disappear when datastore is ts
 import DataStore from '@openstad-headless/data-store/src';
-import Form, { FormValue } from '@openstad-headless/form/src/form';
+import type { FormValue } from '@openstad-headless/form/src/form';
+import Form from '@openstad-headless/form/src/form';
 import { loadWidget } from '@openstad-headless/lib/load-widget';
 import { sanitizeHtml } from '@openstad-headless/lib/sanitize';
-import { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
-import { Banner, Button, Icon, Spacer } from '@openstad-headless/ui/src';
+import type { BaseProps, ProjectSettingProps } from '@openstad-headless/types';
+import { Banner, Button, Spacer } from '@openstad-headless/ui/src';
 import {
   Heading2,
   Heading3,

@@ -48,6 +48,11 @@ db.Widget.scope = () => ({
       : null,
 });
 
+db.sequelize.transaction = async (fn) => fn({});
+db.WidgetVersion.findOne = async () => null;
+db.WidgetVersion.create = async (values) => values;
+db.WidgetVersion.findAll = async () => [];
+
 function createApp(user) {
   const app = express();
   app.use(express.json());
@@ -107,6 +112,17 @@ describe('PUT /project/:projectId/widgets/:id', () => {
 
     expect(updated.config.rawInput).not.toContain('<script>');
     expect(updated.config.rawInput).toContain('hoi');
+  });
+
+  it('keeps id and style in rawInput', async () => {
+    await request(createApp(editor))
+      .put(`/project/${PROJECT_ID}/widgets/6`)
+      .send({
+        config: { rawInput: '<div id="x" style="color:red">hoi</div>' },
+      });
+
+    expect(updated.config.rawInput).toContain('id="x"');
+    expect(updated.config.rawInput).toContain('style="color:red"');
   });
 });
 

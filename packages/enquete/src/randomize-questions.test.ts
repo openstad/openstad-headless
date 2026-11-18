@@ -9,6 +9,7 @@ import {
 type TestField = {
   fieldKey: string;
   type?: string;
+  excludeFromRandomize?: boolean;
 };
 
 const question = (fieldKey: string): TestField => ({ fieldKey, type: 'text' });
@@ -151,6 +152,33 @@ describe('randomizeFieldsPerPage', () => {
 
     expect(result[1]).toEqual(withVideo[1]);
     expect(result[3]).toEqual(withVideo[3]);
+  });
+
+  test('keeps a question with excludeFromRandomize on its own position', () => {
+    const withPinnedRemark: TestField[] = [
+      question('q1'),
+      question('q2'),
+      question('q3'),
+      question('q4'),
+      { fieldKey: 'remark', type: 'text', excludeFromRandomize: true },
+    ];
+
+    const orders = Array.from({ length: 50 }, (_, index) =>
+      keys(
+        randomizeFieldsPerPage({
+          fields: withPinnedRemark,
+          startPositions: [0],
+          endPositions: [withPinnedRemark.length],
+          randomizePerPage: [true],
+          seed: index + 1,
+        })
+      )
+    );
+
+    orders.forEach((order) => expect(order[4]).toBe('remark'));
+    expect(
+      orders.some((order) => order.slice(0, 4).join() !== 'q1,q2,q3,q4')
+    ).toBe(true);
   });
 
   test('leaves a page with a single question untouched', () => {

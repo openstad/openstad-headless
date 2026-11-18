@@ -206,7 +206,10 @@ service.updateUser = async function ({ authConfig, userData = {} }) {
       body,
     });
     if (!response.ok) {
-      throw new Error('Fetch failed');
+      const err = new Error('Fetch failed');
+      // keep the status so callers can tell a refusal from an outage
+      err.status = response.status;
+      throw err;
     }
 
     let userData = await response.json();
@@ -218,6 +221,7 @@ service.updateUser = async function ({ authConfig, userData = {} }) {
     });
     return mappedUserData;
   } catch (err) {
+    if (err.status) throw err;
     throw new Error('Cannot connect to auth server');
   }
 };

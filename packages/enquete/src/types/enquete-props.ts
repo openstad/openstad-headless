@@ -24,6 +24,8 @@ export type EnqueteProps = {
   infoBlockStyle?: string;
   allowedPolygons?: Array<{ id: number; name: string }>;
   enableDraftPersistence?: boolean;
+  closeFormAfterSubmit?: boolean;
+  closedFormMessage?: string;
   draftRetentionHours?: number;
   gtmEnvironment?: string;
   isQuiz?: boolean;
@@ -54,6 +56,7 @@ export type Item = {
   imageCropRatioHeight?: number;
   randomizeItems?: boolean;
   randomizeQuestions?: boolean;
+  excludeFromRandomize?: boolean;
   image?: string;
   imageAlt?: string;
   imageDescription?: string;
@@ -89,6 +92,7 @@ export type Item = {
   videoUrl?: string;
   videoSubtitle?: boolean;
   videoLang?: string;
+  videoLoop?: boolean;
   images?: Array<{
     url: string;
     name?: string;

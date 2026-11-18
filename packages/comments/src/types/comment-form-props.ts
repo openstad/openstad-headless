@@ -1,4 +1,4 @@
-import { BaseProps, Comment } from '@openstad-headless/types';
+import type { BaseProps, Comment } from '@openstad-headless/types';
 
 export type CommentFormProps = BaseProps & {
   activeMode?: 'edit' | 'reply' | '';
