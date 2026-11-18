@@ -482,6 +482,7 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     displayImageDescription: 'Beschrijving van de afbeelding tonen',
     displayLikes: 'Toon de likes widget',
     displayLocation: 'Plaats weergeven',
+    displayLocationAddress: 'Adres (straat en woonplaats) weergeven bij plaats',
     displayModBreak: 'Officiële reactie weergeven',
     displaySocials: 'Delen via social media opties weergeven',
     displayStatus: 'Gekoppelde statussen weergeven',
@@ -622,6 +623,8 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     displayShareButtons: 'Deel knoppen weergeven',
     displaySorting: 'Sorteeropties weergeven',
     displayStatusLabel: 'Status label weergeven',
+    displayStreetFilter: 'Straatfilter weergeven',
+    displayStreetFilterHint: 'Hint onder het straatfilter weergeven',
     displaySummary: 'Samenvatting weergeven',
     displayTagFilters: 'Filteren op tags weergeven?',
     displayTagIcon: 'Tag icoon weergeven in de tegels',
@@ -662,6 +665,9 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     showActiveTags:
       'Wil je onder de filters de actieve tags zien waar op is gefilterd?',
     sorting: 'Selecteer uw gewenste sorteeropties',
+    streetFilterHint: 'Hinttekst voor het straatfilter',
+    streetFilterLabel: 'Label voor het straatfilter',
+    streetFilterPlaceholder: 'Tekst voor straatfilter placeholder',
     summaryMaxLength:
       'Hoeveelheid karakters van de samenvatting die getoond wordt',
     tagGroups: 'Selecteer de gewenste tag groepen',
