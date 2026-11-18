@@ -109,6 +109,7 @@ export default function WidgetResourceOverview({ apiUrl }: WithApiUrlProps) {
                     </TabsList>
                     <TabsContent value="general" className="p-0">
                       <WidgetResourcesMapMap
+                        showMarkerPreviewSetting
                         {...extractConfig<
                           MultiProjectResourceOverviewProps,
                           ResourceOverviewMapWidgetTabProps

@@ -224,6 +224,24 @@
   opacity: 0.35;
 }
 
+.osc-base-map-widget-container .osc-map-marker svg {
+  transition: transform 0.15s ease;
+  transform-origin: 50% 100%;
+}
+
+.osc-base-map-widget-container .osc-map-marker:hover svg,
+.osc-base-map-widget-container .osc-map-marker:focus-visible svg {
+  transform: scale(1.15);
+}
+
+.osc-base-map-widget-container .osc-map-marker.osc-map-marker-selected svg {
+  transform: scale(1.3);
+}
+
+.osc-base-map-widget-container img.osc-map-marker-selected {
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.6));
+}
+
 .osc-base-map-widget-container .osc-map-marker-cluster-faded {
   opacity: 0.35;
 }

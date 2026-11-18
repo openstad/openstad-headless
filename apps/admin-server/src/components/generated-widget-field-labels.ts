@@ -688,6 +688,8 @@ export const WIDGET_FIELD_LABELS: Record<string, Record<string, string>> = {
     mapAriaLabel: 'Toegankelijke naam van de kaart',
     mapCenterMode: 'Automatisch inzoomen en centreren',
     markerInteractionType: 'Hoe wil je dat de interactie werkt met de markers?',
+    markerPreviewButtonText: 'Tekst van de knop in het voorbeeld',
+    markerPreviewCard: 'Klik op een pin toont een voorbeeld in de kaart',
     openInNewTab: 'Open in nieuw tabblad',
     tilesVariant: 'Kaart stijl',
     width: 'Breedte',

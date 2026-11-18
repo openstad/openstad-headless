@@ -32,6 +32,7 @@ export const getServerSideProps = withApiUrl;
 
 export type ResourceOverviewMapWidgetTabProps = {
   hideOverviewFields?: boolean;
+  showMarkerPreviewSetting?: boolean;
   supportsMarkerToggle?: boolean;
 } & Omit<ResourceOverviewMapWidgetProps, keyof Omit<BaseProps, 'projectId'>>;
 
