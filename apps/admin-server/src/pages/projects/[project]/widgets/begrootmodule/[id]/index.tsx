@@ -1,8 +1,9 @@
 import AuditLogTable from '@/components/audit-log-table';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import WidgetVersionHistory from '@/components/widget-version-history';
+import { flushAllFields } from '@/hooks/useFieldDebounce';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -10,7 +11,7 @@ import {
 import { widgetBreadcrumbs } from '@/lib/widget-breadcrumbs';
 import type { StemBegrootWidgetProps } from '@openstad-headless/stem-begroot/src/stem-begroot';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useState } from 'react';
 
 import { PageLayout } from '../../../../../../components/ui/page-layout';
 import {
@@ -35,29 +36,17 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<StemBegrootWidgetProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<StemBegrootWidgetProps>({
-      projectId,
-    });
+  const { widget, previewConfig, onFieldChanged } =
+    useWidgetDraft<StemBegrootWidgetProps>({ projectId });
 
-  const totalPropPackage = {
-    ...widget?.config,
-    ...previewConfig,
-    updateConfig: (config: StemBegrootWidgetProps) =>
-      updateConfig({ ...widget.config, ...config }),
+  const [activeTab, setActiveTab] = useState('display');
 
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
-    projectId,
+  const onTabChange = (value: string) => {
+    flushAllFields();
+    setActiveTab(value);
   };
+
+  const tabUpdateConfig = ignoreTabSubmit;
 
   return (
     <div>
@@ -69,7 +58,7 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
           widget?.description
         )}>
         <div className="container py-6">
-          <Tabs defaultValue="display">
+          <Tabs value={activeTab} onValueChange={onTabChange}>
             <TabsList className="w-full bg-white border-b-0 mb-4 rounded-md">
               <TabsTrigger value="display">Weergave opties</TabsTrigger>
               <TabsTrigger value="text">Teksten</TabsTrigger>
@@ -81,33 +70,66 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="include">Inclusief/exclusief</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
 
             {previewConfig ? (
               <>
                 <TabsContent value="display" className="p-0">
-                  <BegrootmoduleDisplay {...totalPropPackage} />
+                  <BegrootmoduleDisplay
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
                 </TabsContent>
                 <TabsContent value="text" className="p-0">
-                  <BegrootmoduleText {...totalPropPackage} />
+                  <BegrootmoduleText
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
                 </TabsContent>
                 <TabsContent value="explanation" className="p-0">
-                  <BegrootmoduleExplanation {...totalPropPackage} />
+                  <BegrootmoduleExplanation
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
                 </TabsContent>
                 <TabsContent value="search" className="p-0">
-                  <WidgetStemBegrootSearch {...totalPropPackage} />
+                  <WidgetStemBegrootSearch
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
                 </TabsContent>
                 <TabsContent value="tags" className="p-0">
-                  <WidgetStemBegrootOverviewTags {...totalPropPackage} />
+                  <WidgetStemBegrootOverviewTags
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
                 </TabsContent>
                 <TabsContent value="sorting" className="p-0">
-                  <WidgetStemBegrootSorting {...totalPropPackage} />
+                  <WidgetStemBegrootSorting
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
                 </TabsContent>
                 <TabsContent value="pagination" className="p-0">
-                  <WidgetStemBegrootPagination {...totalPropPackage} />
+                  <WidgetStemBegrootPagination
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
                 </TabsContent>
                 <TabsContent value="include" className="p-0">
-                  <WidgetStemBegrootInclude {...totalPropPackage} />
+                  <WidgetStemBegrootInclude
+                    {...previewConfig}
+                    updateConfig={tabUpdateConfig}
+                    onFieldChanged={onFieldChanged}
+                  />
                 </TabsContent>
                 <TabsContent value="publish" className="p-0">
                   <WidgetPublish apiUrl={apiUrl} />
@@ -121,17 +143,20 @@ export default function WidgetBegrootModule({ apiUrl }: WithApiUrlProps) {
                 projectId={projectId as string}
               />
             </TabsContent>
-          </Tabs>
-
-          <div className="container py-6 mt-6 bg-white rounded-md">
-            {previewConfig && (
-              <WidgetPreview
-                type="begrootmodule"
-                config={previewConfig}
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
                 projectId={projectId as string}
               />
-            )}
-          </div>
+            </TabsContent>
+          </Tabs>
+
+          <WidgetEditorPreview
+            type="begrootmodule"
+            config={previewConfig}
+            projectId={projectId as string}
+            className="container py-6 mt-6 bg-white rounded-md"
+          />
         </div>
       </PageLayout>
     </div>

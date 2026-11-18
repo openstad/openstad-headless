@@ -444,7 +444,8 @@ router
       .authorizeData(req.body, 'update')
       .update(req.body)
       .then(async (result) => {
-        if (!comment.location && !comment.parentId) {
+        // Only touch tags when the client sends them; partial updates must not wipe them.
+        if (!comment.location && !comment.parentId && 'tags' in req.body) {
           let tags = req.body.tags || [];
           if (!Array.isArray(tags)) tags = [tags];
           tags = tags.filter((tag) => !Number.isNaN(parseInt(tag)));

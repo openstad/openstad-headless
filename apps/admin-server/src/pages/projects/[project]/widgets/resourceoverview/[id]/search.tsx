@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -11,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -45,16 +45,21 @@ export default function WidgetResourceOverviewSearch(
       displaySearch: props.displaySearch || false,
       displaySearchText: props.displaySearchText || false,
       textActiveSearch:
-        props.textActiveSearch || 'Je ziet hier zoekresultaten voor [zoekterm]',
+        props.textActiveSearch ?? 'Je ziet hier zoekresultaten voor [zoekterm]',
       searchLabel: props.searchLabel || 'Zoeken',
       displaySearchHint: props.displaySearchHint || false,
       searchHint: props.searchHint || '',
       displaySearchPlaceholder: props.displaySearchPlaceholder !== false,
-      searchPlaceholder: props.searchPlaceholder || 'Zoeken',
+      searchPlaceholder: props.searchPlaceholder ?? 'Zoeken',
     },
   });
 
   const { onFieldChange } = useFieldDebounce(props.onFieldChanged);
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Zoeken',
+  });
 
   const displaySearchPlaceholder = form.watch('displaySearchPlaceholder');
 
@@ -195,9 +200,6 @@ export default function WidgetResourceOverviewSearch(
               )}
             />
           )}
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

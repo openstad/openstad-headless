@@ -48,6 +48,11 @@ db.Widget.scope = () => ({
       : null,
 });
 
+db.sequelize.transaction = async (fn) => fn({});
+db.WidgetVersion.findOne = async () => null;
+db.WidgetVersion.create = async (values) => values;
+db.WidgetVersion.findAll = async () => [];
+
 function createApp(user) {
   const app = express();
   app.use(express.json());

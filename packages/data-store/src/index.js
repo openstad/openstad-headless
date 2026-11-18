@@ -15,6 +15,7 @@ import useEnqueteResultCount from './hooks/use-enquete-result-count';
 import useMarkers from './hooks/use-markers.js';
 import useProjectVotedUsersCount from './hooks/use-project-voted-users-count';
 import useResourceLinks from './hooks/use-resource-links';
+import useResourceStreets from './hooks/use-resource-streets';
 import useResource from './hooks/use-resource.js';
 import useResources from './hooks/use-resources.js';
 import useStatuses from './hooks/use-statuses.js';
@@ -55,6 +56,7 @@ function DataStore(props = {}) {
   self.useChoiceGuideResultCount = useChoiceGuideResultCount.bind(self);
   self.useProjectVotedUsersCount = useProjectVotedUsersCount.bind(self);
   self.useResourceLinks = useResourceLinks.bind(self);
+  self.useResourceStreets = useResourceStreets.bind(self);
   self.useUserActivity = useUserActivity.bind(self);
   self.useWidget = useWidget.bind(self);
   self.useWidgets = useWidgets.bind(self);

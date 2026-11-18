@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -19,6 +18,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { YesNoSelect } from '@/lib/form-widget-helpers';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import {
@@ -33,22 +33,33 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-const formSchema = z.object({
-  displayTagFilters: z.boolean(),
-  tagGroups: z
-    .array(
+const formSchema = z
+  .object({
+    displayTagFilters: z.boolean(),
+    tagGroups: z.array(
       z.object({
         type: z.string(),
         label: z.string().optional(),
         multiple: z.boolean(),
       })
-    )
-    .refine((value) => value.some((item) => item), {
-      message: 'You have to select at least one item.',
-    }),
-  displayTagGroupName: z.boolean(),
-  filterBehavior: z.string().optional(),
-});
+    ),
+    filterBehavior: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    // Only require at least one tag group when the tag filter is actually
+    // enabled; otherwise the toggle can be turned off / groups cleared freely.
+    if (
+      data.displayTagFilters === true &&
+      (!data.tagGroups || data.tagGroups.length === 0)
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['tagGroups'],
+        message:
+          "Selecteer minimaal één tag groep of schakel 'Filteren op tags weergeven' uit.",
+      });
+    }
+  });
 
 type Tag = {
   id: number;
@@ -77,18 +88,18 @@ export default function WidgetStemBegrootOverviewTags(
     }
   }, [tags]);
 
-  async function onSubmit(values: FormData) {
-    props.updateConfig({ ...props, ...values });
-  }
-
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
     defaultValues: {
       displayTagFilters: props?.displayTagFilters || false,
       tagGroups: props.tagGroups || [],
-      displayTagGroupName: props?.displayTagGroupName || false,
       filterBehavior: props?.filterBehavior || 'or',
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Tags',
   });
 
   return (
@@ -97,7 +108,7 @@ export default function WidgetStemBegrootOverviewTags(
         <Heading size="xl">Tags</Heading>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(e) => e.preventDefault()}
           className="lg:w-3/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
@@ -165,7 +176,7 @@ export default function WidgetStemBegrootOverviewTags(
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-1 lg:grid-cols-[auto_1fr_1fr] gap-x-8 gap-y-2">
-                  {(tagGroupNames || []).map((groupName, index) => (
+                  {(tagGroupNames || []).map((groupName) => (
                     <>
                       <FormField
                         key={`parent${groupName}`}
@@ -181,7 +192,7 @@ export default function WidgetStemBegrootOverviewTags(
                                   <FormLabel>{groupName}</FormLabel>
                                   <Switch.Root
                                     className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                                    onCheckedChange={(checked: any) => {
+                                    onCheckedChange={(checked) => {
                                       const groups =
                                         handleTagCheckboxGroupChange(
                                           groupName,
@@ -221,7 +232,11 @@ export default function WidgetStemBegrootOverviewTags(
                                   <Input
                                     placeholder="Groep label"
                                     key={`${groupName}-label-input-field`}
-                                    defaultValue={field.value.at(index)?.label}
+                                    value={
+                                      field.value.find(
+                                        (g) => g.type === groupName
+                                      )?.label ?? ''
+                                    }
                                     disabled={
                                       field.value.find(
                                         (g) => g.type === groupName
@@ -229,17 +244,19 @@ export default function WidgetStemBegrootOverviewTags(
                                     }
                                     onChange={(e) => {
                                       const groups = field.value;
-                                      const existingGroup = groups[index];
-
-                                      if (existingGroup) {
-                                        existingGroup.label = e.target.value;
-                                        groups[index] = existingGroup;
-                                        field.onChange(groups);
-                                        props.onFieldChanged(
-                                          field.name,
-                                          groups
-                                        );
-                                      }
+                                      if (
+                                        !groups.some(
+                                          (g) => g.type === groupName
+                                        )
+                                      )
+                                        return;
+                                      const next = groups.map((g) =>
+                                        g.type === groupName
+                                          ? { ...g, label: e.target.value }
+                                          : g
+                                      );
+                                      field.onChange(next);
+                                      props.onFieldChanged(field.name, next);
                                     }}
                                   />
                                 </>
@@ -266,7 +283,7 @@ export default function WidgetStemBegrootOverviewTags(
                                   </FormLabel>
                                   <Switch.Root
                                     className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                                    onCheckedChange={(checked: any) => {
+                                    onCheckedChange={(checked) => {
                                       const groups =
                                         handleTagCheckboxGroupChange(
                                           groupName,
@@ -300,13 +317,10 @@ export default function WidgetStemBegrootOverviewTags(
                     </>
                   ))}
                 </div>
+                <FormMessage />
               </FormItem>
             )}
           />
-
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

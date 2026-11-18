@@ -11,6 +11,7 @@ const { Strategy: BearerStrategy } = require('passport-http-bearer');
 const { Strategy: AuthTokenStrategy } = require('passport-auth-token');
 const db = require('./db');
 const validate = require('./validate');
+const normalizeEmail = require('./utils/normalizeEmail');
 const TokenStrategy = require('./token-strategy');
 const clientAuth = require('./utils/clientAuth');
 
@@ -25,7 +26,7 @@ const tokenUrl = require('./services/tokenUrl');
  */
 passport.use(
   new LocalStrategy({ usernameField: 'email' }, (email, password, done) => {
-    db.User.findOne({ where: { email: email } })
+    db.User.findOne({ where: { email: normalizeEmail(email) } })
       .then((user) => {
         return validate.user(user, password);
       })
