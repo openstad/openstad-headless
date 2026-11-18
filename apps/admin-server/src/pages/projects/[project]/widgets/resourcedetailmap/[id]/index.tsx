@@ -1,8 +1,8 @@
 import AuditLogTable from '@/components/audit-log-table';
-import WidgetPreview from '@/components/widget-preview';
+import WidgetEditorPreview from '@/components/widget-editor-preview';
 import WidgetPublish from '@/components/widget-publish';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
-import { useWidgetPreview } from '@/hooks/useWidgetPreview';
+import WidgetVersionHistory from '@/components/widget-version-history';
+import { ignoreTabSubmit, useWidgetDraft } from '@/hooks/useWidgetDraft';
 import {
   WithApiUrlProps,
   withApiUrl,
@@ -28,29 +28,10 @@ export default function WidgetResourceDetailMap({ apiUrl }: WithApiUrlProps) {
   const id = router.query.id;
   const projectId = router.query.project as string;
 
-  const { data: widget, updateConfig } =
-    useWidgetConfig<ResourceDetailMapWidgetProps>();
-  const { previewConfig, updatePreview } =
-    useWidgetPreview<ResourceDetailMapWidgetProps>({
-      projectId,
-    });
+  const { widget, previewConfig, onFieldChanged } =
+    useWidgetDraft<ResourceDetailMapWidgetProps>({ projectId });
 
-  const totalPropPackage = {
-    ...widget?.config,
-    ...previewConfig,
-    updateConfig: (config: ResourceDetailMapWidgetProps) =>
-      updateConfig({ ...widget.config, ...config }),
-
-    onFieldChanged: (key: string, value: any) => {
-      if (previewConfig) {
-        updatePreview({
-          ...previewConfig,
-          [key]: value,
-        });
-      }
-    },
-    projectId,
-  };
+  const tabUpdateConfig = ignoreTabSubmit;
 
   return (
     <div>
@@ -67,10 +48,15 @@ export default function WidgetResourceDetailMap({ apiUrl }: WithApiUrlProps) {
               <TabsTrigger value="general">Algemeen</TabsTrigger>
               <TabsTrigger value="publish">Publiceren</TabsTrigger>
               <TabsTrigger value="auditlog">Logboek</TabsTrigger>
+              <TabsTrigger value="versions">Versiegeschiedenis</TabsTrigger>
             </TabsList>
             <TabsContent value="general" className="p-0">
               {previewConfig && (
-                <WidgetResourceDetailMapGeneral {...totalPropPackage} />
+                <WidgetResourceDetailMapGeneral
+                  {...previewConfig}
+                  updateConfig={tabUpdateConfig}
+                  onFieldChanged={onFieldChanged}
+                />
               )}
             </TabsContent>
             <TabsContent value="publish" className="p-0">
@@ -83,19 +69,20 @@ export default function WidgetResourceDetailMap({ apiUrl }: WithApiUrlProps) {
                 projectId={projectId as string}
               />
             </TabsContent>
+            <TabsContent value="versions" className="p-0">
+              <WidgetVersionHistory
+                widgetId={id as string}
+                projectId={projectId as string}
+              />
+            </TabsContent>
           </Tabs>
 
-          <div className="container py-6 mt-6 bg-white rounded-md">
-            {previewConfig && (
-              <>
-                <WidgetPreview
-                  type="resourcedetailmap"
-                  config={previewConfig}
-                  projectId={projectId as string}
-                />
-              </>
-            )}
-          </div>
+          <WidgetEditorPreview
+            type="resourcedetailmap"
+            config={previewConfig}
+            projectId={projectId as string}
+            className="container py-6 mt-6 bg-white rounded-md"
+          />
         </div>
       </PageLayout>
     </div>

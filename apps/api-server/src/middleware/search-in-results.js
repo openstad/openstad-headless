@@ -1,30 +1,24 @@
 const config = require('config');
 
 function getNestedValue(obj, path) {
-  if (path === 'replies.description') {
-    if (!Array.isArray(obj.replies)) return [];
-    return obj.replies
-      .map((reply) => reply && reply.description)
-      .filter((desc) => typeof desc === 'string');
-  }
-
-  const parts = path.split('.');
-  let current = obj;
-
-  for (const part of parts) {
-    if (current == null || typeof current !== 'object') {
-      return undefined;
+  return path.split('.').reduce((current, part) => {
+    if (Array.isArray(current)) {
+      return current
+        .map((item) => (item == null ? undefined : item[part]))
+        .flat()
+        .filter((value) => value !== undefined && value !== null);
     }
-    current = current[part];
-  }
-
-  return current;
+    if (current == null || typeof current !== 'object') return undefined;
+    return current[part];
+  }, obj);
 }
 
 module.exports = function ({
   searchfields = ['title', 'summary', 'description'],
 }) {
   return function (req, res, next) {
+    const fields =
+      typeof searchfields === 'function' ? searchfields(req) : searchfields;
     let search = req.query.search;
 
     // if no search query exists move on
@@ -45,9 +39,9 @@ module.exports = function ({
 
       let useSearchFields;
       if (key === 'text') {
-        useSearchFields = searchfields;
+        useSearchFields = fields;
       } else {
-        useSearchFields = searchfields.filter((field) => field === key);
+        useSearchFields = fields.filter((field) => field === key);
       }
 
       let searchTerms = value.split(' ');

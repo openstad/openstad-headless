@@ -5,6 +5,7 @@ import { ListHeading, Paragraph } from '@/components/ui/typography';
 import useComments from '@/hooks/use-comments';
 import useResources from '@/hooks/use-resources';
 import { exportComments } from '@/lib/export-helpers/comments-export';
+import { getSentimentLabel } from '@/lib/sentiment-labels';
 import { Paginator } from '@openstad-headless/ui/src';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -244,7 +245,7 @@ export default function ProjectComments() {
                 {comment.createdAt}
               </Paragraph>
               <Paragraph className="hidden lg:flex truncate lg:col-span-1">
-                {comment.sentiment}
+                {getSentimentLabel(comment.sentiment)}
               </Paragraph>
               <Paragraph className="hidden lg:flex truncate my-auto">
                 {comment.yes || 0}
