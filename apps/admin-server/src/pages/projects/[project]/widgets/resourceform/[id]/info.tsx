@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,58 +9,49 @@ import {
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Heading } from '@/components/ui/typography';
-import { useWidgetConfig } from '@/hooks/use-widget-config';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
+import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ResourceFormWidgetProps } from '@openstad-headless/resource-form/src/props';
 import * as Switch from '@radix-ui/react-switch';
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
 const formSchema = z.object({
   allowAnonymousSubmissions: z.boolean(),
-  nameInHeader: z.boolean(),
   loginText: z.string(),
   loginButtonText: z.string(),
 });
 
-export default function WidgetResourceFormInfo() {
+export default function WidgetResourceFormInfo(
+  props: ResourceFormWidgetProps & EditFieldProps<ResourceFormWidgetProps>
+) {
   type FormData = z.infer<typeof formSchema>;
   const category = 'info';
 
-  // should use the passed props widget, this is the old way and is not advised
-  const {
-    data: widget,
-    isLoading: isLoadingWidget,
-    updateConfig,
-  } = useWidgetConfig<any>();
-
-  const defaults = useCallback(
-    () => ({
-      allowAnonymousSubmissions:
-        widget?.config?.[category]?.allowAnonymousSubmissions || false,
-      nameInHeader: widget?.config?.[category]?.nameInHeader || false,
-      loginText: widget?.config?.[category]?.loginText || '',
-      loginButtonText: widget?.config?.[category]?.loginButtonText || '',
-    }),
-    [widget?.config]
-  );
-
-  async function onSubmit(values: FormData) {
-    try {
-      await updateConfig({ [category]: values });
-    } catch (error) {
-      console.error('could not update', error);
-    }
-  }
+  const info = (props as any)[category] || {};
 
   const form = useForm<FormData>({
     resolver: zodResolver<any>(formSchema),
-    defaultValues: defaults(),
+    defaultValues: {
+      allowAnonymousSubmissions: info.allowAnonymousSubmissions || false,
+      loginText: info.loginText || '',
+      loginButtonText: info.loginButtonText || '',
+    },
   });
 
-  useEffect(() => {
-    form.reset(defaults());
-  }, [form, defaults]);
+  const { onFieldChanged } = props;
+  const pushToDraft = useCallback(
+    (name: string, value: any) =>
+      onFieldChanged?.(`${category}.${name}`, value),
+    [onFieldChanged, category]
+  );
+  useSyncDraftForm(form, pushToDraft, {
+    schema: formSchema,
+    prefix: category,
+    label: 'Weergave',
+  });
 
   return (
     <div className="p-6 bg-white rounded-md">
@@ -69,7 +59,7 @@ export default function WidgetResourceFormInfo() {
         <Heading size="xl">Weergave</Heading>
         <Separator className="my-4" />
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(event) => event.preventDefault()}
           className="lg:w-2/3 grid grid-cols-1 gap-4">
           <FormField
             control={form.control}
@@ -77,27 +67,6 @@ export default function WidgetResourceFormInfo() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Mogen niet‑ingelogde gebruikers inzenden?</FormLabel>
-                <Switch.Root
-                  className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
-                  onCheckedChange={(e: boolean) => {
-                    field.onChange(e);
-                  }}
-                  checked={field.value}>
-                  <Switch.Thumb className="block w-[21px] h-[21px] bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-[27px]" />
-                </Switch.Root>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="nameInHeader"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  Wordt de gebruikersnaam weergegeven in de header van het
-                  formulier?
-                </FormLabel>
                 <Switch.Root
                   className="block w-[50px] h-[25px] bg-stone-300 rounded-full relative focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=checked]:bg-primary outline-none cursor-default"
                   onCheckedChange={(e: boolean) => {
@@ -136,9 +105,6 @@ export default function WidgetResourceFormInfo() {
               </FormItem>
             )}
           />
-          <Button className="w-fit col-span-full" type="submit">
-            Opslaan
-          </Button>
         </form>
       </Form>
     </div>

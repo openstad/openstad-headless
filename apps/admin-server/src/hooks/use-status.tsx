@@ -1,3 +1,4 @@
+import { throwApiError } from '@/lib/api-error';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
 
@@ -17,13 +18,12 @@ export default function useStatuses(projectId?: string, id?: string) {
     color: string | undefined,
     label: string | undefined,
     mapIcon: string | undefined,
-    listIcon: string | undefined,
     extraFunctionality: {
       editableByUser: boolean | undefined;
       canComment: boolean | undefined;
       canLike: boolean | undefined;
     }
-  ) {
+  ): Promise<any | null> {
     const res = await fetch(url, {
       method: 'PUT',
       headers: {
@@ -39,10 +39,13 @@ export default function useStatuses(projectId?: string, id?: string) {
         color,
         label,
         mapIcon,
-        listIcon,
         extraFunctionality,
       }),
     });
+
+    if (!res.ok) {
+      await throwApiError(res, 'De status kon niet worden opgeslagen.');
+    }
 
     return await res.json();
   }

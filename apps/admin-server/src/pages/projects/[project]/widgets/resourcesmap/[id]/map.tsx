@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -21,6 +20,7 @@ import { Heading } from '@/components/ui/typography';
 import useTags from '@/hooks/use-tags';
 import { useFieldDebounce } from '@/hooks/useFieldDebounce';
 import { YesNoSelect, undefinedToTrueOrProp } from '@/lib/form-widget-helpers';
+import { useSyncDraftForm } from '@/hooks/useWidgetDraft';
 import { EditFieldProps } from '@/lib/form-widget-helpers/EditFieldProps';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
@@ -81,6 +81,11 @@ export default function WidgetResourcesMapMap(
       height: props?.height || '',
       displayMarkers: undefinedToTrueOrProp(props?.displayMarkers),
     },
+  });
+
+  useSyncDraftForm(form, props.onFieldChanged, {
+    schema: formSchema,
+    label: 'Kaart',
   });
 
   const { data: tags } = useTags(props.projectId);

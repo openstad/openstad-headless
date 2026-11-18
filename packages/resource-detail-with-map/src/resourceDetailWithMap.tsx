@@ -83,7 +83,6 @@ function ResourceDetailWithMap({
   displayDate = true,
   displayBudget = true,
   displayLocation = true,
-  displayBudgetDocuments = true,
   displayLikes = false,
   displayTags = false,
   displayStatus = false,

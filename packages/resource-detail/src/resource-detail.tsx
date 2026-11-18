@@ -198,7 +198,6 @@ function ResourceDetail({
   displayDate = true,
   displayBudget = true,
   displayLocation = true,
-  displayBudgetDocuments = true,
   displayLikes = true,
   displayTags = true,
   displayStatus = true,

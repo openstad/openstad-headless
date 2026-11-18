@@ -35,11 +35,7 @@ export type LinkRequests = {
 };
 
 export type General = {
-  resource?:
-    'resource' | 'article' | 'activeUser' | 'resourceUser' | 'submission';
-  formName?: string;
   redirectUrl?: string;
-  hideAdmin?: boolean;
   showMinMaxAfterBlur?: boolean;
 };
 
@@ -51,7 +47,6 @@ export type Confirmation = {
 export type Submit = {
   submitButton?: string;
   saveButton?: string;
-  saveConceptButton?: string;
   defaultAddedTags?: string;
 };
 
@@ -59,7 +54,6 @@ export type Info = {
   allowAnonymousSubmissions?: boolean;
   loginText?: string;
   loginButtonText?: string;
-  nameInHeader?: boolean;
 };
 
 export type Item = {
