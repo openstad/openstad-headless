@@ -35,6 +35,7 @@ const {
   snapshotModBreakDescriptions,
   findNewModBreaks,
   findChangedModBreaks,
+  resolveModBreakRecipients,
   sendModBreakNotifications,
 } = require('../lib/modbreak-notifications');
 
@@ -102,13 +103,32 @@ async function getUpdatedResourceEmailFlags(projectId) {
     return {
       admin: notifications?.sendUpdatedResourceAdminEmail === true,
       user: notifications?.sendUpdatedResourceUserEmail === true,
+      modBreakAuthor: notifications?.sendModBreakNotification === true,
     };
   } catch (err) {
     console.error(
       `Failed to read updated resource email settings for project ${projectId}:`,
       err
     );
-    return { admin: false, user: false };
+    return { admin: false, user: false, modBreakAuthor: false };
+  }
+}
+
+async function sendUpdatedResourceUserEmail(req) {
+  const recipients = await resolveModBreakRecipients({
+    db,
+    resource: req.results,
+    excludeUserId: req.user?.id,
+  });
+  for (const recipient of recipients) {
+    await db.Notification.create({
+      type: 'updated resource - user feedback',
+      projectId: req.project.id,
+      data: {
+        userId: recipient.userId,
+        resourceId: req.results.id,
+      },
+    });
   }
 }
 
@@ -956,22 +976,6 @@ async function sendUpdateNotifications(req, res, next) {
       logNotificationError('Error sending admin notification for resource:')
     );
   }
-  if (
-    sendUpdatedResourceEmail.user &&
-    !req.changedToPublished &&
-    req.results.userId
-  ) {
-    db.Notification.create({
-      type: 'updated resource - user feedback',
-      projectId: req.project.id,
-      data: {
-        userId: req.results.userId,
-        resourceId: req.results.id,
-      },
-    }).catch(
-      logNotificationError('Error sending user notification for resource:')
-    );
-  }
   if (req.changedToPublished && req.results.userId) {
     db.Notification.create({
       type: 'new published resource - user feedback',
@@ -993,6 +997,21 @@ async function sendUpdateNotifications(req, res, next) {
     req.previousModBreakDescriptions,
     req.results?.modBreaks
   );
+
+  const ownerGetsModBreakEmail =
+    sendUpdatedResourceEmail.modBreakAuthor &&
+    (newModBreaks.length > 0 || changedModBreaks.length > 0);
+
+  if (
+    sendUpdatedResourceEmail.user &&
+    !req.changedToPublished &&
+    !ownerGetsModBreakEmail &&
+    req.results.userId
+  ) {
+    sendUpdatedResourceUserEmail(req).catch(
+      logNotificationError('Error sending user notification for resource:')
+    );
+  }
 
   sendModBreakNotifications({
     db,

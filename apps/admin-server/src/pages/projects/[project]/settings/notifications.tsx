@@ -263,8 +263,9 @@ export default function ProjectSettingsNotifications({
                     </FormLabel>
                     <FormDescription>
                       Standaard uitgeschakeld. Bij inschakelen krijgt de
-                      indiener bij elke wijziging een e-mail, ook bij
-                      redactionele wijzigingen door een beheerder.
+                      indiener een e-mail als iemand anders de inzending
+                      wijzigt. Alleen als de indiener e-mailnotificaties heeft
+                      toegestaan.
                     </FormDescription>
                     <FormControl>
                       <div className="flex items-center gap-2">
