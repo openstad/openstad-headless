@@ -134,7 +134,7 @@ router
       include: [db.Project.scope('includeAreas')],
     })
       .then((found) => {
-        if (!found) {
+        if (!found || !found.project) {
           return next(createError(404, 'Widget not found'));
         }
         req.widget = found;
@@ -156,21 +156,25 @@ router
       );
     }
 
-    const projectDomains = widget.project.config.allowedDomains || [];
-    const allowedDomains = prefillAllowedDomains(
-      projectDomains,
-      widget.project.url
-    );
-
-    const defaultConfig = getDefaultConfig(widget.project, widget.type, config);
-    await addPrivacyConsent(
-      defaultConfig,
-      widget.project,
-      widget.type,
-      widget.config
-    );
-
     try {
+      const projectDomains = widget.project.config.allowedDomains || [];
+      const allowedDomains = prefillAllowedDomains(
+        projectDomains,
+        widget.project.url
+      );
+
+      const defaultConfig = getDefaultConfig(
+        widget.project,
+        widget.type,
+        config
+      );
+      await addPrivacyConsent(
+        defaultConfig,
+        widget.project,
+        widget.type,
+        widget.config
+      );
+
       const output = setConfigsToOutput(
         widget.type,
         componentId,
