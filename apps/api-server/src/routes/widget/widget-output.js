@@ -221,6 +221,7 @@ function getWidgetJavascriptOutput(
           redirectUri.searchParams.delete('openstadlogout');
           redirectUri.searchParams.delete('openstadlogintoken');
           redirectUri.searchParams.delete('openstadprojectid');
+          redirectUri.searchParams.delete('expireOnClose');
           redirectUri.hash = '';
 
           const config = JSON.parse(\`${widgetConfigWithCorrectEscapes}\`.replaceAll("[[REDIRECT_URI]]", encodeURIComponent(redirectUri.toString())));

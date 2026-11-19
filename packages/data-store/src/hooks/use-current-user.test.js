@@ -9,13 +9,16 @@ import {
   pickInitialUser,
   refreshCurrentUser,
   refreshCurrentUserOnAuthChange,
+  removeExpireOnCloseFromUrl,
+  revokeKnownLogins,
 } from './use-current-user';
 
 let capturedFetcher;
+let swrData;
 vi.mock('swr', () => ({
   default: (_key, fetcher) => {
     capturedFetcher = fetcher;
-    return { data: undefined, error: undefined, isLoading: true };
+    return { data: swrData, error: undefined, isLoading: true };
   },
   mutate: vi.fn(),
 }));
@@ -43,6 +46,15 @@ function createSharedApi(fetchMe) {
 function runGetCurrentUser(store, props = {}) {
   useCurrentUser.call(store, props);
   return capturedFetcher();
+}
+
+const API_URL = 'http://api.local';
+
+function unexpiredJwt(name) {
+  const encode = (value) =>
+    Buffer.from(JSON.stringify(value)).toString('base64url');
+  const exp = Math.floor(Date.now() / 1000) + 3600;
+  return `${encode({ alg: 'HS256' })}.${encode({ exp, name })}.sig`;
 }
 
 describe('consumeLoginTokenFromUrl', () => {
@@ -96,6 +108,43 @@ describe('consumeLoginTokenFromUrl', () => {
 
     expect(result.jwt).toBeNull();
     expect(result.search).toBe('?foo=bar');
+  });
+});
+
+describe('removeExpireOnCloseFromUrl', () => {
+  test('keeps the login token when expireOnClose is the first parameter', () => {
+    expect(
+      removeExpireOnCloseFromUrl(
+        'http://x/w.html?expireOnClose=1&openstadlogintoken=jwt-x&openstadprojectid=3'
+      )
+    ).toBe('http://x/w.html?openstadlogintoken=jwt-x&openstadprojectid=3');
+  });
+
+  test('removes a trailing expireOnClose', () => {
+    expect(
+      removeExpireOnCloseFromUrl('http://x/w.html?a=1&expireOnClose=1')
+    ).toBe('http://x/w.html?a=1');
+  });
+
+  test('keeps the hash and leaves a url without the parameter alone', () => {
+    expect(removeExpireOnCloseFromUrl('http://x/w.html?a=1#top')).toBe(
+      'http://x/w.html?a=1#top'
+    );
+  });
+
+  test('leaves the login token readable after removing expireOnClose', () => {
+    const cleaned = new URL(
+      removeExpireOnCloseFromUrl(
+        'http://x/w.html?expireOnClose=1&openstadlogintoken=jwt-x&openstadprojectid=3'
+      )
+    );
+
+    const result = consumeLoginTokenFromUrl({
+      search: cleaned.search,
+      projectId: 3,
+    });
+
+    expect(result.jwt).toBe('jwt-x');
   });
 });
 
@@ -419,7 +468,61 @@ describe('useCurrentUser logout and cross-tab writes', () => {
     global.window = originalWindow;
     global.document = originalDocument;
     global.history = originalHistory;
+    delete global.globalOpenStadUser;
     vi.restoreAllMocks();
+  });
+
+  function cmsRenderedLogin(projectId) {
+    global.globalOpenStadUser = { id: 12, jwt: 'jwt-cms', projectId };
+    return {
+      currentUserJWT: null,
+      apiUrl: API_URL,
+      user: { fetchMe: vi.fn().mockResolvedValue({ id: 12, role: 'member' }) },
+    };
+  }
+
+  test('uses the login rendered by the cms on the first load with multi-project login', async () => {
+    setup({ projects: {} });
+    const api = cmsRenderedLogin(21);
+
+    await expect(
+      runGetCurrentUser(
+        { projectId: 21, api, refresh: vi.fn() },
+        { projectId: 21, multiProjectLogin: true }
+      )
+    ).resolves.toEqual({ id: 12, role: 'member' });
+    expect(stored()[21].openStadUser.jwt).toBe('jwt-cms');
+  });
+
+  test('does not write the login rendered by the cms back after a logout in another tab with multi-project login', async () => {
+    setup({ projects: {} });
+    const api = cmsRenderedLogin(22);
+    const store = { projectId: 22, api, refresh: vi.fn() };
+    const props = { projectId: 22, multiProjectLogin: true };
+
+    await runGetCurrentUser(store, props);
+    global.window.localStorage.setItem('openstad', JSON.stringify({}));
+
+    await expect(runGetCurrentUser(store, props)).resolves.toEqual({});
+    expect(stored()[22]?.openStadUser).toBeUndefined();
+    expect(api.user.fetchMe).toHaveBeenCalledTimes(1);
+  });
+
+  test('still writes the login rendered by the cms back after a logout in another tab without multi-project login', async () => {
+    setup({ projects: {} });
+    const api = cmsRenderedLogin(23);
+    const store = { projectId: 23, api, refresh: vi.fn() };
+    const props = { projectId: 23 };
+
+    await runGetCurrentUser(store, props);
+    global.window.localStorage.setItem('openstad', JSON.stringify({}));
+
+    await expect(runGetCurrentUser(store, props)).resolves.toEqual({
+      id: 12,
+      role: 'member',
+    });
+    expect(stored()[23].openStadUser.jwt).toBe('jwt-cms');
+    expect(api.user.fetchMe).toHaveBeenCalledTimes(2);
   });
 
   test('openstadlogout clears every project with multi-project login', async () => {
@@ -603,5 +706,176 @@ describe('useCurrentUser logout and cross-tab writes', () => {
         { projectId: 6, multiProjectLogin: true }
       )
     ).resolves.toEqual({ id: 12, role: 'member' });
+  });
+});
+
+describe('revokeKnownLogins', () => {
+  let originalWindow;
+  let originalDocument;
+  let originalFetch;
+
+  function storeLogins(projects) {
+    global.window = {
+      localStorage: createLocalStorage({ openstad: JSON.stringify(projects) }),
+    };
+  }
+
+  beforeEach(() => {
+    originalWindow = global.window;
+    originalDocument = global.document;
+    originalFetch = global.fetch;
+    global.document = { cookie: '' };
+  });
+
+  afterEach(() => {
+    global.window = originalWindow;
+    global.document = originalDocument;
+    global.fetch = originalFetch;
+    vi.useRealTimers();
+  });
+
+  test('revokes the login of every stored project on the same api', async () => {
+    const jwt6 = unexpiredJwt('6');
+    const jwt7 = unexpiredJwt('7');
+    storeLogins({
+      6: { openStadUser: { jwt: jwt6, apiUrl: API_URL } },
+      7: { openStadUser: { jwt: jwt7, apiUrl: API_URL } },
+      8: {
+        openStadUser: { jwt: unexpiredJwt('8'), apiUrl: 'http://other.api' },
+      },
+    });
+    global.fetch = vi.fn().mockResolvedValue({ ok: true });
+
+    await revokeKnownLogins({ apiUrl: API_URL });
+
+    expect(global.fetch.mock.calls).toEqual([
+      [
+        `${API_URL}/auth/project/6/logout`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${jwt6}` },
+          keepalive: true,
+        },
+      ],
+      [
+        `${API_URL}/auth/project/7/logout`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${jwt7}` },
+          keepalive: true,
+        },
+      ],
+    ]);
+  });
+
+  test('ignores revocations that fail', async () => {
+    storeLogins({
+      6: { openStadUser: { jwt: unexpiredJwt('6'), apiUrl: API_URL } },
+    });
+    global.fetch = vi.fn().mockRejectedValue(new Error('Failed to fetch'));
+
+    await revokeKnownLogins({ apiUrl: API_URL });
+
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  test('stops waiting for revocations after three seconds', async () => {
+    vi.useFakeTimers();
+    storeLogins({
+      6: { openStadUser: { jwt: unexpiredJwt('6'), apiUrl: API_URL } },
+    });
+    global.fetch = vi.fn(() => new Promise(() => {}));
+    const done = vi.fn();
+
+    revokeKnownLogins({ apiUrl: API_URL }).then(done);
+    await vi.advanceTimersByTimeAsync(2999);
+    expect(done).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1);
+    expect(done).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('useCurrentUser logout', () => {
+  let originalWindow;
+  let originalDocument;
+  let originalFetch;
+  const jwt6 = unexpiredJwt('6');
+
+  const stored = () =>
+    JSON.parse(global.window.localStorage.getItem('openstad'));
+
+  function renderWithUser(props) {
+    const order = [];
+    global.fetch = vi.fn(async () => {
+      order.push('revoke');
+      return { ok: true };
+    });
+    const api = {
+      apiUrl: API_URL,
+      user: { logout: vi.fn(() => order.push('navigate')) },
+    };
+    const { data } = useCurrentUser.call(
+      { projectId: 6, api, refresh: vi.fn() },
+      props
+    );
+    return { data, api, order };
+  }
+
+  beforeEach(() => {
+    originalWindow = global.window;
+    originalDocument = global.document;
+    originalFetch = global.fetch;
+    global.window = {
+      location: { search: '', href: 'https://example.com/' },
+      localStorage: createLocalStorage({
+        openstad: JSON.stringify({
+          6: { openStadUser: { jwt: jwt6, apiUrl: API_URL } },
+        }),
+      }),
+    };
+    global.document = { cookie: '' };
+    swrData = { id: 12 };
+  });
+
+  afterEach(() => {
+    global.window = originalWindow;
+    global.document = originalDocument;
+    global.fetch = originalFetch;
+    swrData = undefined;
+  });
+
+  test('revokes the stored logins before clearing storage and navigating with multi-project login', async () => {
+    const { data, api, order } = renderWithUser({
+      projectId: 6,
+      multiProjectLogin: true,
+    });
+
+    await data.logout({ url: 'https://example.com/after' });
+
+    expect(global.fetch).toHaveBeenCalledWith(
+      `${API_URL}/auth/project/6/logout`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${jwt6}` },
+        keepalive: true,
+      }
+    );
+    expect(order).toEqual(['revoke', 'navigate']);
+    expect(api.user.logout).toHaveBeenCalledWith({
+      url: 'https://example.com/after',
+    });
+    expect(stored()).toEqual({});
+  });
+
+  test('logs out without revoking without multi-project login', async () => {
+    const { data, api } = renderWithUser({ projectId: 6 });
+
+    await data.logout({ url: 'https://example.com/after' });
+
+    expect(global.fetch).not.toHaveBeenCalled();
+    expect(api.user.logout).toHaveBeenCalledWith({
+      url: 'https://example.com/after',
+    });
+    expect(stored()).toEqual({});
   });
 });

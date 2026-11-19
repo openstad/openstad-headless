@@ -3,12 +3,21 @@ import useSWR, { mutate } from 'swr';
 
 import {
   clearLogoutSignalCookie,
+  getKnownIdentities,
   hasActiveSessionCookie,
   hasLogoutSignalCookie,
   notifyAuthChange,
   onAuthChange,
 } from '../../../lib/auth-broker';
 import { LocalStorage } from '../../../lib/local-storage';
+
+const REVOKE_LOGINS_TIMEOUT_MS = 3000;
+
+const projectsWithStoredLogin = new Set();
+
+function markStoredLogin(projectId) {
+  projectsWithStoredLogin.add(String(projectId));
+}
 
 function setActiveCookie() {
   document.cookie =
@@ -19,6 +28,13 @@ function setActiveCookie() {
 function activateExpireOnClose(storage) {
   storage.set('expireOnClose', true);
   setActiveCookie();
+}
+
+export function removeExpireOnCloseFromUrl(href) {
+  const url = new URL(href);
+  if (!url.searchParams.has('expireOnClose')) return href;
+  url.searchParams.delete('expireOnClose');
+  return url.toString();
 }
 
 export function consumeLoginTokenFromUrl({ search, projectId }) {
@@ -45,6 +61,7 @@ export function consumeLoginToken({ storage, projectId, location, history }) {
   if (!pickup.jwt) return null;
 
   storage.set('openStadUser', { jwt: pickup.jwt });
+  markStoredLogin(projectId);
   history.replaceState(
     null,
     '',
@@ -81,8 +98,29 @@ export function refreshCurrentUserOnAuthChange(projectId) {
   };
 }
 
+export function revokeKnownLogins({
+  apiUrl,
+  timeoutMs = REVOKE_LOGINS_TIMEOUT_MS,
+}) {
+  const revocations = getKnownIdentities({ apiUrl }).map(({ projectId, jwt }) =>
+    fetch(`${apiUrl}/auth/project/${projectId}/logout`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${jwt}` },
+      keepalive: true,
+    })
+  );
+  let timer;
+  const timeout = new Promise((resolve) => {
+    timer = setTimeout(resolve, timeoutMs);
+  });
+  return Promise.race([Promise.allSettled(revocations), timeout]).finally(() =>
+    clearTimeout(timer)
+  );
+}
+
 export function applyJwt({ storage, api, projectId, jwt }) {
   storage.set('openStadUser', { jwt, apiUrl: api.apiUrl });
+  markStoredLogin(projectId);
   api.currentUserJWT = jwt;
   refreshCurrentUser(projectId);
   notifyAuthChange([String(projectId)]);
@@ -158,9 +196,11 @@ export default function useCurrentUser(props) {
 
     if (params.has('expireOnClose')) {
       activateExpireOnClose(storage);
-      let url = window.location.href;
-      url = url.replace(/[?&]expireOnClose=1/, '');
-      history.replaceState(null, '', url);
+      history.replaceState(
+        null,
+        '',
+        removeExpireOnCloseFromUrl(window.location.href)
+      );
     }
 
     let jwt;
@@ -200,7 +240,14 @@ export default function useCurrentUser(props) {
       jwt = sessionUser.jwt;
     }
     const jwtIsStored = !!jwt && jwt === sessionUser.jwt && jwt !== jwtFromUrl;
-    if (!jwt && initialUser.jwt) {
+    if (jwtIsStored) {
+      markStoredLogin(projectId);
+    }
+    const storedLoginWasRemoved =
+      !jwt &&
+      multiProjectLogin &&
+      projectsWithStoredLogin.has(String(projectId));
+    if (!jwt && initialUser.jwt && !storedLoginWasRemoved) {
       jwt = initialUser.jwt;
     }
 
@@ -253,6 +300,7 @@ export default function useCurrentUser(props) {
           jwt,
           apiUrl: self.api.apiUrl,
         });
+        markStoredLogin(projectId);
         if (openStadUser && openStadUser.expireOnClose) {
           activateExpireOnClose(storage);
         }
@@ -269,8 +317,11 @@ export default function useCurrentUser(props) {
 
   // add functionality
   if (data) {
-    data.logout = function (params) {
+    data.logout = async function (params) {
       const storage = new LocalStorage(props);
+      if (multiProjectLogin) {
+        await revokeKnownLogins({ apiUrl: self.api.apiUrl });
+      }
       storage.destroy();
       self.api.user.logout(params);
     };
