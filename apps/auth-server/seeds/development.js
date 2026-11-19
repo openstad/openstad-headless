@@ -1,4 +1,7 @@
 const fs = require('fs').promises;
+const crypto = require('crypto');
+
+const randomCode = () => crypto.randomBytes(16).toString('hex');
 
 const removeProtocol = (url) => {
   return url
@@ -19,6 +22,15 @@ module.exports = async function seed(db) {
   process.env.AUTH_FIRST_LOGIN_CODE =
     process.env.AUTH_FIRST_LOGIN_CODE || rack();
   let uniqueCode = process.env.AUTH_FIRST_LOGIN_CODE;
+
+  const anonymousSecret =
+    process.env.DEV_ANONYMOUS_CLIENT_SECRET || randomCode();
+  const codes = {
+    admin: randomCode(),
+    moderator: randomCode(),
+    editor: randomCode(),
+    member: randomCode(),
+  };
 
   console.log('  creating development data');
 
@@ -41,14 +53,14 @@ module.exports = async function seed(db) {
 
     console.log('    - generic anonymous client');
     console.log('      clientId:', 'anonymous');
-    console.log('      clientSecret:', 'anonymous123');
+    console.log('      clientSecret:', anonymousSecret);
     await db.Client.create({
       id: 4,
       redirectUrl: '', // deprecated
       name: 'Default site',
       description: 'Client for managing default site',
       clientId: 'anonymous',
-      clientSecret: 'anonymous123',
+      clientSecret: anonymousSecret,
       authTypes: JSON.stringify(['Anonymous']),
       requiredUserFields: JSON.stringify(['postcode']),
       allowedDomains: JSON.stringify(allowedDomains),
@@ -78,7 +90,7 @@ module.exports = async function seed(db) {
     });
 
     console.log('    - generic admin user');
-    console.log('      uniquecode: 123');
+    console.log('      uniquecode:', codes.admin);
     await db.User.create({
       id: 2,
       name: 'Development admin',
@@ -89,13 +101,13 @@ module.exports = async function seed(db) {
       userId: 2,
     });
     await db.UniqueCode.create({
-      code: '123',
+      code: codes.admin,
       userId: 2,
       clientId: 3,
     });
 
     console.log('    - generic moderator user');
-    console.log('      uniquecode: 456');
+    console.log('      uniquecode:', codes.moderator);
     await db.User.create({
       id: 3,
       role: 'moderator',
@@ -107,13 +119,13 @@ module.exports = async function seed(db) {
       userId: 3,
     });
     await db.UniqueCode.create({
-      code: '456',
+      code: codes.moderator,
       userId: 3,
       clientId: 3,
     });
 
     console.log('    - generic editor user');
-    console.log('      uniquecode: 457');
+    console.log('      uniquecode:', codes.editor);
     await db.User.create({
       id: 4,
       role: 'editor',
@@ -125,13 +137,13 @@ module.exports = async function seed(db) {
       userId: 4,
     });
     await db.UniqueCode.create({
-      code: '457',
+      code: codes.editor,
       userId: 4,
       clientId: 3,
     });
 
     console.log('    - generic member user');
-    console.log('      uniquecode: 789');
+    console.log('      uniquecode:', codes.member);
     await db.User.create({
       id: 5,
       role: 'member',
@@ -143,7 +155,7 @@ module.exports = async function seed(db) {
       userId: 5,
     });
     await db.UniqueCode.create({
-      code: '789',
+      code: codes.member,
       userId: 5,
       clientId: 3,
     });
