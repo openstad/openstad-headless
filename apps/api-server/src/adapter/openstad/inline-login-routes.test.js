@@ -441,3 +441,64 @@ describe('completeFields', () => {
     expect(next).toHaveBeenCalledWith(expect.any(Error));
   });
 });
+
+describe('revoked logins', () => {
+  const now = Math.floor(Date.now() / 1000);
+
+  beforeEach(() => {
+    process.env.MULTI_PROJECT_LOGIN = 'true';
+    vi.spyOn(db.LoginRevocation, 'findOne').mockResolvedValue({
+      revokedAt: new Date(now * 1000),
+    });
+  });
+
+  afterEach(() => {
+    delete process.env.MULTI_PROJECT_LOGIN;
+  });
+
+  it('rejects a source token issued before the revocation', async () => {
+    const result = await call(routes.exchange, {
+      sourceJwt: sourceJwt({ iat: now - 60 }),
+    });
+
+    expect(result.status).toBe(401);
+    expect(result.body).toEqual({ status: 'invalid_token' });
+    expect(db.LoginRevocation.findOne).toHaveBeenCalledWith({
+      where: { provider: 'openstad', identifier: '42' },
+    });
+    expect(db.User.create).not.toHaveBeenCalled();
+  });
+
+  it('exchanges a source token issued after the revocation', async () => {
+    const result = await call(routes.exchange, {
+      sourceJwt: sourceJwt({ iat: now + 1 }),
+    });
+
+    expect(result.status).toBe(200);
+    expect(result.body.jwt).toBeDefined();
+  });
+
+  it('rejects a pending token issued before the revocation', async () => {
+    db.User.findOne.mockResolvedValue({
+      id: 77,
+      projectId: 2,
+      idpUser: { identifier: 42, provider: 'default' },
+    });
+    const update = vi.spyOn(service, 'updateUser').mockResolvedValue({});
+
+    const result = await call(routes.completeFields, {
+      pendingJwt: jwt.sign(
+        { userId: 77, projectId: 2, pending: true, iat: now - 60 },
+        secret
+      ),
+      fields: { postcode: '1234AB' },
+    });
+
+    expect(result.status).toBe(401);
+    expect(result.body).toEqual({ status: 'invalid_token' });
+    expect(db.LoginRevocation.findOne).toHaveBeenCalledWith({
+      where: { provider: 'default', identifier: '42' },
+    });
+    expect(update).not.toHaveBeenCalled();
+  });
+});

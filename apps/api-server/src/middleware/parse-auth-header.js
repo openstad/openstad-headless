@@ -7,7 +7,12 @@ function parseAuthHeader(authorizationHeader, { jwtSecret, fixedAuthTokens }) {
       return {};
     }
     return claims && claims.userId
-      ? { userId: claims.userId, authProvider: claims.authProvider }
+      ? {
+          userId: claims.userId,
+          authProvider: claims.authProvider,
+          tokenProjectId: claims.projectId,
+          issuedAt: claims.iat,
+        }
       : {};
   }
 

@@ -4,6 +4,7 @@ const db = require('../../db');
 const authSettings = require('../../util/auth-settings');
 const mapUserData = require('../../util/map-user-data');
 const sessionDuration = require('../../util/session-duration');
+const { isRevoked, revoke } = require('../../util/login-revocation');
 const service = require('./service');
 const {
   applyClientConsents,
@@ -29,6 +30,16 @@ const verifyJwt = (token) => {
 
 const isOpenstadAdapter = (authConfig) =>
   (authConfig.adapter || 'openstad') === 'openstad';
+
+const isLoginRevoked = async ({ user, issuedAt }) =>
+  process.env.MULTI_PROJECT_LOGIN === 'true' &&
+  Boolean(user.idpUser.identifier) &&
+  (await isRevoked({
+    db,
+    provider: user.idpUser.provider,
+    identifier: user.idpUser.identifier,
+    issuedAt,
+  }));
 
 const loadTargetUser = ({ authConfig, identifier }) =>
   Promise.all([
@@ -142,6 +153,10 @@ exports.exchange = async (req, res, next) => {
       return res.status(401).json({ status: 'not_allowed' });
     }
 
+    if (await isLoginRevoked({ user: sourceUser, issuedAt: claims.iat })) {
+      return res.status(401).json({ status: 'invalid_token' });
+    }
+
     const sourceProject = await db.Project.findOne({
       where: { id: sourceUser.projectId },
     });
@@ -252,6 +267,10 @@ exports.completeFields = async (req, res, next) => {
       return res.status(401).json({ status: 'invalid_token' });
     }
 
+    if (await isLoginRevoked({ user: projectUser, issuedAt: claims.iat })) {
+      return res.status(401).json({ status: 'invalid_token' });
+    }
+
     const authConfig = req.authConfig;
     const identifier = projectUser.idpUser.identifier;
     const [client, rawUser] = await loadTargetUser({ authConfig, identifier });
@@ -324,6 +343,28 @@ exports.completeFields = async (req, res, next) => {
       role,
       hasUniqueCode,
     });
+  } catch (err) {
+    return next(err);
+  }
+};
+
+exports.logoutEverywhere = async (req, res, next) => {
+  try {
+    const user = req.user;
+    if (!user || !user.id || !user.idpUser || !user.idpUser.identifier) {
+      return res.status(401).json({ status: 'not_logged_in' });
+    }
+
+    if (String(user.projectId) === String(config.admin.projectId)) {
+      return res.status(204).end();
+    }
+
+    await revoke({
+      db,
+      provider: user.idpUser.provider,
+      identifier: user.idpUser.identifier,
+    });
+    return res.status(204).end();
   } catch (err) {
     return next(err);
   }

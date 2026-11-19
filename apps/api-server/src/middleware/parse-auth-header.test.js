@@ -15,24 +15,33 @@ describe('parseAuthHeader', () => {
     expect(parseAuthHeader(`Bearer ${pendingJwt}`, { jwtSecret })).toEqual({});
   });
 
-  it('resolves userId and authProvider for a regular token', () => {
-    const token = jwt.sign({ userId: 1, authProvider: 'openstad' }, jwtSecret);
+  it('resolves userId, authProvider and issuedAt for a regular token', () => {
+    const token = jwt.sign(
+      { userId: 1, authProvider: 'openstad', iat: 1700000000 },
+      jwtSecret
+    );
 
-    expect(parseAuthHeader(`Bearer ${token}`, { jwtSecret })).toEqual({
+    const parsed = parseAuthHeader(`Bearer ${token}`, { jwtSecret });
+
+    expect(parsed).toEqual({
       userId: 1,
       authProvider: 'openstad',
+      issuedAt: 1700000000,
     });
+    expect(parsed.tokenProjectId).toBeUndefined();
   });
 
-  it('accepts a token carrying the new projectId claim', () => {
+  it('returns the projectId claim as tokenProjectId', () => {
     const token = jwt.sign(
-      { userId: 1, authProvider: 'openstad', projectId: 2 },
+      { userId: 1, authProvider: 'openstad', projectId: 2, iat: 1700000000 },
       jwtSecret
     );
 
     expect(parseAuthHeader(`Bearer ${token}`, { jwtSecret })).toEqual({
       userId: 1,
       authProvider: 'openstad',
+      tokenProjectId: 2,
+      issuedAt: 1700000000,
     });
   });
 

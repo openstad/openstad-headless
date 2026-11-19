@@ -111,6 +111,9 @@ if (process.env.MULTI_PROJECT_LOGIN === 'true') {
   router
     .route('/project/:projectId/complete-fields')
     .post(inlineLoginRateLimiter(), inlineLoginRoutes.completeFields);
+  router
+    .route('/project/:projectId/logout')
+    .post(inlineLoginRateLimiter(), inlineLoginRoutes.logoutEverywhere);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -118,7 +121,7 @@ if (process.env.MULTI_PROJECT_LOGIN === 'true') {
 
 router
   .route('(/project/:projectId)?/login')
-  .get(rateLimiter(), async function (req, res, next) {
+  .get(async function (req, res, next) {
     // logout first?
     const forceNewLogin = await shouldForceNewLogin({
       query: req.query,
@@ -194,7 +197,7 @@ router
 
 router
   .route('(/project/:projectId)?/digest-login')
-  .get(rateLimiter(), async function (req, res, next) {
+  .get(async function (req, res, next) {
     // check redirect first
     let returnTo = req.query.returnTo;
     returnTo = decodeURIComponent(returnTo);
