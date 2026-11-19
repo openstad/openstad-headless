@@ -92,6 +92,8 @@ The role on the target project is the user's role row for the target client, or 
 
 A `pendingJwt` is valid for 15 minutes and is only accepted by `complete-fields`. Sent as `Authorization: Bearer` to any other route it is treated as no login (anonymous).
 
+The JWTs of the `openstad` adapter carry a `projectId` claim. A request on another project than the one in the claim is handled as anonymous, so a JWT of one project is never a login on another project; that takes an `exchange`. The admin project is the exception: the admin panel uses its token of project 1 on all projects. Tokens without the claim, such as older tokens and tokens of the OIDC adapter, keep working.
+
 Any other error is passed on as a regular error response (`5xx`); the widget then falls back to the popup.
 
 ## Exchange policy: when a login is never silent
@@ -135,7 +137,15 @@ Consequences:
 
 ## Logout
 
-Logout ends the whole auth-server session and clears the logins of all projects in the browser, also with the flag on. This holds for the logout of a widget and, with the flag on, also for a logout through a link on the site that returns with `openstadlogout`, and for a logout through the CMS. The CMS removes `openstadlogout` from the url itself, so it sets a short-lived cookie `openstad_logout` (five minutes, path `/`) that the widgets read and remove. On a host with several CMS sites in subfolders, a logout on one site therefore also clears the widget logins of the other sites on that host. Other open tabs follow the stored logins and log out too; a tab never writes back a login that was removed while it was loading the user. A widget only fetches its user again when the stored login of its own project changes, once per project; a refreshed profile in another tab does not count, so opening or reloading a tab costs the other tabs no requests. Logout per project is postponed: the auth-server lets a valid session through to every client, so removing only one client's login would let the next person on a shared device log back in with one click.
+Logout ends the whole auth-server session and clears the logins of all projects that are stored on this host, also with the flag on. This holds for the logout of a widget and, with the flag on, also for a logout through a link on the site that returns with `openstadlogout`, and for a logout through the CMS. The CMS removes `openstadlogout` from the url itself, so it sets a short-lived cookie `openstad_logout` (five minutes, path `/`) that the widgets read and remove. On a host with several CMS sites in subfolders, a logout on one site therefore also clears the widget logins of the other sites on that host. Other open tabs follow the stored logins and log out too; a tab never writes back a login that was removed while it was loading the user. A widget only fetches its user again when the stored login of its own project changes, once per project; a refreshed profile in another tab does not count, so opening or reloading a tab costs the other tabs no requests. Logout per project is postponed: the auth-server lets a valid session through to every client, so removing only one client's login would let the next person on a shared device log back in with one click.
+
+With the flag on, a logout also ends the login on other domains and hosts. Before the logins are cleared, the widget calls `POST /auth/project/:projectId/logout` for every stored identity, and the CMS does the same with its session token. The api-server stores a revocation per identity (provider and identifier) in the table `login_revocations`. From then on it rejects every JWT of that identity that was issued at or before the logout time: a `GET` request is handled as anonymous, other methods get `401`. A CMS session on another host ends at its next `/me` check.
+
+Exceptions:
+
+- The admin panel is excluded in both directions. A token of the admin panel is never revoked, and a signout in the admin panel writes no revocation.
+- A forced new login (projects with only vote codes, "Vul een andere stemcode in") writes no revocation.
+- A vote code identity is a separate identity. A logout with an e-mail identity does not revoke it.
 
 ## CMS sites (Apostrophe)
 

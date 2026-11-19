@@ -155,13 +155,15 @@ With the flag on:
   - "Vul een andere stemcode in" always forces a new login;
   - `config.auth.forceNewLoginOnWidgets` on a project overrides the default (`true` or `false`). The setting also applies to the regular CMS login.
 - After voting, the budgeting widget also ends the auth-server session.
-- Logging out, through a widget, the CMS or a link on the site that returns with `openstadlogout`, clears the logins of all projects in this browser and ends the auth-server session. Other open tabs follow the stored logins and log out as well. After a CMS logout the widgets read a short-lived cookie `openstad_logout`, because the CMS removes the `openstadlogout` parameter itself.
+- Logging out, through a widget, the CMS or a link on the site that returns with `openstadlogout`, clears the logins of all projects on this host and ends the auth-server session. The login on other domains and hosts ends too: the api-server no longer accepts JWTs of that identity that were issued at or before the logout. The admin panel is excluded. Other open tabs follow the stored logins and log out as well. After a CMS logout the widgets read a short-lived cookie `openstad_logout`, because the CMS removes the `openstadlogout` parameter itself.
 - A vote code identity is never logged in on a project without vote codes: the auth-server ends that session and shows the regular login screen.
 - The CMS login reuses the auth-server session like the widgets do. The CMS admin login (`/admin/login`) reuses the session for a user with the role `admin`, `moderator` or `editor` on that site, and then always asks for the 2FA code, once per site per session. Without a session, or for other users, it shows the admin login screen as before. The admin panel itself always asks for its own login.
 - The project settings in the admin panel show a button "Bewerk site" for projects with a website, which opens the CMS admin login of that site.
 - A vote code login creates its own identity. It is never linked to the visitor's e-mail identity, so votes cannot be traced back to an e-mail address and profile data is not shared with vote code projects.
 
-Endpoints, the exchange policy, the vote code lockout and known gaps are described in [multi-project login](./multi-project-login.md).
+Migration 121 adds the table `login_revocations` to the api-server database. It stores a logout per identity and is only used with the flag on.
+
+Endpoints, the exchange policy, the vote code lockout, logout and known gaps are described in [multi-project login](./multi-project-login.md).
 
 Independent of the flag: in production (`NODE_ENV=production` without `FORCE_HTTP`) the api-server only sends a login token back to an `https:` URL. A plain `http:` return address is refused with `Redirect url must use https`.
 
