@@ -38,10 +38,14 @@ describe('project userMapping', () => {
 
   it('does not mutate the stored project config', async () => {
     const project = {
-      config: { auth: { provider: { openstad: { userMapping: { name: 'x' } } } } },
+      config: {
+        auth: { provider: { openstad: { userMapping: { name: 'x' } } } },
+      },
     };
     await authSettings.config({ project, useAuth: 'openstad' });
-    expect(project.config.auth.provider.openstad.userMapping).toEqual({ name: 'x' });
+    expect(project.config.auth.provider.openstad.userMapping).toEqual({
+      name: 'x',
+    });
   });
 
   it('keeps default mapping for name, email and role', async () => {
