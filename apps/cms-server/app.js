@@ -27,6 +27,7 @@ const messageStreaming = require('./services/message-streaming');
 
 const compression = require('compression');
 const path = require('node:path');
+const { loginUrlSuffix } = require('./modules/openstad-auth/lib/login-url');
 
 let projects = {};
 let subscriptions = {};
@@ -489,10 +490,9 @@ app.get('/auth/login', (req, res, next) => {
   const project = projects[domainAndPath] ? projects[domainAndPath] : false;
 
   const apiUrl = process.env.API_URL;
-  let url = `${apiUrl}/auth/project/${project.id}/login?redirectUri=${returnUrl}`;
-  url = req.query.loginPriviliged
-    ? url + '&loginPriviliged=1'
-    : url + '&forceNewLogin=1';
+  const url =
+    `${apiUrl}/auth/project/${project.id}/login?redirectUri=${returnUrl}` +
+    loginUrlSuffix({ privileged: !!req.query.loginPriviliged, project });
 
   console.log(
     `[${new Date().toISOString()}][cms-auth] login redirect: projectId=${project?.id} returnUrl=${decodeURIComponent(returnUrl)?.substring(0, 100)}`

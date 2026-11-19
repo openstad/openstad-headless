@@ -7,8 +7,23 @@ const db = require('../../db');
 const service = require('./service');
 const hasRole = require('../../lib/sequelize-authorization/lib/hasRole');
 const isRedirectAllowed = require('../../services/isRedirectAllowed');
+const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const prefillAllowedDomains = require('../../services/prefillAllowedDomains');
 const sessionDuration = require('../../util/session-duration');
+const { canSendJwtTo, setQueryParam } = require('./return-to');
+const {
+  applyClientConsents,
+  upsertProjectUser,
+  mintJwt,
+  shouldForceNewLogin,
+} = require('./inline-login');
+const inlineLoginRoutes = require('./inline-login-routes');
+const { popupLoginPage } = require('./popup-login-page');
+
+const isPopupLogin = (req) =>
+  process.env.MULTI_PROJECT_LOGIN === 'true' && req.query.popup === '1';
+const popupParam = (req) => (isPopupLogin(req) ? '&popup=1' : '');
+
 let router = express.Router({ mergeParams: true });
 
 // Todo: dit is 'openstad', dus veel configuratie mag hier hardcoded en uit de config gehaald
@@ -60,7 +75,11 @@ router
 
       // TODO: iss moet gecontroleerd
       jwt.sign(
-        { userId: openStadUser.id, authProvider: req.authConfig.provider },
+        {
+          userId: openStadUser.id,
+          authProvider: req.authConfig.provider,
+          projectId: parseInt(req.params.projectId, 10),
+        },
         config.auth['jwtSecret'],
         {
           expiresIn: sessionDuration.getJwtExpiresInForRole(openStadUser.role),
@@ -80,6 +99,23 @@ router
     }
   });
 
+if (process.env.MULTI_PROJECT_LOGIN === 'true') {
+  const inlineLoginRateLimiter = () =>
+    rateLimiter({ message: { status: 'too_many_requests' } });
+  router
+    .route('/project/:projectId/exchange')
+    .post(inlineLoginRateLimiter(), inlineLoginRoutes.exchange);
+  router
+    .route('/project/:projectId/uniquecode-login')
+    .post(inlineLoginRateLimiter(), inlineLoginRoutes.uniqueCodeLogin);
+  router
+    .route('/project/:projectId/complete-fields')
+    .post(inlineLoginRateLimiter(), inlineLoginRoutes.completeFields);
+  router
+    .route('/project/:projectId/logout')
+    .post(inlineLoginRateLimiter(), inlineLoginRoutes.logoutEverywhere);
+}
+
 // ----------------------------------------------------------------------------------------------------
 // login
 
@@ -87,7 +123,16 @@ router
   .route('(/project/:projectId)?/login')
   .get(async function (req, res, next) {
     // logout first?
-    if (!req.query.forceNewLogin) return next();
+    const forceNewLogin = await shouldForceNewLogin({
+      query: req.query,
+      project: req.project,
+      fetchClient: () =>
+        service.fetchClient({
+          authConfig: req.authConfig,
+          project: req.project,
+        }),
+    });
+    if (!forceNewLogin) return next();
 
     const projectId = req.params.projectId;
     if (
@@ -102,7 +147,8 @@ router
         req.project.id +
         '/login?useAuth=' +
         req.authConfig.provider +
-        '&redirectUri=' +
+        popupParam(req) +
+        '&newLoginDone=1&redirectUri=' +
         encodeURIComponent(req.query.redirectUri);
       backToHereUrl = encodeURIComponent(backToHereUrl);
       let url =
@@ -131,6 +177,7 @@ router
           req.project.id +
           '/digest-login?useAuth=' +
           req.authConfig.provider +
+          popupParam(req) +
           '&returnTo=' +
           req.query.redirectUri
       );
@@ -166,6 +213,8 @@ router
         returnTo +
         (returnTo.includes('?') ? '&' : '?') +
         'openstadlogintoken=[[jwt]]';
+    if (req.params.projectId)
+      returnTo = setQueryParam(returnTo, 'openstadprojectid', req.project.id);
     let redirectUrl = returnTo;
     redirectUrl =
       redirectUrl ||
@@ -195,17 +244,28 @@ router
     };
 
     // check if redirect domain is allowed
-    if (isAllowedRedirectDomain(redirectUrl, req.project)) {
+    const redirectDomainAllowed = isAllowedRedirectDomain(
+      redirectUrl,
+      req.project
+    );
+    if (redirectDomainAllowed && canSendJwtTo(redirectUrl)) {
       req.redirectUrl = redirectUrl;
       return next();
-    } else {
+    }
+    if (redirectDomainAllowed) {
       console.log(
-        `[${new Date().toISOString()}][digest-login] redirect domain not allowed: ${redirectUrl?.substring(0, 100)} projectId=${req.project?.id}`
+        `[${new Date().toISOString()}][digest-login] https required for the redirect: ${redirectUrl?.substring(0, 100)} projectId=${req.project?.id}`
       );
-      res.status(500).json({
-        status: 'Redirect domain not allowed',
+      return res.status(500).json({
+        status: 'Redirect url must use https',
       });
     }
+    console.log(
+      `[${new Date().toISOString()}][digest-login] redirect domain not allowed: ${redirectUrl?.substring(0, 100)} projectId=${req.project?.id}`
+    );
+    res.status(500).json({
+      status: 'Redirect domain not allowed',
+    });
   })
   .get(async function (req, res, next) {
     let code = req.query.code;
@@ -213,7 +273,7 @@ router
       console.log(
         `[${new Date().toISOString()}][digest-login] no auth code in request: projectId=${req.project?.id}`
       );
-      throw createError(403, 'Je bent niet ingelogd');
+      return next(createError(403, 'Je bent niet ingelogd'));
     }
 
     let url = `${req.authConfig.serverUrlInternal}/oauth/token`;
@@ -271,104 +331,21 @@ router
     }
     return next();
   })
-  .get(function (req, res, next) {
+  .get(async function (req, res, next) {
     req.userData.projectId = req.project.id; // todo: ik weet nog niet waar dit moet
+    req.userData = applyClientConsents(req.userData);
     let data = req.userData;
 
-    if (!!data && !!data.emailNotificationConsent && !!data.clientId) {
-      const clientId = String(data?.clientId);
-      const currentValue =
-        typeof data.emailNotificationConsent === 'object'
-          ? data.emailNotificationConsent
-          : {};
-      const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
-
-      if (clientConsentIsSet) {
-        data.emailNotificationConsent = currentValue[clientId];
-      } else {
-        // clientConsent is not set (correctly); remove it to prevent overwriting existing consent
-        delete data.emailNotificationConsent;
-      }
+    try {
+      req.userData.id = await upsertProjectUser({
+        User: db.User,
+        project: req.project,
+        userData: data,
+      });
+      return next();
+    } catch (err) {
+      return next(err);
     }
-
-    if (!!data && !!data.privacyConsentAt && !!data.clientId) {
-      const clientId = String(data?.clientId);
-      const currentValue =
-        typeof data.privacyConsentAt === 'object' ? data.privacyConsentAt : {};
-      const clientConsentIsSet = currentValue.hasOwnProperty(clientId);
-
-      if (clientConsentIsSet) {
-        data.privacyConsentAt = currentValue[clientId];
-      } else {
-        delete data.privacyConsentAt;
-      }
-    }
-
-    // if user has same projectId and userId
-    // rows are duplicate for a user
-    let where = {
-      where: Sequelize.and(
-        {
-          idpUser: {
-            identifier: data.idpUser.identifier,
-            provider: data.idpUser.provider,
-          },
-        },
-        { projectId: data.projectId }
-      ),
-    };
-
-    db.User.findAll(where)
-      .then((result) => {
-        if (result && result.length > 1)
-          return next(createError(403, 'Meerdere users gevonden'));
-        if (result && result.length == 1) {
-          let user = result[0];
-
-          user
-            .update(data)
-            .then(() => {
-              req.userData.id = user.id;
-              console.log(
-                `[${new Date().toISOString()}][digest-login] user found and updated: userId=${user.id} projectId=${req.project?.id}`
-              );
-              return next();
-            })
-            .catch((e) => {
-              console.log(
-                `[${new Date().toISOString()}][digest-login] user update failed: userId=${user.id} projectId=${req.project?.id} error=${e?.message}`
-              );
-              req.userData.id = user.id;
-              return next();
-            });
-        } else {
-          if (!req.project.config.users.canCreateNewUsers)
-            return next(
-              createError(
-                403,
-                'Users mogen niet aangemaakt worden op deze project'
-              )
-            );
-
-          data.complete = true;
-
-          db.User.create(data)
-            .then((result) => {
-              req.userData.id = result.id;
-              console.log(
-                `[${new Date().toISOString()}][digest-login] user created: userId=${result.id} projectId=${req.project?.id} role=${result.role}`
-              );
-              return next();
-            })
-            .catch((err) => {
-              console.log(
-                `[${new Date().toISOString()}][digest-login] user create failed: projectId=${req.project?.id} error=${err?.message}`
-              );
-              next(err);
-            });
-        }
-      })
-      .catch(next);
   })
   .get(function (req, res, next) {
     if (
@@ -400,35 +377,46 @@ router
 
     return next();
   })
-  .get(function (req, res, next) {
+  .get(async function (req, res, next) {
     if (!req.redirectUrl.match('[[jwt]]')) return next();
-    jwt.sign(
-      { userId: req.userData.id, authProvider: req.authConfig.provider },
-      req.authConfig.jwtSecret,
-      {
-        expiresIn: sessionDuration.getJwtExpiresInForRole(req.userData.role),
-      },
-      (err, token) => {
-        if (err) {
-          console.log(
-            `[${new Date().toISOString()}][digest-login] JWT sign error: userId=${req.userData?.id} projectId=${req.project?.id} error=${err?.message}`
-          );
-          return next(err);
-        }
-        req.redirectUrl = req.redirectUrl.replace('[[jwt]]', token);
-        if (sessionDuration.shouldExpireOnClose(req.userData.role)) {
-          req.redirectUrl +=
-            (req.redirectUrl.includes('?') ? '&' : '?') + 'expireOnClose=1';
-        }
-        console.log(
-          `[${new Date().toISOString()}][digest-login] complete: userId=${req.userData?.id} projectId=${req.project?.id} role=${req.userData?.role} redirect=${req.redirectUrl?.substring(0, 80)}`
-        );
-        return next();
-      }
+    let token;
+    try {
+      token = await mintJwt({
+        authConfig: req.authConfig,
+        userId: req.userData.id,
+        role: req.userData.role,
+        projectId: parseInt(req.params.projectId, 10),
+      });
+    } catch (err) {
+      console.log(
+        `[${new Date().toISOString()}][digest-login] JWT sign error: userId=${req.userData?.id} projectId=${req.project?.id} error=${err?.message}`
+      );
+      return next(err);
+    }
+    req.loginJwt = token;
+    req.redirectUrl = req.redirectUrl.replace('[[jwt]]', token);
+    if (sessionDuration.shouldExpireOnClose(req.userData.role)) {
+      req.redirectUrl +=
+        (req.redirectUrl.includes('?') ? '&' : '?') + 'expireOnClose=1';
+    }
+    console.log(
+      `[${new Date().toISOString()}][digest-login] complete: userId=${req.userData?.id} projectId=${req.project?.id} role=${req.userData?.role} redirect=${req.redirectUrl?.substring(0, 80)}`
     );
+    return next();
   })
   .get(function (req, res, next) {
-    res.redirect(req.redirectUrl);
+    if (!isPopupLogin(req) || !req.loginJwt) {
+      return res.redirect(req.redirectUrl);
+    }
+    res.set('Cache-Control', 'no-store');
+    res.type('html').send(
+      popupLoginPage({
+        origin: new URL(req.redirectUrl).origin,
+        projectId: req.project.id,
+        jwt: req.loginJwt,
+        fallbackUrl: req.redirectUrl,
+      })
+    );
   });
 
 // ----------------------------------------------------------------------------------------------------

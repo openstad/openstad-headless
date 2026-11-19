@@ -7,6 +7,8 @@ const db = require('../db');
 const authSettings = require('../util/auth-settings');
 const auditLogService = require('../services/audit-log');
 const { isExpired } = require('../lib/api-token-status');
+const { parseAuthHeader } = require('./parse-auth-header');
+const { isRevoked } = require('../util/login-revocation');
 
 const INVALID_TOKEN_ERRORS = [
   'TokenExpiredError',
@@ -94,16 +96,17 @@ module.exports = async function getUser(req, res, next) {
 
     let parsedAuthHeader;
     try {
-      parsedAuthHeader = parseAuthHeader(req.headers['authorization']);
+      parsedAuthHeader = parseAuthHeader(req.headers['authorization'], {
+        jwtSecret: config && config.auth && config.auth['jwtSecret'],
+        fixedAuthTokens:
+          config && config.auth && config.auth['fixedAuthTokens'],
+      });
     } catch (err) {
       if (!INVALID_TOKEN_ERRORS.includes(err?.name)) throw err;
-      if (SAFE_METHODS.includes(req.method)) {
-        res.set('WWW-Authenticate', 'Bearer error="invalid_token"');
-        return nextWithEmptyUser(req, res, next);
-      }
-      return next(createError(401, 'Invalid or expired token'));
+      return rejectInvalidToken(req, res, next);
     }
-    let { userId, isFixed, authProvider } = parsedAuthHeader;
+    let { userId, isFixed, authProvider, tokenProjectId, issuedAt } =
+      parsedAuthHeader;
     let authConfig = await authSettings.config({
       project: req.project,
       useAuth: authProvider,
@@ -115,6 +118,18 @@ module.exports = async function getUser(req, res, next) {
 
     let projectId = req.project && req.project.id;
 
+    if (
+      tokenProjectId != null &&
+      projectId &&
+      String(tokenProjectId) !== String(projectId) &&
+      String(tokenProjectId) !== String(config.admin.projectId)
+    ) {
+      console.warn(
+        `[${new Date().toISOString()}][auth-middleware] token project mismatch: userId=${userId} claim=${tokenProjectId} project=${projectId} path=${req.originalUrl}`
+      );
+      return nextWithEmptyUser(req, res, next);
+    }
+
     const userEntity =
       (await getUserInstance({
         authConfig,
@@ -123,6 +138,30 @@ module.exports = async function getUser(req, res, next) {
         isFixed,
         projectId,
       })) || {};
+
+    if (
+      process.env.MULTI_PROJECT_LOGIN === 'true' &&
+      !isFixed &&
+      userEntity.idpUser &&
+      userEntity.idpUser.identifier
+    ) {
+      const ownProjectId = tokenOwnProjectId({
+        tokenProjectId,
+        userEntity,
+        userId,
+      });
+      if (
+        String(ownProjectId) !== String(config.admin.projectId) &&
+        (await isRevoked({
+          db,
+          provider: userEntity.idpUser.provider,
+          identifier: userEntity.idpUser.identifier,
+          issuedAt,
+        }))
+      ) {
+        return rejectInvalidToken(req, res, next);
+      }
+    }
 
     req.user = userEntity;
 
@@ -269,55 +308,18 @@ function nextWithEmptyUser(req, res, next) {
   return next();
 }
 
-function parseAuthHeader(authorizationHeader) {
-  // todo: // config moet authConfig zijn
-  const fixedAuthTokens =
-    config && config.auth && config.auth['fixedAuthTokens'];
-
-  if (authorizationHeader.match(/^bearer /i)) {
-    const jwt = parseJwt(authorizationHeader);
-    return jwt && jwt.userId
-      ? { userId: jwt.userId, authProvider: jwt.authProvider }
-      : {};
+function rejectInvalidToken(req, res, next) {
+  if (SAFE_METHODS.includes(req.method)) {
+    res.set('WWW-Authenticate', 'Bearer error="invalid_token"');
+    return nextWithEmptyUser(req, res, next);
   }
-
-  if (fixedAuthTokens) {
-    const token = fixedAuthTokens.find(
-      (token) => token.token === authorizationHeader
-    );
-    if (token) {
-      return {
-        userId: token.userId,
-        isFixed: true,
-        authProvider: token.authProvider,
-      };
-    }
-  }
-
-  return {};
+  return next(createError(401, 'Invalid or expired token'));
 }
 
-/**
- * get token from authorization header and parse jwt.
- * @param authorizationHeader
- * @returns {*}
- */
-function parseJwt(authorizationHeader) {
-  let token = authorizationHeader.replace(/^bearer /i, '');
-  try {
-    return jwt.verify(token, config.auth['jwtSecret']);
-  } catch (err) {
-    if (err.name === 'TokenExpiredError') {
-      console.log(
-        `[${new Date().toISOString()}][auth-middleware] JWT expired: expiredAt=${err.expiredAt?.toISOString?.() || 'unknown'}`
-      );
-    } else {
-      console.log(
-        `[${new Date().toISOString()}][auth-middleware] JWT verification failed: ${err.name}: ${err.message}`
-      );
-    }
-    throw err;
-  }
+function tokenOwnProjectId({ tokenProjectId, userEntity, userId }) {
+  if (tokenProjectId != null) return tokenProjectId;
+  if (String(userEntity.id) === String(userId)) return userEntity.projectId;
+  return config.admin.projectId;
 }
 
 /**

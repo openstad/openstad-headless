@@ -57,7 +57,7 @@ const makeReq = (overrides = {}) => ({
   brute: { resetKey: vi.fn() },
   bruteKey: 'bk',
   session: {},
-  logIn: (user, cb) => cb(null),
+  logIn: (user, options, cb) => cb(null),
   ...overrides,
 });
 

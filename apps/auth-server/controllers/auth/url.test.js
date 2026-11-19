@@ -85,7 +85,7 @@ const makeReq = (overrides = {}) => ({
   bruteKey: 'bk',
   session: {},
   header: vi.fn(() => 'https://referer.example.com'),
-  logIn: (user, cb) => cb(null),
+  logIn: (user, options, cb) => cb(null),
   ...overrides,
 });
 

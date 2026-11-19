@@ -231,10 +231,18 @@ exports.checkPhonenumberAuth = (errorCallback) => {
 /**
  * Check if 2FA is required and for what roles
  */
+const twoFactorScreenUrl = (req) =>
+  `/auth/two-factor?clientId=${
+    req.client.clientId
+  }&redirect_uri=${req.redirectUri ? encodeURIComponent(req.redirectUri) : ''}`;
+
 exports.check2FA = (req, res, next) => {
   const twoFactorRoles = req.client.twoFactorRoles;
-  const twoFactorValid =
-    req.currentClientAuth?.twoFactorValid || req.session?.twoFactorValid;
+  const twoFactorValid = req.currentClientAuth?.twoFactorValid;
+
+  if (req.currentClientAuth?.twoFactorRequired && !twoFactorValid) {
+    return res.redirect(twoFactorScreenUrl(req));
+  }
 
   // if no role is present, assume default role
   const userRole = req.currentClientRole || req.user.role || defaultRole;
@@ -263,11 +271,7 @@ exports.check2FA = (req, res, next) => {
     twoFactorRoles.includes(userRole) &&
     !twoFactorValid
   ) {
-    return res.redirect(
-      `/auth/two-factor?clientId=${
-        req.client.clientId
-      }&redirect_uri=${req.redirectUri ? encodeURIComponent(req.redirectUri) : ''}`
-    );
+    return res.redirect(twoFactorScreenUrl(req));
   }
 
   try {

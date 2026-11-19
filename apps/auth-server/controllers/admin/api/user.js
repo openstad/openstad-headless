@@ -1,19 +1,11 @@
 const db = require('../../../db');
 const hat = require('hat');
 const getClientIdFromRequest = require('../../../utils/getClientIdFromRequest');
-
-// Secrets that must never leave the auth server through the admin API
-const stripSensitive = (user) => {
-  delete user.password;
-  delete user.hashedPhoneNumber;
-  delete user.twoFactorToken;
-  delete user.resetPasswordToken;
-  return user;
-};
+const stripUserSecrets = require('../../../utils/stripUserSecrets');
 
 const outputUser = (req, res, next) => {
   let result = { ...req.userObject };
-  result = stripSensitive(result.dataValues);
+  result = stripUserSecrets(result.dataValues);
   if (result.roles) {
     result.roles = result.roles.map((role) => {
       let client = req.clients.find((c) => c.id == role.clientId);
@@ -40,7 +32,7 @@ const outputUser = (req, res, next) => {
 exports.all = (req, res, next) => {
   res.json({
     total: req.totalCodeCount,
-    data: req.users.map((user) => stripSensitive(user.toJSON())),
+    data: req.users.map((user) => stripUserSecrets(user.toJSON())),
   });
 };
 

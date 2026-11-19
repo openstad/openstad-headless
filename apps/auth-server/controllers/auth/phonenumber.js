@@ -274,7 +274,7 @@ exports.postSmsCode = (req, res, next) => {
         );
       }
 
-      req.logIn(user, function (err) {
+      clientAuth.loginWithFreshSession(req, user, function (err) {
         if (err) {
           return next(err);
         }

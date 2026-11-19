@@ -383,7 +383,7 @@ let moduleDefinitions = {
       step2:
         'Bekijk hieronder je selectie. Ben je tevreden? Klik dan onderaan door naar stap 3 om jouw stemcode in te vullen.',
       step3:
-        'Via onderstaande knop kun je op een aparte pagina je persoonlijke stemcode invullen. Wij controleren de stemcode op geldigheid. Als dat gelukt is kom je terug op deze pagina waarna je kunt stemmen.',
+        'Via onderstaande knop vul je je persoonlijke stemcode in. Wij controleren de stemcode op geldigheid. Als dat gelukt is, kun je stemmen.',
       step3success:
         'Het controleren van je stemcode is gelukt! Je bent bijna klaar. Klik op onderstaande knop om je stem te versturen.',
       voteMessage: 'Gelukt, je hebt gestemd!',

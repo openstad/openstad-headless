@@ -117,6 +117,9 @@ spec:
           - name: NODE_ENV
             value: production
 
+          - name: MULTI_PROJECT_LOGIN
+            value: {{ .Values.multiProjectLogin | default false | toString | quote }}
+
           - name: DISABLE_RATE_LIMITER
             value: {{ .Values.cms.disableRateLimiter | default "false" | quote }}
 

@@ -18,6 +18,7 @@ const originalUserFindOne = db.User.findOne;
 const originalProjectFindOne = db.Project.findOne;
 const originalApiTokenFindOne = db.ApiToken.findOne;
 const originalAuditLogFindOne = db.AuditLog.findOne;
+const originalLoginRevocationFindOne = db.LoginRevocation.findOne;
 const originalLogDirect = auditLogService.logDirect;
 const originalAuthSettingsConfig = authSettings.config;
 const originalFixedAuthTokens = config.auth.fixedAuthTokens;
@@ -39,6 +40,7 @@ afterEach(() => {
   db.Project.findOne = originalProjectFindOne;
   db.ApiToken.findOne = originalApiTokenFindOne;
   db.AuditLog.findOne = originalAuditLogFindOne;
+  db.LoginRevocation.findOne = originalLoginRevocationFindOne;
   auditLogService.logDirect = originalLogDirect;
   authSettings.config = originalAuthSettingsConfig;
   // Restore fixedAuthTokens in case a test mutated the shared config singleton
@@ -56,7 +58,15 @@ function createMockReq(overrides = {}) {
 }
 
 function createMockRes() {
-  return { status: vi.fn().mockReturnThis(), json: vi.fn() };
+  return { status: vi.fn().mockReturnThis(), json: vi.fn(), set: vi.fn() };
+}
+
+function mockAuthConfig() {
+  authSettings.config = vi.fn().mockResolvedValue({
+    provider: {},
+    adapter: 'openstad',
+    default: 'openstad',
+  });
 }
 
 describe('user middleware', () => {
@@ -197,6 +207,299 @@ describe('user middleware', () => {
       await getUserMiddleware(req, res, next);
 
       expect(next).toHaveBeenCalledWith(expect.any(Error));
+    });
+  });
+
+  describe('token projectId claim', () => {
+    const REQUEST_PROJECT_ID = 2;
+    const OTHER_PROJECT_ID = REQUEST_PROJECT_ID + 100;
+
+    let warnLog;
+    beforeEach(() => {
+      warnLog = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      mockAuthConfig();
+    });
+
+    function claimReq(claims = {}, overrides = {}) {
+      const token = jwt.sign(
+        { userId: 10, authProvider: 'openstad', ...claims },
+        JWT_SECRET
+      );
+      return createMockReq({
+        method: 'GET',
+        headers: { authorization: `Bearer ${token}` },
+        ...overrides,
+      });
+    }
+
+    it.each([REQUEST_PROJECT_ID, String(REQUEST_PROJECT_ID)])(
+      'resolves the user when the claim %j equals the request project',
+      async (claim) => {
+        const fakeUser = {
+          id: 10,
+          role: 'member',
+          projectId: REQUEST_PROJECT_ID,
+          idpUser: null,
+        };
+        db.User.findOne = vi.fn().mockResolvedValue(fakeUser);
+
+        const req = claimReq({ projectId: claim });
+        const next = vi.fn();
+
+        await getUserMiddleware(req, createMockRes(), next);
+
+        expect(req.user).toBe(fakeUser);
+        expect(next).toHaveBeenCalledWith();
+        expect(warnLog).not.toHaveBeenCalled();
+      }
+    );
+
+    it('resolves the user when the claim is the admin project on another project', async () => {
+      const adminUser = {
+        id: 10,
+        role: 'admin',
+        projectId: config.admin.projectId,
+        idpUser: null,
+      };
+      db.User.findOne = vi.fn().mockResolvedValue(adminUser);
+
+      const req = claimReq({ projectId: config.admin.projectId });
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      expect(req.user).toBe(adminUser);
+      expect(next).toHaveBeenCalledWith();
+    });
+
+    it.each(['GET', 'POST'])(
+      '%s with a claim for another project continues anonymous without flagging the token',
+      async (method) => {
+        db.User.findOne = vi.fn();
+
+        const req = claimReq({ projectId: OTHER_PROJECT_ID }, { method });
+        const res = createMockRes();
+        const next = vi.fn();
+
+        await getUserMiddleware(req, res, next);
+
+        expect(req.user).toEqual({ role: 'anonymous', id: null });
+        expect(db.User.findOne).not.toHaveBeenCalled();
+        expect(res.set).not.toHaveBeenCalled();
+        expect(next).toHaveBeenCalledTimes(1);
+        expect(next).toHaveBeenCalledWith();
+        expect(warnLog).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it('resolves the user for a token without a projectId claim', async () => {
+      const fakeUser = {
+        id: 10,
+        role: 'member',
+        projectId: REQUEST_PROJECT_ID,
+        idpUser: null,
+      };
+      db.User.findOne = vi.fn().mockResolvedValue(fakeUser);
+
+      const req = claimReq();
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      expect(req.user).toBe(fakeUser);
+      expect(next).toHaveBeenCalledWith();
+      expect(warnLog).not.toHaveBeenCalled();
+    });
+
+    it('ignores the claim when the request has no project', async () => {
+      const adminUser = {
+        id: 10,
+        role: 'admin',
+        projectId: config.admin.projectId,
+        idpUser: null,
+      };
+      db.User.findOne = vi.fn().mockResolvedValue(adminUser);
+
+      const req = claimReq({ projectId: OTHER_PROJECT_ID }, { project: null });
+      const next = vi.fn();
+
+      await getUserMiddleware(req, createMockRes(), next);
+
+      expect(req.user).toBe(adminUser);
+      expect(next).toHaveBeenCalledWith();
+      expect(warnLog).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('login revocation', () => {
+    const PROJECT_ID = 2;
+    const NOW = Math.floor(Date.now() / 1000);
+    const IDP_USER = { identifier: 42, provider: 'openstad' };
+
+    beforeEach(() => {
+      process.env.MULTI_PROJECT_LOGIN = 'true';
+      mockAuthConfig();
+    });
+
+    afterEach(() => {
+      delete process.env.MULTI_PROJECT_LOGIN;
+    });
+
+    function projectUser(overrides = {}) {
+      return {
+        id: 10,
+        role: 'member',
+        projectId: PROJECT_ID,
+        idpUser: { ...IDP_USER },
+        ...overrides,
+      };
+    }
+
+    function revokedAt(seconds) {
+      db.LoginRevocation.findOne = vi
+        .fn()
+        .mockResolvedValue({ revokedAt: new Date(seconds * 1000) });
+    }
+
+    function tokenReq({ method = 'GET', claims = {}, signOptions } = {}) {
+      const token = jwt.sign(
+        {
+          userId: 10,
+          authProvider: 'openstad',
+          projectId: PROJECT_ID,
+          iat: NOW - 60,
+          ...claims,
+        },
+        JWT_SECRET,
+        signOptions
+      );
+      return createMockReq({
+        method,
+        headers: { authorization: `Bearer ${token}` },
+      });
+    }
+
+    async function run(req) {
+      const res = createMockRes();
+      const next = vi.fn();
+      await getUserMiddleware(req, res, next);
+      return { res, next };
+    }
+
+    it('continues anonymous and flags the token on a GET with a revoked login', async () => {
+      db.User.findOne = vi.fn().mockResolvedValue(projectUser());
+      revokedAt(NOW);
+
+      const req = tokenReq();
+      const { res, next } = await run(req);
+
+      expect(db.LoginRevocation.findOne).toHaveBeenCalledWith({
+        where: { provider: 'openstad', identifier: '42' },
+      });
+      expect(req.user).toEqual({ role: 'anonymous', id: null });
+      expect(res.set).toHaveBeenCalledWith(
+        'WWW-Authenticate',
+        'Bearer error="invalid_token"'
+      );
+      expect(next).toHaveBeenCalledWith();
+    });
+
+    it('answers 401 on a POST with a revoked login', async () => {
+      db.User.findOne = vi.fn().mockResolvedValue(projectUser());
+      revokedAt(NOW);
+
+      const req = tokenReq({ method: 'POST' });
+      const { next } = await run(req);
+
+      expect(next).toHaveBeenCalledTimes(1);
+      const error = next.mock.calls[0][0];
+      expect(error).toBeInstanceOf(Error);
+      expect(error.status).toBe(401);
+      expect(req.user).toBeUndefined();
+    });
+
+    it('accepts a token issued after the revocation', async () => {
+      const user = projectUser();
+      db.User.findOne = vi.fn().mockResolvedValue(user);
+      revokedAt(NOW - 120);
+
+      const req = tokenReq();
+      const { res, next } = await run(req);
+
+      expect(req.user).toBe(user);
+      expect(res.set).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalledWith();
+    });
+
+    it('treats a revoked login without an issue time as revoked', async () => {
+      db.User.findOne = vi.fn().mockResolvedValue(projectUser());
+      revokedAt(NOW - 120);
+
+      const req = tokenReq({ signOptions: { noTimestamp: true } });
+      const { res } = await run(req);
+
+      expect(req.user).toEqual({ role: 'anonymous', id: null });
+      expect(res.set).toHaveBeenCalled();
+    });
+
+    it('checks a token without projectId claim against the own project of the user', async () => {
+      db.User.findOne = vi.fn().mockResolvedValue(projectUser());
+      revokedAt(NOW);
+
+      const req = tokenReq({ claims: { projectId: undefined } });
+      await run(req);
+
+      expect(db.LoginRevocation.findOne).toHaveBeenCalled();
+      expect(req.user).toEqual({ role: 'anonymous', id: null });
+    });
+
+    it('skips the lookup for an admin project token', async () => {
+      const adminUser = projectUser({
+        role: 'admin',
+        projectId: config.admin.projectId,
+      });
+      db.User.findOne = vi.fn().mockResolvedValue(adminUser);
+      revokedAt(NOW);
+
+      const req = tokenReq({ claims: { projectId: config.admin.projectId } });
+      const { next } = await run(req);
+
+      expect(db.LoginRevocation.findOne).not.toHaveBeenCalled();
+      expect(req.user).toBe(adminUser);
+      expect(next).toHaveBeenCalledWith();
+    });
+
+    it('skips the lookup for a legacy admin token resolved through the admin fallback', async () => {
+      const adminUser = projectUser({
+        role: 'admin',
+        projectId: config.admin.projectId,
+      });
+      const fallbackUser = projectUser({ id: 20 });
+      db.User.findOne = vi
+        .fn()
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(adminUser)
+        .mockResolvedValueOnce(fallbackUser);
+      revokedAt(NOW);
+
+      const req = tokenReq({ claims: { projectId: undefined } });
+      await run(req);
+
+      expect(db.LoginRevocation.findOne).not.toHaveBeenCalled();
+      expect(req.user).toBe(fallbackUser);
+    });
+
+    it('does not look up revocations without multi-project login', async () => {
+      delete process.env.MULTI_PROJECT_LOGIN;
+      const user = projectUser();
+      db.User.findOne = vi.fn().mockResolvedValue(user);
+      revokedAt(NOW);
+
+      const req = tokenReq();
+      await run(req);
+
+      expect(db.LoginRevocation.findOne).not.toHaveBeenCalled();
+      expect(req.user).toBe(user);
     });
   });
 

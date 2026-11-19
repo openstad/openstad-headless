@@ -96,6 +96,7 @@ services:
       - FORCE_HTTP=${FORCE_HTTP}
       - IMAGE_APP_URL_INTERNAL=http://openstad-image-server:${IMAGE_PORT_API}
       - SPAM_FILTER_ENABLED=${SPAM_FILTER_ENABLED:-false}
+      - MULTI_PROJECT_LOGIN=true
     ports:
       - '${API_PORT}:${API_PORT}'
     volumes:
@@ -161,6 +162,7 @@ services:
       - ALLOWED_ADMIN_DOMAINS=["${ADMIN_DOMAIN}"]
       - ENVIRONMENT_NAME=${ENVIRONMENT_NAME}
       - NODE_ENV=development
+      - MULTI_PROJECT_LOGIN=true
     ports:
       - '${AUTH_PORT}:${AUTH_PORT}'
     volumes:
@@ -216,6 +218,7 @@ services:
       - PORT=${ADMIN_PORT}
       - EMAIL_ASSETS_URL=${EMAIL_ASSETS_URL}
       - NEXT_PUBLIC_SPAM_FILTER_ENABLED=${SPAM_FILTER_ENABLED:-false}
+      - MULTI_PROJECT_LOGIN=true
       - MAX_FILE_UPLOAD_SIZE_MB=${MAX_FILE_UPLOAD_SIZE_MB:-25}
     ports:
       - '${ADMIN_PORT}:${ADMIN_PORT}'
@@ -243,6 +246,7 @@ services:
       - API_URL_INTERNAL=http://openstad-api-server:${API_PORT}
       - API_KEY=${API_FIXED_AUTH_KEY}
       - FORCE_HTTP=${FORCE_HTTP}
+      - MULTI_PROJECT_LOGIN=true
       - APOS_RELEASE_ID=${APOS_RELEASE_ID}
     ports:
       - '${CMS_PORT}:${CMS_PORT}'

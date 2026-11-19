@@ -23,12 +23,15 @@ const clientMw = require('../middleware/client');
 const userMw = require('../middleware/user');
 const bruteForce = require('../middleware/bruteForce');
 const normalizeEmailMw = require('../middleware/normalizeEmail');
+const reuseSessionForAdminLogin = require('../middleware/adminLoginSessionReuse');
+const endCodeOnlySessionForOtherClients = require('../middleware/codeOnlySessionGuard');
 const authMw = require('../middleware/auth');
 const passwordResetMw = require('../middleware/passwordReset');
 const logMw = require('../middleware/log');
 const currentClientAuthMw = require('../middleware/currentClientAuth');
 
 //UTILS
+const clientAuth = require('../utils/clientAuth');
 const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
 
 //MODELS
@@ -273,7 +276,7 @@ module.exports = function (app) {
   // admin login routes redirect to normal login but with priviliged params
   app.get(
     '/auth/admin/login',
-    [csrfProtection, addCsrfGlobal],
+    [csrfProtection, addCsrfGlobal, reuseSessionForAdminLogin],
     (req, res, next) => {
       const queryIndex = req.originalUrl.indexOf('?');
       const queryString =
@@ -464,6 +467,7 @@ module.exports = function (app) {
     clientMw.withOne,
     currentClientAuthMw,
     authMw.check,
+    endCodeOnlySessionForOtherClients,
     userMw.withRoleForClient,
     clientMw.checkRequiredUserFields,
     clientMw.check2FA,
@@ -530,7 +534,13 @@ module.exports = function (app) {
       console.log(
         `[${new Date().toISOString()}][auth] deserialize error: ${err.message}`
       );
-      await req.session.destroy();
+      try {
+        await clientAuth.destroySession(req);
+      } catch (destroyErr) {
+        console.error(
+          `[${new Date().toISOString()}][auth] session destroy failed: ${destroyErr?.message || destroyErr}`
+        );
+      }
       let querystring = '?';
       if (req.query.clientId) querystring += `&clientId=${req.query.clientId}`;
       if (req.query.client_id)

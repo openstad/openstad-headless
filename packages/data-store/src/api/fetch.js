@@ -73,84 +73,94 @@ function ensureOscErrorListener() {
   });
 }
 
-export default async function doFetch(url = '', options = {}) {
-  ensureOscErrorListener();
-  let self = this;
-  let json;
+async function request(self, url, options, allowedStatuses) {
+  const method = (options.method || 'GET').toUpperCase();
+  const clientErrorId = makeLocalErrorId();
+  const fullUrl = self.apiUrl + url;
 
-  if (!options.suspense) {
-    const method = (options.method || 'GET').toUpperCase();
-    const clientErrorId = makeLocalErrorId();
-    const fullUrl = this.apiUrl + url;
+  options.headers = options.headers || {};
+  options.headers['Content-Type'] =
+    options.headers['Content-Type'] || 'application/json';
 
-    options.headers = options.headers || {};
-    options.headers['Content-Type'] =
-      options.headers['Content-Type'] || 'application/json';
-
-    if (self.currentUserJWT) {
-      options.headers['Authorization'] = 'Bearer ' + self.currentUserJWT;
-    }
-
-    let response;
-    try {
-      response = await fetch(fullUrl, options);
-    } catch (networkError) {
-      const error = buildEnrichedError({
-        message: networkError?.message || 'Network request failed',
-        failureType: 'network_error',
-        status: null,
-        clientErrorId,
-        url,
-        method,
-        responseBody: null,
-      });
-      dispatchOscError(error);
-      throw error;
-    }
-
-    clearInvalidToken(self, response);
-
-    if (!response.ok) {
-      let bodyText = await response.text();
-      let body;
-      try {
-        body = bodyText ? JSON.parse(bodyText) : {};
-      } catch (parseError) {
-        body = {};
-      }
-
-      let error = buildEnrichedError({
-        message:
-          body.error || body.message || response.statusText || 'Request failed',
-        failureType: 'http_error',
-        status: response.status,
-        clientErrorId,
-        url,
-        method,
-        responseBody: bodyText || null,
-      });
-      dispatchOscError(error);
-      throw error;
-    }
-
-    try {
-      json = await response.json();
-    } catch (parseError) {
-      const error = buildEnrichedError({
-        message: 'Invalid JSON response',
-        failureType: 'invalid_json',
-        status: response.status,
-        clientErrorId,
-        url,
-        method,
-        responseBody: null,
-      });
-      dispatchOscError(error);
-      throw error;
-    }
-
-    return json || {};
+  if (self.currentUserJWT) {
+    options.headers['Authorization'] = 'Bearer ' + self.currentUserJWT;
   }
 
-  return undefined;
+  let response;
+  try {
+    response = await fetch(fullUrl, options);
+  } catch (networkError) {
+    const error = buildEnrichedError({
+      message: networkError?.message || 'Network request failed',
+      failureType: 'network_error',
+      status: null,
+      clientErrorId,
+      url,
+      method,
+      responseBody: null,
+    });
+    dispatchOscError(error);
+    throw error;
+  }
+
+  clearInvalidToken(self, response);
+
+  if (!response.ok && !allowedStatuses.includes(response.status)) {
+    let bodyText = await response.text();
+    let body;
+    try {
+      body = bodyText ? JSON.parse(bodyText) : {};
+    } catch (parseError) {
+      body = {};
+    }
+
+    let error = buildEnrichedError({
+      message:
+        body.error || body.message || response.statusText || 'Request failed',
+      failureType: 'http_error',
+      status: response.status,
+      clientErrorId,
+      url,
+      method,
+      responseBody: bodyText || null,
+    });
+    dispatchOscError(error);
+    throw error;
+  }
+
+  let json;
+  try {
+    json = await response.json();
+  } catch (parseError) {
+    const error = buildEnrichedError({
+      message: 'Invalid JSON response',
+      failureType: 'invalid_json',
+      status: response.status,
+      clientErrorId,
+      url,
+      method,
+      responseBody: null,
+    });
+    dispatchOscError(error);
+    throw error;
+  }
+
+  return { status: response.status, data: json || {} };
+}
+
+export default async function doFetch(url = '', options = {}) {
+  ensureOscErrorListener();
+  if (options.suspense) return undefined;
+
+  const result = await request(this, url, options, []);
+  return result.data;
+}
+
+export async function fetchWithStatus(
+  url = '',
+  options = {},
+  allowedStatuses = []
+) {
+  ensureOscErrorListener();
+  return request(this, url, options, allowedStatuses);
 }

@@ -37,4 +37,10 @@ externalCertificates.validateInfrastructure().catch((err) => {
   );
 });
 
-Server.start(config.get('express.port'));
+require('./src/services/validateProjectAuthConfig')
+  .warnAboutJwtSecretOverrides(require('./src/db'))
+  .then(() => Server.start(config.get('express.port')))
+  .catch((err) => {
+    console.error('[auth-settings] Startup validation failed:', err.message);
+    process.exit(1);
+  });

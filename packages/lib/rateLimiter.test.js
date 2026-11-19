@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, test } from 'vitest';
 
+const express = require('express');
+const request = require('supertest');
+
 const rateLimiter = require('./rateLimiter');
 const { isPrivateIp, normalizeIp } = rateLimiter;
 
@@ -113,5 +116,26 @@ describe('rateLimiter options', () => {
     const blocked = await hit(limiter, 1);
     expect(blocked.status).toBe(429);
     expect(blocked.headers['ratelimit-policy']).toBe('2;w=5');
+  });
+});
+
+describe('rateLimiter message', () => {
+  const appWith = (options) => {
+    const app = express();
+    app.set('trust proxy', 1);
+    app.get('/', rateLimiter(options), (req, res) => res.json({ ok: true }));
+    return app;
+  };
+
+  test('answers with the given json once the limit is reached', async () => {
+    const app = appWith({ max: 1, message: { status: 'too_many_requests' } });
+    const ip = '203.0.113.10';
+
+    await request(app).get('/').set('X-Forwarded-For', ip);
+    const limited = await request(app).get('/').set('X-Forwarded-For', ip);
+
+    expect(limited.status).toBe(429);
+    expect(limited.headers['content-type']).toMatch(/application\/json/);
+    expect(limited.body).toEqual({ status: 'too_many_requests' });
   });
 });

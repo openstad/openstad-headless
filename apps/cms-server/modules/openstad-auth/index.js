@@ -5,6 +5,9 @@
 
 const Url = require('url');
 const expressSession = require('express-session');
+const { isLoginTokenForProject } = require('./lib/login-token');
+const { markLogoutForWidgets } = require('./lib/logout-signal');
+const { revokeLogin } = require('./lib/revoke-login');
 
 function removeURLParameter(url, parameter) {
   // prefer to use l.search if you have a location/link object
@@ -52,6 +55,14 @@ module.exports = {
           if (!/^\/(?![/\\])/.test(target)) {
             target = '/';
           }
+          markLogoutForWidgets(res, {
+            secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
+          });
+          await revokeLogin({
+            apiUrl: process.env.API_URL_INTERNAL || process.env.API_URL,
+            projectId: req.project?.id,
+            jwt: req.session.openstadLoginToken,
+          });
           return req.session.destroy(() => {
             res.redirect(target);
           });
@@ -67,7 +78,7 @@ module.exports = {
           return self.apos.permissions.can(req, permission);
         };
 
-        if (req.query.openstadlogintoken) {
+        if (isLoginTokenForProject(req.query, req.project?.id)) {
           const thisHost = req.headers['x-forwarded-host'] || req.get('host');
           const protocol = req.headers['x-forwarded-proto'] || req.protocol;
           const fullUrl = protocol + '://' + thisHost + req.originalUrl;
@@ -77,7 +88,10 @@ module.exports = {
           let returnTo =
             req.session && req.session.returnTo
               ? req.session.returnTo
-              : removeURLParameter(fullUrlPath, 'openstadlogintoken');
+              : removeURLParameter(
+                  removeURLParameter(fullUrlPath, 'openstadlogintoken'),
+                  'openstadprojectid'
+                );
 
           returnTo = Url.parse(returnTo, true);
           returnTo = returnTo.path;
@@ -124,6 +138,7 @@ module.exports = {
                 id: user.id,
                 role: user.role,
                 jwt,
+                projectId,
               };
 
               if (

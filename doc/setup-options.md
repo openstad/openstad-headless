@@ -139,3 +139,43 @@ proxy (sized above the cap so an oversized upload reaches the image server and g
 The admin UI reads the same env var at runtime through `/api/upload-limit` and uses it for
 its client-side size check and the "Maximale bestandsgrootte" hint, so set it to the same
 value on the admin-server and the image server.
+
+## Multi-project login (`MULTI_PROJECT_LOGIN`) (2026-10-07)
+
+Opt-in: set `MULTI_PROJECT_LOGIN=true` on the api-server, the auth-server, the cms-server and the admin-server. Only the exact value `true` enables it. Without it, login behaves as before. In the Helm chart, set `multiProjectLogin: true`; it is passed to all four.
+
+With the flag on:
+
+- A visitor who is logged in on one project is logged in on another project of the same installation with one click (no redirect). Missing data is asked for in a dialog in the widget; a vote code is asked for in that dialog too.
+- The first login opens the auth server in a popup window. When the browser blocks the popup, the widget offers a button to log in in the same window. Logging in automatically without any click on another domain is not possible because browsers block third-party cookies.
+- A magic link opened in another tab also completes the login in the original tab.
+- Widgets no longer force a new login by default (`forceNewLogin=1`). Exceptions:
+  - projects whose auth client only allows `UniqueCode` always force a new login, so the next person on a shared device does not continue as the previous voter;
+  - projects whose auth client allows `Phonenumber` always force a new login, so the visitor gets the SMS screen instead of an error;
+  - "Vul een andere stemcode in" always forces a new login;
+  - `config.auth.forceNewLoginOnWidgets` on a project overrides the default (`true` or `false`). The setting also applies to the regular CMS login.
+- After voting, the budgeting widget also ends the auth-server session.
+- Logging out, through a widget, the CMS or a link on the site that returns with `openstadlogout`, clears the logins of all projects on this host and ends the auth-server session. The login on other domains and hosts ends too: the api-server no longer accepts JWTs of that identity that were issued at or before the logout. The admin panel is excluded. Other open tabs follow the stored logins and log out as well. After a CMS logout the widgets read a short-lived cookie `openstad_logout`, because the CMS removes the `openstadlogout` parameter itself.
+- A vote code identity is never logged in on a project without vote codes: the auth-server ends that session and shows the regular login screen.
+- The CMS login reuses the auth-server session like the widgets do. The CMS admin login (`/admin/login`) reuses the session for a user with the role `admin`, `moderator` or `editor` on that site, and then always asks for the 2FA code, once per site per session. Without a session, or for other users, it shows the admin login screen as before. The admin panel itself always asks for its own login.
+- The project settings in the admin panel show a button "Bewerk site" for projects with a website, which opens the CMS admin login of that site.
+- A vote code login creates its own identity. It is never linked to the visitor's e-mail identity, so votes cannot be traced back to an e-mail address and profile data is not shared with vote code projects.
+
+Migration 121 adds the table `login_revocations` to the api-server database. It stores a logout per identity and is only used with the flag on.
+
+Endpoints, the exchange policy, the vote code lockout, logout and known gaps are described in [multi-project login](./multi-project-login.md).
+
+Independent of the flag: in production (`NODE_ENV=production` without `FORCE_HTTP`) the api-server only sends a login token back to an `https:` URL. A plain `http:` return address is refused with `Redirect url must use https`.
+
+Independent of the flag: at startup the api-server reports projects that override `config.auth.jwtSecret`. Tokens are verified with the global secret, so logins for those projects fail until the override is removed. The server keeps running.
+
+## Trusted proxies (`TRUST_PROXY`) (2026-10-07)
+
+Sets Express' `trust proxy` on the api-server and the auth-server, which decides how `req.ip` is read from `X-Forwarded-For`. Rate limiting, brute-force protection and the vote code lockout use `req.ip`.
+
+- Unset (default): every proxy is trusted. This is the previous behaviour, but clients can then spoof their IP address.
+- A number: the number of proxy hops in front of the app. Behind a single ingress controller use `1`.
+- An address or subnet list, for example `10.0.0.0/8, loopback`.
+- `false`: ignore `X-Forwarded-For`.
+
+In the Helm chart, set `trustProxy`; it is passed to the api-server and the auth-server. The default is empty, which trusts every proxy like before. Behind a single ingress controller use `"1"`, and add one for every extra proxy in front of the ingress, such as a CDN.
