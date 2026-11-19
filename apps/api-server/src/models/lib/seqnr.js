@@ -3,7 +3,10 @@ let renumber = async function ({
   where = {},
   seqnrFieldName = 'seqnr',
 }) {
-  let instances = await model.findAll({ where, order: [seqnrFieldName] });
+  let instances = await model.findAll({
+    where,
+    order: [seqnrFieldName, 'id'],
+  });
 
   let nr = 10;
   for (let instance of instances) {

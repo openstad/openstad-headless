@@ -29,7 +29,13 @@ import * as z from 'zod';
 const formSchema = z.object({
   name: z.string(),
   type: z.string(),
-  seqnr: z.coerce.number(),
+  seqnr: z.preprocess(
+    (val) => (val === '' || val === null ? undefined : val),
+    z.coerce
+      .number({ invalid_type_error: 'Vul een geheel getal in' })
+      .int('Vul een geheel getal in')
+      .optional()
+  ),
   addToNewResources: z.boolean().optional(),
 });
 
@@ -174,10 +180,10 @@ export default function ProjectTagCreate({ preset }: { preset?: string }) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Sequence nummer
+                      Volgorde (optioneel)
                       <InfoDialog
                         content={
-                          'Dit nummer bepaalt de volgorde waarin de tags worden getoond. Automatisch worden tientallen gegenereerd, zodat je later ruimte hebt om tags tussen te voegen.'
+                          'Dit nummer bepaalt de volgorde waarin de tags binnen hun type worden getoond. Laat je het veld leeg, dan komt de tag onderaan. Automatisch worden tientallen gegenereerd, zodat je later ruimte hebt om tags tussen te voegen.'
                         }
                       />
                     </FormLabel>
