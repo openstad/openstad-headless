@@ -144,6 +144,16 @@ const regenerateSession = (req, { preserveClientAuth = false } = {}) => {
   });
 };
 
+const destroySession = (req) => {
+  if (!req.session || typeof req.session.destroy !== 'function') {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) =>
+    req.session.destroy((err) => (err ? reject(err) : resolve()))
+  );
+};
+
 const loginWithFreshSession = (req, user, done) => {
   const preserveClientAuth = isSameSessionUser(req.session, user);
 
@@ -169,6 +179,7 @@ const saveSession = (session) => {
 
 module.exports = {
   clearClientAuth,
+  destroySession,
   getClientAuth,
   getSessionMaxAgeMsForRole,
   initializeClientAuth,

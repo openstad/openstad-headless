@@ -197,7 +197,13 @@ exports.logout = async (req, res) => {
     });
   }
 
-  await req.session.destroy();
+  try {
+    await clientAuth.destroySession(req);
+  } catch (err) {
+    console.error(
+      `[${new Date().toISOString()}][auth-logout] session destroy failed: clientId=${req.client?.id} error=${err?.message || err}`
+    );
+  }
 
   const config = req.client.config;
 

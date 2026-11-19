@@ -81,6 +81,49 @@ describe('regenerateSession', () => {
   });
 });
 
+describe('destroySession', () => {
+  it('resolves only after the store has destroyed the session', async () => {
+    let finishDestroy;
+    const req = {
+      session: {
+        destroy: vi.fn((cb) => {
+          finishDestroy = cb;
+        }),
+      },
+    };
+    let resolved = false;
+
+    const pending = clientAuth.destroySession(req).then(() => {
+      resolved = true;
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(req.session.destroy).toHaveBeenCalledTimes(1);
+    expect(resolved).toBe(false);
+
+    finishDestroy(null);
+    await pending;
+
+    expect(resolved).toBe(true);
+  });
+
+  it('rejects when the store fails to destroy the session', async () => {
+    const req = {
+      session: {
+        destroy(cb) {
+          cb(new Error('store down'));
+        },
+      },
+    };
+
+    await expect(clientAuth.destroySession(req)).rejects.toThrow('store down');
+  });
+
+  it('resolves when there is no session', async () => {
+    await expect(clientAuth.destroySession({})).resolves.toBeUndefined();
+  });
+});
+
 describe('initializeClientAuth', () => {
   it('stamps a fresh authenticatedAt so a re-login extends the session window', async () => {
     const session = {

@@ -31,6 +31,7 @@ const logMw = require('../middleware/log');
 const currentClientAuthMw = require('../middleware/currentClientAuth');
 
 //UTILS
+const clientAuth = require('../utils/clientAuth');
 const getClientIdFromRequest = require('../utils/getClientIdFromRequest');
 
 //MODELS
@@ -533,7 +534,13 @@ module.exports = function (app) {
       console.log(
         `[${new Date().toISOString()}][auth] deserialize error: ${err.message}`
       );
-      await req.session.destroy();
+      try {
+        await clientAuth.destroySession(req);
+      } catch (destroyErr) {
+        console.error(
+          `[${new Date().toISOString()}][auth] session destroy failed: ${destroyErr?.message || destroyErr}`
+        );
+      }
       let querystring = '?';
       if (req.query.clientId) querystring += `&clientId=${req.query.clientId}`;
       if (req.query.client_id)
