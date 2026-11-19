@@ -25,6 +25,8 @@ module.exports = async function seed(db) {
 
   const anonymousSecret =
     process.env.DEV_ANONYMOUS_CLIENT_SECRET || randomCode();
+  const uniquecodeSecret =
+    process.env.DEV_UNIQUECODE_CLIENT_SECRET || randomCode();
   const codes = {
     admin: randomCode(),
     moderator: randomCode(),
@@ -37,14 +39,14 @@ module.exports = async function seed(db) {
   try {
     console.log('    - generic uniquecode client');
     console.log('      clientId:', 'uniquecode');
-    console.log('      clientSecret:', 'uniquecode123');
+    console.log('      clientSecret:', uniquecodeSecret);
     await db.Client.create({
       id: 3,
       redirectUrl: '', // deprecated
       name: 'Default site',
       description: 'Client for managing default site',
       clientId: 'uniquecode',
-      clientSecret: 'uniquecode123',
+      clientSecret: uniquecodeSecret,
       authTypes: JSON.stringify(['UniqueCode']),
       requiredUserFields: JSON.stringify(['name']),
       allowedDomains: JSON.stringify(allowedDomains),
