@@ -2,6 +2,7 @@ import { SessionContext } from '@/auth-context';
 import { ConfirmActionDialog } from '@/components/dialog-confirm-action';
 import { RemoveResourceDialog } from '@/components/dialog-resource-remove';
 import { RenameResourceDialog } from '@/components/dialog-resource-rename';
+import { ImportWidgetDialog } from '@/components/dialog-widget-import';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { PageLayout } from '@/components/ui/page-layout';
@@ -27,6 +28,7 @@ export default function ProjectWidgets() {
     isLoading: isLoadingWidgets,
     remove,
     duplicate,
+    copyWidgets,
   } = useWidgetsHook(project as string);
 
   const [data, setData] = useState(widgets);
@@ -57,12 +59,18 @@ export default function ProjectWidgets() {
           },
         ]}
         action={
-          <Link href={`/projects/${project}/widgets/create`}>
-            <Button variant="default" className="flex w-fit">
-              <Plus size="20" className="hidden lg:flex" />
-              Widget toevoegen
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <ImportWidgetDialog
+              projectId={project as string}
+              copyWidgets={copyWidgets}
+            />
+            <Link href={`/projects/${project}/widgets/create`}>
+              <Button variant="default" className="flex w-fit">
+                <Plus size="20" className="hidden lg:flex" />
+                Widget toevoegen
+              </Button>
+            </Link>
+          </div>
         }>
         <div className="container py-6">
           <div className="float-left mb-4 flex gap-4">

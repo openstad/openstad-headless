@@ -7,6 +7,11 @@ const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const getWidgetSettings = require('../widget/widget-settings');
 const createError = require('http-errors');
 const { snapshotWidgetVersion } = require('../../services/widget-version');
+const {
+  canUserUseSourceProjectForDuplication,
+  isProjectAdminOrEditor,
+} = require('../../services/authClientSync');
+const { copyWidgetsBetweenProjects } = require('../../services/widgetCopy');
 router.all('*', function (req, res, next) {
   req.scope = [];
   return next();
@@ -180,6 +185,79 @@ router
       );
 
       res.json(duplicatedWidgets);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+router
+  .route('/copy')
+  .post(auth.useReqUser)
+  .post(rateLimiter(), async function (req, res, next) {
+    const targetProjectId = parseInt(req.params.projectId, 10);
+    const sourceProjectId = req.body.sourceProjectId;
+    const ids = Array.isArray(req.body.ids)
+      ? req.body.ids.filter((id) => Number.isInteger(id))
+      : [];
+
+    if (!Number.isInteger(sourceProjectId) || sourceProjectId < 1) {
+      return next(
+        createError(400, 'sourceProjectId must be a positive integer')
+      );
+    }
+    if (sourceProjectId === targetProjectId) {
+      return next(
+        createError(400, 'sourceProjectId must differ from the target project')
+      );
+    }
+    if (ids.length === 0) {
+      return next(createError(400, 'ids must be a non-empty list of integers'));
+    }
+
+    try {
+      const canReadSource = await canUserUseSourceProjectForDuplication({
+        user: req.user,
+        sourceProjectId,
+      });
+      if (!canReadSource) {
+        return next(
+          createError(403, 'Not allowed to copy widgets from this project')
+        );
+      }
+
+      const canWriteTarget = await isProjectAdminOrEditor({
+        user: req.user,
+        projectId: targetProjectId,
+      });
+      if (!canWriteTarget) {
+        return next(
+          createError(403, 'Not allowed to copy widgets into this project')
+        );
+      }
+
+      const sourceWidgets = await db.Widget.findAll({
+        where: { id: ids, projectId: sourceProjectId },
+      });
+      if (sourceWidgets.length === 0) {
+        return next(
+          createError(404, 'No widgets found for these ids in the project')
+        );
+      }
+
+      for (const widget of sourceWidgets) {
+        if (!widget.can('create', req.user)) {
+          return next(
+            createError(403, `You cannot copy widget with ID ${widget.id}`)
+          );
+        }
+      }
+
+      const result = await copyWidgetsBetweenProjects({
+        sourceWidgets,
+        targetProjectId,
+      });
+
+      res.json(result);
     } catch (error) {
       next(error);
     }
