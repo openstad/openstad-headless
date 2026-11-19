@@ -56,6 +56,21 @@ function sanitizeAuthWrite(auth, user) {
   return { provider };
 }
 
+// userMapping is never writable through the API, for any role.
+function stripUserMapping(auth) {
+  const copy = { ...auth };
+  for (const group of ['provider', 'adapter']) {
+    if (!copy[group] || typeof copy[group] !== 'object') continue;
+    copy[group] = { ...copy[group] };
+    for (const [name, entry] of Object.entries(copy[group])) {
+      if (!entry || typeof entry !== 'object') continue;
+      const { userMapping, ...rest } = entry;
+      copy[group][name] = rest;
+    }
+  }
+  return copy;
+}
+
 function authorizeConfig(value, action, user, self) {
   if (!userHasRole(user, 'editor')) return undefined;
   const isSuperuser = userHasRole(user, 'superuser');
@@ -67,8 +82,8 @@ function authorizeConfig(value, action, user, self) {
     return config;
   }
 
-  if (isSuperuser || !value || typeof value !== 'object' || !value.auth)
-    return value;
+  if (!value || typeof value !== 'object' || !value.auth) return value;
+  if (isSuperuser) return { ...value, auth: stripUserMapping(value.auth) };
   return { ...value, auth: sanitizeAuthWrite(value.auth, user) };
 }
 
