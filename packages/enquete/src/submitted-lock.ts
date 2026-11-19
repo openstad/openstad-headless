@@ -72,11 +72,14 @@ export function isFormClosed({
   flag,
   closeFormAfterSubmit,
   canBypass,
+  projectHasEnded,
 }: {
   flag: boolean;
   closeFormAfterSubmit?: boolean;
   canBypass?: boolean;
+  projectHasEnded?: boolean;
 }): boolean {
+  if (projectHasEnded) return true;
   if (!closeFormAfterSubmit) return false;
   if (canBypass) return false;
   return !!flag;

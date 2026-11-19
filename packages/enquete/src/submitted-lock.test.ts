@@ -103,4 +103,25 @@ describe('isFormClosed', () => {
   test('option on + flag + no bypass => closed', () => {
     expect(isFormClosed({ flag: true, closeFormAfterSubmit: true })).toBe(true);
   });
+
+  test('project ended => closed, even with option off', () => {
+    expect(
+      isFormClosed({
+        flag: false,
+        closeFormAfterSubmit: false,
+        projectHasEnded: true,
+      })
+    ).toBe(true);
+  });
+
+  test('project ended => closed, even for users who can bypass', () => {
+    expect(
+      isFormClosed({
+        flag: false,
+        closeFormAfterSubmit: true,
+        canBypass: true,
+        projectHasEnded: true,
+      })
+    ).toBe(true);
+  });
 });

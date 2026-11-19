@@ -60,6 +60,8 @@ import { EnquetePropsType } from './types/';
 
 const DEFAULT_CLOSED_FORM_MESSAGE =
   'Je antwoord is ontvangen. Je kunt deze enquête maar één keer invullen.';
+const PROJECT_ENDED_MESSAGE =
+  'Dit project is beëindigd. Je kunt deze enquête niet meer invullen.';
 
 // Helper types and functions for draft persistence
 
@@ -1042,10 +1044,12 @@ function Enquete(props: EnqueteWidgetProps) {
     };
   }, []);
 
+  const projectHasEnded = !!props.project?.projectHasEnded;
   const formClosed = isFormClosed({
     flag: submittedFlag,
     closeFormAfterSubmit: props.closeFormAfterSubmit,
     canBypass: hasRole(currentUser, 'editor'),
+    projectHasEnded,
   });
   useEffect(() => {
     if (formClosed && focusClosedBlockRef.current) {
@@ -1055,10 +1059,15 @@ function Enquete(props: EnqueteWidgetProps) {
   }, [formClosed]);
   const waitingForUser =
     !!props.closeFormAfterSubmit && submittedFlag && currentUserIsLoading;
-  const closedMessage = (props.closedFormMessage || '').trim()
-    ? (props.closedFormMessage as string)
-    : DEFAULT_CLOSED_FORM_MESSAGE;
-  const submittedAt = formClosed ? readSubmittedAt(submittedStorageKey) : null;
+  const closedMessage = projectHasEnded
+    ? PROJECT_ENDED_MESSAGE
+    : (props.closedFormMessage || '').trim()
+      ? (props.closedFormMessage as string)
+      : DEFAULT_CLOSED_FORM_MESSAGE;
+  const submittedAt =
+    formClosed && !projectHasEnded
+      ? readSubmittedAt(submittedStorageKey)
+      : null;
 
   return (
     <div

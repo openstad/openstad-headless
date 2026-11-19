@@ -102,6 +102,12 @@ router
   // create submission
   // ---------------
   .post(auth.can('Submission', 'create'))
+  .post(function (req, res, next) {
+    if (req.project?.config?.project?.projectHasEnded) {
+      return next(createError(401, 'Dit project is beëindigd'));
+    }
+    return next();
+  })
   .post(rateLimiter(), function (req, res, next) {
     if (isSpamFilterEnabled()) {
       const analysis = analyzeSpamPayload(req.body.submittedData || {}, {
