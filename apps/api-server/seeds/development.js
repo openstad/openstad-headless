@@ -30,12 +30,12 @@ module.exports = async function seed(config, db) {
             openstad: {
               adapter: 'openstad',
               clientId: 'uniquecode',
-              clientSecret: 'uniquecode123',
+              clientSecret: process.env.DEV_UNIQUECODE_CLIENT_SECRET,
             },
             anonymous: {
               adapter: 'openstad',
               clientId: 'anonymous',
-              clientSecret: 'anonymous123',
+              clientSecret: process.env.DEV_ANONYMOUS_CLIENT_SECRET,
             },
           },
         },
@@ -96,12 +96,12 @@ module.exports = async function seed(config, db) {
             openstad: {
               adapter: 'openstad',
               clientId: 'uniquecode',
-              clientSecret: 'uniquecode123',
+              clientSecret: process.env.DEV_UNIQUECODE_CLIENT_SECRET,
             },
             anonymous: {
               adapter: 'openstad',
               clientId: 'anonymous',
-              clientSecret: 'anonymous123',
+              clientSecret: process.env.DEV_ANONYMOUS_CLIENT_SECRET,
             },
           },
         },
@@ -138,12 +138,12 @@ module.exports = async function seed(config, db) {
             openstad: {
               adapter: 'openstad',
               clientId: 'uniquecode',
-              clientSecret: 'uniquecode123',
+              clientSecret: process.env.DEV_UNIQUECODE_CLIENT_SECRET,
             },
             anonymous: {
               adapter: 'openstad',
               clientId: 'anonymous',
-              clientSecret: 'anonymous123',
+              clientSecret: process.env.DEV_ANONYMOUS_CLIENT_SECRET,
             },
           },
         },

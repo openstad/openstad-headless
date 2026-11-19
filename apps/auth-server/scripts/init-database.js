@@ -2,6 +2,7 @@ require('dotenv').config({ path: '../../.env' });
 require('dotenv').config({ path: '.env' });
 
 const db = require('../db');
+const envSeedName = require('../utils/envSeedName');
 
 const { Umzug, SequelizeStorage } = require('umzug');
 
@@ -54,14 +55,18 @@ if (
         console.log(err);
       }
 
-      datafile = process.env.NODE_ENV || 'development';
-      try {
-        await require(`../seeds/${datafile}`)(db);
-      } catch (err) {
-        if (err && err.message && err.message.match(/Cannot find module/)) {
-          console.log(`  no ${datafile} data seeds found`);
-        } else {
-          console.log(err.message);
+      datafile = envSeedName(process.env.NODE_ENV);
+      if (!datafile) {
+        console.log('  NODE_ENV not set, skipping environment data seeds');
+      } else {
+        try {
+          await require(`../seeds/${datafile}`)(db);
+        } catch (err) {
+          if (err && err.message && err.message.match(/Cannot find module/)) {
+            console.log(`  no ${datafile} data seeds found`);
+          } else {
+            console.log(err.message);
+          }
         }
       }
 
