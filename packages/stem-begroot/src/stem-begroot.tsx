@@ -232,8 +232,9 @@ function StemBegroot({
         });
 
         // Remove pendingBudgetVote from URL
-        url.searchParams.delete('pendingBudgetVote');
-        window.history.replaceState({}, document.title, url.toString());
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete('pendingBudgetVote');
+        window.history.replaceState({}, document.title, cleanUrl.toString());
         hasToRestoreVotesFromServer = false;
 
         if (!pendingBudgetVote.ok || !pendingBudgetVote) {
@@ -1021,6 +1022,7 @@ function StemBegroot({
     const currentUrl = new URL(location.href);
     const params = currentUrl.searchParams;
     params.delete('openstadlogintoken');
+    params.delete('openstadprojectid');
 
     const logoutUrlEndingAuthServerSession = props.multiProjectLogin
       ? props.logout?.url
