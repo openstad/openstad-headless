@@ -83,39 +83,6 @@ describe('user middleware', () => {
     });
   });
 
-  describe('upload path with authorization header and the legacy bypass enabled', () => {
-    afterEach(() => {
-      delete process.env.API_UPLOAD_LEGACY_AUTH_BYPASS;
-    });
-
-    it('replaces authorization with upload-service JWT and proceeds', async () => {
-      process.env.API_UPLOAD_LEGACY_AUTH_BYPASS = 'true';
-      authSettings.config = vi.fn().mockResolvedValue({
-        provider: {},
-        adapter: 'openstad',
-        default: 'openstad',
-      });
-      db.User.findOne = vi.fn().mockResolvedValue(null);
-
-      const req = createMockReq({
-        headers: { authorization: 'some-token' },
-        path: '/upload/images',
-      });
-      const res = createMockRes();
-      const next = vi.fn();
-
-      await getUserMiddleware(req, res, next);
-
-      const authHeader = req.headers['authorization'];
-      expect(authHeader).toMatch(/^Bearer /i);
-      const token = authHeader.replace(/^Bearer /i, '');
-      const decoded = jwt.verify(token, JWT_SECRET);
-      expect(decoded.userId).toBe('9999999');
-      expect(decoded.authProvider).toBe('upload-service');
-      expect(next).toHaveBeenCalledWith();
-    });
-  });
-
   describe('valid JWT token', () => {
     it('fetches user from db and attaches to req.user when idpUser is absent', async () => {
       const payload = { userId: 10, authProvider: 'openstad' };

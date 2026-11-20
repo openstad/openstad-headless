@@ -1,6 +1,5 @@
 const config = require('config');
 const crypto = require('crypto');
-const jwt = require('jsonwebtoken');
 const merge = require('merge');
 const createError = require('http-errors');
 const db = require('../db');
@@ -18,12 +17,6 @@ const INVALID_TOKEN_ERRORS = [
 const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
 
 let adapters = {};
-const uploadPathSuffixes = [
-  '/upload/image',
-  '/upload/images',
-  '/upload/document',
-  '/upload/documents',
-];
 
 // RFC 7235 allows any amount of whitespace between the auth scheme and its
 // credentials, so match the scheme tolerantly instead of assuming a single
@@ -73,25 +66,6 @@ module.exports = async function getUser(req, res, next) {
     const bearerToken = parseBearerToken(req.headers['authorization']);
     if (bearerToken && bearerToken.startsWith('osr_')) {
       return handleApiToken(req, res, next, bearerToken);
-    }
-
-    if (
-      process.env.API_UPLOAD_LEGACY_AUTH_BYPASS === 'true' &&
-      req.headers['authorization']
-    ) {
-      const isUploadRequest = uploadPathSuffixes.some((path) =>
-        req.path.endsWith(path)
-      );
-
-      if (isUploadRequest) {
-        const payload = {
-          userId: '9999999',
-          authProvider: 'upload-service',
-          exp: Math.floor(Date.now() / 1000) + 5 * 60,
-        };
-        const uploadJwt = jwt.sign(payload, config.auth.jwtSecret);
-        req.headers['authorization'] = `Bearer ${uploadJwt}`;
-      }
     }
 
     let parsedAuthHeader;

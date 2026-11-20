@@ -76,6 +76,12 @@ async function detectImageMimeType(response, extension) {
   return ct && ct.startsWith('image/') ? ct : 'application/octet-stream';
 }
 const { resolveMaxUploadSizeMb } = require('./max-upload-size');
+const {
+  MAX_UPLOAD_FILES,
+  UNSUPPORTED_DOCUMENT_TYPE,
+  createRequestBudgetStorage,
+  createValidatingDocumentStorage,
+} = require('./upload-guards');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('path');
@@ -90,6 +96,9 @@ const maxFileUploadSizeMB = resolveMaxUploadSizeMb(
   process.env.MAX_FILE_UPLOAD_SIZE_MB
 );
 const maxFileUploadBytes = maxFileUploadSizeMB * 1024 * 1024;
+// One request may carry up to MAX_UPLOAD_FILES files, each already capped at
+// maxFileUploadBytes. The total stops a request from exceeding that combined budget.
+const maxRequestBytes = maxFileUploadBytes * MAX_UPLOAD_FILES;
 
 const getPublicS3BaseUrl = () =>
   process.env.S3_ENDPOINT.replace(
@@ -293,6 +302,10 @@ if (s3.isEnabled()) {
 }
 
 imageMulterConfig.dest = process.env.IMAGES_DIR || 'images/';
+imageMulterConfig.storage = createRequestBudgetStorage(
+  imageMulterConfig.storage,
+  maxRequestBytes
+);
 
 const imageUpload = multer(imageMulterConfig);
 
@@ -500,29 +513,6 @@ const documentMulterConfig = {
     console.error(err);
     next(err);
   },
-  fileFilter: function (req, file, cb) {
-    const allowedTypes = [
-      'image/gif',
-      'application/pdf',
-      'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-powerpoint',
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-    ];
-
-    if (
-      file.mimetype &&
-      allowedTypes.indexOf(file.mimetype) === -1 &&
-      !file.mimetype.startsWith('image/')
-    ) {
-      req.fileValidationError = 'goes wrong on the mimetype';
-      return cb(null, false, new Error('goes wrong on the mimetype'));
-    }
-
-    cb(null, true);
-  },
 };
 
 if (s3.isEnabled()) {
@@ -560,6 +550,10 @@ if (s3.isEnabled()) {
 }
 
 documentMulterConfig.dest = process.env.DOCUMENTS_DIR || 'documents/';
+documentMulterConfig.storage = createValidatingDocumentStorage(
+  documentMulterConfig.storage,
+  maxRequestBytes
+);
 const documentUpload = multer(documentMulterConfig);
 
 function handleFileResponse(filePath, readStream, res) {
@@ -734,24 +728,28 @@ app.post('/image', imageUpload.single('image'), (req, res, next) => {
   });
 });
 
-app.post('/images', imageUpload.array('image', 30), (req, res, next) => {
-  res.json(
-    req.files.map((file) => {
-      const url = getFileUrl(file, 'image');
+app.post(
+  '/images',
+  imageUpload.array('image', MAX_UPLOAD_FILES),
+  (req, res, next) => {
+    res.json(
+      req.files.map((file) => {
+        const url = getFileUrl(file, 'image');
 
-      let protocol = '';
+        let protocol = '';
 
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
-      }
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          protocol = process.env.FORCE_HTTP ? 'http://' : 'https://';
+        }
 
-      return {
-        name: sanitizeFileName(file.originalname),
-        url: protocol + url,
-      };
-    })
-  );
-});
+        return {
+          name: sanitizeFileName(file.originalname),
+          url: protocol + url,
+        };
+      })
+    );
+  }
+);
 
 /**
  *  The url for creating one Document
@@ -775,7 +773,7 @@ app.post('/document', documentUpload.single('document'), (req, res, next) => {
 
 app.post(
   '/documents',
-  documentUpload.array('document', 30),
+  documentUpload.array('document', MAX_UPLOAD_FILES),
   (req, res, next) => {
     res.json(
       req.files.map((file) => {
@@ -809,7 +807,15 @@ app.use(function (err, req, res, next) {
     });
   }
 
-  if (err && err.code === UNSUPPORTED_IMAGE_TYPE) {
+  if (err && err.code === 'LIMIT_REQUEST_SIZE') {
+    return res.status(413).json({ error: err.message });
+  }
+
+  if (
+    err &&
+    (err.code === UNSUPPORTED_IMAGE_TYPE ||
+      err.code === UNSUPPORTED_DOCUMENT_TYPE)
+  ) {
     return res.status(415).json({ error: err.message });
   }
 
