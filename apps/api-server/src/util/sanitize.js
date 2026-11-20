@@ -127,9 +127,25 @@ var allSafeTags = {
 };
 var rawInputTags = {
   ...allSafeTags,
+  allowedTags: [...allSafeTags.allowedTags, 'iframe'],
   allowedAttributes: {
     ...allSafeTags.allowedAttributes,
     '*': [...allSafeTags.allowedAttributes['*'], 'id', 'style'],
+    iframe: [
+      'allow',
+      'allowfullscreen',
+      'frameborder',
+      'height',
+      'loading',
+      'referrerpolicy',
+      'src',
+      'title',
+      'width',
+    ],
+  },
+  allowedIframeDomains: ['youtube.com', 'youtube-nocookie.com', 'vimeo.com'],
+  exclusiveFilter: function (frame) {
+    return frame.tag === 'iframe' && !frame.attribs.src;
   },
 };
 

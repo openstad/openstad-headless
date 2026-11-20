@@ -124,6 +124,30 @@ describe('PUT /project/:projectId/widgets/:id', () => {
     expect(updated.config.rawInput).toContain('id="x"');
     expect(updated.config.rawInput).toContain('style="color:red"');
   });
+
+  it('keeps a YouTube iframe in rawInput', async () => {
+    const iframe =
+      '<iframe src="https://www.youtube.com/embed/zB8YffmXkmQ" title="Video"></iframe>';
+
+    await request(createApp(editor))
+      .put(`/project/${PROJECT_ID}/widgets/6`)
+      .send({ config: { rawInput: iframe } });
+
+    expect(updated.config.rawInput).toContain(iframe);
+  });
+
+  it('removes an iframe from another domain in rawInput', async () => {
+    await request(createApp(editor))
+      .put(`/project/${PROJECT_ID}/widgets/6`)
+      .send({
+        config: {
+          rawInput: '<iframe src="https://evil.com/x"></iframe><p>hoi</p>',
+        },
+      });
+
+    expect(updated.config.rawInput).not.toContain('<iframe');
+    expect(updated.config.rawInput).toContain('<p>hoi</p>');
+  });
 });
 
 describe('DELETE /project/:projectId/widgets/:id', () => {
