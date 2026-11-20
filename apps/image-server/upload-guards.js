@@ -75,6 +75,8 @@ const CFB_SIGNATURE = Buffer.from([
   0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1,
 ]);
 
+// "Leading bytes" (magic bytes): trusted file signatures at the start of a file.
+// We prefer these over client-provided MIME or extension, which can be spoofed.
 function startsWithBytes(buffer, signature) {
   return (
     buffer.length >= signature.length &&
@@ -106,16 +108,20 @@ function officeOpenXmlMime(buffer) {
 function detectFileType(buffer) {
   if (!Buffer.isBuffer(buffer) || buffer.length < 4) return null;
 
+  // PNG fixed 8-byte signature.
   if (startsWithBytes(buffer, PNG_SIGNATURE)) {
     return { ext: 'png', mime: 'image/png' };
   }
+  // JPEG files start with FF D8 FF.
   if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
     return { ext: 'jpg', mime: 'image/jpeg' };
   }
+  // GIF header includes the version marker.
   const head6 = buffer.subarray(0, 6).toString('ascii');
   if (head6 === 'GIF87a' || head6 === 'GIF89a') {
     return { ext: 'gif', mime: 'image/gif' };
   }
+  // WEBP is RIFF with a WEBP marker at offset 8.
   if (
     buffer.length >= 12 &&
     buffer.subarray(0, 4).toString('ascii') === 'RIFF' &&
@@ -139,13 +145,16 @@ function detectFileType(buffer) {
   if (tiffLittle || tiffBig) {
     return { ext: 'tiff', mime: 'image/tiff' };
   }
+  // PDF starts with "%PDF-".
   if (buffer.subarray(0, 5).toString('ascii') === '%PDF-') {
     return { ext: 'pdf', mime: 'application/pdf' };
   }
+  // Legacy Office binary container for doc/xls/ppt.
   if (startsWithBytes(buffer, CFB_SIGNATURE)) {
     return { ext: 'cfb', mime: 'application/x-cfb' };
   }
 
+  // ZIP signatures; then inspect entries to allow only Office Open XML zips.
   const zip =
     buffer[0] === 0x50 &&
     buffer[1] === 0x4b &&
@@ -177,6 +186,7 @@ function readStreamToBuffer(stream) {
         reject(error);
         return;
       }
+      // Gather the whole upload so type checks can inspect magic bytes.
       resolve(Buffer.concat(chunks));
     });
   });
@@ -203,6 +213,7 @@ function createValidatingDocumentStorage(baseStorage, maxRequestBytes) {
             throw unsupportedDocumentTypeError();
           }
 
+          // Hand storage a stream again after validating buffered bytes.
           Object.defineProperty(file, 'stream', {
             configurable: true,
             enumerable: false,
