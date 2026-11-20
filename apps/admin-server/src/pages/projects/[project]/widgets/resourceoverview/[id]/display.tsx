@@ -174,6 +174,10 @@ export default function WidgetResourceOverviewDisplay(
   const displayTags = watch('displayTags');
   const displayCollapsibleFilter = watch('displayCollapsibleFilter');
   const autoApply = watch('autoApply');
+  const displayLocationFilter = watch('displayLocationFilter');
+  const displayLocationHint = watch('displayLocationHint');
+  const displayStreetFilter = watch('displayStreetFilter');
+  const displayStreetFilterHint = watch('displayStreetFilterHint');
 
   const { data: tags } = useTags(props.projectId);
   const [tagGroupNames, setGroupedNames] = useState<string[]>([]);
@@ -369,77 +373,83 @@ export default function WidgetResourceOverviewDisplay(
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="locationLabel"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Label voor het postcodeveld</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {displayLocationFilter && (
+            <>
+              <FormField
+                control={form.control}
+                name="locationLabel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Label voor het postcodeveld</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <FormField
-            control={form.control}
-            name="displayLocationHint"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Hint onder het postcodeveld weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <FormField
+                control={form.control}
+                name="displayLocationHint"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hint onder het postcodeveld weergeven</FormLabel>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <FormField
-            control={form.control}
-            name="locationHint"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Hinttekst voor het postcodeveld</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              {displayLocationHint && (
+                <FormField
+                  control={form.control}
+                  name="locationHint"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Hinttekst voor het postcodeveld</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          onChange={(e) => {
+                            onFieldChange(field.name, e.target.value);
+                            field.onChange(e);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
-          <FormField
-            control={form.control}
-            name="locationPlaceholder"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tekst voor postcodeveld placeholder</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <FormField
+                control={form.control}
+                name="locationPlaceholder"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tekst voor postcodeveld placeholder</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
 
           <FormField
             control={form.control}
@@ -453,77 +463,83 @@ export default function WidgetResourceOverviewDisplay(
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="streetFilterLabel"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Label voor het straatfilter</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {displayStreetFilter && (
+            <>
+              <FormField
+                control={form.control}
+                name="streetFilterLabel"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Label voor het straatfilter</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <FormField
-            control={form.control}
-            name="displayStreetFilterHint"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Hint onder het straatfilter weergeven</FormLabel>
-                {YesNoSelect(field, props)}
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <FormField
+                control={form.control}
+                name="displayStreetFilterHint"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hint onder het straatfilter weergeven</FormLabel>
+                    {YesNoSelect(field, props)}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          <FormField
-            control={form.control}
-            name="streetFilterHint"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Hinttekst voor het straatfilter</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              {displayStreetFilterHint && (
+                <FormField
+                  control={form.control}
+                  name="streetFilterHint"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Hinttekst voor het straatfilter</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          onChange={(e) => {
+                            onFieldChange(field.name, e.target.value);
+                            field.onChange(e);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
-          <FormField
-            control={form.control}
-            name="streetFilterPlaceholder"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tekst voor straatfilter placeholder</FormLabel>
-                <FormControl>
-                  <Input
-                    {...field}
-                    onChange={(e) => {
-                      onFieldChange(field.name, e.target.value);
-                      field.onChange(e);
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+              <FormField
+                control={form.control}
+                name="streetFilterPlaceholder"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tekst voor straatfilter placeholder</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        onChange={(e) => {
+                          onFieldChange(field.name, e.target.value);
+                          field.onChange(e);
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </>
+          )}
 
           <FormField
             control={form.control}
