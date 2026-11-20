@@ -61,11 +61,16 @@ const flush = () =>
     await new Promise((resolve) => setTimeout(resolve, 0));
   });
 
-function storedProject(project: Record<string, unknown>, url = '') {
+function storedProject(
+  project: Record<string, unknown>,
+  url = '',
+  installationUrls = { cms: '' }
+) {
   return {
     id: 2,
     name: 'Plannen',
     url,
+    installationUrls,
     config: {
       project: { projectHasEnded: false, ...project },
       basicAuth: { active: false },
@@ -95,7 +100,7 @@ describe('Projectinformatie on the project settings page', () => {
       root.render(
         <SaveControllerProvider>
           <Bar />
-          <ProjectSettings cmsUrl="" />
+          <ProjectSettings />
         </SaveControllerProvider>
       )
     );
@@ -243,6 +248,33 @@ describe('Projectinformatie on the project settings page', () => {
     await flipWebsite();
 
     expect(controller.state).not.toBe('dirty');
+  });
+
+  it('fills the CMS host and the project slug when the website is switched on', async () => {
+    project.data = storedProject(
+      { endDate: '2099-01-31T00:00:00.000Z', projectToggle: false },
+      '',
+      { cms: 'openstad-acc.example.nl' }
+    );
+    await openPage();
+    await flipWebsite();
+
+    expect(
+      (container.querySelector('input[name="url"]') as HTMLInputElement).value
+    ).toBe('openstad-acc.example.nl/plannen');
+  });
+
+  it('leaves the URL empty when the API reports no CMS host', async () => {
+    project.data = storedProject({
+      endDate: '2099-01-31T00:00:00.000Z',
+      projectToggle: false,
+    });
+    await openPage();
+    await flipWebsite();
+
+    expect(
+      (container.querySelector('input[name="url"]') as HTMLInputElement).value
+    ).toBe('');
   });
 
   it('keeps the stored URL when the website is switched off and on again', async () => {
