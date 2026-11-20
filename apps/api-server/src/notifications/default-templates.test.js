@@ -193,3 +193,60 @@ describe('default template: new modbreak - user feedback', () => {
     expect(withoutLink.html).not.toContain('Uitschrijven');
   });
 });
+
+describe('default template: login email', () => {
+  const render = (data) => {
+    const template = extractTemplate('login email');
+    const body = new nunjucks.Environment().renderString(template.body, data);
+    return { template, body };
+  };
+
+  it('greets the user by name with the variables the auth server sends', async () => {
+    const { template, body } = render({
+      name: 'test ian',
+      user: { name: 'test ian' },
+      clientName: 'Testproject',
+      loginurl: 'https://example.org/login',
+      imagePath: '',
+    });
+    const result = await mjml2html(body);
+
+    expect(result.errors).toEqual([]);
+    expect(result.html).toContain('Beste test ian');
+    expect(result.html).toContain('Voor Testproject');
+    expect(result.html).not.toContain('[object Object]');
+    expect(template.subject).toBe('Inloggen bij {{project.name}}');
+  });
+
+  it('falls back to bezoeker without a name', () => {
+    const { body } = render({ user: {}, clientName: 'Testproject' });
+
+    expect(body).toContain('Beste bezoeker');
+  });
+});
+
+describe.each([
+  ['new enquete - admin', 'Nieuwe formulier inzending op Testproject'],
+  ['new enquete - user', 'Bedankt voor je inzending'],
+])('default template: %s', (type, subject) => {
+  const data = {
+    project: { name: 'Testproject' },
+    enqueteContent: '<mj-text>Antwoord test ian</mj-text>',
+  };
+
+  it('renders the submitted answers with a subject', async () => {
+    const template = extractTemplate(type);
+    const env = new nunjucks.Environment();
+    const result = await mjml2html(env.renderString(template.body, data));
+
+    expect(result.errors).toEqual([]);
+    expect(result.html).toContain('Antwoord test ian');
+    expect(env.renderString(template.subject, data)).toBe(subject);
+  });
+
+  it('does not send a placeholder contact address', () => {
+    const template = extractTemplate(type);
+
+    expect(template.body).not.toContain('support@website.nl');
+  });
+});
