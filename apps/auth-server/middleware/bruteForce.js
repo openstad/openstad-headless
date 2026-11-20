@@ -14,6 +14,30 @@ const failCallback = function (req, res, next, options) {
   ); // brute force protection triggered, send them back to the login page
 };
 
+/**
+ * Key for the login/forgot/unique-code limiters.
+ *
+ * Sessions are created for every request (saveUninitialized), so a client
+ * that simply drops the cookie gets a fresh session id, and a limiter keyed
+ * on the session id never trips. Key on the client IP instead, combined with
+ * the submitted e-mail/phone/code when there is one, so one IP cannot try the
+ * same account endlessly and one account cannot be locked by a stranger
+ * hitting it from elsewhere.
+ */
+function bruteKey(req) {
+  const ip = (
+    req.ip ||
+    (req.connection && req.connection.remoteAddress) ||
+    'unknown'
+  ).toString();
+  const body = req.body || {};
+  const subject =
+    body.email || body.phoneNumber || body.uniqueCode || body.code || '';
+  const normalized = String(subject).trim().toLowerCase().slice(0, 254);
+  return normalized ? `${ip}|${normalized}` : ip;
+}
+exports.bruteKey = bruteKey;
+
 //CONFIGURE BRUTE FORCE PROTECT
 let userLimiter = rateLimit({
   keyGenerator: (req, res) => req.bruteKey,
@@ -28,7 +52,7 @@ let userLimiter = rateLimit({
 exports.user = [
   function (req, res, next) {
     req.brute = userLimiter;
-    req.bruteKey = (req.session && req.session.id) || req.ip;
+    req.bruteKey = bruteKey(req);
     return next();
   },
   userLimiter,
@@ -48,7 +72,7 @@ let userVeryRestrictedLimiter = rateLimit({
 exports.userVeryRestricted = [
   function (req, res, next) {
     req.brute = userVeryRestrictedLimiter;
-    req.bruteKey = (req.session && req.session.id) || req.ip;
+    req.bruteKey = bruteKey(req);
     return next();
   },
   userVeryRestrictedLimiter,
@@ -68,7 +92,7 @@ let globalLimiter = rateLimit({
 exports.global = [
   function (req, res, next) {
     req.brute = globalLimiter;
-    req.bruteKey = (req.session && req.session.id) || req.ip;
+    req.bruteKey = bruteKey(req);
     return next();
   },
   globalLimiter,
