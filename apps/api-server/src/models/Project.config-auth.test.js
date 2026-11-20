@@ -85,9 +85,10 @@ describe('Project.config auth write protection', () => {
     expect(openstad.serverUrlInternal).toBeUndefined();
   });
 
-  it('superuser keeps full control over auth config', () => {
+  it('superuser keeps control over auth config except userMapping', () => {
     const cfg = authorize('superuser');
-    expect(cfg.auth.provider.openstad.userMapping).toBeDefined();
+    expect(cfg.auth.provider.openstad.userMapping).toBeUndefined();
+    expect(cfg.auth.provider.openstad.clientSecret).toBe('stolen');
     expect(cfg.auth.adapter.openstad.modulePath).toBe('evil');
   });
 

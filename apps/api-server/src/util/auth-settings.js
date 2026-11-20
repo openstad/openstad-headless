@@ -11,8 +11,16 @@ let createProjectConfig = function ({
   Object.keys(defaultConfig.provider).map((key) => (temp.provider[key] = {})); // todo: defaultConfig is non-extensible, that's why this very not robust fix
   let apiAuthConfig = merge.recursive(temp, defaultConfig);
 
-  let projectSpecificConfig =
-    (project && project.config && project.config.auth) || {};
+  // userMapping is evaluated as code, so never take it from project config
+  let projectSpecificConfig = merge.recursive(
+    true,
+    (project && project.config && project.config.auth) || {}
+  );
+  for (const group of ['provider', 'adapter']) {
+    for (const entry of Object.values(projectSpecificConfig[group] || {})) {
+      if (entry && typeof entry == 'object') delete entry.userMapping;
+    }
+  }
   let mergedConfig = merge.recursive({}, apiAuthConfig, projectSpecificConfig);
 
   if (useOnlyDefinedOnProject) {
