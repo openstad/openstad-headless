@@ -104,7 +104,10 @@ export function MapPreviewCard({
                 }}
               />
             ) : null}
-            <ButtonLink appearance="primary-action-button" href={detailUrl}>
+            <ButtonLink
+              appearance="secondary-action-button"
+              className="osc-map-preview-card__button"
+              href={detailUrl}>
               {buttonText || 'Lees meer'}
             </ButtonLink>
           </div>

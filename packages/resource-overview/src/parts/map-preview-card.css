@@ -58,6 +58,10 @@
   overflow: hidden;
 }
 
+.osc-map-preview-card__button {
+  margin-block-start: 1rem;
+}
+
 .osc-map-preview-card__title:focus {
   outline: none;
 }
