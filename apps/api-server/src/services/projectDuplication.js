@@ -373,7 +373,16 @@ async function getValidTags(projectId, tags) {
   return validTags.map((tag) => tag.id);
 }
 
+function clearInheritedSiteSettings(config) {
+  if (!config || !config.project) return config;
+  const project = { ...config.project };
+  delete project.lastUrl;
+  delete project.projectToggle;
+  return { ...config, project };
+}
+
 module.exports = {
+  clearInheritedSiteSettings,
   createTags,
   createStatuses,
   createNotificationTemplates,

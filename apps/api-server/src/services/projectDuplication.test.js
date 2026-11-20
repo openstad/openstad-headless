@@ -113,3 +113,40 @@ describe('getOrCreateUser', () => {
     expect(created.projectId).toBe(5);
   });
 });
+
+describe('clearInheritedSiteSettings', () => {
+  it('drops the website settings of the source project and keeps the rest', () => {
+    const config = {
+      project: {
+        lastUrl: 'plannen.example.nl',
+        projectToggle: true,
+        endDate: '2030-01-01',
+        cssUrl: ['https://openstad-cdn.nl/css/custom.css'],
+      },
+      votes: { isActive: true },
+    };
+
+    expect(dup.clearInheritedSiteSettings(config)).toEqual({
+      project: {
+        endDate: '2030-01-01',
+        cssUrl: ['https://openstad-cdn.nl/css/custom.css'],
+      },
+      votes: { isActive: true },
+    });
+  });
+
+  it('returns a config without project settings unchanged', () => {
+    const config = { votes: { isActive: true } };
+
+    expect(dup.clearInheritedSiteSettings(config)).toBe(config);
+    expect(dup.clearInheritedSiteSettings(undefined)).toBeUndefined();
+  });
+
+  it('does not change the config it was given', () => {
+    const config = { project: { lastUrl: 'plannen.example.nl' } };
+
+    dup.clearInheritedSiteSettings(config);
+
+    expect(config.project.lastUrl).toBe('plannen.example.nl');
+  });
+});

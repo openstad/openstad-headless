@@ -437,6 +437,9 @@ async function prepareDuplicationPayload(req, res, next) {
   delete req.body.resources;
   delete req.body.resourceSettings;
   delete req.body.notificationTemplates;
+  if (!req.body.url) {
+    req.body.config = dup.clearInheritedSiteSettings(req.body.config);
+  }
   req.authProviderConfigForSync = {};
   if (isDuplicationPayload) {
     req.body.config = authClientSync.sanitizeAuthConfigForDuplication(
