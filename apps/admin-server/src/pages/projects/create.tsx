@@ -19,6 +19,7 @@ import {
   ProjectImportError,
   buildProjectImportPayload,
 } from '@/lib/project-import';
+import { REFUSED_BY_SERVER } from '@/lib/read-json';
 import { zodResolver } from '@hookform/resolvers/zod';
 import router from 'next/router';
 import * as React from 'react';
@@ -141,7 +142,22 @@ export default function CreateProject() {
       });
 
       if (!response.ok) {
-        const responseJSON = await response.json();
+        const responseJSON = await response.json().catch(() => null);
+        if (!responseJSON) {
+          setTemplateErrors([
+            {
+              step: 'Project aanmaken vanuit template',
+              error:
+                response.status === 403
+                  ? REFUSED_BY_SERVER
+                  : `Onverwacht antwoord van de server (status ${response.status}).`,
+            },
+          ]);
+          toast.error(
+            'Er is een fout opgetreden bij het aanmaken van het project.'
+          );
+          return;
+        }
         setTemplateErrors(
           responseJSON.errors || [
             {

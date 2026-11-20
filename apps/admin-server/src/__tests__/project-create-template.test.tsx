@@ -3,6 +3,7 @@ import {
   SaveControllerProvider,
   useSaveController,
 } from '@/components/ui/save-controller';
+import { REFUSED_BY_SERVER } from '@/lib/read-json';
 import CreateProject from '@/pages/projects/create';
 import { act } from 'react';
 import { type Root, createRoot } from 'react-dom/client';
@@ -146,6 +147,43 @@ describe('creating a project from a template', () => {
     expect(posts).toBe(1);
     expect(confirmSpy).not.toHaveBeenCalled();
     expect(nav.router.pushes).toEqual(['/projects/99/widgets']);
+  });
+
+  it('says the server refused the request when the answer is an empty 403', async () => {
+    (globalThis as any).fetch = vi.fn(
+      async () => new Response('', { status: 403 })
+    );
+    act(() =>
+      root.render(
+        <SaveControllerProvider>
+          <Bar />
+          <CreateProject />
+        </SaveControllerProvider>
+      )
+    );
+    await settle();
+    const inputs = Array.from(
+      container.querySelectorAll('input[placeholder="Naam"]')
+    ) as HTMLInputElement[];
+    setInput(container.querySelector('select') as HTMLSelectElement, '7');
+    setInput(inputs[1], 'Project uit template');
+    await settle();
+    const submit = Array.from(container.querySelectorAll('button')).find(
+      (button) => button.textContent === 'Aanmaken'
+    ) as HTMLButtonElement;
+    await act(async () => {
+      submit.click();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+    await settle();
+
+    const errors = Array.from(container.querySelectorAll('li')).map(
+      (item) => item.textContent
+    );
+    expect(errors).toEqual([
+      `Project aanmaken vanuit template - ${REFUSED_BY_SERVER}`,
+    ]);
+    expect(nav.router.pushes).toEqual([]);
   });
 
   it('creates an empty project with its own save button', async () => {

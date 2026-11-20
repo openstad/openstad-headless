@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { readCreated, readJson, readSaved } from './read-json';
+import {
+  REFUSED_BY_SERVER,
+  readCreated,
+  readJson,
+  readSaved,
+} from './read-json';
 
 describe('readJson', () => {
   it('returns the JSON body', async () => {
@@ -52,5 +57,24 @@ describe('readJson', () => {
     );
     const ok = new Response(JSON.stringify({ id: 6 }), { status: 200 });
     await expect(readSaved(ok, 'Mislukt.')).resolves.toEqual({ id: 6 });
+  });
+
+  it('readSaved says the server refused the request for a 403 without a body', async () => {
+    const refused = new Response('', { status: 403 });
+    await expect(readSaved(refused, 'Mislukt.')).rejects.toThrow(
+      new Error(REFUSED_BY_SERVER)
+    );
+  });
+
+  it('readSaved keeps the API message for a 403 with a JSON body', async () => {
+    const forbidden = new Response(
+      JSON.stringify({ message: 'Geen rechten.' }),
+      {
+        status: 403,
+      }
+    );
+    await expect(readSaved(forbidden, 'Mislukt.')).rejects.toThrow(
+      new Error('Geen rechten.')
+    );
   });
 });
