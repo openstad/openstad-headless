@@ -18,6 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Heading } from '@/components/ui/typography';
 import useNotificationTemplate from '@/hooks/use-notification-template';
+import { useProject } from '@/hooks/use-project';
 import { useSyncFormDefaults } from '@/hooks/useSyncFormDefaults';
 import { applyFilters } from '@/lib/nunjucks-filters';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
@@ -26,7 +27,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import { useRouter } from 'next/router';
 import nunjucks from 'nunjucks';
 import * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import useSWR from 'swr';
 import * as z from 'zod';
@@ -536,6 +537,7 @@ export function NotificationForm({
   type MailContextType = {
     user: { name: string; fullName: string };
     name: string;
+    clientName: string;
     loginurl: string;
     imagePath: string;
     resource: any;
@@ -543,12 +545,22 @@ export function NotificationForm({
   const [mailContext, setMailContext] = useState<MailContextType>({
     user: { name: 'Gebruiker', fullName: 'Gebruiker' },
     name: 'Gebruiker',
+    clientName: '',
     loginurl: 'https://openstad.nl/login',
     imagePath: process.env.EMAIL_ASSETS_URL || '',
     resource: {
       tags: [],
     },
   });
+
+  const { data: projectData } = useProject();
+  useEffect(() => {
+    if (!projectData?.name) return;
+    setMailContext((prev: MailContextType) => ({
+      ...prev,
+      clientName: projectData.name,
+    }));
+  }, [projectData?.name]);
 
   useEffect(() => {
     async function setUserNameInMailContext() {
@@ -621,60 +633,34 @@ export function NotificationForm({
 
   useSyncFormDefaults(form, defaults, id || defaultTemplate);
 
-  const [templateData, setTemplateData] = useState(defaultValueBody || '');
   const [mjmlHtml, setMjmlHtml] = useState('');
-
-  let mailTemplate: any = nunjucksEnv.renderString(templateData, mailContext);
-
   const [error, setError] = useState<string | null>(null);
+  const renderRun = useRef(0);
 
-  async function convertMJMLToHTML(data = mailTemplate) {
-    if (data === '') {
+  async function renderPreview(source: string) {
+    const run = ++renderRun.current;
+    if (!source) {
       setMjmlHtml("<p style='text-align: center;'>Inhoud is leeg.</p>");
-      // Without this a render error from an earlier value would stay on screen
-      // and keep blocking this form's save.
       setError(null);
       return;
     }
-
     try {
       const mjml2html = (await import('mjml-browser')).default;
-      const htmlOutput = (await mjml2html(data)).html;
-      setMjmlHtml(htmlOutput);
+      const { html } = await mjml2html(
+        nunjucksEnv.renderString(source, mailContext)
+      );
+      if (run !== renderRun.current) return;
+      setMjmlHtml(html);
       setError(null);
     } catch (err) {
+      if (run !== renderRun.current) return;
       setError('Er is een fout opgetreden bij het renderen van de template.');
     }
   }
 
   useEffect(() => {
-    convertMJMLToHTML();
-  }, [mailContext]);
-
-  const handleOnChange = (e: any, field: any) => {
-    if (e.target.value.length > 0) {
-      try {
-        convertMJMLToHTML(
-          nunjucksEnv.renderString(e.target.value, mailContext)
-        );
-      } catch (err) {
-        setError('Er is een fout opgetreden bij het renderen van de template.');
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (!fieldValue) {
-      // An emptied field has nothing to render; this also clears a stale error.
-      convertMJMLToHTML('');
-      return;
-    }
-    try {
-      convertMJMLToHTML(nunjucksEnv.renderString(fieldValue, mailContext));
-    } catch (err) {
-      setError('Er is een fout opgetreden bij het renderen van de template.');
-    }
-  }, [fieldValue]);
+    renderPreview(fieldValue);
+  }, [fieldValue, mailContext]);
 
   const save = useCallback(async () => {
     // The save bar replaces `form.handleSubmit`, so the resolver has to be run
@@ -690,21 +676,17 @@ export function NotificationForm({
     }
     const sent = cloneDeep(form.getValues());
     const values = formSchema.parse(sent);
-    try {
-      if (isExistingTemplate) {
-        await update(id as string, values.label, values.subject, values.body);
-      } else {
-        await create(
-          project,
-          values.engine,
-          type,
-          values.label,
-          values.subject,
-          values.body
-        );
-      }
-    } catch (requestError) {
-      throw new Error('Opslaan is mislukt. Probeer het opnieuw.');
+    if (isExistingTemplate) {
+      await update(id as string, values.label, values.subject, values.body);
+    } else {
+      await create(
+        project,
+        values.engine,
+        type,
+        values.label,
+        values.subject,
+        values.body
+      );
     }
     rebaselineAfterSave(form, sent);
   }, [create, error, form, id, isExistingTemplate, project, type, update]);
@@ -794,7 +776,6 @@ export function NotificationForm({
                           field.value.length > 0 ? field.value : body
                         }
                         rows={20}
-                        onKeyUpCapture={(e) => handleOnChange(e, field)}
                         {...field}
                       />
                     </FormControl>

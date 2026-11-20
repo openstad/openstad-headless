@@ -14,7 +14,6 @@ import * as React from 'react';
 export default function ProjectNotifications() {
   const coreTypes: NotificationTypeDefinition[] = [
     { type: 'login email', label: '' },
-    { type: 'login sms', label: '' },
     { type: 'new published resource - user feedback', label: '' },
     { type: 'new published resource - admin update', label: '' },
     { type: 'updated resource - user feedback', label: '' },

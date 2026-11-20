@@ -1,3 +1,4 @@
+import { readSaved } from '@/lib/read-json';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
 
@@ -40,16 +41,12 @@ export default function useNotificationTemplate(projectId?: string) {
       }),
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      notificationTemplateSwr.mutate([...currentTemplates(), data]);
-      return data;
-    } else {
-      console.error('Creating the template failed', res.status, res.statusText);
-      throw new Error(
-        'Het sjabloon kon niet worden aangemaakt. Probeer het opnieuw.'
-      );
-    }
+    const data = await readSaved(
+      res,
+      'Het sjabloon kon niet worden aangemaakt. Probeer het opnieuw.'
+    );
+    notificationTemplateSwr.mutate([...currentTemplates(), data]);
+    return data;
   }
 
   async function update(
@@ -71,29 +68,25 @@ export default function useNotificationTemplate(projectId?: string) {
       }),
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      // Replace the stored template instead of appending it: the page groups
-      // the list by type, so a second entry for the same id would render a
-      // duplicate form right after the save.
-      const templates = currentTemplates();
-      const index = templates.findIndex(
-        (template: any) => String(template?.id) === String(data?.id)
-      );
-      notificationTemplateSwr.mutate(
-        index === -1
-          ? [...templates, data]
-          : templates.map((template: any, i: number) =>
-              i === index ? data : template
-            )
-      );
-      return data;
-    } else {
-      console.error('Saving the template failed', res.status, res.statusText);
-      throw new Error(
-        'Het sjabloon kon niet worden opgeslagen. Probeer het opnieuw.'
-      );
-    }
+    const data = await readSaved(
+      res,
+      'Het sjabloon kon niet worden opgeslagen. Probeer het opnieuw.'
+    );
+    // Replace the stored template instead of appending it: the page groups
+    // the list by type, so a second entry for the same id would render a
+    // duplicate form right after the save.
+    const templates = currentTemplates();
+    const index = templates.findIndex(
+      (template: any) => String(template?.id) === String(data?.id)
+    );
+    notificationTemplateSwr.mutate(
+      index === -1
+        ? [...templates, data]
+        : templates.map((template: any, i: number) =>
+            i === index ? data : template
+          )
+    );
+    return data;
   }
 
   return { ...notificationTemplateSwr, create, update };
