@@ -87,21 +87,29 @@ export default function Templates() {
       toast.error('Vul een naam in en kies een bestand.');
       return;
     }
-    setImportSaving(true);
+    let templateData: unknown = null;
     try {
       const parsed = JSON.parse(importFile);
       // Accept an exported template ({ name, data }) or a bare payload object.
-      const templateData =
+      templateData =
         parsed && typeof parsed.data === 'object' ? parsed.data : parsed;
-      if (!templateData || typeof templateData !== 'object') {
-        throw new Error('invalid');
-      }
+    } catch {
+      templateData = null;
+    }
+    if (!templateData || typeof templateData !== 'object') {
+      toast.error(
+        'Dit bestand is geen geldig templatebestand. Kies een bestand dat je via Exporteren hebt opgeslagen.'
+      );
+      return;
+    }
+    setImportSaving(true);
+    try {
       await createTemplate(importName.trim(), templateData);
       toast.success('Template geïmporteerd.');
       setImportName('');
       setImportFile('');
     } catch (error) {
-      toast.error('De file die geüpload is bevat onjuiste data.');
+      toast.error(`Importeren is niet gelukt. ${(error as Error).message}`);
     } finally {
       setImportSaving(false);
     }

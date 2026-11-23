@@ -1,3 +1,4 @@
+import { readSaved } from '@/lib/read-json';
 import useSWR from 'swr';
 
 export type ProjectTemplate = {
@@ -22,11 +23,10 @@ export default function useTemplates() {
       body: JSON.stringify({ name, data }),
     });
 
-    if (!res.ok) {
-      throw new Error('Kon de template niet opslaan');
-    }
-
-    const template = await res.json();
+    const template = await readSaved(
+      res,
+      'De template kon niet worden opgeslagen.'
+    );
     templatesSwr.mutate();
     return template;
   }
