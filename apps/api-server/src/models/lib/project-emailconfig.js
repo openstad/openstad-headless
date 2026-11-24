@@ -40,6 +40,10 @@ Wil je dit liever niet? Dan hoef je alleen een keer in te loggen op de website o
         type: 'string', // todo: add type email/list of emails
         default: apiConfig.mail.from,
       },
+      replyTo: {
+        type: 'string',
+        default: '',
+      },
       projectmanagerAddress: {
         type: 'string', // todo: add type email/list of emails
         default: 'EMAIL@NOT.DEFINED',

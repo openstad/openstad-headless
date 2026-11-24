@@ -33,6 +33,10 @@ const dup = require('../services/projectDuplication');
 const projectUsers = require('../services/projectUsers');
 const authClientSync = require('../services/authClientSync');
 const projectCertificates = require('../services/projectCertificates');
+const {
+  readGlobalSettings,
+  emailConfigDefaults,
+} = require('../services/global-settings');
 
 const widgetDefinitions = getWidgetSettings();
 
@@ -434,6 +438,20 @@ function serializeProjectsList(req, res, next) {
 // ----------------------------------------------------------------------------
 // Create project  (POST /)
 // ----------------------------------------------------------------------------
+
+async function applyGlobalSettings(req, res, next) {
+  try {
+    const globalSettings = await readGlobalSettings();
+    req.body.emailConfig = merge.recursive(
+      true,
+      emailConfigDefaults(globalSettings),
+      req.body.emailConfig || {}
+    );
+    return next();
+  } catch (err) {
+    return next(err);
+  }
+}
 
 async function prepareDuplicationPayload(req, res, next) {
   const isDuplicationPayload = req.body.isDuplicateRequest === true;
@@ -1318,6 +1336,7 @@ module.exports = {
   listProjects,
   serializeProjectsList,
   // create
+  applyGlobalSettings,
   prepareDuplicationPayload,
   createProjectRecord,
   syncAuthProvidersAfterCreate,

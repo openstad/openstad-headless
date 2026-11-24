@@ -53,6 +53,9 @@ const formSchema = z.object({
     message: 'Vul geldige e-mailadressen in, gescheiden met een komma.',
   }),
   fromName: z.string().optional(),
+  replyTo: z
+    .union([z.string().email('Geen geldig e-mailadres'), z.literal('')])
+    .optional(),
   sendUpdatedResourceAdminEmail: z.boolean().optional(),
   sendUpdatedResourceUserEmail: z.boolean().optional(),
   sendCommentAdminEmail: z.boolean().optional(),
@@ -81,6 +84,7 @@ export default function ProjectSettingsNotifications({
     () => ({
       fromAddress: data?.emailConfig?.[category]?.fromAddress || '',
       fromName: data?.emailConfig?.[category]?.fromName || '',
+      replyTo: data?.emailConfig?.[category]?.replyTo || '',
       projectmanagerAddress:
         data?.emailConfig?.[category]?.projectmanagerAddress || null,
       sendUpdatedResourceAdminEmail:
@@ -124,6 +128,7 @@ export default function ProjectSettingsNotifications({
         fromAddress: values.fromAddress,
         projectmanagerAddress: values.projectmanagerAddress,
         fromName: values.fromName,
+        replyTo: values.replyTo || '',
         sendUpdatedResourceAdminEmail:
           values.sendUpdatedResourceAdminEmail || false,
         sendUpdatedResourceUserEmail:
@@ -214,6 +219,24 @@ export default function ProjectSettingsNotifications({
                       Als je hier een naam invult komt dit voor het e-mailadres
                       van de afzender te staan, bijvoorbeeld: OpenStad site
                       &#60;info@openstad.nl&#62;
+                    </FormDescription>
+                    <FormControl>
+                      <Input placeholder="" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="replyTo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Naar welk e-mailadres gaan antwoorden op de notificaties?
+                    </FormLabel>
+                    <FormDescription>
+                      Laat leeg om antwoorden naar de afzender te laten gaan.
                     </FormDescription>
                     <FormControl>
                       <Input placeholder="" {...field} />

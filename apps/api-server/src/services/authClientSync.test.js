@@ -144,4 +144,29 @@ describe('buildAuthProviderSyncConfig', () => {
     expect(out).toEqual(fallback);
     expect(out).not.toBe(fallback);
   });
+
+  it('keeps the provider config when the request body is stripped afterwards', async () => {
+    const fallback = {
+      openstad: {
+        authTypes: ['Url'],
+        config: {
+          fromEmail: 'template@example.com',
+          styling: { logo: 'https://example.com/logo.png' },
+        },
+      },
+    };
+    const out = await authClientSync.buildAuthProviderSyncConfig({
+      sourceProject: null,
+      fallbackProviderConfig: fallback,
+    });
+
+    delete fallback.openstad.config;
+    delete fallback.openstad.authTypes;
+
+    expect(out.openstad.config).toEqual({
+      fromEmail: 'template@example.com',
+      styling: { logo: 'https://example.com/logo.png' },
+    });
+    expect(out.openstad.authTypes).toEqual(['Url']);
+  });
 });

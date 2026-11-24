@@ -263,9 +263,17 @@ module.exports = (db, sequelize, DataTypes) => {
     deleteableBy: 'editor',
   };
 
+  async function replyToFor(projectId) {
+    if (!projectId) return undefined;
+    const project =
+      await db.Project.scope('includeEmailConfig').findByPk(projectId);
+    return project?.emailConfig?.notifications?.replyTo || undefined;
+  }
+
   NotificationMessage.prototype.send = async function () {
     try {
-      await sendMessage[this.engine]({ message: this });
+      const replyTo = await replyToFor(this.projectId);
+      await sendMessage[this.engine]({ message: this, replyTo });
       await this.update({ status: 'sent' });
     } catch (err) {
       console.error('Send failed:', err);

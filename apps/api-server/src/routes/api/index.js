@@ -122,6 +122,8 @@ router.use('/project/:projectId(\\d+)/markers', require('./markers'));
 router.use('/repo', require('./template')); // backwards compatibility
 router.use('/template', require('./template'));
 
+router.use('/global-settings', require('./global-settings'));
+
 // audit logs
 router.use('/project/:projectId(\\d+)/audit-log', require('./audit-log'));
 router.use('/audit-log', require('./audit-log'));
