@@ -1,5 +1,8 @@
 module.exports = async function seed(config, db) {
   try {
+    console.log('  creating global settings');
+    await db.GlobalSettings.bulkCreate([{ id: 1, branding: {}, email: {} }]);
+
     console.log('  creating default project');
     let project = await db.Project.create({
       id: 1,
