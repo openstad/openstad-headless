@@ -1,4 +1,8 @@
 const merge = require('merge');
+const {
+  assertValidContent,
+  isContentType,
+} = require('../notifications/content-catalog');
 
 module.exports = (db, sequelize, DataTypes) => {
   const NotificationTemplate = sequelize.define(
@@ -36,8 +40,30 @@ module.exports = (db, sequelize, DataTypes) => {
         allowNull: true,
         default: '',
       },
+
+      content: {
+        type: DataTypes.JSON,
+        allowNull: true,
+        defaultValue: null,
+        validate: {
+          isNotificationContent(value) {
+            if (value === null || value === undefined) return;
+            assertValidContent(value);
+          },
+        },
+      },
     },
     {
+      validate: {
+        contentOnlyForContentTypes() {
+          if (this.content && !isContentType(this.type)) {
+            throw new Error(
+              `Notification type '${this.type}' cannot be edited with fields`
+            );
+          }
+        },
+      },
+
       hooks: {
         afterCreate: async function (instance) {
           await updateAuthClient(instance, {

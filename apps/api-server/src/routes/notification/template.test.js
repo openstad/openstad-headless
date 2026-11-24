@@ -41,7 +41,11 @@ describe('default notification template', () => {
     expect(res.status).toBe(200);
     expect(res.body.type).toBe('contact message - user');
     expect(res.body.subject).toBe('Bericht ontvangen over een inzending');
-    expect(res.body.body).toContain('{{senderName}}');
+    expect(res.body.body).toContain('{{ senderName }}');
+    expect(res.body.content.heading).toBe(
+      'Bericht ontvangen over een inzending'
+    );
+    expect(res.body.fixedBlock).toBe('het bericht van de afzender');
   });
 
   it('answers 404 for a type without a default template', async () => {
@@ -107,20 +111,12 @@ describe('mail styling for the preview', () => {
 });
 
 describe('preview of a notification template', () => {
-  const fs = require('fs');
-  const defaultTemplatesDir = require('path').join(
-    __dirname,
-    '../../notifications/default-templates'
-  );
+  const { loadDefaultTemplate } = require('../../models/NotificationMessage');
+  const { CONTENT_CATALOG } = require('../../notifications/content-catalog');
 
-  function defaultTemplate(type) {
-    const file = fs
-      .readFileSync(require('path').join(defaultTemplatesDir, type))
-      .toString();
-    return {
-      subject: file.match(/<subject>([\s\S]*)<\/subject>/)[1],
-      body: file.match(/<body>([\s\S]*)<\/body>/)[1],
-    };
+  async function defaultTemplate(type) {
+    const { subject, body } = await loadDefaultTemplate(type);
+    return { subject, body };
   }
 
   afterEach(() => {
@@ -158,7 +154,7 @@ describe('preview of a notification template', () => {
     const res = await preview(editor, {
       type,
       engine: 'email',
-      ...defaultTemplate(type),
+      ...(await defaultTemplate(type)),
     });
 
     expect(res.status).toBe(200);
@@ -174,7 +170,7 @@ describe('preview of a notification template', () => {
     const res = await preview(editor, {
       type: 'login email',
       engine: 'email',
-      ...defaultTemplate('login email'),
+      ...(await defaultTemplate('login email')),
     });
 
     expect(res.status).toBe(200);
@@ -234,6 +230,52 @@ describe('preview of a notification template', () => {
     });
 
     expect(res.status).toBe(400);
+  });
+
+  it('renders a preview from fields and returns the mjml it built', async () => {
+    withProject();
+    const type = 'user account about to expire';
+
+    const res = await preview(editor, {
+      type,
+      engine: 'email',
+      subject: CONTENT_CATALOG[type].subject,
+      content: {
+        ...CONTENT_CATALOG[type].content,
+        heading: 'Hallo {{ user.name }}',
+      },
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.html).toContain('Hallo Voorbeeld Gebruiker');
+    expect(res.body.mjml).toContain('Hallo {{ user.name }}');
+  });
+
+  it('answers 400 for fields on a type that has none', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'login email',
+      engine: 'email',
+      subject: 'x',
+      content: { heading: 'x' },
+    });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('answers 400 for a field that is not text', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'new published resource - user feedback',
+      engine: 'email',
+      subject: 'x',
+      content: { heading: 5 },
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('content.heading must be a string');
   });
 
   it('does not render a preview for someone without rights', async () => {

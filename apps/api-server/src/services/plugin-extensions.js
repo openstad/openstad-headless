@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { isContentType } = require('../notifications/content-catalog');
 
 const CORE_TEMPLATE_DIRECTORY = path.join(
   __dirname,
@@ -45,8 +46,9 @@ function loadImplementation(plugin, what, relPath, context, resolvePluginFile) {
 }
 
 function coreTemplateExists(type) {
-  return fs.existsSync(
-    path.join(CORE_TEMPLATE_DIRECTORY, path.basename(type || ''))
+  return (
+    isContentType(type) ||
+    fs.existsSync(path.join(CORE_TEMPLATE_DIRECTORY, path.basename(type || '')))
   );
 }
 

@@ -4,6 +4,11 @@ const mjml2html = require('mjml');
 const sendMessage = require('../notifications/send-engines');
 const { mailStylingFor } = require('../services/mail-styling');
 const {
+  isContentType,
+  catalogEntry,
+} = require('../notifications/content-catalog');
+const { buildContentMjml } = require('../notifications/content-layout');
+const {
   createTemplateEnv,
   toPlainData,
 } = require('@openstad-headless/lib/template-env');
@@ -25,7 +30,20 @@ async function readTemplateFile(templatePath) {
   }
 }
 
+function templateFromRow(row) {
+  if (!row.content) return row;
+  return {
+    subject: row.subject,
+    body: buildContentMjml(row.type, row.content),
+  };
+}
+
 async function loadDefaultTemplate(type) {
+  if (isContentType(type)) {
+    const { subject, content } = catalogEntry(type);
+    return { subject, content, body: buildContentMjml(type, content) };
+  }
+
   const coreTemplatePath = path.join(
     __dirname,
     '../notifications/default-templates',
@@ -142,7 +160,9 @@ module.exports = (db, sequelize, DataTypes) => {
                 },
               });
               isCustomTemplate = !!template;
-              if (!template) {
+              if (template) {
+                template = templateFromRow(template);
+              } else {
                 template = await loadDefaultTemplate(instance.type);
               }
               if (!template)

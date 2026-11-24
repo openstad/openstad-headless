@@ -13,8 +13,16 @@ const templatesDir = path.join(
 
 const require = createRequire(import.meta.url);
 const { buildQAHtmlTable } = require('../services/qa-processor');
+const { CONTENT_CATALOG } = require('./content-catalog');
+const { buildContentMjml } = require('./content-layout');
 
-function extractTemplate(type) {
+function defaultTemplate(type) {
+  if (CONTENT_CATALOG[type]) {
+    return {
+      subject: CONTENT_CATALOG[type].subject,
+      body: buildContentMjml(type, CONTENT_CATALOG[type].content),
+    };
+  }
   const file = fs.readFileSync(path.join(templatesDir, type)).toString();
   const match = file.match(
     /<subject>((?:.|\r|\n)*)<\/subject>(?:.|\r|\n)*<body>((?:.|\r|\n)*)<\/body>/
@@ -32,7 +40,7 @@ describe('default template: user account about to expire', () => {
   };
 
   it('renders a non-empty mail body through nunjucks and mjml', async () => {
-    const template = extractTemplate('user account about to expire');
+    const template = defaultTemplate('user account about to expire');
     expect(template.subject).toBeTruthy();
     expect(template.body).toBeTruthy();
 
@@ -53,7 +61,7 @@ describe('default template: user account about to expire', () => {
 
 describe('default template: contact message - user', () => {
   it('renders the message, the reply address and the footer', async () => {
-    const template = extractTemplate('contact message - user');
+    const template = defaultTemplate('contact message - user');
     const nunjucksEnv = new nunjucks.Environment();
     const body = nunjucksEnv.renderString(template.body, {
       user: { name: 'Bram' },
@@ -62,6 +70,7 @@ describe('default template: contact message - user', () => {
       senderEmail: 'cees@example.nl',
       message: 'Zullen we samenwerken?',
       logo: 'https://gemeente.nl/logo.png',
+      styling: { accentColor: '#00325F' },
     });
 
     const result = await mjml2html(body);
@@ -69,7 +78,9 @@ describe('default template: contact message - user', () => {
     expect(result.errors).toEqual([]);
     expect(template.subject).toBe('Bericht ontvangen over een inzending');
     expect(result.html).toContain('Zullen we samenwerken?');
-    expect(result.html).toContain('mailto:cees@example.nl');
+    expect(result.html).toContain(
+      'Reageren kan met een e-mail naar cees@example.nl.'
+    );
     expect(result.html).toContain('Dit is een automatisch bericht.');
     expect(result.html).toContain('https://gemeente.nl/logo.png');
     expect(result.html).toContain('Bericht van Cees');
@@ -94,7 +105,7 @@ describe.each([
   ]);
 
   async function render(data) {
-    const template = extractTemplate(type);
+    const template = defaultTemplate(type);
     const body = new nunjucks.Environment().renderString(template.body, {
       user: { name: 'Test' },
       project: { title: 'P' },
@@ -133,7 +144,7 @@ describe.each([
 
 describe('default template: new modbreak - user feedback', () => {
   const renderModBreakMail = (data) => {
-    const template = extractTemplate('new modbreak - user feedback');
+    const template = defaultTemplate('new modbreak - user feedback');
     const body = new nunjucks.Environment().renderString(template.body, {
       user: { name: 'Bram' },
       resource: { title: 'Bram de Bouwer' },
@@ -146,7 +157,7 @@ describe('default template: new modbreak - user feedback', () => {
     return mjml2html(body);
   };
 
-  it('renders in the layout of the contact message mail', async () => {
+  it('renders the official response, the logo and the footer', async () => {
     const result = await renderModBreakMail({});
 
     expect(result.errors).toEqual([]);
@@ -159,7 +170,7 @@ describe('default template: new modbreak - user feedback', () => {
   });
 
   it('uses the new name in the subject for a new and a changed response', () => {
-    const template = extractTemplate('new modbreak - user feedback');
+    const template = defaultTemplate('new modbreak - user feedback');
     const env = new nunjucks.Environment();
 
     expect(
@@ -174,7 +185,7 @@ describe('default template: new modbreak - user feedback', () => {
     ).toBe('Een officiële reactie bij uw inzending is aangepast');
   });
 
-  it('links to the resource with a button and a plain link', async () => {
+  it('links to the resource with a button and the link as text', async () => {
     const redirectUrl = 'https://gemeente.nl/inzending?openstadResourceId=5';
     const result = await renderModBreakMail({ redirectUrl });
 
@@ -182,7 +193,7 @@ describe('default template: new modbreak - user feedback', () => {
     expect(result.html).toMatch(
       new RegExp(`href="${redirectUrl.replace('?', '\\?')}"[^>]*>\\s*Weergeven`)
     );
-    expect(result.html).toContain(`>${redirectUrl}</a>`);
+    expect(result.html).toContain(`Gebruik deze link: ${redirectUrl}`);
   });
 
   it('shows the unsubscribe link only when there is one', async () => {
@@ -205,14 +216,19 @@ function visibleText(source) {
     .replace(/<[^>]*>/g, ' ');
 }
 
-const templateTypes = fs.readdirSync(templatesDir);
+const templateTypes = [
+  ...new Set([
+    ...fs.readdirSync(templatesDir),
+    ...Object.keys(CONTENT_CATALOG),
+  ]),
+];
 const submissionMailTypes = templateTypes.filter((type) =>
   type.includes('resource')
 );
 
 describe('default templates: wording', () => {
   it.each(templateTypes)('%s does not show the word resource', (type) => {
-    const { subject, body } = extractTemplate(type);
+    const { subject, body } = defaultTemplate(type);
 
     expect(visibleText(`${subject} ${body}`)).not.toMatch(/resource/i);
   });
@@ -220,7 +236,7 @@ describe('default templates: wording', () => {
   it.each(submissionMailTypes)(
     '%s has a real subject instead of its type name',
     (type) => {
-      const { subject } = extractTemplate(type);
+      const { subject } = defaultTemplate(type);
 
       expect(subject.trim()).not.toBe(type);
     }
@@ -229,7 +245,7 @@ describe('default templates: wording', () => {
   it.each(submissionMailTypes)(
     '%s renders a subject and body that mention the inzending',
     async (type) => {
-      const { subject, body } = extractTemplate(type);
+      const { subject, body } = defaultTemplate(type);
       const env = new nunjucks.Environment();
       const data = {
         project: { title: 'Voorbeeldproject' },
@@ -259,7 +275,7 @@ async function renderApiMail(
   type,
   { logo = '', accentColor = '#d32f2f' } = {}
 ) {
-  const { body } = extractTemplate(type);
+  const { body } = defaultTemplate(type);
   const env = new nunjucks.Environment();
   const mjml = env.renderString(body, {
     logo,
@@ -276,7 +292,7 @@ async function renderApiMail(
 
 describe('default templates: mail styling', () => {
   it.each(apiMailTypes)('%s has no broken image references', (type) => {
-    const { body } = extractTemplate(type);
+    const { body } = defaultTemplate(type);
 
     expect(body).not.toMatch(
       /imagePath|logo-openstad|mail-header|googleusercontent/
@@ -313,7 +329,7 @@ describe('default templates: mail styling', () => {
 
 describe('default template: login email', () => {
   async function renderLoginMail(logo) {
-    const { body } = extractTemplate('login email');
+    const { body } = defaultTemplate('login email');
     const authServerData = {
       user: { name: 'Test Gebruiker', email: 'test@example.com' },
       name: 'Test Gebruiker',
@@ -337,7 +353,7 @@ describe('default template: login email', () => {
     const withLogo = await renderLoginMail('https://example.com/brand.png');
     const withoutLogo = await renderLoginMail('');
 
-    expect(extractTemplate('login email').body).not.toMatch(
+    expect(defaultTemplate('login email').body).not.toMatch(
       /imagePath|logo-openstad|mail-header/
     );
     expect(withLogo.html).toContain('src="https://example.com/brand.png"');
