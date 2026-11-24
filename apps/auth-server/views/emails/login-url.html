@@ -6,7 +6,7 @@
 </mj-raw>
 <mj-section>
   <mj-column width="200px">
-    <mj-image src="{{imagePath}}/logo-openstad.png">
+    <mj-image src="{% if logo %}{{ logo }}{% else %}{{imagePath}}/logo-openstad.png{% endif %}">
     </mj-image>
   </mj-column>
 </mj-section>
