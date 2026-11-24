@@ -1,4 +1,70 @@
 // @todo: add all widgets MUST confirm to widgetDefinition for key
+const newLikeSettings = {
+  title: 'Wat vind jij?',
+  yesLabel: 'Voor',
+  noLabel: 'Tegen',
+  displayDislike: true,
+  showProgressBar: false,
+};
+
+const newCommentSettings = {
+  itemsPerPage: 30,
+  defaultSorting: 'createdAt_desc',
+};
+
+const newResourceFormFields = [
+  {
+    id: 'title',
+    trigger: '1',
+    title: 'Titel plan',
+    description:
+      'Geef je voorstel een duidelijke titel, zodat anderen jouw inzending makkelijk kunnen vinden en direct snappen waar het over gaat.',
+    type: 'title',
+    fieldKey: 'title',
+    fieldRequired: true,
+    onlyForModerator: false,
+    minCharacters: '',
+    maxCharacters: '',
+    variant: 'text input',
+    multiple: true,
+    options: [],
+    fieldType: 'text',
+  },
+  {
+    id: 'summary',
+    trigger: '2',
+    title: 'Samenvatting',
+    description: 'Vertel in het kort iets meer over je plan.',
+    type: 'summary',
+    fieldKey: 'summary',
+    fieldRequired: true,
+    onlyForModerator: false,
+    minCharacters: '',
+    maxCharacters: '',
+    variant: 'textarea',
+    multiple: true,
+    options: [],
+    fieldType: 'text',
+  },
+  {
+    id: 'description',
+    trigger: '3',
+    title: 'Beschrijving',
+    description:
+      'Gebruik de ruimte hieronder om je voorstel verder uit te leggen.',
+    type: 'description',
+    fieldKey: 'description',
+    fieldRequired: true,
+    onlyForModerator: false,
+    minCharacters: '',
+    maxCharacters: '',
+    variant: 'textarea',
+    multiple: true,
+    options: [],
+    fieldType: 'text',
+  },
+];
+
 let moduleDefinitions = {
   agenda: {
     packageName: '@openstad-headless/agenda',
@@ -30,6 +96,7 @@ let moduleDefinitions = {
       showProgressBar: true,
       progressBarDescription: '',
     },
+    initialConfig: newLikeSettings,
   },
   comments: {
     packageName: '@openstad-headless/comments',
@@ -45,6 +112,7 @@ let moduleDefinitions = {
       itemsPerPage: 9999,
       displayPagination: false,
     },
+    initialConfig: newCommentSettings,
   },
   enquete: {
     packageName: '@openstad-headless/enquete',
@@ -170,6 +238,20 @@ let moduleDefinitions = {
         markerPreviewButtonText: 'Lees meer',
       },
     },
+    initialConfig: {
+      displayTitle: true,
+      displaySummary: true,
+      displayStatusLabel: true,
+      titleMaxLength: 50,
+      summaryMaxLength: 140,
+      descriptionMaxLength: 140,
+      displayVariant: 'default',
+      bannerText: 'Inzendingen',
+      autoApply: true,
+      filterBehavior: 'and',
+      defaultSorting: 'createdAt_desc',
+      likeWidget: newLikeSettings,
+    },
   },
   multiprojectresourceoverview: {
     packageName: '@openstad-headless/multi-project-resource-overview',
@@ -181,6 +263,10 @@ let moduleDefinitions = {
     defaultConfig: {
       projectId: null,
     },
+    initialConfig: {
+      defaultSorting: 'createdAt_desc',
+      resourceOverviewMapWidget: newLikeSettings,
+    },
   },
   resourcedetail: {
     packageName: '@openstad-headless/resource-detail',
@@ -191,6 +277,13 @@ let moduleDefinitions = {
     componentName: 'ResourceDetail',
     defaultConfig: {
       projectId: null,
+    },
+    initialConfig: {
+      documentsTitle: 'Downloads',
+      documentsDesc:
+        'Hieronder vind je downloads die de indiener heeft geüpload bij deze inzending.',
+      commentsWidget: newCommentSettings,
+      likeWidget: newLikeSettings,
     },
   },
   datecountdownbar: {
@@ -246,6 +339,11 @@ let moduleDefinitions = {
     componentName: 'ChoiceGuide',
     defaultConfig: {
       projectId: null,
+    },
+    initialConfig: {
+      choiceOption: {
+        choiceOptions: [{ id: 1, title: 'Optie 1', description: '' }],
+      },
     },
   },
   choiceguideResults: {
@@ -319,6 +417,9 @@ let moduleDefinitions = {
     defaultConfig: {
       projectId: null,
     },
+    initialConfig: {
+      items: newResourceFormFields,
+    },
   },
   begrootmodule: {
     packageName: '@openstad-headless/stem-begroot',
@@ -390,6 +491,14 @@ let moduleDefinitions = {
       thankMessage: 'Bedankt voor het stemmen!',
       showNewsletterButton: false,
       newsLetterLink: '/',
+    },
+    initialConfig: {
+      showInfoMenu: true,
+      scrollWhenMaxReached: true,
+      voteAfterLoggingIn: true,
+      displayModBreak: true,
+      panelTitle: 'Stem info',
+      defaultSorting: 'createdAt_desc',
     },
   },
   simplevoting: {
@@ -524,6 +633,9 @@ let moduleDefinitions = {
         markerPreviewButtonText: 'Lees meer',
       },
     },
+    initialConfig: {
+      defaultSorting: 'createdAt_desc',
+    },
   },
   resourcedetailwithmap: {
     packageName: '@openstad-headless/resource-detail-with-map',
@@ -563,6 +675,9 @@ let moduleDefinitions = {
       autoZoomAndCenter: 'markers',
       displayDescription: true,
       displayBudgetDocuments: true,
+    },
+    initialConfig: {
+      likeWidget: newLikeSettings,
     },
   },
   documentmap: {
@@ -628,6 +743,15 @@ let moduleDefinitions = {
       displayResourceDescription: 'no',
       onlyIncludeOrExcludeTagIds: '',
     },
+    initialConfig: {
+      ...newCommentSettings,
+      onlyAllowClickOnImage: true,
+      largeDoc: true,
+      minZoom: -3,
+      maxZoom: 3,
+      infoPopupButtonText: 'Hoe werkt het?',
+      likeWidget: newLikeSettings,
+    },
   },
   activity: {
     packageName: '@openstad-headless/activity',
@@ -653,6 +777,16 @@ let moduleDefinitions = {
     componentName: 'Account',
     defaultConfig: {
       projectId: null,
+    },
+    initialConfig: {
+      allowUserEdit: true,
+      showLogoutButton: true,
+      overview_title: 'Mijn account',
+      overview_description:
+        'Op deze pagina kun je je gegevens inzien die aan je account gekoppeld zijn, en deze wijzigen.',
+      info_title: 'Persoonlijke gegevens',
+      info_description:
+        "Hieronder vind je de persoonsgegevens die aan je account zijn toegevoegd. Klik op 'Gegevens bewerken' om deze gegevens aan te passen.",
     },
   },
   distributionmodule: {
@@ -684,6 +818,9 @@ let moduleDefinitions = {
       pointsErrorMessage:
         'Er zijn niet genoeg punten over om deze verdeling te maken. Pas je keuze aan zodat de overige punten <b>0 punten</b> is',
       pointsLeftoverText: 'Overige punten',
+    },
+    initialConfig: {
+      showProgress: true,
     },
   },
   videoSlider: {

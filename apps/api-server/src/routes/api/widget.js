@@ -6,6 +6,7 @@ const sanitize = require('../../util/sanitize');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
 const getWidgetSettings = require('../widget/widget-settings');
 const createError = require('http-errors');
+const merge = require('merge');
 const { snapshotWidgetVersion } = require('../../services/widget-version');
 router.all('*', function (req, res, next) {
   req.scope = [];
@@ -63,9 +64,11 @@ router
 
     let widgetConfig = {};
     try {
-      // Clone to avoid mutating the shared widget definition object.
-      widgetConfig = JSON.parse(
-        JSON.stringify(widgetDefinition.defaultConfig || {})
+      widgetConfig = merge.recursive(
+        true,
+        {},
+        widgetDefinition.defaultConfig || {},
+        widgetDefinition.initialConfig || {}
       );
       if (widgetConfig && typeof widgetConfig === 'object') {
         widgetConfig.projectId = projectId;
