@@ -36,6 +36,27 @@ const projectCertificates = require('../services/projectCertificates');
 
 const widgetDefinitions = getWidgetSettings();
 
+const NEW_PROJECT_CONFIG = {
+  votes: {
+    isViewable: true,
+    isActive: true,
+    requiredUserRole: 'anonymous',
+  },
+  resources: {
+    titleMinLength: 5,
+    titleMaxLength: 50,
+    summaryMinLength: 20,
+    summaryMaxLength: 250,
+    descriptionMinLength: 50,
+    descriptionMaxLength: 1000,
+    minimumYesVotes: 25,
+  },
+  map: {
+    minZoom: '11',
+    maxZoom: '20',
+  },
+};
+
 const DUPLICATE_ROLLBACK_SESSION_TTL_MS = 60 * 60 * 1000;
 const duplicateRollbackSessionStore = createDuplicateRollbackSessionStore({
   projectModel: db.Project,
@@ -544,10 +565,17 @@ async function prepareDuplicationPayload(req, res, next) {
 }
 
 function createProjectRecord(req, res, next) {
-  db.Project.create(
-    { emailConfig: {}, ...req.body },
-    { skipDefaultStatuses: req.skipDefaultStatuses }
-  )
+  const data = { emailConfig: {}, ...req.body };
+  if (!req.isDuplicationPayload) {
+    data.config = merge.recursive(
+      true,
+      {},
+      NEW_PROJECT_CONFIG,
+      req.body.config || {}
+    );
+  }
+
+  db.Project.create(data, { skipDefaultStatuses: req.skipDefaultStatuses })
     .then((result) => {
       req.results = result;
       req.projectId = result.id;
