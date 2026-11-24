@@ -6,13 +6,13 @@ import {
 } from './TagGroupHelper';
 
 describe('handleTagCheckboxGroupChange', () => {
-  it('adds a new group when a type is checked on', () => {
+  it('adds a new group labelled with its name when a type is checked on', () => {
     const result = handleTagCheckboxGroupChange('theme', true, [], 'type', 7);
     expect(result).toEqual([
       {
         type: 'theme',
         multiple: false,
-        label: '',
+        label: 'theme',
         projectId: '7',
         inlineOptions: false,
       },
