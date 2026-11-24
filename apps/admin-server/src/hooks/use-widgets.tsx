@@ -1,5 +1,17 @@
+import { readJson } from '@/lib/read-json';
 import { validateProjectNumber } from '@/lib/validateProjectNumber';
 import useSWR from 'swr';
+
+const COPY_ERROR_MESSAGES: Record<number, string> = {
+  403: 'Je mag geen widgets uit dit project importeren.',
+  404: 'De geselecteerde widgets bestaan niet meer.',
+};
+const COPY_ERROR_MESSAGE = 'De widgets konden niet worden geïmporteerd.';
+
+export type WidgetCopyResult = {
+  widgets: Widget[];
+  cleared: { id: number; description: string; keys: string[] }[];
+};
 
 export function useWidgetsHook(projectId?: string) {
   const projectNumber: number | undefined = validateProjectNumber(projectId);
@@ -90,7 +102,37 @@ export function useWidgetsHook(projectId?: string) {
     }
   }
 
-  return { ...widgetsSwr, createWidget, updateWidget, remove, duplicate };
+  async function copyWidgets(
+    sourceProjectId: number,
+    ids: number[]
+  ): Promise<WidgetCopyResult> {
+    const copyUrl = `/api/openstad/api/project/${projectNumber}/widgets/copy`;
+
+    const res = await fetch(copyUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ sourceProjectId, ids }),
+    });
+
+    if (!res.ok) {
+      throw new Error(COPY_ERROR_MESSAGES[res.status] ?? COPY_ERROR_MESSAGE);
+    }
+
+    const result: WidgetCopyResult = await readJson(res, COPY_ERROR_MESSAGE);
+    await widgetsSwr.mutate();
+    return result;
+  }
+
+  return {
+    ...widgetsSwr,
+    createWidget,
+    updateWidget,
+    remove,
+    duplicate,
+    copyWidgets,
+  };
 }
 
 export type Widget = {
