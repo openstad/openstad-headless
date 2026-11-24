@@ -22,7 +22,7 @@ export function handleTagCheckboxGroupChange(
     updatedFields.push({
       type: tagGroupName,
       multiple: false,
-      label: '',
+      label: tagGroupName,
       projectId: projectId?.toString(),
       inlineOptions: false,
     });
