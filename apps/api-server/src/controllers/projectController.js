@@ -967,7 +967,9 @@ async function updateAuthClients(req, res, next) {
 }
 
 async function updateProjectRecord(req, res, next) {
-  const project = await db.Project.findOne({ where: { id: req.results.id } });
+  const project = await db.Project.scope('includeEmailConfig').findOne({
+    where: { id: req.results.id },
+  });
   if (!(project && project.can && project.can('update', req.user)))
     return next(new Error('You cannot update this project'));
 

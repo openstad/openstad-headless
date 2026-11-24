@@ -199,6 +199,10 @@ Als de webmaster de website gesloten heeft is deze in principe nog wel te bezoek
         type: 'string',
         default: '',
       },
+      accentColor: {
+        type: 'string',
+        default: '#00325F',
+      },
     },
   },
 };

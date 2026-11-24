@@ -22,7 +22,8 @@ export default function useNotificationTemplate(projectId?: string) {
     type: string,
     label: string,
     subject: string,
-    body: string
+    body: string,
+    content: NotificationContent | null
   ) {
     const projectNumber: number | undefined = validateProjectNumber(projectId);
 
@@ -38,6 +39,7 @@ export default function useNotificationTemplate(projectId?: string) {
         label: label,
         subject: subject,
         body: body,
+        content: content,
       }),
     });
 
@@ -53,7 +55,8 @@ export default function useNotificationTemplate(projectId?: string) {
     id: string,
     label: string,
     subject: string,
-    body: string
+    body: string,
+    content: NotificationContent | null
   ) {
     let url = `/api/openstad/notification/project/${projectNumber}/template/${id}`;
     const res = await fetch(url, {
@@ -65,6 +68,7 @@ export default function useNotificationTemplate(projectId?: string) {
         label: label,
         subject: subject,
         body: body,
+        content: content,
       }),
     });
 
@@ -89,5 +93,60 @@ export default function useNotificationTemplate(projectId?: string) {
     return data;
   }
 
-  return { ...notificationTemplateSwr, create, update };
+  async function preview(payload: {
+    type: string;
+    engine: string;
+    subject: string;
+    body?: string;
+    content?: NotificationContent;
+  }): Promise<NotificationPreview> {
+    const res = await fetch(`${url}/preview`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    return readSaved(res, 'De preview kon niet worden gemaakt.');
+  }
+
+  async function remove(id: string) {
+    const res = await fetch(`${url}/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      throw new Error(
+        'De standaardversie kon niet worden teruggezet. Probeer het opnieuw.'
+      );
+    }
+    notificationTemplateSwr.mutate(
+      currentTemplates().filter(
+        (template: any) => String(template?.id) !== String(id)
+      )
+    );
+  }
+
+  return { ...notificationTemplateSwr, create, update, preview, remove };
 }
+
+export type NotificationPreview = {
+  subject: string;
+  html?: string;
+  text?: string;
+  mjml?: string;
+};
+
+export type NotificationContent = {
+  heading: string;
+  intro: string;
+  buttonLabel: string;
+  buttonUrl: string;
+  footer: string;
+  showLogo: boolean;
+};
+
+export type NotificationDefault = {
+  type: string;
+  subject: string;
+  body: string;
+  content: NotificationContent | null;
+  fixedBlock: string | null;
+};

@@ -7,6 +7,8 @@ const userHasRole = require('../lib/sequelize-authorization/lib/hasRole');
 const authSettings = require('../util/auth-settings');
 const { getSafeConfig } = require('./lib/safe-config');
 
+const HEX_COLOR = /^#[0-9a-fA-F]{6}$/;
+
 // Auth provider settings that non-superusers may change (the admin UI ones).
 // Everything else under config.auth (clientSecret, serverUrl*, userMapping,
 // modulePath, adapter, jwtSecret) is evaluated or trusted by the api-server.
@@ -162,6 +164,17 @@ module.exports = function (db, sequelize, DataTypes) {
             'emailConfig',
             configField.parseConfig('projectEmailConfig', value)
           );
+        },
+        validate: {
+          accentColorIsHexColor(value) {
+            const accentColor = value?.styling?.accentColor;
+            if (accentColor === undefined) return;
+            if (!HEX_COLOR.test(accentColor)) {
+              throw new Error(
+                'De accentkleur moet een kleurcode zijn, bijvoorbeeld #00325F'
+              );
+            }
+          },
         },
         auth: {
           viewableBy: 'editor',

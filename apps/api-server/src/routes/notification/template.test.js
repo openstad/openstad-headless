@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import request from 'supertest';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 process.env.NODE_CONFIG_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -12,10 +12,12 @@ process.env.NODE_CONFIG_DIR = path.resolve(
 process.env.SUPPRESS_NO_CONFIG_WARNING = '1';
 
 const require = createRequire(import.meta.url);
+const db = require('../../db');
 const templateRouter = require('./template');
 
 function createApp(user) {
   const app = express();
+  app.use(express.json());
   app.use((req, res, next) => {
     req.user = user;
     req.project = { id: 1 };
@@ -39,7 +41,11 @@ describe('default notification template', () => {
     expect(res.status).toBe(200);
     expect(res.body.type).toBe('contact message - user');
     expect(res.body.subject).toBe('Bericht ontvangen over een inzending');
-    expect(res.body.body).toContain('{{senderName}}');
+    expect(res.body.body).toContain('{{ senderName }}');
+    expect(res.body.content.heading).toBe(
+      'Bericht ontvangen over een inzending'
+    );
+    expect(res.body.fixedBlock).toBe('het bericht van de afzender');
   });
 
   it('answers 404 for a type without a default template', async () => {
@@ -57,5 +63,230 @@ describe('default notification template', () => {
 
     expect(res.status).not.toBe(200);
     expect(res.body.subject).toBeUndefined();
+  });
+});
+
+describe('mail styling for the preview', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function withProject(emailConfig) {
+    const project = db.Project.build({ id: 1, config: {}, emailConfig });
+    return vi.spyOn(db.Project, 'scope').mockReturnValue({
+      findByPk: async () => project,
+    });
+  }
+
+  it('returns the logo and accent color the mail will use', async () => {
+    const scope = withProject({
+      styling: {
+        logo: 'https://example.com/brand.png',
+        accentColor: '#d32f2f',
+      },
+    });
+
+    const res = await request(createApp(editor)).get(
+      '/project/1/template/styling'
+    );
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      logo: 'https://example.com/brand.png',
+      accentColor: '#d32f2f',
+    });
+    expect(scope).toHaveBeenCalledWith('includeConfig', 'includeEmailConfig');
+  });
+
+  it('does not return the styling to someone without rights', async () => {
+    withProject({ styling: { logo: 'https://example.com/brand.png' } });
+
+    const res = await request(createApp({ id: 2, role: 'member' })).get(
+      '/project/1/template/styling'
+    );
+
+    expect(res.status).not.toBe(200);
+    expect(res.body.logo).toBeUndefined();
+  });
+});
+
+describe('preview of a notification template', () => {
+  const { loadDefaultTemplate } = require('../../models/NotificationMessage');
+  const { CONTENT_CATALOG } = require('../../notifications/content-catalog');
+
+  async function defaultTemplate(type) {
+    const { subject, body } = await loadDefaultTemplate(type);
+    return { subject, body };
+  }
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  function withProject() {
+    const project = db.Project.build({
+      id: 1,
+      name: 'Voorbeeldproject',
+      title: 'Voorbeeldproject',
+      config: {},
+      emailConfig: {
+        styling: {
+          logo: 'https://example.com/brand.png',
+          accentColor: '#d32f2f',
+        },
+      },
+    });
+    vi.spyOn(db.Project, 'scope').mockReturnValue({
+      findByPk: async () => project,
+    });
+  }
+
+  function preview(user, payload) {
+    return request(createApp(user))
+      .post('/project/1/template/preview')
+      .send(payload);
+  }
+
+  it('renders a default mail with sample data and the project styling', async () => {
+    withProject();
+    const type = 'new published resource - user feedback';
+
+    const res = await preview(editor, {
+      type,
+      engine: 'email',
+      ...(await defaultTemplate(type)),
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.subject).toBe('Nieuwe inzending op Voorbeeldproject');
+    expect(res.body.html).toContain('src="https://example.com/brand.png"');
+    expect(res.body.html.toLowerCase()).toContain('#d32f2f');
+    expect(res.body.html).toContain('Meer bomen in de straat');
+  });
+
+  it('greets the user by name in the login mail', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'login email',
+      engine: 'email',
+      ...(await defaultTemplate('login email')),
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.html).toContain('Beste Voorbeeld Gebruiker');
+    expect(res.body.html).not.toContain('[object Object]');
+  });
+
+  it('returns plain text for an sms', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'login sms',
+      engine: 'sms',
+      subject: '',
+      body: 'Je code is {{ code }}',
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.text).toBe('Je code is 123456');
+  });
+
+  it('answers 400 for a template that cannot be rendered', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'user account about to expire',
+      engine: 'email',
+      subject: 'Test',
+      body: '<mjml><mj-body>{% if %}</mj-body></mjml>',
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toContain('De template kan niet worden gerenderd');
+  });
+
+  it('does not run code injected into the template', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'user account about to expire',
+      engine: 'email',
+      subject: '{{ constructor.constructor("return 6*7")() }}',
+      body: '<mjml><mj-body><mj-section><mj-column><mj-text>x</mj-text></mj-column></mj-section></mj-body></mjml>',
+    });
+
+    expect(JSON.stringify(res.body)).not.toContain('42');
+  });
+
+  it('answers 400 for an unknown engine', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'login email',
+      engine: 'fax',
+      subject: '',
+      body: '',
+    });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('renders a preview from fields and returns the mjml it built', async () => {
+    withProject();
+    const type = 'user account about to expire';
+
+    const res = await preview(editor, {
+      type,
+      engine: 'email',
+      subject: CONTENT_CATALOG[type].subject,
+      content: {
+        ...CONTENT_CATALOG[type].content,
+        heading: 'Hallo {{ user.name }}',
+      },
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.html).toContain('Hallo Voorbeeld Gebruiker');
+    expect(res.body.mjml).toContain('Hallo {{ user.name }}');
+  });
+
+  it('answers 400 for fields on a type that has none', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'login email',
+      engine: 'email',
+      subject: 'x',
+      content: { heading: 'x' },
+    });
+
+    expect(res.status).toBe(400);
+  });
+
+  it('answers 400 for a field that is not text', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'new published resource - user feedback',
+      engine: 'email',
+      subject: 'x',
+      content: { heading: 5 },
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('content.heading must be a string');
+  });
+
+  it('does not render a preview for someone without rights', async () => {
+    withProject();
+
+    const res = await preview(
+      { id: 2, role: 'member' },
+      { type: 'login email', engine: 'email', subject: 'x', body: 'x' }
+    );
+
+    expect(res.status).not.toBe(200);
+    expect(res.body.html).toBeUndefined();
   });
 });

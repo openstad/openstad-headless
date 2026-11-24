@@ -1,4 +1,5 @@
 import { NotificationForm } from '@/components/notification-form';
+import { NotificationStylingForm } from '@/components/notification-styling-form';
 import AccordionUI from '@/components/ui/accordion';
 import { PageLayout } from '@/components/ui/page-layout';
 import { Separator } from '@/components/ui/separator';
@@ -88,6 +89,9 @@ export default function ProjectNotifications() {
           },
         ]}>
         <div className="container py-10">
+          <div className="mb-6">
+            <NotificationStylingForm project={project} />
+          </div>
           <div className="p-6 bg-white rounded-md">
             <div className="space-y-4 lg:w-1/2">
               <h2 className="font-futura font-bold tracking-tight text-2xl">
@@ -119,6 +123,15 @@ export default function ProjectNotifications() {
                         <br />
                         <br />
                         <p>{variableText}</p>
+                        <br />
+                        <p>
+                          Huisstijl:
+                          <br />
+                          &#123;&#123; logo &#125;&#125; (leeg als er geen logo
+                          is)
+                          <br />
+                          &#123;&#123; styling.accentColor &#125;&#125;
+                        </p>
                         <br />
                         <p>
                           user:
@@ -200,7 +213,7 @@ export default function ProjectNotifications() {
                         <br />
                         <p>
                           Voor een overzicht van ingevulde waardes van een
-                          resource kan dit gebruikt worden:
+                          inzending kan dit gebruikt worden:
                           <br />
                           &#123;&#123; submissionContent | safe &#125;&#125;
                         </p>
@@ -285,6 +298,7 @@ export default function ProjectNotifications() {
                         label={template.label}
                         subject={template.subject}
                         body={template.body}
+                        content={template.content}
                       />
                     </div>
                   ))}

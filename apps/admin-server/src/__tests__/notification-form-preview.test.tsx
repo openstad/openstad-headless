@@ -7,8 +7,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const state = vi.hoisted(() => ({
   defaultTemplate: undefined as { subject: string; body: string } | undefined,
-  resolveSessionUser: undefined as
-    undefined | ((user: { name: string }) => void),
 }));
 
 vi.mock('next/router', () => ({
@@ -19,13 +17,6 @@ vi.mock('next/router', () => ({
   }),
 }));
 
-vi.mock('@/auth-context', () => ({
-  fetchSessionUser: () =>
-    new Promise((resolve) => {
-      state.resolveSessionUser = resolve;
-    }),
-}));
-
 vi.mock('swr', () => ({
   default: () => ({
     data: state.defaultTemplate,
@@ -34,15 +25,17 @@ vi.mock('swr', () => ({
 }));
 
 vi.mock('@/hooks/use-notification-template', () => ({
-  default: () => ({ data: [], create: vi.fn(), update: vi.fn() }),
-}));
-
-vi.mock('@/hooks/use-project', () => ({
-  useProject: () => ({ data: { name: 'Testproject' } }),
-}));
-
-vi.mock('mjml-browser', () => ({
-  default: (input: string) => ({ html: input }),
+  default: () => ({
+    data: [],
+    create: vi.fn(),
+    update: vi.fn(),
+    remove: vi.fn(),
+    preview: async ({ subject, body }: { subject: string; body: string }) => ({
+      subject,
+      html: body,
+      mjml: body,
+    }),
+  }),
 }));
 
 (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
@@ -58,7 +51,6 @@ describe('notification form preview', () => {
 
   beforeEach(() => {
     state.defaultTemplate = undefined;
-    state.resolveSessionUser = undefined;
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
@@ -79,7 +71,7 @@ describe('notification form preview', () => {
     );
   }
 
-  it('shows the default template once the session user arrives after it', async () => {
+  it('shows the default template once it arrives after the first render', async () => {
     renderForm();
     await flush();
 
@@ -91,7 +83,7 @@ describe('notification form preview', () => {
     await flush();
 
     await act(async () => {
-      state.resolveSessionUser?.({ name: 'Ian' });
+      await new Promise((resolve) => setTimeout(resolve, 500));
     });
     await flush();
 

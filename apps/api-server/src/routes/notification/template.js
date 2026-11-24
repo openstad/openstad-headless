@@ -4,7 +4,20 @@ const auth = require('../../middleware/sequelize-authorization-middleware');
 const router = express.Router({ mergeParams: true });
 const createError = require('http-errors');
 const rateLimiter = require('@openstad-headless/lib/rateLimiter');
-const { loadDefaultTemplate } = require('../../models/NotificationMessage');
+const {
+  loadDefaultTemplate,
+  renderTemplate,
+} = require('../../models/NotificationMessage');
+const { mailStylingFor } = require('../../services/mail-styling');
+const { previewData } = require('../../notifications/preview-data');
+const {
+  assertValidContent,
+  isContentType,
+  fixedBlockDescription,
+} = require('../../notifications/content-catalog');
+const { buildContentMjml } = require('../../notifications/content-layout');
+
+const PREVIEW_ENGINES = ['email', 'sms'];
 
 // scopes
 // ------
@@ -130,6 +143,86 @@ router
   });
 
 router
+  .route('/preview')
+  .post(auth.can('NotificationTemplate', 'create'))
+  .post(rateLimiter(), async function (req, res, next) {
+    const { type, engine, subject, content } = req.body;
+
+    if (!PREVIEW_ENGINES.includes(engine)) {
+      return next(createError(400, 'engine must be email or sms'));
+    }
+    if (typeof subject !== 'string') {
+      return next(createError(400, 'subject must be a string'));
+    }
+
+    try {
+      let body = req.body.body;
+      if (content !== undefined && content !== null) {
+        if (!isContentType(type)) {
+          throw createError(400, `Notification type '${type}' has no fields`);
+        }
+        try {
+          assertValidContent(content);
+        } catch (err) {
+          throw createError(400, err.message);
+        }
+        body = buildContentMjml(type, content);
+      } else if (typeof body !== 'string') {
+        throw createError(400, 'body must be a string');
+      }
+
+      const project = await db.Project.scope(
+        'includeConfig',
+        'includeEmailConfig'
+      ).findByPk(req.params.projectId);
+      if (!project) {
+        throw createError(404, 'Project not found');
+      }
+
+      const styling = await mailStylingFor(project);
+      let rendered;
+      try {
+        rendered = await renderTemplate(
+          { subject, body },
+          previewData({ project, styling }),
+          { engine, type, projectId: project.id }
+        );
+      } catch (err) {
+        throw createError(
+          400,
+          `De template kan niet worden gerenderd: ${err.message}`
+        );
+      }
+
+      res.json(
+        engine === 'email'
+          ? { subject: rendered.subject, html: rendered.body, mjml: body }
+          : { subject: rendered.subject, text: rendered.body }
+      );
+    } catch (err) {
+      next(err);
+    }
+  });
+
+router
+  .route('/styling')
+  .get(auth.can('NotificationTemplate', 'list'))
+  .get(async function (req, res, next) {
+    try {
+      const project = await db.Project.scope(
+        'includeConfig',
+        'includeEmailConfig'
+      ).findByPk(req.params.projectId);
+      if (!project) {
+        throw createError(404, 'Project not found');
+      }
+      res.json(await mailStylingFor(project));
+    } catch (err) {
+      next(err);
+    }
+  });
+
+router
   .route('/default/:type')
   .get(auth.can('NotificationTemplate', 'list'))
   .get(async function (req, res, next) {
@@ -138,10 +231,13 @@ router
       if (!template) {
         throw createError(404, 'No default template for this type');
       }
+      const hasFields = isContentType(req.params.type);
       res.json({
         type: req.params.type,
         subject: template.subject.trim(),
         body: template.body.trim(),
+        content: hasFields ? template.content : null,
+        fixedBlock: hasFields ? fixedBlockDescription(req.params.type) : null,
       });
     } catch (err) {
       next(err);

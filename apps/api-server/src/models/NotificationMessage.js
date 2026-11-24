@@ -2,7 +2,12 @@ const fs = require('fs').promises;
 const path = require('path');
 const mjml2html = require('mjml');
 const sendMessage = require('../notifications/send-engines');
-const { authClientSettingsFor } = require('../services/auth-client-settings');
+const { mailStylingFor } = require('../services/mail-styling');
+const {
+  isContentType,
+  catalogEntry,
+} = require('../notifications/content-catalog');
+const { buildContentMjml } = require('../notifications/content-layout');
 const {
   createTemplateEnv,
   toPlainData,
@@ -25,13 +30,20 @@ async function readTemplateFile(templatePath) {
   }
 }
 
-async function mailLogo(project) {
-  if (!project) return '';
-  const settings = await authClientSettingsFor(project);
-  return (settings && settings.logo) || project.config?.styling?.logo || '';
+function templateFromRow(row) {
+  if (!row.content) return row;
+  return {
+    subject: row.subject,
+    body: buildContentMjml(row.type, row.content),
+  };
 }
 
 async function loadDefaultTemplate(type) {
+  if (isContentType(type)) {
+    const { subject, content } = catalogEntry(type);
+    return { subject, content, body: buildContentMjml(type, content) };
+  }
+
   const coreTemplatePath = path.join(
     __dirname,
     '../notifications/default-templates',
@@ -148,7 +160,9 @@ module.exports = (db, sequelize, DataTypes) => {
                 },
               });
               isCustomTemplate = !!template;
-              if (!template) {
+              if (template) {
+                template = templateFromRow(template);
+              } else {
                 template = await loadDefaultTemplate(instance.type);
               }
               if (!template)
@@ -161,7 +175,8 @@ module.exports = (db, sequelize, DataTypes) => {
                 'includeConfig',
                 'includeEmailConfig'
               ).findByPk(instance.projectId);
-              templateData.logo = await mailLogo(templateData.project);
+              templateData.styling = await mailStylingFor(templateData.project);
+              templateData.logo = templateData.styling.logo;
               let keys = ['resource', 'user', 'comment', 'submission'];
               for (let key of keys) {
                 let idkey = key + 'Id';
