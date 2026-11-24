@@ -11,6 +11,7 @@ const {
 const { mailStylingFor } = require('../../services/mail-styling');
 const { previewData } = require('../../notifications/preview-data');
 const {
+  assertValidContent,
   isContentType,
   fixedBlockDescription,
 } = require('../../notifications/content-catalog');
@@ -154,22 +155,22 @@ router
       return next(createError(400, 'subject must be a string'));
     }
 
-    let body = req.body.body;
-    if (content !== undefined && content !== null) {
-      if (!isContentType(type)) {
-        return next(
-          createError(400, `Notification type '${type}' has no fields`)
-        );
-      }
-      if (typeof content !== 'object' || Array.isArray(content)) {
-        return next(createError(400, 'content must be an object'));
-      }
-      body = buildContentMjml(type, content);
-    } else if (typeof body !== 'string') {
-      return next(createError(400, 'body must be a string'));
-    }
-
     try {
+      let body = req.body.body;
+      if (content !== undefined && content !== null) {
+        if (!isContentType(type)) {
+          throw createError(400, `Notification type '${type}' has no fields`);
+        }
+        try {
+          assertValidContent(content);
+        } catch (err) {
+          throw createError(400, err.message);
+        }
+        body = buildContentMjml(type, content);
+      } else if (typeof body !== 'string') {
+        throw createError(400, 'body must be a string');
+      }
+
       const project = await db.Project.scope(
         'includeConfig',
         'includeEmailConfig'

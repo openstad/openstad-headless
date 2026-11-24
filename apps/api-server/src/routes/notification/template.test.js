@@ -264,6 +264,20 @@ describe('preview of a notification template', () => {
     expect(res.status).toBe(400);
   });
 
+  it('answers 400 for a field that is not text', async () => {
+    withProject();
+
+    const res = await preview(editor, {
+      type: 'new published resource - user feedback',
+      engine: 'email',
+      subject: 'x',
+      content: { heading: 5 },
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('content.heading must be a string');
+  });
+
   it('does not render a preview for someone without rights', async () => {
     withProject();
 

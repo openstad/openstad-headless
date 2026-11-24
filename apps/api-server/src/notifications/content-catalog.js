@@ -213,6 +213,31 @@ const FIXED_BLOCK_DESCRIPTIONS = {
   projectWarnings: 'de lijst met waarschuwingen',
 };
 
+const CONTENT_TEXT_KEYS = [
+  'heading',
+  'intro',
+  'buttonLabel',
+  'buttonUrl',
+  'footer',
+];
+
+function assertValidContent(value) {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new Error('content must be an object');
+  }
+  for (const [key, fieldValue] of Object.entries(value)) {
+    if (key === 'showLogo') {
+      if (typeof fieldValue !== 'boolean') {
+        throw new Error('content.showLogo must be a boolean');
+      }
+    } else if (!CONTENT_TEXT_KEYS.includes(key)) {
+      throw new Error(`content contains an unknown field: ${key}`);
+    } else if (typeof fieldValue !== 'string') {
+      throw new Error(`content.${key} must be a string`);
+    }
+  }
+}
+
 function isContentType(type) {
   return Object.prototype.hasOwnProperty.call(CONTENT_CATALOG, type);
 }
@@ -234,6 +259,7 @@ function fixedBlockDescription(type) {
 
 module.exports = {
   CONTENT_CATALOG,
+  assertValidContent,
   isContentType,
   catalogEntry,
   fixedBlockDescription,
