@@ -33,8 +33,6 @@ vi.mock('@/hooks/use-project-list', () => ({
   }),
 }));
 
-vi.mock('@/hooks/use-admin-project-id', () => ({ default: () => 1 }));
-
 vi.mock('@/hooks/use-user', () => ({
   default: () => ({
     data: users.list,

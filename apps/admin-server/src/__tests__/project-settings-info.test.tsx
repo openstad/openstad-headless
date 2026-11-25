@@ -216,7 +216,7 @@ describe('Projectinformatie on the project settings page', () => {
     await flipWebsite();
     expect(
       (container.querySelector('input[name="url"]') as HTMLInputElement).value
-    ).toBe('oud.example.nl');
+    ).toBe('');
     expect(controller.state).toBe('dirty');
 
     await flipWebsite();
