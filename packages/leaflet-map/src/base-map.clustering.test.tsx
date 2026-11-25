@@ -118,3 +118,26 @@ describe('BaseMap with clustering and an extreme project maxZoom', () => {
     expect(commits).toBeLessThan(20);
   }, 5000);
 });
+
+describe('BaseMap clusters submissions and marker sets separately', () => {
+  it('never puts a marker-set marker in a submission cluster', async () => {
+    const spot = (prefix: string) =>
+      Array.from({ length: 5 }, (_, i) => ({
+        markerId: `${prefix}${i}`,
+        lat: 52.51,
+        lng: 6.09,
+      }));
+    (globalThis as any).__markerSets = [{ id: 1, markers: spot('s') }];
+    await renderMap({
+      map: { clustering: 'high' },
+      center: { lat: 52.51, lng: 6.09 },
+      zoom: 12,
+      markers: spot('r'),
+      markerSets: [{ id: 1 }],
+    });
+    const counts = Array.from(
+      container!.querySelectorAll('.osc-map-marker-cluster .sr-only')
+    ).map((el) => el.textContent?.match(/\d+/)?.[0]);
+    expect(counts.sort()).toEqual(['5', '5']);
+  }, 5000);
+});

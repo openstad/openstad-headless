@@ -32,11 +32,10 @@ export function shouldClusterMarker(
 }
 
 export function shouldRenderClusterGroup(
-  clusterMarkerCount: number,
-  markerSetMarkerCount: number,
+  markerCount: number,
   isActive: boolean
 ): boolean {
-  return isActive && clusterMarkerCount + markerSetMarkerCount > 0;
+  return isActive && markerCount > 0;
 }
 
 export const MAX_SUPPORTED_ZOOM = 25;

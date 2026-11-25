@@ -56,21 +56,17 @@ describe('shouldClusterMarker', () => {
   });
 });
 
-describe('marker sets', () => {
-  it('renders the group for a marker-set-only map', () => {
-    expect(shouldRenderClusterGroup(0, 3, true)).toBe(true);
+describe('shouldRenderClusterGroup', () => {
+  it('renders a group that has markers', () => {
+    expect(shouldRenderClusterGroup(3, true)).toBe(true);
   });
 
-  it('renders the group for submissions only', () => {
-    expect(shouldRenderClusterGroup(2, 0, true)).toBe(true);
-  });
-
-  it('never renders the group when clustering is off', () => {
-    expect(shouldRenderClusterGroup(2, 3, false)).toBe(false);
+  it('never renders a group when clustering is off', () => {
+    expect(shouldRenderClusterGroup(3, false)).toBe(false);
   });
 
   it('does not render an empty group', () => {
-    expect(shouldRenderClusterGroup(0, 0, true)).toBe(false);
+    expect(shouldRenderClusterGroup(0, true)).toBe(false);
   });
 });
 

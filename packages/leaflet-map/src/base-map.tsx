@@ -835,10 +835,13 @@ const BaseMap = ({
   const markerSetMarkerCount = Array.isArray(markerSetNodes)
     ? markerSetNodes.filter(Boolean).length
     : 0;
-  const renderClusterGroup = shouldRenderClusterGroup(
+  const renderSubmissionClusters = shouldRenderClusterGroup(
     clusterMarkers.length,
+    clusteringActive
+  );
+  const renderMarkerSetClusters = shouldRenderClusterGroup(
     markerSetMarkerCount,
-    !!clustering?.isActive
+    clusteringActive
   );
 
   return (
@@ -983,12 +986,17 @@ const BaseMap = ({
                 }
               })}
 
-            {renderClusterGroup && (
+            {renderSubmissionClusters && (
               <MarkerClusterGroup
                 {...props}
                 {...clustering}
                 categorize={categorize}
-                markers={clusterMarkers}>
+                markers={clusterMarkers}
+              />
+            )}
+
+            {renderMarkerSetClusters && (
+              <MarkerClusterGroup {...props} {...clustering}>
                 {markerSetNodes}
               </MarkerClusterGroup>
             )}
@@ -1001,7 +1009,7 @@ const BaseMap = ({
               onMarkerClick={onMarkerClick}
             />
 
-            {!renderClusterGroup && markerSetNodes}
+            {!renderMarkerSetClusters && markerSetNodes}
 
             {locationProx &&
               locationProx.lat &&
