@@ -13,7 +13,7 @@ import { useCallback, useEffect, useRef } from 'react';
  *   getCurrentState.current = () => ({ name, markers }); // keep up to date
  */
 export default function useUnsavedChanges(
-  message = 'Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je wilt doorgaan?'
+  message = 'Je hebt niet-opgeslagen wijzigingen. Als je doorgaat, gaan deze verloren. Weet je zeker dat je wilt doorgaan?'
 ) {
   const savedStateRef = useRef<any>(null);
   const getCurrentStateRef = useRef<(() => any) | null>(null);
