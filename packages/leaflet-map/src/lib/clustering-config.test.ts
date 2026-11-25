@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   getClusteringConfig,
   getEffectiveMaxZoom,
+  getMapMaxZoom,
   shouldClusterMarker,
   shouldRenderClusterGroup,
 } from './clustering-config';
@@ -91,5 +92,18 @@ describe('getEffectiveMaxZoom', () => {
     expect(getEffectiveMaxZoom('abc')).toBe(20);
     expect(getEffectiveMaxZoom(0)).toBe(20);
     expect(getEffectiveMaxZoom(-3)).toBe(20);
+  });
+});
+
+describe('getMapMaxZoom', () => {
+  it('leaves the project max zoom untouched when clustering is off', () => {
+    expect(getMapMaxZoom('201', false)).toBe('201');
+    expect(getMapMaxZoom(18, false)).toBe(18);
+    expect(getMapMaxZoom(undefined, false)).toBeUndefined();
+  });
+
+  it('caps the max zoom when clustering is on', () => {
+    expect(getMapMaxZoom('201', true)).toBe(25);
+    expect(getMapMaxZoom(18, true)).toBe(18);
   });
 });

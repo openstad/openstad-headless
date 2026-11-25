@@ -48,6 +48,13 @@ export function getEffectiveMaxZoom(maxZoom?: number | string | null): number {
   return Math.min(value, MAX_SUPPORTED_ZOOM);
 }
 
+export function getMapMaxZoom(
+  maxZoom: number | string | undefined,
+  clusteringActive: boolean
+): number | string | undefined {
+  return clusteringActive ? getEffectiveMaxZoom(maxZoom) : maxZoom;
+}
+
 export function disableClusterPanOnFocus(leaflet: any): boolean {
   const MarkerCluster = leaflet?.MarkerCluster;
   if (!MarkerCluster || typeof MarkerCluster.mergeOptions !== 'function') {

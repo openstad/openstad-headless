@@ -25,7 +25,7 @@ import './css/base-map.css';
 import { InvalidateSizeOnResize } from './invalidate-size-on-resize';
 import {
   getClusteringConfig,
-  getEffectiveMaxZoom,
+  getMapMaxZoom,
   shouldClusterMarker,
   shouldRenderClusterGroup,
 } from './lib/clustering-config';
@@ -623,7 +623,8 @@ const BaseMap = ({
     (marker) => marker.isClustered
   );
 
-  const effectiveMaxZoom = getEffectiveMaxZoom(maxZoom);
+  const clusteringActive = !!clustering?.isActive;
+  const tileMaxZoom = getMapMaxZoom(maxZoom, clusteringActive);
 
   // ToDo: why can't these just be passed as props
   const tileLayerProps = {
@@ -632,7 +633,7 @@ const BaseMap = ({
     customUrl: customUrlSetting,
     tiles,
     minZoom,
-    maxZoom: effectiveMaxZoom,
+    maxZoom: tileMaxZoom,
   };
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -920,7 +921,7 @@ const BaseMap = ({
             className="osc-base-map-widget-container"
             id={`osc-base-map-${mapId}`}
             scrollWheelZoom={scrollWheelZoom}
-            maxZoom={effectiveMaxZoom}
+            maxZoom={clusteringActive ? (tileMaxZoom as number) : undefined}
             zoom={zoom}>
             <MapConsumer mapId={mapId} />
             <MapAccessibleName
