@@ -1,15 +1,3 @@
-.a-b-slider-container {
-  --ab-slider-color: var(--setAbSliderColor, var(--osc-primary, #12b886));
-  --ab-slider-track: var(--setAbSliderTrackColor, #eee);
-  --ab-slider-edge: #08543c;
-}
-
-@supports (color: color-mix(in srgb, red 50%, black)) {
-  .a-b-slider-container {
-    --ab-slider-edge: color-mix(in srgb, var(--ab-slider-color) 45%, black);
-  }
-}
-
 .question-type-range {
   margin: 1rem 0;
 }
@@ -69,7 +57,7 @@
   content: '';
   width: 100%;
   height: 8px;
-  background: var(--ab-slider-track);
+  background: #eee;
   position: relative;
   display: block;
   top: 40px;
@@ -89,12 +77,14 @@ input[type='range'].a-to-b-range {
 }
 
 input[type='range'].a-to-b-range:focus::-webkit-slider-thumb {
-  outline: 2px solid var(--ab-slider-edge);
+  outline: 2px solid
+    var(--utrecht-button-primary-action-active-background-color);
   outline-offset: 2px;
 }
 
 input[type='range'].a-to-b-range:focus::-moz-range-thumb {
-  outline: 2px solid var(--ab-slider-edge);
+  outline: 2px solid
+    var(--utrecht-button-primary-action-active-background-color);
   outline-offset: 2px;
 }
 
@@ -103,8 +93,7 @@ input[type='range'].a-to-b-range::-webkit-slider-thumb {
   appearance: none;
   width: 25px;
   height: 25px;
-  background: var(--ab-slider-color);
-  box-shadow: inset 0 0 0 2px var(--ab-slider-edge);
+  background: var(--utrecht-button-primary-action-active-background-color);
   cursor: pointer;
   border-radius: 50%;
 }
@@ -112,11 +101,9 @@ input[type='range'].a-to-b-range::-webkit-slider-thumb {
 input[type='range'].a-to-b-range::-moz-range-thumb {
   width: 25px;
   height: 25px;
-  background: var(--ab-slider-color);
-  box-shadow: inset 0 0 0 2px var(--ab-slider-edge);
+  background: var(--utrecht-button-primary-action-active-background-color);
   cursor: pointer;
   border-radius: 50%;
-  border: none;
 }
 
 .osc
@@ -134,8 +121,7 @@ input[type='range'].a-to-b-range::-moz-range-thumb {
 
 .a-b-slider-container .range-bar-container .slider_line-container--bar {
   height: 8px;
-  background-color: var(--ab-slider-color);
-  box-shadow: inset 0 0 0 1px var(--ab-slider-edge);
+  background-color: #1371ef;
   transition: none !important;
 }
 
