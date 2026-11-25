@@ -1,6 +1,8 @@
 import { MarkerOptions, divIcon, point } from 'leaflet';
 import type { MarkerCluster } from 'leaflet';
 
+import { sanitizeColor } from './sanitize';
+
 export default function amapsCreateClusterIcon(
   cluster: MarkerCluster,
   categorize = {
@@ -43,7 +45,7 @@ export default function amapsCreateClusterIcon(
 
   let soFar = 0;
   Object.keys(colors).forEach((key) => {
-    let myColor = key;
+    let myColor = sanitizeColor(key);
     let perc = (100 * colors[key]) / total;
     let angle = (soFar / 100) * 360;
 
