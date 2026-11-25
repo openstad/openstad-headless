@@ -209,7 +209,6 @@ module.exports = function (db, sequelize, DataTypes) {
             img: process.env.IMAGE_APP_URL
               ? new URL(process.env.IMAGE_APP_URL).host
               : '',
-            cms: process.env.CMS_URL ? new URL(process.env.CMS_URL).host : '',
           };
         },
         set(val) {
