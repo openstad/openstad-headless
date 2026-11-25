@@ -15,7 +15,7 @@ export async function readCreated(res: Response, message: string) {
 
 /** Shown when something in front of the API refuses a request with an empty 403. */
 export const REFUSED_BY_SERVER =
-  'De server heeft dit geweigerd. Opnieuw proberen helpt niet, neem contact op met de beheerder.';
+  'De server heeft dit verzoek geweigerd (fout 403). Opnieuw proberen helpt niet; neem contact op met de beheerder van de server.';
 
 /** As readCreated, but an error status throws the API's own message when it sends one. */
 export async function readSaved(res: Response, message: string) {
