@@ -15,7 +15,6 @@ function getResourceFormExtraDataConfig(widgetConfig) {
   const items = Array.isArray(widgetConfig?.items) ? widgetConfig.items : [];
   const uniqueFieldKeys = new Set();
   const moderatorOnlyFieldKeys = new Set();
-  const fieldTypesByKey = {};
 
   for (const item of items) {
     if (typeof item.fieldKey !== 'string') continue;
@@ -23,15 +22,11 @@ function getResourceFormExtraDataConfig(widgetConfig) {
     if (item?.onlyForModerator) {
       moderatorOnlyFieldKeys.add(item.fieldKey);
     }
-    if (typeof item.type === 'string') {
-      fieldTypesByKey[item.fieldKey] = item.type;
-    }
   }
 
   return {
     fieldKeys: Array.from(uniqueFieldKeys),
     moderatorOnlyFieldKeys: Array.from(moderatorOnlyFieldKeys),
-    fieldTypesByKey,
   };
 }
 
@@ -62,7 +57,6 @@ async function attachModeratorOnlyExtraDataKeys(resources) {
       resource.hasResourceFormConfig = false;
       resource.resourceFormFieldKeys = [];
       resource.moderatorOnlyExtraDataKeys = [];
-      resource.resourceFormFieldTypes = {};
     });
     return;
   }
@@ -92,7 +86,6 @@ async function attachModeratorOnlyExtraDataKeys(resources) {
     resource.resourceFormFieldKeys = extraDataConfig?.fieldKeys || [];
     resource.moderatorOnlyExtraDataKeys =
       extraDataConfig?.moderatorOnlyFieldKeys || [];
-    resource.resourceFormFieldTypes = extraDataConfig?.fieldTypesByKey || {};
   });
 }
 
