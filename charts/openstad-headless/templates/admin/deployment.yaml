@@ -65,8 +65,6 @@ spec:
             value: https://{{ template "openstad.api.url" . }}
           - name: API_URL_INTERNAL
             value: http://{{ printf "%s.%s.svc.cluster.local:%d" (include "openstad.api.fullname" .) .Release.Namespace (.Values.api.service.httpPort | int) }}
-          - name: CMS_URL
-            value: https://{{ template "openstad.cms.url" . }}
           - name: MULTI_PROJECT_LOGIN
             value: {{ .Values.multiProjectLogin | default false | toString | quote }}
           - name: API_FIXED_AUTH_KEY
