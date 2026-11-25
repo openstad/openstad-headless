@@ -39,7 +39,7 @@ export default function amapsCreateClusterIcon(
   });
 
   let html =
-    '<svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="14" fill="white"/>';
+    '<svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="14" fill="white"/>';
 
   let soFar = 0;
   Object.keys(colors).forEach((key) => {
@@ -66,7 +66,7 @@ export default function amapsCreateClusterIcon(
     '</text>';
 
   html += '</svg>';
-  html += `<span class="sr-only">${count} locaties gegroepeerd</span>`;
+  html += `<span class="sr-only">${count} locaties gegroepeerd, druk op Enter om in te zoomen</span>`;
 
   let className = 'osc-map-marker-cluster';
   if (isFaded) className += ' osc-map-marker-cluster-faded';

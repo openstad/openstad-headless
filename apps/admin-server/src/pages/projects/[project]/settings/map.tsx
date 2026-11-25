@@ -40,6 +40,7 @@ const formSchema = z.object({
   maxZoom: z.string().optional(),
   minZoom: z.string().optional(),
   areaId: z.string().optional(),
+  clustering: z.string().optional(),
   tilesVariant: z.string().optional(),
   customUrl: z.string().optional(),
   autoZoomAndCenter: z.string().optional(),
@@ -61,6 +62,7 @@ export default function ProjectSettingsMap() {
       minZoom: data?.config?.map?.minZoom || '7',
       maxZoom: data?.config?.map?.maxZoom || '20',
       areaId: data?.config?.map?.areaId || '',
+      clustering: data?.config?.map?.clustering || 'off',
       tilesVariant: data?.config?.map?.tilesVariant || 'nlmaps',
       customUrl: data?.config?.map?.customUrl || '',
       autoZoomAndCenter: data?.config?.map?.autoZoomAndCenter || 'area',
@@ -100,6 +102,7 @@ export default function ProjectSettingsMap() {
     const result = await updateProject({
       map: {
         areaId: values.areaId,
+        clustering: values.clustering,
         minZoom: values.minZoom,
         maxZoom: values.maxZoom,
         tilesVariant: values.tilesVariant,
@@ -141,6 +144,13 @@ export default function ProjectSettingsMap() {
       setDisabled(false);
     }
   }, [form.watch('minZoom'), form.watch('maxZoom')]);
+
+  const clusteringOptions = [
+    { value: 'off', label: 'Uit' },
+    { value: 'low', label: 'Laag' },
+    { value: 'medium', label: 'Middel' },
+    { value: 'high', label: 'Hoog' },
+  ];
 
   const tileLayerOptions = [
     { value: 'nlmaps', label: 'Nederlandse Kaart' },
@@ -307,6 +317,37 @@ export default function ProjectSettingsMap() {
                     )}
                   />
                 )}
+
+                <FormField
+                  control={form.control}
+                  name="clustering"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel>Markers samenvoegen (clustering)</FormLabel>
+                      <FormDescription>
+                        Hoe hoger, hoe meer markers die dicht bij elkaar staan
+                        samengaan tot één cirkel met een aantal.
+                      </FormDescription>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || 'off'}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Uit" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {clusteringOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
                 <FormField
                   control={form.control}

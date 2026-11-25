@@ -23,6 +23,12 @@ import { Area, isPointInArea } from './area';
 import { AutoZoom } from './auto-zoom';
 import './css/base-map.css';
 import { InvalidateSizeOnResize } from './invalidate-size-on-resize';
+import {
+  getClusteringConfig,
+  getEffectiveMaxZoom,
+  shouldClusterMarker,
+  shouldRenderClusterGroup,
+} from './lib/clustering-config';
 import { focusFirstTabbableAfter } from './lib/focus-after';
 import parseLocation from './lib/parse-location';
 import { sanitizeColor } from './lib/sanitize';
@@ -374,12 +380,7 @@ const BaseMap = ({
   const customUrlSetting =
     tilesVariant === 'custom' ? props?.map?.customUrl : undefined;
 
-  // clustering throws errors; unclear why: it only happens in the built widgets, not in the dev components
-  // it looks like a timing issue where not everything loads in the right order
-  // so it is disabled for now
-  clustering = {
-    isActive: false,
-  };
+  clustering = getClusteringConfig(props?.map);
 
   let [currentMarkers, setCurrentMarkers] = useState(markers);
   let [currentPolyLines, setPolyLines] = useState<
@@ -446,7 +447,7 @@ const BaseMap = ({
                     description: inhoud,
                     markerId: `record-${lat}-${long}-${titel || 'marker'}`,
                     isVisible: true,
-                    isClustered: false,
+                    doNotCluster: true,
                     icon: L.icon({
                       iconUrl: icon,
                       iconSize: [30, 40],
@@ -509,7 +510,7 @@ const BaseMap = ({
                         Objectnaam || 'marker'
                       }`,
                       isVisible: true,
-                      isClustered: false,
+                      doNotCluster: true,
                       icon: L.icon({
                         iconUrl: icon,
                         iconSize: [30, 40],
@@ -540,8 +541,9 @@ const BaseMap = ({
           iconCreateFunction: marker.iconCreateFunction || iconCreateFunction,
           onClick: mergedOnClick,
           isVisible: true,
-          isClustered:
-            clustering?.isActive && !marker.doNotCluster ? false : undefined,
+          isClustered: shouldClusterMarker(marker, clustering)
+            ? true
+            : undefined,
         };
 
         // Handle categorization
@@ -584,7 +586,8 @@ const BaseMap = ({
           marker.markerId !== currentMarkers[index]?.markerId ||
           marker.lat !== currentMarkers[index]?.lat ||
           marker.lng !== currentMarkers[index]?.lng ||
-          marker.isSelected !== currentMarkers[index]?.isSelected
+          marker.isSelected !== currentMarkers[index]?.isSelected ||
+          marker.isClustered !== currentMarkers[index]?.isClustered
       );
 
     if (markersChanged) {
@@ -616,7 +619,11 @@ const BaseMap = ({
     onMarkerClick,
   ]);
 
-  let clusterMarkers: MarkerProps[] = [];
+  const clusterMarkers: MarkerProps[] = (currentMarkers || []).filter(
+    (marker) => marker.isClustered
+  );
+
+  const effectiveMaxZoom = getEffectiveMaxZoom(maxZoom);
 
   // ToDo: why can't these just be passed as props
   const tileLayerProps = {
@@ -625,7 +632,7 @@ const BaseMap = ({
     customUrl: customUrlSetting,
     tiles,
     minZoom,
-    maxZoom,
+    maxZoom: effectiveMaxZoom,
   };
 
   const [isTouchDevice, setIsTouchDevice] = useState(false);
@@ -745,6 +752,94 @@ const BaseMap = ({
     );
   };
 
+  const markerSetNodes =
+    Array.isArray(markerSetsConfig) &&
+    markerSetsConfig.length > 0 &&
+    Array.isArray(allMarkerSets) &&
+    allMarkerSets.length > 0 &&
+    markerSetsConfig.map((config: any) => {
+      const found = allMarkerSets.find((ms: any) => ms.id === config.id);
+      if (!found || !Array.isArray(found.markers)) return null;
+      return (
+        <React.Fragment key={`ms-group-${found.id}`}>
+          {found.markers.map((m: any, mIdx: number) => {
+            if (m.lat == null || m.lng == null) return null;
+            const icon = m.icon
+              ? L.icon({
+                  iconUrl: m.icon,
+                  iconSize: [30, 40],
+                  iconAnchor: [15, 40],
+                  popupAnchor: [0, -40],
+                  className: 'custom-image-icon',
+                })
+              : MarkerIcon({ icon: { color: m.color || '#555588' } });
+            const target = m.openInNewTab ? '_blank' : '_self';
+            const btnText = m.buttonText || 'Lees verder';
+            // Validate inline so the sanitisation is visible at the
+            // call-site: only http/https/mailto survive, and we use
+            // the serialised URL rather than the raw input.
+            let safeUrl = '';
+            if (m.url) {
+              try {
+                const parsed = new URL(m.url, window.location.origin);
+                if (['http:', 'https:', 'mailto:'].includes(parsed.protocol)) {
+                  safeUrl = parsed.href;
+                }
+              } catch {
+                safeUrl = '';
+              }
+            }
+
+            const isDirect = markerInteractionType === 'direct';
+
+            return (
+              <LeafletMarkerComponent
+                key={`ms-${found.id}-${mIdx}`}
+                position={[m.lat, m.lng]}
+                icon={icon}
+                eventHandlers={
+                  isDirect && safeUrl
+                    ? {
+                        click: () => {
+                          window.open(safeUrl, target);
+                        },
+                      }
+                    : {}
+                }>
+                {!isDirect && (m.title || m.description || safeUrl) && (
+                  <Popup className="leaflet-popup">
+                    {m.title && (
+                      <h3 className="utrecht-heading-3">{m.title}</h3>
+                    )}
+                    {m.description && <p>{m.description}</p>}
+                    {safeUrl && (
+                      <a
+                        className="pop-up-link"
+                        href={safeUrl}
+                        target={target}
+                        rel={
+                          m.openInNewTab ? 'noopener noreferrer' : undefined
+                        }>
+                        {btnText}
+                      </a>
+                    )}
+                  </Popup>
+                )}
+              </LeafletMarkerComponent>
+            );
+          })}
+        </React.Fragment>
+      );
+    });
+  const markerSetMarkerCount = Array.isArray(markerSetNodes)
+    ? markerSetNodes.filter(Boolean).length
+    : 0;
+  const renderClusterGroup = shouldRenderClusterGroup(
+    clusterMarkers.length,
+    markerSetMarkerCount,
+    !!clustering?.isActive
+  );
+
   return (
     <>
       {(mapDataLayers.length > 0 ||
@@ -825,6 +920,7 @@ const BaseMap = ({
             className="osc-base-map-widget-container"
             id={`osc-base-map-${mapId}`}
             scrollWheelZoom={scrollWheelZoom}
+            maxZoom={effectiveMaxZoom}
             zoom={zoom}>
             <MapConsumer mapId={mapId} />
             <MapAccessibleName
@@ -874,7 +970,7 @@ const BaseMap = ({
               currentMarkers.length > 0 &&
               currentMarkers.map((data) => {
                 if (data.isClustered) {
-                  clusterMarkers.push(data);
+                  return null; // drawn inside the cluster group below
                 } else if (data.lat && data.lng) {
                   return (
                     <Marker
@@ -886,13 +982,14 @@ const BaseMap = ({
                 }
               })}
 
-            {clusterMarkers.length > 0 && (
+            {renderClusterGroup && (
               <MarkerClusterGroup
                 {...props}
                 {...clustering}
                 categorize={categorize}
-                markers={clusterMarkers}
-              />
+                markers={clusterMarkers}>
+                {markerSetNodes}
+              </MarkerClusterGroup>
             )}
 
             <MapEventsListener
@@ -903,96 +1000,7 @@ const BaseMap = ({
               onMarkerClick={onMarkerClick}
             />
 
-            {/* Marker set markers with popup support */}
-            {Array.isArray(markerSetsConfig) &&
-              markerSetsConfig.length > 0 &&
-              Array.isArray(allMarkerSets) &&
-              allMarkerSets.length > 0 &&
-              markerSetsConfig.map((config: any) => {
-                const found = allMarkerSets.find(
-                  (ms: any) => ms.id === config.id
-                );
-                if (!found || !Array.isArray(found.markers)) return null;
-                return (
-                  <React.Fragment key={`ms-group-${found.id}`}>
-                    {found.markers.map((m: any, mIdx: number) => {
-                      if (m.lat == null || m.lng == null) return null;
-                      const icon = m.icon
-                        ? L.icon({
-                            iconUrl: m.icon,
-                            iconSize: [30, 40],
-                            iconAnchor: [15, 40],
-                            popupAnchor: [0, -40],
-                            className: 'custom-image-icon',
-                          })
-                        : MarkerIcon({ icon: { color: m.color || '#555588' } });
-                      const target = m.openInNewTab ? '_blank' : '_self';
-                      const btnText = m.buttonText || 'Lees verder';
-                      // Validate inline so the sanitisation is visible at the
-                      // call-site: only http/https/mailto survive, and we use
-                      // the serialised URL rather than the raw input.
-                      let safeUrl = '';
-                      if (m.url) {
-                        try {
-                          const parsed = new URL(m.url, window.location.origin);
-                          if (
-                            ['http:', 'https:', 'mailto:'].includes(
-                              parsed.protocol
-                            )
-                          ) {
-                            safeUrl = parsed.href;
-                          }
-                        } catch {
-                          safeUrl = '';
-                        }
-                      }
-
-                      const isDirect = markerInteractionType === 'direct';
-
-                      return (
-                        <LeafletMarkerComponent
-                          key={`ms-${found.id}-${mIdx}`}
-                          position={[m.lat, m.lng]}
-                          icon={icon}
-                          eventHandlers={
-                            isDirect && safeUrl
-                              ? {
-                                  click: () => {
-                                    window.open(safeUrl, target);
-                                  },
-                                }
-                              : {}
-                          }>
-                          {!isDirect &&
-                            (m.title || m.description || safeUrl) && (
-                              <Popup className="leaflet-popup">
-                                {m.title && (
-                                  <h3 className="utrecht-heading-3">
-                                    {m.title}
-                                  </h3>
-                                )}
-                                {m.description && <p>{m.description}</p>}
-                                {safeUrl && (
-                                  <a
-                                    className="pop-up-link"
-                                    href={safeUrl}
-                                    target={target}
-                                    rel={
-                                      m.openInNewTab
-                                        ? 'noopener noreferrer'
-                                        : undefined
-                                    }>
-                                    {btnText}
-                                  </a>
-                                )}
-                              </Popup>
-                            )}
-                        </LeafletMarkerComponent>
-                      );
-                    })}
-                  </React.Fragment>
-                );
-              })}
+            {!renderClusterGroup && markerSetNodes}
 
             {locationProx &&
               locationProx.lat &&

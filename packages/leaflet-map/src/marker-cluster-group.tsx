@@ -1,10 +1,14 @@
+import L from 'leaflet';
 import type { MarkerCluster } from 'leaflet';
 import { useCallback, useEffect, useRef } from 'react';
 import LeafletMarkerClusterGroup from 'react-leaflet-cluster';
 
 import amapsCreateClusterIcon from './lib/amaps-cluster-icon.js';
+import { disableClusterPanOnFocus } from './lib/clustering-config';
 import Marker from './marker';
 import type { MarkerClusterGroupProps } from './types/marker-cluster-group-props';
+
+disableClusterPanOnFocus(L);
 
 export default function MarkerClusterGroup({
   maxClusterRadius = 40,
@@ -12,6 +16,7 @@ export default function MarkerClusterGroup({
   iconCreateFunction = amapsCreateClusterIcon,
   categorize = undefined,
   markers = [],
+  children = undefined,
   ...props
 }: MarkerClusterGroupProps) {
   let categorizeRef = useRef(categorize);
@@ -43,9 +48,15 @@ export default function MarkerClusterGroup({
     [markers]
   );
 
+  const prefersReducedMotion =
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
   return (
     // @ts-ignore
     <LeafletMarkerClusterGroup
+      {...(prefersReducedMotion ? { animate: false } : {})}
       {...props}
       iconCreateFunction={useIconCreateFunction}
       maxClusterRadius={maxClusterRadius}
@@ -54,6 +65,7 @@ export default function MarkerClusterGroup({
         // @ts-ignore
         return <Marker {...data} key={`marker-${data.markerId}`} />;
       })}
+      {children}
     </LeafletMarkerClusterGroup>
   );
 }

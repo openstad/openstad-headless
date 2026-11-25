@@ -1,6 +1,7 @@
 import react from '@vitejs/plugin-react';
 import { type UserConfig, defineConfig } from 'vite';
 
+import { bindLeafletToMarkerCluster } from './bind-leaflet-plugin';
 import { prefix } from './prefix';
 
 export interface WidgetConfigOptions {
@@ -39,7 +40,10 @@ export function createWidgetConfig(options: WidgetConfigOptions) {
 
   return defineConfig(({ command }) => {
     const config: UserConfig = {
-      plugins: [react(command === 'serve' ? {} : { jsxRuntime: 'classic' })],
+      plugins: [
+        react(command === 'serve' ? {} : { jsxRuntime: 'classic' }),
+        bindLeafletToMarkerCluster(),
+      ],
     };
 
     if (usePrefix) {
