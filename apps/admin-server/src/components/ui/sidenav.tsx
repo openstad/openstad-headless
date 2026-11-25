@@ -15,6 +15,8 @@ import { useRouter } from 'next/router';
 import { useContext, useEffect, useState } from 'react';
 
 import { SessionContext } from '../../auth-context';
+import hasRole from '../../lib/hasRole';
+import type { Role } from '../../lib/roles';
 import { Logo } from './logo';
 
 export function Sidenav({

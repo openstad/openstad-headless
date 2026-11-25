@@ -95,7 +95,7 @@ describe('Projectinformatie on the project settings page', () => {
       root.render(
         <SaveControllerProvider>
           <Bar />
-          <ProjectSettings cmsUrl="" />
+          <ProjectSettings />
         </SaveControllerProvider>
       )
     );
