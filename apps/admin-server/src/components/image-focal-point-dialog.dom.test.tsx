@@ -86,6 +86,20 @@ describe('ImageFocalPointDialog', () => {
     );
   });
 
+  it('reports the value of the axis the last arrow key moved', () => {
+    const press = (key: string) =>
+      act(() => {
+        picker().dispatchEvent(
+          new KeyboardEvent('keydown', { key, bubbles: true })
+        );
+      });
+    expect(picker().getAttribute('aria-valuenow')).toBe('20');
+    press('ArrowDown');
+    expect(picker().getAttribute('aria-valuenow')).toBe('31');
+    press('ArrowLeft');
+    expect(picker().getAttribute('aria-valuenow')).toBe('19');
+  });
+
   it('moves the dot to where the photo is pressed and dragged', () => {
     picker().getBoundingClientRect = () =>
       ({ left: 0, top: 0, width: 200, height: 100 }) as DOMRect;

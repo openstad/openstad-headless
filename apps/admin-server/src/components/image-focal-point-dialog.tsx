@@ -117,6 +117,7 @@ export const ImageFocalPointDialog: React.FC<{
     setDragging(false);
   };
   const [focused, setFocused] = useState(false);
+  const [keyAxis, setKeyAxis] = useState<'x' | 'y'>('x');
 
   const setFromPointer = (event: React.PointerEvent<HTMLDivElement>) =>
     setPoint(
@@ -150,7 +151,7 @@ export const ImageFocalPointDialog: React.FC<{
             aria-label="Focuspunt"
             aria-valuemin={0}
             aria-valuemax={100}
-            aria-valuenow={Math.round(point.x)}
+            aria-valuenow={Math.round(point[keyAxis])}
             aria-valuetext={describeFocalPoint(point)}
             className="relative mx-auto w-fit max-w-full cursor-crosshair touch-none select-none rounded outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             onPointerDown={(event) => {
@@ -171,6 +172,9 @@ export const ImageFocalPointDialog: React.FC<{
               const next = movePointByKey(point, event.key, event.shiftKey);
               if (!next) return;
               event.preventDefault();
+              setKeyAxis(
+                event.key === 'ArrowUp' || event.key === 'ArrowDown' ? 'y' : 'x'
+              );
               setPoint(next);
             }}>
             <img
