@@ -3,12 +3,30 @@ import React, { ReactNode } from 'react';
 import '../index.css';
 import './index.css';
 
+export type FocalPoint = { x: number; y: number };
+
+export function focalPointStyle(
+  fp?: FocalPoint | null
+): React.CSSProperties | undefined {
+  if (
+    !fp ||
+    typeof fp.x !== 'number' ||
+    typeof fp.y !== 'number' ||
+    !Number.isFinite(fp.x) ||
+    !Number.isFinite(fp.y)
+  ) {
+    return undefined;
+  }
+  return { objectPosition: `${fp.x}% ${fp.y}%` };
+}
+
 export function Image({
   imageFooter,
   imageHeader,
   cornerBadge,
   href,
   linkLabel,
+  focalPoint,
   ...props
 }: React.ImgHTMLAttributes<HTMLImageElement> & {
   imageFooter?: ReactNode;
@@ -16,12 +34,14 @@ export function Image({
   cornerBadge?: ReactNode;
   href?: string;
   linkLabel?: string;
+  focalPoint?: FocalPoint | null;
 }) {
   // ponytail: role=presentation alleen als er geen alt is; anders werd een
   // meegegeven alt door de vaste presentation-rol genegeerd (WCAG 1.1.1)
   const image = (
     <img
       {...props}
+      style={{ ...props.style, ...focalPointStyle(focalPoint) }}
       alt={props.alt ? props.alt : ''}
       role={props.alt ? props.role : 'presentation'}
     />

@@ -142,10 +142,11 @@ export const StemBegrootBudgetList = ({
                 defaultImage = tagWithImage?.defaultResourceImage || '';
               }
 
-              const resourceImages =
+              const firstImage =
                 Array.isArray(resource.images) && resource.images.length > 0
-                  ? resource.images?.at(0)?.url
-                  : defaultImage;
+                  ? resource.images?.at(0)
+                  : undefined;
+              const resourceImages = firstImage ? firstImage.url : defaultImage;
               const hasImages = !!resourceImages
                 ? ''
                 : 'resource-has-no-images';
@@ -167,6 +168,7 @@ export const StemBegrootBudgetList = ({
                   key={`resource-detail-image-${resource.id}`}
                   className={`budget-list-selection-indicaction ${hasImages}`}
                   src={resourceImages}
+                  focalPoint={firstImage?.focalPoint}
                 />
               );
             })}

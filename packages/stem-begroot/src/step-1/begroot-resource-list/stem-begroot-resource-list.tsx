@@ -156,7 +156,7 @@ export const StemBegrootResourceList = ({
                 }}
                 itemRenderer={(i) => (
                   <ClickableImage clickable={clickableImage} src={i.url}>
-                    <Image src={i.url} />
+                    <Image src={i.url} focalPoint={i.focalPoint} />
                   </ClickableImage>
                 )}
               />

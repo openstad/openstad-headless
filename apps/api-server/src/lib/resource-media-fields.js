@@ -61,12 +61,41 @@ function toMediaItems(value, annotationKey) {
   return items;
 }
 
-function normalizeImages(value) {
+const roundOneDecimal = (n) => Math.round(n * 10) / 10;
+const clampPercent = (n) => roundOneDecimal(Math.min(100, Math.max(0, n)));
+
+function cleanFocalPoint(fp) {
+  if (!fp || typeof fp !== 'object') return null;
+  if (fp.x === null || fp.y === null || fp.x === '' || fp.y === '') return null;
+  const x = Number(fp.x);
+  const y = Number(fp.y);
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return null;
+  return { x: clampPercent(x), y: clampPercent(y) };
+}
+
+function normalizeImages(value, previousImages) {
+  const previous = Array.isArray(previousImages) ? previousImages : [];
   return toMediaItems(value, 'description').map((item) => {
     const cleaned = { url: item.url };
     if (item.name) cleaned.name = cleanText(item.name);
     if (item.description) cleaned.description = cleanText(item.description);
+
+    let focalPoint = null;
+    if (Object.prototype.hasOwnProperty.call(item, 'focalPoint')) {
+      focalPoint = cleanFocalPoint(item.focalPoint);
+    } else {
+      const prev = previous.find((p) => p && p.url === item.url);
+      focalPoint = prev ? cleanFocalPoint(prev.focalPoint) : null;
+    }
+    if (focalPoint) cleaned.focalPoint = focalPoint;
     return cleaned;
+  });
+}
+
+function stripFocalPoints(value) {
+  return toMediaItems(value, 'description').map((item) => {
+    const { focalPoint, ...rest } = item;
+    return rest;
   });
 }
 
@@ -81,4 +110,4 @@ function normalizeDocuments(value) {
   });
 }
 
-module.exports = { normalizeImages, normalizeDocuments };
+module.exports = { normalizeImages, normalizeDocuments, stripFocalPoints };

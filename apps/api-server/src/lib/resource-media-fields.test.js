@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   normalizeDocuments,
   normalizeImages,
+  stripFocalPoints,
 } from './resource-media-fields.js';
 
 describe('normalizeImages', () => {
@@ -147,5 +148,81 @@ describe('normalizeDocuments', () => {
     expect(normalizeDocuments('http://localhost:31450/document/a.pdf')).toEqual(
       [{ url: 'http://localhost:31450/document/a.pdf' }]
     );
+  });
+});
+
+describe('normalizeImages focalPoint', () => {
+  const fp = (x, y) => ({ x, y });
+
+  it('keeps a valid focal point', () => {
+    expect(normalizeImages([{ url: 'a.jpg', focalPoint: fp(30, 70) }])).toEqual(
+      [{ url: 'a.jpg', focalPoint: fp(30, 70) }]
+    );
+  });
+
+  it('clamps to 0-100 and rounds to 1 decimal', () => {
+    expect(
+      normalizeImages([{ url: 'a.jpg', focalPoint: fp(150, -5) }])[0].focalPoint
+    ).toEqual(fp(100, 0));
+    expect(
+      normalizeImages([{ url: 'a.jpg', focalPoint: fp(33.349, '66.66') }])[0]
+        .focalPoint
+    ).toEqual(fp(33.3, 66.7));
+  });
+
+  it('drops invalid focal points', () => {
+    for (const bad of [
+      fp(NaN, 1),
+      fp('abc', 1),
+      { x: 1 },
+      'x',
+      5,
+      fp(null, 1),
+    ]) {
+      expect(normalizeImages([{ url: 'a.jpg', focalPoint: bad }])).toEqual([
+        { url: 'a.jpg' },
+      ]);
+    }
+  });
+
+  it('clears the point when focalPoint is null', () => {
+    const prev = [{ url: 'a.jpg', focalPoint: fp(10, 10) }];
+    expect(normalizeImages([{ url: 'a.jpg', focalPoint: null }], prev)).toEqual(
+      [{ url: 'a.jpg' }]
+    );
+  });
+
+  it('carries the point over on the same url when the key is absent', () => {
+    const prev = [{ url: 'a.jpg', focalPoint: fp(10, 20) }];
+    expect(normalizeImages([{ url: 'a.jpg' }], prev)).toEqual([
+      { url: 'a.jpg', focalPoint: fp(10, 20) },
+    ]);
+  });
+
+  it('does not carry the point over when the url changed', () => {
+    const prev = [{ url: 'a.jpg', focalPoint: fp(10, 20) }];
+    expect(normalizeImages([{ url: 'b.jpg' }], prev)).toEqual([
+      { url: 'b.jpg' },
+    ]);
+  });
+
+  it('keeps the point for the resident-form shape {name,url,description}', () => {
+    const prev = [{ url: 'a.jpg', focalPoint: fp(10, 20) }];
+    expect(
+      normalizeImages([{ name: 'n', url: 'a.jpg', description: 'd' }], prev)
+    ).toEqual([
+      { url: 'a.jpg', name: 'n', description: 'd', focalPoint: fp(10, 20) },
+    ]);
+  });
+});
+
+describe('stripFocalPoints', () => {
+  it('removes every focalPoint key', () => {
+    expect(
+      stripFocalPoints([
+        { url: 'a.jpg', focalPoint: { x: 1, y: 2 } },
+        { url: 'b.jpg', focalPoint: null },
+      ])
+    ).toEqual([{ url: 'a.jpg' }, { url: 'b.jpg' }]);
   });
 });

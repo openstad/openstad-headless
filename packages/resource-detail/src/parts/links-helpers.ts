@@ -10,7 +10,10 @@ export type ResourceLink = {
     detailUrl?: string | null;
     title: string;
     summary?: string;
-    images?: Array<{ url?: string }>;
+    images?: Array<{
+      url?: string;
+      focalPoint?: { x: number; y: number } | null;
+    }>;
     tags?: Array<{ id: number; name?: string; type?: string }>;
   };
 };
@@ -35,6 +38,7 @@ export type RelatedItem = {
   title: string;
   summary?: string;
   image?: string;
+  imageFocalPoint?: { x: number; y: number } | null;
   url?: string;
   tags?: RelatedTag[];
 };
@@ -203,6 +207,7 @@ export function toRelatedItems(
         title: link.resource.title,
         summary: link.resource.summary,
         image: link.resource.images?.[0]?.url,
+        imageFocalPoint: link.resource.images?.[0]?.focalPoint ?? undefined,
         url: linkToDetail
           ? link.resource.detailUrl || buildItemLink(itemLink, id)
           : undefined,

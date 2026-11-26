@@ -132,11 +132,21 @@ export const GridderResourceDetail = ({
   const canLike = canLikeResource(resource);
 
   const renderImage = (
-    image: string,
+    resourceImage: {
+      url: string;
+      focalPoint?: { x: number; y: number } | null;
+    },
     clickableImage: boolean,
     alt?: string
   ) => {
-    const imageComponent = <Image src={image} className="--aspectRatio-16-9" />;
+    const image = resourceImage.url;
+    const imageComponent = (
+      <Image
+        src={image}
+        focalPoint={resourceImage.focalPoint}
+        className="--aspectRatio-16-9"
+      />
+    );
 
     return clickableImage ? (
       <div
@@ -171,7 +181,9 @@ export const GridderResourceDetail = ({
       <div className="osc-gridder-resource-detail">
         <section className={`osc-gridder-resource-detail-photo ${hasImages}`}>
           {renderImage(
-            resource.images?.at(0)?.url || defaultImage,
+            resource.images?.at(0)?.url
+              ? resource.images.at(0)
+              : { url: defaultImage },
             clickableImage,
             resource.images?.at(0)?.alt
           )}

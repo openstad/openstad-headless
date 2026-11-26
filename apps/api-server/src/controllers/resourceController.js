@@ -25,6 +25,7 @@ const {
   getValidStatuses,
   getOnlyIds,
 } = require('../services/resourceTagsStatuses');
+const { stripFocalPoints } = require('../lib/resource-media-fields');
 const { collectStreets } = require('../lib/resource-streets');
 const { stripVisibilityScope } = require('../lib/resource-create-scope');
 const { normalizeContributedUrl } = require('../util/normalize-url');
@@ -42,6 +43,8 @@ const {
 const userhasModeratorRights = (user) => {
   return hasRole(user, 'editor');
 };
+
+const canSetFocalPoint = (user) => hasRole(user, ['editor', 'moderator']);
 
 function stripHiddenVoteScore(resources, canIncludeVoteCount) {
   if (canIncludeVoteCount) return;
@@ -441,6 +444,10 @@ function prepareCreateResourceData(req) {
   req.body = removeSpamMetaFields(req.body);
   if (req.isSpamSubmission) {
     req.body.publishDate = null;
+  }
+
+  if (req.body.images !== undefined && !canSetFocalPoint(req.user)) {
+    req.body.images = stripFocalPoints(req.body.images);
   }
 
   return {
@@ -858,6 +865,10 @@ function updateResource(req, res, next) {
     delete data.modBreaks;
   }
 
+  if (data.images !== undefined && !canSetFocalPoint(req.user)) {
+    data.images = stripFocalPoints(data.images);
+  }
+
   const urlError = normalizeExtraDataUrl(data);
   if (urlError) return next(urlError);
 
@@ -1210,6 +1221,8 @@ function respondSharedResource(req, res, next) {
 module.exports = {
   setResourceScope,
   userhasModeratorRights,
+  canSetFocalPoint,
+  prepareCreateResourceData,
   // streets
   listStreets,
   // markers

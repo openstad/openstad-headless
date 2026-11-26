@@ -227,7 +227,8 @@ module.exports = function (db, sequelize, DataTypes) {
         allowNull: null,
         defaultValue: [],
         set: function (value) {
-          this.setDataValue('images', normalizeImages(value));
+          const previousImages = this.getDataValue('images');
+          this.setDataValue('images', normalizeImages(value, previousImages));
         },
         validate: {
           descriptionLength(value) {

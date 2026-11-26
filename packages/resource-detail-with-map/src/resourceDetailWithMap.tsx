@@ -218,6 +218,7 @@ function ResourceDetailWithMap({
                 itemRenderer={(i) => (
                   <Image
                     src={i.url}
+                    focalPoint={i.focalPoint}
                     imageFooter={
                       <div>
                         <Paragraph

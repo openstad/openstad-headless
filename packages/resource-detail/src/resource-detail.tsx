@@ -434,6 +434,7 @@ function ResourceDetail({
 
   const renderImage = (
     src: string,
+    focalPoint: { x: number; y: number } | null | undefined,
     clickableImage: boolean,
     imageDescription?: string,
     imageAlt?: string
@@ -442,6 +443,7 @@ function ResourceDetail({
       <>
         <Image
           src={src}
+          focalPoint={focalPoint}
           imageFooter={
             displayStatusBar &&
             resource.statuses &&
@@ -603,7 +605,13 @@ function ResourceDetail({
                     previous: 'Vorige afbeelding',
                   }}
                   itemRenderer={(i) =>
-                    renderImage(i.url, clickableImage, i.description, i.alt)
+                    renderImage(
+                      i.url,
+                      i.focalPoint,
+                      clickableImage,
+                      i.description,
+                      i.alt
+                    )
                   }
                 />
               )}
