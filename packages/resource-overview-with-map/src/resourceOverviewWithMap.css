@@ -96,6 +96,17 @@
 .resourceOverviewWithMap-container .osc-resource-overview-content-item-footer {
   grid-column: 2;
 }
+
+.resourceOverviewWithMap-container
+  .resource-card--link:not(:has(.osc-carousel-container)) {
+  grid-template-columns: 1fr;
+}
+
+.resourceOverviewWithMap-container
+  .resource-card--link:not(:has(.osc-carousel-container))
+  .osc-resource-overview-content-item-footer {
+  grid-column: 1;
+}
 .osc-filter-search-bar.utrecht-textbox {
   max-width: revert;
   width: 100%;

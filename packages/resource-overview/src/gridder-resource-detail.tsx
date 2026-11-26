@@ -41,6 +41,7 @@ export type GridderResourceDetailProps = BaseProps &
     documentsDesc?: string;
     displayTags?: boolean;
     displayBudget?: boolean;
+    displayImage?: boolean;
     dialogTagGroups?: string[];
     refreshResourceLikes?: () => void;
     likeWidget?: Omit<
@@ -64,6 +65,7 @@ export const GridderResourceDetail = ({
   clickableImage = false,
   displayTags = true,
   displayBudget = true,
+  displayImage = true,
   dialogTagGroups = undefined,
   currentUser,
   ...props
@@ -130,6 +132,7 @@ export const GridderResourceDetail = ({
       : defaultImage;
   const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
   const canLike = canLikeResource(resource);
+  const displayPhotoSection = displayImage || displayBudget || displayTags;
 
   const renderImage = (
     image: string,
@@ -169,52 +172,55 @@ export const GridderResourceDetail = ({
         />
       )}
       <div className="osc-gridder-resource-detail">
-        <section className={`osc-gridder-resource-detail-photo ${hasImages}`}>
-          {renderImage(
-            resource.images?.at(0)?.url || defaultImage,
-            clickableImage,
-            resource.images?.at(0)?.alt
-          )}
+        {displayPhotoSection && (
+          <section className={`osc-gridder-resource-detail-photo ${hasImages}`}>
+            {displayImage &&
+              renderImage(
+                resource.images?.at(0)?.url || defaultImage,
+                clickableImage,
+                resource.images?.at(0)?.alt
+              )}
 
-          <div className="osc-gridder-resource-detail-budget-theme-bar">
-            {displayBudget && (
-              <>
-                <Heading4>Budget</Heading4>
-                <Paragraph>
-                  {`€ ${
-                    resource.budget > 0
-                      ? resource.budget.toLocaleString('nl-NL')
-                      : 0
-                  }`}
-                </Paragraph>
-                <Spacer size={1} />
-              </>
-            )}
+            <div className="osc-gridder-resource-detail-budget-theme-bar">
+              {displayBudget && (
+                <>
+                  <Heading4>Budget</Heading4>
+                  <Paragraph>
+                    {`€ ${
+                      resource.budget > 0
+                        ? resource.budget.toLocaleString('nl-NL')
+                        : 0
+                    }`}
+                  </Paragraph>
+                  <Spacer size={1} />
+                </>
+              )}
 
-            {displayTags && (
-              <>
-                <Heading4>Tags</Heading4>
-                <Spacer size={0.5} />
-                <div className="pill-grid" role="list">
-                  {(
-                    resourceFilteredTags as Array<{
-                      type: string;
-                      name: string;
-                    }>
-                  )
-                    ?.filter((t) => t.type !== 'status')
-                    ?.map((t) => (
-                      <Pill
-                        key={`${t.type}-${t.name}`}
-                        role="listitem"
-                        text={t.name}
-                      />
-                    ))}
-                </div>
-              </>
-            )}
-          </div>
-        </section>
+              {displayTags && (
+                <>
+                  <Heading4>Tags</Heading4>
+                  <Spacer size={0.5} />
+                  <div className="pill-grid" role="list">
+                    {(
+                      resourceFilteredTags as Array<{
+                        type: string;
+                        name: string;
+                      }>
+                    )
+                      ?.filter((t) => t.type !== 'status')
+                      ?.map((t) => (
+                        <Pill
+                          key={`${t.type}-${t.name}`}
+                          role="listitem"
+                          text={t.name}
+                        />
+                      ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+        )}
 
         <section className="osc-gridder-resource-detail-texts-and-actions-container">
           <div>
