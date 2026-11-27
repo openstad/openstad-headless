@@ -119,25 +119,32 @@ describe('BaseMap with clustering and an extreme project maxZoom', () => {
   }, 5000);
 });
 
-describe('BaseMap clusters submissions and marker sets separately', () => {
-  it('never puts a marker-set marker in a submission cluster', async () => {
-    const spot = (prefix: string) =>
-      Array.from({ length: 5 }, (_, i) => ({
-        markerId: `${prefix}${i}`,
-        lat: 52.51,
-        lng: 6.09,
-      }));
-    (globalThis as any).__markerSets = [{ id: 1, markers: spot('s') }];
+describe('BaseMap clusters all map markers together', () => {
+  const spot = (prefix: string, n: number) =>
+    Array.from({ length: n }, (_, i) => ({
+      markerId: `${prefix}${i}`,
+      lat: 52.51,
+      lng: 6.09,
+    }));
+
+  async function clusterCounts(props: Record<string, any>) {
     await renderMap({
       map: { clustering: 'high' },
       center: { lat: 52.51, lng: 6.09 },
       zoom: 12,
-      markers: spot('r'),
-      markerSets: [{ id: 1 }],
+      ...props,
     });
-    const counts = Array.from(
+    return Array.from(
       container!.querySelectorAll('.osc-map-marker-cluster .sr-only')
     ).map((el) => el.textContent?.match(/\d+/)?.[0]);
-    expect(counts.sort()).toEqual(['5', '5']);
+  }
+
+  it('counts submissions and marker-set markers in one cluster', async () => {
+    (globalThis as any).__markerSets = [{ id: 1, markers: spot('s', 10) }];
+    const counts = await clusterCounts({
+      markers: spot('r', 20),
+      markerSets: [{ id: 1 }],
+    });
+    expect(counts).toEqual(['30']);
   }, 5000);
 });
