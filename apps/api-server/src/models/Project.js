@@ -259,11 +259,13 @@ module.exports = function (db, sequelize, DataTypes) {
 
         beforeDestroy: async function (instance, options) {
           // project has ended
-          if (!(
-            instance &&
-            instance.config &&
-            instance.config.project.projectHasEnded
-          ))
+          if (
+            !(
+              instance &&
+              instance.config &&
+              instance.config.project.projectHasEnded
+            )
+          )
             throw Error(
               'Cannot delete an active project - first set the project-has-ended parameter'
             );
@@ -407,7 +409,14 @@ module.exports = function (db, sequelize, DataTypes) {
 
     try {
       if (!self.id) throw Error('Project not found');
-      if (!self.config.project.projectHasEnded)
+      const endedFlag = self?.config?.project?.projectHasEnded === true;
+      const endDate = self?.config?.project?.endDate;
+      const endedByDate =
+        !!endDate && moment(endDate).isValid() && moment().isAfter(endDate);
+
+      // Keep the explicit flag as the primary signal, but allow manual
+      // anonymization when the configured project end date has already passed.
+      if (!endedFlag && !endedByDate)
         throw createError(
           400,
           'Cannot anonymize users on an active project - first set the project-has-ended parameter'
