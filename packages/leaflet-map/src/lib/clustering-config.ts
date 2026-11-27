@@ -62,3 +62,19 @@ export function disableClusterPanOnFocus(leaflet: any): boolean {
   MarkerCluster.mergeOptions({ autoPanOnFocus: false });
   return true;
 }
+
+export function activateClusterOnSpace(
+  event: {
+    originalEvent?: Pick<KeyboardEvent, 'key' | 'preventDefault'>;
+    layer?: {
+      fire: (type: string, data: object, propagate: boolean) => unknown;
+    };
+  },
+  container?: Pick<HTMLElement, 'focus'>
+): boolean {
+  if (event.originalEvent?.key !== ' ') return false;
+  event.originalEvent.preventDefault();
+  event.layer?.fire('click', { originalEvent: event.originalEvent }, true);
+  container?.focus();
+  return true;
+}

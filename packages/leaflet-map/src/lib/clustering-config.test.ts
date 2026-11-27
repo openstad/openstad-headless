@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
+  activateClusterOnSpace,
   getClusteringConfig,
   getEffectiveMaxZoom,
   getMapMaxZoom,
@@ -101,5 +102,34 @@ describe('getMapMaxZoom', () => {
   it('caps the max zoom when clustering is on', () => {
     expect(getMapMaxZoom(201, true)).toBe(25);
     expect(getMapMaxZoom(18, true)).toBe(18);
+  });
+});
+
+describe('activateClusterOnSpace', () => {
+  function pressOnCluster(key: string) {
+    const originalEvent = { key, preventDefault: vi.fn() };
+    const layer = { fire: vi.fn() };
+    const container = { focus: vi.fn() };
+    const handled = activateClusterOnSpace(
+      { originalEvent, layer } as any,
+      container as any
+    );
+    return { handled, originalEvent, layer, container };
+  }
+
+  it('zooms in on Space without scrolling the page', () => {
+    const { handled, originalEvent, layer, container } = pressOnCluster(' ');
+    expect(handled).toBe(true);
+    expect(originalEvent.preventDefault).toHaveBeenCalled();
+    expect(layer.fire).toHaveBeenCalledWith('click', { originalEvent }, true);
+    expect(container.focus).toHaveBeenCalled();
+  });
+
+  it('ignores other keys', () => {
+    const { handled, originalEvent, layer, container } = pressOnCluster('a');
+    expect(handled).toBe(false);
+    expect(originalEvent.preventDefault).not.toHaveBeenCalled();
+    expect(layer.fire).not.toHaveBeenCalled();
+    expect(container.focus).not.toHaveBeenCalled();
   });
 });
