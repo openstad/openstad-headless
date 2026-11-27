@@ -491,3 +491,37 @@ describe('contactFieldsShown', () => {
     });
   });
 });
+
+describe('toRelatedItems focal point', () => {
+  it('returns the focal point of the first image', () => {
+    const items = toRelatedItems(
+      [
+        {
+          id: 1,
+          direction: 'outgoing',
+          source: 'openstad',
+          targetId: '2',
+          resource: {
+            id: 2,
+            title: 'With focus',
+            images: [{ url: 'https://img/2', focalPoint: { x: 20, y: 80 } }],
+          },
+        },
+        {
+          id: 2,
+          direction: 'outgoing',
+          source: 'openstad',
+          targetId: '3',
+          resource: {
+            id: 3,
+            title: 'Without focus',
+            images: [{ url: 'https://img/3' }],
+          },
+        },
+      ],
+      {}
+    );
+    expect(items[0].imageFocalPoint).toEqual({ x: 20, y: 80 });
+    expect(items[1].imageFocalPoint).toBeUndefined();
+  });
+});

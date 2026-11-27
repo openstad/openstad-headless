@@ -95,11 +95,14 @@ export const BegrotenSelectedOverview = ({
                       defaultImage = tagWithImage?.defaultResourceImage || '';
                     }
 
-                    const resourceImages =
+                    const firstImage =
                       Array.isArray(resource.images) &&
                       resource.images.length > 0
-                        ? resource.images?.at(0)?.url
-                        : defaultImage;
+                        ? resource.images?.at(0)
+                        : undefined;
+                    const resourceImages = firstImage
+                      ? firstImage.url
+                      : defaultImage;
                     const hasImages = !!resourceImages
                       ? ''
                       : 'resource-has-no-images';
@@ -112,6 +115,7 @@ export const BegrotenSelectedOverview = ({
                           <Image
                             className="budget-overview-image"
                             src={resourceImages}
+                            focalPoint={firstImage?.focalPoint}
                           />
                           <div className="budget-resource-container">
                             <Paragraph>{resource.title}</Paragraph>
@@ -200,10 +204,11 @@ export const BegrotenSelectedOverview = ({
               defaultImage = tagWithImage?.defaultResourceImage || '';
             }
 
-            const resourceImages =
+            const firstImage =
               Array.isArray(resource.images) && resource.images.length > 0
-                ? resource.images?.at(0)?.url
-                : defaultImage;
+                ? resource.images?.at(0)
+                : undefined;
+            const resourceImages = firstImage ? firstImage.url : defaultImage;
             const hasImages = !!resourceImages ? '' : 'resource-has-no-images';
 
             return (
@@ -214,6 +219,7 @@ export const BegrotenSelectedOverview = ({
                       <Image
                         className="budget-overview-image"
                         src={resourceImages}
+                        focalPoint={firstImage?.focalPoint}
                       />
                       <div className="budget-resource-container">
                         <Paragraph>{resource.title}</Paragraph>

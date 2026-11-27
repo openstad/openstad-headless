@@ -1,5 +1,6 @@
 import DataStore from '@openstad-headless/data-store/src';
 import { Icon, IconButton } from '@openstad-headless/ui/src';
+import { focalPointStyle } from '@openstad-headless/ui/src/image';
 import { Button, Heading, Paragraph } from '@utrecht/component-library-react';
 import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 
@@ -249,6 +250,7 @@ export function RelatedResources({
                 className="osc-related-resources-image"
                 src={item.image}
                 alt=""
+                style={focalPointStyle(item.imageFocalPoint)}
               />
             ) : null}
             {displayImage && !item.image ? (

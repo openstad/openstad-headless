@@ -210,7 +210,7 @@ export const StemBegrootResourceDetailDialog = ({
                             <ClickableImage
                               clickable={clickableImage}
                               src={i.url}>
-                              <Image src={i.url} />
+                              <Image src={i.url} focalPoint={i.focalPoint} />
                             </ClickableImage>
                           );
                         } else if (resource?.location) {

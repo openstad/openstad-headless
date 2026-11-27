@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { getResourceImageUrl } from './resource-image';
+import { getResourceImage, getResourceImageUrl } from './resource-image';
 
 describe('getResourceImageUrl', () => {
   test('uses the first own image of the resource', () => {
@@ -54,5 +54,37 @@ describe('getResourceImageUrl', () => {
       ''
     );
     expect(getResourceImageUrl(undefined)).toBe('');
+  });
+});
+
+describe('getResourceImage', () => {
+  test('returns url and focal point of the first own image', () => {
+    expect(
+      getResourceImage({
+        images: [
+          { url: '' },
+          { url: 'https://img/b.jpg', focalPoint: { x: 20, y: 80 } },
+        ],
+      })
+    ).toEqual({ url: 'https://img/b.jpg', focalPoint: { x: 20, y: 80 } });
+  });
+
+  test('has no focal point when the image has none', () => {
+    expect(
+      getResourceImage({ images: [{ url: 'https://img/a.jpg' }] }).focalPoint
+    ).toBeUndefined();
+  });
+
+  test('tag default image has no focal point', () => {
+    expect(
+      getResourceImage({
+        images: [],
+        tags: [{ name: 'Groen', defaultResourceImage: 'https://img/tag.jpg' }],
+      })
+    ).toEqual({ url: 'https://img/tag.jpg' });
+  });
+
+  test('returns an empty url when nothing is available', () => {
+    expect(getResourceImage(undefined)).toEqual({ url: '' });
   });
 });

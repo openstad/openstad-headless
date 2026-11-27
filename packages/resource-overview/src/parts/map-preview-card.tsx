@@ -1,4 +1,4 @@
-import { getResourceImageUrl } from '@openstad-headless/lib/resource-image';
+import { getResourceImage } from '@openstad-headless/lib/resource-image';
 import { IconButton, Image, headingLevels } from '@openstad-headless/ui/src';
 import {
   ButtonLink,
@@ -41,7 +41,8 @@ export function MapPreviewCard({
   onCloseRef.current = onClose;
 
   const isLoaded = !!resource?.id;
-  const imageUrl = isLoaded ? getResourceImageUrl(resource) : '';
+  const resourceImage = isLoaded ? getResourceImage(resource) : { url: '' };
+  const imageUrl = resourceImage.url;
 
   const close = () => {
     onCloseRef.current();
@@ -85,7 +86,11 @@ export function MapPreviewCard({
       ) : (
         <>
           {imageUrl ? (
-            <Image src={imageUrl} className="osc-map-preview-card__image" />
+            <Image
+              src={imageUrl}
+              focalPoint={resourceImage.focalPoint}
+              className="osc-map-preview-card__image"
+            />
           ) : null}
           <div className="osc-map-preview-card__body">
             <Heading

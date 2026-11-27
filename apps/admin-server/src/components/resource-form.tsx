@@ -1,4 +1,8 @@
 import { ImageCropDialog } from '@/components/image-crop-dialog';
+import {
+  ImageFocalPointDialog,
+  focalPointHintAfterCrop,
+} from '@/components/image-focal-point-dialog';
 import ImageGalleryStyle from '@/components/image-gallery-style';
 import MapInput from '@/components/maps/leaflet-input';
 import { MapErrorBoundary } from '@/components/maps/map-error-boundary';
@@ -48,6 +52,7 @@ import {
   ArrowRight,
   ArrowUp,
   Crop,
+  Crosshair,
   Plus,
   X,
 } from 'lucide-react';
@@ -128,6 +133,10 @@ const baseSchema = z.object({
         url: z.string(),
         name: z.string().optional(),
         description: z.string().optional(),
+        focalPoint: z
+          .object({ x: z.number(), y: z.number() })
+          .nullable()
+          .optional(),
       })
     )
     .optional()
@@ -550,6 +559,7 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
   });
 
   const [cropImageIndex, setCropImageIndex] = useState(-1);
+  const [focalImageIndex, setFocalImageIndex] = useState(-1);
 
   const { fields: documentFields, remove: removeFile } = useFieldArray({
     control: form.control,
@@ -816,7 +826,9 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
                       <div
                         key={id}
                         className={`relative grid ${
-                          index === imageIndexOpen ? 'col-span-full' : 'tile'
+                          index === imageIndexOpen
+                            ? 'col-span-full'
+                            : 'tile min-h-[7.5rem]'
                         } gap-x-4 items-center image-gallery`}
                         style={{
                           gridTemplateColumns:
@@ -853,6 +865,15 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
                           }}
                           className="absolute right-0 top-0 z-10">
                           <Crop size={24} />
+                        </Button>
+                        <Button
+                          type="button"
+                          aria-label="Focuspunt instellen"
+                          onClick={() => {
+                            setFocalImageIndex(index);
+                          }}
+                          className="absolute right-0 top-9 z-10">
+                          <Crosshair size={24} aria-hidden="true" />
                         </Button>
 
                         <div
@@ -905,11 +926,32 @@ export default function ResourceForm({ onFormSubmit, useGlobalSave }: Props) {
                 imageUrl={imageFields[cropImageIndex].url}
                 onClose={() => setCropImageIndex(-1)}
                 onSave={(url) => {
+                  const current = form.getValues(`images.${cropImageIndex}`);
                   updateImage(cropImageIndex, {
-                    ...form.getValues(`images.${cropImageIndex}`),
+                    ...current,
                     url,
+                    focalPoint: null,
                   });
                   setCropImageIndex(-1);
+                  const hint = focalPointHintAfterCrop(current?.focalPoint);
+                  if (hint) toast(hint, { duration: 8000 });
+                }}
+              />
+            )}
+            {focalImageIndex >= 0 && imageFields[focalImageIndex] && (
+              <ImageFocalPointDialog
+                imageUrl={imageFields[focalImageIndex].url}
+                initialPoint={
+                  form.getValues(`images.${focalImageIndex}`)?.focalPoint ??
+                  null
+                }
+                onClose={() => setFocalImageIndex(-1)}
+                onSave={(focalPoint) => {
+                  updateImage(focalImageIndex, {
+                    ...form.getValues(`images.${focalImageIndex}`),
+                    focalPoint,
+                  });
+                  setFocalImageIndex(-1);
                 }}
               />
             )}

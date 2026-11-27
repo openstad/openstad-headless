@@ -621,6 +621,7 @@ const defaultItemRenderer = (
               itemRenderer={(i) => (
                 <Image
                   src={i.url}
+                  focalPoint={i.focalPoint}
                   imageFooter={
                     props.displayStatusLabel && (
                       <div className={`${hasImages} ${statusClasses}`}>
@@ -809,6 +810,7 @@ const defaultItemRenderer = (
               itemRenderer={(i) => (
                 <Image
                   src={i.url}
+                  focalPoint={i.focalPoint}
                   imageFooter={
                     props.displayStatusLabel && (
                       <div className={`${hasImages} ${statusClasses}`}>
