@@ -10,7 +10,7 @@ vi.mock('@openstad-headless/data-store/src', () => {
   return {
     default: class {
       useDatalayer() {
-        return stable;
+        return (globalThis as any).__dataLayerResult || stable;
       }
       useMarkers() {
         return { data: (globalThis as any).__markerSets || [] };
@@ -54,6 +54,7 @@ afterEach(() => {
   act(() => root?.unmount());
   container?.remove();
   (globalThis as any).__markerSets = undefined;
+  (globalThis as any).__dataLayerResult = undefined;
 });
 
 async function renderMap(props: Record<string, any>) {
@@ -144,6 +145,28 @@ describe('BaseMap clusters all map markers together', () => {
     const counts = await clusterCounts({
       markers: spot('r', 20),
       markerSets: [{ id: 1 }],
+    });
+    expect(counts).toEqual(['30']);
+  }, 5000);
+
+  it('counts data-layer markers in the same cluster', async () => {
+    (globalThis as any).__dataLayerResult = {
+      data: [
+        {
+          id: 7,
+          icon: [{ url: 'http://x/icon.png' }],
+          layer: {
+            features: Array.from({ length: 10 }, (_, i) => ({
+              geometry: { type: 'Point', coordinates: [6.09, 52.51] },
+              properties: { Objectnaam: `boom ${i}` },
+            })),
+          },
+        },
+      ],
+    };
+    const counts = await clusterCounts({
+      markers: spot('r', 20),
+      dataLayerSettings: { datalayer: [{ id: 7, name: 'Bomen' }] },
     });
     expect(counts).toEqual(['30']);
   }, 5000);

@@ -447,7 +447,6 @@ const BaseMap = ({
                     description: inhoud,
                     markerId: `record-${lat}-${long}-${titel || 'marker'}`,
                     isVisible: true,
-                    doNotCluster: true,
                     icon: L.icon({
                       iconUrl: icon,
                       iconSize: [30, 40],
@@ -510,7 +509,6 @@ const BaseMap = ({
                         Objectnaam || 'marker'
                       }`,
                       isVisible: true,
-                      doNotCluster: true,
                       icon: L.icon({
                         iconUrl: icon,
                         iconSize: [30, 40],
