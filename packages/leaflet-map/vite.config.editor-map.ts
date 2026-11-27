@@ -1,6 +1,7 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
+import { bindLeafletToMarkerCluster } from '../lib/bind-leaflet-plugin';
 import { prefix } from '../lib/prefix';
 
 // https://vitejs.dev/config/
@@ -14,8 +15,9 @@ export default defineConfig(({ command }) => {
     // During build, use the classic runtime and build as an IIFE so we can deliver it to the browser
   } else {
     return {
-      plugins: [react({ jsxRuntime: 'classic' })],
+      plugins: [react({ jsxRuntime: 'classic' }), bindLeafletToMarkerCluster()],
       css: prefix(),
+      define: { 'process.env.NODE_ENV': '"production"' },
       build: {
         outDir: './dist/editor-map',
         lib: {

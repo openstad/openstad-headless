@@ -82,6 +82,7 @@ export type ProjectSettingProps = {
     minZoom: string;
     maxZoom: string;
     areaId: string;
+    clustering?: string;
     tilesVariant?: string;
     customUrl?: string;
     autoZoomAndCenter?: 'area' | 'markers';

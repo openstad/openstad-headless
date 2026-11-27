@@ -13,7 +13,7 @@ export function isSafeUrl(url: string): boolean {
 
 export function sanitizeColor(color: string): string {
   if (/^#[0-9A-Fa-f]{3,8}$/.test(color)) return color;
-  if (/^(rgb|hsl)a?\([^)]+\)$/.test(color)) return color;
+  if (/^(rgb|hsl)a?\([0-9a-z.,%\s/+-]+\)$/i.test(color)) return color;
   if (/^[a-zA-Z]+$/.test(color)) return color;
   return '#000000';
 }

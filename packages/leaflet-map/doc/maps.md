@@ -124,6 +124,14 @@ doNotCluster?: boolean
 ![clusterimage](./img/cluster-icon.png)
 De default `iconCreateFunction` is afgeleid van de kaarten van de Gemeente Amsterdam. Daar worden clusters getekent als een cirkel met daaarin het aantal elementen in het cluster. De kleuren van de cirkel tonen de [cetagorieën](#categorizering) van die icons, wanneer van toepassing.
 
+De standaardkleur van de ring, de kleur van het getal en het lettertype komen uit design tokens. Categoriekleuren komen uit `categorize` en gebruiken geen token.
+
+| Token                            | Valt terug op                                      | Daarna                      |
+| -------------------------------- | -------------------------------------------------- | --------------------------- |
+| `--nlds-map-cluster-color`       | `--utrecht-button-primary-action-background-color` | `#164995`                   |
+| `--nlds-map-cluster-text-color`  | `--utrecht-document-color`                         | `#1a1a1a`                   |
+| `--nlds-map-cluster-font-family` | `--utrecht-document-font-family`                   | het lettertype van de kaart |
+
 ### categorizering
 
 ```

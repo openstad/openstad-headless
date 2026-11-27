@@ -321,6 +321,11 @@ module.exports = {
         type: 'string',
         default: '0',
       },
+      clustering: {
+        type: 'enum',
+        values: ['off', 'low', 'medium', 'high'],
+        default: 'off',
+      },
     },
   },
 

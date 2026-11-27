@@ -113,6 +113,7 @@ const EditorMap = ({
     <>
       <BaseMap
         {...props}
+        map={{ ...(props as any).map, clustering: 'off' }}
         center={currentCenter}
         markers={[currentEditorMarker]}
         onClick={updateLocation}
