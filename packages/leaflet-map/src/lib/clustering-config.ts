@@ -48,9 +48,9 @@ export function getEffectiveMaxZoom(maxZoom?: number | string | null): number {
 }
 
 export function getMapMaxZoom(
-  maxZoom: number | string | undefined,
+  maxZoom: number | undefined,
   clusteringActive: boolean
-): number | string | undefined {
+): number | undefined {
   return clusteringActive ? getEffectiveMaxZoom(maxZoom) : maxZoom;
 }
 

@@ -924,7 +924,7 @@ const BaseMap = ({
             className="osc-base-map-widget-container"
             id={`osc-base-map-${mapId}`}
             scrollWheelZoom={scrollWheelZoom}
-            maxZoom={clusteringActive ? (tileMaxZoom as number) : undefined}
+            maxZoom={clusteringActive ? tileMaxZoom : undefined}
             zoom={zoom}>
             <MapConsumer mapId={mapId} />
             <MapAccessibleName
