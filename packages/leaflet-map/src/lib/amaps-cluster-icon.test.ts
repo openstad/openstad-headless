@@ -56,3 +56,43 @@ describe('amapsCreateClusterIcon colours', () => {
     expect(html).toContain('stroke="#000000"');
   });
 });
+
+describe('amapsCreateClusterIcon styling hooks', () => {
+  function iconHtml(markers: any[], categories: Record<string, any> = {}) {
+    const cluster = {
+      getChildCount: () => markers.length,
+      getAllChildMarkers: () => markers,
+    } as any;
+    return String(
+      (
+        amapsCreateClusterIcon(cluster, {
+          categorizeByField: 'tag',
+          categories,
+        } as any) as any
+      ).options.html
+    );
+  }
+
+  it('gives markers without a category the default segment', () => {
+    const html = iconHtml([{ options: {} }]);
+    expect(html).toContain(
+      'class="osc-map-marker-cluster-segment osc-map-marker-cluster-segment-default"'
+    );
+    expect(html).toContain('stroke="#164995"');
+  });
+
+  it('keeps category segments out of the default class', () => {
+    const html = iconHtml([{ options: { data: { tag: 'a' } } }], {
+      a: { color: '#ff0000' },
+    });
+    expect(html).not.toContain('osc-map-marker-cluster-segment-default');
+    expect(html).toContain('class="osc-map-marker-cluster-segment"');
+    expect(html).toContain('stroke="#ff0000"');
+  });
+
+  it('marks the count for styling', () => {
+    expect(iconHtml([{ options: {} }])).toContain(
+      'class="osc-map-marker-cluster-count'
+    );
+  });
+});
