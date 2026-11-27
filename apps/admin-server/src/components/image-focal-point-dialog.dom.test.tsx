@@ -19,7 +19,7 @@ const picker = () =>
   ) as HTMLElement;
 const field = (id: string) => document.getElementById(id) as HTMLInputElement;
 const button = (label: string) =>
-  [...document.querySelectorAll('button')].find(
+  Array.from(document.querySelectorAll('button')).find(
     (b) => b.textContent?.trim() === label
   ) as HTMLButtonElement;
 
